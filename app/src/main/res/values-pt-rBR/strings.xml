@@ -86,7 +86,7 @@
     <string name="preference_exposure">Defina a compensação de exposição</string>
     <string name="preference_exposure_summary">Definido 0 como padrão para compensação de exposição.</string>
     <string name="preference_lock_orientation">Travar orientação de foto/vídeo</string>
-    <string name="preference_lock_orientation_summary">Se definida, a orientação do dispositivo será ignorada e a orientação da foto/vídeo será respeitada de acordo com a orientação especificada.</string>
+    <string name="preference_lock_orientation_summary">Se definida, a orientação do dispositivo será ignorada e a orientação da foto/vídeo será respeitada de acordo com a orientação especificada\n%s</string>
     <string name="preference_face_detection">Detecção de rosto</string>
     <string name="preference_face_detection_summary">Usa detecção facial em vez de áreas focais.</string>
 
@@ -113,7 +113,7 @@
     <string name="preference_lock_video">Travar tela enquanto filma</string>
     <string name="preference_lock_video_summary">Trava a tela enquanto filma para previnir falhas acidentais na filmagem. Deslize na tela para desbloquear.</string>
     <string name="preference_rotate_preview">Rotação de visualização</string>
-    <string name="preference_rotate_preview_summary">Opção para rotacionar a visualização (não afetará o resultado das fotos/vídeos)</string>
+    <string name="preference_rotate_preview_summary">Opção para rotacionar a visualização (não afetará o resultado das fotos/vídeos)\n%s</string>
 	
     <string name="preference_screen_gui">GUI na tela…</string>
     <string name="preference_preview_size">Tamanho de Visualização</string>
@@ -142,7 +142,7 @@
     <string name="preference_grid">Mostrar grade</string>
     <string name="grid">Grade</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostrar uma guia cortada</string>
-    <string name="preference_crop_guide_summary">Uma guia cortada exibe um retângulo mostrando que a relação de aspecto especificado parece útil se você planeja cortar a foto/vídeo depois para um diferente aspecto especificado. Requer modo WYSIWYG ou estar em modo de vídeo.</string>
+    <string name="preference_crop_guide_summary">Uma guia cortada exibe um retângulo mostrando que a relação de aspecto especificado parece útil se você planeja cortar a foto/vídeo depois para um diferente aspecto especificado. Requer modo WYSIWYG ou estar em modo de vídeo\n%s</string>
     <string name="preference_thumbnail_animation">Mostrar animação para captura de fotos</string>
     <string name="preference_thumbnail_animation_summary">Exibe uma animação quando uma foto é tirada</string>
     <string name="preference_keep_display_on">Manter tela ligada</string>
@@ -156,7 +156,7 @@
     <string name="preference_screen_location_settings">Configurações de Localização</string>
     <string name="preference_resolution">Resolução da câmera</string>
     <string name="preference_quality">Qualidade da imagem</string>
-    <string name="preference_quality_summary">Defina a qualidade da imagem das fotos salvas (90%% é recomendado)</string>
+    <string name="preference_quality_summary">Defina a qualidade da imagem das fotos salvas (90%% é recomendado)\n%s</string>
     <string name="preference_location">Geotag</string>
     <string name="preference_location_summary">Armazena a localização de GPS no arquivo de fotos/vídeos</string>
     <string name="preference_gps_direction">Salvar direções de compasso</string>
@@ -175,13 +175,13 @@
     <string name="preference_video_stabilization">Habilitar estabilização de vídeo</string>
     <string name="preference_video_stabilization_summary">Estabilização de vídeo reduz a agitação devido a movimentação da câmera tanto na pré-visualização quanto em vídeos gravados.</string>
     <string name="preference_video_bitrate">Taxa de bits de vídeo (aprox)</string>
-    <string name="preference_video_bitrate_summary">Defina aproximadamente a taxa de bits dos vídeos (maior quer dizer melhor qualidade, mas ocupa mais espaço; pode falhar a gravação se a taxa de bits não for suportada)</string>
+    <string name="preference_video_bitrate_summary">Defina aproximadamente a taxa de bits dos vídeos (maior quer dizer melhor qualidade, mas ocupa mais espaço; pode falhar a gravação se a taxa de bits não for suportada)\n%s</string>
     <string name="preference_video_fps">Taxa de frame de vídeo (aprox)</string>
-    <string name="preference_video_fps_summary">Defina a taxa de frame (FPS) de vídeos (por ser aproximado, não é garantido que vai ser alcançado e pode causar falha na gravação de vídeo se taxa de frame se não for suportado)</string>
+    <string name="preference_video_fps_summary">Defina a taxa de frame (FPS) de vídeos (por ser aproximado, não é garantido que vai ser alcançado e pode causar falha na gravação de vídeo se taxa de frame se não for suportado)\n%s</string>
     <string name="preference_video_max_duration">Duração máxima de vídeo</string>
-    <string name="preference_video_max_duration_summary">A gravação parará depois da duração especificada.</string>
+    <string name="preference_video_max_duration_summary">A gravação parará depois da duração especificada.\n%s</string>
     <string name="preference_video_restart">Recomeçar vídeo depois da duração máx</string>
-    <string name="preference_video_restart_summary">Se definido, o vídeo que foi parado depois de atingir duração máx irá recomeçar de acordo com o número de vezes especificado.</string>
+    <string name="preference_video_restart_summary">Se definido, o vídeo que foi parado depois de atingir duração máx irá recomeçar de acordo com o número de vezes especificado.\n%s</string>
     <string name="preference_record_audio">Gravar áudio</string>
     <string name="preference_record_audio_summary">Grava o áudio ao redor enquanto filma</string>
     <string name="preference_record_audio_src">Fonte de áudio</string>

@@ -86,7 +86,7 @@
     <string name="preference_exposure">Régler la compensation d\'exposition</string>
     <string name="preference_exposure_summary">Mettre à 0 pour la compensation de l\'exposition par défaut</string>
     <string name="preference_lock_orientation">Bloquer l\'orientation de la photo/vidéo</string>
-    <string name="preference_lock_orientation_summary">Si elle est définie, l\'orientation de l\'appareil sera ignorée, et l\'orientation de la photo/vidéo sera l\'orientation spécifiée</string>
+    <string name="preference_lock_orientation_summary">Si elle est définie, l\'orientation de l\'appareil sera ignorée, et l\'orientation de la photo/vidéo sera l\'orientation spécifiée\n%s</string>
     <string name="preference_face_detection">Détection des visages</string>
     <string name="preference_face_detection_summary">Utilise la détection des visages au lieu des zones de focus</string>
 
@@ -125,7 +125,7 @@
     <string name="preference_lock_video">Verrouiller l\'écran lors de l\'enregistrement vidéo</string>
     <string name="preference_lock_video_summary">Lors de l\'enregistrement vidéo, l\'interface graphique sera verrouillée pour éviter d\'arrêter accidentellement l\'enregistrement. Balayez l\'écran pour déverrouiller. Notez que l\'enregistrement vidéo sera toujours arrêté si l\'application passe en arrière-plan ou si l\'écran est occulté.</string>
     <string name="preference_rotate_preview">Pivoter l\'aperçu</string>
-    <string name="preference_rotate_preview_summary">Option pour faire pivoter l\'aperçu (n\'affecte pas les photos/videos originales)</string>
+    <string name="preference_rotate_preview_summary">Option pour faire pivoter l\'aperçu (n\'affecte pas les photos/videos originales)\n%s</string>
     <string name="preference_screen_gui">Interface à l\'écran…</string>
     <string name="preference_preview_size">Taille de l\'aperçu</string>
     <string name="preference_ui_placement">Emplacement de l\'interface utilisateur</string>
@@ -155,7 +155,7 @@
     <string name="preference_grid">Afficher une grille</string>
     <string name="grid">Grille</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Afficher un guide de recadrage</string>
-    <string name="preference_crop_guide_summary">Un guide de recadrage affiche un rectangle montrant à quoi le rapport d\'aspect spécifié ressemble - utile si vous prévoyez de recadrer la photo/vidéo après un ratio d\'aspect différent. Nécessite le mode photo WYSIWYG, ou d\'être en mode vidéo.</string>
+    <string name="preference_crop_guide_summary">Un guide de recadrage affiche un rectangle montrant à quoi le rapport d\'aspect spécifié ressemble - utile si vous prévoyez de recadrer la photo/vidéo après un ratio d\'aspect différent. Nécessite le mode photo WYSIWYG, ou d\'être en mode vidéo\n%s</string>
     <string name="preference_show_toasts">Afficher les messages d\'information</string>
     <string name="preference_show_toasts_summary">Affiche les messages d\'informations à l\'écran</string>
     <string name="preference_thumbnail_animation">Voir l\'animation des vignettes</string>
@@ -173,7 +173,7 @@
     <string name="preference_screen_location_settings">Paramètres de géocodage…</string>
     <string name="preference_resolution">Résolution de l\'appareil photo</string>
     <string name="preference_quality">Qualité de l\'image</string>
-    <string name="preference_quality_summary">Réglez la qualité des photos enregistrées (la valeur recommandée est 90 %%)</string>
+    <string name="preference_quality_summary">Réglez la qualité des photos enregistrées (la valeur recommandée est 90 %%)\n%s</string>
     <string name="preference_location">Stocker les données de position (Géocodage)</string>
     <string name="preference_location_summary">Enregistre la position GPS dans les photos/videos</string>
     <string name="preference_gps_direction">Stocker la direction de la boussole</string>
@@ -199,16 +199,16 @@
     <string name="preference_video_stabilization">Activer la stabilisation vidéo</string>
     <string name="preference_video_stabilization_summary">La stabilisation vidéo réduit les tremblements dûent aux mouvements de la caméra à la fois dans l\'aperçu et dans les vidéos enregistrées</string>
     <string name="preference_video_bitrate">Débit des vidéos (approx.)</string>
-    <string name="preference_video_bitrate_summary">Règle le débit approximatif des vidéos (plus élevé signifie une meilleure qualité, mais prend plus d\'espace disque, et peut entraîner un échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)</string>
+    <string name="preference_video_bitrate_summary">Règle le débit approximatif des vidéos (plus élevé signifie une meilleure qualité, mais prend plus d\'espace disque, et peut entraîner un échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)\n%s</string>
     <string name="preference_video_fps">Nombre d\'image de la vidéo (approx.)</string>
-    <string name="preference_video_fps_summary">Définir le nombre d\'image par seconde (IPS) des vidéos (en fonction de votre appareil le nombre d\'IPS peut être aproximatif et pourrait ne pas atteindre le maximum. Un mauvais réglage peut entraîner l\'échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)</string>
+    <string name="preference_video_fps_summary">Définir le nombre d\'image par seconde (IPS) des vidéos (en fonction de votre appareil le nombre d\'IPS peut être aproximatif et pourrait ne pas atteindre le maximum. Un mauvais réglage peut entraîner l\'échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)\n%s</string>
     <string name="preference_video_max_duration">Durée maximale de la vidéo</string>
-    <string name="preference_video_max_duration_summary">L\'enregistrement vidéo s\'arrêtera après la durée spécifiée</string>
+    <string name="preference_video_max_duration_summary">L\'enregistrement vidéo s\'arrêtera après la durée spécifiée\n%s</string>
     <string name="preference_video_restart">Nombre de vidéos après la durée maximale</string>
-    <string name="preference_video_restart_summary">Si la vidéo est stoppée après avoir atteint la durée maximale sélectionnée (si activé), alors l\'enregistrement va reprendre autant de fois que le nombre spécifié dans ce paramètre</string>
+    <string name="preference_video_restart_summary">Si la vidéo est stoppée après avoir atteint la durée maximale sélectionnée (si activé), alors l\'enregistrement va reprendre autant de fois que le nombre spécifié dans ce paramètre\n%s</string>
 
     <string name="preference_video_max_filesize">Taille maximale d\'un fichier vidéo</string>
-    <string name="preference_video_max_filesize_summary">L\'enregistrement vidéo va s\'arrêter/ou redémarrer (voir option ci-dessous) quand la taille maximale approximative du fichier est atteinte. Notez que la plupart des périphériques Android ont une taille maximale pour les vidéos (typiquement entre 2 et 4 Go), mais cette option permet de choisir une valeur</string>
+    <string name="preference_video_max_filesize_summary">L\'enregistrement vidéo va s\'arrêter/ou redémarrer (voir option ci-dessous) quand la taille maximale approximative du fichier est atteinte. Notez que la plupart des périphériques Android ont une taille maximale pour les vidéos (typiquement entre 2 et 4 Go), mais cette option permet de choisir une valeur\n%s</string>
     <string name="preference_video_restart_max_filesize">Redémarrer sur la taille maximale</string>
     <string name="preference_video_restart_max_filesize_summary">Si activé, redémarrage automatique quand la taille maximale de fichier est atteinte (soit la valeur par défaut du périphérique, soit la valeur spécifiée)</string>
     <string name="preference_record_audio">Enregistrement audio</string>

@@ -87,7 +87,7 @@
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation</string>
     <string name="preference_lock_orientation">Lock photo/video orientation</string>
-    <string name="preference_lock_orientation_summary">If set, the orientation of the device will be ignored, and the orientation of the photo/video will be with respect to the specified orientation</string>
+    <string name="preference_lock_orientation_summary">If set, the orientation of the device will be ignored, and the orientation of the photo/video will be with respect to the specified orientation\n%s</string>
     <string name="preference_face_detection">Face detection</string>
     <string name="preference_face_detection_summary">Use face detection instead of focus areas</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Lock screen when recording video</string>
     <string name="preference_lock_video_summary">When recording video, the GUI will be locked to prevent accidentally stopping recording. Swipe the screen to unlock. Note that video recording will always stop if the app goes into background or the screen is blanked.</string>
     <string name="preference_rotate_preview">Rotate preview</string>
-    <string name="preference_rotate_preview_summary">Option to rotate the preview (won\'t affect resultant photos/videos)</string>
+    <string name="preference_rotate_preview_summary">Option to rotate the preview (won\'t affect resultant photos/videos)\n%s</string>
     <string name="preference_screen_gui">On screen GUI…</string>
     <string name="preference_preview_size">Preview size</string>
     <string name="preference_ui_placement">UI placement</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Show a grid</string>
     <string name="grid">Grid</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Show a crop guide</string>
-    <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.</string>
+    <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.\n%s</string>
     <string name="preference_show_toasts">Show \"toast\" messages</string>
     <string name="preference_show_toasts_summary">Whether to display the popup \"toast\" messages</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Location settings…</string>
     <string name="preference_resolution">Camera resolution</string>
     <string name="preference_quality">Image quality</string>
-    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (default value is 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (default value is 90%%)\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Enable video stabilization</string>
     <string name="preference_video_stabilization_summary">Video stabilization reduces the shaking due to the motion of the camera in both the preview and in recorded videos</string>
     <string name="preference_video_bitrate">Video bitrate (approx)</string>
-    <string name="preference_video_bitrate_summary">Set the approximate bitrate of videos (higher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)</string>
+    <string name="preference_video_bitrate_summary">Set the approximate bitrate of videos (higher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)\n%s</string>
     <string name="preference_video_fps">Video frame rate (approx)</string>
-    <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported). Note that this setting is ignored for slow motion videos.</string>
+    <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported). Note that this setting is ignored for slow motion videos.\n%s</string>
     <string name="preference_video_max_duration">Maximum duration of video</string>
-    <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration</string>
+    <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration\n%s</string>
     <string name="preference_video_restart">Restart video after max duration</string>
-    <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times</string>
+    <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times\n%s</string>
     <string name="preference_video_max_filesize">Maximum file size of video</string>
-    <string name="preference_video_max_filesize_summary">The video recording will stop and/or restart (see option below) when the (approximate) maximum file size is reached. Note that almost all Android devices have a maximum file size for videos (typically around 2GB or 4GB), but this option allows setting a specific value.</string>
+    <string name="preference_video_max_filesize_summary">The video recording will stop and/or restart (see option below) when the (approximate) maximum file size is reached. Note that almost all Android devices have a maximum file size for videos (typically around 2GB or 4GB), but this option allows setting a specific value.\n%s</string>
     <string name="preference_video_restart_max_filesize">Restart on maximum file size</string>
     <string name="preference_video_restart_max_filesize_summary">Whether to automatically restart when the maximum file size is reached (whether the device default max file size, or user specified)</string>
     <string name="preference_record_audio">Record audio</string>
@@ -315,9 +315,9 @@
     <string name="preference_camera2_fake_flash_summary">Enable this if your device has buggy flash behaviour with Camera2 API</string>
 
     <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode</string>
+    <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode\n%s</string>
     <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
-    <string name="preference_expo_bracketing_stops_summary">How many stops to subtract/add for the darkest/brightest image</string>
+    <string name="preference_expo_bracketing_stops_summary">How many stops to subtract/add for the darkest/brightest image\n%s</string>
 
     <string name="preference_nr_save">Noise Reduction original images</string>
     <string name="preference_nr_save_summary">Whether to save original images in noise reduction mode. Note this can make saving photos much slower.\n%s</string>

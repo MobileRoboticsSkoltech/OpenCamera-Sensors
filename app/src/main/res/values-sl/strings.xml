@@ -87,7 +87,7 @@
     <string name="preference_exposure">Nastavi izravnavo osvetlitve</string>
     <string name="preference_exposure_summary">Nastavite na 0 za privzeto izravnavo osvetlitve</string>
     <string name="preference_lock_orientation">Zakleni usmerjenost fotografij/videoposnetkov</string>
-    <string name="preference_lock_orientation_summary">Če je nastavljeno, bo usmerjenost naprave prezrta in fotografije/videoposnetki bodo usmerjeni glede na določeno usmerjenost</string>
+    <string name="preference_lock_orientation_summary">Če je nastavljeno, bo usmerjenost naprave prezrta in fotografije/videoposnetki bodo usmerjeni glede na določeno usmerjenost\n%s</string>
     <string name="preference_face_detection">Zaznavanje obrazov</string>
     <string name="preference_face_detection_summary">Uporabi zaznavanje obrazov namesto področij ostrenja</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Zakleni zaslon ob snemanju videoposnetkov</string>
     <string name="preference_lock_video_summary">Ob snemanju videoposnetkov se bo gr. up. vmesnik zaklenil, da se prepreči naključna ustavitev snemanja. Povlecite zaslon za odklepanje. Upoštevajte, da se bo snemanje videoposnetkov vedno ustavilo, če se program postavi v ozadje ali zaslon izprazni.</string>
     <string name="preference_rotate_preview">Zavrti predogled</string>
-    <string name="preference_rotate_preview_summary">Možnost vrtenja predogleda (ne bo vplivalo na nastale fotografije/videoposnetke)</string>
+    <string name="preference_rotate_preview_summary">Možnost vrtenja predogleda (ne bo vplivalo na nastale fotografije/videoposnetke)\n%s</string>
     <string name="preference_screen_gui">Gr. up. vmesnik na zaslonu …</string>
     <string name="preference_preview_size">Velikost predogleda</string>
     <string name="preference_ui_placement">Posavitev up. vmesnika</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Prikaži mrežo</string>
     <string name="grid">Mreža</string>
     <string name="preference_crop_guide">Prikaži vodnik za obrezovanje</string>
-    <string name="preference_crop_guide_summary">Vodnik za obrezovanje prikazuje pravokotnik določenega razmerja slike - uporabno, če boste kasneje obrezali fotografijo/videoposnetek na drugo razmerje. Zahteva način za fotografije WYSIWYG ali način za videoposnetke.</string>
+    <string name="preference_crop_guide_summary">Vodnik za obrezovanje prikazuje pravokotnik določenega razmerja slike - uporabno, če boste kasneje obrezali fotografijo/videoposnetek na drugo razmerje. Zahteva način za fotografije WYSIWYG ali način za videoposnetke\n%s</string>
     <string name="preference_show_toasts">Prikaži \"pojavna\" sporočila</string>
     <string name="preference_show_toasts_summary">Ali naj se prikažejo \"pojavna\" sporočila</string>
     <string name="preference_thumbnail_animation">Prikaži animacijo sličice</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Nastavitve lokacije …</string>
     <string name="preference_resolution">Ločljivost fotoaparata</string>
     <string name="preference_quality">Kakovost slik</string>
-    <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (privzeta vrednost je 90 %%)</string>
+    <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (privzeta vrednost je 90 %%)\n%s</string>
 	<string name="preference_raw">RAW</string>
     <string name="preference_location">Shrani podatke o lokaciji (označevanje z zemljepisnim položajem)</string>
     <string name="preference_location_summary">Shrani podatke o lokaicji GPS v fotografijah/videoposnetkih</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Omogoči ustalitev videoposnetkov</string>
     <string name="preference_video_stabilization_summary">Ustaltev videoposnetkov zmanjša tresenje zaradi gibanja kamere tako v predogledu, kot v posnetku.</string>
     <string name="preference_video_bitrate">Bitna hitrost videoposnetkov (pribl.)</string>
-    <string name="preference_video_bitrate_summary">Nastavite pribl. hitrost videoposnetkov (višje vrednosti pomenijo boljšo kakovost, vendar zavzamejo več prostora na disku; snemanje videoposnetkov lahko spodleti, če bitna hitrost ni podprta)</string>
+    <string name="preference_video_bitrate_summary">Nastavite pribl. hitrost videoposnetkov (višje vrednosti pomenijo boljšo kakovost, vendar zavzamejo več prostora na disku; snemanje videoposnetkov lahko spodleti, če bitna hitrost ni podprta)\n%s</string>
     <string name="preference_video_fps">Hitrost sličic videoposnetkov (pribl.)</string>
-    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna. Doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)</string>
+    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna. Doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)\n%s</string>
     <string name="preference_video_max_duration">Najdaljše trajanje videoposnetkov</string>
-    <string name="preference_video_max_duration_summary">Snemanje videoposnetkov se bo ustavilo po tem času</string>
+    <string name="preference_video_max_duration_summary">Snemanje videoposnetkov se bo ustavilo po tem času\n%s</string>
     <string name="preference_video_restart">Ponovno zaženi videoposnetek po najdaljšem trajanju</string>
-    <string name="preference_video_restart_summary">Če se je videoposnetek ustavil, ko je bilo doseženo najdaljše trajanje (če je nastavljeno), bo ta možnost povzročila ponovni zagon videoposnetka do določenega števila ponovitev</string>
+    <string name="preference_video_restart_summary">Če se je videoposnetek ustavil, ko je bilo doseženo najdaljše trajanje (če je nastavljeno), bo ta možnost povzročila ponovni zagon videoposnetka do določenega števila ponovitev\n%s</string>
     <string name="preference_video_max_filesize">Največja velikost videoposnetkov</string>
-    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android zgornjo omejitev velikosti datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti</string>
+    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android zgornjo omejitev velikosti datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti\n%s</string>
     <string name="preference_video_restart_max_filesize">Ponovno zaženi ob največji velikosti datoteke</string>
     <string name="preference_video_restart_max_filesize_summary">Ali naj se videoposnetek ponovno zažene, ko je dosežena (privzeta ali uporabniško določena) največja velikost datoteke</string>
     <string name="preference_record_audio">Snemaj zvok</string>
@@ -314,9 +314,9 @@
     <string name="preference_camera2_fake_flash_summary">Omogočite, če se vaša naprava neobičajno vede z API-jem Camera2</string>
 
     <string name="preference_expo_bracketing_n_images">Korektura sam. osvetlitve</string>
-    <string name="preference_expo_bracketing_n_images_summary">Število slik korekture samodejne osvetlitve</string>
+    <string name="preference_expo_bracketing_n_images_summary">Število slik korekture samodejne osvetlitve\n%s</string>
     <string name="preference_expo_bracketing_stops">Korak kor. sam. osvetlitve</string>
-    <string name="preference_expo_bracketing_stops_summary">Število pozitivnih/negativnih korakov za najtemnejšo/najsvetlejšo sliko</string>
+    <string name="preference_expo_bracketing_stops_summary">Število pozitivnih/negativnih korakov za najtemnejšo/najsvetlejšo sliko\n%s</string>
 	
 	<string name="preference_nr_save">Izvirne slike zmanjševanja šuma</string>
     <string name="preference_nr_save_summary">Ali naj se izvirne slike shranijo v načinu zmanjševanja šuma. Upoštevajte, da se bodo pri tem slike shranjevale dalj časa.\n%s</string>

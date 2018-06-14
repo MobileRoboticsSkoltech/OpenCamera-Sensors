@@ -87,7 +87,7 @@
     <string name="preference_exposure">Expozíció kompenzáció beállítása</string>
     <string name="preference_exposure_summary">Az alapértelmezett kompenzációhoz állítsd 0-ra</string>
     <string name="preference_lock_orientation">Fotó/videó tájolás zárolása</string>
-    <string name="preference_lock_orientation_summary">Ha be van állítva, a készülék tájolása figyelmen kívül lesz hagyva, és a fotó/videó a megadott tájolás szerint fog állni</string>
+    <string name="preference_lock_orientation_summary">Ha be van állítva, a készülék tájolása figyelmen kívül lesz hagyva, és a fotó/videó a megadott tájolás szerint fog állni\n%s</string>
     <string name="preference_face_detection">Arcfelismerés</string>
     <string name="preference_face_detection_summary">Arcfelismerés használata fókuszterületek helyett</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Képernyő zárolása videofelvétel alatt</string>
     <string name="preference_lock_video_summary">Videó készítése alatt a felhasználói felület zárolva lesz, megakadályozva a felvétel véletlen leállítását. Feloldáshoz csúsztad az ujjad a képernyőn. Megjegyzendő, hogy a felvétel le fog állni, ha az alkalmazás háttérbe kerül vagy a képernyő kikapcsol.</string>
     <string name="preference_rotate_preview">Előnézet forgatása</string>
-    <string name="preference_rotate_preview_summary">Az előnézet forgatásának lehetősége (nem befolyásolja az elkészített fotót, videót)</string>
+    <string name="preference_rotate_preview_summary">Az előnézet forgatásának lehetősége (nem befolyásolja az elkészített fotót, videót)\n%s</string>
     <string name="preference_screen_gui">Kezelőfelület…</string>
     <string name="preference_preview_size">Előnézet mérete</string>
     <string name="preference_ui_placement">Kezelőfelület elhelyezés</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Rács megjelenítése</string>
     <string name="grid">Rács</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Vágási segédvonal megjelenítése</string>
-    <string name="preference_crop_guide_summary">A vágási segéd egy négyzetet jelenít meg, mutatva, hogy nézne ki a megadott oldalarány – hasznos, ha a fotót/videót később más oldalarányúra tervezed vágni. WYSIWYG fényképmód, vagy videózás mód szükséges hozzá.</string>
+    <string name="preference_crop_guide_summary">A vágási segéd egy négyzetet jelenít meg, mutatva, hogy nézne ki a megadott oldalarány – hasznos, ha a fotót/videót később más oldalarányúra tervezed vágni. WYSIWYG fényképmód, vagy videózás mód szükséges hozzá\n%s</string>
     <string name="preference_show_toasts">\"toast\" üzenetek megjelenítése</string>
     <string name="preference_show_toasts_summary">Megjelenjenek-e felugró \"toast\" üzenetek</string>
     <string name="preference_thumbnail_animation">Bélyegkép animáció megjelenítése</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Helymeghatározás beállítások…</string>
     <string name="preference_resolution">Kamera felbontása</string>
     <string name="preference_quality">Képminőség</string>
-    <string name="preference_quality_summary">Beállítja, hogy a képek milyen JPEG minőséggel legyenek elmentve (ajánlott érték 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_quality_summary">Beállítja, hogy a képek milyen JPEG minőséggel legyenek elmentve (ajánlott érték 90%%)\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Helyadatok eltárolása (geotaggelés)</string>
     <string name="preference_location_summary">Eltárolja a GPS helyadatot a fotóban/videóban</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Videó stabilizáció engedélyezése</string>
     <string name="preference_video_stabilization_summary">A videó stabilizálása csökkenti a kamera mozgásából származó remegést az előnézeten és a felvett videón.</string>
     <string name="preference_video_bitrate">Videó bitráta (nagyjából)</string>
-    <string name="preference_video_bitrate_summary">A videók hozzávetőleges bitrátájának beállítása (a magasabb jobb minőséget jelent, de több tárhelyet foglal; ha a bitráta nem támogatott, sikertelen lehet a felvétel)</string>
+    <string name="preference_video_bitrate_summary">A videók hozzávetőleges bitrátájának beállítása (a magasabb jobb minőséget jelent, de több tárhelyet foglal; ha a bitráta nem támogatott, sikertelen lehet a felvétel)\n%s</string>
     <string name="preference_video_fps">Videó képkockaszám (nagyjából)</string>
-    <string name="preference_video_fps_summary">A videók képkockasebességének (FPS) beállítása (hozzávetőleges, az elérése nem garantálható és ha a képkockaszám nem támogatott, sikertelen lehet a felvétel)</string>
+    <string name="preference_video_fps_summary">A videók képkockasebességének (FPS) beállítása (hozzávetőleges, az elérése nem garantálható és ha a képkockaszám nem támogatott, sikertelen lehet a felvétel)\n%s</string>
     <string name="preference_video_max_duration">Videó maximális időtartama</string>
-    <string name="preference_video_max_duration_summary">A videofelvétel leáll a megadott idő után</string>
+    <string name="preference_video_max_duration_summary">A videofelvétel leáll a megadott idő után\n%s</string>
     <string name="preference_video_restart">Újraindítás a maximális időtartam után</string>
-    <string name="preference_video_restart_summary">Ha a videó elérte a maximális időtartamot (ha be lett állítva) és megállt, újraindítja a felvételt a megadott számú alkalommal</string>
+    <string name="preference_video_restart_summary">Ha a videó elérte a maximális időtartamot (ha be lett állítva) és megállt, újraindítja a felvételt a megadott számú alkalommal\n%s</string>
     <string name="preference_video_max_filesize">Videó maximális fáljmérete</string>
-    <string name="preference_video_max_filesize_summary">A felvétel leáll és/vagy újraindul (lásd a beállítást alább), ha (nagyjából) elérte a maximális fájlméretet. Megjegyezzük, hogy az Androidos eszközökön korlátozott a videofájlok mérete (általában 2GB vagy 4GB körül), de ez a beállítás lehetővé teszi egyedi érték megadását</string>
+    <string name="preference_video_max_filesize_summary">A felvétel leáll és/vagy újraindul (lásd a beállítást alább), ha (nagyjából) elérte a maximális fájlméretet. Megjegyezzük, hogy az Androidos eszközökön korlátozott a videofájlok mérete (általában 2GB vagy 4GB körül), de ez a beállítás lehetővé teszi egyedi érték megadását\n%s</string>
     <string name="preference_video_restart_max_filesize">Újraindítás a maximális méret után</string>
     <string name="preference_video_restart_max_filesize_summary">Újrainduljon-e a videofelvétel, miután elérte a maximális fájlméretet (az eszközön alapértelmezett, vagy a beállított)</string>
     <string name="preference_record_audio">Hangrögzítés</string>
@@ -310,9 +310,9 @@
     <string name="preference_camera2_fake_flash_summary">Engedélyezd, ha a készülék vakuja hibásan működik Camera2 API-val</string>
 
     <string name="preference_expo_bracketing_n_images">Expozíciósorozat</string>
-    <string name="preference_expo_bracketing_n_images_summary">Képek száma az expozíciósorozat módban</string>
+    <string name="preference_expo_bracketing_n_images_summary">Képek száma az expozíciósorozat módban\n%s</string>
     <string name="preference_expo_bracketing_stops">Expozíciósorozat lépésköz</string>
-    <string name="preference_expo_bracketing_stops_summary">Az egyes képek készítése ennyi fényérték eltéréssel</string>
+    <string name="preference_expo_bracketing_stops_summary">Az egyes képek készítése ennyi fényérték eltéréssel\n%s</string>
 
     <string name="seconds_abbreviation">mp</string> <!-- short for seconds -->
 

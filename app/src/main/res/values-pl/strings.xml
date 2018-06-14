@@ -86,7 +86,7 @@
     <string name="preference_exposure">Ustaw korektę ekspozycji</string>
     <string name="preference_exposure_summary">Ustaw 0 dla domyślnej korekty ekspozycji</string>
     <string name="preference_lock_orientation">Zablokuj orientację zdjęcia/wideo</string>
-    <string name="preference_lock_orientation_summary">Jeśli ustawione, orientacja urządzenia będzie pomijana i zostanie zastosowana określona</string>
+    <string name="preference_lock_orientation_summary">Jeśli ustawione, orientacja urządzenia będzie pomijana i zostanie zastosowana określona\n%s</string>
     <string name="preference_face_detection">Wykrywanie twarzy</string>
     <string name="preference_face_detection_summary">Używa wykrywania twarzy zamiast obszarów ostrości</string>
     <string name="preference_category_camera_controls">Sterowanie aparatem</string>
@@ -126,7 +126,7 @@
     <string name="preference_lock_video">Blokowanie ekranu podczas nagrywania filmu</string>
     <string name="preference_lock_video_summary">Podczas nagrywania filmu interfejs jest blokowany aby zapobiec przypadkowemu zatrzymaniu. Przeciągnij ekran aby odblokować. Nagrywanie zostanie przerwane jeśli aplikacja działa w tle lub ekran jest pusty.</string>
     <string name="preference_rotate_preview">Obracanie podglądu</string>
-    <string name="preference_rotate_preview_summary">Umożliwia obtót podglądu (nie wpływa na zapisywane pliki)</string>
+    <string name="preference_rotate_preview_summary">Umożliwia obtót podglądu (nie wpływa na zapisywane pliki)\n%s</string>
     <string name="preference_screen_gui">Interfejs fotografowania…</string>
     <string name="preference_preview_size">Rozmiar podglądu</string>
     <string name="preference_ui_placement">Położenie interfejsu</string>
@@ -157,7 +157,7 @@
     <string name="grid">Kratka</string>
     <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Pokaż prowadnice kadrowania</string>
-    <string name="preference_crop_guide_summary">Prowadnice pokazują jak wyglądają wybrane proporcje obrazu. Jest to przydatne gdy chcemy później przyciąć zdjęcie do innych proporcji niż plik z aparatu. Wymaga trybu WYSIWYG lub trybu filmowania.</string>
+    <string name="preference_crop_guide_summary">Prowadnice pokazują jak wyglądają wybrane proporcje obrazu. Jest to przydatne gdy chcemy później przyciąć zdjęcie do innych proporcji niż plik z aparatu. Wymaga trybu WYSIWYG lub trybu filmowania\n%s</string>
     <string name="preference_show_toasts">Pokaż wyskakujące powiadomienia</string>
     <string name="preference_show_toasts_summary">Czy pokazywać wyskakujące powiadomienia</string>
     <string name="preference_thumbnail_animation">Pokaż animację miniaturki</string>
@@ -174,7 +174,7 @@
     <string name="preference_screen_location_settings">Ustawienia lokalizacji…</string>
     <string name="preference_resolution">Rozdzielczość</string>
     <string name="preference_quality">Jakość obrazu</string>
-    <string name="preference_quality_summary">Ustaw jakość zapisywanych plików JPEG (domyślna wartość to 90%%)</string>
+    <string name="preference_quality_summary">Ustaw jakość zapisywanych plików JPEG (domyślna wartość to 90%%)\n%s</string>
     <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Zapisuj dane geolokalizacji</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Włącz stabilizację obrazu</string>
     <string name="preference_video_stabilization_summary">Stabilizacja redukuje wstrząsy wywołane ruchem urządzenia. Działa w podglądzie jak i w zapisywanym pliku.</string>
     <string name="preference_video_bitrate">Bitrate filmów (przybliżone)</string>
-    <string name="preference_video_bitrate_summary">Ustawia przybliżone bitrate filmów (wyższe oznacza lepszą jakość, ale zabiera więcej pamięci; ustawienie nieobsługiwanego bitrate może spowodować błąd zapisu)</string>
+    <string name="preference_video_bitrate_summary">Ustawia przybliżone bitrate filmów (wyższe oznacza lepszą jakość, ale zabiera więcej pamięci; ustawienie nieobsługiwanego bitrate może spowodować błąd zapisu)\n%s</string>
     <string name="preference_video_fps">Częstotliwość klatek (przybliżone)</string>
-    <string name="preference_video_fps_summary">Ustawia częstotliwość klatek (kl/s) filmów (może być przybliżona, ustawienie nieobsługiwanej wartości może spowodować błąd zapisu)</string>
+    <string name="preference_video_fps_summary">Ustawia częstotliwość klatek (kl/s) filmów (może być przybliżona, ustawienie nieobsługiwanej wartości może spowodować błąd zapisu)\n%s</string>
     <string name="preference_video_max_duration">Maksymalny czas trwania</string>
-    <string name="preference_video_max_duration_summary">Nagrywanie filmu zostanie zatrzymane po określonym czasie</string>
+    <string name="preference_video_max_duration_summary">Nagrywanie filmu zostanie zatrzymane po określonym czasie\n%s</string>
     <string name="preference_video_restart">Restart nagrywania po maksymalnym czasie</string>
-    <string name="preference_video_restart_summary">Po zatrzymaniu nagrywania po maksymalnym czasie (jeśli jest ustawiony) zostanie rozpoczęte nowe nagranie (określoną ilość razy).</string>
+    <string name="preference_video_restart_summary">Po zatrzymaniu nagrywania po maksymalnym czasie (jeśli jest ustawiony) zostanie rozpoczęte nowe nagranie (określoną ilość razy).\n%s</string>
     <string name="preference_video_max_filesize">Maksymalny rozmiar pliku</string>
-    <string name="preference_video_max_filesize_summary">Nagrywanie filmu zostanie zatrzymane jeśli plik osiągnie określony rozmiar. Większość urządzeń z Androidem ma ustawioną maksymalną wielkość pliku wideo (2GB lub 4GB), ale ta opcja pozwala ustalić konkretną wartość</string>
+    <string name="preference_video_max_filesize_summary">Nagrywanie filmu zostanie zatrzymane jeśli plik osiągnie określony rozmiar. Większość urządzeń z Androidem ma ustawioną maksymalną wielkość pliku wideo (2GB lub 4GB), ale ta opcja pozwala ustalić konkretną wartość\n%s</string>
     <string name="preference_video_restart_max_filesize">Restart nagrywania po maksymalnym rozmiarze</string>
     <string name="preference_video_restart_max_filesize_summary">Automatyczny restart nagrywania gdy rozmiar pliku osiągnie ustawioną maksymalną wartość</string>
     <string name="preference_record_audio">Nagrywanie z dźwiękiem</string>
@@ -298,9 +298,9 @@
     <string name="preference_camera2_fake_flash">Użyj alternatywnej lampy błyskowej</string>
     <string name="preference_camera2_fake_flash_summary">Włącz jeśli w Twoim urządzeniu lampa błyskowa przejawia dziwne zachowanie z Camera2 API</string>
     <string name="preference_expo_bracketing_n_images">Bracketing ekspozycji</string>
-    <string name="preference_expo_bracketing_n_images_summary">Ilość obrazów w trybie bracketingu</string>
+    <string name="preference_expo_bracketing_n_images_summary">Ilość obrazów w trybie bracketingu\n%s</string>
     <string name="preference_expo_bracketing_stops">Stopniowanie Bracketingu</string>
-    <string name="preference_expo_bracketing_stops_summary">Jaki ustawić zakres wartości dla jaśniejszej/ciemniejszej ekspozycji</string>
+    <string name="preference_expo_bracketing_stops_summary">Jaki ustawić zakres wartości dla jaśniejszej/ciemniejszej ekspozycji\n%s</string>
     <string name="seconds_abbreviation">s</string>
     <!-- short for seconds -->
     <string name="video_no_free_space">Brak wystarczającej ilości miejsca by zapisać film</string>

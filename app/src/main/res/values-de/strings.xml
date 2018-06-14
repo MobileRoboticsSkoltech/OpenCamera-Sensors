@@ -87,7 +87,7 @@
     <string name="preference_exposure">Belichtungskorrektur</string>
     <string name="preference_exposure_summary">Für die Standardbelichtung auf 0 setzen</string>
     <string name="preference_lock_orientation">Foto-/Video-Orientierung sperren</string>
-    <string name="preference_lock_orientation_summary">Wenn aktiviert, wird die Lage des Gerätes ignoriert und die Orientierung der Aufnahme auf diesen Wert fest eingestellt.</string>
+    <string name="preference_lock_orientation_summary">Wenn aktiviert, wird die Lage des Gerätes ignoriert und die Orientierung der Aufnahme auf diesen Wert fest eingestellt\n%s</string>
     <string name="preference_face_detection">Gesichtserkennung</string>
     <string name="preference_face_detection_summary">Stellt die Schärfe auf die Gesichter ein</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Bildschirm bei Videoaufnahme sperren</string>
     <string name="preference_lock_video_summary">Wenn aktiviert, wird bei Videoaufnahmen die Oberfläche gesperrt, um versehentliches Stoppen zu verhindern. Zum Entsperren einfach wischen.</string>
     <string name="preference_rotate_preview">Vorschau drehen</string>
-    <string name="preference_rotate_preview_summary">Vorschaubild drehen (hat keinen Einfluss auf die Aufnahme)</string>
+    <string name="preference_rotate_preview_summary">Vorschaubild drehen (hat keinen Einfluss auf die Aufnahme)\n%s</string>
     <string name="preference_screen_gui">Benutzeroberfläche…</string>
     <string name="preference_preview_size">Vorschaugröße</string>
     <string name="preference_ui_placement">Ausrichtung der Oberfläche</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Gitter-Hilfslinien</string>
     <string name="grid">Gitter</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Beschnitt-Hilfslinien</string>
-    <string name="preference_crop_guide_summary">Anzeige einer rechteckigen Hilfslinie entsprechend dem gewählten Seitenverhältnis (nützlich, wenn ein Beschnitt geplant ist). Nur in der WYSIWYG-Vorschau oder bei Videoaufnahme möglich.</string>
+    <string name="preference_crop_guide_summary">Anzeige einer rechteckigen Hilfslinie entsprechend dem gewählten Seitenverhältnis (nützlich, wenn ein Beschnitt geplant ist). Nur in der WYSIWYG-Vorschau oder bei Videoaufnahme möglich\n%s</string>
     <string name="preference_show_toasts">Toast-Benachrichtigungen</string>
     <string name="preference_show_toasts_summary">Anzeige von Popup-Meldungen aktivieren/deaktivieren</string>
     <string name="preference_thumbnail_animation">Vorschau-Animation</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Standort-Einstellungen…</string>
     <string name="preference_resolution">Kamera-Auflösung</string>
     <string name="preference_quality">Bildqualität</string>
-    <string name="preference_quality_summary">Die Qualität beim Speichern der Fotos einstellen (Empfehlung: 90%%)</string>
+    <string name="preference_quality_summary">Die Qualität beim Speichern der Fotos einstellen (Empfehlung: 90%%)\n%s</string>
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Geotagging</string>
     <string name="preference_location_summary">Wenn aktiviert, werden die GPS-Standortdaten in den Aufnahmen gespeichert.</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Video-Stabilisierung</string>
     <string name="preference_video_stabilization_summary">Die Video-Stabilisierung reduziert das Bildwackeln in der Vorschau und der Aufnahme</string>
     <string name="preference_video_bitrate">Video-Bitrate (durchschnittlich)</string>
-    <string name="preference_video_bitrate_summary">Einstellung der durchschnittlichen Bitrate der Videoaufnahme (je höher umso besser die Qualität und höher die Dateigröße). Nicht alle Geräte unterstützen alle Bitraten</string>
+    <string name="preference_video_bitrate_summary">Einstellung der durchschnittlichen Bitrate der Videoaufnahme (je höher umso besser die Qualität und höher die Dateigröße). Nicht alle Geräte unterstützen alle Bitraten\n%s</string>
     <string name="preference_video_fps">Bildwiederholfrequenz</string>
-    <string name="preference_video_fps_summary">Einstellung der Bildwiederholrate (FPS) der Videoaufnahme. Dieser Wert kann nicht immer garantiert werden. Nicht alle Geräte unterstützen alle Raten</string>
+    <string name="preference_video_fps_summary">Einstellung der Bildwiederholrate (FPS) der Videoaufnahme. Dieser Wert kann nicht immer garantiert werden. Nicht alle Geräte unterstützen alle Raten\n%s</string>
     <string name="preference_video_max_duration">Maximaldauer</string>
-    <string name="preference_video_max_duration_summary">Die Videoaufnahme wird nach dieser Zeit abgebrochen.</string>
+    <string name="preference_video_max_duration_summary">Die Videoaufnahme wird nach dieser Zeit abgebrochen.\n%s</string>
     <string name="preference_video_restart">Neustart der Aufnahme nach Maximaldauer</string>
-    <string name="preference_video_restart_summary">Nach dem Erreichen der Maximaldauer wird die Aufnahme so oft wie angegeben neu gestartet</string>
+    <string name="preference_video_restart_summary">Nach dem Erreichen der Maximaldauer wird die Aufnahme so oft wie angegeben neu gestartet\n%s</string>
     <string name="preference_video_max_filesize">Maximale Dateigröße für Video</string>
-    <string name="preference_video_max_filesize_summary">Die Videoaufnahme stoppt und/oder started (siehe nächste Optionen), wenn die maximale Dateigröße fast erreicht ist. Alle Android Geräte haben eine maximale Größe von 2GB oder 4GB für Videos. Mit diesem Wert läßt sich ein bestimmter Wert einstellen.</string>
+    <string name="preference_video_max_filesize_summary">Die Videoaufnahme stoppt und/oder started (siehe nächste Optionen), wenn die maximale Dateigröße fast erreicht ist. Alle Android Geräte haben eine maximale Größe von 2GB oder 4GB für Videos. Mit diesem Wert läßt sich ein bestimmter Wert einstellen.\n%s</string>
     <string name="preference_video_restart_max_filesize">Neustart bei maximaler Dateigröße</string>
     <string name="preference_video_restart_max_filesize_summary">Legt fest, ob die Videoaufnahme neugestartet wird, sobald das geräte-definierte oder das benutzerdefinierte Maximum erreicht ist.</string>
     <string name="preference_record_audio">Ton aufzeichnen</string>
@@ -310,9 +310,9 @@
     <string name="preference_camera2_fake_flash_summary">Aktiviere dies, wenn dein Geräte Probleme mit der Camera2 API hat</string>
 
     <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_n_images_summary">Anzahl der Bilder für Exposure Bracketing Modus</string>
+    <string name="preference_expo_bracketing_n_images_summary">Anzahl der Bilder für Exposure Bracketing Modus\n%s</string>
     <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
-    <string name="preference_expo_bracketing_stops_summary">Anzahl der Stops für jedes Bild</string>
+    <string name="preference_expo_bracketing_stops_summary">Anzahl der Stops für jedes Bild\n%s</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 

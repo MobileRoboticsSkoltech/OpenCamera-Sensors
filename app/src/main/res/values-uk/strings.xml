@@ -87,7 +87,7 @@
     <string name="preference_exposure">Компенсація експозиції</string>
     <string name="preference_exposure_summary">Типове значення 0 для компенсації експозиції</string>
     <string name="preference_lock_orientation">Блокування орієнтації фото/відео</string>
-    <string name="preference_lock_orientation_summary">Ігнорування системної орієнтації екрану пристрою</string>
+    <string name="preference_lock_orientation_summary">Ігнорування системної орієнтації екрану пристрою\n%s</string>
     <string name="preference_face_detection">Розпізнавання облич</string>
     <string name="preference_face_detection_summary">"Розпізнавання облич в об'єктиві для фокусування"</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Блокувати екран під час запису відео</string>
     <string name="preference_lock_video_summary">Під час запису відео, графічний інтерфейс буде заблоковано, аби запобігати випадковому припиненню запису. Проведіть по екрану, аби розблокувати. Зверніть увагу, що запис відео припиниться, якщо додаток перейде у фоновий режим або ж згасне екран.</string>
     <string name="preference_rotate_preview">Поворот попереднього перегляду</string>
-    <string name="preference_rotate_preview_summary">Можливість повороту попереднього перегляду (не впливає на фото/відео)</string>
+    <string name="preference_rotate_preview_summary">Можливість повороту попереднього перегляду (не впливає на фото/відео)\n%s</string>
     <string name="preference_screen_gui">Налаштування інтерфейсу</string>
     <string name="preference_preview_size">Розмір попереднього перегляду</string>
     <string name="preference_ui_placement">Розміщення інтерфейсу</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Показати сітку</string>
     <string name="grid">Сітка</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Порадник по обрізанню фото</string>
-    <string name="preference_crop_guide_summary">Показ прямокутника, який показуватиме відношення сторін - корисно, якщо ви плануєте обрізати фото/відео. Потребує WYSIWYG режим фотознімку чи режим відео.</string>
+    <string name="preference_crop_guide_summary">Показ прямокутника, який показуватиме відношення сторін - корисно, якщо ви плануєте обрізати фото/відео. Потребує WYSIWYG режим фотознімку чи режим відео\n%s</string>
     <string name="preference_show_toasts">Зринаючі повідомлення</string>
     <string name="preference_show_toasts_summary">Показувати зринаючі повідомлення під час роботи</string>
     <string name="preference_thumbnail_animation">Показувати ескіз анімації</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Налаштування місце-розташування…</string>
     <string name="preference_resolution">Розширення камери</string>
     <string name="preference_quality">Якість зображення</string>
-    <string name="preference_quality_summary">Вибір якості фотографій (рекомендується 90%%)</string>
+    <string name="preference_quality_summary">Вибір якості фотографій (рекомендується 90%%)\n%s</string>
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Зберігати дані про місце-розташування (Geotagging)</string>
     <string name="preference_location_summary">Зберігати дані про місце-розташування в фотографіях в момент зйомки</string>
@@ -204,13 +204,13 @@
     <string name="preference_video_stabilization">Увімкнути стабілізацію відео</string>
     <string name="preference_video_stabilization_summary">Стабілізація відео зменшує тряску, через рух камерою</string>
     <string name="preference_video_bitrate">Відео бітрейт (приблизно)</string>
-    <string name="preference_video_bitrate_summary">Вибір бітрейту відео (чим вище, тим краще якість, але файл буде займати більше місця на флеш-картці. Якщо бітрейт не підтримується, це може викликати помилку під час запису відео)</string>
+    <string name="preference_video_bitrate_summary">Вибір бітрейту відео (чим вище, тим краще якість, але файл буде займати більше місця на флеш-картці. Якщо бітрейт не підтримується, це може викликати помилку під час запису відео)\n%s</string>
     <string name="preference_video_fps">Частота кадрів відео (приблизно)</string>
-    <string name="preference_video_fps_summary">Кількість кадрів на секунду (FPS) у відео (може викликати помилку під час запису, якщо частота не підтримується)</string>
+    <string name="preference_video_fps_summary">Кількість кадрів на секунду (FPS) у відео (може викликати помилку під час запису, якщо частота не підтримується)\n%s</string>
     <string name="preference_video_max_duration">Максимальна тривалість відео</string>
-    <string name="preference_video_max_duration_summary">Відеозапис припиниться, через вказаний час</string>
+    <string name="preference_video_max_duration_summary">Відеозапис припиниться, через вказаний час\n%s</string>
     <string name="preference_video_restart">Записати нове відео, коли буде досягнуто ліміту</string>
-    <string name="preference_video_restart_summary">При досягненні ліміту тривалості, буде записано нове відео. (стільки разів, скільки ви вказали)</string>
+    <string name="preference_video_restart_summary">При досягненні ліміту тривалості, буде записано нове відео. (стільки разів, скільки ви вказали)\n%s</string>
     <string name="preference_video_max_filesize">Максимальний розмір файлу відео</string>
 
 

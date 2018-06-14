@@ -86,7 +86,7 @@
     <string name="preference_exposure">露出補正</string>
     <string name="preference_exposure_summary">0に設定するとデフォルトの露出補正になります</string>
     <string name="preference_lock_orientation">写真/ビデオの向き</string>
-    <string name="preference_lock_orientation_summary">設定すると機械上の向きよりも設定された向きを優先して保存します</string>
+    <string name="preference_lock_orientation_summary">設定すると機械上の向きよりも設定された向きを優先して保存します\n%s</string>
     <string name="preference_face_detection">顔検出</string>
     <string name="preference_face_detection_summary">フォーカスの設定に顔検出を利用します</string>
 
@@ -121,7 +121,7 @@
     <string name="preference_lock_video">録画中は画面を固定する</string>
     <string name="preference_lock_video_summary">録画が停止しないように画面を固定します。固定は画面をスワイプすると解除されます。アプリをバックグラウンドに移すか画面を消灯しても録画は停止します。</string>
     <string name="preference_rotate_preview">回転をプレビュー</string>
-    <string name="preference_rotate_preview_summary">プレビューを回転して表示します(写真/ビデオの保存には影響しません)</string>
+    <string name="preference_rotate_preview_summary">プレビューを回転して表示します(写真/ビデオの保存には影響しません)\n%s</string>
     <string name="preference_screen_gui">画面上での表示設定…</string>
     <string name="preference_preview_size">プレビューサイズ</string>
     <string name="preference_ui_placement">操作位置</string>
@@ -151,7 +151,7 @@
     <string name="preference_grid">グリッドを表示する</string>
     <string name="grid">グリッド</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">クロップを表示する</string>
-    <string name="preference_crop_guide_summary">画面上に切り取り用の線を表示します - 異なる比率に加工する場合に便利です。使用にはWYSIWYGでの写真モード、もしくはビデオモードを必要とします。</string>
+    <string name="preference_crop_guide_summary">画面上に切り取り用の線を表示します - 異なる比率に加工する場合に便利です。使用にはWYSIWYGでの写真モード、もしくはビデオモードを必要とします。\n%s</string>
     <string name="preference_show_toasts">トーストを表示する</string>
     <string name="preference_show_toasts_summary">画面上のメッセージをトースト形式で表示します</string>
     <string name="preference_thumbnail_animation">サムネイルをアニメにする</string>
@@ -167,7 +167,7 @@
     <string name="preference_screen_location_settings">位置情報の設定…</string>
     <string name="preference_resolution">写真の解像度</string>
     <string name="preference_quality">写真の品質</string>
-    <string name="preference_quality_summary">保存する写真の品質を決めます (90%%の圧縮率を提案します)</string>
+    <string name="preference_quality_summary">保存する写真の品質を決めます (90%%の圧縮率を提案します)\n%s</string>
     <string name="preference_location">位置情報を使用する</string>
     <string name="preference_location_summary">写真/ビデオにジオタグを埋め込みます</string>
     <string name="preference_gps_direction">方角情報を使用する</string>
@@ -193,11 +193,11 @@
     <string name="preference_video_stabilization">自動回転を有効にする</string>
     <string name="preference_video_stabilization_summary">ビデオ撮影時の自動回転を設定します</string>
     <string name="preference_video_bitrate">ビデオのビットレート</string>
-    <string name="preference_video_bitrate_summary">ビデオのビットレートを設定します(設定を高くするとより多くの保存スペースが必要になり、サポートしていないレートを設定すると録画に失敗する事があります)</string>
+    <string name="preference_video_bitrate_summary">ビデオのビットレートを設定します(設定を高くするとより多くの保存スペースが必要になり、サポートしていないレートを設定すると録画に失敗する事があります)\n%s</string>
     <string name="preference_video_fps">ビデオのフレームレート</string>
-    <string name="preference_video_fps_summary">ビデオのフレームレート(FPS)を設定します(サポートしていないレートを設定すると録画に失敗する事があります)</string>
+    <string name="preference_video_fps_summary">ビデオのフレームレート(FPS)を設定します(サポートしていないレートを設定すると録画に失敗する事があります)\n%s</string>
     <string name="preference_video_max_duration">ビデオの最大撮影時間</string>
-    <string name="preference_video_max_duration_summary">指定した時間が経過するとビデオ撮影が自動的に停止します</string>
+    <string name="preference_video_max_duration_summary">指定した時間が経過するとビデオ撮影が自動的に停止します\n%s</string>
     <string name="preference_video_restart">ビデオの最大撮影回数</string>
     <string name="preference_video_restart_summary">最大撮影時間の経過後に指定した回数だけ撮影を繰り返します(有効時のみ)</string>
 

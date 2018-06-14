@@ -86,7 +86,7 @@
     <string name="preference_exposure">Imposta la compensazione d\'esposizione</string>
     <string name="preference_exposure_summary">Imposta a 0 per la compensazione d\'esposizione predefinita</string>
     <string name="preference_lock_orientation">Blocco orientamento foto/video</string>
-    <string name="preference_lock_orientation_summary">Se impostato, l\'orientamento del dispositivo sarà ignorato e l\'orientamento delle foto e dei video sarà come quello della specifica rotazione</string>
+    <string name="preference_lock_orientation_summary">Se impostato, l\'orientamento del dispositivo sarà ignorato e l\'orientamento delle foto e dei video sarà come quello della specifica rotazione\n%s</string>
     <string name="preference_face_detection">Riconoscimento volti</string>
     <string name="preference_face_detection_summary">Usa il riconoscimento volti al posto dell\'area della messa a fuoco</string>
 
@@ -124,7 +124,7 @@
     <string name="preference_lock_video">Blocco schermo nella registrazione video</string>
     <string name="preference_lock_video_summary">Quando si registra un video l\'interfaccia sarà bloccata per prevenire accidentali interruzioni. Trascina il dito sullo schermo per sbloccare. Nota che la registrazione del video sarà interrotta se l\'app andrà in background o se lo schermo è oscurato.</string>
     <string name="preference_rotate_preview">Ruota anteprima</string>
-    <string name="preference_rotate_preview_summary">Opzione per ruotare l\'anteprima (non avrà effetto sulla foto ottenuta)</string>
+    <string name="preference_rotate_preview_summary">Opzione per ruotare l\'anteprima (non avrà effetto sulla foto ottenuta)\n%s</string>
     <string name="preference_screen_gui">Interfaccia schermo…</string>
     <string name="preference_preview_size">Dimensione anteprima</string>
     <string name="preference_ui_placement">Posizionamento interfaccia</string>
@@ -152,7 +152,7 @@
     <string name="preference_grid">Mostra griglia</string>
     <string name="grid">Griglia</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostra guida ritaglio</string>
-    <string name="preference_crop_guide_summary">La guida al ritaglio mostra sullo schermo un rettangolo di certe proporzioni - utile se in un secondo momento si ha intenzione di ritagliare la foto o il video ad un certo rapporto di proporzioni. Richiede la modalità foto WYSIWYG, o di essere in modalità video.</string>
+    <string name="preference_crop_guide_summary">La guida al ritaglio mostra sullo schermo un rettangolo di certe proporzioni - utile se in un secondo momento si ha intenzione di ritagliare la foto o il video ad un certo rapporto di proporzioni. Richiede la modalità foto WYSIWYG, o di essere in modalità video\n%s</string>
     <string name="preference_show_toasts">Visualizza il messaggio \"toast\"</string>
     <string name="preference_show_toasts_summary">Decide quando visualizzare il popup per messaggio \"toast\"</string>
     <string name="preference_take_photo_border">visualizza bordo quando si scatta foto</string>
@@ -170,7 +170,7 @@
     <string name="preference_screen_location_settings">Impostazioni posizione…</string>
     <string name="preference_resolution">Risoluzione fotocamera</string>
     <string name="preference_quality">Qualità immagine</string>
-    <string name="preference_quality_summary">Imposta la qualità dell\'immmagine per le foto da salvare (il valore consigliato è 90%%)</string>
+    <string name="preference_quality_summary">Imposta la qualità dell\'immmagine per le foto da salvare (il valore consigliato è 90%%)\n%s</string>
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Salva la località (Geotagging)</string>
     <string name="preference_location_summary">Salva le coordinate GPS nelle foto e nei video</string>
@@ -199,15 +199,15 @@
     <string name="preference_video_stabilization">Abilita stabilizzazione video</string>
     <string name="preference_video_stabilization_summary">La stabilizzazione video riduce i tremolii durante il movimento della videocamera sia per l\'anteprima che per i video registrati</string>
     <string name="preference_video_bitrate">Video bitrate (circa)</string>
-    <string name="preference_video_bitrate_summary">Imposta il bitrate appropriato per i video (più alto significa più qualità, ma conseguentemente più peso; inoltre la registrazione del video potrebbe fallire se un certo bitrate non è supportato dal dispositivo)</string>
+    <string name="preference_video_bitrate_summary">Imposta il bitrate appropriato per i video (più alto significa più qualità, ma conseguentemente più peso; inoltre la registrazione del video potrebbe fallire se un certo bitrate non è supportato dal dispositivo)\n%s</string>
     <string name="preference_video_fps">Video frame rate (circa)</string>
-    <string name="preference_video_fps_summary">Imposta il frame rate (FPS) per i video (può essere approssimativo e non è garantito raggiungerlo, inoltre potrebbe causare degli errori se un certo frame rate non è supportato)</string>
+    <string name="preference_video_fps_summary">Imposta il frame rate (FPS) per i video (può essere approssimativo e non è garantito raggiungerlo, inoltre potrebbe causare degli errori se un certo frame rate non è supportato)\n%s</string>
     <string name="preference_video_max_duration">Durata massima dei video</string>
-    <string name="preference_video_max_duration_summary">La registrazione del video sarà interrotta ad una durata specifica</string>
+    <string name="preference_video_max_duration_summary">La registrazione del video sarà interrotta ad una durata specifica\n%s</string>
     <string name="preference_video_restart">Ricomincia il video dopo una certa durata</string>
-    <string name="preference_video_restart_summary">Se il video è stato interrotto dopo aver superato la durata massima (se impostata), questa opzione farà ricominciare il video un certo numero di volte</string><!-- @TODO MA IN CHE SENSO? COSA FA? -->
+    <string name="preference_video_restart_summary">Se il video è stato interrotto dopo aver superato la durata massima (se impostata), questa opzione farà ricominciare il video un certo numero di volte\n%s</string><!-- @TODO MA IN CHE SENSO? COSA FA? -->
     <string name="preference_video_max_filesize">Dimensione massima di un video</string>
-    <string name="preference_video_max_filesize_summary">La registrazione del video verrà interrotta e/o riavviata (vedi opzione seguente) quando la (approssimativamente) dimensione massima del file verrà raggiunta. Si noti che pressoché tutti i devices Android hanno come dimensione massima per i video valori tra i 2GB e i 4GB, ma questa opzione permette di impostare un valore specifico</string>
+    <string name="preference_video_max_filesize_summary">La registrazione del video verrà interrotta e/o riavviata (vedi opzione seguente) quando la (approssimativamente) dimensione massima del file verrà raggiunta. Si noti che pressoché tutti i devices Android hanno come dimensione massima per i video valori tra i 2GB e i 4GB, ma questa opzione permette di impostare un valore specifico\n%s</string>
     <string name="preference_video_restart_max_filesize">Riavvia se raggiunta la dimensione massima del file</string>
     <string name="preference_video_restart_max_filesize_summary">determina se riavviare automaticamente quando viene raggiunta la dimensione massima del file (qualora sia specificata la dimensione massima per il file o un valore impostato dall\'utente)</string>
     <string name="preference_record_audio">Registrazione audio</string>
@@ -305,9 +305,9 @@
     <string name="preference_camera2_fake_flash_summary">Abilita questa opzione se il tuo dispositivo mostra un comportamento anomalo del flash con le API Camera2</string>
 
     <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_n_images_summary">Numero di immagini per la modalità exposure bracketing</string>
+    <string name="preference_expo_bracketing_n_images_summary">Numero di immagini per la modalità exposure bracketing\n%s</string>
     <string name="preference_expo_bracketing_stops">Termina Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_stops_summary">Quanti fermi si vogliono aggiungere/sottrarre per ottenere l\'immagine più/meno luminosa</string>
+    <string name="preference_expo_bracketing_stops_summary">Quanti fermi si vogliono aggiungere/sottrarre per ottenere l\'immagine più/meno luminosa\n%s</string>
 
     <string name="seconds_abbreviation">s</string> <!-- abbrevizaione per secondi -->
 

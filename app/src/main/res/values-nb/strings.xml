@@ -87,7 +87,7 @@
     <string name="preference_exposure">Bestem eksponeringskompensasjonen.</string>
     <string name="preference_exposure_summary">Sett den til 0 for å bruke standard-eksponeringskompensasjonen.</string>
     <string name="preference_lock_orientation">Lås foto-/video-roteringen</string>
-    <string name="preference_lock_orientation_summary">Hvis dette er valgt, vil enhetens rotering bli ignorert, og bildets/videoens rotering vil samsvare med den bestemte roteringen.</string>
+    <string name="preference_lock_orientation_summary">Hvis dette er valgt, vil enhetens rotering bli ignorert, og bildets/videoens rotering vil samsvare med den bestemte roteringen\n%s</string>
     <string name="preference_face_detection">Ansiktsoppdagelse</string>
     <string name="preference_face_detection_summary">Bruk ansikstsoppdagelse istedet for fokusområder.</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Lås skjermen under videoopptak</string>
     <string name="preference_lock_video_summary">Under opptak av video, vil brukergrensesnitt bli låst for å unngå at opptaket blir stoppet ved et uhell. Sveip skjermen for å låse opp. Bemerk at opptak alltid vil bli stoppet dersom appen går inn i bakgrunnen eller at skjermen blir blank.</string>
     <string name="preference_rotate_preview">Rotér forhåndsvisningen</string>
-    <string name="preference_rotate_preview_summary">Innstilling for å rotere forhåndsvisningen (Påvirker ikke de resulterende bildene/videoene).</string>
+    <string name="preference_rotate_preview_summary">Innstilling for å rotere forhåndsvisningen (Påvirker ikke de resulterende bildene/videoene)\n%s</string>
     <string name="preference_screen_gui">Grensesnittet på skjermen…</string>
     <string name="preference_preview_size">Forhåndsvisningsstørrelse</string>
     <string name="preference_ui_placement">Grensesnittsplassering</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Vis netting</string>
     <string name="grid">Netting</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Vis en klippingsveiviser</string>
-    <string name="preference_crop_guide_summary">En klippeveiviser viser et rektangel som vis hva det bestemte skjermforholdet ser ut som — Nyttig dersom du planlegger å klippe bildet/videoen etterpå til et annet skjermforhold. Krever WYSIWYG-fotomodus, eller å være i videomodus.</string>
+    <string name="preference_crop_guide_summary">En klippeveiviser viser et rektangel som vis hva det bestemte skjermforholdet ser ut som — Nyttig dersom du planlegger å klippe bildet/videoen etterpå til et annet skjermforhold. Krever WYSIWYG-fotomodus, eller å være i videomodus\n%s</string>
     <string name="preference_show_toasts">Vis oppsprettsbeskjeder</string>
     <string name="preference_show_toasts_summary">Hvorvidt oppsprettsbeskjedene skal vises.</string>
     <string name="preference_thumbnail_animation">Vis forhåndsvisningsanimasjon</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Posisjonsinnstillinger…</string>
     <string name="preference_resolution">Kameraoppløsning</string>
     <string name="preference_quality">Bildekvalitet</string>
-    <string name="preference_quality_summary">Velg JPEG-kvaliteten til de lagrede bildene (Standardverdien er 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_quality_summary">Velg JPEG-kvaliteten til de lagrede bildene (Standardverdien er 90%%)\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Lagre posisjonsdata (Geotagging)</string>
     <string name="preference_location_summary">Lagre GPS-posisjonsdata i bildene/videoene.</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Aktiver videovater</string>
     <string name="preference_video_stabilization_summary">Videovater reduserer ristingen fra kamerabevegelsene, både i forhåndsvisningen og i opptatte videoer.</string>
     <string name="preference_video_bitrate">Videobitfrekvens (Omtrentlig)</string>
-    <string name="preference_video_bitrate_summary">Bestem den omtrentlige bitfrekvensen til videoene (Høyere betyr bedre kvalitet, men tar opp mere diskplass; Det kan få videoopptak til å mislykkes dersom bitfrekvensen ikke er støttet).</string>
+    <string name="preference_video_bitrate_summary">Bestem den omtrentlige bitfrekvensen til videoene (Høyere betyr bedre kvalitet, men tar opp mere diskplass; Det kan få videoopptak til å mislykkes dersom bitfrekvensen ikke er støttet).\n%s</string>
     <string name="preference_video_fps">Video-bildefrekvens (Omtrentlig)</string>
-    <string name="preference_video_fps_summary">Bestem antall bilder i sekundet (FPS) i videoer (Kan være omtrentlig, er ikke garantert å lykkes, og kan få videotopptakt til å mislykkes dersom bildefrekvensen ikke er støttet).</string>
+    <string name="preference_video_fps_summary">Bestem antall bilder i sekundet (FPS) i videoer (Kan være omtrentlig, er ikke garantert å lykkes, og kan få videotopptakt til å mislykkes dersom bildefrekvensen ikke er støttet).\n%s</string>
     <string name="preference_video_max_duration">Maksvarigheten til videoer</string>
-    <string name="preference_video_max_duration_summary">Videoopptakene vil stoppes etter den bestemte tidslengden.</string>
+    <string name="preference_video_max_duration_summary">Videoopptakene vil stoppes etter den bestemte tidslengden.\n%s</string>
     <string name="preference_video_restart">Start videoen på nytt etter maksvarigheten</string>
-    <string name="preference_video_restart_summary">Dersom videoen har stoppet etter å ha truffet maksvarighetene (om den er valgt), vil denne innstillingen få videoen til å starte på nytt, frem til det bestemte antall ganger.</string>
+    <string name="preference_video_restart_summary">Dersom videoen har stoppet etter å ha truffet maksvarighetene (om den er valgt), vil denne innstillingen få videoen til å starte på nytt, frem til det bestemte antall ganger.\n%s</string>
     <string name="preference_video_max_filesize">Maksfilstørrelsen til videoen</string>
-    <string name="preference_video_max_filesize_summary">Videoopptaket vil stoppes og/eller startes på nytt (Se innstillingen nedenfor), når den omtrentlige maksfilstørrelsen har blitt nådd. Bemerk at nesten alle Android enheter har en maksfilstørrelse for videoen (Vanligvis omkring 2GB eller 4GB), men denne innstillingen tillater å velge en bestemt verdi.</string>
+    <string name="preference_video_max_filesize_summary">Videoopptaket vil stoppes og/eller startes på nytt (Se innstillingen nedenfor), når den omtrentlige maksfilstørrelsen har blitt nådd. Bemerk at nesten alle Android enheter har en maksfilstørrelse for videoen (Vanligvis omkring 2GB eller 4GB), men denne innstillingen tillater å velge en bestemt verdi.\n%s</string>
     <string name="preference_video_restart_max_filesize">Start på nytt ved maks filstørrelse</string>
     <string name="preference_video_restart_max_filesize_summary">Hvorvidt det skal automatisk startes på nytt når maksfilstørrelsen har blitt nådd (Hvorvidt det skal være enhetens maksfilstørrelse, eller en brukerbestemt verdi).</string>
     <string name="preference_record_audio">Ta opp lyd</string>
@@ -312,9 +312,9 @@
     <string name="preference_camera2_fake_flash_summary">Aktiver dette dersom enheten har trøbbel med blitsen i Camera2-APIen. this if your device has buggy flash behaviour with Camera2 API</string>
 
     <string name="preference_expo_bracketing_n_images">Eksponeringsbrakett</string>
-    <string name="preference_expo_bracketing_n_images_summary">Antall bilder i eksponeringsbrakettmodusen.</string>
+    <string name="preference_expo_bracketing_n_images_summary">Antall bilder i eksponeringsbrakettmodusen\n%s</string>
     <string name="preference_expo_bracketing_stops">Eksponeringsbrakett-stopper</string>
-    <string name="preference_expo_bracketing_stops_summary">Hvor mange stopp som skal legges til / fjernes fra, for det mørkeste/lyseste bildet.</string>
+    <string name="preference_expo_bracketing_stops_summary">Hvor mange stopp som skal legges til / fjernes fra, for det mørkeste/lyseste bildet\n%s</string>
 
     <string name="preference_nr_save">Støyreduksjon av opprinnelige bilder</string>
     <string name="preference_nr_save_summary">Hvorvidt de opprinnelige bildene skal lagres under støyreduksjonsmodus. Bemerk at dette kan gjøre det mye tregere å lagre bilder.\n%s</string>

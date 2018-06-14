@@ -85,7 +85,7 @@
     <string name="preference_exposure">設定曝光補償</string>
     <string name="preference_exposure_summary">設為 0 使用預設曝光補償。</string>
     <string name="preference_lock_orientation">鎖定照片/影片方向</string>
-    <string name="preference_lock_orientation_summary">如果設定，裝置的方向將被忽略，且照片/影片的方向將相對於指定的方向。</string>
+    <string name="preference_lock_orientation_summary">如果設定，裝置的方向將被忽略，且照片/影片的方向將相對於指定的方向。\n%s</string>
     <string name="preference_face_detection">臉部偵測</string>
     <string name="preference_face_detection_summary">用臉部偵測代替對焦區。</string>
 
@@ -118,7 +118,7 @@
     <string name="preference_lock_video">錄影時鎖定螢幕</string>
     <string name="preference_lock_video_summary">當錄製影片時，圖形化使用者介面將被鎖定以防止意外的停止錄影。滑動螢幕以解鎖。注意，如果程式轉到背景或螢幕是空白，影片錄製會停止。</string>
     <string name="preference_rotate_preview">旋轉預覽</string>
-    <string name="preference_rotate_preview_summary">旋轉預覽選項 (不會影響最終的照片/影片)</string>
+    <string name="preference_rotate_preview_summary">旋轉預覽選項 (不會影響最終的照片/影片)\n%s</string>
     <string name="preference_screen_gui">螢幕GUI…</string>
     <string name="preference_preview_size">預覽大小</string>
     <string name="preference_ui_placement">UI 佈局</string>
@@ -148,7 +148,7 @@
     <string name="preference_grid">顯示格線</string>
     <string name="grid">格</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">顯示裁切輔助</string>
-    <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的解析度很有用。需要所見即所得拍照模式，或處於錄影模式中。</string>
+    <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的解析度很有用。需要所見即所得拍照模式，或處於錄影模式中。\n%s</string>
     <string name="preference_show_toasts">顯示拍照前提示訊息</string>
     <string name="preference_show_toasts_summary">是否要在拍照快門前顯示彈出訊息提示</string>
     <string name="preference_thumbnail_animation">顯示縮圖動畫</string>
@@ -164,7 +164,7 @@
     <string name="preference_screen_location_settings">位置設定…</string>
     <string name="preference_resolution">相機解析度</string>
     <string name="preference_quality">圖像品質</string>
-    <string name="preference_quality_summary">設定儲存的照片圖像的圖像品質（建議值是90%%）</string>
+    <string name="preference_quality_summary">設定儲存的照片圖像的圖像品質（建議值是90%%）\n%s</string>
     <string name="preference_location">儲存位置資料 (地理標記)</string>
     <string name="preference_location_summary">在照片/影片中儲存 GPS 位置資料</string>
     <string name="preference_gps_direction">儲存羅盤方向</string>
@@ -190,13 +190,13 @@
     <string name="preference_video_stabilization">啟用影片穩定</string>
     <string name="preference_video_stabilization_summary">影片穩定減少在預覽和錄影中由於相機移動引起的晃動。</string>
     <string name="preference_video_bitrate">影片位元率 (大約)</string>
-    <string name="preference_video_bitrate_summary">設定影片的大致位元率 (越高表示越好的品質，但佔用更多磁碟空間；如果位元率不支援可能造成錄影失敗)</string>
+    <string name="preference_video_bitrate_summary">設定影片的大致位元率 (越高表示越好的品質，但佔用更多磁碟空間；如果位元率不支援可能造成錄影失敗)\n%s</string>
     <string name="preference_video_fps">影片FPS (大約)</string>
-    <string name="preference_video_fps_summary">設定影片的 FPS(大約值，不能保證有用，且如果不支援可能造成錄影失敗)</string>
+    <string name="preference_video_fps_summary">設定影片的 FPS(大約值，不能保證有用，且如果不支援可能造成錄影失敗)\n%s</string>
     <string name="preference_video_max_duration">影片最長持續時間</string>
-    <string name="preference_video_max_duration_summary">在指定的時間後錄影將停止。</string>
+    <string name="preference_video_max_duration_summary">在指定的時間後錄影將停止。\n%s</string>
     <string name="preference_video_restart">在最大持續時間後重啟錄影</string>
-    <string name="preference_video_restart_summary">如果在達到最大持續時間(如果有設定)後影片停止，此選項將使錄影重啟，最多為指定的次數。</string>
+    <string name="preference_video_restart_summary">如果在達到最大持續時間(如果有設定)後影片停止，此選項將使錄影重啟，最多為指定的次數。\n%s</string>
     <string name="preference_record_audio">錄音</string>
     <string name="preference_record_audio_summary">錄影時錄音</string>
     <string name="preference_record_audio_src">音源</string>

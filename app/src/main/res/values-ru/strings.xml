@@ -87,7 +87,7 @@
     <string name="preference_exposure">Компенсация экспозиции</string>
     <string name="preference_exposure_summary">Значение 0 для компенсации экспозиции по умолчанию</string>
     <string name="preference_lock_orientation">Блокировка ориентации фото/видео</string>
-    <string name="preference_lock_orientation_summary">Игнорирование системной ориентации экрана устройства</string>
+    <string name="preference_lock_orientation_summary">Игнорирование системной ориентации экрана устройства\n%s</string>
     <string name="preference_face_detection">Распознавание лиц</string>
     <string name="preference_face_detection_summary">Распознавание лиц в объективе для фокусировки</string>
 
@@ -127,7 +127,7 @@
     <string name="preference_lock_video">Блокировать экран при записи видео</string>
     <string name="preference_lock_video_summary">При записи видео графический интерфейс будет заблокирован для предотвращения случайной остановки записи. Проведите по экрану, чтобы разблокировать. Обратите внимание, что запись видео остановится, если приложение перейдет в фоновый режим или погаснет экран.</string>
     <string name="preference_rotate_preview">Поворот превью</string>
-    <string name="preference_rotate_preview_summary">Возможность поворота превью (не повлияет на фото/видео)</string>
+    <string name="preference_rotate_preview_summary">Возможность поворота превью (не повлияет на фото/видео)\n%s</string>
     <string name="preference_screen_gui">Настройки интерфейса</string>
     <string name="preference_preview_size">Размер предпросмотра</string>
     <string name="preference_ui_placement">Расположение интерфейса</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Показать сетку</string>
     <string name="grid">Сетка</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Руководство по обрезке</string>
-    <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете обрезать фото/видео. Требуется режим фотосъемки WYSIWYG или режим видео.</string>
+    <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете обрезать фото/видео. Требуется режим фотосъемки WYSIWYG или режим видео\n%s</string>
     <string name="preference_show_toasts">Всплывающие сообщения</string>
     <string name="preference_show_toasts_summary">Показывать всплыващие уведомления при работе</string>
     <string name="preference_thumbnail_animation">Показать эскиз анимации</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Настройки местоположения…</string>
     <string name="preference_resolution">Разрешение камеры</string>
     <string name="preference_quality">Качество изображения</string>
-    <string name="preference_quality_summary">Выбор качества фотографий (рекомендуется 90%%)</string>
+    <string name="preference_quality_summary">Выбор качества фотографий (рекомендуется 90%%)\n%s</string>
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Хранить данные о местоположении (геотеггинг)</string>
     <string name="preference_location_summary">Хранить данные о местоположении в фотографиях</string>
@@ -204,15 +204,15 @@
     <string name="preference_video_stabilization">Включить стабилизацию видео</string>
     <string name="preference_video_stabilization_summary">Стабилизация видео уменьшает тряску в связи с движением камеры</string>
     <string name="preference_video_bitrate">Видео битрейт (примерно)</string>
-    <string name="preference_video_bitrate_summary">Выбор битрейта видео. (чем выше, тем лучше качество, но файл будет занимать больше места на диске. Неподдерживаемый битрейт может стать причиной ошибки при записи видео).</string>
+    <string name="preference_video_bitrate_summary">Выбор битрейта видео. (чем выше, тем лучше качество, но файл будет занимать больше места на диске. Неподдерживаемый битрейт может стать причиной ошибки при записи видео).\n%s</string>
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
-    <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается</string>
+    <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается\n%s</string>
     <string name="preference_video_max_duration">Максимальная длительность видео</string>
-    <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности</string>
+    <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности\n%s</string>
     <string name="preference_video_restart">Записать новое видео после достижения лимита</string>
-    <string name="preference_video_restart_summary">При достижении лимита продолжительности, будет записано новое видео (столько раз, сколько вы выбрали)</string>
+    <string name="preference_video_restart_summary">При достижении лимита продолжительности, будет записано новое видео (столько раз, сколько вы выбрали)\n%s</string>
     <string name="preference_video_max_filesize">Максимальный размер файла видео</string>
-    <string name="preference_video_max_filesize_summary">Видеозапись прекратится или начнется заново (смотрите опцию ниже), когда размер файла достигнет указанной величины (приблизительно). Стоит заметить, что почти у всех Android-устройств есть ограничение на максимальный размер видео (обычно около 2 или 4 Гб), однако с помощью этой опции можно указать конкретное значение</string>
+    <string name="preference_video_max_filesize_summary">Видеозапись прекратится или начнется заново (смотрите опцию ниже), когда размер файла достигнет указанной величины (приблизительно). Стоит заметить, что почти у всех Android-устройств есть ограничение на максимальный размер видео (обычно около 2 или 4 Гб), однако с помощью этой опции можно указать конкретное значение\n%s</string>
     <string name="preference_video_restart_max_filesize">Начать видеозапись заново при достижении максимального размера файла</string>
     <string name="preference_video_restart_max_filesize_summary">Автоматически начать видеозапись заново при достижении максимального размера файла (обусловленного ограничениями устройства или указанного пользователем)</string>
     <string name="preference_record_audio">Запись звука</string>
@@ -310,9 +310,9 @@
     <string name="preference_camera2_fake_flash_summary">Включите, если у вашего устройства проблемы со вспышкой в Camera2 API</string>
 
     <string name="preference_expo_bracketing_n_images">Брекетинг экспозиции</string>
-    <string name="preference_expo_bracketing_n_images_summary">Количество изображений для режима брекетинга экспозиции</string>
+    <string name="preference_expo_bracketing_n_images_summary">Количество изображений для режима брекетинга экспозиции\n%s</string>
     <string name="preference_expo_bracketing_stops">Остановки брекетинга экспозиции</string>
-    <string name="preference_expo_bracketing_stops_summary">Число остановок для каждого изображения</string>
+    <string name="preference_expo_bracketing_stops_summary">Число остановок для каждого изображения\n%s</string>
 
     <string name="seconds_abbreviation">сек</string> <!-- short for seconds -->
 

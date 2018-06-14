@@ -86,7 +86,7 @@
     <string name="preference_exposure">Pozlama telafisini ayarla</string>
     <string name="preference_exposure_summary">Öntanımlı pozlama telafisini 0 a ayarla</string>
     <string name="preference_lock_orientation">Fotoğraf/vidyo yönlendirmeyi kilitle</string>
-    <string name="preference_lock_orientation_summary"> Eğer ayarlanırsa, cihazın yönlendirmesi geçilecektir ve fotoğraf/vidyo yönlendirmesi daha önce belirlenen yönlendirme ayarına uyacaktır</string>
+    <string name="preference_lock_orientation_summary"> Eğer ayarlanırsa, cihazın yönlendirmesi geçilecektir ve fotoğraf/vidyo yönlendirmesi daha önce belirlenen yönlendirme ayarına uyacaktır\n%s</string>
     <string name="preference_face_detection">Yüz tanıma</string>
     <string name="preference_face_detection_summary">Odak alanları yerine yüz tanımayı kullan</string>
 
@@ -121,7 +121,7 @@
     <string name="preference_lock_video">Vidyo kaydederken ekranı kilitle</string>
     <string name="preference_lock_video_summary">Vidyo kaydederken, GUI kazara kaydı durdurmayı önlemek için kilitlenecek. Kilidi açmak için ekranı kaydırın. Vidyo kaydederken eğer uygulama arkaplana giderse ya da ekran boşsa kayıt daima durdurulacaktır.</string>
     <string name="preference_rotate_preview">Önzilemeyi döndür</string>
-    <string name="preference_rotate_preview_summary">Önizlemeyi döndürme seçeneği(etkile\'yecek fotoğraf/vidyo sonucunu etkilemeyecektir)</string>
+    <string name="preference_rotate_preview_summary">Önizlemeyi döndürme seçeneği(etkile\'yecek fotoğraf/vidyo sonucunu etkilemeyecektir)\n%s</string>
     <string name="preference_screen_gui">GUI Ekran Ayarları(grafik arayuzu)…</string>
     <string name="preference_preview_size">Önizleme boyutu</string>
     <string name="preference_ui_placement">Kullanıcı arayüzü</string>
@@ -150,7 +150,7 @@
     <string name="preference_show_battery_summary">Ekranda şu anki pil seviyesini göster</string>
     <string name="preference_grid">Çerçeve göster</string>
     <string name="preference_crop_guide">Kırpma yardımcısını göster</string>
-    <string name="preference_crop_guide_summary">Kırpma yardımcısı -eğer daha sonra fotoğraf/vidyoları farklı görüntü oranlarında kırpmayı planlıyorsanız kullanışlıdır- özel görüntü oranlarının nasıl göründüğünü dikdörtgen şeklinde gösterir. WYSIWYG fotoğraf modu ya da vidyo modunda olmak gerekir.</string>
+    <string name="preference_crop_guide_summary">Kırpma yardımcısı -eğer daha sonra fotoğraf/vidyoları farklı görüntü oranlarında kırpmayı planlıyorsanız kullanışlıdır- özel görüntü oranlarının nasıl göründüğünü dikdörtgen şeklinde gösterir. WYSIWYG fotoğraf modu ya da vidyo modunda olmak gerekir\n%s</string>
     <string name="preference_show_toasts">\"ileti\" mesajları göster</string>
     <string name="preference_show_toasts_summary">\"ileti\" mesajlarını açılır pencere şeklinde göster</string>
     <string name="preference_thumbnail_animation">Önizleme animasyonunu göster</string>
@@ -166,7 +166,7 @@
     <string name="preference_screen_location_settings">Konum ayarları…</string>
     <string name="preference_resolution">Kamera çözünürlüğü</string>
     <string name="preference_quality">Resim kalitesi</string>
-    <string name="preference_quality_summary">Kaydedilmiş fotoğrafların resim kalitesini ayarla(tavsiye edilen değer 90%%)</string>
+    <string name="preference_quality_summary">Kaydedilmiş fotoğrafların resim kalitesini ayarla(tavsiye edilen değer 90%%)\n%s</string>
     <string name="preference_location">Konum verisini kaydet(Geotagging)</string>
     <string name="preference_location_summary">Fotoğraf/vidyolardaki GPS konum bilgisini kaydet</string>
     <string name="preference_gps_direction">Pusula yönünü kaydet</string>
@@ -192,13 +192,13 @@
     <string name="preference_video_stabilization">Vidyo stabilizasyonunu etkinleştir</string>
     <string name="preference_video_stabilization_summary">Vidyo stabilizasyonu, önizleme yaparken ve kaydedilmiş vidyolarda kamera hareketine bağlı olarak sarsıntıyı azaltır</string>
     <string name="preference_video_bitrate">Vidyo bitrate (ortalama)</string>
-    <string name="preference_video_bitrate_summary">Vidyoların ortalama bitoranlarını ayarla(değerler yükseldikçe kalite yükselir fakat dosyalar daha fazla alan kaplar; eğer bitoranı desteklenmezse vidyo kaydederken hatalar oluşabilir)</string>
+    <string name="preference_video_bitrate_summary">Vidyoların ortalama bitoranlarını ayarla(değerler yükseldikçe kalite yükselir fakat dosyalar daha fazla alan kaplar; eğer bitoranı desteklenmezse vidyo kaydederken hatalar oluşabilir)\n%s</string>
     <string name="preference_video_fps">Vidyo kare oranı (ortalama)</string>
-    <string name="preference_video_fps_summary">Vidyoların kare oranını(FPS) ayarla(ortalama olabilir, tamamlanacağının garantisi yoktur ve kare oranı desteklenmezse hatalar oluşabilir)</string>
+    <string name="preference_video_fps_summary">Vidyoların kare oranını(FPS) ayarla(ortalama olabilir, tamamlanacağının garantisi yoktur ve kare oranı desteklenmezse hatalar oluşabilir)\n%s</string>
     <string name="preference_video_max_duration">Vidyoların maksimum süresi</string>
-    <string name="preference_video_max_duration_summary">Vidyo kaydı belirlenen süreden sonra durdurulacaktır</string>
+    <string name="preference_video_max_duration_summary">Vidyo kaydı belirlenen süreden sonra durdurulacaktır\n%s</string>
     <string name="preference_video_restart">Maksimum süreye ulaşıldığında vidyoyu yeniden başlat</string>
-    <string name="preference_video_restart_summary">Vidyo maksimum süreye(ayarlandı ise) ulaşdığında, bu seçenek vidyoyu belirli bir sayıya ulaşana dek yeniden başlatacaktır</string>
+    <string name="preference_video_restart_summary">Vidyo maksimum süreye(ayarlandı ise) ulaşdığında, bu seçenek vidyoyu belirli bir sayıya ulaşana dek yeniden başlatacaktır\n%s</string>
 
     <string name="preference_record_audio">Sesleri kaydet</string>
     <string name="preference_record_audio_summary">Vidyo kaydederken sesleri de kaydet</string>

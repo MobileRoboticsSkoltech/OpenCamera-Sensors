@@ -79,7 +79,7 @@
     <string name="preference_exposure">Ekspozisiya kompensasiyası</string>
     <string name="preference_exposure_summary">Susmaya görə ekspozisiya kompensasiyasının dəyəri 0-dır</string>
     <string name="preference_lock_orientation">Foto/Video fırlanmasının bloklanması</string>
-    <string name="preference_lock_orientation_summary">Əgər işə salınsa cihaz ekranının fırlanması dayanacaq və Foto/Video fırlanması verilmiş orientasiyadan asılı olacaq</string>
+    <string name="preference_lock_orientation_summary">Əgər işə salınsa cihaz ekranının fırlanması dayanacaq və Foto/Video fırlanması verilmiş orientasiyadan asılı olacaq\n%s</string>
     <string name="preference_face_detection">Üz tanınması</string>
     <string name="preference_face_detection_summary">Obyektivdə sifətin aydınlaşdırılması</string>
     <string name="preference_category_camera_controls">Kamera idarəsi</string>
@@ -105,7 +105,7 @@
     <string name="preference_lock_video">Video qeydi zamanı ekranı kilidlə</string>
     <string name="preference_lock_video_summary">Video qeydi zamanı, qeydin təsadüfi dayanmasının qarşısını almaq üçün qrafik interfeys kilidlənəcək. Kilidi açmaq üçün ekranı sürüşdürün. Diqqətli olun ki, əgər proqram fon rejiminə keçsə və ya ekran sönsə video qeydi dayanacaq.</string>
     <string name="preference_rotate_preview">Ön izləmə fırlanması</string>
-    <string name="preference_rotate_preview_summary">Ön izləmədə fırlanma imkanı (şəkil və video nəticələrinə təsir etmir)</string>
+    <string name="preference_rotate_preview_summary">Ön izləmədə fırlanma imkanı (şəkil və video nəticələrinə təsir etmir)\n%s</string>
     <string name="preference_screen_gui">Təsvir parametrləri…</string>
     <string name="preference_preview_size">Önbaxış ölçüsü</string>
     <string name="preference_ui_placement">İnterfeys</string>
@@ -133,7 +133,7 @@
     <string name="preference_grid">Tor göstər</string>
     <string name="grid">Tor</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Kəsmək üçün təlimat</string>
-    <string name="preference_crop_guide_summary">Kənarların nisbətini göstərən dördbucaqlı təsvir - şəkil/video kəsən zaman faydalıdır. WYSIWYG şəkilçəkmə və ya video rejimi tələb olunur</string>
+    <string name="preference_crop_guide_summary">Kənarların nisbətini göstərən dördbucaqlı təsvir - şəkil/video kəsən zaman faydalıdır. WYSIWYG şəkilçəkmə və ya video rejimi tələb olunur\n%s</string>
     <string name="preference_thumbnail_animation">Eskiz animasiyasını göstər</string>
     <string name="preference_thumbnail_animation_summary">Şəkil çəkilişi zamanı eskizlərin yerdəyişməsi animasiyası görünür</string>
     <string name="preference_keep_display_on">Ekranı açıq saxla</string>
@@ -146,7 +146,7 @@
     <string name="preference_screen_location_settings">Məkan parametrləri…</string>
     <string name="preference_resolution">Kamera icazələri</string>
     <string name="preference_quality">Təsvir keyfiyyəti</string>
-    <string name="preference_quality_summary">Şəkil üçün keyfiyyət dərəcəsi seçin (90%% tövsiyyə edilir)</string>
+    <string name="preference_quality_summary">Şəkil üçün keyfiyyət dərəcəsi seçin (90%% tövsiyyə edilir)\n%s</string>
     <string name="preference_location">Məkan məlumatları (Geotagging)</string>
     <string name="preference_location_summary">Şəkil və videolarda GPS məkan məlumatlarının saxlanılması</string>
     <string name="preference_gps_direction">Kompas istiqamətini saxla</string>
@@ -165,13 +165,13 @@
     <string name="preference_video_stabilization">Video stabilləşməsini işə sal</string>
     <string name="preference_video_stabilization_summary">Video stabilləşdirməsi çəkiliş zamanı kamera silkələnməsini azaldır</string>
     <string name="preference_video_bitrate">Video bitreyt (təxmini)</string>
-    <string name="preference_video_bitrate_summary">Video bitreyt seçimi (nə qədər yuxarı olsa, keyfiyyət o qədər yaxşı olar, ancaq fayl kartda çox yer tutacaq. Dəstəklənməyən bitreyt video qeydi zamanı səhvə səbəb ola bilər)</string>
+    <string name="preference_video_bitrate_summary">Video bitreyt seçimi (nə qədər yuxarı olsa, keyfiyyət o qədər yaxşı olar, ancaq fayl kartda çox yer tutacaq. Dəstəklənməyən bitreyt video qeydi zamanı səhvə səbəb ola bilər)\n%s</string>
     <string name="preference_video_fps">Video kadr tezliyi (təxmini)</string>
-    <string name="preference_video_fps_summary">Videoda bir saniyədəki kadrların sayı (FPS) (əgər kadr tezliyi dəstəklənmirsə video qeydi zamanı xətalar baş verə bilər)</string>
+    <string name="preference_video_fps_summary">Videoda bir saniyədəki kadrların sayı (FPS) (əgər kadr tezliyi dəstəklənmirsə video qeydi zamanı xətalar baş verə bilər)\n%s</string>
     <string name="preference_video_max_duration">Maksimum video müddəti</string>
-    <string name="preference_video_max_duration_summary">Göstərilən müddət başa çatdıqdan sonra video qeydi dayanacaq</string>
+    <string name="preference_video_max_duration_summary">Göstərilən müddət başa çatdıqdan sonra video qeydi dayanacaq\n%s</string>
     <string name="preference_video_restart">Maksimum müddətdən sonra yeni video</string>
-    <string name="preference_video_restart_summary">Əgər işə salınsa, video qoyulan həddə çatdıqdan sonra yeni video qeydi başlayacaq (nə qədər seçsəniz o qədər)</string>
+    <string name="preference_video_restart_summary">Əgər işə salınsa, video qoyulan həddə çatdıqdan sonra yeni video qeydi başlayacaq (nə qədər seçsəniz o qədər)\n%s</string>
     <string name="preference_record_audio">Səs qeydi</string>
     <string name="preference_record_audio_summary">Video qeydi zamanı səsin yazılması</string>
     <string name="preference_record_audio_src">Səs mənbəyi</string>

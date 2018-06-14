@@ -86,7 +86,7 @@
     <string name="preference_exposure">设置曝光补偿</string>
     <string name="preference_exposure_summary">设为 0 使用默认曝光补偿。</string>
     <string name="preference_lock_orientation">锁定照片/视频方向</string>
-    <string name="preference_lock_orientation_summary">如果设置，设备的方向将被忽略，并且照片/视频的方向将是相对于指定的方向。</string>
+    <string name="preference_lock_orientation_summary">如果设置，设备的方向将被忽略，并且照片/视频的方向将是相对于指定的方向。\n%s</string>
     <string name="preference_face_detection">脸部侦测</string>
     <string name="preference_face_detection_summary">用脸部侦测代替聚焦区。</string>
 
@@ -125,7 +125,7 @@
     <string name="preference_lock_video">录像时锁定屏幕</string>
     <string name="preference_lock_video_summary">当录制视频时，图形用户界面将被锁定以防止意外的停止录像。滑动屏幕以解锁。注意，如果程序转到后台或屏幕是空白，视频录制总是会停止。</string>
     <string name="preference_rotate_preview">旋转预览</string>
-    <string name="preference_rotate_preview_summary">旋转预览选项 (不会影响最终的照片/视频)</string>
+    <string name="preference_rotate_preview_summary">旋转预览选项 (不会影响最终的照片/视频)\n%s</string>
     <string name="preference_screen_gui">屏幕GUI…</string>
     <string name="preference_preview_size">预览大小</string>
     <string name="preference_ui_placement">UI 布局</string>
@@ -155,7 +155,7 @@
     <string name="preference_grid">显示网格</string>
     <string name="grid">格</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">显示裁剪指南</string>
-    <string name="preference_crop_guide_summary">裁剪指南显示一个矩形显示指定的宽高比看起来像什么 - 如果你计划以后裁剪照片/视频为不同的分辨率，这有用。需要所见即所得照片模式，或处于视频模式中。</string>
+    <string name="preference_crop_guide_summary">裁剪指南显示一个矩形显示指定的宽高比看起来像什么 - 如果你计划以后裁剪照片/视频为不同的分辨率，这有用。需要所见即所得照片模式，或处于视频模式中。\n%s</string>
     <string name="preference_show_toasts">显示 \"toast\" 消息</string>
     <string name="preference_show_toasts_summary">是否显示弹出的 \"toast\" 消息</string>
     <string name="preference_thumbnail_animation">显示缩略图动画</string>
@@ -171,7 +171,7 @@
     <string name="preference_screen_location_settings">位置设置…</string>
     <string name="preference_resolution">相机分辨率</string>
     <string name="preference_quality">图像质量</string>
-    <string name="preference_quality_summary">设置保存的照片图像的图像质量（建议值是90%%）</string>
+    <string name="preference_quality_summary">设置保存的照片图像的图像质量（建议值是90%%）\n%s</string>
     <string name="preference_location">存储位置数据 (地理标记)</string>
     <string name="preference_location_summary">在照片/视频中存储 GPS 位置数据</string>
     <string name="preference_gps_direction">存储罗盘方向</string>
@@ -197,15 +197,15 @@
     <string name="preference_video_stabilization">启用视频稳定</string>
     <string name="preference_video_stabilization_summary">视频稳定减少在预览和录像中由于相机移动引起的晃动。</string>
     <string name="preference_video_bitrate">视频比特率 (大约)</string>
-    <string name="preference_video_bitrate_summary">设置视频的大致比特率 (更高表示更好的质量，但是占用更多磁盘空间；如果比特率不被支持可能引起录像失败)</string>
+    <string name="preference_video_bitrate_summary">设置视频的大致比特率 (更高表示更好的质量，但是占用更多磁盘空间；如果比特率不被支持可能引起录像失败)\n%s</string>
     <string name="preference_video_fps">视频帧率 (大约)</string>
-    <string name="preference_video_fps_summary">设置视频的帧率(FPS)(可能是大约，不能保证实现，并可能导致录像失败，如果帧率不被支持)</string>
+    <string name="preference_video_fps_summary">设置视频的帧率(FPS)(可能是大约，不能保证实现，并可能导致录像失败，如果帧率不被支持)\n%s</string>
     <string name="preference_video_max_duration">视频最长持续时间</string>
-    <string name="preference_video_max_duration_summary">在指定的时间后录像将停止。</string>
+    <string name="preference_video_max_duration_summary">在指定的时间后录像将停止。\n%s</string>
     <string name="preference_video_restart">在最大持续时间后重启视频</string>
-    <string name="preference_video_restart_summary">如果在达到最大持续时间(如果设置了)后视频停止，此选项将使视频重启，最多为指定的次数。</string>
+    <string name="preference_video_restart_summary">如果在达到最大持续时间(如果设置了)后视频停止，此选项将使视频重启，最多为指定的次数。\n%s</string>
     <string name="preference_video_max_filesize">视频文件最大尺寸</string>
-    <string name="preference_video_max_filesize_summary">当达到文件(大致)最大尺寸时，视频录制将停止并且/或者重启(参见下面选项)。注意几乎所有的 Android 设备对视频文件都有最大尺寸的限制(通常约为2GB或4GB)，但是此选项允许设置一个指定值</string>
+    <string name="preference_video_max_filesize_summary">当达到文件(大致)最大尺寸时，视频录制将停止并且/或者重启(参见下面选项)。注意几乎所有的 Android 设备对视频文件都有最大尺寸的限制(通常约为2GB或4GB)，但是此选项允许设置一个指定值\n%s</string>
     <string name="preference_video_restart_max_filesize">达到最大尺寸时重启</string>
     <string name="preference_video_restart_max_filesize_summary">当达到最大文件尺寸时是否自动重启(是否设备默认最大文件尺寸，或用户指定值)</string>
     <string name="preference_record_audio">录音</string>

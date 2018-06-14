@@ -86,7 +86,7 @@
     <string name="preference_exposure">Nastavit kompenzaci expozice</string>
     <string name="preference_exposure_summary">Nastavte na 0 pro implicitní kompenzaci expozice</string>
     <string name="preference_lock_orientation">Zamknout foto/video orientaci</string>
-    <string name="preference_lock_orientation_summary">Pokud zapnuto, orientace zařízení bude ignorována a foto/video orientace bude respektovat nastavení</string>
+    <string name="preference_lock_orientation_summary">Pokud zapnuto, orientace zařízení bude ignorována a foto/video orientace bude respektovat nastavení\n%s</string>
     <string name="preference_face_detection">Detekce obličeje</string>
     <string name="preference_face_detection_summary">Použít detekci obličeje místo oblastí ostření</string>
 
@@ -121,7 +121,7 @@
     <string name="preference_lock_video">Zamknout obrazovku při nahrávání videa</string>
     <string name="preference_lock_video_summary">Při nahrávání videa bude GUI uzamčeno proti náhodnému zastavení nahrávání. Přejeďte prstem pro odemčení. Mějte na paměti, že nahrávání videa bude zastaveno vždy když bude aplikace na pozadí nebo je obrazovka prázdná.</string>
     <string name="preference_rotate_preview">Otočit náhled</string>
-    <string name="preference_rotate_preview_summary">Možnosti otočení náhledu (nemá vliv na výsledné fotografie/videa)</string>
+    <string name="preference_rotate_preview_summary">Možnosti otočení náhledu (nemá vliv na výsledné fotografie/videa)\n%s</string>
     <string name="preference_screen_gui">GUI na obrazovce…</string>
     <string name="preference_preview_size">Velikost náhledu</string>
     <string name="preference_ui_placement">UI rozmístění</string>
@@ -151,7 +151,7 @@
     <string name="preference_grid">Zobrazit mřížku</string>
     <string name="grid">Mřížka</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Zobrazit vodítka oříznutí</string>
-    <string name="preference_crop_guide_summary">Vodítko oříznutí zobrazuje obdélník ukazující jak zvolený poměr stran vypadá - vhodné pokud poté plánujete ořez fotografie/videa na jiný poměr stran. Vyžaduje WYSIWYG fotografický mód nebo video mód.</string>
+    <string name="preference_crop_guide_summary">Vodítko oříznutí zobrazuje obdélník ukazující jak zvolený poměr stran vypadá - vhodné pokud poté plánujete ořez fotografie/videa na jiný poměr stran. Vyžaduje WYSIWYG fotografický mód nebo video mód\n%s</string>
     <string name="preference_show_toasts">Zobrazit \"toast\" zprávy</string>
     <string name="preference_show_toasts_summary">Zda-li zobrazovat vyskakovací \"toast\" zprávy</string>
     <string name="preference_thumbnail_animation">Zobrazit náhled animace</string>
@@ -167,7 +167,7 @@
     <string name="preference_screen_location_settings">Nastavení polohy…</string>
     <string name="preference_resolution">Rozlišení fotoaparátu</string>
     <string name="preference_quality">Obrazová kvalita</string>
-    <string name="preference_quality_summary">Nastavte obrazovou kvalitu uložených fotografií (doporučená hodnota je 90%%)</string>
+    <string name="preference_quality_summary">Nastavte obrazovou kvalitu uložených fotografií (doporučená hodnota je 90%%)\n%s</string>
     <string name="preference_location">Uchovávat polohu (Geotagging)</string>
     <string name="preference_location_summary">Uložit GPS polohu ve fotografiích/videích</string>
     <string name="preference_gps_direction">Uchovávat směr kompasu</string>
@@ -193,13 +193,13 @@
     <string name="preference_video_stabilization">Zapnout stabilizaci videa</string>
     <string name="preference_video_stabilization_summary">Stabilizace videa snižuje otřesy při pohybu fotoaparátu, a to jak v náhledu tak i v nahraných videích</string>
     <string name="preference_video_bitrate">Přenosová rychlost videa (cca)</string>
-    <string name="preference_video_bitrate_summary">Nastavit přibližnou přenosovou rychlost pro videa (vyšší znamená lepší kvalitu, ale zabírá více místa na diskhigher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)</string>
+    <string name="preference_video_bitrate_summary">Nastavit přibližnou přenosovou rychlost pro videa (vyšší znamená lepší kvalitu, ale zabírá více místa na disk)\n%s</string>
     <string name="preference_video_fps">Snímková frekvence videa (cca)</string>
-    <string name="preference_video_fps_summary">Nastavit snímkovou frekvenci (FPS) videa (může být přibližné, není zaručeno jeho dosažení a může způsobovat selhání nahrávání pokud není snímková frekvence podporována)</string>
+    <string name="preference_video_fps_summary">Nastavit snímkovou frekvenci (FPS) videa (může být přibližné, není zaručeno jeho dosažení a může způsobovat selhání nahrávání pokud není snímková frekvence podporována)\n%s</string>
     <string name="preference_video_max_duration">Maximální délka videa</string>
-    <string name="preference_video_max_duration_summary">Nahrávání videa bude zastaveno po určené době</string>
+    <string name="preference_video_max_duration_summary">Nahrávání videa bude zastaveno po určené době\n%s</string>
     <string name="preference_video_restart">Restartovat nahrávání videa po uplynutí maximální délky</string>
-    <string name="preference_video_restart_summary">Pokud je nahrávání videa zastaveno po zmáčknutí maximální délky (pokud je nastavena), toto nastavení restartuje nahrávání videa kolikrát je upřesněno</string>
+    <string name="preference_video_restart_summary">Pokud je nahrávání videa zastaveno po zmáčknutí maximální délky (pokud je nastavena), toto nastavení restartuje nahrávání videa kolikrát je upřesněno\n%s</string>
 
     <string name="preference_record_audio">Nahrávat zvuk</string>
     <string name="preference_record_audio_summary">Nahrávat zvuk při natáčení videa</string>

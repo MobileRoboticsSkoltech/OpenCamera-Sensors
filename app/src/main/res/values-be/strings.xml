@@ -86,7 +86,7 @@
     <string name="preference_exposure">Абраць кампенсацыю экспазіцыі</string>
     <string name="preference_exposure_summary">Усталюйце 0 для выкарыстання прадвызначанай кампенсацыі экспазіцыі</string>
     <string name="preference_lock_orientation">Блакаваць фота / відэа арыентацыю</string>
-    <string name="preference_lock_orientation_summary">Калі ўключана, арыентацыя прылады будзе праігнаравана, а арыентацыя фота / відэа будзе такой як прызначана</string>
+    <string name="preference_lock_orientation_summary">Калі ўключана, арыентацыя прылады будзе праігнаравана, а арыентацыя фота / відэа будзе такой як прызначана\n%s</string>
     <string name="preference_face_detection">Выяўленне твару</string>
     <string name="preference_face_detection_summary">Выкарыстоўваць выяўленне твару замест асноўных напрамкаў</string>
 
@@ -119,7 +119,7 @@
     <string name="preference_lock_video">Блакаваць экран падчас запісу відэа</string>
     <string name="preference_lock_video_summary">Падчас запісу відэа, графічны інтэрфейс будзе заблакаваны , каб выпадкова не прыпыніць запіс. Правядзіце па экране, каб разблакаваць. Звярніце ўвагу, што запіс відэа заўсёды можна спыніць, калі дадатак пераходзіць у фонавы рэжым або экран гасіцца.</string>
     <string name="preference_rotate_preview">Паварочваць пры папярэднім праглядзе</string>
-    <string name="preference_rotate_preview_summary">Опцыя паварочвання пры папярэднім праглядзе (не ўплывае на вынік фота / відэа)</string>
+    <string name="preference_rotate_preview_summary">Опцыя паварочвання пры папярэднім праглядзе (не ўплывае на вынік фота / відэа)\n%s</string>
     <string name="preference_screen_gui">Графічны інтэрфейс…</string>
     <string name="preference_preview_size">Памер папярэдняга прагляду</string>
     <string name="preference_ui_placement">Інтэрфейс</string>
@@ -148,7 +148,7 @@
     <string name="preference_show_battery_summary">Адлюстроўваць узровень зараду батарэі на экране</string>
     <string name="preference_grid">Паказваць сетку</string>
     <string name="preference_crop_guide">Паказваць дапаможнік памеру</string>
-    <string name="preference_crop_guide_summary">Дапаможнік паказвае прапорцыі , калі вы плануеце пасля абрэзаць фота/відэа .Патрабуецца WYSIWYG рэжым. </string>
+    <string name="preference_crop_guide_summary">Дапаможнік паказвае прапорцыі , калі вы плануеце пасля абрэзаць фота/відэа .Патрабуецца WYSIWYG рэжым\n%s</string>
     <string name="preference_show_toasts">Паказваць паведамленні пераключэння</string>
     <string name="preference_show_toasts_summary">Паказвае паведамленні пры пераключэнні</string>
     <string name="preference_thumbnail_animation">Паказваць  анімацыю мініяцюр</string>
@@ -164,7 +164,7 @@
     <string name="preference_screen_location_settings">Налады месцазнаходжання…</string>
     <string name="preference_resolution">Раздзяляльная здольнасць камеры</string>
     <string name="preference_quality">Якасць малюнка</string>
-    <string name="preference_quality_summary">Абраць якасць фота (рэкамендавана 90 %%)</string>
+    <string name="preference_quality_summary">Абраць якасць фота (рэкамендавана 90 %%)\n%s</string>
     <string name="preference_location">Захоўваць звесткі аб месцазнаходжанні (адзнака на карце)</string>
     <string name="preference_location_summary">Захоўваць звесткі аб месцазнаходжанні на фота / відэа</string>
     <string name="preference_gps_direction">Захоўваць напрамак компаса</string>
@@ -190,13 +190,13 @@
     <string name="preference_video_stabilization">Уключыць стабілізацыю відэа</string>
     <string name="preference_video_stabilization_summary">Стабілізацыя відэа памяншае трасяніну падчас руху камеры .</string>
     <string name="preference_video_bitrate">Бітрэйт відэа (прыблізна)</string>
-    <string name="preference_video_bitrate_summary">Абраць бітрэйт відэа (чым вышэй ,тым лепш якасць, але займае больш месца на дыску; можа адбыцца памылка, калі бітрэйт не падтрымліваецца)</string>
+    <string name="preference_video_bitrate_summary">Абраць бітрэйт відэа (чым вышэй ,тым лепш якасць, але займае больш месца на дыску; можа адбыцца памылка, калі бітрэйт не падтрымліваецца)\n%s</string>
     <string name="preference_video_fps">Частата кадраў (прыблізна)</string>
-    <string name="preference_video_fps_summary">Абраць частату кадраў (FPS) відэа </string>
+    <string name="preference_video_fps_summary">Абраць частату кадраў (FPS) відэа\n%s</string>
     <string name="preference_video_max_duration">Максімальная працягласць відэа</string>
-    <string name="preference_video_max_duration_summary">Запіс відэа спыніцца пасля вызначанай працягласці</string>
+    <string name="preference_video_max_duration_summary">Запіс відэа спыніцца пасля вызначанай працягласці\n%s</string>
     <string name="preference_video_restart">Перазапуск відэа пасля дасягнення найбольшай працягласці</string>
-    <string name="preference_video_restart_summary">Калі відэазапіс спыніўся,  дасягнуўшы максімальнай працягласці (калі ўключана), гэтая опцыя перазапусціць відэа  прызначаную колькасць разоў</string>
+    <string name="preference_video_restart_summary">Калі відэазапіс спыніўся,  дасягнуўшы максімальнай працягласці (калі ўключана), гэтая опцыя перазапусціць відэа  прызначаную колькасць разоў\n%s</string>
     <string name="preference_record_audio">Запіс аўдыё</string>
     <string name="preference_record_audio_summary">Запіс аўдыё пры запісе відэа</string>
     <string name="preference_record_audio_src">Крыніца гуку</string>
