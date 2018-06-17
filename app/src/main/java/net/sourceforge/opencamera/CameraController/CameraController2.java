@@ -1662,7 +1662,30 @@ public class CameraController2 extends CameraController {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
-    	raw_size = null;
+		if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+			android.util.Size [] camera_picture_sizes_hires = configs.getHighResolutionOutputSizes(ImageFormat.JPEG);
+			if( camera_picture_sizes_hires != null ) {
+				for(android.util.Size camera_size : camera_picture_sizes_hires) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "high resolution picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+					// check not already listed?
+					boolean found = false;
+					for(android.util.Size sz : camera_picture_sizes) {
+						if( sz.equals(camera_size) )
+							found = true;
+					}
+					if( !found ) {
+						CameraController.Size size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight());
+						size.supports_burst = false;
+						camera_features.picture_sizes.add(size);
+					}
+				}
+			}
+		}
+		// test high resolution modes not supporting burst:
+		//camera_features.picture_sizes.get(0).supports_burst = false;
+
+		raw_size = null;
     	if( capabilities_raw ) {
 		    android.util.Size [] raw_camera_picture_sizes = configs.getOutputSizes(ImageFormat.RAW_SENSOR);
 		    if( raw_camera_picture_sizes == null ) {
@@ -2735,6 +2758,11 @@ public class CameraController2 extends CameraController {
 		this.use_expo_fast_burst = use_expo_fast_burst;
 	}
 
+	@Override
+	public boolean isBurstOrExpo() {
+		// not supported for CameraController1
+		return this.enable_burst;
+	}
 	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		if( MyDebug.LOG )
@@ -4794,7 +4822,8 @@ public class CameraController2 extends CameraController {
 						if( exposure_time <= fixed_exposure_time ) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "optimise for bright scene");
-							n_burst = 2;
+							//n_burst = 2;
+							n_burst = 4;
 							if( !camera_settings.has_iso ) {
 								double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 								exposure_time *= exposure_time_scale;

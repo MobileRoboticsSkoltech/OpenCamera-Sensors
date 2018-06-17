@@ -784,6 +784,12 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public boolean isBurstOrExpo() {
+		// not supported for CameraController1
+		return false;
+	}
+
+	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		// not supported for CameraController1
 	}

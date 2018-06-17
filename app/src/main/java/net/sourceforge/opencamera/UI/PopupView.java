@@ -336,13 +336,26 @@ public class PopupView extends LinearLayout {
 			if( !preview.isVideo() ) {
 				// only show photo resolutions in photo mode - even if photo snapshots whilst recording video is supported, the
 				// resolutions for that won't match what the user has requested for photo mode resolutions
-				final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
-				picture_size_index = preview.getCurrentPictureSizeIndex();
+				final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes(true);
+				//picture_size_index = preview.getCurrentPictureSizeIndex();
+				picture_size_index = -1;
+				CameraController.Size current_picture_size = preview.getCurrentPictureSize();
 				final List<String> picture_size_strings = new ArrayList<>();
-				for(CameraController.Size picture_size : picture_sizes) {
+				for(int i=0;i<picture_sizes.size();i++) {
+					CameraController.Size picture_size = picture_sizes.get(i);
 					// don't display MP here, as call to Preview.getMPString() here would contribute to poor performance!
 					String size_string = picture_size.width + " x " + picture_size.height;
 					picture_size_strings.add(size_string);
+					if( picture_size.equals( current_picture_size ) ) {
+						picture_size_index = i;
+					}
+				}
+				if( picture_size_index == -1 ) {
+					Log.e(TAG, "couldn't find index of current picture size");
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "picture_size_index: " + picture_size_index);
 				}
 				addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 					final Handler handler = new Handler();

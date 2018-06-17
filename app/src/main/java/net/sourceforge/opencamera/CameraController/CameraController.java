@@ -144,12 +144,14 @@ public abstract class CameraController {
 	public static class Size {
 		public final int width;
 		public final int height;
-		final List<int[]> fps_ranges;
-		public final boolean high_speed;
+		public boolean supports_burst; // for photo
+		final List<int[]> fps_ranges; // for video
+		public final boolean high_speed; // for video
 
 		Size(int width, int height, List<int[]> fps_ranges, boolean high_speed) {
 			this.width = width;
 			this.height = height;
+			this.supports_burst = true;
 			this.fps_ranges = fps_ranges;
 			this.high_speed = high_speed;
 			Collections.sort(this.fps_ranges, new RangeSorter());
@@ -346,6 +348,7 @@ public abstract class CameraController {
 	public abstract void setExpoBracketingNImages(int n_images);
 	public abstract void setExpoBracketingStops(double stops);
 	public abstract void setUseExpoFastBurst(boolean use_expo_fast_burst);
+	public abstract boolean isBurstOrExpo();
 	/** If optimise_ae_for_dro is true, then this is a hint that if in auto-exposure mode and flash/torch
 	 *  is not on, the CameraController should try to optimise for a DRO (dynamic range optimisation) mode.
 	 */

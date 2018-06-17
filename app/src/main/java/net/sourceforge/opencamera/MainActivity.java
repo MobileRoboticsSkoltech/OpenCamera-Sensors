@@ -1426,18 +1426,25 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putInt("preview_width", preview.getCurrentPreviewSize().width);
 		bundle.putInt("preview_height", preview.getCurrentPreviewSize().height);
 
-		List<CameraController.Size> sizes = this.preview.getSupportedPictureSizes();
+		// Note that we set check_burst to false, as the Settings always displays all supported resolutions (along with the "saved"
+		// resolution preference, even if that doesn't support burst and we're in a burst mode).
+		// This is to be consistent with other preferences, e.g., we still show RAW settings even though that might not be supported
+		// for the current photo mode.
+		List<CameraController.Size> sizes = this.preview.getSupportedPictureSizes(false);
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];
 			int [] heights = new int[sizes.size()];
+			boolean [] supports_burst = new boolean[sizes.size()];
 			int i=0;
 			for(CameraController.Size size: sizes) {
 				widths[i] = size.width;
 				heights[i] = size.height;
+				supports_burst[i] = size.supports_burst;
 				i++;
 			}
 			bundle.putIntArray("resolution_widths", widths);
 			bundle.putIntArray("resolution_heights", heights);
+			bundle.putBooleanArray("resolution_supports_burst", supports_burst);
 		}
 		if( preview.getCurrentPictureSize() != null ) {
 			bundle.putInt("resolution_width", preview.getCurrentPictureSize().width);

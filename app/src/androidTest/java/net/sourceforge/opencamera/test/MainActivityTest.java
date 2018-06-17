@@ -751,7 +751,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void checkOptimalVideoPictureSize(double targetRatio) {
         // even the picture resolution should have same aspect ratio for video - otherwise have problems on Nexus 7 with Android 4.4.3
 		Log.d(TAG, "video picture size: " + mPreview.getCameraController().getPictureSize().width + ", " + mPreview.getCameraController().getPictureSize().height);
-        List<CameraController.Size> sizes = mPreview.getSupportedPictureSizes();
+        List<CameraController.Size> sizes = mPreview.getSupportedPictureSizes(false);
     	CameraController.Size best_size = mPreview.getOptimalVideoPictureSize(sizes, targetRatio);
 		Log.d(TAG, "best size: " + best_size.width + ", " + best_size.height);
     	assertTrue( best_size.width == mPreview.getCameraController().getPictureSize().width );
@@ -6832,10 +6832,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-	    List<CameraController.Size> preview_sizes = mPreview.getSupportedPictureSizes();
+	    List<CameraController.Size> picture_sizes = mPreview.getSupportedPictureSizes(true);
 
 	    // change back camera to the last size
-		CameraController.Size size = preview_sizes.get(preview_sizes.size()-1);
+		CameraController.Size size = picture_sizes.get(picture_sizes.size()-1);
 	    {
 		    Log.d(TAG, "set size to " + size.width + " x " + size.height);
 		    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -6858,10 +6858,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
 
-	    List<CameraController.Size> front_preview_sizes = mPreview.getSupportedPictureSizes();
+	    List<CameraController.Size> front_picture_sizes = mPreview.getSupportedPictureSizes(true);
 
 	    // change front camera to the last size
-		CameraController.Size front_size = front_preview_sizes.get(front_preview_sizes.size()-1);
+		CameraController.Size front_size = front_picture_sizes.get(front_picture_sizes.size()-1);
 	    {
 		    Log.d(TAG, "set front_size to " + front_size.width + " x " + front_size.height);
 		    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);

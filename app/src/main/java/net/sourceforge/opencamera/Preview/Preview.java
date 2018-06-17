@@ -1747,6 +1747,43 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			camera_controller.setWantBurst(false);
 		}
+		if( camera_controller.isBurstOrExpo() ) {
+			// check photo resolution supports burst
+			CameraController.Size current_size = getCurrentPictureSize();
+			if( current_size != null && !current_size.supports_burst ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "burst mode: current picture size doesn't support burst");
+				// set to next largest that supports burst
+				CameraController.Size new_size = null;
+				for(int i=0;i<sizes.size();i++) {
+					CameraController.Size size = sizes.get(i);
+					if( size.supports_burst && size.width*size.height <= current_size.width*current_size.height ) {
+						if( new_size == null || size.width*size.height > new_size.width*new_size.height ) {
+							current_size_index = i;
+							new_size = size;
+						}
+					}
+		        }
+		        if( new_size == null ) {
+					Log.e(TAG, "can't find burst-supporting picture size smaller than the current picture size");
+					// just find largest that supports burst
+					for(int i=0;i<sizes.size();i++) {
+						CameraController.Size size = sizes.get(i);
+						if( size.supports_burst ) {
+							if( new_size == null || size.width*size.height > new_size.width*new_size.height ) {
+								current_size_index = i;
+								new_size = size;
+							}
+						}
+					}
+					if( new_size == null ) {
+						Log.e(TAG, "can't find burst-supporting picture size");
+					}
+				}
+				// if we set a new size, we don't save this to applicationinterface (so that if user switches to a burst mode and back
+				// when the original resolution doesn't support burst we revert to the original resolution)
+			}
+		}
 
 		camera_controller.setOptimiseAEForDRO( applicationInterface.getOptimiseAEForDROPref() );
 		
@@ -2345,15 +2382,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		        	}
 		        }
 			}
-			if( current_size_index != -1 ) {
-				CameraController.Size current_size = sizes.get(current_size_index);
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
+			{
+				CameraController.Size current_size = getCurrentPictureSize();
+				if( current_size != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
 
-	    		// now save, so it's available for PreferenceActivity
-	    		applicationInterface.setCameraResolutionPref(current_size.width, current_size.height);
+					// now save, so it's available for PreferenceActivity
+					applicationInterface.setCameraResolutionPref(current_size.width, current_size.height);
+				}
 			}
 			// size set later in setPreviewSize()
+			// also note that we check for compatibility with burst (CameraController.Size.supports_burst) later on
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCameraParameters: time after picture sizes: " + (System.currentTimeMillis() - debug_time));
@@ -2636,9 +2676,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
     	}
     	else {
-    		if( current_size_index != -1 ) {
-    			new_size = sizes.get(current_size_index);
-    		}
+    		new_size = getCurrentPictureSize();
     	}
     	if( new_size != null ) {
     		camera_controller.setPictureSize(new_size.width, new_size.height);
@@ -3038,9 +3076,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		float mp = (width*height)/1000000.0f;
 		return formatFloatToString(mp) + "MP";
 	}
+
+	private static String getBurstString(Resources resources, boolean supports_burst) {
+		// should return empty string if supports_burst==true, as this is also used for video resolution strings
+		return supports_burst ? "" : ", " + resources.getString(R.string.no_burst);
+	}
 	
-	public static String getAspectRatioMPString(int width, int height) {
-		return "(" + getAspectRatio(width, height) + ", " + getMPString(width, height) + ")";
+	public static String getAspectRatioMPString(Resources resources, int width, int height, boolean supports_burst) {
+		return "(" + getAspectRatio(width, height) + ", " + getMPString(width, height) + getBurstString(resources, supports_burst) + ")";
 	}
 	
 	public String getCamcorderProfileDescriptionShort(String quality) {
@@ -3085,7 +3128,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
 			type = "QCIF ";
 		}
-		return highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
+		return highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(getResources(), profile.videoFrameWidth, profile.videoFrameHeight, true);
 	}
 
 	public double getTargetRatio() {
@@ -6185,17 +6228,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return new CameraController.Size(preview_w, preview_h);
     }
 
-    public List<CameraController.Size> getSupportedPictureSizes() {
+    /**
+     * @param check_burst If false, and a burst mode is in use (fast burst, expo, HDR), then the
+     *                    returned list will be filtered to remove sizes that don't support burst.
+     */
+    public List<CameraController.Size> getSupportedPictureSizes(boolean check_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPictureSizes");
+		if( check_burst && camera_controller != null && camera_controller.isBurstOrExpo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to filter picture sizes for a burst mode");
+			List<CameraController.Size> filtered_sizes = new ArrayList<>();
+			for(CameraController.Size size : sizes) {
+				if( size.supports_burst ) {
+					filtered_sizes.add(size);
+				}
+			}
+			return filtered_sizes;
+		}
 		return this.sizes;
-    }
+	}
     
-    public int getCurrentPictureSizeIndex() {
+    /*public int getCurrentPictureSizeIndex() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentPictureSizeIndex");
     	return this.current_size_index;
-    }
+    }*/
     
     public CameraController.Size getCurrentPictureSize() {
     	if( current_size_index == -1 || sizes == null )

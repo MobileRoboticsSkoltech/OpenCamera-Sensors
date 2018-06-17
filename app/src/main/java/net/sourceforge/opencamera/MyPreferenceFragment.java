@@ -150,11 +150,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		final int resolution_height = bundle.getInt("resolution_height");
 		final int [] widths = bundle.getIntArray("resolution_widths");
 		final int [] heights = bundle.getIntArray("resolution_heights");
-		if( widths != null && heights != null ) {
+		final boolean [] supports_burst = bundle.getBooleanArray("resolution_supports_burst");
+		if( widths != null && heights != null && supports_burst != null ) {
 			CharSequence [] entries = new CharSequence[widths.length];
 			CharSequence [] values = new CharSequence[widths.length];
 			for(int i=0;i<widths.length;i++) {
-				entries[i] = widths[i] + " x " + heights[i] + " " + Preview.getAspectRatioMPString(widths[i], heights[i]);
+				entries[i] = widths[i] + " x " + heights[i] + " " + Preview.getAspectRatioMPString(getResources(), widths[i], heights[i], supports_burst[i]);
 				values[i] = widths[i] + " " + heights[i];
 			}
 			ListPreference lp = (ListPreference)findPreference("preference_resolution");
@@ -847,6 +848,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 				about_string.append(widths[i]);
                 				about_string.append("x");
                 				about_string.append(heights[i]);
+                				if( supports_burst != null && !supports_burst[i] ) {
+                					about_string.append("[no burst]");
+								}
                 			}
                         }
 						about_string.append("\nPhoto resolution: ");

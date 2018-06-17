@@ -563,6 +563,8 @@
     <string name="preference_video_bitrate_150000000">150Mbps</string>
     <string name="preference_video_bitrate_200000000">200Mbps</string>
 
+    <string name="no_burst">no burst</string> <!-- string for burst mode not being supported for a resolution -->
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>
