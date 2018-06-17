@@ -181,7 +181,7 @@
     <string name="preference_require_location">Données de position indispensables</string>
     <string name="preference_require_location_summary">Prendre des photos/vidéos uniquement si les données de position sont activées et disponibles</string>
     <string name="preference_stamp">Incrustation photo</string>
-    <string name="preference_stamp_summary">Incruste sur les photos la date, l\'heure et la position GPS si les informations de position/direction sont activées</string>
+    <string name="preference_stamp_summary">Incruste sur les photos la date, l\'heure et la position GPS si les informations de position/direction sont activées\n%s</string>
     <string name="preference_stamp_dateformat">Format de la date</string>
     <string name="preference_stamp_timeformat">Format de l\'heure</string>
     <string name="preference_stamp_gpsformat">Format GPS</string>
@@ -214,7 +214,7 @@
     <string name="preference_record_audio">Enregistrement audio</string>
     <string name="preference_record_audio_summary">Enregistre aussi l\'audio lors de l\'enregistrement vidéo</string>
     <string name="preference_record_audio_src">Source audio</string>
-    <string name="preference_record_audio_src_summary">Sélectionne l\'entrée audio pour l\'enregistrement</string>
+    <string name="preference_record_audio_src_summary">Sélectionne l\'entrée audio pour l\'enregistrement\n%s</string>
     <string name="preference_record_audio_channels">Format audio</string>
     <string name="preference_record_audio_channels_summary">Spécifiez mono ou stéréo pour l\'enregistrement audio (stéréo uniquement pris en charge sur certains appareils)</string>
     <string name="preference_video_flash">Clignoter pendant l\'enregistrement vidéo</string>

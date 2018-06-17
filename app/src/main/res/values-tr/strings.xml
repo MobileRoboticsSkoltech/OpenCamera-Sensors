@@ -174,7 +174,7 @@
     <string name="preference_require_location">Konum bilgisi gerekliliği</string>
     <string name="preference_require_location_summary">Konum bilgisi etkinleştirilidiğinde, sadece konum bilgisi ulaşılabilir olduğunda fotoğraf/vidyo çek</string>
     <string name="preference_stamp">Fotoğraflara tarih-saat ekleme</string>
-    <string name="preference_stamp_summary">Fotoğraflara tarih-saaat ekle; konum/yön bilgisi açık ise GPS bilgisini de ekle</string>
+    <string name="preference_stamp_summary">Fotoğraflara tarih-saaat ekle; konum/yön bilgisi açık ise GPS bilgisini de ekle\n%s</string>
     <string name="preference_stamp_dateformat">Tarih formatı</string>
     <string name="preference_stamp_timeformat">Saat modu formatı</string>
     <string name="preference_stamp_gpsformat">GPS formatı</string>
@@ -203,7 +203,7 @@
     <string name="preference_record_audio">Sesleri kaydet</string>
     <string name="preference_record_audio_summary">Vidyo kaydederken sesleri de kaydet</string>
     <string name="preference_record_audio_src">Sesin Kaynağı</string>
-    <string name="preference_record_audio_src_summary">Ses kaydetmede kullanılacak mikrofon</string>
+    <string name="preference_record_audio_src_summary">Ses kaydetmede kullanılacak mikrofon\n%s</string>
     <string name="preference_record_audio_channels">Ses kanalları</string>
     <string name="preference_record_audio_channels_summary">Ses kaydetmede kullanılacak kanalları mono ya da stereo özelleştir(stereo sadece bazı cihazlarda desteklenir)</string>
     <string name="preference_video_flash">vidyo kaydederken Flaşı aç</string>

@@ -458,6 +458,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			setSummary("preference_exif_copyright");
 		}
 
+		setSummary("preference_save_photo_prefix");
+		setSummary("preference_save_video_prefix");
+		setSummary("preference_textstamp");
 
 		final boolean using_android_l = bundle.getBoolean("using_android_l");
 		if( MyDebug.LOG )
@@ -1294,16 +1297,40 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	    if( pref instanceof EditTextPreference ) {
 	    	// %s only supported for ListPreference
 			// we also display the usual summary if no preference value is set
-	    	if( pref.getKey().equals("preference_exif_artist") || pref.getKey().equals("preference_exif_copyright") ) {
+	    	if( pref.getKey().equals("preference_exif_artist") ||
+					pref.getKey().equals("preference_exif_copyright") ||
+					pref.getKey().equals("preference_save_photo_prefix") ||
+					pref.getKey().equals("preference_save_video_prefix") ||
+					pref.getKey().equals("preference_textstamp")
+					) {
+	    		String default_value = "";
+				if( pref.getKey().equals("preference_save_photo_prefix") )
+					default_value = "IMG_";
+				else if( pref.getKey().equals("preference_save_video_prefix") )
+					default_value = "VID_";
 				EditTextPreference editTextPref = (EditTextPreference)pref;
-				if( editTextPref.getText().length() > 0 ) {
+				if( editTextPref.getText().equals(default_value) ) {
+					switch (pref.getKey()) {
+						case "preference_exif_artist":
+							pref.setSummary(R.string.preference_exif_artist_summary);
+							break;
+						case "preference_exif_copyright":
+							pref.setSummary(R.string.preference_exif_copyright_summary);
+							break;
+						case "preference_save_photo_prefix":
+							pref.setSummary(R.string.preference_save_photo_prefix_summary);
+							break;
+						case "preference_save_video_prefix":
+							pref.setSummary(R.string.preference_save_video_prefix_summary);
+							break;
+						case "preference_textstamp":
+							pref.setSummary(R.string.preference_textstamp_summary);
+							break;
+					}
+				}
+				else {
+					// non-default value, so display the current value
 					pref.setSummary(editTextPref.getText());
-				}
-				else if( pref.getKey().equals("preference_exif_artist") ) {
-					pref.setSummary(R.string.preference_exif_artist_summary);
-				}
-				else if( pref.getKey().equals("preference_exif_copyright") ) {
-					pref.setSummary(R.string.preference_exif_copyright_summary);
 				}
 			}
 		}

@@ -172,7 +172,7 @@
     <string name="preference_require_location">Патрабаваць звесткі пра месцазнаходжанне</string>
     <string name="preference_require_location_summary">Калі  ўключана, рабіце фота / відэа толькі калі  месцазнаходжанне вызначана</string>
     <string name="preference_stamp">Друкаваць на фотаздымках</string>
-    <string name="preference_stamp_summary">Друкаваць на фотаздымках дату і час, а таксама звесткі GPS , калі звесткі / кірунак уключаны</string>
+    <string name="preference_stamp_summary">Друкаваць на фотаздымках дату і час, а таксама звесткі GPS , калі звесткі / кірунак уключаны\n%s</string>
     <string name="preference_stamp_dateformat">Фармат даты</string>
     <string name="preference_stamp_timeformat">Фармат часу</string>
     <string name="preference_stamp_gpsformat">Фармат друку звестак GPS </string>
@@ -200,7 +200,7 @@
     <string name="preference_record_audio">Запіс аўдыё</string>
     <string name="preference_record_audio_summary">Запіс аўдыё пры запісе відэа</string>
     <string name="preference_record_audio_src">Крыніца гуку</string>
-    <string name="preference_record_audio_src_summary">Мікрафон падчас запісу аўдыё</string>
+    <string name="preference_record_audio_src_summary">Мікрафон падчас запісу аўдыё\n%s</string>
     <string name="preference_record_audio_channels">Аўдыяканалы</string>
     <string name="preference_record_audio_channels_summary">Мона або стэрэа падчас запісу аўдыё (стэрэа падтрымліваецца толькі на некаторых прыладах)</string>
     <string name="preference_video_flash">Выьліск падчас запісу відэа</string>

@@ -175,7 +175,7 @@
     <string name="preference_require_location">位置情報を要求する</string>
     <string name="preference_require_location_summary">有効にすると位置情報を取得可能な場合のみ写真/ビデオの撮影が動作します</string>
     <string name="preference_stamp">情報を貼り付ける</string>
-    <string name="preference_stamp_summary">写真に日付と時刻を貼り付けます。GPSが有効であれば位置情報も埋め込みます。</string>
+    <string name="preference_stamp_summary">写真に日付と時刻を貼り付けます。GPSが有効であれば位置情報も埋め込みます。\n%s</string>
     <string name="preference_stamp_dateformat">日付の形式</string>
     <string name="preference_stamp_timeformat">時刻の形式</string>
     <string name="preference_stamp_gpsformat">GPSの形式</string>
@@ -204,7 +204,7 @@
     <string name="preference_record_audio">音声録音</string>
     <string name="preference_record_audio_summary">ビデオの撮影時に音声も録音します</string>
     <string name="preference_record_audio_src">オーディオソース</string>
-    <string name="preference_record_audio_src_summary">音声の録音にマイクを使用します</string>
+    <string name="preference_record_audio_src_summary">音声の録音にマイクを使用します\n%s</string>
     <string name="preference_record_audio_channels">オーディオチャンネル</string>
     <string name="preference_record_audio_channels_summary">モノラルもしくはステレオを指定します (ステレオはサポートしている機械でのみ有効です)</string>
     <string name="preference_video_flash">録画中にフラッシュを使用する</string>

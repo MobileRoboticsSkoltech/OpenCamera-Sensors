@@ -184,7 +184,7 @@
     <string name="preference_require_location">Krever posisjonsdata</string>
     <string name="preference_require_location_summary">Dersom posisjonsdataer er aktiver, så ta kun (opp) bilder/videoer dersom posisjonsdataer er tilgjengelige.</string>
     <string name="preference_stamp">Stemple bilder</string>
-    <string name="preference_stamp_summary">Stemple bilder med dato og klokkeslett; og også GPS-info dersom posisjons-/retnings-dataer er aktivert.</string>
+    <string name="preference_stamp_summary">Stemple bilder med dato og klokkeslett; og også GPS-info dersom posisjons-/retnings-dataer er aktivert\n%s</string>
     <string name="preference_stamp_dateformat">Datostemplingsformat</string>
     <string name="preference_stamp_timeformat">Klokkeslettsstemplingsformat</string>
     <string name="preference_stamp_gpsformat">GPS-stemplingsformat</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Ta opp lyd</string>
     <string name="preference_record_audio_summary">Ta opp lyd under videoopptak.</string>
     <string name="preference_record_audio_src">Lydkilde</string>
-    <string name="preference_record_audio_src_summary">Mikrofonen som skal brukes til lydopptak.</string>
+    <string name="preference_record_audio_src_summary">Mikrofonen som skal brukes til lydopptak\n%s</string>
     <string name="preference_record_audio_channels">Lydkanaler</string>
     <string name="preference_record_audio_channels_summary">Velg mono eller stereo for opptak av lyd (Stereo støttes kun på noen enheter).</string>
     <string name="preference_video_flash">Blits under videoopptak</string>
@@ -344,7 +344,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Speil frontkameraet</string>
-    <string name="preference_front_camera_mirror_summary">Hvorvidt bilder skal speiles når frontkameraet brukes.</string>
+    <string name="preference_front_camera_mirror_summary">Hvorvidt bilder skal speiles når frontkameraet brukes\n%s</string>
 
     <string name="preference_calibrate_level">Kalibrer vatervinkelen</string>
     <string name="preference_calibrate_level_summary">Denne innstillingen kalibrerer din enhets akselleromenter, sånn at auto-vateren og vater-/vinkel-innstillingene på skjermen virker riktig.</string>
@@ -361,7 +361,7 @@
     <string name="preference_show_geo_direction_lines">Vis kompassretnings-linjer</string>
     <string name="preference_show_geo_direction_lines_summary">Vis kompassretnings-linjer.</string>
     <string name="preference_video_subtitle">Videoundertekster</string>
-    <string name="preference_video_subtitle_summary">Lag en undertekstfil (.SRT) som lagrer dato og klokkeslett; og også GPS-info dersom plasserings-/retnings-dataer er aktivert.</string>
+    <string name="preference_video_subtitle_summary">Lag en undertekstfil (.SRT) som lagrer dato og klokkeslett; og også GPS-info dersom plasserings-/retnings-dataer er aktivert\n%s</string>
 
     <string name="duration_unlimited">Ubegrenset</string>
     <string name="duration_3s">3 sekunder</string>

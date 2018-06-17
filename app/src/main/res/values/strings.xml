@@ -184,7 +184,7 @@
     <string name="preference_require_location">Require location data</string>
     <string name="preference_require_location_summary">If location data is enabled, only take photo/video if location data is available</string>
     <string name="preference_stamp">Stamp photos</string>
-    <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location/direction data is enabled</string>
+    <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location/direction data is enabled\n%s</string>
     <string name="preference_stamp_dateformat">Datestamp format</string>
     <string name="preference_stamp_timeformat">Timestamp format</string>
     <string name="preference_stamp_gpsformat">GPS stamp format</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>
-    <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
+    <string name="preference_record_audio_src_summary">Microphone to use for recording audio\n%s</string>
     <string name="preference_record_audio_channels">Audio channels</string>
     <string name="preference_record_audio_channels_summary">Specify mono or stereo for recording audio (stereo only supported on some devices)</string>
     <string name="preference_video_flash">Flash while recording video</string>
@@ -347,7 +347,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Front camera mirror</string>
-    <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera</string>
+    <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera\n%s</string>
 
     <string name="preference_calibrate_level">Calibrate level angle</string>
     <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-level and on-screen level/angle options work correctly</string>
@@ -364,7 +364,7 @@
     <string name="preference_show_geo_direction_lines">Show compass direction lines</string>
     <string name="preference_show_geo_direction_lines_summary">Display compass direction lines</string>
     <string name="preference_video_subtitle">Video subtitles</string>
-    <string name="preference_video_subtitle_summary">Create a subtitles (.SRT) file storing date and time; and also GPS info if location/direction data is enabled</string>
+    <string name="preference_video_subtitle_summary">Create a subtitles (.SRT) file storing date and time; and also GPS info if location/direction data is enabled\n%s</string>
 
     <string name="duration_unlimited">Unlimited</string>
     <string name="duration_3s">3 seconds</string>

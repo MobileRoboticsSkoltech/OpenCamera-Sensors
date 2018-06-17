@@ -184,7 +184,7 @@
     <string name="preference_require_location">Вимагати дані про місце-розташування</string>
     <string name="preference_require_location_summary">Якщо вимога даних про місце розташування увімкнуто, ви зможете знімати фото/відео лише коли вони доступні</string>
     <string name="preference_stamp">Відмітки</string>
-    <string name="preference_stamp_summary">Зберігати разом із фотографіями такі дані, як: дата/час/місце-розташування</string>
+    <string name="preference_stamp_summary">Зберігати разом із фотографіями такі дані, як: дата/час/місце-розташування\n%s</string>
     <string name="preference_stamp_dateformat">Формат дати</string>
     <string name="preference_stamp_timeformat">Формат часу</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Запис звуку</string>
     <string name="preference_record_audio_summary">Запис звуку під час запису відео</string>
     <string name="preference_record_audio_src">Джерело звуку</string>
-    <string name="preference_record_audio_src_summary">Мікрофон для запису звуку</string>
+    <string name="preference_record_audio_src_summary">Мікрофон для запису звуку\n%s</string>
     <string name="preference_record_audio_channels">Число каналів</string>
     <string name="preference_record_audio_channels_summary">Налаштування моно чи стереозвуку (стерео доступно не для всіх пристроїв)</string>
     <string name="preference_video_flash">Спалах під час запису відео</string>

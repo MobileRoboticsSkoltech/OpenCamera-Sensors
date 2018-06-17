@@ -179,7 +179,7 @@
     <string name="preference_require_location">Richiede dati posizione</string>
     <string name="preference_require_location_summary">Se i dati posizione sono abilitati, permette di scattare foto o riprendere video solamente se i dati di posizione sono disponibili</string>
     <string name="preference_stamp">Timbro foto</string>
-    <string name="preference_stamp_summary">Timbro foto con data e ora; ed anche info GPS info se i dati di posizione/direzione sono abilitati</string>
+    <string name="preference_stamp_summary">Timbro foto con data e ora; ed anche info GPS info se i dati di posizione/direzione sono abilitati\n%s</string>
     <string name="preference_stamp_dateformat">Formato data/ora</string>
     <string name="preference_stamp_timeformat">Formato data/ora</string>
     <string name="preference_stamp_gpsformat">Formato timbro GPS</string>
@@ -213,7 +213,7 @@
     <string name="preference_record_audio">Registrazione audio</string>
     <string name="preference_record_audio_summary">Registra l\' audio quando si registra un video</string>
     <string name="preference_record_audio_src">Sorgente audio</string>
-    <string name="preference_record_audio_src_summary">Il microfono da usare per la registrazione dell\'audio</string>
+    <string name="preference_record_audio_src_summary">Il microfono da usare per la registrazione dell\'audio\n%s</string>
     <string name="preference_record_audio_channels">Canali Audio</string>
     <string name="preference_record_audio_channels_summary">Specifica modalità mono o stereo per la registrazione audio (modalità stereo supportata solo su alcuni modelli)</string>
     <string name="preference_video_flash">Flash durante la registrazione video</string>
@@ -330,7 +330,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Specchio camera frontale</string>
-    <string name="preference_front_camera_mirror_summary">Specifica quando specchiare immagini usando la fotocamera frontale.</string>
+    <string name="preference_front_camera_mirror_summary">Specifica quando specchiare immagini usando la fotocamera frontale\n%s</string>
 
     <string name="preference_calibrate_level">Calibra livello angolo</string>
     <string name="preference_calibrate_level_summary">Questa opzione calibra l\'accelerometro del dispositivo, in modo tale che sia l\'auto-level che le opzioni on-screen level/angolo funzionino correttamente.</string>
@@ -347,7 +347,7 @@
     <string name="preference_show_geo_direction_lines">Visualizza linee direzione bussola</string>
     <string name="preference_show_geo_direction_lines_summary">Visualizza linee di direzione della bussola</string>
     <string name="preference_video_subtitle">Sottotitoli Video</string>
-    <string name="preference_video_subtitle_summary">Crea il file con i sottotitoli (.SRT) contenente data e ora; ed anche le informazioni relative al GPS se i dati di posizione/direzione sono abilitati</string>
+    <string name="preference_video_subtitle_summary">Crea il file con i sottotitoli (.SRT) contenente data e ora; ed anche le informazioni relative al GPS se i dati di posizione/direzione sono abilitati\n%s</string>
 
     <string name="duration_unlimited">Illimitata</string>
     <string name="duration_3s">3 secondi</string>

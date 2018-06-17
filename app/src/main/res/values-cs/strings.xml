@@ -175,7 +175,7 @@
     <string name="preference_require_location">Vyžadovat polohu</string>
     <string name="preference_require_location_summary">Pokud je zjištění polohy zapnuto, pořidí fotografii/video pouze je-li poloha k dispozici</string>
     <string name="preference_stamp">Razítkovat fotografie</string>
-    <string name="preference_stamp_summary">Orazí fotografie datem a časem; a také GPS informacemi pokud je poloha/směr zapnuta</string>
+    <string name="preference_stamp_summary">Orazí fotografie datem a časem; a také GPS informacemi pokud je poloha/směr zapnuta\n%s</string>
     <string name="preference_stamp_dateformat">Formát razítka s datem</string>
     <string name="preference_stamp_timeformat">Formát časového razítka</string>
     <string name="preference_stamp_gpsformat">Formát GPS razítka</string>
@@ -204,7 +204,7 @@
     <string name="preference_record_audio">Nahrávat zvuk</string>
     <string name="preference_record_audio_summary">Nahrávat zvuk při natáčení videa</string>
     <string name="preference_record_audio_src">Zdroj zvuku</string>
-    <string name="preference_record_audio_src_summary">Mikrofon používaný při natáčení videa</string>
+    <string name="preference_record_audio_src_summary">Mikrofon používaný při natáčení videa\n%s</string>
     <string name="preference_record_audio_channels">Kanály zvuku</string>
     <string name="preference_record_audio_channels_summary">Nastavit mono nebo stereo pro nahrávání zvuku (stereo je podporováno jen na některých zařízeních)</string>
     <string name="preference_video_flash">Blikat při nahrávání videa</string>

@@ -184,7 +184,7 @@
     <string name="preference_require_location">Helyadatok megkövetelése</string>
     <string name="preference_require_location_summary">Ha a helymeghatározás engedélyezve van, csak akkor enged fotózni/videózni, ha a helyadat rendelkezésre áll</string>
     <string name="preference_stamp">Fotók feliratozása</string>
-    <string name="preference_stamp_summary">A fotók feliratozása dátum- és időbélyeggel, valamint GPS információval, ha a hely/irány adat elérhető</string>
+    <string name="preference_stamp_summary">A fotók feliratozása dátum- és időbélyeggel, valamint GPS információval, ha a hely/irány adat elérhető\n%s</string>
     <string name="preference_stamp_dateformat">Dátumbélyeg formátum</string>
     <string name="preference_stamp_timeformat">Időbélyeg formátum</string>
     <string name="preference_stamp_gpsformat">GPS bélyeg formátum</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Hangrögzítés</string>
     <string name="preference_record_audio_summary">Hangrögzítés videofelvétel alatt</string>
     <string name="preference_record_audio_src">Hangforrás</string>
-    <string name="preference_record_audio_src_summary">Hangrögzítésre használandó mikrofon</string>
+    <string name="preference_record_audio_src_summary">Hangrögzítésre használandó mikrofon\n%s</string>
     <string name="preference_record_audio_channels">Hangcsatornák</string>
     <string name="preference_record_audio_channels_summary">Monó vagy sztereó hangfelvétel készítése (sztereó felvételre nem minden eszköz képes)</string>
     <string name="preference_video_flash">Villogás felvétel alatt</string>
@@ -335,7 +335,7 @@
     <string name="selfie">Szelfi</string>
 
     <string name="preference_front_camera_mirror">Előlapi kamera tükrözés</string>
-    <string name="preference_front_camera_mirror_summary">Az előlapi kamera használatakor a kép tükrözése.</string>
+    <string name="preference_front_camera_mirror_summary">Az előlapi kamera használatakor a kép tükrözése\n%s</string>
 
     <string name="preference_calibrate_level">Vízszint kalibrálása</string>
     <string name="preference_calibrate_level_summary">Ez a beállítás kalibrálja a készülék gyorsulásmérőjét, így az auto-stabilizálás és a képernyőn megjelenő vízszintező jól fog működni</string>
@@ -352,7 +352,7 @@
     <string name="preference_show_geo_direction_lines">Iránytű irányvonalak megjelenítése</string>
     <string name="preference_show_geo_direction_lines_summary">Irányvonalakat jelenít meg az iránytű alapján</string>
     <string name="preference_video_subtitle">Videó feliratok</string>
-    <string name="preference_video_subtitle_summary">Felirat (.srt) fájl létrehozása dátummal, idővel és GPS szélesség/hosszúság adatokkal</string>
+    <string name="preference_video_subtitle_summary">Felirat (.srt) fájl létrehozása dátummal, idővel és GPS szélesség/hosszúság adatokkal\n%s</string>
 
     <string name="duration_unlimited">Korlátlan</string>
     <string name="duration_3s">3 másodperc</string>

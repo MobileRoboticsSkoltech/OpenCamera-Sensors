@@ -184,7 +184,7 @@
     <string name="preference_require_location">Wymagaj danych geolokalizacji</string>
     <string name="preference_require_location_summary">Jeśli zapisywanie danych geolokalizacyjnych jest włączone, zapisanie zdjęcia lub filmu nastąpi tylko gdy te dane są dostępne</string>
     <string name="preference_stamp">Stempluj zdjęcia</string>
-    <string name="preference_stamp_summary">Stempluje zdjęcia datą i czasem, jeśli są dostępne także danymi z GPS</string>
+    <string name="preference_stamp_summary">Stempluje zdjęcia datą i czasem, jeśli są dostępne także danymi z GPS\n%s</string>
     <string name="preference_stamp_dateformat">Format daty stempla</string>
     <string name="preference_stamp_timeformat">Format czasu stempla</string>
     <string name="preference_stamp_gpsformat">Format stempla GPS</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Nagrywanie z dźwiękiem</string>
     <string name="preference_record_audio_summary">Nagrywanie filmu wraz z dźwiękiem</string>
     <string name="preference_record_audio_src">Źródło dźwięku</string>
-    <string name="preference_record_audio_src_summary">Wybór mikrofonu, z którego będzie nagrywany dźwięk</string>
+    <string name="preference_record_audio_src_summary">Wybór mikrofonu, z którego będzie nagrywany dźwięk\n%s</string>
     <string name="preference_record_audio_channels">Kanały dźwięku</string>
     <string name="preference_record_audio_channels_summary">Wybór między dźwiękiem mono a stereo (dostępne na niektórych urządzeniach)</string>
     <string name="preference_video_flash">Wskaźnik nagrywania</string>
@@ -319,7 +319,7 @@
     <string name="record_video">Nagraj film</string>
     <string name="selfie">Autoportret</string>
     <string name="preference_front_camera_mirror">Efekt lustra przedniego aparatu</string>
-    <string name="preference_front_camera_mirror_summary">Włącza efekt lutrzanego odbicia dla przedniego aparatu</string>
+    <string name="preference_front_camera_mirror_summary">Włącza efekt lutrzanego odbicia dla przedniego aparatu\n%s</string>
     <string name="preference_calibrate_level">Kalibracja poziomu</string>
     <string name="preference_calibrate_level_summary">Ta opcja pozwala skalibrować akcelerometr urządzenia aby autopoziomowanie działało poprawnie.</string>
     <string name="preference_calibrate_level_dialog">Postaw swoje urządzenie (pionowo lub poziomo) na płaskiej wypoziomowanej powierzchni a następnie wciśnij Kalibruj.\n\n Naciśnij Resetuj aby usunąć dane kalibracyjne.\n\nNaciśnij wstecz aby anulować.</string>
@@ -333,7 +333,7 @@
     <string name="preference_show_geo_direction_lines">Pokaż linie kompasu</string>
     <string name="preference_show_geo_direction_lines_summary">Wyświetla linie kierunkowe kompasu</string>
     <string name="preference_video_subtitle">Napisy</string>
-    <string name="preference_video_subtitle_summary">Tworzy napisy (w formacie SRT), w których zapisywane są data, czas i dane GPS jeśli są włączone</string>
+    <string name="preference_video_subtitle_summary">Tworzy napisy (w formacie SRT), w których zapisywane są data, czas i dane GPS jeśli są włączone\n%s</string>
     <string name="duration_unlimited">Bez limitu</string>
     <string name="duration_3s">3 sekundy</string>
     <string name="duration_5s">5 sekund</string>

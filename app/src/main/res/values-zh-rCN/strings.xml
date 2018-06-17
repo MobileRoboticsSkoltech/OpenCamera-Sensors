@@ -179,7 +179,7 @@
     <string name="preference_require_location">需要位置数据</string>
     <string name="preference_require_location_summary">如果启用位置数据，只拍照/录像如果位置数据可用。</string>
     <string name="preference_stamp">戳记照片</string>
-    <string name="preference_stamp_summary">用日期和时间戳记照片；如果启用了位置/方向数据也戳记 GPS 信息</string>
+    <string name="preference_stamp_summary">用日期和时间戳记照片；如果启用了位置/方向数据也戳记 GPS 信息\n%s</string>
     <string name="preference_stamp_dateformat">日期戳记格式</string>
     <string name="preference_stamp_gpsformat">GPS 戳记格式</string>
     <string name="preference_stamp_timeformat">时间戳记格式</string>
@@ -211,7 +211,7 @@
     <string name="preference_record_audio">录音</string>
     <string name="preference_record_audio_summary">录像时录音</string>
     <string name="preference_record_audio_src">音频源</string>
-    <string name="preference_record_audio_src_summary">麦克风用于录制音频</string>
+    <string name="preference_record_audio_src_summary">麦克风用于录制音频\n%s</string>
     <string name="preference_record_audio_channels">音频声道</string>
     <string name="preference_record_audio_channels_summary">规定使用单声道或者立体声进行录音（仅部分设备支持立体声）。</string>
     <string name="preference_video_flash">录像时闪光</string>

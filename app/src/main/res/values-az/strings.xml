@@ -154,7 +154,7 @@
     <string name="preference_require_location">Məkan məlumatlarını tələb etmək</string>
     <string name="preference_require_location_summary">Əgər məkan məlumatları işə salınsa, siz yalnız məlumat mövcud olan zaman şəkil/video əldə edə biləcəksiniz</string>
     <string name="preference_stamp">Möhürləmə</string>
-    <string name="preference_stamp_summary">Şəkillə birlikdə bu kimi məlumatların saxlanılması: tarix/vaxt/məkan</string>
+    <string name="preference_stamp_summary">Şəkillə birlikdə bu kimi məlumatların saxlanılması: tarix/vaxt/məkan\n%s</string>
     <string name="preference_textstamp">Mətn möhürü</string>
     <string name="preference_textstamp_summary">Şəkil üzərində xüsusi mətn yaz</string>
     <string name="preference_stamp_fontsize">Şrift ölçüsü</string>
@@ -175,7 +175,7 @@
     <string name="preference_record_audio">Səs qeydi</string>
     <string name="preference_record_audio_summary">Video qeydi zamanı səsin yazılması</string>
     <string name="preference_record_audio_src">Səs mənbəyi</string>
-    <string name="preference_record_audio_src_summary">Səs qeydi üçün mikrofon istifadəsi</string>
+    <string name="preference_record_audio_src_summary">Səs qeydi üçün mikrofon istifadəsi\n%s</string>
     <string name="preference_video_flash">Video qeydi zamanı işıq</string>
     <string name="preference_video_flash_summary">Əgər işə salınsa, video qeydi zamanı işıq yanıb sönəcək (məsafədən qeyd zamanı istifadə etmək olar)</string>
     <string name="preference_category_online">Müxtəlif</string>

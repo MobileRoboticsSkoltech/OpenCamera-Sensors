@@ -184,7 +184,7 @@
     <string name="preference_require_location">Requerer dados de localização</string>
     <string name="preference_require_location_summary">Se os dados de localização estiverem ativados, apenas tirar fotografias/vídeos se os dados de localização estiverem disponíveis</string>
     <string name="preference_stamp">Carimbar fotografias</string>
-    <string name="preference_stamp_summary">Carimbar fotografias com a data e hora; e também com informação GPS se os dados de localização/direção estiverem ativados</string>
+    <string name="preference_stamp_summary">Carimbar fotografias com a data e hora; e também com informação GPS se os dados de localização/direção estiverem ativados\n%s</string>
     <string name="preference_stamp_dateformat">Formato do carimbo de data</string>
     <string name="preference_stamp_timeformat">Formato do carimbo de hora</string>
     <string name="preference_stamp_gpsformat">Formato do carimbo de GPS</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Gravar áudio</string>
     <string name="preference_record_audio_summary">Gravar áudio durante a gravação de vídeo</string>
     <string name="preference_record_audio_src">Fonte de áudio</string>
-    <string name="preference_record_audio_src_summary">O microfone usado na gravação de áudio</string>
+    <string name="preference_record_audio_src_summary">O microfone usado na gravação de áudio\n%s</string>
     <string name="preference_record_audio_channels">Canais de áudio</string>
     <string name="preference_record_audio_channels_summary">Especificar mono ou stereo para a gravação de áudio (stereo apenas é suportado em alguns dispositivos)</string>
     <string name="preference_video_flash">Flash durante a gravação de vídeo</string>

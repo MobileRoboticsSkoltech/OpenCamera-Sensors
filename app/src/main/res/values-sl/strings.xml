@@ -184,7 +184,7 @@
     <string name="preference_require_location">Zahtevaj podatke o lokaciji</string>
     <string name="preference_require_location_summary">Če so podatki o lokaciji omogočeni, snemaj fotografije/videoposnetke samo, če so ti podatki na voljo</string>
     <string name="preference_stamp">Časovni žig fotografij</string>
-    <string name="preference_stamp_summary">Na fotografije dodaj časovni žig in tudi podatke GPS, če so podatki o lokaciji/smeri omogočeni</string>
+    <string name="preference_stamp_summary">Na fotografije dodaj časovni žig in tudi podatke GPS, če so podatki o lokaciji/smeri omogočeni\n%s</string>
     <string name="preference_stamp_dateformat">Oblika datumskega žiga</string>
     <string name="preference_stamp_timeformat">Oblika časovnega žiga</string>
     <string name="preference_stamp_gpsformat">Oblika žiga GPS</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Snemaj zvok</string>
     <string name="preference_record_audio_summary">Snemaj zvok ob snemanju vidoposnetkov</string>
     <string name="preference_record_audio_src">Vir zvoka</string>
-    <string name="preference_record_audio_src_summary">Kateri mikrofon naj se uporabi za snemanje zvoka</string>
+    <string name="preference_record_audio_src_summary">Kateri mikrofon naj se uporabi za snemanje zvoka\n%s</string>
     <string name="preference_record_audio_channels">Zvočni kanali</string>
     <string name="preference_record_audio_channels_summary">Določite mono ali stereo za snemanje zvoka (stereo je podprt samo na nekaterih napravah)</string>
     <string name="preference_video_flash">Svetilka med snemanjem videoposnetkov</string>
@@ -346,7 +346,7 @@
     <string name="selfie">Samoposnetek</string>
 
     <string name="preference_front_camera_mirror">Zrcaljenje sprednjega fotoaparata</string>
-    <string name="preference_front_camera_mirror_summary">Ali naj se ob uporabi sprednjega fotoaparata slike zrcalijo.</string>
+    <string name="preference_front_camera_mirror_summary">Ali naj se ob uporabi sprednjega fotoaparata slike zrcalijo\n%s</string>
 	
 	<string name="preference_calibrate_level">Kot ravni umerjanja</string>
     <string name="preference_calibrate_level_summary">Ta možnost umeri pospeškomer naprave za pravilno delovanje samodejne izravnave in prikaza ravni/kota na zaslonu.</string>
@@ -363,7 +363,7 @@
 	<string name="preference_show_geo_direction_lines">Prikaži črte smeri neba</string>
     <string name="preference_show_geo_direction_lines_summary">Prikaži črte smeri neba</string>
 	<string name="preference_video_subtitle">Podnapisi</string>
-    <string name="preference_video_subtitle_summary">Ustvari datoteko podnapisov (.srt) s podatki o času, datumu in tudi GPS-u, če sta lokacija in smer omogočena</string>
+    <string name="preference_video_subtitle_summary">Ustvari datoteko podnapisov (.srt) s podatki o času, datumu in tudi GPS-u, če sta lokacija in smer omogočena\n%s</string>
 
     <string name="duration_unlimited">Neomejeno</string>
     <string name="duration_3s">3 s</string>

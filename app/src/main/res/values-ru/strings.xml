@@ -184,7 +184,7 @@
     <string name="preference_require_location">Требовать данные о местоположении</string>
     <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только, если они доступны</string>
     <string name="preference_stamp">Штампы</string>
-    <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение</string>
+    <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение\n%s</string>
     <string name="preference_stamp_dateformat">Формат даты</string>
     <string name="preference_stamp_timeformat">Формат времени</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Запись звука</string>
     <string name="preference_record_audio_summary">Запись звука при записи видео</string>
     <string name="preference_record_audio_src">Источник звука</string>
-    <string name="preference_record_audio_src_summary">Микрофон для записи звука</string>
+    <string name="preference_record_audio_src_summary">Микрофон для записи звука\n%s</string>
     <string name="preference_record_audio_channels">Число каналов</string>
     <string name="preference_record_audio_channels_summary">Настройка моно или стереозвука (стерео доступно не на всех устройствах)</string>
     <string name="preference_video_flash">Вспышка во время записи видео</string>
@@ -335,7 +335,7 @@
     <string name="selfie">Селфи</string>
 
     <string name="preference_front_camera_mirror">Зеркалить фронтальную камеру</string>
-    <string name="preference_front_camera_mirror_summary">Отражать изображения зеркально при использовании фронтальной камеры.</string>
+    <string name="preference_front_camera_mirror_summary">Отражать изображения зеркально при использовании фронтальной камеры\n%s</string>
 
     <string name="preference_calibrate_level">Калибровать уровень угла</string>
     <string name="preference_calibrate_level_summary">Эта настройка калибрует акселерометр вашего устройства для корректной работы автоматической стабилизации и настроек наэкранного уровня/угла.</string>
@@ -352,7 +352,7 @@
     <string name="preference_show_geo_direction_lines">Отображать линии направления компаса</string>
     <string name="preference_show_geo_direction_lines_summary">Отображать линии направления компаса на экране</string>
     <string name="preference_video_subtitle">Субтитры видео</string>
-    <string name="preference_video_subtitle_summary">Создавать файл субтитров (.SRT) с датой и временем записи, а также информацией GPS при включенных данных геолокации/направления</string>
+    <string name="preference_video_subtitle_summary">Создавать файл субтитров (.SRT) с датой и временем записи, а также информацией GPS при включенных данных геолокации/направления\n%s</string>
 
     <string name="duration_unlimited">Без ограничений</string>
     <string name="duration_3s">3 секунды</string>

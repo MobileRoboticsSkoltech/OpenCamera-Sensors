@@ -164,7 +164,7 @@
     <string name="preference_require_location">Somente com Geotag</string>
     <string name="preference_require_location_summary">Se o Geotag estiver habilitado, só capturará fotos/vídeos se o GPS estiver disponível</string>
     <string name="preference_stamp">Marca d\'água</string>
-    <string name="preference_stamp_summary">Crie sua marca d\'água com data e hora, e também com informações do GPS se este estiver ativado</string>
+    <string name="preference_stamp_summary">Crie sua marca d\'água com data e hora, e também com informações do GPS se este estiver ativado\n%s</string>
     <string name="preference_textstamp">Texto customizado</string>
     <string name="preference_textstamp_summary">Use uma marca d\'água personalizada para fotos</string>
     <string name="preference_stamp_fontsize">Tamanho da fonte</string>
@@ -185,7 +185,7 @@
     <string name="preference_record_audio">Gravar áudio</string>
     <string name="preference_record_audio_summary">Grava o áudio ao redor enquanto filma</string>
     <string name="preference_record_audio_src">Fonte de áudio</string>
-    <string name="preference_record_audio_src_summary">Microfone usado para gravar áudio</string>
+    <string name="preference_record_audio_src_summary">Microfone usado para gravar áudio\n%s</string>
     <string name="preference_video_flash">Lanterna durante filmagem</string>
     <string name="preference_video_flash_summary">Se habilitada, o flash ficará ligado enquanto filma.</string>
     <string name="preference_category_online">Diversos</string>

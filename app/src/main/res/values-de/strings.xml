@@ -184,7 +184,7 @@
     <string name="preference_require_location">Standortdaten erforderlich</string>
     <string name="preference_require_location_summary">Wenn aktiviert, werden die Aufnahmen nur bei Verfügbarkeit der Standortdaten ausgelöst.</string>
     <string name="preference_stamp">Fotos stempeln</string>
-    <string name="preference_stamp_summary">Wenn aktiviert, werden die Fotos mit Datum, Zeit, eigenem Text und/oder GPS-Daten (sofern aktiviert) gestempelt.</string>
+    <string name="preference_stamp_summary">Wenn aktiviert, werden die Fotos mit Datum, Zeit, eigenem Text und/oder GPS-Daten (sofern aktiviert) gestempelt\n%s</string>
     <string name="preference_stamp_dateformat">Datumsstempel</string>
     <string name="preference_stamp_timeformat">Zeitstempel</string>
     <string name="preference_stamp_gpsformat">GPS-Stempel</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio">Ton aufzeichnen</string>
     <string name="preference_record_audio_summary">Wenn aktiviert, wird das Video mit Ton aufgenommen.</string>
     <string name="preference_record_audio_src">Audio-Quelle</string>
-    <string name="preference_record_audio_src_summary">Einstellung der Mikrofonquelle für die Tonaufnahme</string>
+    <string name="preference_record_audio_src_summary">Einstellung der Mikrofonquelle für die Tonaufnahme\n%s</string>
     <string name="preference_record_audio_channels">Audio-Kanäle</string>
     <string name="preference_record_audio_channels_summary">Mono- oder Stereo-Aufnahme (Stereo wird nur von einigen Geräten unterstützt)</string>
     <string name="preference_video_flash">Blitzlicht während der Videoaufnahme</string>
@@ -335,7 +335,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Spiegele Front Kamera</string>
-    <string name="preference_front_camera_mirror_summary">Bestimmt, ob Bilder der Front Kamera gespiegelt werden.</string>
+    <string name="preference_front_camera_mirror_summary">Bestimmt, ob Bilder der Front Kamera gespiegelt werden\n%s</string>
 
     <string name="preference_calibrate_level">Kalibriere den Gyro</string>
     <string name="preference_calibrate_level_summary">Diese Option kalibriert den Lagesensor, sodaß die Bilderausrichtung korrekt bestimmt wird.</string>
@@ -352,7 +352,7 @@
     <string name="preference_show_geo_direction_lines">Zeige Kompass Richtung</string>
     <string name="preference_show_geo_direction_lines_summary">Zeige Kompass Richtungslinien</string>
     <string name="preference_video_subtitle">Video Untertitel</string>
-    <string name="preference_video_subtitle_summary">Erzeuge ein Untertitel .SRT File um das Datum und Zeit zu speichern, sowie die GPS Daten sofern Orts- und Richtungsdaten aktiviert sind</string>
+    <string name="preference_video_subtitle_summary">Erzeuge ein Untertitel .SRT File um das Datum und Zeit zu speichern, sowie die GPS Daten sofern Orts- und Richtungsdaten aktiviert sind\n%s</string>
 
     <string name="duration_unlimited">Unbegrenzt</string>
     <string name="duration_3s">3 Sekunden</string>

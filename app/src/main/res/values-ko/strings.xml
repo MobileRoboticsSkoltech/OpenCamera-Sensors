@@ -163,7 +163,7 @@
     <string name="preference_require_location">위치 데이터 요청</string>
     <string name="preference_require_location_summary">위치 데이터가 활성화된 경우 위치 데이터가 존재할때만 사진/동영상을 촬영합니다</string>
     <string name="preference_stamp">사진 스탬프</string>
-    <string name="preference_stamp_summary">사진에 날짜와 시간을 새깁니다; 만약 위치/방향 데이터가 활성화된 경우에는 GPS 정보도 기록합니다</string>
+    <string name="preference_stamp_summary">사진에 날짜와 시간을 새깁니다; 만약 위치/방향 데이터가 활성화된 경우에는 GPS 정보도 기록합니다\n%s</string>
     <string name="preference_textstamp">임의 텍스트</string>
     <string name="preference_textstamp_summary">사진에 임의의 텍스트를 새깁니다</string>
     <string name="preference_stamp_fontsize">글자 크기</string>
@@ -184,7 +184,7 @@
     <string name="preference_record_audio">오디오 녹음</string>
     <string name="preference_record_audio_summary">동영상 녹화시 오디오를 녹음합니다</string>
     <string name="preference_record_audio_src">오디오 음원</string>
-    <string name="preference_record_audio_src_summary">오디오 녹음에 사용할 마이크로폰 설정</string>
+    <string name="preference_record_audio_src_summary">오디오 녹음에 사용할 마이크로폰 설정\n%s</string>
     <string name="preference_video_flash">동영상 녹화시 깜빡임</string>
     <string name="preference_video_flash_summary">만약 활성화되면 동영상 촬영시 플래시가 깜빡입니다 (원거리에서 카메라가 촬영중임을 알리는 데 사용됩니다)</string>
 

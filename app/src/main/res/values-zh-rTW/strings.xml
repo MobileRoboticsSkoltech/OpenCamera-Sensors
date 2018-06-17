@@ -172,7 +172,7 @@
     <string name="preference_require_location">需要位置資料</string>
     <string name="preference_require_location_summary">如果啟用位置資料，只拍照/錄影如果位置資料可用。</string>
     <string name="preference_stamp">標記照片</string>
-    <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料也標記 GPS 資訊</string>
+    <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料也標記 GPS 資訊\n%s</string>
     <string name="preference_stamp_dateformat">日期標記格式</string>
     <string name="preference_stamp_timeformat">時間標記格式</string>
     <string name="preference_stamp_gpsformat">GPS 標記格式</string>
@@ -200,7 +200,7 @@
     <string name="preference_record_audio">錄音</string>
     <string name="preference_record_audio_summary">錄影時錄音</string>
     <string name="preference_record_audio_src">音源</string>
-    <string name="preference_record_audio_src_summary">麥克風用於錄製音訊</string>
+    <string name="preference_record_audio_src_summary">麥克風用於錄製音訊\n%s</string>
 	<string name="preference_record_audio_channels">音源頻道</string>
     <string name="preference_record_audio_channels_summary">指定使用單聲道或立體聲來錄音 (立體聲只支援某些裝置)</string>
     <string name="preference_video_flash">錄影時閃光</string>
