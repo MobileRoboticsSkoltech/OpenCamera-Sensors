@@ -6880,7 +6880,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(front_size.equals(front_new_size));
 
 	    // change front camera to the first size
-		front_size = front_preview_sizes.get(0);
+		front_size = front_picture_sizes.get(0);
 	    {
 		    Log.d(TAG, "set front_size to " + front_size.width + " x " + front_size.height);
 		    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
