@@ -1656,19 +1656,15 @@ public class CameraController2 extends CameraController {
 
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 		camera_features.picture_sizes = new ArrayList<>();
-		for(android.util.Size camera_size : camera_picture_sizes) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
-		}
-
 		if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+			// we add the high resolutions first, so that the camera_features.picture_sizes is sorted from high to low
 			android.util.Size [] camera_picture_sizes_hires = configs.getHighResolutionOutputSizes(ImageFormat.JPEG);
 			if( camera_picture_sizes_hires != null ) {
 				for(android.util.Size camera_size : camera_picture_sizes_hires) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "high resolution picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-					// check not already listed?
+					// Check not already listed? If it's listed in both, we'll add it later on when scanning camera_picture_sizes
+					// (and we don't want to set supports_burst to false for such a resolution).
 					boolean found = false;
 					for(android.util.Size sz : camera_picture_sizes) {
 						if( sz.equals(camera_size) )
@@ -1681,6 +1677,11 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
+		}
+		for(android.util.Size camera_size : camera_picture_sizes) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 		// test high resolution modes not supporting burst:
 		//camera_features.picture_sizes.get(0).supports_burst = false;
