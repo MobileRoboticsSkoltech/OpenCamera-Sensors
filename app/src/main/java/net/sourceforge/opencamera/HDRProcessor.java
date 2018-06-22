@@ -33,12 +33,13 @@ public class HDRProcessor {
 	private final Context context;
 	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using HDR
 
-	// we lazily create and cache scripts
-	// these should be set to null in onDestroy, to help garbage collection
-	/*private ScriptC_process_hdr processHDRScript;
-	private ScriptC_process_avg processAvgScript;*/
-	/*private ScriptC_create_mtb createMTBScript;
-	private ScriptC_align_mtb alignMTBScript;*/
+	// we lazily create and cache scripts that would otherwise have to be repeatedly created in a single
+	// HDR or NR photo
+	// these should be set to null in freeScript(), to help garbage collection
+	/*private ScriptC_process_hdr processHDRScript;*/
+	private ScriptC_process_avg processAvgScript;
+	private ScriptC_create_mtb createMTBScript;
+	private ScriptC_align_mtb alignMTBScript;
 	/*private ScriptC_histogram_adjust histogramAdjustScript;
 	private ScriptC_histogram_compute histogramScript;
 	private ScriptC_avg_brighten avgBrightenScript;
@@ -66,18 +67,24 @@ public class HDRProcessor {
 		this.context = context;
 	}
 
-	public void onDestroy() {
+	private void freeScripts() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "onDestroy");
-
-		/*processHDRScript = null;
-		processAvgScript = null;*/
-		/*createMTBScript = null;
-		alignMTBScript = null;*/
+			Log.d(TAG, "freeScripts");
+		/*processHDRScript = null;*/
+		processAvgScript = null;
+		createMTBScript = null;
+		alignMTBScript = null;
 		/*histogramAdjustScript = null;
 		histogramScript = null;
 		avgBrightenScript = null;
 		sharpnessScript = null;*/
+	}
+
+	public void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+
+		freeScripts(); // just in case
 
 		if( rs != null ) {
 			// need to destroy context, otherwise this isn't necessarily garbage collected - we had tests failing with out of memory
@@ -847,6 +854,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processHDRScript");
 		Allocation output_allocation;
+		boolean free_output_allocation = false;
 		if( release_bitmaps ) {
 			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset (otherwise we'll have
 			// problems due to the output being equal to one of the inputs)
@@ -854,6 +862,7 @@ public class HDRProcessor {
 		}
 		else {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
+			free_output_allocation = true;
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time before processHDRScript: " + (System.currentTimeMillis() - time_s));
@@ -905,6 +914,13 @@ public class HDRProcessor {
 				Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
+		if( free_output_allocation )
+			output_allocation.destroy();
+		for(int i=0;i<n_bitmaps;i++) {
+			allocations[i].destroy();
+			allocations[i] = null;
+		}
+		freeScripts();
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
@@ -927,10 +943,12 @@ public class HDRProcessor {
 		Allocation allocation = Allocation.createFromBitmap(rs, bitmaps.get(0));
 
 		Allocation output_allocation;
+		boolean free_output_allocation = false;
 		if( release_bitmaps ) {
 			output_allocation = allocation;
 		}
 		else {
+			free_output_allocation = true;
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
 
@@ -982,6 +1000,11 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
+
+		if( free_output_allocation )
+			allocation.destroy();
+		output_allocation.destroy();
+		freeScripts();
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for processSingleImage: " + (System.currentTimeMillis() - time_s));
@@ -1244,10 +1267,10 @@ public class HDRProcessor {
 		// write new avg image
 
 		// create RenderScript
-		/*if( processAvgScript == null ) {
+		if( processAvgScript == null ) {
 			processAvgScript = new ScriptC_process_avg(rs);
-		}*/
-		ScriptC_process_avg processAvgScript = new ScriptC_process_avg(rs);
+		}
+		//ScriptC_process_avg processAvgScript = new ScriptC_process_avg(rs);
 
 		/*final boolean separate_first_pass = false; // whether to convert the first two images in separate passes (reduces memory)
 		if( first && separate_first_pass ) {
@@ -1513,12 +1536,12 @@ public class HDRProcessor {
 		}
 
 		// create RenderScript
-		/*if( createMTBScript == null ) {
+		if( createMTBScript == null ) {
 			createMTBScript = new ScriptC_create_mtb(rs);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after creating createMTBScript: " + (System.currentTimeMillis() - time_s));
-		}*/
-		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
+		}
+		//ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating createMTBScript: " + (System.currentTimeMillis() - time_s));
 
@@ -1695,17 +1718,19 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "base image not suitable for image alignment");
 			for(int i=0;i<mtb_allocations.length;i++) {
-				if( mtb_allocations[i] != null )
+				if( mtb_allocations[i] != null ) {
 					mtb_allocations[i].destroy();
+					mtb_allocations[i] = null;
+				}
 			}
 			return new BrightnessDetails(median_brightness);
 		}
 
 		// create RenderScript
-		/*if( alignMTBScript == null ) {
+		if( alignMTBScript == null ) {
 			alignMTBScript = new ScriptC_align_mtb(rs);
-		}*/
-		ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
+		}
+		//ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
 		// set parameters
 		alignMTBScript.set_bitmap0(mtb_allocations[base_bitmap]);
@@ -1807,8 +1832,10 @@ public class HDRProcessor {
 			offsets_y[i] = 0;
 		}*/
 		for(int i=0;i<mtb_allocations.length;i++) {
-			if( mtb_allocations[i] != null )
+			if( mtb_allocations[i] != null ) {
 				mtb_allocations[i].destroy();
+				mtb_allocations[i] = null;
+			}
 		}
 		return new BrightnessDetails(median_brightness);
 	}
@@ -2208,6 +2235,7 @@ public class HDRProcessor {
 			Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - time_s));
 		int [] histogram = computeHistogram(allocation_in, avg, false);
 		allocation_in.destroy();
+		freeScripts();
 		return histogram;
 	}
 
@@ -2458,6 +2486,7 @@ public class HDRProcessor {
 			bitmap = new_bitmap;
 		}
 
+		freeScripts();
 		if( MyDebug.LOG )
 			Log.d(TAG, "### total time for avgBrighten: " + (System.currentTimeMillis() - time_s));
 		return bitmap;
