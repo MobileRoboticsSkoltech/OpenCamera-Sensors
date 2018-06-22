@@ -545,7 +545,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, 1, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, 1, true, width, height, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -1184,25 +1184,40 @@ public class HDRProcessor {
 			Allocation allocation_new_align = null;
 			int alignment_width = width;
 			int alignment_height = height;
+			int full_alignment_width = width;
+			int full_alignment_height = height;
 
 			//final boolean scale_align = false;
 			final boolean scale_align = true;
 			//final int scale_align_size = 2;
 			final int scale_align_size = 4;
+			boolean crop_to_centre = true;
 			if( scale_align ) {
 			    // use scaled down bitmaps for alignment
 				if( MyDebug.LOG )
 					Log.d(TAG, "### time before creating allocations for autoalignment: " + (System.currentTimeMillis() - time_s));
                 Matrix align_scale_matrix = new Matrix();
                 align_scale_matrix.postScale(1.0f/scale_align_size, 1.0f/scale_align_size);
+				full_alignment_width /= scale_align_size;
+				full_alignment_height /= scale_align_size;
+
+				/*int align_width = width;
+				int align_height = height;
+				int align_x = 0;
+				int align_y = 0;*/
+				int align_width = width/4;
+				int align_height = height/4;
+				int align_x = (width - align_width)/2;
+				int align_y = (height - align_height)/2;
+				crop_to_centre = false; // no need to crop in autoAlignment, as we're cropping here
 
 				if( allocation_avg_align == null ) {
-    				bitmap_avg_align = Bitmap.createBitmap(bitmap_avg, 0, 0, width, height, align_scale_matrix, false);
+    				bitmap_avg_align = Bitmap.createBitmap(bitmap_avg, align_x, align_y, align_width, align_height, align_scale_matrix, false);
 					allocation_avg_align = Allocation.createFromBitmap(rs, bitmap_avg_align);
                     if( MyDebug.LOG )
                         Log.d(TAG, "### time after creating avg allocation for autoalignment: " + (System.currentTimeMillis() - time_s));
 				}
-                bitmap_new_align = Bitmap.createBitmap(bitmap_new, 0, 0, width, height, align_scale_matrix, false);
+                bitmap_new_align = Bitmap.createBitmap(bitmap_new, align_x, align_y, align_width, align_height, align_scale_matrix, false);
 				allocation_new_align = Allocation.createFromBitmap(rs, bitmap_new_align);
 
 				alignment_width = bitmap_new_align.getWidth();
@@ -1226,7 +1241,7 @@ public class HDRProcessor {
 				allocations[1] = allocation_new;
 			}
 
-			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, null, 0, true, null, false, floating_point, 1, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, null, 0, true, null, false, floating_point, 1, crop_to_centre, full_alignment_width, full_alignment_height, time_s);
 			if( scale_align ) {
 				for(int i=0;i<offsets_x.length;i++) {
 					offsets_x[i] *= scale_align_size;
@@ -1486,7 +1501,7 @@ public class HDRProcessor {
 	 * @param floating_point If true, the first allocation is in floating point (F32_3) format.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, int min_step_size, long time_s) {
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, int min_step_size, boolean crop_to_centre, int full_width, int full_height, long time_s) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoAlignment");
 			Log.d(TAG, "width: " + width);
@@ -1513,21 +1528,26 @@ public class HDRProcessor {
 
 		// Testing shows that in practice we get good results by only aligning the centre quarter of the images. This gives better
 		// performance, and uses less memory.
-		int mtb_width = width/2;
-		int mtb_height = height/2;
-		int mtb_x = mtb_width/2;
-		int mtb_y = mtb_height/2;
-		if( !use_mtb ) {
-			// If using full image rather than mtb, we can get away with an even smaller region
-			mtb_width = width/4;
-			mtb_height = height/4;
-			mtb_x = (width - mtb_width)/2;
-			mtb_y = (height - mtb_height)/2;
-		}
-		/*int mtb_width = width;
+		// If copy_to_centre is false, this has already been done by the caller.
+		int mtb_width = width;
 		int mtb_height = height;
 		int mtb_x = 0;
-		int mtb_y = 0;*/
+		int mtb_y = 0;
+		if( crop_to_centre ) {
+			if( use_mtb ) {
+				mtb_width = width/2;
+				mtb_height = height/2;
+				mtb_x = mtb_width/2;
+				mtb_y = mtb_height/2;
+			}
+			else {
+				// If using full image rather than mtb, we can get away with an even smaller region
+				mtb_width = width/4;
+				mtb_height = height/4;
+				mtb_x = (width - mtb_width)/2;
+				mtb_y = (height - mtb_height)/2;
+			}
+		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "mtb_x: " + mtb_x);
 			Log.d(TAG, "mtb_y: " + mtb_y);
@@ -1702,7 +1722,7 @@ public class HDRProcessor {
 		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
 		// to misidentify cases as needing a large offset.
 		// Update: use a smaller window for noise reduction (when use_mtb==false)
-		int max_dim = Math.max(width, height); // n.b., use the full width and height here, not the mtb_width, height
+		int max_dim = Math.max(full_width, full_height); // n.b., use the full width and height here, not the mtb_width, height
 		int max_ideal_size = max_dim / (use_mtb ? 150 : 300);
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {

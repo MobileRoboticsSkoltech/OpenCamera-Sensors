@@ -10625,8 +10625,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 0, 0};
 					//int [] exp_offsets_x = {0, 8, 0};
 					//int [] exp_offsets_y = {0, 1, 0};
-					int [] exp_offsets_x = {0, 7, 0};
-					int [] exp_offsets_y = {0, -1, 0};
+					//int [] exp_offsets_x = {0, 7, 0};
+					//int [] exp_offsets_y = {0, -1, 0};
+					int [] exp_offsets_x = {0, 8, 0};
+					int [] exp_offsets_y = {0, -4, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
@@ -11014,7 +11016,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 6, 0};
 					//int [] exp_offsets_x = {0, -6, 0};
 					//int [] exp_offsets_y = {0, 2, 0};
-					int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
