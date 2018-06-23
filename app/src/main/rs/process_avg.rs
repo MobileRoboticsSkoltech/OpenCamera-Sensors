@@ -27,8 +27,20 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
     {
         // temporal merging
         //const float C = 32.0f*32.0f;
+
+        // diff based on rgb
         float3 diff = pixel_avg_f - pixel_new_f;
         float L = dot(diff, diff);
+
+        // diff based on luminance
+        /*float value_avg = fmax(pixel_avg_f.r, pixel_avg_f.g);
+        value_avg = fmax(value_avg, pixel_avg_f.b);
+        float value_new = fmax(pixel_new_f.r, pixel_new_f.g);
+        value_new = fmax(value_new, pixel_new_f.b);
+        float diff = value_avg - value_new;
+        float L = 3.0f*diff*diff;*/
+        //L = 0.0f; // test no wiener filter
+
         /*if( L > C ) {
             // error too large, so no contribution for new image pixel
             return pixel_avg_f;
