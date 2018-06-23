@@ -545,7 +545,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, 1, true, width, height, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, 1, true, true, width, height, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -1179,6 +1179,7 @@ public class HDRProcessor {
 		{
 			// perform auto-alignment
 			boolean floating_point = !first;
+			List<Bitmap> align_bitmaps = new ArrayList<>();
 			Allocation [] allocations = new Allocation[2];
 			Bitmap bitmap_new_align = null;
 			Allocation allocation_new_align = null;
@@ -1223,6 +1224,8 @@ public class HDRProcessor {
 				alignment_width = bitmap_new_align.getWidth();
 				alignment_height = bitmap_new_align.getHeight();
 
+				align_bitmaps.add(bitmap_avg_align);
+				align_bitmaps.add(bitmap_new_align);
 				allocations[0] = allocation_avg_align;
 				allocations[1] = allocation_new_align;
 				floating_point = false;
@@ -1237,11 +1240,14 @@ public class HDRProcessor {
 				allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
 				if( MyDebug.LOG )
 					Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+				align_bitmaps.add(bitmap_avg);
+				align_bitmaps.add(bitmap_new);
 				allocations[0] = allocation_avg;
 				allocations[1] = allocation_new;
 			}
 
-			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, null, 0, true, null, false, floating_point, 1, crop_to_centre, full_alignment_width, full_alignment_height, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
 			if( scale_align ) {
 				for(int i=0;i<offsets_x.length;i++) {
 					offsets_x[i] *= scale_align_size;
@@ -1501,7 +1507,7 @@ public class HDRProcessor {
 	 * @param floating_point If true, the first allocation is in floating point (F32_3) format.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, int min_step_size, boolean crop_to_centre, int full_width, int full_height, long time_s) {
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, int min_step_size, boolean crop_to_centre, boolean try_harder, int full_width, int full_height, long time_s) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoAlignment");
 			Log.d(TAG, "width: " + width);
@@ -1534,14 +1540,13 @@ public class HDRProcessor {
 		int mtb_x = 0;
 		int mtb_y = 0;
 		if( crop_to_centre ) {
-			if( use_mtb ) {
+			if( try_harder ) {
 				mtb_width = width/2;
 				mtb_height = height/2;
 				mtb_x = mtb_width/2;
 				mtb_y = mtb_height/2;
 			}
 			else {
-				// If using full image rather than mtb, we can get away with an even smaller region
 				mtb_width = width/4;
 				mtb_height = height/4;
 				mtb_x = (width - mtb_width)/2;
@@ -1721,9 +1726,9 @@ public class HDRProcessor {
 		// sampling - since we sample every step_size pixels - though there might be some overhead for every extra call
 		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
 		// to misidentify cases as needing a large offset.
-		// Update: use a smaller window for noise reduction (when use_mtb==false)
+		// Update: use a smaller window for noise reduction (when try_harder==false)
 		int max_dim = Math.max(full_width, full_height); // n.b., use the full width and height here, not the mtb_width, height
-		int max_ideal_size = max_dim / (use_mtb ? 150 : 300);
+		int max_ideal_size = max_dim / (try_harder ? 150 : 300);
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
 			initial_step_size *= 2;
