@@ -923,10 +923,26 @@ public class ImageSaver extends Thread {
 			Bitmap nr_bitmap;
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 				try {
+					long time_s = System.currentTimeMillis();
 					// initialise allocation from first two bitmaps
 					int inSampleSize = hdrProcessor.getAvgSampleSize();
-					Bitmap bitmap0 = loadBitmap(request.jpeg_images.get(0), false, inSampleSize);
+					long this_time_s = System.currentTimeMillis();
+					/*Bitmap bitmap0 = loadBitmap(request.jpeg_images.get(0), false, inSampleSize);
 					Bitmap bitmap1 = loadBitmap(request.jpeg_images.get(1), false, inSampleSize);
+					*/
+					Bitmap bitmap0, bitmap1;
+					{
+						// load using SMP
+						List<byte []> sub_jpeg_list = new ArrayList<>();
+						sub_jpeg_list.add(request.jpeg_images.get(0));
+						sub_jpeg_list.add(request.jpeg_images.get(1));
+						List<Bitmap> bitmaps = loadBitmaps(sub_jpeg_list, -1, inSampleSize);
+						bitmap0 = bitmaps.get(0);
+						bitmap1 = bitmaps.get(1);
+					}
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "*** time for loading first two bitmaps: " + (System.currentTimeMillis() - this_time_s));
+					}
 					int width = bitmap0.getWidth();
 					int height = bitmap0.getHeight();
 					float avg_factor = 1.0f;
@@ -938,22 +954,41 @@ public class ImageSaver extends Thread {
 								Log.d(TAG, "iso: " + iso);
 						}
 					}
+					this_time_s = System.currentTimeMillis();
 					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, iso);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "*** time for processing first two bitmaps: " + (System.currentTimeMillis() - this_time_s));
+					}
 					Allocation allocation = avg_data.allocation_out;
 
 					for(int i=2;i<request.jpeg_images.size();i++) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "processAvg for image: " + i);
 
+						this_time_s = System.currentTimeMillis();
 						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false, inSampleSize);
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "*** time for loading extra bitmap: " + (System.currentTimeMillis() - this_time_s));
+						}
 						avg_factor = (float)i;
+						this_time_s = System.currentTimeMillis();
 						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, iso);
 						// updateAvg recycles new_bitmap
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "*** time for updating extra bitmap: " + (System.currentTimeMillis() - this_time_s));
+						}
 					}
 
+					this_time_s = System.currentTimeMillis();
 					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, iso);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "*** time for brighten: " + (System.currentTimeMillis() - this_time_s));
+					}
 					avg_data.destroy();
 					avg_data = null;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "*** total time for saving NR image: " + (System.currentTimeMillis() - time_s));
+					}
 				}
 				catch(HDRProcessorException e) {
 					e.printStackTrace();
