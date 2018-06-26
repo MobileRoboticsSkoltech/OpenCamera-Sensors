@@ -169,10 +169,15 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         // testAvg8: zoom in to 60%, ensure still appears reasonably sharp
         // testAvg23: ensure we do reduce the noise, e.g., view around "vicks", without making the
         // text blurry
+        // testAvg24: want to reduce the colour noise near the wall, but don't blur out detail, e.g.
+        // at the flowers
+        // Also need to be careful of performance.
         /*float old_value = fmax(rgb.r, rgb.g);
         old_value = fmax(old_value, rgb.b);*/
         float3 sum = 0.0;
+        //float3 colour_sum = 0.0;
         // if changing the radius, may also want to change the value returned by HDRProcessor.getAvgSampleSize()
+        //int radius = 16;
         //int radius = 4;
         //int radius = 2;
         int radius = 1;
@@ -184,6 +189,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
             for(int cx=x-radius;cx<=x+radius;cx++) {
                 if( cx >= 0 && cx < width && cy >= 0 && y < height ) {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
+                    //colour_sum += this_pixel;
                     {
                         /*float this_value = fmax(this_pixel.r, this_pixel.g);
                         this_value = fmax(this_value, this_pixel.b);*/
@@ -201,8 +207,8 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
                         float L = dot(diff, diff);
                         /*float diff = this_value - old_value;
                         float L = diff*diff;*/
+                        //L = 0.0f; // test no wiener filter
                         float weight = L/(L+C);
-                        //weight = 0.0;
                         this_pixel = weight * rgb + (1.0-weight) * this_pixel;
                     }
                     sum += this_pixel;
@@ -213,10 +219,25 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
 
         rgb = sum / count;
 
-        /*float new_value = fmax(rgb.r, rgb.g);
+        /*float3 rgb_luminance = sum / count; // luminance average
+        rgb = colour_sum / count; // colour average
+
+        // we apply stronger denoise to colour than for luminance
+        // we shift rgb (the colour average) to match the desired luminance
+        float luminance_value = fmax(rgb_luminance.r, rgb_luminance.g);
+        luminance_value = fmax(luminance_value, rgb_luminance.b);
+        float new_value = fmax(rgb.r, rgb.g);
         new_value = fmax(new_value, rgb.b);
+        if( new_value > 0.5f )
+            rgb *= luminance_value/new_value;
+        //rgb += luminance_value - new_value;
+        //rgb = clamp(rgb, 0.0f, 255.0f);
         // preserve value - we want denoise only for chrominance
-        rgb *= old_value/new_value;*/
+        //if( new_value > 0.5f )
+        //    rgb *= old_value/new_value;
+        //rgb += old_value - new_value;
+        //rgb = clamp(rgb, 0.0f, 255.0f);
+        */
     }
 
     rgb = rgb - black_level;
