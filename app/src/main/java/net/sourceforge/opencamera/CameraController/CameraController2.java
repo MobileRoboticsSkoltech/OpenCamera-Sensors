@@ -4824,7 +4824,7 @@ public class CameraController2 extends CameraController {
 							if( MyDebug.LOG )
 								Log.d(TAG, "optimise for bright scene");
 							//n_burst = 2;
-							n_burst = 4;
+							n_burst = 3;
 							if( !camera_settings.has_iso ) {
 								double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 								exposure_time *= exposure_time_scale;
