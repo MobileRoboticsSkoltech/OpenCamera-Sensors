@@ -11602,7 +11602,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_6.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg23_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg23_output.jpg", 1044, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11690,7 +11690,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg25/input2.jpg");
 		inputs.add(avg_images_path + "testAvg25/input3.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11738,6 +11738,30 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				else {
 					assertTrue(false);
 				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg27".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg27() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg27");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg27/IMG_20180610_205929_0.jpg");
+		inputs.add(avg_images_path + "testAvg27/IMG_20180610_205929_1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg27_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
 			}
 		});
 
