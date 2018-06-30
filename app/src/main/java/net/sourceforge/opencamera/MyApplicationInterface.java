@@ -947,38 +947,58 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 
 		int photo_cost = imageSaver.computePhotoCost(n_raw > 0, n_jpegs);
-    	if( imageSaver.queueWouldBlock(photo_cost) )
-    		return false;
+    	if( imageSaver.queueWouldBlock(photo_cost) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "canTakeNewPhoto: no, as queue would block");
+			return false;
+		}
 
     	// even if the queue isn't full, we may apply additional limits
+		int n_images_to_save = imageSaver.getNImagesToSave();
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.FastBurst ) {
 			// only allow one fast burst at a time, so require queue to be empty
-			if( imageSaver.getNImagesToSave() > 0 ) {
+			if( n_images_to_save > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "canTakeNewPhoto: no, as too many for fast burst");
 				return false;
 			}
 		}
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			// allow a max of 2 photos in memory when at max of 8 images
-			if( imageSaver.getNImagesToSave() >= 2*photo_cost ) {
+			if( n_images_to_save >= 2*photo_cost ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "canTakeNewPhoto: no, as too many for nr");
 				return false;
 			}
 		}
 		if( n_jpegs > 1 ) {
 			// if in any other kind of burst mode (e.g., expo burst, HDR), allow a max of 3 photos in memory
-			if( imageSaver.getNImagesToSave() >= 3*photo_cost ) {
+			if( n_images_to_save >= 3*photo_cost ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "canTakeNewPhoto: no, as too many for burst");
 				return false;
 			}
 		}
 		if( n_raw > 0 ) {
 			// if RAW mode, allow a max of 3 photos
-			if( imageSaver.getNImagesToSave() >= 3*photo_cost ) {
+			if( n_images_to_save >= 3*photo_cost ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "canTakeNewPhoto: no, as too many for raw");
 				return false;
 			}
 		}
 		// otherwise, still have a max limit of 5 photos
-		if( imageSaver.getNImagesToSave() >= 5*photo_cost ) {
-			return false;
+		if( n_images_to_save >= 5*photo_cost ) {
+			if( main_activity.supportsNoiseReduction() && n_images_to_save <= 8 ) {
+				// if we take a photo in NR mode, then switch to std mode, it doesn't make sense to suddenly block!
+				// so need to at least allow a new photo, if the number of photos is less than 1 NR photo
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "canTakeNewPhoto: no, as too many for regular");
+				return false;
+			}
 		}
 
     	return true;
