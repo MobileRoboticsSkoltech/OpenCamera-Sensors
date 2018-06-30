@@ -109,6 +109,7 @@ public class ImageSaver extends Thread {
 		final boolean is_front_facing;
 		final boolean mirror;
 		final Date current_date;
+		final int iso; // not applicable for RAW image
 		final String preference_stamp;
 		final String preference_textstamp;
 		final int font_size;
@@ -138,6 +139,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			int iso,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -159,6 +161,7 @@ public class ImageSaver extends Thread {
 			this.is_front_facing = is_front_facing;
 			this.mirror = mirror;
 			this.current_date = current_date;
+			this.iso = iso;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
 			this.font_size = font_size;
@@ -411,6 +414,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			int iso,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -435,6 +439,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				iso,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -469,6 +474,7 @@ public class ImageSaver extends Thread {
 				false,
 				false,
 				current_date,
+				0,
 				null, null, 0, 0, null, null, null, null,
 				false, null, false, 0.0,
 				null, null,
@@ -485,6 +491,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			int iso,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -507,6 +514,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				iso,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -564,6 +572,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			int iso,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -590,6 +599,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				iso,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -691,6 +701,7 @@ public class ImageSaver extends Thread {
 			false,
 			false,
 			null,
+			0,
 			null, null, 0, 0, null, null, null, null,
 			false, null, false, 0.0,
 			null, null,
@@ -969,16 +980,8 @@ public class ImageSaver extends Thread {
 					int width = bitmap0.getWidth();
 					int height = bitmap0.getHeight();
 					float avg_factor = 1.0f;
-					int iso = 800;
-					if( main_activity.getPreview().getCameraController() != null ) {
-						if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
-							iso = main_activity.getPreview().getCameraController().captureResultIso();
-							if( MyDebug.LOG )
-								Log.d(TAG, "iso: " + iso);
-						}
-					}
 					this_time_s = System.currentTimeMillis();
-					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, iso);
+					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, request.iso);
 					if( bitmaps != null ) {
 						bitmaps.set(0, null);
 						bitmaps.set(1, null);
@@ -1030,7 +1033,7 @@ public class ImageSaver extends Thread {
 						}
 						avg_factor = (float)i;
 						this_time_s = System.currentTimeMillis();
-						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, iso);
+						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, request.iso);
 						// updateAvg recycles new_bitmap
 						if( bitmaps != null ) {
 							bitmaps.set(i, null);
@@ -1041,7 +1044,7 @@ public class ImageSaver extends Thread {
 					}
 
 					this_time_s = System.currentTimeMillis();
-					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, iso);
+					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, request.iso);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "*** time for brighten: " + (System.currentTimeMillis() - this_time_s));
 					}

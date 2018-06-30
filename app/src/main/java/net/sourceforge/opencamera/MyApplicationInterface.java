@@ -2177,6 +2177,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 		String custom_tag_artist = sharedPreferences.getString(PreferenceKeys.ExifArtistPreferenceKey, "");
 		String custom_tag_copyright = sharedPreferences.getString(PreferenceKeys.ExifCopyrightPreferenceKey, "");
 
+		int iso = 800; // default value if we can't get ISO
+		if( main_activity.getPreview().getCameraController() != null ) {
+			if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
+				iso = main_activity.getPreview().getCameraController().captureResultIso();
+				if( MyDebug.LOG )
+					Log.d(TAG, "iso: " + iso);
+			}
+		}
+
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
@@ -2226,6 +2235,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					is_front_facing,
 					mirror,
 					current_date,
+					iso,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
@@ -2246,6 +2256,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					is_front_facing,
 					mirror,
 					current_date,
+					iso,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
