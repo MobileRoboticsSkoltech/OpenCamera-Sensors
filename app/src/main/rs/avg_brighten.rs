@@ -185,9 +185,13 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         int height = rsAllocationGetDimY(bitmap);
         int count = 0;
         //float C = 0.1f*rgb.g*rgb.g;
-        for(int cy=y-radius;cy<=y+radius;cy++) {
-            for(int cx=x-radius;cx<=x+radius;cx++) {
-                if( cx >= 0 && cx < width && cy >= 0 && y < height ) {
+        int sx = (x >= radius) ? x-radius : 0;
+        int ex = (x < width-radius) ? x+radius : 0;
+        int sy = (y >= radius) ? y-radius : 0;
+        int ey = (y < height-radius) ? y+radius : 0;
+        for(int cy=sy;cy<ey;cy++) {
+            for(int cx=sx;cx<=ex;cx++) {
+                if( cx >= 0 && cx < width && cy >= 0 && cy < height ) {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
                     //colour_sum += this_pixel;
                     {
