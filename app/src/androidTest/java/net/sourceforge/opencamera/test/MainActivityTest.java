@@ -2826,6 +2826,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_dro");
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_nr = mActivity.supportsNoiseReduction() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_noise_reduction");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
@@ -2913,6 +2914,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		else if( is_hdr ) {
 			suffix = "_HDR";
 		}
+		else if( is_nr ) {
+			suffix = "_NR";
+		}
 		else if( is_expo ) {
 			//suffix = "_EXP" + (n_expo_images-1);
 			suffix = "_" + (n_expo_images-1);
@@ -2935,7 +2939,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "waiting for thumbnail animation");
 				Thread.sleep(10);
 				int allowed_time_ms = 8000;
-				if( !mPreview.usingCamera2API() && ( is_hdr || is_expo ) ) {
+				if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo ) ) {
 					// some devices need longer time
 					allowed_time_ms = 10000;
 				}
@@ -8478,6 +8482,59 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
 			assertTrue(mPreview.getCameraController().test_capture_results == 1);
 		}
+	}
+
+	/** Tests NR photo mode.
+	 */
+	public void testTakePhotoNR() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoNR");
+
+		setToDefault();
+
+		if( !mActivity.supportsNoiseReduction() ) {
+			return;
+		}
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
+		editor.apply();
+		updateForSettings();
+
+		final int n_back_photos = 3;
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+
+		// then try again without waiting
+		for(int i=1;i<n_back_photos;i++) {
+			subTestTakePhoto(false, false, true, false, false, false, false, false);
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == i+1);
+		}
+
+		// then try front camera
+
+		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
+			return;
+		}
+
+		int cameraId = mPreview.getCameraId();
+
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		clickView(switchCameraButton);
+		waitUntilCameraOpened();
+
+		int new_cameraId = mPreview.getCameraId();
+
+		Log.d(TAG, "cameraId: " + cameraId);
+		Log.d(TAG, "new_cameraId: " + new_cameraId);
+
+		assertTrue(cameraId != new_cameraId);
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	/** Tests fast burst with 20 images.
