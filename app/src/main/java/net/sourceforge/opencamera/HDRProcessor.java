@@ -1063,13 +1063,15 @@ public class HDRProcessor {
 	/** Combines two images by averaging them. Each pixel of bitmap_avg is modified to contain:
 	 *      (avg_factor * bitmap_avg + bitmap_new)/(avg_factor+1)
 	 *  A simple average is therefore obtained by calling this function with avg_factor = 1.0f.
-	 *  For averaging multiple images, call this function repeatedly, with avg_factor increasing by
-	 *  1.0 each time.
+	 *  For averaging multiple images, first call this function with avg_factor 1.0 for the first
+	 *  two images, then call updateAvg() for subsequent images, increasing avg_factor by 1.0 each
+	 *  time.
 	 *  The reason we do it this way (rather than just receiving a list of bitmaps) is so that we
 	 *  can average multiple images without having to keep them all in memory simultaneously.
-	 * @param bitmap_avg     One of the input images; the result is written to this bitmap.
-	 * @param bitmap_new     The other input image.
+	 * @param bitmap_avg     One of the input images. The bitmap is recycled.
+	 * @param bitmap_new     The other input image. The bitmap is recycled.
 	 * @param avg_factor     The weighting factor for bitmap_avg.
+	 * @param iso            The ISO used to take the photos.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public AvgData processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
@@ -1127,7 +1129,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
-		AvgData avg_data = processAvgCore(null, null, bitmap_avg, bitmap_new, width, height, avg_factor, iso, true, null, null, time_s);
+		AvgData avg_data = processAvgCore(null, null, bitmap_avg, bitmap_new, width, height, avg_factor, iso, null, null, time_s);
 
 		//allocation_avg.copyTo(bitmap_avg);
 
@@ -1137,6 +1139,14 @@ public class HDRProcessor {
 		return avg_data;
 	}
 
+	/** Combines multiple images by averaging them. See processAvg() for more details.
+	 * @param avg_data       The argument returned by processAvg().
+	 * @param width          The width of the images.
+	 * @param height         The height of the images.
+	 * @param bitmap_new     The new input image. The bitmap is recycled.
+	 * @param avg_factor     The weighting factor for bitmap_avg.
+	 * @param iso            The ISO used to take the photos.
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public void updateAvg(AvgData avg_data, int width, int height, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
@@ -1158,14 +1168,32 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));*/
 
-		processAvgCore(avg_data.allocation_out, avg_data.allocation_out, null, bitmap_new, width, height, avg_factor, iso, false, avg_data.allocation_avg_align, avg_data.bitmap_avg_align, time_s);
+		processAvgCore(avg_data.allocation_out, avg_data.allocation_out, null, bitmap_new, width, height, avg_factor, iso, avg_data.allocation_avg_align, avg_data.bitmap_avg_align, time_s);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for updateAvg: " + (System.currentTimeMillis() - time_s));
 	}
 
+	/** Core algorithm for Noise Reduction algorithm.
+	 * @param allocation_out If non-null, this will be used for the output allocation, otherwise a
+	 *                       new one will be created.
+	 * @param allocation_avg If non-null, an allocation for the averaged image so far. If null, the
+	 *                       first bitmap should be supplied as bitmap_avg.
+	 * @param bitmap_avg     If non-null, the first bitmap (which will be recycled). If null, an
+	 *                       allocation_avg should be supplied.
+	 * @param bitmap_new     The new bitmap to combined. The bitmap will be recycled.
+	 * @param width          The width of the bitmaps.
+	 * @param height         The height of the bitmaps.
+	 * @param avg_factor     The averaging factor.
+	 * @param iso            The ISO used for the photos.
+	 * @param allocation_avg_align If non-null, use this allocation for alignment for averaged image.
+	 * @param bitmap_avg_align Should be supplied if allocation_avg_align is non-null, and stores
+	 *                         the bitmap corresponding to the allocation_avg_align.
+	 * @param time_s         Time, for debugging.
+	 * @throws HDRProcessorException
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, boolean first, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
+	private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgCore");
 			Log.d(TAG, "iso: " + iso);
@@ -1176,9 +1204,10 @@ public class HDRProcessor {
 
 		offsets_x = new int[2];
 		offsets_y = new int[2];
+		boolean floating_point = bitmap_avg == null;
 		{
+			boolean floating_point_align = floating_point;
 			// perform auto-alignment
-			boolean floating_point = !first;
 			List<Bitmap> align_bitmaps = new ArrayList<>();
 			Allocation [] allocations = new Allocation[2];
 			Bitmap bitmap_new_align = null;
@@ -1228,7 +1257,7 @@ public class HDRProcessor {
 				align_bitmaps.add(bitmap_new_align);
 				allocations[0] = allocation_avg_align;
 				allocations[1] = allocation_new_align;
-				floating_point = false;
+				floating_point_align = false;
 				if( MyDebug.LOG )
 					Log.d(TAG, "### time after creating allocations for autoalignment: " + (System.currentTimeMillis() - time_s));
             }
@@ -1246,8 +1275,8 @@ public class HDRProcessor {
 				allocations[1] = allocation_new;
 			}
 
-			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
-			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
 			if( scale_align ) {
 				for(int i=0;i<offsets_x.length;i++) {
 					offsets_x[i] *= scale_align_size;
@@ -1343,10 +1372,10 @@ public class HDRProcessor {
 			Log.d(TAG, "call processAvgScript");
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time before processAvgScript: " + (System.currentTimeMillis() - time_s));
-		if( first )
-			processAvgScript.forEach_avg(allocation_avg, allocation_out);
-		else
+		if( floating_point )
 			processAvgScript.forEach_avg_f(allocation_avg, allocation_out);
+		else
+			processAvgScript.forEach_avg(allocation_avg, allocation_out);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
 
