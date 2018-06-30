@@ -11039,7 +11039,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 35, 196);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg7".
@@ -11116,7 +11116,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 26, 94);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg9".
@@ -11350,7 +11350,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 27, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg13".
@@ -11497,7 +11497,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 100, 233);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg18".
@@ -11552,7 +11552,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 91, 252);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg20".
@@ -11704,7 +11704,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+		checkHistogramDetails(hdrHistogramDetails, 0, 81, 254);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg24".
@@ -11728,7 +11728,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+        checkHistogramDetails(hdrHistogramDetails, 0, 77, 250);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg25".
