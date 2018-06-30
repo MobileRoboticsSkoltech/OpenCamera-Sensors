@@ -1583,6 +1583,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "updateForSettings: time after update folder history: " + (System.currentTimeMillis() - debug_time));
 		}
 
+		imageQueueChanged(); // needed at least for changing photo mode, but might as well call it always
+
 		if( !keep_popup ) {
 			mainUI.destroyPopup(); // important as we don't want to use a cached popup
 			if( MyDebug.LOG ) {
@@ -2191,7 +2193,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		});
     }
 
-	/** Called when the number of images being saved in ImageSaver changes.
+	/** Called when the number of images being saved in ImageSaver changes (or otherwise something
+	 *  that changes our calculation of whether we can take a new photo, e.g., changing photo mode).
 	 */
 	void imageQueueChanged() {
 		if( MyDebug.LOG )
