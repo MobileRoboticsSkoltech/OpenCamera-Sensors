@@ -1329,9 +1329,12 @@ public class HDRProcessor {
 
 		processAvgScript.set_avg_factor(avg_factor);
 
-		float limited_iso = Math.min(iso, 800);
+		// if changing this, pay close attention to tests testAvg6, testAvg8, testAvg17, testAvg23
+		//float limited_iso = Math.min(iso, 800);
+		float limited_iso = Math.min(iso, 400);
 		limited_iso = Math.max(limited_iso, 100);
 		float wiener_C = 10.0f * limited_iso;
+		//float wiener_C = 1000.0f;
 		if( MyDebug.LOG )
 			Log.d(TAG, "wiener_C: " + wiener_C);
 		processAvgScript.set_wiener_C(wiener_C);
