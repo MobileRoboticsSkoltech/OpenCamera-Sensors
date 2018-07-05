@@ -179,6 +179,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         // if changing the radius, may also want to change the value returned by HDRProcessor.getAvgSampleSize()
         //int radius = 16;
         //int radius = 4;
+        //int radius = 3;
         //int radius = 2;
         int radius = 1;
         int width = rsAllocationGetDimX(bitmap);
@@ -186,20 +187,24 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         int count = 0;
         //float C = 0.1f*rgb.g*rgb.g;
         int sx = (x >= radius) ? x-radius : 0;
-        int ex = (x < width-radius) ? x+radius : 0;
+        int ex = (x < width-radius) ? x+radius : width-1;
         int sy = (y >= radius) ? y-radius : 0;
-        int ey = (y < height-radius) ? y+radius : 0;
-        for(int cy=sy;cy<ey;cy++) {
+        int ey = (y < height-radius) ? y+radius : height-1;
+        for(int cy=sy;cy<=ey;cy++) {
             for(int cx=sx;cx<=ex;cx++) {
                 if( cx >= 0 && cx < width && cy >= 0 && cy < height ) {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
                     //colour_sum += this_pixel;
                     {
                         /*float this_value = fmax(this_pixel.r, this_pixel.g);
-                        this_value = fmax(this_value, this_pixel.b);*/
+                        this_value = fmax(this_value, this_pixel.b);
+                        if( this_value > 0.5f )
+                            this_pixel *= old_value/this_value;*/
                         // use a wiener filter, so that more similar pixels have greater contribution
                         // smaller value of C means stronger filter (i.e., less averaging)
                         // see note above for details on the choice of this value
+                        // if changing this, consider if we also want to change the value for the
+                        // colour only spatial filtering, below
                         //const float C = 64.0f*64.0f;
                         //const float C = 32.0f*32.0f;
                         const float C = 64.0f*64.0f/8.0f;
@@ -242,6 +247,60 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         //rgb += old_value - new_value;
         //rgb = clamp(rgb, 0.0f, 255.0f);
         */
+    }
+    if( false )
+    {
+        // spatial noise reduction filter, colour only
+        // if changing this, see list of tests under standard spatial noise reduction above
+        float old_value = fmax(rgb.r, rgb.g);
+        old_value = fmax(old_value, rgb.b);
+        float3 sum = 0.0;
+        int radius = 4;
+        int width = rsAllocationGetDimX(bitmap);
+        int height = rsAllocationGetDimY(bitmap);
+        int count = 0;
+        int sx = (x >= radius) ? x-radius : 0;
+        int ex = (x < width-radius) ? x+radius : width-1;
+        int sy = (y >= radius) ? y-radius : 0;
+        int ey = (y < height-radius) ? y+radius : height-1;
+        for(int cy=sy;cy<=ey;cy++) {
+            for(int cx=sx;cx<=ex;cx++) {
+                if( cx >= 0 && cx < width && cy >= 0 && cy < height ) {
+                    float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
+                    {
+                        float this_value = fmax(this_pixel.r, this_pixel.g);
+                        this_value = fmax(this_value, this_pixel.b);
+                        if( this_value > 0.5f )
+                            this_pixel *= old_value/this_value;
+                        // use a wiener filter, so that more similar pixels have greater contribution
+                        // smaller value of C means stronger filter (i.e., less averaging)
+                        // for now set at same value as standard spatial filter above
+                        const float C = 64.0f*64.0f/8.0f;
+                        float3 diff = rgb - this_pixel;
+                        float L = dot(diff, diff);
+                        //L = 0.0f; // test no wiener filter
+                        float weight = L/(L+C);
+
+                        /*{
+                            // also take distance into account
+                            float factor_c = 32.0;
+                            float dist2 = dx*dx + dy*dy;
+                            dist2 = 32.0;
+                            float radius_weight = exp(-dist2/factor_c);
+                            weight = 1.0 - weight;
+                            weight *= radius_weight;
+                            weight = 1.0 - weight;
+                        }*/
+
+                        this_pixel = weight * rgb + (1.0-weight) * this_pixel;
+                    }
+                    sum += this_pixel;
+                    count++;
+                }
+            }
+        }
+
+        rgb = sum / count;
     }
 
     rgb = rgb - black_level;
@@ -300,6 +359,10 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         float gamma_scale = new_value / value;
         hdr *= gamma_scale;
     }
+
+    // apply gamma correction
+    //hdr = powr(hdr/255.0f, 0.454545454545f) * 255.0f;
+
 	uchar4 out;
     out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
     out.a = 255;
