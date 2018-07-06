@@ -192,7 +192,8 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         int ey = (y < height-radius) ? y+radius : height-1;
         for(int cy=sy;cy<=ey;cy++) {
             for(int cx=sx;cx<=ex;cx++) {
-                if( cx >= 0 && cx < width && cy >= 0 && cy < height ) {
+                //if( cx >= 0 && cx < width && cy >= 0 && cy < height )
+                {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
                     //colour_sum += this_pixel;
                     {
@@ -265,7 +266,8 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         int ey = (y < height-radius) ? y+radius : height-1;
         for(int cy=sy;cy<=ey;cy++) {
             for(int cx=sx;cx<=ex;cx++) {
-                if( cx >= 0 && cx < width && cy >= 0 && cy < height ) {
+                //if( cx >= 0 && cx < width && cy >= 0 && cy < height )
+                {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
                     {
                         float this_value = fmax(this_pixel.r, this_pixel.g);
