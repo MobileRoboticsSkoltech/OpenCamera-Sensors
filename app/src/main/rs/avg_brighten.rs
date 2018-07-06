@@ -248,14 +248,14 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         //rgb = clamp(rgb, 0.0f, 255.0f);
         */
     }
-    if( false )
+    //if( false )
     {
         // spatial noise reduction filter, colour only
         // if changing this, see list of tests under standard spatial noise reduction above
         float old_value = fmax(rgb.r, rgb.g);
         old_value = fmax(old_value, rgb.b);
         float3 sum = 0.0;
-        int radius = 4;
+        int radius = 3;
         int width = rsAllocationGetDimX(bitmap);
         int height = rsAllocationGetDimY(bitmap);
         int count = 0;
@@ -282,6 +282,10 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
                         float weight = L/(L+C);
 
                         /*{
+                            int ix = (int)x;
+                            int iy = (int)y;
+                            int dx = cx - ix;
+                            int dy = cy - iy;
                             // also take distance into account
                             float factor_c = 32.0;
                             float dist2 = dx*dx + dy*dy;
