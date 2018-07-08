@@ -39,6 +39,12 @@ public class AvgTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg25"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg26"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg27"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg28"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg29"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg30"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg31"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg32"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg33"));
         return suite;
     }
 }
