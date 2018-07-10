@@ -2540,9 +2540,10 @@ public class HDRProcessor {
 		if( iso <= 150 ) {
 			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
+			// keep n_tiles==1 - get too much contrast enhancement with n_tiles==4 e.g. for testAvg34
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
-			adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 4, time_s);
-			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);
+			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 4, time_s);
+			adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
