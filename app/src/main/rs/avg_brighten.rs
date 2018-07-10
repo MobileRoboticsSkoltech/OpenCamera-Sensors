@@ -14,6 +14,8 @@ void setBlackLevel(float value) {
 
 float gain;
 float gamma;
+float mid_x;
+float max_x;
 
 //float tonemap_scale;
 //float linear_scale;
@@ -309,6 +311,32 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         rgb = sum / count;
     }
 
+    /*{
+        // sharpen
+        int width = rsAllocationGetDimX(bitmap);
+        int height = rsAllocationGetDimY(bitmap);
+        if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
+            float3 p00 = rsGetElementAt_float3(bitmap, x-1, y-1);
+            float3 p10 = rsGetElementAt_float3(bitmap, x, y-1);
+            float3 p20 = rsGetElementAt_float3(bitmap, x+1, y-1);
+
+            float3 p01 = rsGetElementAt_float3(bitmap, x-1, y);
+            float3 p21 = rsGetElementAt_float3(bitmap, x+1, y);
+
+            float3 p02 = rsGetElementAt_float3(bitmap, x-1, y+1);
+            float3 p12 = rsGetElementAt_float3(bitmap, x, y+1);
+            float3 p22 = rsGetElementAt_float3(bitmap, x+1, y+1);
+
+            float3 unsharp = 8.0f*rgb - ( p00 + p10 + p20 + p01 + p21 + p02 + p12 + p22 );
+            rgb += (2.0f/16.0f) * unsharp;
+
+            //float3 smooth = p00 + 2.0f*p10 + p20 + 2.0f*p01 + 4.0f*rgb + 2.0f*p21 + p02 + 2.0f*p12 + p22;
+            //rgb += 1.0f * ( rgb - smooth/16.0f );
+
+            rgb = clamp(rgb, 0.0f, 255.0f);
+        }
+    }*/
+
     rgb = rgb - black_level;
     rgb = rgb * white_level;
     rgb = clamp(rgb, 0.0f, 255.0f);
@@ -356,12 +384,28 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
     out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
     out.a = 255;*/
 
+    // apply combination of gain and gamma
+    /*
     rgb *= gain;
     float3 hdr = rgb;
     float value = fmax(hdr.r, hdr.g);
     value = fmax(value, hdr.b);
     if( value >= 0.5f ) {
         float new_value = powr(value/255.0f, gamma) * 255.0f;
+        float gamma_scale = new_value / value;
+        hdr *= gamma_scale;
+    }
+    */
+
+    // apply piecewise function of gain vs gamma
+    float3 hdr = rgb;
+    float value = fmax(hdr.r, hdr.g);
+    value = fmax(value, hdr.b);
+    if( value <= mid_x ) {
+        hdr *= gain;
+    }
+    else {
+        float new_value = powr(value/max_x, gamma) * 255.0f;
         float gamma_scale = new_value / value;
         hdr *= gamma_scale;
     }

@@ -2403,7 +2403,8 @@ public class HDRProcessor {
 		float max_possible_value = gain*max_brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_possible_value: " + max_possible_value);
-		if( max_possible_value > 255.0f ) {
+
+		/*if( max_possible_value > 255.0f ) {
 			gain = 255.0f / max_brightness;
 			if( MyDebug.LOG )
 				Log.d(TAG, "limit gain to: " + gain);
@@ -2417,6 +2418,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "gamma " + gamma);
 		final float min_gamma_non_bright_c = 0.75f;
+		//final float min_gamma_non_bright_c = 0.5f;
 		if( gamma > 1.0f ) {
 			gamma = 1.0f;
 			if( MyDebug.LOG ) {
@@ -2425,11 +2427,27 @@ public class HDRProcessor {
 		}
 		else if( iso > 150 && gamma < min_gamma_non_bright_c ) {
 			// too small gamma on non-bright reduces contrast too much (e.g., see testAvg9)
+			// however we can't clamp too much, see testAvg28, testAvg32
 			gamma = min_gamma_non_bright_c;
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "clamped gamma to : " + gamma);
 			}
+		}*/
+
+		float mid_x = 255.5f;
+		if( max_possible_value > 255.0f ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use piecewise gain/gamma");
+			// use piecewise function with gain and gamma
+			float mid_y = 0.5f*255.0f;
+			mid_x = mid_y / gain;
+			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "mid_x " + mid_x);
+			Log.d(TAG, "gamma " + gamma);
+		}
+
 		//float gain = median_target / (float)median_brightness;
 		/*float gamma = (float)(Math.log(max_target/(float)median_target) / Math.log(max_brightness/(float)median_brightness));
 		float gain = median_target / ((float)Math.pow(median_brightness/255.0f, gamma) * 255.0f);
@@ -2465,6 +2483,8 @@ public class HDRProcessor {
 
 		avgBrightenScript.set_gamma(gamma);
 		avgBrightenScript.set_gain(gain);
+		avgBrightenScript.set_mid_x(mid_x);
+		avgBrightenScript.set_max_x(max_brightness);
 
 		/*float tonemap_scale_c = 255.0f;
 		if( MyDebug.LOG )
