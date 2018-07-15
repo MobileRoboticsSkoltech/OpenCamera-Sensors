@@ -1202,6 +1202,8 @@ public class HDRProcessor {
 		Allocation allocation_new = null;
 		boolean free_allocation_avg = false;
 
+		//Allocation allocation_diffs = null;
+
 		offsets_x = new int[2];
 		offsets_y = new int[2];
 		boolean floating_point = bitmap_avg == null;
@@ -1231,23 +1233,29 @@ public class HDRProcessor {
 				full_alignment_width /= scale_align_size;
 				full_alignment_height /= scale_align_size;
 
-				/*int align_width = width;
+				final boolean full_align = false; // whether alignment images should be created as being cropped to the centre
+				//final boolean full_align = true; // whether alignment images should be created as being cropped to the centre
+				int align_width = width;
 				int align_height = height;
 				int align_x = 0;
-				int align_y = 0;*/
-				int align_width = width/4;
-				int align_height = height/4;
-				int align_x = (width - align_width)/2;
-				int align_y = (height - align_height)/2;
-				crop_to_centre = false; // no need to crop in autoAlignment, as we're cropping here
+				int align_y = 0;
+				if( !full_align ) {
+					align_width = width/4;
+					align_height = height/4;
+					align_x = (width - align_width)/2;
+					align_y = (height - align_height)/2;
+					crop_to_centre = false; // no need to crop in autoAlignment, as we're cropping here
+				}
 
+				final boolean filter_align = false;
+				//final boolean filter_align = true;
 				if( allocation_avg_align == null ) {
-    				bitmap_avg_align = Bitmap.createBitmap(bitmap_avg, align_x, align_y, align_width, align_height, align_scale_matrix, false);
+    				bitmap_avg_align = Bitmap.createBitmap(bitmap_avg, align_x, align_y, align_width, align_height, align_scale_matrix, filter_align);
 					allocation_avg_align = Allocation.createFromBitmap(rs, bitmap_avg_align);
                     if( MyDebug.LOG )
                         Log.d(TAG, "### time after creating avg allocation for autoalignment: " + (System.currentTimeMillis() - time_s));
 				}
-                bitmap_new_align = Bitmap.createBitmap(bitmap_new, align_x, align_y, align_width, align_height, align_scale_matrix, false);
+                bitmap_new_align = Bitmap.createBitmap(bitmap_new, align_x, align_y, align_width, align_height, align_scale_matrix, filter_align);
 				allocation_new_align = Allocation.createFromBitmap(rs, bitmap_new_align);
 
 				alignment_width = bitmap_new_align.getWidth();
@@ -1277,6 +1285,24 @@ public class HDRProcessor {
 
 			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
 			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+
+			/*
+			// compute allocation_diffs
+			// if enabling this, should also:
+			// - set full_align above to true
+			// - set filter_align above to true
+			if( processAvgScript == null ) {
+				processAvgScript = new ScriptC_process_avg(rs);
+			}
+			processAvgScript.set_bitmap_align_new(allocations[1]);
+			processAvgScript.set_offset_x_new(offsets_x[1]);
+			processAvgScript.set_offset_y_new(offsets_y[1]);
+			allocation_diffs = Allocation.createTyped(rs, Type.createXY(rs, Element.F32(rs), alignment_width, alignment_height));
+			processAvgScript.forEach_compute_diff(allocations[0], allocation_diffs);
+			processAvgScript.set_scale_align_size(scale_align_size);
+			processAvgScript.set_allocation_diffs(allocation_diffs);
+			*/
+
 			if( scale_align ) {
 				for(int i=0;i<offsets_x.length;i++) {
 					offsets_x[i] *= scale_align_size;
@@ -1364,6 +1390,7 @@ public class HDRProcessor {
 		limited_iso = Math.max(limited_iso, 100);
 		float wiener_C = 10.0f * limited_iso;
 		//float wiener_C = 1000.0f;
+		//float wiener_C = 4000.0f;
 		if( MyDebug.LOG )
 			Log.d(TAG, "wiener_C: " + wiener_C);
 		processAvgScript.set_wiener_C(wiener_C);
@@ -1379,6 +1406,10 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
 
+		/*if( allocation_diffs != null ) {
+			allocation_diffs.destroy();
+			allocation_diffs = null;
+		}*/
 		allocation_new.destroy();
 		if( free_allocation_avg ) {
 			allocation_avg.destroy();
@@ -2375,6 +2406,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
 		int max_gain_factor = 4;
+		//int max_gain_factor = 2;
 		/*if( iso <= 150 ) {
 			max_gain_factor = 4;
 		}*/
@@ -2474,6 +2506,7 @@ public class HDRProcessor {
 		avgBrightenScript.set_bitmap(input);
 		float black_level = 0.0f;
 		if( iso >= 700 ) {
+		//if( iso >= 400 ) {
 			black_level = 4.0f;
 		}
 		if( MyDebug.LOG ) {
