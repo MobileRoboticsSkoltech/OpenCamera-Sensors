@@ -2340,11 +2340,13 @@ public class HDRProcessor {
 	}
 
 	private static class HistogramInfo {
+		public final int total;
 		public final int mean_brightness;
 		public final int median_brightness;
 		public final int max_brightness;
 
-		HistogramInfo(int mean_brightness, int median_brightness, int max_brightness) {
+		HistogramInfo(int total, int mean_brightness, int median_brightness, int max_brightness) {
+			this.total = total;
 			this.mean_brightness = mean_brightness;
 			this.median_brightness = median_brightness;
 			this.max_brightness = max_brightness;
@@ -2372,7 +2374,7 @@ public class HDRProcessor {
 		}
 		int mean_brightness = (int)(sum_brightness/count + 0.1);
 
-		return new HistogramInfo(mean_brightness, median_brightness, max_brightness);
+		return new HistogramInfo(total, mean_brightness, median_brightness, max_brightness);
 	}
 
 	private int getBrightnessTarget(int brightness, int max_gain_factor, int ideal_brightness) {
@@ -2522,6 +2524,27 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "black_level: " + black_level);
+		}
+		{
+			// quick and dirty dehaze algorithm
+			// helps (among others): testAvg9, testAvg27, testAvg30, testAvg33
+			int total = histogramInfo.total;
+			int percentile = (int)(total*0.001f);
+			int count = 0;
+			int darkest_brightness = -1;
+			for(int i = 0; i < histo.length; i++) {
+				count += histo[i];
+				if( count >= percentile && darkest_brightness == -1 ) {
+					darkest_brightness = i;
+				}
+			}
+			black_level = Math.max(black_level, darkest_brightness);
+			black_level = Math.min(black_level, 18);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "percentile: " + percentile);
+				Log.d(TAG, "darkest_brightness: " + darkest_brightness);
+				Log.d(TAG, "black_level is now: " + black_level);
+			}
 		}
 		avgBrightenScript.invoke_setBlackLevel(black_level);
 
