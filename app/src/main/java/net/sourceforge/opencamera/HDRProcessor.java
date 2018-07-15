@@ -750,7 +750,7 @@ public class HDRProcessor {
 		//final float tonemap_scale_c = 255.0f - median_brightness;
 		float tonemap_scale_c = 255.0f;
 
-		int median_target = getMedianTarget(median_brightness, 2);
+		int median_target = getBrightnessTarget(median_brightness, 2);
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "median_target: " + median_target);
@@ -960,7 +960,7 @@ public class HDRProcessor {
 			int max_brightness = histogramInfo.max_brightness;
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-			int median_target = getMedianTarget(median_brightness, 2);
+			int median_target = getBrightnessTarget(median_brightness, 2);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "median brightness: " + median_brightness);
 				Log.d(TAG, "median target: " + median_target);
@@ -2340,10 +2340,12 @@ public class HDRProcessor {
 	}
 
 	private static class HistogramInfo {
+		public final int mean_brightness;
 		public final int median_brightness;
 		public final int max_brightness;
 
-		HistogramInfo(int median_brightness, int max_brightness) {
+		HistogramInfo(int mean_brightness, int median_brightness, int max_brightness) {
+			this.mean_brightness = mean_brightness;
 			this.median_brightness = median_brightness;
 			this.max_brightness = max_brightness;
 		}
@@ -2355,10 +2357,12 @@ public class HDRProcessor {
 			total += value;
 		int middle = total / 2;
 		int count = 0;
+		double sum_brightness = 0.0f;
 		int median_brightness = -1;
 		int max_brightness = 0;
 		for(int i = 0; i < histo.length; i++) {
 			count += histo[i];
+			sum_brightness += (double)(histo[i] * i);
 			if( count >= middle && median_brightness == -1 ) {
 				median_brightness = i;
 			}
@@ -2366,19 +2370,20 @@ public class HDRProcessor {
 				max_brightness = i;
 			}
 		}
+		int mean_brightness = (int)(sum_brightness/count + 0.1);
 
-		return new HistogramInfo(median_brightness, max_brightness);
+		return new HistogramInfo(mean_brightness, median_brightness, max_brightness);
 	}
 
-	private int getMedianTarget(int median_brightness, int max_gain_factor) {
-		if( median_brightness <= 0 )
-			median_brightness = 1;
+	private int getBrightnessTarget(int brightness, int max_gain_factor) {
+		if( brightness <= 0 )
+			brightness = 1;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
-			Log.d(TAG, "median_brightness: " + median_brightness);
+			Log.d(TAG, "brightness: " + brightness);
 		}
-		int median_target = Math.min(119, max_gain_factor*median_brightness);
-		return Math.max(median_brightness, median_target); // don't make median darker
+		int median_target = Math.min(119, max_gain_factor*brightness);
+		return Math.max(brightness, median_target); // don't make darker
 	}
 
 	/** Final stage of the noise reduction algorithm.
@@ -2401,7 +2406,7 @@ public class HDRProcessor {
 
 		int [] histo = computeHistogram(input, false, true);
 		HistogramInfo histogramInfo = getHistogramInfo(histo);
-		int median_brightness = histogramInfo.median_brightness;
+		int brightness = histogramInfo.median_brightness;
 		int max_brightness = histogramInfo.max_brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
@@ -2410,19 +2415,20 @@ public class HDRProcessor {
 		/*if( iso <= 150 ) {
 			max_gain_factor = 4;
 		}*/
-		int median_target = getMedianTarget(median_brightness, max_gain_factor);
-		//int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
+		int brightness_target = getBrightnessTarget(brightness, max_gain_factor);
+		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "median brightness: " + median_brightness);
+			Log.d(TAG, "median brightness: " + histogramInfo.median_brightness);
+			Log.d(TAG, "mean brightness: " + histogramInfo.mean_brightness);
 			Log.d(TAG, "max brightness: " + max_brightness);
-			Log.d(TAG, "median target: " + median_target);
+			Log.d(TAG, "brightness target: " + brightness_target);
 			//Log.d(TAG, "max target: " + max_target);
 		}
 
 		/* We use a combination of gain and gamma to brighten images if required. Gain works best for
 		 * dark images (e.g., see testAvg8), gamma works better for bright images (e.g., testAvg12).
 		 */
-		float gain = median_target / (float)median_brightness;
+		float gain = brightness_target / (float)brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "gain " + gain);
 		if( gain < 1.0f ) {
@@ -2441,12 +2447,12 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "limit gain to: " + gain);
 			// use gamma correction for the remainder
-			if( median_target > gain * median_brightness ) {
-				gamma = (float) (Math.log(median_target / 255.0f) / Math.log(gain * median_brightness / 255.0f));
+			if( brightness_target > gain * brightness ) {
+				gamma = (float) (Math.log(brightness_target / 255.0f) / Math.log(gain * brightness / 255.0f));
 			}
 		}
 
-		//float gamma = (float)(Math.log(median_target/255.0f) / Math.log(median_brightness/255.0f));
+		//float gamma = (float)(Math.log(brightness_target/255.0f) / Math.log(brightness/255.0f));
 		if( MyDebug.LOG )
 			Log.d(TAG, "gamma " + gamma);
 		final float min_gamma_non_bright_c = 0.75f;
@@ -2480,15 +2486,15 @@ public class HDRProcessor {
 			Log.d(TAG, "gamma " + gamma);
 		}
 
-		//float gain = median_target / (float)median_brightness;
-		/*float gamma = (float)(Math.log(max_target/(float)median_target) / Math.log(max_brightness/(float)median_brightness));
-		float gain = median_target / ((float)Math.pow(median_brightness/255.0f, gamma) * 255.0f);
+		//float gain = brightness_target / (float)brightness;
+		/*float gamma = (float)(Math.log(max_target/(float)brightness_target) / Math.log(max_brightness/(float)brightness));
+		float gain = brightness_target / ((float)Math.pow(brightness/255.0f, gamma) * 255.0f);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "gamma " + gamma);
 			Log.d(TAG, "gain " + gain);
 			Log.d(TAG, "gain2 " + max_target / ((float)Math.pow(max_brightness/255.0f, gamma) * 255.0f));
 		}*/
-		/*float gain = median_target / (float)median_brightness;
+		/*float gain = brightness_target / (float)brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "gain: " + gain);
 		}
@@ -2540,12 +2546,12 @@ public class HDRProcessor {
 		/*{
 			max_possible_value = max_brightness;
 			float tonemap_scale_c = 255.0f;
-			if( 255.0f / max_possible_value < ((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f ) {
-				final float tonemap_denom = ((float)median_target)/(float)median_brightness - (255.0f / max_possible_value);
+			if( 255.0f / max_possible_value < ((float)brightness_target)/(float)brightness + brightness_target / 255.0f - 1.0f ) {
+				final float tonemap_denom = ((float)brightness_target)/(float)brightness - (255.0f / max_possible_value);
 				if( MyDebug.LOG )
 					Log.d(TAG, "tonemap_denom: " + tonemap_denom);
 				if( tonemap_denom != 0.0f ) // just in case
-					tonemap_scale_c = (255.0f - median_target) / tonemap_denom;
+					tonemap_scale_c = (255.0f - brightness_target) / tonemap_denom;
 				//throw new RuntimeException(); // test
 			}
 			// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
