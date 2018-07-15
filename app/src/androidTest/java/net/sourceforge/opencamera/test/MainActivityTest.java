@@ -12032,9 +12032,64 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHistogramDetails(hdrHistogramDetails, 0, 86, 255);
 	}
 
-	/** Tests Avg algorithm on test samples "testHDRtemp".
-	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
-	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
+	/** Tests Avg algorithm on test samples "testAvg35".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg35() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg35");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg35/IMG_20180711_144453_0.jpg");
+		inputs.add(avg_images_path + "testAvg35/IMG_20180711_144453_1.jpg");
+		inputs.add(avg_images_path + "testAvg35/IMG_20180711_144453_2.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg35_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 0, 86, 255);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg36".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg36() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg36");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_0.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_1.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_2.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_3.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_4.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_5.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_6.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_7.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg36_output.jpg", 752, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 0, 86, 255);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvgtemp".
+	 *  Used for one-off testing, or to recreate NR images from the base exposures to test an updated alorithm.
+	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testAvgtemp/ .
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
