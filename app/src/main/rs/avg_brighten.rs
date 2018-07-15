@@ -311,8 +311,9 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         rgb = sum / count;
     }
 
-    /*{
+    {
         // sharpen
+        // helps: testAvg12, testAvg16, testAvg23, testAvg30, testAvg32
         int width = rsAllocationGetDimX(bitmap);
         int height = rsAllocationGetDimY(bitmap);
         if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
@@ -335,7 +336,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
 
             rgb = clamp(rgb, 0.0f, 255.0f);
         }
-    }*/
+    }
 
     rgb = rgb - black_level;
     rgb = rgb * white_level;

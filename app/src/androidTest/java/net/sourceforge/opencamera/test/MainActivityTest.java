@@ -11041,7 +11041,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		//checkHistogramDetails(hdrHistogramDetails, 18, 51, 201);
 		//checkHistogramDetails(hdrHistogramDetails, 14, 38, 200);
-		checkHistogramDetails(hdrHistogramDetails, 0, 9, 193);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 9, 193);
+		checkHistogramDetails(hdrHistogramDetails, 0, 9, 199);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg7".
@@ -11713,7 +11714,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		checkHistogramDetails(hdrHistogramDetails, 0, 81, 251);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 81, 251);
+		checkHistogramDetails(hdrHistogramDetails, 0, 80, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg24".
@@ -11739,7 +11741,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         //checkHistogramDetails(hdrHistogramDetails, 0, 77, 250);
         //checkHistogramDetails(hdrHistogramDetails, 0, 74, 250);
-        checkHistogramDetails(hdrHistogramDetails, 0, 86, 250);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 86, 250);
+        checkHistogramDetails(hdrHistogramDetails, 0, 86, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg25".
