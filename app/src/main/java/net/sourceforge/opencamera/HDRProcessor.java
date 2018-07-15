@@ -750,7 +750,7 @@ public class HDRProcessor {
 		//final float tonemap_scale_c = 255.0f - median_brightness;
 		float tonemap_scale_c = 255.0f;
 
-		int median_target = getBrightnessTarget(median_brightness, 2);
+		int median_target = getBrightnessTarget(median_brightness, 2, 119);
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "median_target: " + median_target);
@@ -960,7 +960,7 @@ public class HDRProcessor {
 			int max_brightness = histogramInfo.max_brightness;
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-			int median_target = getBrightnessTarget(median_brightness, 2);
+			int median_target = getBrightnessTarget(median_brightness, 2, 119);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "median brightness: " + median_brightness);
 				Log.d(TAG, "median target: " + median_target);
@@ -2375,14 +2375,14 @@ public class HDRProcessor {
 		return new HistogramInfo(mean_brightness, median_brightness, max_brightness);
 	}
 
-	private int getBrightnessTarget(int brightness, int max_gain_factor) {
+	private int getBrightnessTarget(int brightness, int max_gain_factor, int ideal_brightness) {
 		if( brightness <= 0 )
 			brightness = 1;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 			Log.d(TAG, "brightness: " + brightness);
 		}
-		int median_target = Math.min(119, max_gain_factor*brightness);
+		int median_target = Math.min(ideal_brightness, max_gain_factor*brightness);
 		return Math.max(brightness, median_target); // don't make darker
 	}
 
@@ -2410,12 +2410,16 @@ public class HDRProcessor {
 		int max_brightness = histogramInfo.max_brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-		int max_gain_factor = 4;
-		//int max_gain_factor = 2;
-		/*if( iso <= 150 ) {
+		//int max_gain_factor = 4;
+		int max_gain_factor = 3;
+		int ideal_brightness = 119;
+		// for iso > 120, this helps: testAvg6, testAvg9, testAvg10, testAvg28, testAvg31, testAvg37
+		// for iso <= 120, this helps: testAvg12, testAvg21, testAvg35
+		if( iso <= 120 ) {
 			max_gain_factor = 4;
-		}*/
-		int brightness_target = getBrightnessTarget(brightness, max_gain_factor);
+			ideal_brightness = 199;
+		}
+		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "median brightness: " + histogramInfo.median_brightness);
@@ -2511,8 +2515,9 @@ public class HDRProcessor {
 		ScriptC_avg_brighten avgBrightenScript = new ScriptC_avg_brighten(rs);
 		avgBrightenScript.set_bitmap(input);
 		float black_level = 0.0f;
-		if( iso >= 700 ) {
-		//if( iso >= 400 ) {
+		// need to do this for ISO >= 400 to help: testAvg31
+		//if( iso >= 700 ) {
+		if( iso >= 400 ) {
 			black_level = 4.0f;
 		}
 		if( MyDebug.LOG ) {
