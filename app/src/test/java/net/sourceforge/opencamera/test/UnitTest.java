@@ -497,4 +497,116 @@ public class UnitTest {
 		assertEquals( ImageSaver.computeRequestCost(false, 3), 3*ImageSaver.computeRequestCost(false, 1));
 
 	}
+
+	private class float4 {
+		float r, g, b, a;
+
+		float4(float r, float g, float b, float a) {
+			this.r = r;
+			this.g = g;
+			this.b = b;
+			this.a = a;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if( !(o instanceof float4) )
+				return false;
+			float4 that = (float4)o;
+			return this.r == that.r && this.g == that.g && this.b == that.b && this.a == that.a;
+		}
+
+		@Override
+		public int hashCode() {
+			// must override this, as we override equals()
+			return (int)(531*r + 227*g + b*31 + a);
+		}
+	}
+
+	/** Duplicates the code in avg_brighter.rs for median filter, to test this.
+	 *  Finds median of the supplied values, sorting by the alpha component.
+	 */
+	private float4 findMedian(float4 p0, float4 p1, float4 p2, float4 p3, float4 p4) {
+        if( p0.a > p1.a ) {
+            float4 temp_p = p0;
+            p0 = p1;
+            p1 = temp_p;
+        }
+        if( p0.a > p2.a ) {
+            float4 temp_p = p0;
+            p0 = p2;
+            p2 = temp_p;
+        }
+        if( p0.a > p3.a ) {
+            float4 temp_p = p0;
+            p0 = p3;
+            p3 = temp_p;
+        }
+        if( p0.a > p4.a ) {
+            float4 temp_p = p0;
+            p0 = p4;
+            p4 = temp_p;
+        }
+        //
+        if( p1.a > p2.a ) {
+            float4 temp_p = p1;
+            p1 = p2;
+            p2 = temp_p;
+        }
+        if( p1.a > p3.a ) {
+            float4 temp_p = p1;
+            p1 = p3;
+            p3 = temp_p;
+        }
+        if( p1.a > p4.a ) {
+            float4 temp_p = p1;
+            p1 = p4;
+            p4 = temp_p;
+        }
+        //
+        if( p2.a > p3.a ) {
+            float4 temp_p = p2;
+            p2 = p3;
+            p3 = temp_p;
+        }
+        if( p2.a > p4.a ) {
+            float4 temp_p = p2;
+            p2 = p4;
+            p4 = temp_p;
+        }
+		Log.d(TAG, "median is: " + p2.r + " , " + p2.g + " , " + p2.b + " , " + p2.a);
+        return p2;
+	}
+
+	@Test
+	public void testMedian() {
+		Log.d(TAG, "testMedian");
+
+		float4 m0 = findMedian(
+				new float4(127, 0, 64, 127),
+				new float4(49, 49, 49, 49),
+				new float4(0, 0, 0, 0),
+				new float4(120, 120, 121, 121),
+				new float4(0, 51, 53, 53)
+		);
+		assertEquals(m0, new float4(0, 51, 53, 53));
+
+		float4 m1 = findMedian(
+				new float4(127, 0, 64, 127),
+				new float4(49, 49, 71, 71),
+				new float4(120, 120, 121, 121),
+				new float4(127, 151, 64, 151),
+				new float4(0, 51, 53, 53)
+		);
+		assertEquals(m1, new float4(120, 120, 121, 121));
+
+		float4 m2 = findMedian(
+				new float4(127, 0, 64, 127),
+				new float4(49, 49, 71, 71),
+				new float4(49, 49, 71, 71),
+				new float4(120, 120, 121, 121),
+				new float4(0, 51, 53, 53)
+		);
+		assertEquals(m2, new float4(49, 49, 71, 71));
+	}
 }
