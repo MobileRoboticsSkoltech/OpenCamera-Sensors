@@ -14,6 +14,7 @@ void setBlackLevel(float value) {
 
 float gain;
 float gamma;
+float low_x;
 float mid_x;
 float max_x;
 
@@ -346,9 +347,17 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
     float3 hdr = rgb;
     float value = fmax(hdr.r, hdr.g);
     value = fmax(value, hdr.b);
-    if( value <= mid_x ) {
-        hdr *= gain;
+    if( value <= low_x ) {
+        // don't scale
     }
+    else if( value <= mid_x ) {
+        float alpha = (value-low_x)/(mid_x-low_x);
+        float new_value = (1.0-alpha)*low_x + alpha*gain*mid_x;
+        hdr *= new_value/value;
+    }
+    /*if( value <= mid_x ) {
+        hdr *= gain;
+    }*/
     else {
         float new_value = powr(value/max_x, gamma) * 255.0f;
         float gamma_scale = new_value / value;

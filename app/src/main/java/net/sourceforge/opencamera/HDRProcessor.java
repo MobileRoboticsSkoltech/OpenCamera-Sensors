@@ -2412,13 +2412,10 @@ public class HDRProcessor {
 		int max_brightness = histogramInfo.max_brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-		//int max_gain_factor = 4;
-		int max_gain_factor = 3;
+		int max_gain_factor = 4;
 		int ideal_brightness = 119;
-		// for iso > 120, this helps: testAvg6, testAvg9, testAvg10, testAvg28, testAvg31, testAvg37
-		// for iso <= 120, this helps: testAvg12, testAvg21, testAvg35
 		if( iso <= 120 ) {
-			max_gain_factor = 4;
+			// this helps: testAvg12, testAvg21, testAvg35
 			ideal_brightness = 199;
 		}
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
@@ -2487,7 +2484,13 @@ public class HDRProcessor {
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
+		float low_x = 0.0f;
+		if( iso >= 400 ) {
+			// this helps: testAvg10, testAvg28, testAvg31, testAvg33
+			low_x = Math.min(8.0f, 0.125f*mid_x);
+		}
 		if( MyDebug.LOG ) {
+			Log.d(TAG, "low_x " + low_x);
 			Log.d(TAG, "mid_x " + mid_x);
 			Log.d(TAG, "gamma " + gamma);
 		}
@@ -2553,6 +2556,7 @@ public class HDRProcessor {
 
 		avgBrightenScript.set_gamma(gamma);
 		avgBrightenScript.set_gain(gain);
+		avgBrightenScript.set_low_x(low_x);
 		avgBrightenScript.set_mid_x(mid_x);
 		avgBrightenScript.set_max_x(max_brightness);
 
