@@ -2484,6 +2484,18 @@ public class HDRProcessor {
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
+		else if( max_possible_value < 255.0f && max_brightness > 0 ) {
+		    // slightly brightens testAvg17
+			float alt_gain = 255.0f / max_brightness;
+			alt_gain = Math.min(alt_gain, max_gain_factor);
+			if( MyDebug.LOG )
+				Log.d(TAG, "alt_gain: " + alt_gain);
+			if( alt_gain > gain ) {
+				gain = alt_gain;
+				if( MyDebug.LOG )
+					Log.d(TAG, "increased gain to: " + gain);
+			}
+		}
 		float low_x = 0.0f;
 		if( iso >= 400 ) {
 			// this helps: testAvg10, testAvg28, testAvg31, testAvg33
