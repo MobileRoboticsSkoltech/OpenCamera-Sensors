@@ -258,7 +258,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         rgb = sum / count;
     }
 
-    /*{
+    {
         // sharpen
         // helps: testAvg12, testAvg16, testAvg23, testAvg30, testAvg32
         if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
@@ -274,14 +274,19 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
             float3 p22 = rsGetElementAt_float3(bitmap, x+1, y+1);
 
             float3 blurred = (p00 + p10 + p20 + p01 + 8.0f*rgb + p21 + p02 + p12 + p22)/16.0f;
-            rgb += 2.0f * (rgb-blurred);
+            float3 shift = 1.5f * (rgb-blurred);
+            const float threshold2 = 8*8;
+            if( dot(shift, shift) > threshold2 )
+            {
+                rgb += shift;
+            }
 
             //float3 smooth = p00 + 2.0f*p10 + p20 + 2.0f*p01 + 4.0f*rgb + 2.0f*p21 + p02 + 2.0f*p12 + p22;
             //rgb += 1.0f * ( rgb - smooth/16.0f );
 
             rgb = clamp(rgb, 0.0f, 255.0f);
         }
-    }*/
+    }
 
     rgb = rgb - black_level;
     rgb = rgb * white_level;
