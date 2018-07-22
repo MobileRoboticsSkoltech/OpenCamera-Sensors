@@ -2576,6 +2576,31 @@ public class HDRProcessor {
 		avgBrightenScript.set_mid_x(mid_x);
 		avgBrightenScript.set_max_x(max_brightness);
 
+		/* We want A and B s.t.:
+	        float alpha = (value-low_x)/(mid_x-low_x);
+    	    float new_value = (1.0-alpha)*low_x + alpha*gain*mid_x;
+			We should be able to write this as new_value = A * value + B
+			alpha = value/(mid_x-low_x) - low_x/(mid_x-low_x)
+			new_value = low_x - value*low_x/(mid_x-low_x) + low_x^2/(mid_x-low_x) +
+			    value*gain*mid_x/(mid_x-low_x) - gain*mid_x*low_x/(mid_x-low_x)
+			So A = (gain*mid_x - low_x)/(mid_x-low_x)
+			B = low_x + low_x^2/(mid_x-low_x) - gain*mid_x*low_x/(mid_x-low_x)
+			= (low_x*mid_x - low_x^2 + low_x^2 - gain*mid_x*low_x)/(mid_x-low_x)
+			= (low_x*mid_x - gain*mid_x*low_x)/(mid_x-low_x)
+			= low_x*mid_x*(1-gain)/(mid_x-low_x)
+		 */
+		float gain_A = 1.0f, gain_B = 0.0f;
+		if( mid_x > low_x ) {
+			gain_A = (gain * mid_x - low_x) / (mid_x - low_x);
+			gain_B = low_x*mid_x*(1.0f-gain)/ (mid_x - low_x);
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "gain_A: " + gain_A);
+			Log.d(TAG, "gain_B: " + gain_B);
+		}
+		avgBrightenScript.set_gain_A(gain_A);
+		avgBrightenScript.set_gain_B(gain_B);
+
 		/*float tonemap_scale_c = 255.0f;
 		if( MyDebug.LOG )
 			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
