@@ -1385,8 +1385,12 @@ public class HDRProcessor {
 		processAvgScript.set_avg_factor(avg_factor);
 
 		// if changing this, pay close attention to tests testAvg6, testAvg8, testAvg17, testAvg23
-		//float limited_iso = Math.min(iso, 800);
 		float limited_iso = Math.min(iso, 400);
+		if( iso >= 700 ) {
+		    // helps reduce speckles in testAvg17, testAvg23, testAvg33, testAvg38
+			// using this level for testAvg31 (ISO 609) would increase ghosting
+		    limited_iso = 500;
+        }
 		limited_iso = Math.max(limited_iso, 100);
 		float wiener_C = 10.0f * limited_iso;
 		//float wiener_C = 1000.0f;
