@@ -12162,6 +12162,101 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 	}
 
+	/** Tests Avg algorithm on test samples "testAvg39".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg39() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg39");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg39/input001.jpg");
+		inputs.add(avg_images_path + "testAvg39/input002.jpg");
+		inputs.add(avg_images_path + "testAvg39/input003.jpg");
+		inputs.add(avg_images_path + "testAvg39/input004.jpg");
+		inputs.add(avg_images_path + "testAvg39/input005.jpg");
+		inputs.add(avg_images_path + "testAvg39/input006.jpg");
+		inputs.add(avg_images_path + "testAvg39/input007.jpg");
+		inputs.add(avg_images_path + "testAvg39/input008.jpg");
+		inputs.add(avg_images_path + "testAvg39/input009.jpg");
+		inputs.add(avg_images_path + "testAvg39/input010.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg39_output.jpg", 521, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg40".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg40() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg40");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg40/input001.jpg");
+		inputs.add(avg_images_path + "testAvg40/input002.jpg");
+		inputs.add(avg_images_path + "testAvg40/input003.jpg");
+		inputs.add(avg_images_path + "testAvg40/input004.jpg");
+		inputs.add(avg_images_path + "testAvg40/input005.jpg");
+		inputs.add(avg_images_path + "testAvg40/input006.jpg");
+		inputs.add(avg_images_path + "testAvg40/input007.jpg");
+		inputs.add(avg_images_path + "testAvg40/input008.jpg");
+		inputs.add(avg_images_path + "testAvg40/input009.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg40_output.jpg", 199, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg41".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg41() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg41");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg41/input001.jpg");
+		inputs.add(avg_images_path + "testAvg41/input002.jpg");
+		inputs.add(avg_images_path + "testAvg41/input003.jpg");
+		inputs.add(avg_images_path + "testAvg41/input004.jpg");
+		inputs.add(avg_images_path + "testAvg41/input005.jpg");
+		inputs.add(avg_images_path + "testAvg41/input006.jpg");
+		inputs.add(avg_images_path + "testAvg41/input007.jpg");
+		inputs.add(avg_images_path + "testAvg41/input008.jpg");
+		inputs.add(avg_images_path + "testAvg41/input009.jpg");
+		inputs.add(avg_images_path + "testAvg41/input010.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg41_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
 	/** Tests Avg algorithm on test samples "testAvgtemp".
 	 *  Used for one-off testing, or to recreate NR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testAvgtemp/ .
