@@ -488,12 +488,12 @@ public abstract class CameraController {
 	public long captureResultExposureTime() {
 		return 0;
 	}
-	/*public boolean captureResultHasFrameDuration() {
+	public boolean captureResultHasFrameDuration() {
 		return false;
-	}*/
-	/*public long captureResultFrameDuration() {
+	}
+	public long captureResultFrameDuration() {
 		return 0;
-	}*/
+	}
 	/*public boolean captureResultHasFocusDistance() {
 		return false;
 	}*/

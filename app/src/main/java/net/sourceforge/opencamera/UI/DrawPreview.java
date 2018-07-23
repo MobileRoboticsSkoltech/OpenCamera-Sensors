@@ -922,12 +922,12 @@ public class DrawPreview {
 						iso_exposure_string += " ";
 					iso_exposure_string += preview.getExposureTimeString(exposure_time);
 				}
-				/*if( camera_controller.captureResultHasFrameDuration() ) {
+				if( preview.isVideoRecording() && camera_controller.captureResultHasFrameDuration() ) {
 					long frame_duration = camera_controller.captureResultFrameDuration();
 					if( iso_exposure_string.length() > 0 )
 						iso_exposure_string += " ";
 					iso_exposure_string += preview.getFrameDurationString(frame_duration);
-				}*/
+				}
 
 				last_iso_exposure_time = time_ms;
 			}

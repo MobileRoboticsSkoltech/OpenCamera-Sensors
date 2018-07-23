@@ -3729,11 +3729,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return string;
 	}
 
-	/*public String getFrameDurationString(long frame_duration) {
+	public String getFrameDurationString(long frame_duration) {
 		double frame_duration_s = frame_duration/1000000000.0;
 		double frame_duration_r = 1.0/frame_duration_s;
 		return getResources().getString(R.string.fps) + " " + decimal_format_1dp.format(frame_duration_r);
-	}*/
+	}
 	
 	/*private String getFocusOneDistanceString(float dist) {
 		if( dist == 0.0f )

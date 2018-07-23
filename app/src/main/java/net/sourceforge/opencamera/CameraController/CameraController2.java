@@ -2864,6 +2864,7 @@ public class CameraController2 extends CameraController {
 		}
 		// maxImages only needs to be 2, as we always read the JPEG data and close the image straight away in the imageReader
 		imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
+		//imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.YUV_420_888, 2);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "created new imageReader: " + imageReader.toString());
 			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
@@ -5331,7 +5332,6 @@ public class CameraController2 extends CameraController {
 		return capture_result_exposure_time;
 	}
 
-	/*
 	@Override
 	public boolean captureResultHasFrameDuration() {
 		return capture_result_has_frame_duration;
@@ -5342,6 +5342,7 @@ public class CameraController2 extends CameraController {
 		return capture_result_frame_duration;
 	}
 	
+	/*
 	@Override
 	public boolean captureResultHasFocusDistance() {
 		return capture_result_has_focus_distance;
@@ -5921,6 +5922,10 @@ public class CameraController2 extends CameraController {
 			else if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
 				capture_result_has_exposure_time = true;
 				capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+				if( capture_result_exposure_time <= 0 ) {
+					// wierd bug seen on Nokia 8
+					capture_result_has_exposure_time = false;
+				}
 			}
 			else {
 				capture_result_has_exposure_time = false;
