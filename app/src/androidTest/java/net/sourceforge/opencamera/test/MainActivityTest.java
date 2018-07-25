@@ -10661,7 +10661,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg1/input1.jpg");
 		inputs.add(avg_images_path + "testAvg1/input2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -10712,7 +10714,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg2/input1.jpg");
 		inputs.add(avg_images_path + "testAvg2/input2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -10763,7 +10767,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg3/input3.jpg");
 		inputs.add(avg_images_path + "testAvg3/input4.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -10852,7 +10858,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg4/input3.jpg");
 		inputs.add(avg_images_path + "testAvg4/input4.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -10917,7 +10925,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg5/input3.jpg");
 		inputs.add(avg_images_path + "testAvg5/input4.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -10987,7 +10997,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg6/input6.jpg");
 		inputs.add(avg_images_path + "testAvg6/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11067,7 +11079,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg7/input6.jpg");
 		inputs.add(avg_images_path + "testAvg7/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11111,7 +11125,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg8/input6.jpg");
 		inputs.add(avg_images_path + "testAvg8/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11163,7 +11179,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		String out_filename = use_auto_photos ? "testAvg9_auto_output.jpg" : "testAvg9_output.jpg";
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11212,7 +11230,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		String out_filename = use_auto_photos ? "testAvg10_auto_output.jpg" : "testAvg10_output.jpg";
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 800, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1196, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11236,6 +11254,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// note, we don't actually use 8 images for a bright scene like this, but it serves as a good test for
+		// misalignment/ghosting anyway
 		inputs.add(avg_images_path + "testAvg11/input0.jpg");
 		inputs.add(avg_images_path + "testAvg11/input1.jpg");
 		inputs.add(avg_images_path + "testAvg11/input2.jpg");
@@ -11410,7 +11430,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg14/input6.jpg");
 		inputs.add(avg_images_path + "testAvg14/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg14_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg14_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11497,7 +11519,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg17/input6.jpg");
 		inputs.add(avg_images_path + "testAvg17/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 800, new TestAvgCallback() {
+		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
+		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 1600, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11670,10 +11694,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_1.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_2.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_3.jpg");
-		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_4.jpg");
+		// only test 4 images, to reflect latest behaviour that we take 4 images for this ISO
+		/*inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_4.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_5.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_6.jpg");
-		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_7.jpg");
+		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_7.jpg");*/
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg23_output.jpg", 1044, new TestAvgCallback() {
 			@Override
@@ -11788,6 +11813,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// note we now take only 3 images for bright scenes, but still test with 4 images as this serves as a good test
+		// against ghosting
 		inputs.add(avg_images_path + "testAvg26/input0.jpg");
 		inputs.add(avg_images_path + "testAvg26/input1.jpg");
 		inputs.add(avg_images_path + "testAvg26/input2.jpg");
@@ -11856,6 +11883,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg28/input001.jpg");
 		inputs.add(avg_images_path + "testAvg28/input002.jpg");
 		inputs.add(avg_images_path + "testAvg28/input003.jpg");
@@ -11887,6 +11917,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg29/input001.jpg");
 		inputs.add(avg_images_path + "testAvg29/input002.jpg");
 		inputs.add(avg_images_path + "testAvg29/input003.jpg");
@@ -11918,6 +11951,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg30/input001.jpg");
 		inputs.add(avg_images_path + "testAvg30/input002.jpg");
 		inputs.add(avg_images_path + "testAvg30/input003.jpg");
@@ -11943,6 +11979,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg31/input001.jpg");
 		inputs.add(avg_images_path + "testAvg31/input002.jpg");
 		inputs.add(avg_images_path + "testAvg31/input003.jpg");
@@ -11975,6 +12014,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg32/input001.jpg");
 		inputs.add(avg_images_path + "testAvg32/input002.jpg");
 		inputs.add(avg_images_path + "testAvg32/input003.jpg");
@@ -12004,6 +12046,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg33/input001.jpg");
 		inputs.add(avg_images_path + "testAvg33/input002.jpg");
 		inputs.add(avg_images_path + "testAvg33/input003.jpg");
@@ -12091,10 +12136,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_1.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_2.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_3.jpg");
-		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_4.jpg");
+		// only test 4 images, to reflect latest behaviour that we take 4 images for this ISO
+		/*inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_4.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_5.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_6.jpg");
-		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_7.jpg");
+		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_7.jpg");*/
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg36_output.jpg", 752, new TestAvgCallback() {
 			@Override
@@ -12173,6 +12219,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg39/input001.jpg");
 		inputs.add(avg_images_path + "testAvg39/input002.jpg");
 		inputs.add(avg_images_path + "testAvg39/input003.jpg");
@@ -12205,6 +12254,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg40/input001.jpg");
 		inputs.add(avg_images_path + "testAvg40/input002.jpg");
 		inputs.add(avg_images_path + "testAvg40/input003.jpg");
@@ -12236,6 +12288,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
+		// example from Google HDR+ dataset
+		// note, the number of input images doesn't necessarily match what we'd take for this scene, but we want to compare
+		// to the Google HDR+ result
 		inputs.add(avg_images_path + "testAvg41/input001.jpg");
 		inputs.add(avg_images_path + "testAvg41/input002.jpg");
 		inputs.add(avg_images_path + "testAvg41/input003.jpg");
