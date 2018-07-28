@@ -894,6 +894,7 @@ public class CameraController1 extends CameraController {
 		return false;
 	}
 	
+	@Override
 	public void setPreviewFpsRange(int min, int max) {
     	if( MyDebug.LOG )
     		Log.d(TAG, "setPreviewFpsRange: " + min + " to " + max);
@@ -908,6 +909,13 @@ public class CameraController1 extends CameraController {
     		Log.e(TAG, "setPreviewFpsRange failed to get parameters");
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void clearPreviewFpsRange() {
+    	if( MyDebug.LOG )
+    		Log.d(TAG, "clearPreviewFpsRange");
+    	// not supported for old API
 	}
 	
 	public List<int []> getSupportedPreviewFpsRange() {

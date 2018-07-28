@@ -3126,6 +3126,36 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void clearPreviewFpsRange() {
+    	if( MyDebug.LOG )
+    		Log.d(TAG, "clearPreviewFpsRange");
+    	// needed e.g. on Nokia 8 when switching back from slow motion to regular speed, in order to reset to the regular
+		// frame rate
+    	if( camera_settings.ae_target_fps_range != null || camera_settings.sensor_frame_duration != 0 ) {
+			// set back to default
+			camera_settings.ae_target_fps_range = null;
+			camera_settings.sensor_frame_duration = 0;
+			createPreviewRequest();
+			// createPreviewRequest() needed so that the values in the previewBuilder reset to default values, for
+			// CONTROL_AE_TARGET_FPS_RANGE and SENSOR_FRAME_DURATION
+
+			try {
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
+					setRepeatingRequest();
+				}
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to clear preview fps range");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
 	public List<int[]> getSupportedPreviewFpsRange() {
 		List<int[]> l = new ArrayList<>();
 

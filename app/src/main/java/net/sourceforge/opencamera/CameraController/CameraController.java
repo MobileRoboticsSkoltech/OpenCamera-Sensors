@@ -394,6 +394,7 @@ public abstract class CameraController {
 	public abstract int getExposureCompensation();
 	public abstract boolean setExposureCompensation(int new_exposure);
 	public abstract void setPreviewFpsRange(int min, int max);
+	public abstract void clearPreviewFpsRange();
 	public abstract List<int []> getSupportedPreviewFpsRange(); // result depends on setting of setVideoHighSpeed()
 
 	public abstract void setFocusValue(String focus_value);

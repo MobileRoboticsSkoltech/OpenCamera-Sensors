@@ -3971,6 +3971,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "set preview fps range: " + selected_fps);
             camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
         }
+        else if( using_android_l ) {
+            camera_controller.clearPreviewFpsRange();
+		}
 	}
 	
 	public void switchVideo(boolean during_startup, boolean change_user_pref) {
