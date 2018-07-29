@@ -2544,10 +2544,10 @@ public class HDRProcessor {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "black_level: " + black_level);
 		}
-		if( iso <= 150 )
+		if( iso <= 200 )
 		{
 			// quick and dirty dehaze algorithm
-			// helps (among others): testAvg27, testAvg30
+			// helps (among others): testAvg27, testAvg30, testAvg40
 			// we don't do for "dark" images, as this can cause problems due to exaggerating noise (e.g.,
 			// see testAvg38)
 			int total = histogramInfo.total;
