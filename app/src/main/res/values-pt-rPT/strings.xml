@@ -122,8 +122,8 @@
     <string name="preference_save_zulu_time">Fuso horário do nome dos ficheiros</string>
     <string name="preference_show_when_locked">Mostrar câmara quando bloqueado</string>
     <string name="preference_show_when_locked_summary">Se ativado, o Open Camera continuará a ser mostrado acima de qualquer ecrã de bloqueio (terá na mesma de desbloquear para aceder às Definições, Galeria, etc.)</string>
-    <string name="preference_startup_focus">Efetuar auto-focagem na inicialização</string>
-    <string name="preference_startup_focus_summary">Auto-focar quando o Open Camera é iniciado. Se tiver o problema do flash ligar no início, desative esta opção</string>
+    <string name="preference_startup_focus">Efetuar autofocagem na inicialização</string>
+    <string name="preference_startup_focus_summary">Autofocar quando o Open Camera é iniciado. Se tiver o problema de o flash ligar no início, desative esta opção</string>
     <string name="preference_lock_video">Bloquear ecrã durante a gravação de vídeo</string>
     <string name="preference_lock_video_summary">Durante a gravação de vídeo, a interface será bloqueada para prevenir parar a gravação acidentalmente. Deslize o ecrã para desbloquear. Note que a gravação de vídeo será sempre parada se a aplicação entrar em segundo plano ou se o ecrã for desligado.</string>
     <string name="preference_rotate_preview">Rodar pré-visualização</string>
@@ -147,7 +147,7 @@
     <string name="preference_show_angle_line">Mostrar linha de ângulo</string>
     <string name="preference_show_angle_line_summary">Exibir linha do nível horizontal</string>
     <string name="preference_angle_highlight_color">Cor de realce do ângulo</string>
-    <string name="preference_angle_highlight_color_summary">Cor de realce para quando a câmara estiver quase nivelada</string>
+    <string name="preference_angle_highlight_color_summary">Cor de realce para quando a câmera estiver quase nivelada</string>
     <string name="preference_show_geo_direction">Mostrar direção da bússola</string>
     <string name="preference_show_geo_direction_summary">Exibir no ecrã a direção da bússola do dispositivo</string>
     <string name="preference_show_time">Mostrar hora</string>
@@ -159,7 +159,7 @@
     <string name="preference_crop_guide">Mostrar um guia de recorte</string>
     <string name="preference_crop_guide_summary">Um guia de recorte exibe um retângulo mostrando como pareceria o rácio de aspeto especificado - útil se planeia recortar posteriormente a fotografia/vídeo para um rácio de aspeto diferente. Requer o modo de fotografia WYSIWYG, ou estar em modo vídeo\n%s</string>
     <string name="preference_show_toasts">Mostrar mensagens \"toast\"</string>
-    <string name="preference_show_toasts_summary">Optar por exibir o popup de mensagens \"toast\"</string>
+    <string name="preference_show_toasts_summary">Optar por exibir o pop-up de mensagens \"toast\"</string>
     <string name="preference_thumbnail_animation">Mostrar animação da miniatura</string>
     <string name="preference_thumbnail_animation_summary">Exibir uma animação da miniatura quando tirada uma fotografia</string>
     <string name="preference_take_photo_border">Mostrar contorno quando tirada uma fotografia</string>
@@ -212,7 +212,7 @@
     <string name="preference_video_restart">Reiniciar o vídeo após a duração máxima</string>
     <string name="preference_video_restart_summary">Se o vídeo parou após atingir a duração máxima (se definido), esta opção irá reiniciar a gravação de vídeo, até ao número de vezes especificado\n%s</string>
     <string name="preference_video_max_filesize">Tamanho máximo do ficheiro de vídeo</string>
-    <string name="preference_video_max_filesize_summary">A gravação de vídeo irá parar e/ou reiniciar (ver opção em baixo) quando o tamanho máximo (aproximado) do ficheiro for alcançado. Note que a maioria dos dispositivos Android têm um tamanho máximo do ficheiro para os vídeos (geralmente à volta dos 2GB ou 4GB), mas esta opção permite definir um valor específico\n%s</string>
+    <string name="preference_video_max_filesize_summary">A gravação de vídeo irá parar e/ou reiniciar (ver opção em embaixo) quando o tamanho máximo (aproximado) do ficheiro for alcançado. Note que a maioria dos dispositivos Android têm um tamanho máximo do ficheiro para os vídeos (geralmente por volta dos 2GB ou 4GB), mas esta opção permite definir um valor específico\n%s</string>
     <string name="preference_video_restart_max_filesize">Reiniciar no tamanho máximo do ficheiro</string>
     <string name="preference_video_restart_max_filesize_summary">Optar por reiniciar automaticamente quando o tamanho máximo do ficheiro for alcançado (seja pelo tamanho máximo do ficheiro do dispositivo, ou especificado pelo utilizador)</string>
     <string name="preference_record_audio">Gravar áudio</string>
@@ -220,7 +220,7 @@
     <string name="preference_record_audio_src">Fonte de áudio</string>
     <string name="preference_record_audio_src_summary">O microfone usado na gravação de áudio\n%s</string>
     <string name="preference_record_audio_channels">Canais de áudio</string>
-    <string name="preference_record_audio_channels_summary">Especificar mono ou stereo para a gravação de áudio (stereo apenas é suportado em alguns dispositivos)</string>
+    <string name="preference_record_audio_channels_summary">Especificar mono ou estéreo para a gravação de áudio (estéreo apenas é suportado em alguns dispositivos)</string>
     <string name="preference_video_flash">Flash durante a gravação de vídeo</string>
     <string name="preference_video_flash_summary">Se ativado, o flash será ligado/desligado durante a gravação de vídeo (pode ser usado para verificar à distância se câmara ainda está a gravar)</string>
     

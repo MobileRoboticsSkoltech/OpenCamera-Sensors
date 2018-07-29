@@ -150,7 +150,7 @@
         <item>Foco</item>
         <item>Zoom</item>
         <item>Mudar nível de exposição</item>
-        <item>Trocar auto-estabilidade ligar/desligar</item>
+        <item>Alternar autoestabilidade ligada/desligada</item>
         <item>Mudar volume do dispositivo</item>
         <item>Não fazer nada</item>
     </string-array>
@@ -182,7 +182,7 @@
     <string-array name="preference_immersive_mode_entries">
         <item>Desligado</item>
         <item>Somente esconder as teclas virtuais de navegação</item>
-        <item>Esconder GUI</item>
+        <item>Esconder IGU</item>
         <item>Esconder tudo</item>
     </string-array>
     <string-array name="preference_immersive_mode_values">
