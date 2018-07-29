@@ -565,6 +565,9 @@
 
     <string name="no_burst">no burst</string> <!-- string for burst mode not being supported for a resolution -->
 
+    <string name="preference_show_video_max_amp">Show audio level meter</string>
+    <string name="preference_show_video_max_amp_summary">Whether to show on-screen audio level when recording video</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

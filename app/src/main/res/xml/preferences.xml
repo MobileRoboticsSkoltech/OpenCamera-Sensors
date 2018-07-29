@@ -402,6 +402,13 @@
                 android:defaultValue="true"
                 />
 
+            <CheckBoxPreference
+                android:key="preference_show_video_max_amp"
+                android:title="@string/preference_show_video_max_amp"
+                android:summary="@string/preference_show_video_max_amp_summary"
+                android:defaultValue="false"
+                />
+
             <ListPreference
                 android:key="preference_grid"
                 android:title="@string/preference_grid"

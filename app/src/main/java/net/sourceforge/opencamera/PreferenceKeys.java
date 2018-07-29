@@ -187,6 +187,8 @@ public class PreferenceKeys {
 
 	public static final String ShowISOPreferenceKey = "preference_show_iso";
 
+	public static final String ShowVideoMaxAmpPreferenceKey = "preference_show_video_max_amp";
+
 	public static final String ShowAnglePreferenceKey = "preference_show_angle";
 
 	public static final String ShowAngleLinePreferenceKey = "preference_show_angle_line";

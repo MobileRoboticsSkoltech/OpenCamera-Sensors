@@ -58,6 +58,7 @@ public class DrawPreview {
 	private boolean show_time_pref;
 	private boolean show_free_memory_pref;
 	private boolean show_iso_pref;
+	private boolean show_video_max_amp_pref;
 	private boolean show_zoom_pref;
 	private boolean show_battery_pref;
 	private boolean show_angle_pref;
@@ -118,6 +119,13 @@ public class DrawPreview {
 	private boolean has_battery_frac;
 	private float battery_frac;
 	private long last_battery_time;
+
+	private boolean has_video_max_amp;
+	private int video_max_amp;
+	private long last_video_max_amp_time;
+	private int video_max_amp_prev1;
+	private int video_max_amp_prev2;
+	private int video_max_amp_peak;
 
 	private Bitmap location_bitmap;
 	private Bitmap location_off_bitmap;
@@ -402,6 +410,7 @@ public class DrawPreview {
 		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
 		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
 		show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowISOPreferenceKey, true);
+		show_video_max_amp_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowVideoMaxAmpPreferenceKey, false);
 		show_zoom_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowZoomPreferenceKey, true);
 		show_battery_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowBatteryPreferenceKey, true);
 
@@ -1386,6 +1395,58 @@ public class DrawPreview {
             	}
 				if( !preview.isVideoRecordingPaused() || ((int)(time_ms / 500)) % 2 == 0 ) { // if video is paused, then flash the video time
 					applicationInterface.drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            		pixels_offset_y += text_y;
+				}
+				if( show_video_max_amp_pref && !preview.isVideoRecordingPaused() ) {
+            		// audio amplitude
+					if( !this.has_video_max_amp || time_ms > this.last_video_max_amp_time + 33 ) {
+						has_video_max_amp = true;
+						video_max_amp_prev1 = video_max_amp_prev2;
+						video_max_amp_prev2 = video_max_amp;
+						video_max_amp = preview.getMaxAmplitude();
+						last_video_max_amp_time = time_ms;
+						if( MyDebug.LOG ) {
+							if( video_max_amp > 30000 ) {
+								Log.d(TAG, "max_amp: " + video_max_amp);
+							}
+							if( video_max_amp > 32767 ) {
+								Log.e(TAG, "video_max_amp greater than max: " + video_max_amp);
+							}
+						}
+						if( video_max_amp_prev2 > video_max_amp_prev1 && video_max_amp_prev2 > video_max_amp ) {
+							// new peak
+							video_max_amp_peak = video_max_amp_prev2;
+						}
+						//video_max_amp_peak = Math.max(video_max_amp_peak, video_max_amp);
+					}
+					float amp_frac = video_max_amp/32767.0f;
+					amp_frac = Math.max(amp_frac, 0.0f);
+					amp_frac = Math.min(amp_frac, 1.0f);
+					//applicationInterface.drawTextWithBackground(canvas, p, "" + max_amp, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+
+		            int amp_width = (int) (120 * scale + 0.5f); // convert dps to pixels
+		            int amp_height = (int) (5 * scale + 0.5f); // convert dps to pixels
+                    int amp_x = (canvas.getWidth() - amp_width)/2;
+					p.setColor(Color.WHITE);
+					p.setStyle(Paint.Style.STROKE);
+    				canvas.drawRect(amp_x, text_base_y - pixels_offset_y, amp_x+amp_width, text_base_y - pixels_offset_y+amp_height, p);
+					p.setStyle(Paint.Style.FILL);
+    				canvas.drawRect(amp_x, text_base_y - pixels_offset_y, amp_x+amp_frac*amp_width, text_base_y - pixels_offset_y+amp_height, p);
+    				if( amp_frac < 1.0f ) {
+	    				p.setColor(Color.BLACK);
+		    			p.setAlpha(64);
+        				canvas.drawRect(amp_x+amp_frac*amp_width+1, text_base_y - pixels_offset_y, amp_x+amp_width, text_base_y - pixels_offset_y+amp_height, p);
+		    			p.setAlpha(255);
+				    }
+				    if( video_max_amp_peak > video_max_amp ) {
+						float peak_frac = video_max_amp_peak/32767.0f;
+						peak_frac = Math.max(peak_frac, 0.0f);
+						peak_frac = Math.min(peak_frac, 1.0f);
+						p.setColor(Color.YELLOW);
+						p.setStyle(Paint.Style.STROKE);
+						canvas.drawLine(amp_x+peak_frac*amp_width, text_base_y - pixels_offset_y, amp_x+peak_frac*amp_width, text_base_y - pixels_offset_y+amp_height, p);
+						p.setColor(Color.WHITE);
+					}
 				}
 			}
 			else if( taking_picture && capture_started ) {
@@ -1492,6 +1553,7 @@ public class DrawPreview {
 					p.setColor(Color.BLACK);
 					p.setAlpha(64);
 					canvas.drawRect(battery_x, battery_y, battery_x + battery_width, battery_y + (1.0f - battery_frac) * (battery_height - 2), p);
+					p.setAlpha(255);
 				}
 			}
 		}
