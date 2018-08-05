@@ -131,9 +131,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
 	private boolean video_restart_on_max_filesize;
 	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
-	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-	private Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
-	private String video_filename; // for VIDEOMETHOD_FILE
+	private class VideoFileInfo {
+		// stores the file (or similar) to record a video
+		private final int video_method;
+		private final Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
+		private final String video_filename; // for VIDEOMETHOD_FILE
+		private final ParcelFileDescriptor video_pfd_saf; // for VIDEOMETHOD_SAF
+
+		VideoFileInfo() {
+			this.video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+			this.video_uri = null;
+			this.video_filename = null;
+			this.video_pfd_saf = null;
+		}
+		VideoFileInfo(int video_method, Uri video_uri, String video_filename, ParcelFileDescriptor video_pfd_saf) {
+			this.video_method = video_method;
+			this.video_uri = video_uri;
+			this.video_filename = video_filename;
+			this.video_pfd_saf = video_pfd_saf;
+		}
+	}
+	private VideoFileInfo videoFileInfo = new VideoFileInfo();
 
 	private static final int PHASE_NORMAL = 0;
 	private static final int PHASE_TIMER = 1;
@@ -842,38 +860,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "runtime exception when stopping video");
-	    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
-	    			if( video_uri != null ) {
+	    		if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+	    			if( videoFileInfo.video_uri != null ) {
 			    		if( MyDebug.LOG )
-			    			Log.d(TAG, "delete corrupt video: " + video_uri);
+			    			Log.d(TAG, "delete corrupt video: " + videoFileInfo.video_uri);
 			    		try {
-		    				DocumentsContract.deleteDocument(getContext().getContentResolver(), video_uri);
+		    				DocumentsContract.deleteDocument(getContext().getContentResolver(), videoFileInfo.video_uri);
 						}
 						catch(FileNotFoundException e2) {
 			    			// note, Android Studio reports a warning that FileNotFoundException isn't thrown, but it can be
 							// thrown by DocumentsContract.deleteDocument - and we get an error if we try to remove the catch!
 							if( MyDebug.LOG )
-								Log.e(TAG, "exception when deleting " + video_uri);
+								Log.e(TAG, "exception when deleting " + videoFileInfo.video_uri);
 							e2.printStackTrace();
 						}
 	    			}
 	    		}
-	    		else if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-		    		if( video_filename != null ) {
+	    		else if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+		    		if( videoFileInfo.video_filename != null ) {
 			    		if( MyDebug.LOG )
-			    			Log.d(TAG, "delete corrupt video: " + video_filename);
-		    			File file = new File(video_filename);
+			    			Log.d(TAG, "delete corrupt video: " + videoFileInfo.video_filename);
+		    			File file = new File(videoFileInfo.video_filename);
 	    				if( !file.delete() ) {
 				    		if( MyDebug.LOG )
-				    			Log.e(TAG, "failed to delete corrupt video: " + video_filename);
+				    			Log.e(TAG, "failed to delete corrupt video: " + videoFileInfo.video_filename);
 	    				}
 		    		}
 	    		}
 				// else don't delete if a plain Uri
 
-	    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-	    		video_uri = null;
-    			video_filename = null;
+				videoFileInfo = new VideoFileInfo();
 	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
     	        	VideoProfile profile = getVideoProfile();
@@ -895,10 +911,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		video_recorder_is_paused = false;
 		applicationInterface.cameraInOperation(false, true);
 		reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-		applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
-		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-		video_uri = null;
-		video_filename = null;
+		applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+		videoFileInfo = new VideoFileInfo();
 	}
 
 	private Context getContext() {
@@ -4636,9 +4650,74 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void onVideoInfo(int what, int extra) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoInfo: " + what + " extra: " + extra);
-		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING && video_restart_on_max_filesize ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "restart due to max filesize reached");
+				Log.d(TAG, "restart due to max filesize approaching - try setNextOutputFile");
+			if( video_recorder == null ) {
+				// just in case?
+				if( MyDebug.LOG )
+					Log.d(TAG, "video_recorder is null!");
+			}
+			else if( applicationInterface.getVideoMaxDurationPref() > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't use setNextOutputFile with setMaxDuration");
+				// using setNextOutputFile with setMaxDuration seems to be buggy:
+				// OnePlus3T: setMaxDuration is ignored if we hit max filesize and call setNextOutputFile before
+				// this would cause testTakeVideoMaxFileSize3 to fail
+				// Nokia 8: the camera server dies when restarting with setNextOutputFile, if setMaxDuration has been set!
+			}
+			else {
+				// First we need to see if there's enough free storage left - it might be that we hit the max filesize that was
+				// set in MyApplicationInterface.getVideoMaxFileSizePref() due to the remaining disk space.
+				// Potentially we could just modify getVideoMaxFileSizePref() to not set VideoMaxFileSize.auto_restart if the
+				// max file size was set due to remaining disk space rather than user preference, but worth rechecking in case
+				// disk space has been freed up; also we might encounter a device limit on max filesize that's less than the
+				// remaining disk space (in which case, we do want to restart).
+				// See testTakeVideoAvailableMemory().
+				boolean has_free_space = false;
+				try {
+					// don't care about the return, we're just looking for NoFreeStorageException
+					applicationInterface.getVideoMaxFileSizePref();
+					has_free_space = true;
+				}
+				catch(NoFreeStorageException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "don't call setNextOutputFile, not enough space remaining");
+				}
+
+				if( has_free_space ) {
+					VideoFileInfo info = createVideoFile();
+					// only assign to videoFileInfo after setNextOutputFile in case it throws an exception (in which case,
+					// we don't want to overwrite the current videoFileInfo).
+					if( info != null ) {
+						try {
+							//if( true )
+							//	throw new IOException(); // test
+							if( info.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+								video_recorder.setNextOutputFile(new File(info.video_filename));
+							}
+							else {
+								video_recorder.setNextOutputFile(info.video_pfd_saf.getFileDescriptor());
+							}
+							if( MyDebug.LOG )
+								Log.d(TAG, "setNextOutputFile succeeded");
+							videoFileInfo = info;
+						}
+						catch(IOException e) {
+							Log.e(TAG, "failed to setNextOutputFile");
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			// no need to explicitly stop if createVideoFile() or setNextOutputFile() fails - just let video reach max filesize
+			// normally
+		}
+		else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
+			// note, if the restart was handled via MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING, then we shouldn't ever
+			// receive MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED
+			if( MyDebug.LOG )
+				Log.d(TAG, "restart due to max filesize reached - do manual restart");
 			Activity activity = (Activity)Preview.this.getContext();
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
@@ -4754,50 +4833,64 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
 	}
-	
-	/** Start video recording.
-	 */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void startVideoRecording(final boolean max_filesize_restart) {
-		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-		// initialise just in case:
-		boolean created_video_file = false;
-		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-		video_uri = null;
-		video_filename = null;
-		ParcelFileDescriptor pfd_saf = null;
+
+	private VideoFileInfo createVideoFile() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createVideoFile");
 		try {
-			video_method = applicationInterface.createOutputVideoMethod();
+			int method = applicationInterface.createOutputVideoMethod();
+			Uri video_uri = null;
+			String video_filename = null;
+			ParcelFileDescriptor video_pfd_saf = null;
     		if( MyDebug.LOG )
-	            Log.e(TAG, "video_method? " + video_method);
-    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+	            Log.d(TAG, "method? " + method);
+    		if( method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+    			/*if( true )
+    				throw new IOException(); // test*/
     			File videoFile = applicationInterface.createOutputVideoFile();
 				video_filename = videoFile.getAbsolutePath();
-				created_video_file = true;
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + video_filename);
     		}
     		else {
-	    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
-	    			video_uri = applicationInterface.createOutputVideoSAF();
+    			Uri uri;
+	    		if( method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+	    			uri = applicationInterface.createOutputVideoSAF();
 	    		}
 	    		else {
-	    			video_uri = applicationInterface.createOutputVideoUri();
+	    			uri = applicationInterface.createOutputVideoUri();
 	    		}
-    			created_video_file = true;
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + video_uri);
-	    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_uri, "rw");
+	    			Log.d(TAG, "save to: " + uri);
+	    		video_pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "rw");
+	    		video_uri = uri;
     		}
+
+    		return new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
 		}
 		catch(IOException e) {
     		if( MyDebug.LOG )
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
 			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/** Start video recording.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void startVideoRecording(final boolean max_filesize_restart) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startVideoRecording");
+		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
+		VideoFileInfo info = createVideoFile();
+		if( info == null ) {
+			videoFileInfo = new VideoFileInfo();
             applicationInterface.onFailedCreateVideoFileError();
 			applicationInterface.cameraInOperation(false, true);
 		}
-		if( created_video_file ) {
+		else {
+			videoFileInfo = info;
         	final VideoProfile profile = getVideoProfile();
     		if( MyDebug.LOG ) {
 				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
@@ -4908,11 +5001,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "actual video_max_duration: " + video_max_duration);
 				local_video_recorder.setMaxDuration((int)video_max_duration);
 
-				if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-					local_video_recorder.setOutputFile(video_filename);
+				if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+					local_video_recorder.setOutputFile(videoFileInfo.video_filename);
 				}
 				else {
-					local_video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+					local_video_recorder.setOutputFile(videoFileInfo.video_pfd_saf.getFileDescriptor());
 				}
 				applicationInterface.cameraInOperation(true, true);
 				told_app_starting = true;

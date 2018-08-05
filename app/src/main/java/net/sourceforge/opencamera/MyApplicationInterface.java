@@ -703,7 +703,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         		if( available_memory > min_free_filesize ) {
         			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available_memory ) {
         				video_max_filesize.max_filesize = available_memory;
-        				// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit before hand, if there's a device max limit set (typically ~2GB)
+        				// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit beforehand, if there's a device max limit set (typically ~2GB)
         				if( MyDebug.LOG )
         					Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
         			}
@@ -1619,18 +1619,24 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void onVideoInfo(int what, int extra) {
 		// we don't show a toast for MEDIA_RECORDER_INFO_MAX_DURATION_REACHED - conflicts with "n repeats to go" toast from Preview
-		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "next output file started");
+			int message_id = R.string.video_max_filesize;
+			main_activity.getPreview().showToast(null, message_id);
+		}
+		else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "max filesize reached");
 			int message_id = R.string.video_max_filesize;
 			main_activity.getPreview().showToast(null, message_id);
-			// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
-			// fixed in 1.25; also was correct for 1.23 and earlier
-			String debug_value = "info_" + what + "_" + extra;
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString("last_video_error", debug_value);
-			editor.apply();
 		}
+		// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
+		// fixed in 1.25; also was correct for 1.23 and earlier
+		String debug_value = "info_" + what + "_" + extra;
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString("last_video_error", debug_value);
+		editor.apply();
 	}
 
 	@Override

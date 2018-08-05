@@ -4541,11 +4541,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int doTest(); // return expected number of new files (or -1 to indicate not to check this)
 	}
 
-	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
+	/**
+	 * @return The number of resultant video files
+	 * @throws InterruptedException
+	 */
+	private int subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
 		assertTrue(mPreview.isPreviewStarted());
 
 		if( test_exposure_lock && !mPreview.supportsExposureLock() ) {
-			return;
+			return 0;
 		}
 
 		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -4744,7 +4748,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		else {
 			Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
 			if( exp_n_new_files >= 0 ) {
-				assertEquals(n_new_files, exp_n_new_files);
+				assertEquals(exp_n_new_files, n_new_files);
 			}
 		}
 
@@ -4772,6 +4776,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "pauseVideoButton.getVisibility(): " + pauseVideoButton.getVisibility());
 		assertTrue( pauseVideoButton.getVisibility() == View.GONE );
 		assertTrue( takePhotoVideoButton.getVisibility() == View.GONE );
+
+		return n_new_files;
 	}
 
 	public void testTakeVideo() throws InterruptedException {
@@ -5211,7 +5217,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Set available memory to make sure that we stop before running out of memory.
-	 *  This test is fine-tuned to Nexus 6 and OnePlus 3T, as we measure hitting max filesize based on time.
+	 *  This test is fine-tuned to Nexus 6, OnePlus 3T and Nokia 8, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoAvailableMemory() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoAvailableMemory");
@@ -5224,6 +5230,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		mActivity.getApplicationInterface().test_set_available_memory = true;
 		mActivity.getApplicationInterface().test_available_memory = 50000000;
+		boolean is_nokia = Build.MANUFACTURER.toLowerCase(Locale.US).contains("hmd global");
+		if( is_nokia )
+		{
+			// Nokia 8 has much smaller video sizes, at least when recording with phone face down, so we both set
+			// 4K, and lower test_available_memory.
+			mActivity.getApplicationInterface().test_available_memory = 21000000; // must be at least MyApplicationInterface.getVideoMaxFileSizePref().min_free_filesize
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6 or OnePlus 3T)
+            editor.apply();
+            updateForSettings();
+        }
 
 		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
 			@Override
@@ -5279,7 +5297,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	/** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 10s.
 	 *  Then check recording stops again within 10s.
-	 *  This test is fine-tuned to Nexus 6 and OnePlus 3T, as we measure hitting max filesize based on time.
+	 *  On Android 8+, we use MediaRecorder.setNextOutputFile() (see Preview.onVideoInfo()), so instead we just wait 5s and
+	 *  check video is still recording, then expect at least 2 resultant video files.
+	 *  This test is fine-tuned to Nexus 6, OnePlus 3T and Nokia 8, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize1() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize1");
@@ -5291,15 +5311,40 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		//editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 3-4s on Nexus 6 at 4K
-		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "9437184"); // approx 3-4s on Nexus 6 at 4K
+		boolean is_nokia = Build.MANUFACTURER.toLowerCase(Locale.US).contains("hmd global");
+		if( is_nokia ) {
+			// Nokia 8 has much smaller video sizes, at least when recording with phone face down, so we also set 4K
+			editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
+			editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "2000000"); // approx 3s on Nokia 8 at 4K
+		}
+		else {
+			//editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
+			//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 3-4s on Nexus 6 at 4K
+			editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "9437184"); // approx 3-4s on Nexus 6 at FullHD
+		}
 		editor.apply();
 		updateForSettings();
 
-		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+		int n_new_files = subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
 			@Override
 			public int doTest() {
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+					assertTrue(mPreview.isVideoRecording());
+					Log.d(TAG, "wait");
+					try {
+						Thread.sleep(5000);
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+						assertTrue(false);
+					}
+					Log.d(TAG, "check still recording");
+					assertTrue(mPreview.isVideoRecording());
+					return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary widly
+				}
+
+				// pre-Android 8 code:
+
 		    	// wait until automatically stops
 				Log.d(TAG, "wait until video recording stops");
 				long time_s = System.currentTimeMillis();
@@ -5379,6 +5424,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary widly
 			}
 		}, 5000, true, false);
+
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+			assertTrue( n_new_files >= 2 );
+		}
 	}
 
 	/** Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
@@ -5959,6 +6008,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(popupButton.getVisibility() == View.VISIBLE);
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
+
+	    // workaround for Android 7.1 bug at https://stackoverflow.com/questions/47548317/what-belong-is-badtokenexception-at-classes-of-project
+		// without this, we get a crash due to that problem on Nexus (old API at least) in testTakeVideoMaxDuration
+	    Thread.sleep(1000);
 
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");

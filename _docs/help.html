@@ -757,9 +757,9 @@ restarting, even if you've set "Restart video after max duration".</p>
 
 <p><b>Restart on maximum file size</b> - Whether to automatically restart if the maximum file size is met. As noted above, almost all
 Android devices have a maximum file size for videos, even if you don't explicitly set one. So it's advisable to keep this option to true,
-so that Open Camera will restart as soon as possible if you're recording video, and hit this limit. Note that there will still be a loss
-of a few seconds while the video stops and restarts - but this at least is better than stopping altogether (and is especially useful if
-you want to leave Open Camera recording without you keeping watch).</p>
+so that Open Camera will restart as soon as possible if you're recording video, and hit this limit. Note that on devices that
+are not running Android 8 or later, there will still be a loss of a few seconds while the video stops and restarts. On Android 8
+or later, the resume should be seamless.</p>
 
 <p><b>Record audio</b> - Whether to record audio when recording a video.</p>
 
