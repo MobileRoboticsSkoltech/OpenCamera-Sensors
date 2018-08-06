@@ -5958,6 +5958,29 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/* Test recording video with a flat (log) profile.
+	 */
+	public void testVideoLogProfile() throws InterruptedException {
+		Log.d(TAG, "testVideoLogProfile");
+
+		setToDefault();
+
+		if( !mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test requires camera2 api");
+			return;
+		}
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "strong");
+		editor.apply();
+		updateForSettings();
+
+		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
+
+		assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
+	}
+
 	private void subTestTakeVideoMaxDuration(boolean restart, boolean interrupt) throws InterruptedException {
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);

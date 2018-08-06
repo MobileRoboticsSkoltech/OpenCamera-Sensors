@@ -696,6 +696,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
 				TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
 				builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
+				test_used_tonemap_curve = true;
 			}
 			else {
 				builder.set(CaptureRequest.TONEMAP_MODE, default_tonemap_mode);
