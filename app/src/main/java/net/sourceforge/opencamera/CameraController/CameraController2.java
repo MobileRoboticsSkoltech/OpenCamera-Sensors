@@ -87,18 +87,14 @@ public class CameraController2 extends CameraController {
 	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
 	private ImageReader imageReader;
 
-	private boolean enable_burst; // whether to take a burst of images; the behaviour of this burst is controlled by burst_type
-	private enum BurstType {
-		BURSTTYPE_NONE, // for when enable_burst is false
-		BURSTTYPE_EXPO, // enable expo bracketing mode; see expo_bracketing_n_images, expo_bracketing_stops for further control
-		BURSTTYPE_NORMAL // take a regular burst; see burst_for_noise_reduction, burst_requested_n_images for further control
-	}
 	private BurstType burst_type = BurstType.BURSTTYPE_NONE;
 	// for BURSTTYPE_EXPO:
 	private final static int max_expo_bracketing_n_images = 5; // could be more, but limit to 5 for now
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
+	// for BURSTTYPE_FOCUS:
+	private int focus_bracketing_n_images = 3;
 	// for BURSTTYPE_NORMAL:
 	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for noise reduction mode
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
@@ -116,8 +112,8 @@ public class CameraController2 extends CameraController {
 	private int n_burst; // number of expected burst images in this capture
 	private boolean burst_single_request; // if n_burst > 1: if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
-	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
-	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
+	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (e.g., when use_expo_fast_burst==false, or for focus bracketing)
+	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using captureBurst())
 	private RawImage pending_raw_image;
 	private ErrorCallback take_picture_error_cb;
 	private boolean want_video_high_speed;
@@ -517,7 +513,7 @@ public class CameraController2 extends CameraController {
 						break;
 					case "flash_red_eye":
 						// not supported for expo bracketing or burst
-						if( CameraController2.this.enable_burst )
+						if( CameraController2.this.burst_type != BurstType.BURSTTYPE_NONE )
 							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 						else
 							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
@@ -897,7 +893,7 @@ public class CameraController2 extends CameraController {
 							/*
 							// code for focus bracketing
 							try {
-								float focus_distance = burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+								float focus_distance = slow_burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
 								if( MyDebug.LOG ) {
 									Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
 								}
@@ -905,7 +901,7 @@ public class CameraController2 extends CameraController {
 								previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
 
 								setRepeatingRequest(previewBuilder.build());
-								//captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								//captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
 							}
 							catch(CameraAccessException e) {
 								if( MyDebug.LOG ) {
@@ -927,7 +923,7 @@ public class CameraController2 extends CameraController {
 										Log.d(TAG, "take picture after delay for next expo");
 									if( camera != null ) { // make sure camera wasn't released in the meantime
 										try {
-											captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+											captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
 										}
 										catch(CameraAccessException e) {
 											if( MyDebug.LOG ) {
@@ -2695,33 +2691,26 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setExpoBracketing(boolean want_expo_bracketing) {
+	public void setBurstType(BurstType burst_type) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setExpoBracketing: " + want_expo_bracketing);
+			Log.d(TAG, "setBurstType: " + burst_type);
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "no camera");
 			return;
 		}
-		if( (enable_burst && burst_type == BurstType.BURSTTYPE_EXPO) == want_expo_bracketing ) {
+		if( this.burst_type == burst_type ) {
 			return;
 		}
 		if( captureSession != null ) {
 			// can only call this when captureSession not created - as it affects how we create the imageReader
 			if( MyDebug.LOG )
-				Log.e(TAG, "can't set expo when captureSession running!");
+				Log.e(TAG, "can't set burst type when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		if( want_expo_bracketing ) {
-			this.enable_burst = true;
-			this.burst_type = BurstType.BURSTTYPE_EXPO;
-		}
-		else {
-			this.enable_burst = false;
-			this.burst_type = BurstType.BURSTTYPE_NONE;
-		}
+		this.burst_type = burst_type;
 		updateUseFakePrecaptureMode(camera_settings.flash_value);
-		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for expo mode
+		camera_settings.setAEMode(previewBuilder, false); // may need to set the ae mode, as flash is disabled for burst modes
 	}
 
 	@Override
@@ -2763,7 +2752,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public boolean isBurstOrExpo() {
 		// not supported for CameraController1
-		return this.enable_burst;
+		return this.burst_type != BurstType.BURSTTYPE_NONE;
 	}
 	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
@@ -2780,36 +2769,6 @@ public class CameraController2 extends CameraController {
 		else {
 			this.optimise_ae_for_dro = optimise_ae_for_dro;
 		}
-	}
-
-	@Override
-	public void setWantBurst(boolean want_burst) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setWantBurst: " + want_burst);
-		if( camera == null ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "no camera");
-			return;
-		}
-		if( (enable_burst && burst_type == BurstType.BURSTTYPE_NORMAL) == want_burst ) {
-			return;
-		}
-		if( captureSession != null ) {
-			// can only call this when captureSession not created - as it affects how we create the imageReader
-			if( MyDebug.LOG )
-				Log.e(TAG, "can't set burst when captureSession running!");
-			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
-		}
-		if( want_burst ) {
-			this.enable_burst = true;
-			this.burst_type = BurstType.BURSTTYPE_NORMAL;
-		}
-		else {
-			this.enable_burst = false;
-			this.burst_type = BurstType.BURSTTYPE_NONE;
-		}
-		updateUseFakePrecaptureMode(camera_settings.flash_value);
-		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for burst mode
 	}
 
 	@Override
@@ -3297,7 +3256,7 @@ public class CameraController2 extends CameraController {
     	if( frontscreen_flash ) {
     		use_fake_precapture_mode = true;
     	}
-    	else if( enable_burst )
+    	else if( burst_type != BurstType.BURSTTYPE_NONE )
     		use_fake_precapture_mode = true;
     	else {
     		use_fake_precapture_mode = use_fake_precapture;
@@ -4401,11 +4360,11 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "takePictureAfterPrecapture");
 		if( !previewIsVideoMode ) {
 			// special burst modes not supported for photo snapshots when recording video
-			if( enable_burst && burst_type == BurstType.BURSTTYPE_EXPO ) {
-				takePictureBurstExpoBracketing();
+			if( burst_type == BurstType.BURSTTYPE_EXPO || burst_type == BurstType.BURSTTYPE_FOCUS ) {
+				takePictureBurstBracketing();
 				return;
 			}
-			else if( enable_burst && burst_type == BurstType.BURSTTYPE_NORMAL ) {
+			else if( burst_type == BurstType.BURSTTYPE_NORMAL ) {
 				takePictureBurst();
 				return;
 			}
@@ -4507,12 +4466,12 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
-	private void takePictureBurstExpoBracketing() {
+	private void takePictureBurstBracketing() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureBurstExpBracketing");
-		if( MyDebug.LOG && !enable_burst ) {
-			Log.e(TAG, "takePictureBurstExpoBracketing called but enable_burst is false");
-		}
+			Log.d(TAG, "takePictureBurstBracketing");
+		if( burst_type != BurstType.BURSTTYPE_EXPO && burst_type != BurstType.BURSTTYPE_FOCUS ) {
+			Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
+        }
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
@@ -4537,9 +4496,10 @@ public class CameraController2 extends CameraController {
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
-			final boolean is_expo = true; // true for expo, false for focus
+			if( burst_type == BurstType.BURSTTYPE_EXPO ) {
 
-			if( is_expo ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "expo bracketing");
 
 			/*stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
@@ -4562,7 +4522,7 @@ public class CameraController2 extends CameraController {
 
 			Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 			if( iso_range == null ) {
-				Log.e(TAG, "takePictureBurstExpoBracketing called but null iso_range");
+				Log.e(TAG, "takePictureBurstBracketing called but null iso_range");
 			}
 			else {
 				// set ISO
@@ -4666,7 +4626,10 @@ public class CameraController2 extends CameraController {
 			}
 
 			}
-			/*else {
+			else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "focus bracketing");
+
 				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "setting torch for capture");
@@ -4676,43 +4639,20 @@ public class CameraController2 extends CameraController {
 					test_fake_flash_photo++;
 				}
 
-				float base_focus_distance = 2.0f;
-				if( camera_settings.has_af_mode && camera_settings.af_mode == CaptureRequest.CONTROL_AF_MODE_OFF )
-					base_focus_distance = camera_settings.focus_distance;
-				else if( capture_result_has_focus_distance ) {
-					base_focus_distance = capture_result_focus_distance_min;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "capture_result_focus_distance_min: " + capture_result_focus_distance_min);
-						Log.d(TAG, "capture_result_focus_distance_max: " + capture_result_focus_distance_max);
-					}
-				}
+				// focus bracketing is only supported if LENS_INFO_MINIMUM_FOCUS_DISTANCE is non-null
+				//float min_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+				//float max_focus_distance = 0.0f;
 
-				float min_focus_distance = base_focus_distance;
-				Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE); // may be null on some devices
-				if( minimum_focus_distance != null ) {
-					min_focus_distance = minimum_focus_distance;
-				}
-				float max_focus_distance = 0.0f;
-
-
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "min_focus_distance: " + min_focus_distance);
-					Log.d(TAG, "base_focus_distance: " + base_focus_distance);
-				}
-
+				// initial request is at the current focus distance
 				requests.add( stillBuilder.build() );
 
 				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
 
-				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, min_focus_distance);
-				requests.add( stillBuilder.build() );
-
-				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, max_focus_distance);
+				// then focus at infinity
+				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f);
 				stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
 				requests.add( stillBuilder.build() );
-
-				use_expo_fast_burst = false;
-			}*/
+			}
 
 			/*
 			// testing:
@@ -4742,7 +4682,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			modified_from_camera_settings = true;
-			if( use_expo_fast_burst ) {
+			if( use_expo_fast_burst && burst_type == BurstType.BURSTTYPE_EXPO ) { // alway use slow burst for focus bracketing
 				if( MyDebug.LOG )
 					Log.d(TAG, "using fast burst");
 				int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
@@ -4778,9 +4718,9 @@ public class CameraController2 extends CameraController {
 	private void takePictureBurst() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurst");
-		if( MyDebug.LOG && !enable_burst ) {
-			Log.e(TAG, "takePictureBurst called but enable_burst is false");
-		}
+		if( burst_type != BurstType.BURSTTYPE_NORMAL ) {
+			Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
+        }
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
@@ -4976,8 +4916,8 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG ) {
 			if( use_fake_precapture_mode )
 				Log.e(TAG, "shouldn't be doing standard precapture when use_fake_precapture_mode is true!");
-			else if( enable_burst )
-				Log.e(TAG, "shouldn't be doing precapture for want_expo_bracketing/want_burst - should be using fake precapture!");
+			else if( burst_type != BurstType.BURSTTYPE_NONE )
+				Log.e(TAG, "shouldn't be doing precapture for burst - should be using fake precapture!");
 		}
 		try {
 			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again

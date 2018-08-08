@@ -1733,34 +1733,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
-			camera_controller.setExpoBracketing(true);
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_EXPO);
 			camera_controller.setExpoBracketingNImages( applicationInterface.getExpoBracketingNImagesPref() );
 			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
 			// setUseExpoFastBurst called when taking a photo
 		}
-		else {
-			camera_controller.setExpoBracketing(false);
-		}
-
-		if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
+		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
 			if( applicationInterface.getBurstForNoiseReduction() ) {
 				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
-					camera_controller.setWantBurst(true);
+					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
 					camera_controller.setBurstForNoiseReduction(true);
 				}
 				else {
-					camera_controller.setWantBurst(false);
+					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
 				}
 			}
 			else {
-				camera_controller.setWantBurst(true);
+				camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
 				camera_controller.setBurstForNoiseReduction(false);
 				camera_controller.setBurstNImages(applicationInterface.getBurstNImages());
 			}
 		}
 		else {
-			camera_controller.setWantBurst(false);
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
 		}
+
 		if( camera_controller.isBurstOrExpo() ) {
 			// check photo resolution supports burst
 			CameraController.Size current_size = getCurrentPictureSize();

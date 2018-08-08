@@ -722,8 +722,19 @@ public class CameraController1 extends CameraController {
     }
 	
 	@Override
-	public void setWantBurst(boolean want_burst) {
-		// not supported
+	public void setBurstType(BurstType burst_type) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setBurstType: " + burst_type);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
+		if( burst_type != BurstType.BURSTTYPE_NONE && burst_type != BurstType.BURSTTYPE_EXPO ) {
+			Log.e(TAG, "burst type not supported");
+			return;
+		}
+		this.want_expo_bracketing = burst_type == BurstType.BURSTTYPE_EXPO;
 	}
 
 	@Override
@@ -734,21 +745,6 @@ public class CameraController1 extends CameraController {
 	@Override
 	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
 		// not supported
-	}
-
-	@Override
-	public void setExpoBracketing(boolean want_expo_bracketing) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setExpoBracketing: " + want_expo_bracketing);
-		if( camera == null ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "no camera");
-			return;
-		}
-		if( this.want_expo_bracketing == want_expo_bracketing ) {
-			return;
-		}
-		this.want_expo_bracketing = want_expo_bracketing;
 	}
 
 	@Override
