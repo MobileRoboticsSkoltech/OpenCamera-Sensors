@@ -3198,6 +3198,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		return preview.supportsExpoBracketing();
     }
 
+    public boolean supportsFocusBracketing() {
+		return preview.supportsFocusBracketing();
+    }
+
     public boolean supportsFastBurst() {
 		// require 512MB just to be safe, due to the large number of images that may be created
 		return( preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() );
@@ -3417,6 +3421,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
 			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);

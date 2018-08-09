@@ -1016,13 +1016,14 @@ public class DrawPreview {
 				}
 			}
 
-			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
+			// RAW not enabled in HDR, ExpoBracketing or FocusBracketing modes (see note in CameraController.takePictureBurstBracketing())
 			// RAW not enabled in NR mode (see note in CameraController.takePictureBurst())
 			if(
 					is_raw_pref &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
 					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing &&
+					photoMode != MyApplicationInterface.PhotoMode.FocusBracketing &&
 					photoMode != MyApplicationInterface.PhotoMode.NoiseReduction ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
@@ -1078,6 +1079,7 @@ public class DrawPreview {
 					photoMode == MyApplicationInterface.PhotoMode.DRO ||
 					photoMode == MyApplicationInterface.PhotoMode.HDR ||
 					photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
+					photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
 					photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
 					photoMode == MyApplicationInterface.PhotoMode.NoiseReduction
 					) &&
@@ -1091,6 +1093,7 @@ public class DrawPreview {
 				Bitmap bitmap = photoMode == MyApplicationInterface.PhotoMode.DRO ? dro_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
+						photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? expo_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
 								null;

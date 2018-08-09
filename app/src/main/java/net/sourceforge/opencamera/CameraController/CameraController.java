@@ -78,10 +78,11 @@ public abstract class CameraController {
 		public boolean can_disable_shutter_sound;
 		public int tonemap_max_curve_points;
 		public boolean supports_tonemap_curve;
-		public boolean supports_expo_bracketing;
+		public boolean supports_expo_bracketing; // whether setBurstTye(BURSTTYPE_EXPO) can be used
 		public int max_expo_bracketing_n_images;
+		public boolean supports_focus_bracketing; // whether setBurstTye(BURSTTYPE_FOCUS) can be used
+		public boolean supports_burst; // whether setBurstTye(BURSTTYPE_NORMAL) can be used
 		public boolean supports_raw;
-		public boolean supports_burst; // whether setWantBurst() can be set to true
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
 		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
 

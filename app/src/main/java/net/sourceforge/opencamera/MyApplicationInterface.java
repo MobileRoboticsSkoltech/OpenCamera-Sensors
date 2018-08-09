@@ -58,6 +58,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		DRO, // single image "fake" HDR
     	HDR, // HDR created from multiple (expo bracketing) images
     	ExpoBracketing, // take multiple expo bracketed images, without combining to a single image
+		FocusBracketing, // take multiple focus bracketed images, without combining to a single image
 		FastBurst,
 		NoiseReduction
     }
@@ -291,6 +292,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public String getFocusPref(boolean is_video) {
+		if( getPhotoMode() == PhotoMode.FocusBracketing && !main_activity.getPreview().isVideo() ) {
+			// alway run in manual focus mode for focus bracketing
+			return "focus_mode_manual2";
+		}
 		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
@@ -1021,6 +1026,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     @Override
+	public boolean isFocusBracketingPref() {
+    	PhotoMode photo_mode = getPhotoMode();
+		return photo_mode == PhotoMode.FocusBracketing;
+	}
+
+    @Override
     public boolean isCameraBurstPref() {
     	PhotoMode photo_mode = getPhotoMode();
 		return photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.NoiseReduction;
@@ -1122,6 +1133,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean expo_bracketing = photo_mode_pref.equals("preference_photo_mode_expo_bracketing");
 		if( expo_bracketing && main_activity.supportsExpoBracketing() )
 			return PhotoMode.ExpoBracketing;
+		boolean focus_bracketing = photo_mode_pref.equals("preference_photo_mode_focus_bracketing");
+		if( focus_bracketing && main_activity.supportsFocusBracketing() )
+			return PhotoMode.FocusBracketing;
 		boolean fast_burst = photo_mode_pref.equals("preference_photo_mode_fast_burst");
 		if( fast_burst && main_activity.supportsFastBurst() )
 			return PhotoMode.FastBurst;
@@ -2317,7 +2331,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( main_activity.getPreview().isVideo() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "snapshop mode");
+				Log.d(TAG, "snapshot mode");
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}
@@ -2332,8 +2346,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		else {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "exposure bracketing mode mode");
-				if( photo_mode != PhotoMode.ExpoBracketing )
+				Log.d(TAG, "exposure/focus bracketing mode mode");
+				if( photo_mode != PhotoMode.ExpoBracketing && photo_mode != PhotoMode.FocusBracketing )
 					Log.e(TAG, "onBurstPictureTaken called with unexpected photo mode?!: " + photo_mode);
 			}
 			

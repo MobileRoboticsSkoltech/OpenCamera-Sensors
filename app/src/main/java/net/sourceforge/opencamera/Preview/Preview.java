@@ -223,8 +223,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private float exposure_step;
 	private boolean supports_expo_bracketing;
 	private int max_expo_bracketing_n_images;
-	private boolean supports_raw;
+	private boolean supports_focus_bracketing;
 	private boolean supports_burst;
+	private boolean supports_raw;
 	private float view_angle_x;
 	private float view_angle_y;
 
@@ -1294,8 +1295,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		exposure_step = 0.0f;
 		supports_expo_bracketing = false;
 		max_expo_bracketing_n_images = 0;
-		supports_raw = false;
+		supports_focus_bracketing = false;
 		supports_burst = false;
+		supports_raw = false;
 		view_angle_x = 55.0f; // set a sensible default
 		view_angle_y = 43.0f; // set a sensible default
 		sizes = null;
@@ -1738,6 +1740,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
 			// setUseExpoFastBurst called when taking a photo
 		}
+		else if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() ) {
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_FOCUS);
+		}
 		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
 			if( applicationInterface.getBurstForNoiseReduction() ) {
 				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
@@ -1939,8 +1944,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.exposure_step = camera_features.exposure_step;
 			this.supports_expo_bracketing = camera_features.supports_expo_bracketing;
 			this.max_expo_bracketing_n_images = camera_features.max_expo_bracketing_n_images;
-			this.supports_raw = camera_features.supports_raw;
+			this.supports_focus_bracketing = camera_features.supports_focus_bracketing;
 			this.supports_burst = camera_features.supports_burst;
+			this.supports_raw = camera_features.supports_raw;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
 			this.supports_video_high_speed = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
@@ -6291,12 +6297,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.max_expo_bracketing_n_images;
     }
 
-    public boolean supportsRaw() {
-    	return this.supports_raw;
+    public boolean supportsFocusBracketing() {
+    	return this.supports_focus_bracketing;
     }
 
     public boolean supportsBurst() {
     	return this.supports_burst;
+    }
+
+    public boolean supportsRaw() {
+    	return this.supports_raw;
     }
 
 	/** Returns the horizontal angle of view in degrees (when unzoomed).

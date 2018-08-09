@@ -135,6 +135,10 @@ public class PopupView extends LinearLayout {
     	else {
         	// make a copy of getSupportedFocusValues() so we can modify it
     		List<String> supported_focus_values = preview.getSupportedFocusValues();
+    		if( !preview.isVideo() && main_activity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+	            // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
+    			supported_focus_values = null;
+			}
     		if( supported_focus_values != null ) {
             	supported_focus_values = new ArrayList<>(supported_focus_values);
             	// only show appropriate continuous focus mode
@@ -174,6 +178,10 @@ public class PopupView extends LinearLayout {
     		if( main_activity.supportsExpoBracketing() ) {
     			photo_modes.add( getResources().getString(R.string.photo_mode_expo_bracketing) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.ExpoBracketing );
+    		}
+    		if( main_activity.supportsFocusBracketing() ) {
+    			photo_modes.add( getResources().getString(R.string.photo_mode_focus_bracketing) );
+    			photo_mode_values.add( MyApplicationInterface.PhotoMode.FocusBracketing );
     		}
     		if( main_activity.supportsFastBurst() ) {
 				photo_modes.add(getResources().getString(R.string.photo_mode_fast_burst));
@@ -230,6 +238,8 @@ public class PopupView extends LinearLayout {
     							toast_message = getResources().getString(R.string.photo_mode_standard_full);
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
     							toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing )
+    							toast_message = getResources().getString(R.string.photo_mode_focus_bracketing_full);
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst )
     							toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction )
@@ -247,6 +257,9 @@ public class PopupView extends LinearLayout {
 							}
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
         						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+    						}
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
     						}
 							else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
 								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");

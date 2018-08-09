@@ -96,10 +96,11 @@ public interface ApplicationInterface {
 	boolean isExpoBracketingPref(); // whether to enable burst photos with expo bracketing
     int getExpoBracketingNImagesPref(); // how many images to take for exposure bracketing
     double getExpoBracketingStopsPref(); // stops per image for exposure bracketing
-	boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
+	boolean isFocusBracketingPref(); // whether to enable burst photos with focus bracketing
 	boolean isCameraBurstPref(); // whether to shoot the camera in burst mode (n.b., not the same as the "auto-repeat" mode)
 	int getBurstNImages(); // only relevant if isCameraBurstPref() returns true; see CameraController doc for setBurstNImages().
 	boolean getBurstForNoiseReduction(); // only relevant if isCameraBurstPref() returns true; see CameraController doc for setBurstForNoiseReduction().
+	boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
 	enum RawPref {
 		RAWPREF_JPEG_ONLY, // JPEG only
 		RAWPREF_JPEG_DNG // JPEG and RAW (DNG)
