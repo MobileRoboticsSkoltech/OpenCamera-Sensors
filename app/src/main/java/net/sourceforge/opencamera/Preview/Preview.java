@@ -3613,15 +3613,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 	
-	public void setFocusDistance(float new_focus_distance) {
-		if( MyDebug.LOG )
+	public void setFocusDistance(float new_focus_distance, boolean is_target_distance) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "setFocusDistance: " + new_focus_distance);
+			Log.d(TAG, "is_target_distance: " + is_target_distance);
+		}
 		if( camera_controller != null ) {
 			if( new_focus_distance < 0.0f )
 				new_focus_distance = 0.0f;
 			else if( new_focus_distance > minimum_focus_distance )
 				new_focus_distance = minimum_focus_distance;
-			if( camera_controller.setFocusDistance(new_focus_distance) ) {
+			if( is_target_distance ) {
+				camera_controller.setFocusBracketingTargetDistance(new_focus_distance);
+			}
+			else if( camera_controller.setFocusDistance(new_focus_distance) ) {
 				// now save
 				applicationInterface.setFocusDistancePref(new_focus_distance);
 				{

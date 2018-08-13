@@ -110,7 +110,20 @@
         android:visibility="gone"
         android:background="@color/seekbar_background"
         />
-    
+
+    <SeekBar
+        android:id="@+id/focus_bracketing_target_seekbar"
+        android:contentDescription="@string/focus_bracketing_target_distance"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:visibility="gone"
+        android:background="@color/seekbar_background"
+        />
+
     <Button
         android:id="@+id/gui_anchor"
         android:layout_width="0dp"

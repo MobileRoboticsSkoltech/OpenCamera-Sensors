@@ -101,6 +101,10 @@ public class MainUI {
 			seekBar.setProgressTintList(progress_color);
 			seekBar.setThumbTintList(thumb_color);
 
+			seekBar = main_activity.findViewById(R.id.focus_bracketing_target_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
 			seekBar = main_activity.findViewById(R.id.exposure_seekbar);
 			seekBar.setProgressTintList(progress_color);
 			seekBar.setThumbTintList(thumb_color);
@@ -385,6 +389,16 @@ public class MainUI {
 			layoutParams.addRule(right_of, 0);
 			layoutParams.addRule(align_parent_top, 0);
 			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+
+			view = main_activity.findViewById(R.id.focus_bracketing_target_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, R.id.preview);
+			layoutParams.addRule(align_right, 0);
+			layoutParams.addRule(left_of, R.id.zoom_seekbar);
+			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(above, R.id.focus_seekbar);
+			layoutParams.addRule(below, 0);
 			view.setLayoutParams(layoutParams);
 		}
 
@@ -1203,9 +1217,9 @@ public class MainUI {
 						}
 						else if (main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2")) {
 							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP)
-								main_activity.changeFocusDistance(-1);
+								main_activity.changeFocusDistance(-1, false);
 							else
-								main_activity.changeFocusDistance(1);
+								main_activity.changeFocusDistance(1, false);
 						}
 						else {
 							// important not to repeatedly request focus, even though main_activity.getPreview().requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)

@@ -571,6 +571,8 @@
     <string name="photo_mode_focus_bracketing">Focus {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_focus_bracketing_full">Focus Bracketing</string>
 
+    <string name="focus_bracketing_target_distance">Focus bracketing target distance</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

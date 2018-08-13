@@ -3259,6 +3259,13 @@ public class CameraController2 extends CameraController {
     	return true;
 	}
 
+	@Override
+	public void setFocusBracketingTargetDistance(float focus_bracketing_target_distance) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusBracketingTargetDistance: " + focus_bracketing_target_distance);
+		this.focus_bracketing_target_distance = focus_bracketing_target_distance;
+	}
+
 	/** Decides whether we should be using fake precapture mode.
 	 */
 	private void updateUseFakePrecaptureMode(String flash_value) {
