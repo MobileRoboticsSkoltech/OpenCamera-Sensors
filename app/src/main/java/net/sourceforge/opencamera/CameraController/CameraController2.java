@@ -3260,6 +3260,13 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void setFocusBracketingNImages(int n_images) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusBracketingNImages: " + n_images);
+		this.focus_bracketing_n_images = n_images;
+	}
+
+	@Override
 	public void setFocusBracketingTargetDistance(float focus_bracketing_target_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusBracketingTargetDistance: " + focus_bracketing_target_distance);

@@ -3435,6 +3435,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
+				int n_images = applicationInterface.getFocusBracketingNImagesPref();
+				photo_mode_string += " (" + n_images + ")";
 			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);

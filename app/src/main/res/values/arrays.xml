@@ -583,6 +583,30 @@
         <item>15</item>
         <item>20</item>
     </string-array>
+    <string-array name="preference_focus_bracketing_n_images_entries">
+        <item>@string/preference_focus_bracketing_n_images_entries_2</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_3</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_4</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_5</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_6</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_8</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_10</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_12</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_15</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_20</item>
+    </string-array>
+    <string-array name="preference_focus_bracketing_n_images_values">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
     <string-array name="flash_icons">
         <item>drawable/flash_off</item>
         <item>drawable/flash_auto</item>

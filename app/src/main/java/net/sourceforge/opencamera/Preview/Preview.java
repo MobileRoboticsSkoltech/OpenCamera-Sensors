@@ -1742,6 +1742,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		else if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() ) {
 			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_FOCUS);
+			camera_controller.setFocusBracketingNImages( applicationInterface.getFocusBracketingNImagesPref() );
 		}
 		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
 			if( applicationInterface.getBurstForNoiseReduction() ) {
@@ -6248,7 +6249,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumExposureTime");
 		long max = max_exposure_time;
-		if( applicationInterface.isExpoBracketingPref() || applicationInterface.isCameraBurstPref() ) {
+		if( applicationInterface.isExpoBracketingPref() || applicationInterface.isFocusBracketingPref() || applicationInterface.isCameraBurstPref() ) {
 			// doesn't make sense to allow exposure times more than 0.5s in these modes
 			max = Math.min(max_exposure_time, 1000000000L/2);
 		}

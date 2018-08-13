@@ -940,6 +940,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 				n_raw = 0;
 				n_jpegs = this.getExpoBracketingNImagesPref();
 			}
+			else if( main_activity.getPreview().supportsFocusBracketing() && this.isFocusBracketingPref() ) {
+				n_raw = 0;
+				n_jpegs = this.getFocusBracketingNImagesPref();
+			}
 			else if( main_activity.getPreview().supportsBurst() && this.isCameraBurstPref() ) {
 				n_raw = 0;
 				if( this.getBurstForNoiseReduction() ) {
@@ -1114,6 +1118,25 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "n_stops = " + n_stops);
 		return n_stops;
     }
+
+    @Override
+	public int getFocusBracketingNImagesPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getFocusBracketingNImagesPref");
+		int n_images;
+		String n_images_s = sharedPreferences.getString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "3");
+		try {
+			n_images = Integer.parseInt(n_images_s);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "n_images_s invalid format: " + n_images_s);
+			n_images = 3;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_images = " + n_images);
+		return n_images;
+	}
 
 	/** Returns the current photo mode.
 	 *  Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
