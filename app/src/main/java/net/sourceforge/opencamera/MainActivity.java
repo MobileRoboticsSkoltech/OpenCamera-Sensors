@@ -3405,10 +3405,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 		}
 		else {
+			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
 			toast_string = getResources().getString(R.string.photo);
 			CameraController.Size current_size = preview.getCurrentPictureSize();
 			toast_string += " " + current_size.width + "x" + current_size.height;
-			if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 ) {
+			if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 && photo_mode != MyApplicationInterface.PhotoMode.FocusBracketing ) {
 				String focus_value = preview.getCurrentFocusValue();
 				if( focus_value != null && !focus_value.equals("focus_mode_auto") && !focus_value.equals("focus_mode_continuous_picture") ) {
 					String focus_entry = preview.findFocusEntryForValue(focus_value);
@@ -3423,7 +3424,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				simple = false;
 			}
 			String photo_mode_string = null;
-			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
 			if( photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_dro);
 			}
