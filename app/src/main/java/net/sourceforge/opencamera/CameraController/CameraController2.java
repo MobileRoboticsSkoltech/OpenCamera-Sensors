@@ -866,6 +866,24 @@ public class CameraController2 extends CameraController {
 						cb.onBurstPictureTaken(images);
 						pending_burst_images.clear();
 						cb.onCompleted();
+
+						if( burst_type == BurstType.BURSTTYPE_FOCUS ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "focus bracketing complete, reset manual focus");
+							camera_settings.setFocusDistance(previewBuilder);
+							try {
+								setRepeatingRequest();
+							}
+							catch(CameraAccessException e) {
+								if( MyDebug.LOG ) {
+									Log.e(TAG, "failed to set focus distance");
+									Log.e(TAG, "reason: " + e.getReason());
+									Log.e(TAG, "message: " + e.getMessage());
+								}
+								e.printStackTrace();
+							}
+						}
+
 					}
 					else {
 						if( MyDebug.LOG )
