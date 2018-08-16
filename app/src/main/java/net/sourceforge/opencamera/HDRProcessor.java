@@ -2537,21 +2537,9 @@ public class HDRProcessor {
 		ScriptC_avg_brighten avgBrightenScript = new ScriptC_avg_brighten(rs);
 		avgBrightenScript.set_bitmap(input);
 		float black_level = 0.0f;
-		// need to do this for ISO >= 400 to help: testAvg31
-		//if( iso >= 700 ) {
-		if( iso >= 400 ) {
-			black_level = 4.0f;
-		}
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "black_level: " + black_level);
-		}
-		//if( iso <= 200 )
-		if( iso <= 700 )
 		{
 			// quick and dirty dehaze algorithm
-			// helps (among others): testAvg27, testAvg30, testAvg31, testAvg39, testAvg40
-			// we don't do for "dark" images, as this can cause problems due to exaggerating noise (e.g.,
-			// see testAvg38)
+			// helps (among others): testAvg1 to testAvg10, testAvg27, testAvg30, testAvg31, testAvg39, testAvg40
 			int total = histogramInfo.total;
 			int percentile = (int)(total*0.001f);
 			int count = 0;
@@ -2563,7 +2551,9 @@ public class HDRProcessor {
 				}
 			}
 			black_level = Math.max(black_level, darkest_brightness);
-			black_level = Math.min(black_level, 18);
+			// don't allow black_level too high for "dark" images, as this can cause problems due to exaggerating noise (e.g.,
+			// see testAvg38)
+			black_level = Math.min(black_level, iso <= 700 ? 18 : 4);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "percentile: " + percentile);
 				Log.d(TAG, "darkest_brightness: " + darkest_brightness);
