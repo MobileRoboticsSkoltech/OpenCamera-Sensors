@@ -8326,6 +8326,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
 
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
+
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
+
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		editor.apply();
 		updateForSettings();

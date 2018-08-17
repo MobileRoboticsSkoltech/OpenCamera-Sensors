@@ -425,7 +425,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// at 100% quality for post-processing, the final image will then be saved at the user requested
 		// setting
 		PhotoMode photo_mode = getPhotoMode();
-		if( photo_mode == PhotoMode.DRO )
+		if( main_activity.getPreview().isVideo() )
+			; // for video photo snapshot mode, the photo modes for 100% quality won't be enabled
+		else if( photo_mode == PhotoMode.DRO )
 			return 100;
 		else if( photo_mode == PhotoMode.HDR )
 			return 100;
