@@ -936,7 +936,8 @@ public class ImageSaver extends Thread {
 				try {
 					long time_s = System.currentTimeMillis();
 					// initialise allocation from first two bitmaps
-					int inSampleSize = hdrProcessor.getAvgSampleSize();
+					//int inSampleSize = hdrProcessor.getAvgSampleSize(request.jpeg_images.size());
+					int inSampleSize = hdrProcessor.getAvgSampleSize(request.iso);
 					//final boolean use_smp = false;
 					final boolean use_smp = true;
 					// n_smp_images is how many bitmaps to decompress at once if use_smp==true. Beware of setting too high -

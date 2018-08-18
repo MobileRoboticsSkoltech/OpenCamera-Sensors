@@ -1021,14 +1021,24 @@ public class HDRProcessor {
 		}
 	}
 
+	private int cached_avg_sample_size = 1;
+
 	/** As part of the noise reduction process, the caller should scale the input images down by the factor returned
 	 *  by this method. This both provides a spatial smoothing, as well as improving performance and memory usage.
-	 *  The bitmap returned by avgBrighten() will automatically be scaled up again by this factor.
 	 */
+	public int getAvgSampleSize(int capture_result_iso) {
+		// If changing this, may also want to change the radius of the spatial filter in avg_brighten.rs ?
+		//this.cached_avg_sample_size = (n_images>=8) ? 2 : 1;
+		this.cached_avg_sample_size = (capture_result_iso >= 1100) ? 2 : 1;
+		//this.cached_avg_sample_size = 1;
+		//this.cached_avg_sample_size = 2;
+		if( MyDebug.LOG )
+			Log.d(TAG, "getAvgSampleSize: " + cached_avg_sample_size);
+		return cached_avg_sample_size;
+	}
+
 	public int getAvgSampleSize() {
-		// If changing this, may also want to change the radius of the spatial filter in avg_brighten.rs
-		return 1;
-		//return 2;
+		return cached_avg_sample_size;
 	}
 
 	public class AvgData {
@@ -1222,7 +1232,11 @@ public class HDRProcessor {
 			//final boolean scale_align = false;
 			final boolean scale_align = true;
 			//final int scale_align_size = 2;
-			final int scale_align_size = 4;
+			//final int scale_align_size = 4;
+			//final int scale_align_size = Math.max(4 / this.cached_avg_sample_size, 1);
+			final int scale_align_size = Math.max(4 / this.getAvgSampleSize(iso), 1);
+			if( MyDebug.LOG )
+				Log.d(TAG, "scale_align_size: " + scale_align_size);
 			boolean crop_to_centre = true;
 			if( scale_align ) {
 			    // use scaled down bitmaps for alignment
@@ -2660,7 +2674,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 
-		int sample_size = getAvgSampleSize();
+		/*int sample_size = getAvgSampleSize();
 		if( MyDebug.LOG )
 			Log.d(TAG, "sample_size: " + sample_size);
 		if( sample_size > 1 ) {
@@ -2669,7 +2683,7 @@ public class HDRProcessor {
 			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
 			bitmap.recycle();
 			bitmap = new_bitmap;
-		}
+		}*/
 
 		freeScripts();
 		if( MyDebug.LOG )

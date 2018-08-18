@@ -10667,7 +10667,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap nr_bitmap;
 		try {
 			// initialise allocation from first two bitmaps
-			int inSampleSize = mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize();
+			//int inSampleSize = mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize(inputs.size());
+			int inSampleSize = mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize(iso);
 			Bitmap bitmap0 = getBitmapFromFile(inputs.get(0), inSampleSize);
 			Bitmap bitmap1 = getBitmapFromFile(inputs.get(1), inSampleSize);
 			int width = bitmap0.getWidth();
@@ -10772,8 +10773,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 1, 0};
 					//int [] exp_offsets_x = {0, 7, 0};
 					//int [] exp_offsets_y = {0, -1, 0};
+					//int [] exp_offsets_x = {0, 8, 0};
+					//int [] exp_offsets_y = {0, -4, 0};
 					int [] exp_offsets_x = {0, 8, 0};
-					int [] exp_offsets_y = {0, -4, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
@@ -11180,7 +11183,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 2, 0};
 					//int [] exp_offsets_x = {0, -4, 0};
 					//int [] exp_offsets_y = {0, 0, 0};
-					int [] exp_offsets_x = {0, 0, 0};
+					//int [] exp_offsets_x = {0, 0, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, -4, 0};
 					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
@@ -11226,7 +11231,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 4, 26, 92);
 		//checkHistogramDetails(hdrHistogramDetails, 3, 19, 68);
 		//checkHistogramDetails(hdrHistogramDetails, 0, 10, 60);
-		checkHistogramDetails(hdrHistogramDetails, 1, 8, 72);
+		//checkHistogramDetails(hdrHistogramDetails, 1, 8, 72);
+		checkHistogramDetails(hdrHistogramDetails, 1, 6, 64);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg9".
