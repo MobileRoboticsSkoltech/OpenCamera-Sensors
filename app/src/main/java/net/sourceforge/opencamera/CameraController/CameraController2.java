@@ -4702,20 +4702,6 @@ public class CameraController2 extends CameraController {
 					test_fake_flash_photo++;
 				}
 
-				// focus bracketing is only supported if LENS_INFO_MINIMUM_FOCUS_DISTANCE is non-null
-				//float min_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
-				//float max_focus_distance = 0.0f;
-
-				// initial request is at the current focus distance
-				/*requests.add( stillBuilder.build() );
-
-				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-
-				// then focus at infinity
-				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f);
-				stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
-				requests.add( stillBuilder.build() );*/
-
 				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF); // just in case
 
 				if( Math.abs(camera_settings.focus_distance - focus_bracketing_source_distance) < 1.0e-5 ) {
@@ -4732,7 +4718,6 @@ public class CameraController2 extends CameraController {
 
 				float focus_distance_s = focus_bracketing_source_distance;
 				float focus_distance_e = focus_bracketing_target_distance;
-				// API should limit the focus distances to less than infinity in focus bracketing mode, but just in case:
 				final float max_focus_bracket_distance_c = 0.1f; // 10m
 				focus_distance_s = Math.max(focus_distance_s, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
 				focus_distance_e = Math.max(focus_distance_e, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
@@ -4748,20 +4733,35 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "real_focus_distance_e: " + real_focus_distance_e);
 				}
 				for(int i=0;i<focus_bracketing_n_images;i++) {
-					float alpha = ((float)i)/(focus_bracketing_n_images-1.0f);
-					float real_distance = (1.0f-alpha)*real_focus_distance_s + alpha*real_focus_distance_e;
-					float distance = 1.0f/real_distance;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "i: " + i);
+					}
+					// for first and last, we still use the real focus distances; for intermediate values, we interpolate
+					// with first/last clamped to max of 10m (to avoid taking reciprocal of 0)
+					float distance;
+					if( i == 0 ) {
+						distance = focus_bracketing_source_distance;
+					}
+					else if( i == focus_bracketing_n_images-1 ) {
+						distance = focus_bracketing_target_distance;
+					}
+					else {
+						float alpha = ((float)i)/(focus_bracketing_n_images-1.0f);
+						float real_distance = (1.0f-alpha)*real_focus_distance_s + alpha*real_focus_distance_e;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "    alpha: " + alpha);
+							Log.d(TAG, "    real_distance: " + real_distance);
+						}
+						distance = 1.0f/real_distance;
+					}
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "    distance: " + distance);
+					}
 					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, distance);
 					if( i == focus_bracketing_n_images-1 ) {
 						stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
 					}
 					requests.add( stillBuilder.build() );
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "i: " + i);
-						Log.d(TAG, "    alpha: " + alpha);
-						Log.d(TAG, "    real_distance: " + real_distance);
-						Log.d(TAG, "    distance: " + distance);
-					}
 				}
 			}
 
