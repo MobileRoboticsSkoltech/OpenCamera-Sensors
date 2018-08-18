@@ -3675,7 +3675,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					else {
 						focus_distance_s = getResources().getString(R.string.infinite);
 					}
-		    		showToast(seekbar_toast, getResources().getString(is_target_distance ? R.string.focus_bracketing_target_distance : R.string.focus_distance) + " " + focus_distance_s);
+					int id = R.string.focus_distance;
+					if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() )
+						id = is_target_distance ? R.string.focus_bracketing_target_distance : R.string.focus_bracketing_source_distance;
+		    		showToast(seekbar_toast, getResources().getString(id) + " " + focus_distance_s);
 				}
 			}
 		}

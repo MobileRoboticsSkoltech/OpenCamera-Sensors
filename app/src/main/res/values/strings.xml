@@ -583,6 +583,7 @@
     <string name="photo_mode_focus_bracketing">Focus {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_focus_bracketing_full">Focus Bracketing</string>
 
+    <string name="focus_bracketing_source_distance">Focus bracketing source distance</string>
     <string name="focus_bracketing_target_distance">Focus bracketing target distance</string>
 
     <string name="focus_bracketing_add_infinity">Add infinite distance</string>
