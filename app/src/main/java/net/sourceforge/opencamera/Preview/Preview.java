@@ -3628,8 +3628,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 	
-	private final Handler focus_bracketing_handler = new Handler(); // used to set focus distance back to source, after temporarily showing the target
-
 	public void setFocusDistance(float new_focus_distance, boolean is_target_distance) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setFocusDistance: " + new_focus_distance);
@@ -3645,18 +3643,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				focus_changed = true;
 				camera_controller.setFocusBracketingTargetDistance(new_focus_distance);
 				// also set the focus distance, so the user can see what the target distance looks like
-				final float saved_focus_distance = camera_controller.getFocusBracketingSourceDistance();
 				camera_controller.setFocusDistance(new_focus_distance);
-				// but now set to revert back to the source
-				focus_bracketing_handler.removeCallbacksAndMessages(null); // remove any previous postDelayed (so we don't keep switching back when moving the target distance slider)
-				focus_bracketing_handler.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						if( MyDebug.LOG )
-							Log.d(TAG, "set manual focus distance back to start");
-						camera_controller.setFocusDistance(saved_focus_distance);
-					}
-				}, 100);
 			}
 			else if( camera_controller.setFocusDistance(new_focus_distance) ) {
 				focus_changed = true;
@@ -3681,6 +3668,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    		showToast(seekbar_toast, getResources().getString(id) + " " + focus_distance_s);
 				}
 			}
+		}
+	}
+
+	public void stoppedSettingFocusDistance(boolean is_target_distance) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "stoppedSettingFocusDistance");
+			Log.d(TAG, "is_target_distance: " + is_target_distance);
+		}
+		if( is_target_distance && camera_controller != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set manual focus distance back to start");
+			camera_controller.setFocusDistance( camera_controller.getFocusBracketingSourceDistance() );
 		}
 	}
 	

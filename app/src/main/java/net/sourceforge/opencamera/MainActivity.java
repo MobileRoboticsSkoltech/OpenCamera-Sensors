@@ -3143,6 +3143,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
+				preview.stoppedSettingFocusDistance(is_target_distance);
 			}
 		});
 		boolean is_visible = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2");
