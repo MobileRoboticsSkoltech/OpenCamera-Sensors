@@ -221,77 +221,7 @@ public class PopupView extends LinearLayout {
         				if( MyDebug.LOG )
         					Log.d(TAG, "clicked photo mode: " + option);
 
-        				int option_id = -1;
-        				for(int i=0;i<photo_modes.size() && option_id==-1;i++) {
-        					if( option.equals( photo_modes.get(i) ) )
-        						option_id = i;
-        				}
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "mode id: " + option_id);
-        				if( option_id == -1 ) {
-            				if( MyDebug.LOG )
-            					Log.e(TAG, "unknown mode id: " + option_id);
-        				}
-        				else {
-    						MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
-    						String toast_message = option;
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard )
-    							toast_message = getResources().getString(R.string.photo_mode_standard_full);
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
-    							toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing )
-    							toast_message = getResources().getString(R.string.photo_mode_focus_bracketing_full);
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst )
-    							toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction )
-    							toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
-    	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    						SharedPreferences.Editor editor = sharedPreferences.edit();
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
-        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
-    						}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
-								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
-							}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
-							}
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
-        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
-    						}
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
-    						}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
-								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
-							}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
-							}
-    						else {
-                				if( MyDebug.LOG )
-                					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
-    						}
-    						editor.apply();
-
-    						boolean done_dialog = false;
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.HDRInfoPreferenceKey);
-    	            			if( !done_hdr_info ) {
-    	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.HDRInfoPreferenceKey);
-    		        	    		done_dialog = true;
-    	            			}
-    	                    }
-
-    	            		if( done_dialog ) {
-    	            			// no need to show toast
-    	            			toast_message = null;
-    	            		}
-
-							main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the photomode
-    	    				main_activity.updateForSettings(toast_message);
-		    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-        				}
+        				changePhotoMode(photo_modes, photo_mode_values, option);
         			}
         		});
     		}
@@ -899,7 +829,7 @@ public class PopupView extends LinearLayout {
 						supported_white_balances_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_white_balances_entries, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.WhiteBalancePreferenceKey, CameraController.WHITE_BALANCE_DEFAULT, "TEST_WHITE_BALANCE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_white_balances_entries, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.WhiteBalancePreferenceKey, CameraController.WHITE_BALANCE_DEFAULT, null, "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						switchToWhiteBalance(selected_value);
@@ -917,7 +847,7 @@ public class PopupView extends LinearLayout {
 						supported_scene_modes_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes_entries, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.SceneModePreferenceKey, CameraController.SCENE_MODE_DEFAULT, "TEST_SCENE_MODE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes_entries, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.SceneModePreferenceKey, CameraController.SCENE_MODE_DEFAULT, null, "TEST_SCENE_MODE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						if( preview.getCameraController() != null ) {
@@ -945,7 +875,7 @@ public class PopupView extends LinearLayout {
 						supported_color_effects_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_color_effects_entries, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.ColorEffectPreferenceKey, CameraController.COLOR_EFFECT_DEFAULT, "TEST_COLOR_EFFECT", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_color_effects_entries, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.ColorEffectPreferenceKey, CameraController.COLOR_EFFECT_DEFAULT, null, "TEST_COLOR_EFFECT", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						if( preview.getCameraController() != null ) {
@@ -958,6 +888,84 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
 			}
 
+		}
+	}
+
+	private void changePhotoMode(List<String> photo_modes, List<MyApplicationInterface.PhotoMode> photo_mode_values, String option) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changePhotoMode: " + option);
+
+		final MainActivity main_activity = (MainActivity)this.getContext();
+		int option_id = -1;
+		for(int i=0;i<photo_modes.size() && option_id==-1;i++) {
+			if( option.equals( photo_modes.get(i) ) )
+				option_id = i;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "mode id: " + option_id);
+		if( option_id == -1 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "unknown mode id: " + option_id);
+		}
+		else {
+			MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
+			String toast_message = option;
+			if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard )
+				toast_message = getResources().getString(R.string.photo_mode_standard_full);
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
+				toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing )
+				toast_message = getResources().getString(R.string.photo_mode_focus_bracketing_full);
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst )
+				toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction )
+				toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
+			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
+			}
+			else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
+				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
+			}
+			editor.apply();
+
+			boolean done_dialog = false;
+			if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+				boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.HDRInfoPreferenceKey);
+				if( !done_hdr_info ) {
+					showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.HDRInfoPreferenceKey);
+					done_dialog = true;
+				}
+			}
+
+			if( done_dialog ) {
+				// no need to show toast
+				toast_message = null;
+			}
+
+			main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the photomode
+			main_activity.updateForSettings(toast_message);
+			main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
 		}
 	}
 
@@ -1248,9 +1256,13 @@ public class PopupView extends LinearLayout {
 	 *                                  sharedPreferences, and passed to the listener.
 	 * @param title                     The text to display as a title for this radio group.
 	 * @param preference_key            The preference key to use for the values in the
-	 *                                  sharedPreferences.
+	 *                                  sharedPreferences. May be null, in which case it's up to
+	 *                                  the user to save the new preference via a listener.
 	 * @param default_value             The default value for the preference_key in the
-	 *                                  sharedPreferences.
+	 *                                  sharedPreferences. Only needed if preference_key is
+	 *                                  non-null.
+	 * @param current_option_value      If preference_key is null, this should be the currently
+	 *                                  selected value. Otherwise, this is ignored.
 	 * @param test_key                  Used for testing, a tag to identify the RadioGroup that's
 	 *                                  created.
 	 * @param listener                  If null, selecting an option will call
@@ -1258,7 +1270,7 @@ public class PopupView extends LinearLayout {
 	 *                                  not null, instead selecting an option will call the
 	 *                                  listener.
 	 */
-	private void addRadioOptionsToPopup(final SharedPreferences sharedPreferences, final List<String> supported_options_entries, final List<String> supported_options_values, final String title, final String preference_key, final String default_value, final String test_key, final RadioOptionsListener listener) {
+	private void addRadioOptionsToPopup(final SharedPreferences sharedPreferences, final List<String> supported_options_entries, final List<String> supported_options_values, final String title, final String preference_key, final String default_value, final String current_option_value, final String test_key, final RadioOptionsListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addRadioOptionsToPopup: " + title);
     	if( supported_options_entries != null ) {
@@ -1298,7 +1310,7 @@ public class PopupView extends LinearLayout {
 					}
 					else {
 						if( !created ) {
-							addRadioOptionsToGroup(rg, sharedPreferences, supported_options_entries, supported_options_values, title, preference_key, default_value, test_key, listener);
+							addRadioOptionsToGroup(rg, sharedPreferences, supported_options_entries, supported_options_values, title, preference_key, default_value, current_option_value, test_key, listener);
 							created = true;
 						}
 						rg.setVisibility(View.VISIBLE);
@@ -1339,10 +1351,11 @@ public class PopupView extends LinearLayout {
         }
     }
 
-    private void addRadioOptionsToGroup(final RadioGroup rg, SharedPreferences sharedPreferences, List<String> supported_options_entries, List<String> supported_options_values, final String title, final String preference_key, final String default_value, final String test_key, final RadioOptionsListener listener) {
+    private void addRadioOptionsToGroup(final RadioGroup rg, SharedPreferences sharedPreferences, List<String> supported_options_entries, List<String> supported_options_values, final String title, final String preference_key, final String default_value, String current_option_value, final String test_key, final RadioOptionsListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addRadioOptionsToGroup: " + title);
-		String current_option_value = sharedPreferences.getString(preference_key, default_value);
+		if( preference_key != null )
+			current_option_value = sharedPreferences.getString(preference_key, default_value);
 		final long debug_time = System.nanoTime();
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		int count = 0;
@@ -1387,10 +1400,12 @@ public class PopupView extends LinearLayout {
 						Log.d(TAG, "clicked current_option entry: " + supported_option_entry);
 						Log.d(TAG, "clicked current_option entry: " + supported_option_value);
 					}
-					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(preference_key, supported_option_value);
-					editor.apply();
+					if( preference_key != null ) {
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(preference_key, supported_option_value);
+						editor.apply();
+					}
 
 					if( listener != null ) {
 						listener.onClick(supported_option_value);
