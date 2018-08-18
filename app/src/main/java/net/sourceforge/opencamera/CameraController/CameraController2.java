@@ -97,6 +97,7 @@ public class CameraController2 extends CameraController {
 	private int focus_bracketing_n_images = 3;
 	private float focus_bracketing_source_distance = 0.0f;
 	private float focus_bracketing_target_distance = 0.0f;
+	private boolean focus_bracketing_add_infinity = false;
 	// for BURSTTYPE_NORMAL:
 	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for noise reduction mode
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
@@ -3286,6 +3287,13 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void setFocusBracketingAddInfinity(boolean focus_bracketing_add_infinity) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusBracketingAddInfinity: " + focus_bracketing_add_infinity);
+		this.focus_bracketing_add_infinity = focus_bracketing_add_infinity;
+	}
+
+	@Override
 	public void setFocusBracketingSourceDistance(float focus_bracketing_source_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusBracketingSourceDistance: " + focus_bracketing_source_distance);
@@ -4765,6 +4773,9 @@ public class CameraController2 extends CameraController {
 				}
 
 				List<Float> focus_distances = setupFocusBracketingDistances(focus_bracketing_source_distance, focus_bracketing_target_distance, focus_bracketing_n_images);
+				if( focus_bracketing_add_infinity ) {
+					focus_distances.add(0.0f);
+				}
 				for(int i=0;i<focus_distances.size();i++) {
 					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distances.get(i));
 					if( i == focus_distances.size()-1 ) {

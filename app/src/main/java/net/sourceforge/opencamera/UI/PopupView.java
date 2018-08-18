@@ -41,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
 
@@ -631,6 +632,39 @@ public class PopupView extends LinearLayout {
 						return -1;
 					}
 				});
+
+        		//CheckBox checkBox = new CheckBox(main_activity);
+				Switch checkBox = new Switch(main_activity);
+        		checkBox.setText(getResources().getString(R.string.focus_bracketing_add_infinity));
+				{
+					// align the checkbox a bit better
+	        		checkBox.setGravity(Gravity.RIGHT);
+					LayoutParams params = new LayoutParams(
+							LayoutParams.MATCH_PARENT,
+							LayoutParams.MATCH_PARENT
+					);
+					final int right_padding = (int) (20 * scale + 0.5f); // convert dps to pixels
+					params.setMargins(0, 0, right_padding, 0);
+					checkBox.setLayoutParams(params);
+				}
+
+        		boolean add_infinity = sharedPreferences.getBoolean(PreferenceKeys.FocusBracketingAddInfinityPreferenceKey, false);
+				if( add_infinity )
+	        		checkBox.setChecked(add_infinity);
+        		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean(PreferenceKeys.FocusBracketingAddInfinityPreferenceKey, isChecked);
+						editor.apply();
+						if( preview.getCameraController() != null ) {
+							preview.getCameraController().setFocusBracketingAddInfinity(main_activity.getApplicationInterface().getFocusBracketingAddInfinityPref());
+						}
+					}
+        		});
+
+        		this.addView(checkBox);
 			}
 
 			if( preview.isVideo() ) {

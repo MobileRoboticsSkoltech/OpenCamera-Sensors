@@ -1743,6 +1743,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() ) {
 			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_FOCUS);
 			camera_controller.setFocusBracketingNImages( applicationInterface.getFocusBracketingNImagesPref() );
+			camera_controller.setFocusBracketingAddInfinity( applicationInterface.getFocusBracketingAddInfinityPref() );
 		}
 		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
 			if( applicationInterface.getBurstForNoiseReduction() ) {

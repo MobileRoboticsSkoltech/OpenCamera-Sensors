@@ -418,6 +418,10 @@ public abstract class CameraController {
 	 *  images to take in the focus burst.
 	 */
 	public abstract void setFocusBracketingNImages(int n_images);
+	/** Only relevant if setBurstType() is also called with BURSTTYPE_FOCUS. If set to true, an
+	 *  additional image will be included at infinite distance.
+	 */
+	public abstract void setFocusBracketingAddInfinity(boolean focus_bracketing_add_infinity);
 	/** Only relevant if setBurstType() is also called with BURSTTYPE_FOCUS. Sets the target focus
 	 *  distance for focus bracketing.
 	 */

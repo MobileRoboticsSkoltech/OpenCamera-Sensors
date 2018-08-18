@@ -71,6 +71,8 @@ public class PreferenceKeys {
 
 	public static final String FocusBracketingNImagesPreferenceKey = "preference_focus_bracketing_n_images";
 
+	public static final String FocusBracketingAddInfinityPreferenceKey = "preference_focus_bracketing_add_infinity";
+
 	public static final String VolumeKeysPreferenceKey = "preference_volume_keys";
 
 	public static final String AudioControlPreferenceKey = "preference_audio_control";

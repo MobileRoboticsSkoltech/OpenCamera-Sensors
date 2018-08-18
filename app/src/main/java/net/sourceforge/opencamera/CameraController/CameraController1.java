@@ -1025,6 +1025,11 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public void setFocusBracketingAddInfinity(boolean focus_bracketing_add_infinity) {
+		// not supported for CameraController1
+	}
+
+	@Override
 	public void setFocusBracketingSourceDistance(float focus_bracketing_source_distance) {
 		// not supported for CameraController1!
 	}

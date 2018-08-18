@@ -1147,6 +1147,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return n_images;
 	}
 
+    @Override
+	public boolean getFocusBracketingAddInfinityPref() {
+		return sharedPreferences.getBoolean(PreferenceKeys.FocusBracketingAddInfinityPreferenceKey, false);
+	}
+
 	/** Returns the current photo mode.
 	 *  Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
 	 *  video recording, the caller should override. We don't override here, as this preference may be used to affect how
