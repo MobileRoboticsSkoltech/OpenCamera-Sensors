@@ -4528,6 +4528,54 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
+	public static List<Float> setupFocusBracketingDistances(float source, float target, int count) {
+		List<Float> focus_distances = new ArrayList<>();
+		float focus_distance_s = source;
+		float focus_distance_e = target;
+		final float max_focus_bracket_distance_c = 0.1f; // 10m
+		focus_distance_s = Math.max(focus_distance_s, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
+		focus_distance_e = Math.max(focus_distance_e, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "focus_distance_s: " + focus_distance_s);
+			Log.d(TAG, "focus_distance_e: " + focus_distance_e);
+		}
+		// we want to interpolate linearly in distance, not 1/distance
+		float real_focus_distance_s = 1.0f/focus_distance_s;
+		float real_focus_distance_e = 1.0f/focus_distance_e;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "real_focus_distance_s: " + real_focus_distance_s);
+			Log.d(TAG, "real_focus_distance_e: " + real_focus_distance_e);
+		}
+		for(int i=0;i<count;i++) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "i: " + i);
+			}
+			// for first and last, we still use the real focus distances; for intermediate values, we interpolate
+			// with first/last clamped to max of 10m (to avoid taking reciprocal of 0)
+			float distance;
+			if( i == 0 ) {
+				distance = source;
+			}
+			else if( i == count-1 ) {
+				distance = target;
+			}
+			else {
+				float alpha = ((float)i)/(count-1.0f);
+				float real_distance = (1.0f-alpha)*real_focus_distance_s + alpha*real_focus_distance_e;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "    alpha: " + alpha);
+					Log.d(TAG, "    real_distance: " + real_distance);
+				}
+				distance = 1.0f/real_distance;
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "    distance: " + distance);
+			}
+			focus_distances.add(distance);
+		}
+		return focus_distances;
+	}
+
 	private void takePictureBurstBracketing() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurstBracketing");
@@ -4716,49 +4764,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "current focus matches neither source nor target");
 				}
 
-				float focus_distance_s = focus_bracketing_source_distance;
-				float focus_distance_e = focus_bracketing_target_distance;
-				final float max_focus_bracket_distance_c = 0.1f; // 10m
-				focus_distance_s = Math.max(focus_distance_s, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
-				focus_distance_e = Math.max(focus_distance_e, max_focus_bracket_distance_c); // since we'll dealing with 1/distance, use Math.max
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "focus_distance_s: " + focus_distance_s);
-					Log.d(TAG, "focus_distance_e: " + focus_distance_e);
-				}
-				// we want to interpolate linearly in distance, not 1/distance
-				float real_focus_distance_s = 1.0f/focus_distance_s;
-				float real_focus_distance_e = 1.0f/focus_distance_e;
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "real_focus_distance_s: " + real_focus_distance_s);
-					Log.d(TAG, "real_focus_distance_e: " + real_focus_distance_e);
-				}
-				for(int i=0;i<focus_bracketing_n_images;i++) {
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "i: " + i);
-					}
-					// for first and last, we still use the real focus distances; for intermediate values, we interpolate
-					// with first/last clamped to max of 10m (to avoid taking reciprocal of 0)
-					float distance;
-					if( i == 0 ) {
-						distance = focus_bracketing_source_distance;
-					}
-					else if( i == focus_bracketing_n_images-1 ) {
-						distance = focus_bracketing_target_distance;
-					}
-					else {
-						float alpha = ((float)i)/(focus_bracketing_n_images-1.0f);
-						float real_distance = (1.0f-alpha)*real_focus_distance_s + alpha*real_focus_distance_e;
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "    alpha: " + alpha);
-							Log.d(TAG, "    real_distance: " + real_distance);
-						}
-						distance = 1.0f/real_distance;
-					}
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "    distance: " + distance);
-					}
-					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, distance);
-					if( i == focus_bracketing_n_images-1 ) {
+				List<Float> focus_distances = setupFocusBracketingDistances(focus_bracketing_source_distance, focus_bracketing_target_distance, focus_bracketing_n_images);
+				for(int i=0;i<focus_distances.size();i++) {
+					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distances.get(i));
+					if( i == focus_distances.size()-1 ) {
 						stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
 					}
 					requests.add( stillBuilder.build() );

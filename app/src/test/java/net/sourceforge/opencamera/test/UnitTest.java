@@ -630,4 +630,39 @@ public class UnitTest {
 		assertEquals(1.0f, brighten_factors.gamma, 0.5f);
 
 	}
+
+	@Test
+	public void testFocusBracketingDistances() {
+		Log.d(TAG, "testFocusBracketingDistances");
+
+		List<Float> focus_distances = CameraController2.setupFocusBracketingDistances(1.0f/0.1f, 1.0f/10.0f, 5);
+		assertEquals(5, focus_distances.size());
+		assertEquals(1.0f/0.1f, focus_distances.get(0), 1.0e-5);
+		assertEquals(1.0f/2.575f, focus_distances.get(1), 1.0e-5);
+		assertEquals(1.0f/5.05f, focus_distances.get(2), 1.0e-5);
+		assertEquals(1.0f/7.525f, focus_distances.get(3), 1.0e-5);
+		assertEquals(1.0f/10.0f, focus_distances.get(4), 1.0e-5);
+
+		focus_distances = CameraController2.setupFocusBracketingDistances(1.0f/10.0f, 1.0f/0.1f, 5);
+		assertEquals(5, focus_distances.size());
+		// should be reverse of above
+		assertEquals(1.0f/0.1f, focus_distances.get(4), 1.0e-5);
+		assertEquals(1.0f/2.575f, focus_distances.get(3), 1.0e-5);
+		assertEquals(1.0f/5.05f, focus_distances.get(2), 1.0e-5);
+		assertEquals(1.0f/7.525f, focus_distances.get(1), 1.0e-5);
+		assertEquals(1.0f/10.0f, focus_distances.get(0), 1.0e-5);
+
+		focus_distances = CameraController2.setupFocusBracketingDistances(1.0f/0.1f, 1.0f/15.0f, 3);
+		assertEquals(3, focus_distances.size());
+		assertEquals(1.0f/0.1f, focus_distances.get(0), 1.0e-5);
+		assertEquals(1.0f/5.05f, focus_distances.get(1), 1.0e-5); // not 7.55, as we clamp distances to a max of 10m when averaging
+		assertEquals(1.0f/15.0f, focus_distances.get(2), 1.0e-5);
+
+		focus_distances = CameraController2.setupFocusBracketingDistances(1.0f/15.0f, 1.0f/0.1f, 3);
+		assertEquals(3, focus_distances.size());
+		// should be reverse of above
+		assertEquals(1.0f/0.1f, focus_distances.get(2), 1.0e-5);
+		assertEquals(1.0f/5.05f, focus_distances.get(1), 1.0e-5); // not 7.55, as we clamp distances to a max of 10m when averaging
+		assertEquals(1.0f/15.0f, focus_distances.get(0), 1.0e-5);
+	}
 }
