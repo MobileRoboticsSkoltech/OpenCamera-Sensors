@@ -1040,6 +1040,12 @@ public class CameraController1 extends CameraController {
 		// not supported for CameraController1!
 	}
 
+	@Override
+	public float getFocusBracketingTargetDistance() {
+		// not supported for CameraController1!
+		return 0.0f;
+	}
+
 	private String convertFlashValueToMode(String flash_value) {
 		String flash_mode = "";
 		switch(flash_value) {

@@ -424,6 +424,7 @@ public abstract class CameraController {
 	public abstract void setFocusBracketingSourceDistance(float focus_bracketing_source_distance);
 	public abstract float getFocusBracketingSourceDistance();
 	public abstract void setFocusBracketingTargetDistance(float focus_bracketing_target_distance);
+	public abstract float getFocusBracketingTargetDistance();
 	public abstract void setFlashValue(String flash_value);
 	public abstract String getFlashValue();
 	public abstract void setRecordingHint(boolean hint);
