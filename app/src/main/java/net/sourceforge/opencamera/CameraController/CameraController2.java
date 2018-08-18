@@ -95,7 +95,8 @@ public class CameraController2 extends CameraController {
 	private boolean use_expo_fast_burst = true;
 	// for BURSTTYPE_FOCUS:
 	private int focus_bracketing_n_images = 3;
-	private float focus_bracketing_target_distance = 0.0f; // will bracket from current manual focus distance to this target
+	private float focus_bracketing_source_distance = 0.0f;
+	private float focus_bracketing_target_distance = 0.0f;
 	// for BURSTTYPE_NORMAL:
 	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for noise reduction mode
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
@@ -3285,6 +3286,18 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void setFocusBracketingSourceDistance(float focus_bracketing_source_distance) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusBracketingSourceDistance: " + focus_bracketing_source_distance);
+		this.focus_bracketing_source_distance = focus_bracketing_source_distance;
+	}
+
+	@Override
+	public float getFocusBracketingSourceDistance() {
+		return this.focus_bracketing_source_distance;
+	}
+
+	@Override
 	public void setFocusBracketingTargetDistance(float focus_bracketing_target_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusBracketingTargetDistance: " + focus_bracketing_target_distance);
@@ -4700,7 +4713,19 @@ public class CameraController2 extends CameraController {
 
 				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF); // just in case
 
-				float focus_distance_s = camera_settings.focus_distance_manual;
+				if( Math.abs(camera_settings.focus_distance - focus_bracketing_source_distance) < 1.0e-5 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "current focus matches source");
+				}
+				else if( Math.abs(camera_settings.focus_distance - focus_bracketing_target_distance) < 1.0e-5 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "current focus matches target");
+				}
+				else {
+					Log.d(TAG, "current focus matches neither source nor target");
+				}
+
+				float focus_distance_s = focus_bracketing_source_distance;
 				float focus_distance_e = focus_bracketing_target_distance;
 				// API should limit the focus distances to less than infinity in focus bracketing mode, but just in case:
 				final float max_focus_bracket_distance_c = 0.1f; // 10m

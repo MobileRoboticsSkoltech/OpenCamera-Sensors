@@ -421,6 +421,8 @@ public abstract class CameraController {
 	/** Only relevant if setBurstType() is also called with BURSTTYPE_FOCUS. Sets the target focus
 	 *  distance for focus bracketing.
 	 */
+	public abstract void setFocusBracketingSourceDistance(float focus_bracketing_source_distance);
+	public abstract float getFocusBracketingSourceDistance();
 	public abstract void setFocusBracketingTargetDistance(float focus_bracketing_target_distance);
 	public abstract void setFlashValue(String flash_value);
 	public abstract String getFlashValue();
