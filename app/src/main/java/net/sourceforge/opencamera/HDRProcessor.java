@@ -2395,7 +2395,7 @@ public class HDRProcessor {
 		return new HistogramInfo(total, mean_brightness, median_brightness, max_brightness);
 	}
 
-	private int getBrightnessTarget(int brightness, int max_gain_factor, int ideal_brightness) {
+	private static int getBrightnessTarget(int brightness, int max_gain_factor, int ideal_brightness) {
 		if( brightness <= 0 )
 			brightness = 1;
 		if( MyDebug.LOG ) {
@@ -2406,30 +2406,23 @@ public class HDRProcessor {
 		return Math.max(brightness, median_target); // don't make darker
 	}
 
-	/** Final stage of the noise reduction algorithm.
-	 *  Note that the returned bitmap will be scaled up by the factor returned by getAvgSampleSize().
-	 * @param input         The allocation in floating point format.
-	 * @param width         Width of the input.
-	 * @param height        Height of the input.
-	 * @param iso           ISO used for the original images.
-	 * @return              Resultant bitmap.
-	 */
-	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "avgBrighten");
-			Log.d(TAG, "iso: " + iso);
+	public static class BrightenFactors {
+		public final float gain;
+		public final float low_x;
+		public final float mid_x;
+		public final float gamma;
+
+		BrightenFactors(float gain, float low_x, float mid_x, float gamma) {
+			this.gain = gain;
+			this.low_x = low_x;
+			this.mid_x = mid_x;
+			this.gamma = gamma;
 		}
-        initRenderscript();
+	}
 
-    	long time_s = System.currentTimeMillis();
-
-		int [] histo = computeHistogram(input, false, true);
-		HistogramInfo histogramInfo = getHistogramInfo(histo);
-		int brightness = histogramInfo.median_brightness;
-		int max_brightness = histogramInfo.max_brightness;
-		if( MyDebug.LOG )
-			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
+	/** Computes various factors used in the avg_brighten.rs script.
+	 */
+	public static BrightenFactors computeBrightenFactors(int iso, int brightness, int max_brightness) {
 		int max_gain_factor = 4;
 		int ideal_brightness = 119;
 		if( iso <= 120 ) {
@@ -2439,9 +2432,6 @@ public class HDRProcessor {
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "median brightness: " + histogramInfo.median_brightness);
-			Log.d(TAG, "mean brightness: " + histogramInfo.mean_brightness);
-			Log.d(TAG, "max brightness: " + max_brightness);
 			Log.d(TAG, "brightness target: " + brightness_target);
 			//Log.d(TAG, "max target: " + max_target);
 		}
@@ -2517,14 +2507,59 @@ public class HDRProcessor {
 		float low_x = 0.0f;
 		if( iso >= 400 ) {
 			// this helps: testAvg10, testAvg28, testAvg31, testAvg33
-			low_x = Math.min(8.0f, 0.125f*mid_x);
-			//low_x = Math.min(12.0f, 0.375f*mid_x);
+			//low_x = Math.min(8.0f, 0.125f*mid_x);
+			// don't use mid_x directly, otherwise we get unstable behaviour depending on whether we
+			// entered "use piecewise gain/gamma" above or not
+			// see unit test testBrightenFactors().
+			float piecewise_mid_y = 0.5f*255.0f;
+			float piecewise_mid_x = piecewise_mid_y / gain;
+			low_x = Math.min(8.0f, 0.125f*piecewise_mid_x);
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "low_x " + low_x);
 			Log.d(TAG, "mid_x " + mid_x);
 			Log.d(TAG, "gamma " + gamma);
 		}
+
+		return new BrightenFactors(gain, low_x, mid_x, gamma);
+	}
+
+	/** Final stage of the noise reduction algorithm.
+	 *  Note that the returned bitmap will be scaled up by the factor returned by getAvgSampleSize().
+	 * @param input         The allocation in floating point format.
+	 * @param width         Width of the input.
+	 * @param height        Height of the input.
+	 * @param iso           ISO used for the original images.
+	 * @return              Resultant bitmap.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "avgBrighten");
+			Log.d(TAG, "iso: " + iso);
+		}
+        initRenderscript();
+
+    	long time_s = System.currentTimeMillis();
+
+		int [] histo = computeHistogram(input, false, true);
+		HistogramInfo histogramInfo = getHistogramInfo(histo);
+		int brightness = histogramInfo.median_brightness;
+		int max_brightness = histogramInfo.max_brightness;
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "median brightness: " + histogramInfo.median_brightness);
+			Log.d(TAG, "mean brightness: " + histogramInfo.mean_brightness);
+			Log.d(TAG, "max brightness: " + max_brightness);
+		}
+
+		BrightenFactors brighten_factors = computeBrightenFactors(iso, brightness, max_brightness);
+		float gain = brighten_factors.gain;
+		float low_x = brighten_factors.low_x;
+		float mid_x = brighten_factors.mid_x;
+		float gamma = brighten_factors.gamma;
 
 		//float gain = brightness_target / (float)brightness;
 		/*float gamma = (float)(Math.log(max_target/(float)brightness_target) / Math.log(max_brightness/(float)brightness));
