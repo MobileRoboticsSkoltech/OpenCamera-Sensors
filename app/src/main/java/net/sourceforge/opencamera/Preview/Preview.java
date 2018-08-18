@@ -2627,7 +2627,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		{
-			float focus_distance_value = applicationInterface.getFocusDistancePref();
+			float focus_distance_value = applicationInterface.getFocusDistancePref(false);
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved focus_distance: " + focus_distance_value);
 			if( focus_distance_value < 0.0f )
@@ -2635,8 +2635,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			else if( focus_distance_value > minimum_focus_distance )
 				focus_distance_value = minimum_focus_distance;
 			camera_controller.setFocusDistance(focus_distance_value);
+			camera_controller.setFocusBracketingSourceDistance(focus_distance_value);
 			// now save
-			applicationInterface.setFocusDistancePref(focus_distance_value);
+			applicationInterface.setFocusDistancePref(focus_distance_value, false);
+		}
+		{
+			float focus_distance_value = applicationInterface.getFocusDistancePref(true);
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved focus_bracketing_target_distance: " + focus_distance_value);
+			if( focus_distance_value < 0.0f )
+				focus_distance_value = 0.0f;
+			else if( focus_distance_value > minimum_focus_distance )
+				focus_distance_value = minimum_focus_distance;
+			camera_controller.setFocusBracketingTargetDistance(focus_distance_value);
+			// now save
+			applicationInterface.setFocusDistancePref(focus_distance_value, true);
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCameraParameters: time after setting up focus: " + (System.currentTimeMillis() - debug_time));
@@ -3626,7 +3639,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				new_focus_distance = 0.0f;
 			else if( new_focus_distance > minimum_focus_distance )
 				new_focus_distance = minimum_focus_distance;
+			boolean focus_changed = false;
 			if( is_target_distance ) {
+				focus_changed = true;
 				camera_controller.setFocusBracketingTargetDistance(new_focus_distance);
 				// also set the focus distance, so the user can see what the target distance looks like
 				final float saved_focus_distance = camera_controller.getFocusBracketingSourceDistance();
@@ -3643,9 +3658,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}, 100);
 			}
 			else if( camera_controller.setFocusDistance(new_focus_distance) ) {
+				focus_changed = true;
 				camera_controller.setFocusBracketingSourceDistance(new_focus_distance);
+			}
+
+			if( focus_changed ) {
 				// now save
-				applicationInterface.setFocusDistancePref(new_focus_distance);
+				applicationInterface.setFocusDistancePref(new_focus_distance, is_target_distance);
 				{
 					String focus_distance_s;
 					if( new_focus_distance > 0.0f ) {
@@ -3655,7 +3674,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					else {
 						focus_distance_s = getResources().getString(R.string.infinite);
 					}
-		    		showToast(seekbar_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
+		    		showToast(seekbar_toast, getResources().getString(is_target_distance ? R.string.focus_bracketing_target_distance : R.string.focus_distance) + " " + focus_distance_s);
 				}
 			}
 		}
