@@ -1408,7 +1408,7 @@ public class DrawPreview {
 				}
 				if( show_video_max_amp_pref && !preview.isVideoRecordingPaused() ) {
             		// audio amplitude
-					if( !this.has_video_max_amp || time_ms > this.last_video_max_amp_time + 33 ) {
+					if( !this.has_video_max_amp || time_ms > this.last_video_max_amp_time + 50 ) {
 						has_video_max_amp = true;
 						video_max_amp_prev1 = video_max_amp_prev2;
 						video_max_amp_prev2 = video_max_amp;
@@ -1433,11 +1433,13 @@ public class DrawPreview {
 					amp_frac = Math.min(amp_frac, 1.0f);
 					//applicationInterface.drawTextWithBackground(canvas, p, "" + max_amp, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 
-		            int amp_width = (int) (120 * scale + 0.5f); // convert dps to pixels
-		            int amp_height = (int) (5 * scale + 0.5f); // convert dps to pixels
+            		pixels_offset_y += text_y; // allow extra space
+		            int amp_width = (int) (160 * scale + 0.5f); // convert dps to pixels
+		            int amp_height = (int) (10 * scale + 0.5f); // convert dps to pixels
                     int amp_x = (canvas.getWidth() - amp_width)/2;
 					p.setColor(Color.WHITE);
 					p.setStyle(Paint.Style.STROKE);
+					p.setStrokeWidth(stroke_width);
     				canvas.drawRect(amp_x, text_base_y - pixels_offset_y, amp_x+amp_width, text_base_y - pixels_offset_y+amp_height, p);
 					p.setStyle(Paint.Style.FILL);
     				canvas.drawRect(amp_x, text_base_y - pixels_offset_y, amp_x+amp_frac*amp_width, text_base_y - pixels_offset_y+amp_height, p);
@@ -1453,6 +1455,7 @@ public class DrawPreview {
 						peak_frac = Math.min(peak_frac, 1.0f);
 						p.setColor(Color.YELLOW);
 						p.setStyle(Paint.Style.STROKE);
+						p.setStrokeWidth(stroke_width);
 						canvas.drawLine(amp_x+peak_frac*amp_width, text_base_y - pixels_offset_y, amp_x+peak_frac*amp_width, text_base_y - pixels_offset_y+amp_height, p);
 						p.setColor(Color.WHITE);
 					}
