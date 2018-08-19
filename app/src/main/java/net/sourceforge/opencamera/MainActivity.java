@@ -732,11 +732,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		editor.apply();
 	}
 
-	void launchOnlineHelp() {
+	void launchOnlineHelp(String append) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "launchOnlineHelp");
-		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/"));
+			Log.d(TAG, "launchOnlineHelp: " + append);
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/"+ append));
 		startActivity(browserIntent);
+	}
+
+	void launchOnlineHelp() {
+		launchOnlineHelp("");
 	}
 
 	// for audio "noise" trigger option

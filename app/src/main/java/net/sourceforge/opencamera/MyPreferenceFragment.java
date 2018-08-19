@@ -1059,9 +1059,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 					        @Override
         					public void onClick(View v) {
                         		if( MyDebug.LOG )
-	            					Log.d(TAG, "online help link clicked");
+	            					Log.d(TAG, "online help link clicked for licence");
 								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-								main_activity.launchOnlineHelp();
+								main_activity.launchOnlineHelp("#licence");
 					        }
 						}, about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
