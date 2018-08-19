@@ -114,7 +114,7 @@ public class PopupView extends LinearLayout {
 				supported_flash_values = filter;
 			}
 			if( supported_flash_values != null && supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
-				addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
+				addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), 0, "TEST_FLASH", new ButtonOptionsPopupListener() {
 					@Override
 					public void onClick(String option) {
 						if( MyDebug.LOG )
@@ -151,7 +151,7 @@ public class PopupView extends LinearLayout {
             		supported_focus_values.remove("focus_mode_continuous_video");
             	}
     		}
-        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), "TEST_FOCUS", new ButtonOptionsPopupListener() {
+        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS", new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
     				if( MyDebug.LOG )
@@ -165,10 +165,16 @@ public class PopupView extends LinearLayout {
 
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 
+    		//final boolean use_expanded_menu = true;
+    		final boolean use_expanded_menu = false;
 			final List<String> photo_modes = new ArrayList<>();
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
-			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
+			photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_standard_full : R.string.photo_mode_standard) );
 			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
+    		if( main_activity.supportsNoiseReduction() ) {
+				photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_noise_reduction_full : R.string.photo_mode_noise_reduction));
+				photo_mode_values.add(MyApplicationInterface.PhotoMode.NoiseReduction);
+			}
 			if( main_activity.supportsDRO() ) {
 				photo_modes.add( getResources().getString(R.string.photo_mode_dro) );
 				photo_mode_values.add( MyApplicationInterface.PhotoMode.DRO );
@@ -177,22 +183,18 @@ public class PopupView extends LinearLayout {
     			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
     		}
+    		if( main_activity.supportsFastBurst() ) {
+				photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_fast_burst_full : R.string.photo_mode_fast_burst));
+				photo_mode_values.add(MyApplicationInterface.PhotoMode.FastBurst);
+			}
     		if( main_activity.supportsExpoBracketing() ) {
-    			photo_modes.add( getResources().getString(R.string.photo_mode_expo_bracketing) );
+    			photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_expo_bracketing_full : R.string.photo_mode_expo_bracketing) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.ExpoBracketing );
     		}
     		if( main_activity.supportsFocusBracketing() ) {
-    			photo_modes.add( getResources().getString(R.string.photo_mode_focus_bracketing) );
+    			photo_modes.add( getResources().getString(use_expanded_menu ? R.string.photo_mode_focus_bracketing_full : R.string.photo_mode_focus_bracketing) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.FocusBracketing );
     		}
-    		if( main_activity.supportsFastBurst() ) {
-				photo_modes.add(getResources().getString(R.string.photo_mode_fast_burst));
-				photo_mode_values.add(MyApplicationInterface.PhotoMode.FastBurst);
-			}
-    		if( main_activity.supportsNoiseReduction() ) {
-				photo_modes.add(getResources().getString(R.string.photo_mode_noise_reduction));
-				photo_mode_values.add(MyApplicationInterface.PhotoMode.NoiseReduction);
-			}
 			if( preview.isVideo() ) {
 				// only show photo modes when in photo mode, not video mode!
 				// (photo modes not supported for photo snapshop whilst recording video)
@@ -211,19 +213,32 @@ public class PopupView extends LinearLayout {
     				current_mode = ""; // this will mean no photo mode is highlighted in the UI
     			}
 
-        		addTitleToPopup(getResources().getString(R.string.photo_mode));
-				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
+    			if( use_expanded_menu ) {
+					addRadioOptionsToPopup(sharedPreferences, photo_modes, photo_modes, getResources().getString(R.string.photo_mode), null, null, current_mode, "TEST_PHOTO_MODE", new RadioOptionsListener() {
+						@Override
+						public void onClick(String selected_value) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "clicked photo mode: " + selected_value);
 
-            	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
-        			@Override
-        			public void onClick(String option) {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "clicked photo mode: " + option);
+							changePhotoMode(photo_modes, photo_mode_values, selected_value);
+						}
+					});
+				}
+				else {
+					addTitleToPopup(getResources().getString(R.string.photo_mode));
+					if( MyDebug.LOG )
+						Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
 
-        				changePhotoMode(photo_modes, photo_mode_values, option);
-        			}
-        		});
+					addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, 4, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
+						@Override
+						public void onClick(String option) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "clicked photo mode: " + option);
+
+							changePhotoMode(photo_modes, photo_mode_values, option);
+						}
+					});
+				}
     		}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 7: " + (System.nanoTime() - debug_time));
@@ -1017,15 +1032,21 @@ public class PopupView extends LinearLayout {
     static abstract class ButtonOptionsPopupListener {
 		public abstract void onClick(String option);
     }
-    
-    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
+
+	/** Creates UI for selecting an option for multiple possibilites, by placing buttons in one or
+	 *  more rows.
+	 * @param max_buttons_per_row If 0, then all buttons will be placed on the same row. Otherwise,
+	 *                            this is the number of buttons per row, multiple rows will be
+	 *                            created if necessary.
+	 */
+    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
 		if(MyDebug.LOG)
 			Log.d(TAG, "addButtonOptionsToPopup");
 		MainActivity main_activity = (MainActivity)this.getContext();
-		createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, test_key, listener);
+		createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, max_buttons_per_row, test_key, listener);
 	}
 
-    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
+    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createButtonOptions");
 		final List<View> buttons = new ArrayList<>();
@@ -1043,13 +1064,22 @@ public class PopupView extends LinearLayout {
 			final float scale = context.getResources().getDisplayMetrics().density;
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 2.04: " + (System.nanoTime() - debug_time));
-			int button_width_dp = total_width_dp/supported_options.size();
+			int actual_max_per_row = supported_options.size();
+			if( max_buttons_per_row > 0 )
+				actual_max_per_row = Math.min(actual_max_per_row, max_buttons_per_row);
+			int button_width_dp = total_width_dp/actual_max_per_row;
 			boolean use_scrollview = false;
-			if( button_width_dp < 40 ) {
+			if( button_width_dp < 40 && max_buttons_per_row == 0 ) {
 				button_width_dp = 40;
 				use_scrollview = true;
 			}
-			final int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
+			int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "actual_max_per_row: " + actual_max_per_row);
+				Log.d(TAG, "button_width_dp: " + button_width_dp);
+				Log.d(TAG, "button_width: " + button_width);
+				Log.d(TAG, "use_scrollview: " + use_scrollview);
+			}
 
 			View.OnClickListener on_click_listener = new View.OnClickListener() {
 					@Override
@@ -1064,9 +1094,33 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 2.05: " + (System.nanoTime() - debug_time));
 
-			for(final String supported_option : supported_options) {
+			for(int button_indx=0;button_indx<supported_options.size();button_indx++) {
+				final String supported_option = supported_options.get(button_indx);
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.06: " + (System.nanoTime() - debug_time));
+				if( MyDebug.LOG )
+					Log.d(TAG, "button_indx = " + button_indx);
+
+    			if( max_buttons_per_row > 0 && button_indx > 0 && button_indx % max_buttons_per_row == 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "start a new row");
+					// add the previous row
+					// no need to handle use_scrollview, as we don't support scrollviews with multiple rows
+					parent.addView(ll2);
+					ll2 = new LinearLayout(context);
+					ll2.setOrientation(LinearLayout.HORIZONTAL);
+
+					int n_remaining = supported_options.size() - button_indx;
+					if( MyDebug.LOG )
+						Log.d(TAG, "n_remaining: " + n_remaining);
+					if( n_remaining <= max_buttons_per_row ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "final row");
+						button_width_dp = total_width_dp/n_remaining;
+						button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
+					}
+				}
+
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_option: " + supported_option);
         		int resource = -1;
@@ -1198,12 +1252,13 @@ public class PopupView extends LinearLayout {
 	        	if( current_view != null ) {
 	        		// scroll to the selected button
 	        		final View final_current_view = current_view;
+	        		final int final_button_width = button_width;
 	        		parent.getViewTreeObserver().addOnGlobalLayoutListener(
 	        			new OnGlobalLayoutListener() {
 							@Override
 							public void onGlobalLayout() {
 								// scroll so selected button is centred
-								int jump_x = final_current_view.getLeft() - (total_width-button_width)/2;
+								int jump_x = final_current_view.getLeft() - (total_width-final_button_width)/2;
 								// scrollTo should automatically clamp to the bounds of the view, but just in case
 								jump_x = Math.min(jump_x, total_width-1);
 								if( jump_x > 0 ) {
