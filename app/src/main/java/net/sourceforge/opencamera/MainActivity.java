@@ -3146,9 +3146,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				preview.stoppedSettingFocusDistance(is_target_distance);
 			}
 		});
+		setManualFocusSeekBarVisibility(is_target_distance);
+	}
+
+    void setManualFocusSeekBarVisibility(final boolean is_target_distance) {
+		SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
 		boolean is_visible = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2");
 		if( is_target_distance ) {
-			is_visible = is_visible && (applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing);
+			is_visible = is_visible && (applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing) && !preview.isVideo();
 		}
 		final int visibility = is_visible ? View.VISIBLE : View.GONE;
 		focusSeekBar.setVisibility(visibility);

@@ -1910,9 +1910,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		editor.putString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), focus_value);
 		editor.apply();
 		// focus may be updated by preview (e.g., when switching to/from video mode)
-    	final int visibility = main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
-	    View focusSeekBar = main_activity.findViewById(R.id.focus_seekbar);
-	    focusSeekBar.setVisibility(visibility);
+		main_activity.setManualFocusSeekBarVisibility(false);
     }
 
     @Override

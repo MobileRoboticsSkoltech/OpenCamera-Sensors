@@ -441,7 +441,7 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
 
-			if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
+			if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "add fast burst options");
 
@@ -526,7 +526,7 @@ public class PopupView extends LinearLayout {
 					}
 				});
 			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+			else if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "add focus bracketing options");
 
