@@ -17,6 +17,7 @@ public class PhotoCamera2Tests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrashRaw"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrashRaw2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoExpo5"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFocusBracketing"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFastBurst"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNR"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashAutoFakeMode"));

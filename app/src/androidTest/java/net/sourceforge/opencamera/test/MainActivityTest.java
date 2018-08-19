@@ -15,6 +15,7 @@ import net.sourceforge.opencamera.CameraController.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
@@ -2657,9 +2658,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_focus_bracketing = mActivity.supportsFocusBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_focus_bracketing");
 		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
+		String n_focus_bracketing_images_s = sharedPreferences.getString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "3");
+		int n_focus_bracketing_images = Integer.parseInt(n_focus_bracketing_images_s);
 		String n_fast_burst_images_s = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
 		int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
@@ -2674,6 +2678,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			exp_n_new_files = 4;
 		else if( is_expo )
 			exp_n_new_files = n_expo_images;
+		else if( is_focus_bracketing )
+			exp_n_new_files = n_focus_bracketing_images;
 		else if( is_fast_burst )
 			exp_n_new_files = n_fast_burst_images;
 		else
@@ -2688,6 +2694,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_focus_bracketing = mActivity.supportsFocusBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_focus_bracketing");
 
 		// check files have names as expected
 		String filename_jpeg = null;
@@ -2706,13 +2713,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				String filename = file.getName();
 				assertTrue(filename.startsWith("IMG_"));
 				if( filename.endsWith(".jpg") ) {
-					assertTrue(hdr_save_expo || is_expo || is_fast_burst || filename_jpeg == null);
+					assertTrue(hdr_save_expo || is_expo || is_focus_bracketing || is_fast_burst || filename_jpeg == null);
 					if( is_hdr && hdr_save_expo ) {
 						// only look for the "_HDR" image
 						if( filename.contains("_HDR") )
 							filename_jpeg = filename;
 					}
-					else if( is_expo ) {
+					else if( is_expo || is_focus_bracketing ) {
 						if( filename_jpeg != null ) {
 							// check same root
 							String filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-5);
@@ -2828,6 +2835,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean is_nr = mActivity.supportsNoiseReduction() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_noise_reduction");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_focus_bracketing = mActivity.supportsFocusBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_focus_bracketing");
 		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
@@ -2917,7 +2925,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		else if( is_nr ) {
 			suffix = "_NR";
 		}
-		else if( is_expo ) {
+		else if( is_expo || is_focus_bracketing ) {
 			//suffix = "_EXP" + (n_expo_images-1);
 			suffix = "_" + (n_expo_images-1);
 		}
@@ -2939,7 +2947,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "waiting for thumbnail animation");
 				Thread.sleep(10);
 				int allowed_time_ms = 8000;
-				if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo ) ) {
+				if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo || is_focus_bracketing ) ) {
 					// some devices need longer time
 					allowed_time_ms = 10000;
 				}
@@ -8562,6 +8570,41 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.ExpoBracketingStopsPreferenceKey, "1");
 		editor.apply();
 		updateForSettings();
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
+	}
+
+	/** Tests taking a photo in focus bracketing mode.
+	 */
+	public void testTakePhotoFocusBracketing() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoFocusBracketing");
+
+		setToDefault();
+
+		if( !mActivity.supportsFocusBracketing() ) {
+			return;
+		}
+
+	    SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+	    assertTrue(focusSeekBar.getVisibility() == View.GONE);
+	    SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+	    assertTrue(focusTargetSeekBar.getVisibility() == View.GONE);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+		editor.apply();
+		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing );
+	    assertTrue(focusSeekBar.getVisibility() == View.VISIBLE);
+		focusSeekBar.setProgress( (int)(0.75*(focusSeekBar.getMax()-1)) );
+	    assertTrue(focusTargetSeekBar.getVisibility() == View.VISIBLE);
+		focusTargetSeekBar.setProgress( (int)(0.5*(focusTargetSeekBar.getMax()-1)) );
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
