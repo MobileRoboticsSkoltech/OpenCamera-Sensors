@@ -8328,6 +8328,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.DRO );
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -8348,6 +8349,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Standard );
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
 	}
 
@@ -8369,6 +8371,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.DRO );
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -8379,6 +8382,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Standard );
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
 	}
 
@@ -8387,12 +8391,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testHDRRestart() {
 		Log.d(TAG, "testHDRRestart");
 		setToDefault();
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Standard );
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
 		editor.apply();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 		restart();
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 	}
 
 	public void testTakePhotoHDR() throws InterruptedException {
@@ -8410,6 +8418,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8433,6 +8442,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8461,6 +8471,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
 		editor.apply();
 		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 
 		int cameraId = mPreview.getCameraId();
 
@@ -8498,6 +8510,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8521,6 +8534,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8545,6 +8559,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.ExpoBracketing );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8571,6 +8586,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.ExpoBracketing );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8630,6 +8646,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.NoiseReduction );
+
 		final int n_back_photos = 3;
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
@@ -8684,6 +8702,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FastBurst );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		if( mPreview.usingCamera2API() ) {
 			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
