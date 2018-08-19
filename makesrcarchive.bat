@@ -12,6 +12,7 @@ copy %src%\gradlew.bat %dst%
 copy %src%\makesrcarchive.bat %dst%
 copy %src%\opencamera_source.txt %dst%
 copy %src%\gpl-3.0.txt %dst%
+copy %src%\google_material_design_icons_LICENSE-2.0.txt %dst%
 copy %src%\settings.gradle %dst%
 
 mkdir %dst%\app
