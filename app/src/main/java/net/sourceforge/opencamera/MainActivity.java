@@ -1983,7 +1983,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    /*if( MyDebug.LOG )
 			Log.d(TAG, "padding: " + bottom);*/
 	    galleryButton.setImageBitmap(null);
-		galleryButton.setImageResource(R.drawable.gallery);
+		galleryButton.setImageResource(R.drawable.baseline_photo_library_white_48);
 		// workaround for setImageResource also resetting padding, Android bug
 		galleryButton.setPadding(left, top, right, bottom);
 		gallery_bitmap = null;

@@ -141,7 +141,7 @@
         android:padding="8dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/gallery"
-        android:src="@drawable/gallery"
+        android:src="@drawable/baseline_photo_library_white_48"
         android:onClick="clickedGallery"
         />
 

@@ -5,5 +5,5 @@
             <solid android:color="#FF2E9CF4"/>
        </shape>
     </item>
-    <item android:drawable="@drawable/gallery"/>
+    <item android:drawable="@drawable/baseline_photo_library_white_48"/>
 </layer-list>
