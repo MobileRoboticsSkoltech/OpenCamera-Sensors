@@ -918,6 +918,18 @@ cards and I am looking into this. Note that (a) this requires rewriting portions
 fix, and (b) this new API is unfortunately not compatible with some of Google/Android's own APIs (e.g., for Exif
 reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>-->
 
+<p><b>Photos or videos fail to save!</b> - Firstly, if you're trying to save to an
+external SD card, see "How can I save to my external SD card?" above. Otherwise:<ul>
+	<li>If Settings/More camera controls/"Use Storage Access Framework" is enabled,
+	in some cases the permission may be lost, try rechoosing the save location (from
+	Settings/More camera controls/"Save location".</li>
+	<li>If not using Storage Access Framework, but you have changed the save location,
+	it may be you've chosen somewhere where applications don't have permission to save
+	files.</li>
+	<li>Or sometimes simply restarting the devices fixes such problems.</li>
+</ul>
+</p>
+
 <p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-level</a>
 option is on. (If they're being rotated even when the phone is held level, it may mean the accelerometer sensor on your
 device isn't calibrated.) It's off by default, but you may have accidentally switched it on. To turn off, go to the "popup" menu
@@ -964,6 +976,12 @@ on. If this doesn't work:</p>
 	<li>Check that Settings/"Face detection" is disabled (focus regions aren't possible in face detection mode).</li>
 	<li>Some devices or cameras (especially front cameras) don't support touch to focus.</li>
 </ul>
+
+<p><b>I get "FAILED TO OPEN CAMERA"</b> - In some cases this is fixed by restarting
+Open Camera, or otherwise make sure nothing else is using the camera (including the
+torch being enabled). In some cases a phone gets into a state where the camera can't
+be opened, which is fixed by rebooting. If it persists even after restarting your
+device, try other camera applications in case the camera is faulty.</p>
 
 <p><b>Why has Open Camera stopped working properly?</b> - If something stops working in Open Camera
 first try a reboot of your device. If that doesn't resolve the problem, try resetting
