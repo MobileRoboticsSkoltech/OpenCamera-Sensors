@@ -242,6 +242,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
 
 	private Toast last_toast;
+	private long last_toast_time_ms;
 	private final ToastBoxer flash_toast = new ToastBoxer();
 	private final ToastBoxer focus_toast = new ToastBoxer();
 	private final ToastBoxer take_photo_toast = new ToastBoxer();
@@ -6712,10 +6713,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Toast toast = new Toast(activity);
 				if( clear_toast != null )
 					clear_toast.toast = toast;*/
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "clear_toast: " + clear_toast);
+					if( clear_toast != null )
+						Log.d(TAG, "clear_toast.toast: " + clear_toast.toast);
+					Log.d(TAG, "last_toast: " + last_toast);
+					Log.d(TAG, "last_toast_time_ms: " + last_toast_time_ms);
+				}
 				// This method is better, as otherwise a previous toast (with different or no clear_toast) never seems to clear if we repeatedly issue new toasts - this doesn't happen if we reuse existing toasts if possible
 				// However should only do this if the previous toast was the most recent toast (to avoid messing up ordering)
 				Toast toast;
-				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast ) {
+				long time_now = System.currentTimeMillis();
+				// We recreate a toast every 2s, to workaround Android toast bug that calling show() no longer seems to extend the toast duration!
+				// (E.g., see bug where toasts for sliders disappear after a while if continually moving the slider.)
+				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast && time_now < last_toast_time_ms+2000) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "reuse last toast: " + last_toast);
 					toast = clear_toast.toast;
@@ -6738,6 +6749,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						clear_toast.toast = toast;
 					View text = new RotatedTextView(message, activity);
 					toast.setView(text);
+					last_toast_time_ms = time_now;
 				}
 				toast.setDuration(Toast.LENGTH_SHORT);
 				if( !((Activity)getContext()).isFinishing() ) {
