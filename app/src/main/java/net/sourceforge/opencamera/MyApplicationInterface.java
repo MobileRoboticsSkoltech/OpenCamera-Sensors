@@ -120,8 +120,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
-	private float focus_distance = 0.0f;
-	private float focus_bracketing_target_distance = 0.0f;
 	// camera properties that aren't saved even in the bundle; these should also be reset in reset()
 	private int zoom_factor = 0; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
 
@@ -152,12 +150,6 @@ public class MyApplicationInterface implements ApplicationInterface {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found cameraId: " + cameraId);
-			focus_distance = savedInstanceState.getFloat("focus_distance", 0.0f);
-			if( MyDebug.LOG )
-				Log.d(TAG, "found focus_distance: " + focus_distance);
-			focus_bracketing_target_distance = savedInstanceState.getFloat("focus_bracketing_target_distance", 0.0f);
-			if( MyDebug.LOG )
-				Log.d(TAG, "found focus_bracketing_target_distance: " + focus_bracketing_target_distance);
         }
 
 		if( MyDebug.LOG )
@@ -174,12 +166,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save cameraId: " + cameraId);
     	state.putInt("cameraId", cameraId);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save focus_distance: " + focus_distance);
-    	state.putFloat("focus_distance", focus_distance);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save focus_bracketing_target_distance: " + focus_bracketing_target_distance);
-    	state.putFloat("focus_bracketing_target_distance", focus_bracketing_target_distance);
 	}
 	
 	void onDestroy() {
@@ -1029,7 +1015,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public float getFocusDistancePref(boolean is_target_distance) {
-    	return is_target_distance ? focus_bracketing_target_distance : focus_distance;
+    	return sharedPreferences.getFloat(is_target_distance ? PreferenceKeys.FocusBracketingTargetDistancePreferenceKey : PreferenceKeys.FocusDistancePreferenceKey, 0.0f);
     }
     
     @Override
@@ -2059,10 +2045,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public void setFocusDistancePref(float focus_distance, boolean is_target_distance) {
-		if( is_target_distance )
-			this.focus_bracketing_target_distance = focus_distance;
-		else
-			this.focus_distance = focus_distance;
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putFloat(is_target_distance ? PreferenceKeys.FocusBracketingTargetDistancePreferenceKey : PreferenceKeys.FocusDistancePreferenceKey, focus_distance);
+		editor.apply();
 	}
 
     private int getStampFontColor() {

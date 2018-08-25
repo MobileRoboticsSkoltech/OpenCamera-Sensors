@@ -69,6 +69,10 @@ public class PreferenceKeys {
 
 	public static final String ExpoBracketingStopsPreferenceKey = "preference_expo_bracketing_stops";
 
+	public static final String FocusDistancePreferenceKey = "preference_focus_distance";
+
+	public static final String FocusBracketingTargetDistancePreferenceKey = "preference_focus_bracketing_target_distance";
+
 	public static final String FocusBracketingNImagesPreferenceKey = "preference_focus_bracketing_n_images";
 
 	public static final String FocusBracketingAddInfinityPreferenceKey = "preference_focus_bracketing_add_infinity";
