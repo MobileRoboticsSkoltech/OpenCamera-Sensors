@@ -5510,6 +5510,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        		if( MyDebug.LOG )
     	        			Log.d(TAG, "repeat mode photos remaining: onPictureTaken started preview: " + remaining_repeat_photos);
     	        	}
+					applicationInterface.cameraInOperation(false, false);
     	        }
     	        else {
     		        phase = PHASE_NORMAL;

@@ -6817,6 +6817,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking take photo");
 		assertTrue(!mPreview.isOnTimer());
 
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+		View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+
 		try {
 			// wait 7s, and test that we've taken the photos by then
 			Thread.sleep(7000);
@@ -6875,6 +6883,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
 				editor.apply();
 			}
+			assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+			assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+		    assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
+		    assertTrue(exposureLockButton.getVisibility() == (mPreview.supportsExposureLock() ? View.VISIBLE : View.GONE));
+			assertTrue(popupButton.getVisibility() == View.VISIBLE);
+			assertTrue(trashButton.getVisibility() == View.GONE);
+			assertTrue(shareButton.getVisibility() == View.GONE);
+
 		    clickView(takePhotoButton);
 			waitForTakePhoto();
 			Log.d(TAG, "done taking 1st photo");
@@ -6884,12 +6900,22 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 7);
+
 			// wait 2s, should still not have taken another photo
 			Thread.sleep(2000);
 			assertTrue(mPreview.count_cameraTakePicture==7);
 			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 7);
+			// check GUI has returned to correct state
+			assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+			assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+		    assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
+		    assertTrue(exposureLockButton.getVisibility() == (mPreview.supportsExposureLock() ? View.VISIBLE : View.GONE));
+			assertTrue(popupButton.getVisibility() == View.VISIBLE);
+			assertTrue(trashButton.getVisibility() == View.GONE);
+			assertTrue(shareButton.getVisibility() == View.GONE);
+
 			// wait another 5s, should have taken another photo (need to allow time for the extra auto-focus)
 			Thread.sleep(5000);
 			assertTrue(mPreview.count_cameraTakePicture==8);
