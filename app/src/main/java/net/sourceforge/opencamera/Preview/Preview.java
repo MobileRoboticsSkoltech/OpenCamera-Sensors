@@ -6169,6 +6169,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "getTonemapMaxCurvePoints");
     	return tonemap_max_curve_points;
     }
+
     public boolean supportsTonemapCurve() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsTonemapCurve");
