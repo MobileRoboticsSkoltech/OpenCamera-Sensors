@@ -122,7 +122,7 @@
     <string name="preference_save_zulu_time">Μορφή ώρας για το όνομα του αρχείου</string>
     <string name="preference_show_when_locked">Εμφάνιση κάμερας όταν λοκαρίστηκε</string>
     <string name="preference_show_when_locked_summary">Αν είναι αυτή η ρύθμιση ενεργή, το Open Camera θα εμφανίζετε πάνω από κάθε οθόνη κλειδώματος (μπορείτε ακόμα να ξεκλειδώσετε για να αποκτήσετε πρόσβαση στις Ρυθμίσεις κ.λ.π.)</string>
-    <string name="preference_startup_focus">Εκτελέση αυτόματης εστίασης κατά την εκκίνηση</string>
+    <string name="preference_startup_focus">Αυτόματη εστίαση κατά την εκκίνηση</string>
     <string name="preference_startup_focus_summary">Με αυτή την ρύθμιση η αυτόματη εστίαση, θα ενεργοποιηθεί όταν ανοίξετε την Κάμερα. Αν έχετε πρόβλημα με το flash κατά την εκκίνηση, απενεργοποιήστε αυτή την επιλογή</string>
     <string name="preference_lock_video">Κλείδωμα της οθόνης κατά την εγγραφή βίντεο</string>
     <string name="preference_lock_video_summary">Κατά την εγγραφή βίντεο, το GUI θα πρέπει να κλειδωθεί για να αποτραπεί η ακούσια διακοπή της εγγραφής. Σύρετε την οθόνη για να την ξεκλειδώσετε. Σημειώστε ότι η εγγραφή βίντεο θα σταματήσει αν η εφαρμογή είναι στο παρασκήνιο, η η οθόνη σβήσει.</string>
@@ -295,7 +295,7 @@
     <string name="photo_mode_expo_bracketing_full">Εκθεση υποστηρίγματος</string>
     <string name="photo_mode_noise_reduction">NR</string>
     <string name="preference_category_stamp">Σφραγίδα φωτογραφίας</string>
-    <string name="preference_hdr_save_expo">Αποθήκευση όλων των εικόνων για την λειτουργία HDR</string>
+    <string name="preference_hdr_save_expo">HDR: Αποθηκεύστε όλες τις εικόνες</string>
     <string name="preference_hdr_save_expo_summary">Αν ειναι ενεργοποιημένη αυτή η ρύθμιση, κατά την χρήση της HDR λειτουργίας "φωτογραφία", οι τρείς βάσεις εικόνων θα αποθηκευθούν, καθώς και η τελική HDR φωτογραφία. Αυτό θα κάνει την αποθήκευση πιο αργή, ειδικά αν επιλεγχθούν επιλογές, όπως \"Σφραγίδα φωτογραφιών\" η Αυτόματο επίπεδο.</string>
 
     <string name="no_permission">Η ΑΔΕΙΑ ΧΡΗΣΗΣ ΔΕΝ ΕΙΝΑΙ ΔΙΑΘΕΣΙΜΗ</string>
@@ -335,7 +335,7 @@
 
     <string name="camera_error">Σοβαρό σφάλμα κάμερας</string>
 
-    <string name="preference_camera2_fast_burst">Ενεργοποίηση της γρήγορης HDR/expo έκρηξης</string>
+    <string name="preference_camera2_fast_burst">Γρήγορη έκρηξη HDR/έκθεσης</string>
     <string name="preference_camera2_fast_burst_summary">Επιτρέπει την ταχύτερη σύλληψη HDR/expo λήψεων. Αν απενεργοποιηθεί, η συσκευή σας θα έχει προβλήματα κατά την λήψη φωτογραφιών μέσω της HDR λειτουργίας.</string>
 
     <string name="camera">Κάμερα</string>
