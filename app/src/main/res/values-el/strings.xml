@@ -99,7 +99,7 @@
     <string name="preference_timer_speak_summary">Εκφώνηση της αντίστροφης μέτρησης για το χρονόμετρο η την λειτουργία ριπής (από 60 δευτερόλεπτα)</string>
     <string name="preference_burst_mode">Ριπή</string> <!-- also used in popup menu, so shouldn't be too long a string -->
     <string name="preference_burst_interval">Διάστημα λειτουργίας ριπής</string>
-    <string name="preference_screen_camera_controls_more">Περισσότερα στοιχεία ελέγχου της κάμερας...</string>
+    <string name="preference_screen_camera_controls_more">Περισσότερα στοιχεία ελέγχου της κάμερας…</string>
     <string name="preference_touch_capture">Αγγιγμα για λήψη</string>
     <string name="preference_touch_capture_summary">Λήψη μιας φωτογραφίας, απλά αγγίζοντας η με διπλό άγγιγμα της προεπισκόπησης</string>
     <string name="preference_pause_preview">Παύση μετά τη λήψη φωτογραφιών</string>
@@ -128,7 +128,7 @@
     <string name="preference_lock_video_summary">Κατά την εγγραφή βίντεο, το GUI θα πρέπει να κλειδωθεί για να αποτραπεί η ακούσια διακοπή της εγγραφής. Σύρετε την οθόνη για να την ξεκλειδώσετε. Σημειώστε ότι η εγγραφή βίντεο θα σταματήσει αν η εφαρμογή είναι στο παρασκήνιο, η η οθόνη σβήσει.</string>
     <string name="preference_rotate_preview">Περιστροφή προεπισκόπησης</string>
     <string name="preference_rotate_preview_summary">Επιλογή για περιστροφή της προεπισκόπησης (δεν θα επηρεάσει τις επακόλουθες φωτογραφίες/βίντεο)</string>
-    <string name="preference_screen_gui">Στην οθόνη GUI...</string>
+    <string name="preference_screen_gui">Στην οθόνη GUI…</string>
     <string name="preference_preview_size">Μέγεθος προεπισκόπησης</string>
     <string name="preference_ui_placement">UI τοποθέτηση</string>
     <string name="preference_immersive_mode">Μοναδική λειτουργία</string>
@@ -395,7 +395,7 @@
     <string name="pause_video">Διακοπή καταγραφής βίντεο</string>
     <string name="resume_video">Συνέχεια καταγραφής βίντεο</string>
 
-    <string name="capturing">Λήψη...</string>
+    <string name="capturing">Λήψη…</string>
 
     <string name="audio_listener_failed">Αδυναμία ανάλυσης ήχου</string>
     <string name="failed_to_process_hdr">Αδυναμία δημιουργίας HDR εικόνων</string>
