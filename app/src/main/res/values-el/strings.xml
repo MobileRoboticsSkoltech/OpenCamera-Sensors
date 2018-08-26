@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <string name="action_settings">Ρυθμίσεις</string>
+    <string name="action_popup">Ρυθμίσεις Παραθύρου</string>
+    <string name="intro_text">Πατήστε για να εστιάσετε και πατήστε το μπλε πλήκτρο της κάμερας για να τραβήξετε φωτογραφίες. Για περισσότερη βοήθεια, κάντε κλικ στην βοήθεια στις Ρυθμίσεις. Το Open Camera είναι εντελώς δωρεάν. Αν σας αρέσει αυτή η εφαρμογή, παρακαλείστε να εξετάσετε την πιθανότητα μιας δωρεάς :) (βλέπε σύνδεσμο σε Ρυθμίσεις, η στην Διαδικτυακή Βοήθεια).\n\nΠολιτική Προσωπικών Δεδομένων: Η άδεια για τη λειτουργία απαιτεί την προσθήκη μιας γεωγραφικής ετικέτας, αλλά αυτό είναι απενεργοποιημένο από προεπιλογή. Αν ενεργοποιηθεί, η τοποθεσία σας είναι κωδικοποιημένη στα αποθηκευμένα αρχεία (χρησιμοποιούνται μόνο για το σκοπό αυτό).</string>
+    <string name="intro_ok">OK (Καμμία εμφάνιση αυτού του μυνήματος ξανά)</string>
+
+    <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
+    <string name="off">Off</string> <!-- whether a setting is turned off, e.g., "Auto-level: Off" -->
+    
+    <string name="choose_save_location">Επιλέξτε την τοποθεσία αποθήκευσης:</string>
+    <string name="clear_folder_history">Εκκαθάριση ιστορικού του φακέλου</string>
+    <string name="clear_folder_history_question">Να εκκαθαριστεί το ιστορικό του φακέλου?</string>
+    <string name="choose_another_folder">Επιλέξτε έναν άλλο φάκελο</string>
+    <string name="changed_save_location">Αλλαγή θέσης αποθήκευσης:</string>
+    <string name="stopped_recording_video">Τερματισμός εγγραφής βίντεο</string>
+    <string name="repeats_to_go">Επανάλυψη δράσης</string> <!--  intentionally starts lower case -->
+    <string name="failed_to_reconnect_camera">Αποτυχία επανασύνδεσης με την κάμερα</string>
+    <string name="video_may_be_corrupted">Το σφάλμα, το αρχείο βίντεο μπορεί να είναι κατεστραμμένο</string>
+    <string name="not_supported">δεν υποστηρίζεται στην συσκευή σας</string> <!--  intentionally starts lower case -->
+    <string name="video_error_unknown">Άγνωστο σφάλμα, το βίντεο σταμάτησε</string>
+    <string name="video_error_server_died">Ο διακομιστής πέθανε, το βίντεο σταμάτησε</string>
+    <string name="video_max_duration">Επετέυχθει η μέγιστη διάρκεια του βίντεο</string>
+    <string name="video_max_filesize">Το βίντεο έχει φτάσει στο μέγιστο μέγεθος του αρχείου</string>
+    <string name="exposure_compensation">Αντιστάθμιση έκθεσης</string>
+    <string name="fps">FPS</string>
+    <string name="focus_distance">Απόσταση εστίασης</string>
+    <string name="infinite">Άπειρη</string>
+    <string name="front_camera">Μπροστινή Κάμερα</string>
+    <string name="back_camera">Πίσω Κάμερα</string>
+    <string name="photo">Φωτογραφία</string>
+    <string name="video">Βίντεο</string>
+    <string name="exposure_locked">Κλείδωμα αντιστάθμισης</string>
+    <string name="exposure_unlocked">Ξεκλείδωμα αντιστάθμισης</string>
+    <string name="cancelled_timer">Ακύρωση χρονομέτρου</string>
+    <string name="cancelled_burst_mode">Ακύρωση λειτουργίας ριπής</string>
+    <string name="started_timer">Εκκίνηση χρονομέτρου</string>
+    <string name="failed_to_save_video">Η αποθήκευση του βίντεο απέτυχε</string>
+    <string name="failed_to_record_video">Η εγγραφή του βίντεο απέτυχε</string>
+    <string name="started_recording_video">Εναρξη εγγραφής βίντεο</string>
+    <string name="sorry">Συγγνώμη</string>
+    <string name="failed_to_save_photo">Η αποθήκευση της φωτογραφίας απέτυχε</string>
+    <string name="failed_to_save_photo_raw">Η αποθήκευση της RAW φωτογραφίας απέτυχε</string>
+    <string name="failed_to_auto_stabilise">Αποτυχία αυτόματου επιπέδου</string>
+    <string name="failed_to_start_camera_preview">Αποτυχία εμφάνισης προεπισκόπησης</string>
+    <string name="taking_photo">Λήψη φωτογραφίας</string>
+    <string name="failed_to_take_picture">Αποτυχία λήψης φωτογραφίας</string>
+    <string name="location_not_available">Η GPS θέση δεν είναι διαθέσιμη</string>
+    <string name="photo_deleted">Η φωτογραφία διαγράφθηκε</string>
+    <string name="no_gallery_app">Η εφαρμογή φωτογραφιών δεν υπάρχει</string>
+    <string name="screen_is_locked">Η οθόνη μπλόκαρε\nακουμπήστε την για ξεμπλοκάρισμα</string>
+    <string name="unlocked">Ξεμπλοκάρισμα</string>
+    <string name="auto_stabilise_not_supported">Συγγνώμη, το αυτόματο επίπεδο δεν υποστηρίζεται\σε αυτή την συσκευή</string>
+    <string name="audio_disabled">Ο ήχος απενεργοποίηθηκε</string>
+    <string name="max_duration">Ανώτατη διάρκεια</string>
+    <string name="color_effect">Επίδραση χρώματος</string>
+    <string name="scene_mode">Λειτουργία σκηνής</string>
+    <string name="white_balance">Λευκή ισορροπία</string>
+    
+    <string name="angle">Γωνία</string>
+    <string name="direction">Κατεύθυνση</string>
+    <string name="failed_to_open_camera_1">ΑΠΟΤΥΧΙΑ ΑΝΟΙΓΜΑΤΟς ΚΑΜΕΡΑΣ.</string>
+    <string name="failed_to_open_camera_2">Η ΚΑΜΕΡΑ ΧΡΗΣΙΜΟΠΟΙΕΙΤΕ</string>
+    <string name="failed_to_open_camera_3">ΑΠΟ ΑΛΛΗ ΕΦΑΡΜΟΓΗ</string>
+    <string name="iso">ISO</string>
+    <string name="zoom">Μεγέθυνση</string>
+    <string name="free_memory">Ελέυθερο</string>
+    <string name="screen_lock_message_1">[Μπλοκάρισμα:</string>
+    <string name="screen_lock_message_2">Πατήστε για ξεμπλοκάρισμα]</string>
+    
+    <string name="failed_to_stamp">Αποτυχία προσθήκης σφραγγίδας στην φωτογραφία</string>
+    <string name="metres_abbreviation">μ</string> <!-- symbol short for metres -->
+    
+    <string name="preference_category_camera_effects">Εφέ κάμερας</string>
+    <string name="preference_auto_stabilise">Αυτόματο Επίπεδο</string>
+    <string name="preference_auto_stabilise_summary">Οι εικόνες θα πρέπει να εναλλάσσονται έτσι ώστε να είναι ενεργό το αυτόματο επίπεδο (μόνο για φωτογραφίες) (τραβήξτε φωτογραφίες πιο αργά, γιατί μπορεί να αποτύχει σε συσκευές με χαμηλή μνήμη)</string>
+    <string name="preference_color_effect">Εφαρμογή ενός χρωματικού εφέ</string>
+    <string name="preference_color_effect_summary">Εφαρμόζει το επιλεγμένο εφέ χρώματος στην φωτογραφία</string>
+    <string name="preference_scene_mode">Εφαρμόστε μια λειτουργία σκηνής</string>
+    <string name="preference_scene_mode_summary">Βελτιστοποίηση φωτογραφίας για διαφορετικές σκηνές</string>
+    <string name="preference_white_balance">Ρυθμίστε την ισορροπία λευκού</string>
+    <string name="preference_white_balance_summary">Επιλέξτε μια ρύθμιση για να ρυθμίσετε την ισορροπία λευκού</string>
+    <string name="preference_iso">Ορισμός του ISO</string>
+    <string name="preference_iso_summary">Μια υψηλότερη τιμή σημαίνει μεγαλύτερη ευαισθησία στο φως (δεν μπορεί να λειτουργήσει σε ορισμένες συσκευές)</string>
+    <string name="preference_exposure">Ρυθμίστε την αντιστάθμιση έκθεσης</string>
+    <string name="preference_exposure_summary">Ορισμός σε 0 για την προεπιλογή αντιστάθμισης έκθεσης</string>
+    <string name="preference_lock_orientation">Κλείδωμα φωτογραφιών/βίντεο προσανατολισμού</string>
+    <string name="preference_lock_orientation_summary">Αν ορίσετε τον προσανατολισμό της συσκευής θα πρέπει να αγνοηθεί, και ο προσανατολισμός της φωτογραφίας/βίντεο θα αλληλοσχετίζεται με τον συγκεκριμένο προσανατολισμό</string>
+    <string name="preference_face_detection">Ανίχνευση προσώπου</string>
+    <string name="preference_face_detection_summary">Χρήση της ανίχνευσης προσώπου στις περιοχές εστίασης</string>
+
+    <string name="preference_category_camera_controls">Ελεγχος της κάμερας</string>
+    <string name="preference_timer">Χρόνομετρο</string>
+    <string name="preference_timer_beep">Ηχητικό σήμα χρονομέτρου</string>
+    <string name="preference_timer_beep_summary">Ηχητικό σήμα όταν το χρονόμετρο μετράει αντίστροφα η για λειτουργία ριπής</string>
+    <string name="preference_timer_speak">Εκφώνηση χρονομέτρου αντίστροφης μέτρησης</string>
+    <string name="preference_timer_speak_summary">Εκφώνηση της αντίστροφης μέτρησης για το χρονόμετρο η την λειτουργία ριπής (από 60 δευτερόλεπτα)</string>
+    <string name="preference_burst_mode">Ριπή</string> <!-- also used in popup menu, so shouldn't be too long a string -->
+    <string name="preference_burst_interval">Διάστημα λειτουργίας ριπής</string>
+    <string name="preference_screen_camera_controls_more">Περισσότερα στοιχεία ελέγχου της κάμερας...</string>
+    <string name="preference_touch_capture">Αγγιγμα για λήψη</string>
+    <string name="preference_touch_capture_summary">Λήψη μιας φωτογραφίας, απλά αγγίζοντας η με διπλό άγγιγμα της προεπισκόπησης</string>
+    <string name="preference_pause_preview">Παύση μετά τη λήψη φωτογραφιών</string>
+    <string name="preference_pause_preview_summary">Παύση στην οθόνη μετά την λήψη μιας φωτογραφίας, με την επιλογή για κοινοποίηση η διαγραφή της φωτογραφίας</string>
+    <string name="preference_shutter_sound">Ηχος κλείστρου</string>
+    <string name="preference_shutter_sound_summary">Αναπαραγωγή ήχου κατά την λήψη φωτογραφίας</string>
+    <string name="preference_volume_keys">Πλήκτρα ρύθμισης ήχου</string>
+    <string name="preference_audio_control">Ρυθμίσεις ελέγχου του ήχου</string>
+    <string name="preference_audio_control_summary">Κατά την λήψη φωτογραφίας η εγγραφή βίντεο, όταν ένας θόρυβος εντοπίζετε, ακούγεται μια φωνητική εντολή (\"cheese\"). Όταν είναι ενεργοποιημένη, χρησιμοποιήστε στην οθόνη, το πλήκτρο μικροφώνου για να ξεκινήσει και να σταματήσει.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    <string name="preference_audio_noise_control_sensitivity">Ευαισθησία ελέγχου του ήχου</string>
+    <string name="preference_audio_noise_control_sensitivity_summary">Επίπεδο θορύβου ευαισθησίας για τον ήχο</string>
+    <string name="preference_save_location">Χώρος αποθήκευσης</string>
+    <string name="preference_save_location_summary">Φάκελος για αποθήκευση φωτογραφίας/βίντεο</string>
+    <string name="preference_using_saf">Χρήση αποθήκευσης πρόσβασης πλαισίου</string>
+    <string name="preference_using_saf_summary">Αν θέλετε χρησιμοποιήστε την Android 5\'s Πρόσβαση αποθήκευσης πλαισίου για την αποθήκευση φωτογραφιών και βίντεο</string>
+    <string name="preference_save_photo_prefix">Αποθήκευση προθέματος φωτογραφιών</string>
+    <string name="preference_save_photo_prefix_summary">Πρόθεμα για την αποθήκευση αρχείων φωτογραφιών</string>
+    <string name="preference_save_video_prefix">Αποθήκευση βίντεο προθέματος</string>
+    <string name="preference_save_video_prefix_summary">Πρόθεμα για την αποθήκευση αρχείων βίντεο</string>
+    <string name="preference_save_zulu_time">Μορφή ώρας για το όνομα του αρχείου</string>
+    <string name="preference_show_when_locked">Εμφάνιση κάμερας όταν λοκαρίστηκε</string>
+    <string name="preference_show_when_locked_summary">Αν είναι αυτή η ρύθμιση ενεργή, το Open Camera θα εμφανίζετε πάνω από κάθε οθόνη κλειδώματος (μπορείτε ακόμα να ξεκλειδώσετε για να αποκτήσετε πρόσβαση στις Ρυθμίσεις κ.λ.π.)</string>
+    <string name="preference_startup_focus">Εκτελέση αυτόματης εστίασης κατά την εκκίνηση</string>
+    <string name="preference_startup_focus_summary">Με αυτή την ρύθμιση η αυτόματη εστίαση, θα ενεργοποιηθεί όταν ανοίξετε την Κάμερα. Αν έχετε πρόβλημα με το flash κατά την εκκίνηση, απενεργοποιήστε αυτή την επιλογή</string>
+    <string name="preference_lock_video">Κλείδωμα της οθόνης κατά την εγγραφή βίντεο</string>
+    <string name="preference_lock_video_summary">Κατά την εγγραφή βίντεο, το GUI θα πρέπει να κλειδωθεί για να αποτραπεί η ακούσια διακοπή της εγγραφής. Σύρετε την οθόνη για να την ξεκλειδώσετε. Σημειώστε ότι η εγγραφή βίντεο θα σταματήσει αν η εφαρμογή είναι στο παρασκήνιο, η η οθόνη σβήσει.</string>
+    <string name="preference_rotate_preview">Περιστροφή προεπισκόπησης</string>
+    <string name="preference_rotate_preview_summary">Επιλογή για περιστροφή της προεπισκόπησης (δεν θα επηρεάσει τις επακόλουθες φωτογραφίες/βίντεο)</string>
+    <string name="preference_screen_gui">Στην οθόνη GUI...</string>
+    <string name="preference_preview_size">Μέγεθος προεπισκόπησης</string>
+    <string name="preference_ui_placement">UI τοποθέτηση</string>
+    <string name="preference_immersive_mode">Μοναδική λειτουργία</string>
+    <string name="preference_show_zoom">Εμφάνιση μεγέθυνσης</string>
+    <string name="preference_show_zoom_summary">Εμφανίζει το τρέχον επίπεδο μεγέθυνσης</string>
+    <string name="preference_show_zoom_controls">Ελεγχος μεγέθυνσης με -/+</string>
+    <string name="preference_show_zoom_controls_summary">Εμφάνιση των πλήκτρων -/+ για τον έλεγχο της μεγέθυνσης</string>
+    <string name="preference_show_zoom_slider_controls">Εμφάνιση ρυθμιστικού ελέγχου μεγέθυνσης</string>
+    <string name="preference_show_zoom_slider_controls_summary">Εμφάνιση ρυθμιστικού ελέγχου μεγέθυνσης</string>
+    <string name="preference_show_iso">Εμφάνιση ISO επιπέδου</string>
+    <string name="preference_show_iso_summary">Εμφανίζει το τρέχον ISO επίπεδο. Στην flash auto λειτουργία το φλας σύμβολο θα δείχνει οτι το φλας λειτουργεί. (Απαιτείται το Camera2 API.)</string>
+    <string name="preference_free_memory">Εμφάνιση ελεύθερης μνήμης</string>
+    <string name="preference_free_memory_summary">Εμφάνιση της ελεύθερης μνήμης τις συσκευής</string>
+    <string name="preference_show_angle">Εμφάνιση γωνίας</string>
+    <string name="preference_show_angle_summary">Εμφανίζει την γωνία προσανατολισμού στην οθόνη</string>
+    <string name="preference_show_angle_line">Εμφάνιση γωνιαίας γραμμής</string>
+    <string name="preference_show_angle_line_summary">Εμφάνιση οριζόντιας επίπεδης γραμμής</string>
+    <string name="preference_angle_highlight_color">Χρώμα Γωνίας/Υψόμετρου</string>
+    <string name="preference_angle_highlight_color_summary">Χρώμα επισήμανσης όταν η κάμερα είναι σχεδόν επίπεδη</string>
+    <string name="preference_show_geo_direction">Εμφάνιση κατεύθυνσης πυξίδας</string>
+    <string name="preference_show_geo_direction_summary">Εμφάνιση κατεύθυνσης πυξίδας στην οθόνη</string>
+    <string name="preference_show_time">Εμφάνιση ώρας</string>
+    <string name="preference_show_time_summary">Εμφανίζει την τρέχουσα ώρα στην οθόνη</string>
+    <string name="preference_show_battery">Εμφάνιση μπαταρίας</string>
+    <string name="preference_show_battery_summary">Εμφάνιση τού επιπέδου της μπαταρίας στην οθόνη</string>
+    <string name="preference_grid">Εμφάνιση πλέγματος</string>
+    <string name="grid">Πλέγμα</string> <!-- short form of Show a grid -->
+    <string name="preference_crop_guide">Εμφάνιση οδηγιών αποκοπής</string>
+    <string name="preference_crop_guide_summary">Εμφάνιση ορθογώνιου όταν εμφανίζεται οτι μία συγκεκριμένη αναλογία διαστάσεων μοιάζει χρήσιμη αν σκοπεύετε να περικόψετε την φωτογραφία/το βίντεο σε διαφορετική αναλογία. Απαιτείται η WYSIWYG λειτουργία "φωτογραφία", ή να είναι σε λειτουργία βίντεο.</string>
+    <string name="preference_show_toasts">Εμφάνιση \"toast\" μυνημάτων</string>
+    <string name="preference_show_toasts_summary">Αν θέλετε να εμφανίσετε τα αναδυόμενα \"toast\" μηνύματα</string>
+    <string name="preference_thumbnail_animation">Εμφάνιση κινούμενων μικρογραφιών</string>
+    <string name="preference_thumbnail_animation_summary">Εμφάνιση κινούμενων μικρογραφιών κατά την λήψη μιας φωτογραφίας</string>
+    <string name="preference_take_photo_border">Εμφάνιση συνόρων κατά την λήψη φωτογραφιών</string>
+    <string name="preference_take_photo_border_summary">Εμφάνιση συνόρων κατά την λήψη φωτογραφιών</string>
+    <string name="preference_keep_display_on">Διατήρηση της οθόνης ανοιχτή</string>
+    <string name="preference_keep_display_on_summary">Αν ενεργοποιηθεί αυτή η ρύθμιση, η οθόνη της συσκευής σας δεν θα σβήσει</string>
+    <string name="preference_max_brightness">Μέγιστη φωτεινότητα</string>
+    <string name="preference_max_brightness_summary">Ενεργοποίηση της μέγιστης φωτεινότητας, αντι της προεπιλεγμένης</string>
+    
+    <string name="preference_category_camera_quality">Ρυθμίσεις φωτογραφίας και βίντεο</string>
+    <string name="preference_screen_photo_settings">Ρυθμίσεις φωτογραφίας…</string>
+    <string name="preference_screen_video_settings">Ρυθμίσεις βίντεο…</string>
+    <string name="preference_screen_location_settings">Ρυθμίσεις τοποθεσίας…</string>
+    <string name="preference_resolution">Ανάλυση κάμερας</string>
+    <string name="preference_quality">Ποιότητα εικόνας</string>
+    <string name="preference_quality_summary">Ορισμός της ποιότητας αποθηκευμένων εικόνων JPEG (προεπιλογή είναι 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_raw">RAW</string>
+    <string name="preference_location">Θέση αποθήκευσης δεδομένων (Geotagging)</string>
+    <string name="preference_location_summary">Αποθήκευση δεδομένων θέσεων GPS στις φωτογραφίες/βίντεο</string>
+    <string name="preference_gps_direction">Αποθήκευση κατεύθυνσης</string>
+    <string name="preference_gps_direction_summary">Αποθήκευση κατεύθυνσης GPS στις φωτογραφίες</string>
+    <string name="preference_require_location">Απαιτούνται δεδομένα τοποθεσίας</string>
+    <string name="preference_require_location_summary">Αν τα δεδομένα τοποθεσίας είναι ενεργοποιημένα, μόνο για λήψη φωτογραφίας/βίντεο, τα δεδομένα θα είναι διαθέσιμα</string>
+    <string name="preference_stamp">Σφραγίδα φωτογραφιών</string>
+    <string name="preference_stamp_summary">Προσθήκη σφραγίδα στις φωτογραφιες με ημερομηνία και ώρα, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη</string>
+    <string name="preference_stamp_dateformat">Μορφή σφραγίδας ημερομηνίας</string>
+    <string name="preference_stamp_timeformat">Μορφή σφραγίδας ώρας</string>
+    <string name="preference_stamp_gpsformat">Μορφή σφραγίδας GPS</string>
+    <string name="preference_textstamp">Προσαρμοσμένο κείμενο</string>
+    <string name="preference_textstamp_summary">Προσθήκη σφραγίδας με προσαρμοσμένο κείμενο</string>
+    <string name="preference_stamp_fontsize">Μέγεθος γραματοσειράς</string>
+    <string name="preference_stamp_fontsize_summary">Μεγέθος γραμματοσειράς για χρήση στις σφραγίδες</string>
+    <string name="preference_stamp_font_color">Χρώμα γραμματοσειράς</string>
+    <string name="preference_stamp_font_color_summary">Χρώμα γραμματοσειράς για χρήση στις σφραγίδες</string>
+    <string name="preference_stamp_style">Στυλ κειμένου</string>
+    <string name="preference_stamp_style_summary">Στυλ κειμένου για χρήση στις σφραγίδες</string>
+    <string name="preference_background_photo_saving">Χρήση νήματος φόντου</string>
+    <string name="preference_background_photo_saving_summary">Εάν θέλετε να αποθηκεύσετε τις φωτογραφίες σε ένα νήμα φόντου (για ταχύτερη λειτουργία)</string>
+    <string name="video_quality">Ανάλυση βίντεο</string>
+    <string name="preference_force_video_4k">Καταγραφή βίντεο 4K UHD (λειτουργεί μόνο σε ορισμένες συσκευές)</string>
+    <string name="preference_force_video_4k_summary">Ενεργοποίηση της 3840x2160 ανάλυσης για την εγγραφή βίντεο στην πίσω κάμερα) - η επιλογή αυτή είναι ένα κόλπο που μπορεί να επιτρέψει σε 4K κάμερες να εκθέσουν την επιλογή για 3rd party εφαρμογές της κάμερας. Αυτό δεν είναι εγγυημένο να λειτουργήσει, παρακαλούμε να το ελέγξετε πριν από την εγγραφή.</string>
+    <string name="preference_video_stabilization">Ενεργοποίηση βίντεο σταθεροποίησης</string>
+    <string name="preference_video_stabilization_summary">Η σταθεροποίηση βίντεο, μειώνει το κούνημα λόγω της κίνησης της κάμερας, τόσο στην προεπισκόπηση αλλά και στην καταγραφή των βίντεο</string>
+    <string name="preference_video_bitrate">Βίντεο bitrate (περ.)</string>
+    <string name="preference_video_bitrate_summary">Ρύθμιση της κατά προσέγγισης bitrate του βίντεο (υψηλότερη σημαίνει καλύτερη ποιότητα, αλλά καταλαμβάνει περισσότερο χώρο στον δίσκο, καί μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο αν το επιλεγμένο bitrate δεν υποστηρίζεται)</string>
+    <string name="preference_video_fps">Ρυθμός καρέ βίντεο (περ.)</string>
+    <string name="preference_video_fps_summary">Ρύθξμιση καρέ τού βίντεο (μπορεί να είναι περίπου, δεν είναι εγγυημένο να επιτευχθεί και μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο, εάν το καρέ δεν υποστηρίζεται)</string>
+    <string name="preference_video_max_duration">Μέγιστη διάρκεια του βίντεο</string>
+    <string name="preference_video_max_duration_summary">Η καταγραφή τού βίντεο θα σταματήσει μετά την καθορισμένη διάρκεια</string>
+    <string name="preference_video_restart">Επανεκκίνηση του βίντεο μετά από την ανώτατη διάρκεια</string>
+    <string name="preference_video_restart_summary">Αν το βίντεο έχει σταματήσει μετά την μέγιστη διάρκεια (αν έχει ρυθμιστεί), η επιλογή αυτή θα επανεκκινήση το βίντεο, μέχρι τον καθορισμένο αριθμό διάρκειας</string>
+    <string name="preference_video_max_filesize">Μέγιστο μέγεθος αρχείου βίντεο</string>
+    <string name="preference_video_max_filesize_summary">Η καταγραφή τού βίντεο θα σταματήσει και/η την επανεκκίνηση του (βλ. παρακάτω επιλογή) όταν το (κατά προσέγγιση) μέγιστο μέγεθος του αρχείου έχει επιτευχθεί. Σημειώστε ότι σχεδόν όλες η Android συσκευές έχουν ένα μέγιστο μέγεθος αρχείου για βίντεο (συνήθως γύρω στα 2GB ή 4GB), αλλά αυτή η επιλογή σας επιτρέπει να ορίσετε μια συγκεκριμένη τιμή</string>
+    <string name="preference_video_restart_max_filesize">Επανεκκίνηση στο μέγιστο μέγεθος αρχείου</string>
+    <string name="preference_video_restart_max_filesize_summary">Αυτόματη επανεκκίνηση καταγραφής των βίντεο όταν το μέγιστο μέγεθος του αρχείου είναι προσβάσιμο (αν η συσκευή έχει προεπιλεγμένο μέγιστο μέγεθος του αρχείου, η έχει οριστεί από τούς χρήστες)</string>
+    <string name="preference_record_audio">Καταγραφή ήχου</string>
+    <string name="preference_record_audio_summary">Καταγραφή ήχου κατά την καταγραφή ενός βίντεο</string>
+    <string name="preference_record_audio_src">Πηγή ήχου</string>
+    <string name="preference_record_audio_src_summary">Χρήση μικροφώνου για την καταγραφή ήχου</string>
+    <string name="preference_record_audio_channels">Κανάλια ήχου</string>
+    <string name="preference_record_audio_channels_summary">Καθορισμός μονοφωνικής ή στερεοφωνικής καταγραφής ήχου (ο ήχος στέρεο υποστηρίζεται μόνο σε ορισμένες συσκευές)</string>
+    <string name="preference_video_flash">Φλας κατά την καταγραφή βίντεο</string>
+    <string name="preference_video_flash_summary">Ενεργοποίηση τού φλας κατά την καταγραφή των βίντεο (μπορεί να χρησιμοποιηθεί αν γίνεται καταγραφή από απόσταση)</string>
+    
+    <string name="preference_category_online">Διάφορα</string>
+    <string name="preference_online_help">Διαδικτυακή Βοήθεια</string>
+    <string name="preference_online_help_summary">Ανοιγμα της Open Camera ιστοσελίδας στο πρόγραμμα περιηγησής σας</string>
+    <string name="preference_donate">Δωρεά για υποστήριξη της ανάπτυξης</string>
+    <string name="preference_donate_summary">Αν σας αρέσει αυτή η εφαρμογή, παρακαλούμε κάντε μια δωρεά για υποστήριξη της ανάπτυξης. Μπορείτε να το κάνετε αυτό μέσω της επιλογής "Δωρεά" - κάντε αυτή την επιλογή για να ανοίξει η σελίδα δωρεών. Ευχαριστούμε!</string>
+    <string name="preference_use_camera2">Χρήση τού Camera2 API</string>
+    <string name="preference_use_camera2_summary">Ενεργοποίηση του Camera2 API σε συσκεύες Android 5 - προσφέρει επιπλέον χαρακτηριστικά, αλλά ενδέχεται να μην λειτουργούν σωστά σε όλες τις συσκευές (θα προκαλέσει μια επανεκκίνηση)</string>
+    <string name="preference_about">Σχετικά με</string>
+    <string name="preference_about_summary">Εφαρμογή και πληροφορίες εντοπισμού σφαλμάτων</string>
+    <string name="preference_reset">Ρυθμίσεις επαναφοράς</string>
+    <string name="preference_reset_summary">Επαναφορά όλων των Open Camera ρυθμίσεων στις προεπιλογές</string>
+    <string name="preference_reset_question">Είστε σίγουρος οτι θέλετε να γίνει, επαναφορά όλων των Open Camera ρυθμίσεων στις προεπιλογές;</string>
+
+    <string name="about_available">Διαθέσιμο</string>
+    <string name="about_not_available">Μη διαθέσιμο</string>
+    <string name="about_copy_to_clipboard">Αντιγραφή στην πρόχειρη μνήμη</string>
+    
+    <string name="take_photo">Λήψη φωτογραφίας</string>
+    <string name="gallery">Συλλογή</string>
+    <string name="exposure">Έκθεση</string>
+    <string name="exposure_lock">Κλείδωμα έκθεσης</string>
+    <string name="focus_mode">Λειτουργία Εστίασης</string>
+    <string name="flash_mode">Λειτουργία Φλας</string>
+    <string name="switch_to_front_camera">Μετάβαση στην μπροστινή κάμερα</string>
+    <string name="switch_to_back_camera">Μετάβαση στην πίσω κάμερα</string>
+    <string name="switch_to_video">Μετάβαση στην λειτουργία βίντεο</string>
+    <string name="switch_to_photo">Μετάβαση στην φωτογραφική λειτουργία</string>
+    <string name="trash">Διαγραφή της τελευταίας φωτογραφίας</string>
+    <string name="share">Κοινοποίηση φωτογραφίας</string>
+    
+    <string name="parent_folder">Γονικός φάκελος</string>
+    <string name="new_folder">Νέος φάκελος</string>
+    <string name="cant_write_folder">Αδυναμία εγγραφής σε αυτό τον φάκελο</string>
+    <string name="cant_access_folder">Αδυναμία πρόσβασης σε αυτό τον φάκελο</string>
+    <string name="enter_new_folder">Εισαγωγή νέου ονόματος φακέλου</string>
+    <string name="failed_create_folder">Αδυναμία δημιουργίας φακέλου</string>
+    <string name="folder_exists">Ο φάκελος υπάρχει ήδη</string>
+
+    <string name="saf_select_save_location">Επιλογή χώρου αποθήκευσης</string>
+    <string name="saf_cancelled">Ακύρωση πρόσβασης στον χώρο αποθήκευσης</string>
+    <string name="saf_permission_failed">Αδυναμία αποθήκευσης σε αυτό τον φάκελο</string>
+
+    <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
+    <string name="permission_record_audio_not_available">Η άδεια για χρήση μικροφώνου δεν είναι διαθέσιμη</string>
+    <string name="permission_location_not_available">Η άδεια για χρήση τού χώρου αποθήκευσης δεν είναι διαθέσιμη</string>
+
+    <string name="start_video">Εναρξη καταγραφής βίντεο</string>
+    <string name="stop_video">Τέλος καταγραφής βίντεο</string>
+
+    <string name="max_filesize">Μέγιστο μέγεθος αρχείου</string>
+    <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+    <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
+
+    <string name="audio_control_start">Εναρξη αναπαραγωγής ήχου</string>
+    <string name="audio_control_stop">Τέλος αναπαραγωγής ήχου</string>
+    <string name="speech_recognizer_started">Πείτε \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    <string name="audio_listener_started">Κάντε έναν δυνατό θόρυβο</string>
+
+    <string name="auto_stabilise_info">Το αυτόματο επίπεδο θα περιστρέφει αυτόματα τις φωτογραφίες ώστε να εμφανίζονται επίπεδες.\n\nΣημειώστε ότι αυτό σημαίνει ότι οι εικόνες θα έχουν ελαφρώς χαμηλότερη ανάλυση (λόγω της περιστροφής και της περικοπής\'s που απαιτείται).</string>
+    <string name="raw_info">DNG αρχεία περιέχουν πλήρες ασυμπίεστα και μη επεξεργασμένα στοιχεία από την φωτογραφική μηχανή σας.\n\nΟι περισσότερες εφαρμογές δεν\'t αναγνωρίζουν αρχείαDNG, αντίθετα θα πρέπει να χρησιμοποιείται εξειδικευμένες εφαρμογές, όπως το Snapseed η το Lightroom.\n\nΣημειώστε ότι οι διάφορες επιλογές επεξεργασίας όπως η "Σφραγίδα φωτογραφιών" και "Αυτόματο επίπεδο" ισχύουν μόνο για εικόνες JPEG, και όχι DNG.\n\nΤα DNG αρχεία καταλαμβάνουν πολύ χώρο, ένα αρχείο εξερευνητής μπορεί να είναι χρήσιμο για τη μεταφορά ή τη διαγραφή τους.\n\nΤα DNG αρχεία αποθηκεύονται μόνο στο πρότυπο.</string>
+    <string name="hdr_info">Η λειτουργία HDR είναι χρήσιμη για λήψεις με μεγάλες διαφορές στην φωτεινότητα. Λειτουργεί με πολλαπλές λήψεις σε διαφορετικές εκθέσεις, και τις συνδυάζει για να δημιουργήσει την τελική εικόνα.\n\nΣημειώστε ότι το HDR δεν είναι κατάλληλο για σκηνές με γρήγορη κίνηση, και μπορεί να οδηγήσει σε λιγότερο ακριβή αναπαραγωγή των χρωμάτων.\n\nΗ λήψη φωτογραφιών σε λειτουργία HDR θα είναι πιο αργή.</string>
+
+    <string name="dont_show_again">Καμμία εμφάνιση ξανά</string>
+
+    <string name="photo_mode">Λειτουργία Φωτογραφίας</string>
+    <string name="photo_mode_standard">Στα</string>
+    <string name="photo_mode_hdr">HDR</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing_full">Εκθεση υποστηρίγματος</string>
+    <string name="photo_mode_noise_reduction">NR</string>
+    <string name="preference_category_stamp">Σφραγίδα φωτογραφίας</string>
+    <string name="preference_hdr_save_expo">Αποθήκευση όλων των εικόνων για την λειτουργία HDR</string>
+    <string name="preference_hdr_save_expo_summary">Αν ειναι ενεργοποιημένη αυτή η ρύθμιση, κατά την χρήση της HDR λειτουργίας "φωτογραφία", οι τρείς βάσεις εικόνων θα αποθηκευθούν, καθώς και η τελική HDR φωτογραφία. Αυτό θα κάνει την αποθήκευση πιο αργή, ειδικά αν επιλεγχθούν επιλογές, όπως \"Σφραγίδα φωτογραφιών\" η Αυτόματο επίπεδο.</string>
+
+    <string name="no_permission">Η ΑΔΕΙΑ ΧΡΗΣΗΣ ΔΕΝ ΕΙΝΑΙ ΔΙΑΘΕΣΙΜΗ</string>
+    <string name="permission_rationale_title">Απαιτείται άδεια χρήσης</string>
+    <string name="permission_rationale_camera">Απαιτείται άδεια χρήσης για ενεργοποίηση της κάμερας</string>
+    <string name="permission_rationale_storage">Απαιτείται άδεια αποθήκευσης για αποθήκευση</string>
+    <string name="permission_rationale_record_audio">Απαιτείται άδεια χρήσης μικροφώνου για καταγραφή ήχου</string>
+    <string name="permission_rationale_location">Απαιτείται άδεια χρήσης τοποθεσίας</string>
+
+    <string name="preference_category_photo_debugging">Επιλογές εντοπισμού σφαλμάτων</string>
+    <string name="preference_category_video_debugging">Επιλογές εντοπισμού σφαλμάτων</string>
+    <string name="preference_camera2_fake_flash">Χρήση εναλλακτικής μεθόδου φλας</string>
+    <string name="preference_camera2_fake_flash_summary">Ενεργοποιήστε αυτό αν η συσκευή σας έχει λανθασμένη συμπεριφορά σε σχέση με το Camera2 API</string>
+
+    <string name="preference_expo_bracketing_n_images">Εκθεση υποστηρίγματος</string>
+    <string name="preference_expo_bracketing_n_images_summary">Αριθμός των εικόνων σε έκθεση υποστηρίγματος</string>
+    <string name="preference_expo_bracketing_stops">Τέλος έκθεσης υποστηρίγματος</string>
+    <string name="preference_expo_bracketing_stops_summary">Πόσες στάσεις να αφαιρεθούν/προστεθούν για την πιο σκοτεινή/φωτεινή εικόνα</string>
+
+    <string name="preference_nr_save">Μείωση θορύβου αυθεντικών εικόνων</string>
+    <string name="preference_nr_save_summary">Αν θέλετε αποθηκεύστε τις αυθεντικές εικόνες με μείωση θορύβου λειτουργίας. Σημείωση αυτό μπορεί να κάνει την αποθήκευση φωτογραφιών πολύ πιο αργή.</string>
+
+    <string name="preference_nr_save_no">Οχι αποθήκευση αυθεντικών φωτογραφιών</string>
+    <string name="preference_nr_save_single">Αποθήκευση μίας αυθεντικής φωτογραφίας</string>
+    <string name="preference_nr_save_all">Αποθήκευση όλων των αυθεντικών φωτογραφιών</string>
+
+    <string name="seconds_abbreviation">δευ</string> <!-- short for seconds -->
+
+    <string name="video_no_free_space">Δεν υπάρχει ελεύθερος χώρος για καταγραφή βίντεο</string>
+    <string name="video_power_critical">Η καταγραφή σταμάτησε\nΤο επίπεδο της μπαταρίας είναι πολύ χαμηλό</string>
+    <string name="preference_video_low_power_check">Ελεγχος επιπέδου μπαταρίας</string>
+    <string name="preference_video_low_power_check_summary">Τέλος της καταγραφής βίντεο, αν το επίπεδο της μπαταρίας είναι εξαιρετικά χαμηλό. Αυτό βοηθά στην μείωση του κινδύνου να καταστραφή το βίντεο αν η συσκευή σας ξαφνικά απενεργοποιηθεί λόγω μπαταρίας.</string>
+
+    <string name="dark">Σκοτάδι</string> <!-- exposure compensation dark -->
+    <string name="bright">Φώς</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Ταχύτητα κλείστρου</string>
+
+    <string name="camera_error">Σοβαρό σφάλμα κάμερας</string>
+
+    <string name="preference_camera2_fast_burst">Ενεργοποίηση της γρήγορης HDR/expo έκρηξης</string>
+    <string name="preference_camera2_fast_burst_summary">Επιτρέπει την ταχύτερη σύλληψη HDR/expo λήψεων. Αν απενεργοποιηθεί, η συσκευή σας θα έχει προβλήματα κατά την λήψη φωτογραφιών μέσω της HDR λειτουργίας.</string>
+
+    <string name="camera">Κάμερα</string>
+    <string name="record_video">Καταγραφή βίντεο</string>
+    <string name="selfie">Selfie</string>
+
+    <string name="preference_front_camera_mirror">Μπροστινός φακός κάμερας</string>
+    <string name="preference_front_camera_mirror_summary">Λήψη φωτογραφιών από τον μπροστινό φακό της κάμερας.</string>
+
+    <string name="preference_calibrate_level">Βαθμονόμηση τού επιπέδου της γωνίας</string>
+    <string name="preference_calibrate_level_summary">Αυτή η επιλογή βαθμονομεί την συσκευή σας\'sΑν το αυτόματο επίπεδο και το επίπεδο οθόνης/γωνίας λειτουργούν σωστά.</string>
+    <string name="preference_calibrate_level_dialog">Παρακαλώ τοποθετήστε την συσκευή σας σε μία επίπεδη, οριζόντια επιφάνεια, έτσι ώστε να είναι σε επίπεδη θέση (είτε σε κατακόρυφο είτε σε οριζόντιο προσανατολισμό) και, στην συνέχεια, επιλέξτε Βαθμονόμηση.\n\nΠατήστε Επαναφορά για να καταργήσετε την βαθμονόμηση από την συσκευή σας.\n\nΠατήστε το πίσω πλήκτρο για ακύρωση.</string>
+    <string name="preference_calibrate_level_calibrate">Βαθμονόμηση</string>
+    <string name="preference_calibrate_level_reset">Επαναφορά</string>
+    <string name="preference_calibrate_level_calibrated">Βαθμός Βαθμονόμησης</string>
+    <string name="preference_calibrate_level_calibration_reset">Επαναφορά βαθμού βαθμονόμησης</string>
+
+    <string name="photo_mode_dro">DRO</string>
+
+    <string name="preference_show_pitch_lines">Εμφάνιση τονικών γραμμών</string>
+    <string name="preference_show_pitch_lines_summary">Εμφάνιση οριζώντιον τονικών γραμμών</string>
+    <string name="preference_show_geo_direction_lines">Εμφάνιση ευθυγραμμικών γραμμών</string>
+    <string name="preference_show_geo_direction_lines_summary">Εμφάνιση ευθυγραμμικών γραμμών</string>
+    <string name="preference_video_subtitle">Βίντεο υπότιτλοι</string>
+    <string name="preference_video_subtitle_summary">Δημιουργία αρχείου υποτίτλων (.SRT) που αποθηκεύει την ημερομηνία και την ώρα, και, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη</string>
+
+    <string name="duration_unlimited">Απεριόριστα</string>
+    <string name="duration_3s">3 δευτερόλεπτα</string>
+    <string name="duration_5s">5 δευτερόλεπτα</string>
+    <string name="duration_10s">10 δευτερόλεπτα</string>
+    <string name="duration_15s">15 δευτερόλεπτα</string>
+    <string name="duration_30s">30 δευτερόλεπτα</string>
+    <string name="duration_1m">1 λεπτό</string>
+    <string name="duration_2m">2 λεπτά</string>
+    <string name="duration_3m">3 λεπτά</string>
+    <string name="duration_4m">4 λεπτά</string>
+    <string name="duration_5m">5 λεπτά</string>
+    <string name="duration_6m">6 λεπτά</string>
+    <string name="duration_7m">7 λεπτά</string>
+    <string name="duration_8m">8 λεπτά</string>
+    <string name="duration_9m">9 λεπτά</string>
+    <string name="duration_10m">10 λεπτά</string>
+    <string name="duration_11m">11 λεπτά</string>
+    <string name="duration_12m">12 λεπτά</string>
+    <string name="duration_15m">15 λεπτά</string>
+    <string name="duration_20m">20 λεπτά</string>
+    <string name="duration_25m">25 λεπτά</string>
+    <string name="duration_30m">30 λεπτά</string>
+    <string name="duration_45m">45 λεπτά</string>
+    <string name="duration_1h">1 ώρα</string>
+
+    <string name="preference_show_take_photo">Εμφάνιση εικονιδίου λήψης φωτογραφίας</string>
+    <string name="preference_show_take_photo_summary">Εμφάνιση τού εικονιδίου για τη λήψη φωτογραφιών και την καταγραφή βίντεο. Χρήσιμο αν η συσκευή σας έχει ένα τέτοιο πλήκτρο και \'d μάλλον θα χρησιμευσεί.</string>
+
+    <string name="video_pause">Το βίντεο τέθεικε σε παύση</string>
+    <string name="video_resume">Το βίντεο συνεχίζεται</string>
+    <string name="pause_video">Διακοπή καταγραφής βίντεο</string>
+    <string name="resume_video">Συνέχεια καταγραφής βίντεο</string>
+
+    <string name="capturing">Λήψη...</string>
+
+    <string name="audio_listener_failed">Αδυναμία ανάλυσης ήχου</string>
+    <string name="failed_to_process_hdr">Αδυναμία δημιουργίας HDR εικόνων</string>
+
+    <string name="white_balance_auto">Αυτόματα</string>
+    <string name="white_balance_cloudy">Θολά</string>
+    <string name="white_balance_daylight">φως της ημέρας</string>
+    <string name="white_balance_fluorescent">Φθορισμός</string>
+    <string name="white_balance_incandescent">Πυράκτωση</string>
+    <string name="white_balance_shade">Σκιά</string>
+    <string name="white_balance_twilight">Σούρουπο</string>
+    <string name="white_balance_warm">Ζέστη</string>
+    <string name="white_balance_manual">Αυτόματα</string>
+
+    <string name="scene_mode_action">Δράση</string>
+    <string name="scene_mode_barcode">Κώδικας φραγμών</string>
+    <string name="scene_mode_beach">Παραλία</string>
+    <string name="scene_mode_candlelight">φως των κεριών</string>
+    <string name="scene_mode_auto">Αυτόματα</string>
+    <string name="scene_mode_fireworks">Πυροτεχνήματα</string>
+    <string name="scene_mode_landscape">Τοπίο</string>
+    <string name="scene_mode_night">Νύχτα</string>
+    <string name="scene_mode_night_portrait">Νυχτερινό πορτραίτο</string>
+    <string name="scene_mode_party">Πάρτυ</string>
+    <string name="scene_mode_portrait">Πορτραίτο</string>
+    <string name="scene_mode_snow">Χιόνι</string>
+    <string name="scene_mode_sports">Αθλήματα</string>
+    <string name="scene_mode_steady_photo">Σταθερή φωτογραφία</string>
+    <string name="scene_mode_sunset">Ηλιοβασίλεμα</string>
+    <string name="scene_mode_theatre">Θέατρο</string>
+
+    <string name="color_effect_aqua">Νερό</string>
+    <string name="color_effect_blackboard">Μαυροπίνακας</string>
+    <string name="color_effect_mono">Μονό</string>
+    <string name="color_effect_negative">Αρνητικά</string>
+    <string name="color_effect_none">Τίποτα</string>
+    <string name="color_effect_posterize">Ποστεροποίηση</string>
+    <string name="color_effect_sepia">Σέπια</string>
+    <string name="color_effect_solarize">Ηλιος</string>
+    <string name="color_effect_whiteboard">Λευκός πίνακας</string>
+
+    <string name="whats_new">Τι Νέα:</string>
+    <string name="donate">Δωρεά</string>
+
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="face_detected">πρόσωπο</string>
+    <string name="faces_detected">πρόσωπα</string>
+    <string name="left_of_screen">στα αριστερά της οθόνης</string>
+    <string name="right_of_screen">στα δεξιά της οθόνης</string>
+    <string name="top_of_screen">στο πάνω μέρος της οθόνης</string>
+    <string name="bottom_of_screen">στο κάτω μέρος της οθόνης</string>
+    <string name="centre_of_screen">στο κέντρο</string>
+
+    <string name="high_speed">Υψηλή Ταχύτητα</string> <!-- in the sense of high speed video frame rates -->
+
+    <string name="preference_video_fps_default">Προεπιλογή</string>
+    <string name="preference_video_fps_15">15</string>
+    <string name="preference_video_fps_24">24</string>
+    <string name="preference_video_fps_25">25</string>
+    <string name="preference_video_fps_30">30</string>
+    <string name="preference_video_fps_60">60</string>
+    <string name="preference_video_fps_96">96</string>
+    <string name="preference_video_fps_100">100</string>
+    <string name="preference_video_fps_120">120</string>
+    <string name="preference_video_fps_240">240</string>
+
+</resources>
