@@ -353,6 +353,9 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
     float3 hdr = rgb;
     float value = fmax(hdr.r, hdr.g);
     value = fmax(value, hdr.b);
+    //hdr *= gain;
+    //const float alpha = 0.7f;
+    //const saturation_level = 10;
     if( value <= low_x ) {
         // don't scale
     }
@@ -363,15 +366,25 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         // This code is critical for performance!
         //float new_value = gain_A * value + gain_B;
         //hdr *= new_value/value;
+
         hdr *= (gain_A + gain_B/value);
+
+        //float new_value = gain_A * value + gain_B;
+        //float shift = new_value - value;
+        //hdr += shift;
+        //hdr = (1.0f-alpha)*(hdr+shift) + alpha*hdr*new_value/value;
+        //hdr = (hdr+saturation_level)*new_value/(value+saturation_level);
     }
-    /*if( value <= mid_x ) {
-        hdr *= gain;
-    }*/
     else {
         float new_value = powr(value/max_x, gamma) * 255.0f;
+
         float gamma_scale = new_value / value;
         hdr *= gamma_scale;
+
+        //float shift = new_value - value;
+        //hdr += shift;
+        //hdr = (1.0f-alpha)*(hdr+shift) + alpha*hdr*new_value/value;
+        //hdr = (hdr+saturation_level)*new_value/(value+saturation_level);
     }
 
     // apply gamma correction
