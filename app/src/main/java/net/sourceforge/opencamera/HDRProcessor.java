@@ -2428,6 +2428,8 @@ public class HDRProcessor {
 		if( iso <= 120 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
 			ideal_brightness = 199;
+			// don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
+			max_gain_factor = 3;
 		}
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
@@ -2488,7 +2490,8 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use piecewise gain/gamma");
 			// use piecewise function with gain and gamma
-			float mid_y = 0.5f*255.0f;
+			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6
+			float mid_y = 0.6f*255.0f;
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
