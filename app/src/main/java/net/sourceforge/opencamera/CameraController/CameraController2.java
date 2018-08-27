@@ -4568,7 +4568,18 @@ public class CameraController2 extends CameraController {
 				distance = target;
 			}
 			else {
-				float alpha = ((float)i)/(count-1.0f);
+				//float alpha = ((float)i)/(count-1.0f);
+				// rather than linear interpolation, we use log, see https://stackoverflow.com/questions/5215459/android-mediaplayer-setvolume-function
+				// this gives more shots are closer focus distances
+				int value = i;
+				if( real_focus_distance_s > real_focus_distance_e ) {
+					// if source is further than target, we still want the interpolation distances to be the same, but in reversed order
+					value = count-1-i;
+				}
+				float alpha = (float)(1.0-Math.log(count-value)/Math.log(count));
+				if( real_focus_distance_s > real_focus_distance_e ) {
+					alpha = 1.0f-alpha;
+				}
 				float real_distance = (1.0f-alpha)*real_focus_distance_s + alpha*real_focus_distance_e;
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "    alpha: " + alpha);
