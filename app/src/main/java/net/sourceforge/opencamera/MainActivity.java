@@ -911,6 +911,56 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private int magnetic_accuracy = -1;
 	private AlertDialog magnetic_accuracy_dialog;
 
+	private boolean magneticListenerIsRegistered;
+
+	/** Registers the magnetic sensor, only if it's required (by user preferences), and hasn't already
+	 *  been registered.
+	 *  If the magnetic sensor was previously registered, but is no longer required by user preferences,
+	 *  then it is unregistered.
+	 */
+	private void registerMagneticListener() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		if( !magneticListenerIsRegistered ) {
+			if( needsMagneticSensor(sharedPreferences) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "register magneticListener");
+				mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
+				magneticListenerIsRegistered = true;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't register magneticListener as not needed");
+			}
+		}
+		else {
+			if( needsMagneticSensor(sharedPreferences) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "magneticListener already registered");
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "magneticListener already registered but no longer needed");
+				mSensorManager.unregisterListener(magneticListener);
+				magneticListenerIsRegistered = false;
+			}
+		}
+	}
+
+	/** Unregisters the magnetic sensor, if it was registered.
+	 */
+	private void unregisterMagneticListener() {
+		if( magneticListenerIsRegistered ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "unregister magneticListener");
+			mSensorManager.unregisterListener(magneticListener);
+			magneticListenerIsRegistered = false;
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "magneticListener wasn't registered");
+		}
+	}
+
 	private final SensorEventListener magneticListener = new SensorEventListener() {
 
 		@Override
@@ -993,9 +1043,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		else {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			if( !applicationInterface.getGeodirectionPref() &&
-					!sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false) &&
-					!sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false) ) {
+			if( !needsMagneticSensor(sharedPreferences) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "don't need magnetic sensor");
 				// note, we shouldn't set shown_magnetic_accuracy_dialog to true here, otherwise we won't pick up if the user enables one of these options
@@ -1013,6 +1061,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				setMagneticAccuracyDialogText();
 			}
 		}
+	}
+
+	/* Whether the user preferences indicate that we need the magnetic sensor to be enabled.
+	 */
+	private boolean needsMagneticSensor(SharedPreferences sharedPreferences) {
+		if( applicationInterface.getGeodirectionPref() ||
+				sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false) ||
+				sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false) ) {
+			return true;
+		}
+		return false;
 	}
 
 	/* To support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie .
@@ -1042,7 +1101,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		getWindow().getDecorView().getRootView().setBackgroundColor(Color.BLACK);
 
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
+        registerMagneticListener();
         orientationEventListener.enable();
 
         registerReceiver(cameraReceiver, new IntentFilter("com.miband2.action.CAMERA"));
@@ -1089,7 +1148,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         super.onPause(); // docs say to call this before freeing other things
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
-        mSensorManager.unregisterListener(magneticListener);
+        unregisterMagneticListener();
         orientationEventListener.disable();
         try {
 			unregisterReceiver(cameraReceiver);
@@ -1787,6 +1846,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		preview.updateFocus(saved_focus_value, true, false);
     	}*/
 
+        registerMagneticListener(); // check whether we need to register or unregister the magnetic listener
     	checkMagneticAccuracy();
 
 		if( MyDebug.LOG ) {
