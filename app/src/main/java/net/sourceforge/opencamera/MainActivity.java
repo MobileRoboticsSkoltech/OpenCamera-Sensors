@@ -909,6 +909,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	};
 	
 	private int magnetic_accuracy = -1;
+	private AlertDialog magnetic_accuracy_dialog;
 
 	private final SensorEventListener magneticListener = new SensorEventListener() {
 
@@ -918,7 +919,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "magneticListener.onAccuracyChanged: " + accuracy);
 			//accuracy = SensorManager.SENSOR_STATUS_ACCURACY_LOW; // test
 			MainActivity.this.magnetic_accuracy = accuracy;
+			setMagneticAccuracyDialogText(); // update if a dialog is already open for this
 			checkMagneticAccuracy();
+
+			// test accuracy changing after dialog opened:
+			/*Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				public void run() {
+					MainActivity.this.magnetic_accuracy = SensorManager.SENSOR_STATUS_ACCURACY_HIGH;
+					setMagneticAccuracyDialogText();
+					checkMagneticAccuracy();
+				}
+			}, 5000);*/
 		}
 
 		@Override
@@ -926,6 +938,37 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			preview.onMagneticSensorChanged(event);
 		}
 	};
+
+	private void setMagneticAccuracyDialogText() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setMagneticAccuracyDialogText()");
+		if( magnetic_accuracy_dialog != null ) {
+			String message = getResources().getString(R.string.magnetic_accuracy_info) + " ";
+			switch( magnetic_accuracy ) {
+				case SensorManager.SENSOR_STATUS_UNRELIABLE:
+					message += getResources().getString(R.string.accuracy_unreliable);
+					break;
+				case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
+					message += getResources().getString(R.string.accuracy_low);
+					break;
+				case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
+					message += getResources().getString(R.string.accuracy_medium);
+					break;
+				case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
+					message += getResources().getString(R.string.accuracy_high);
+					break;
+				default:
+					message += getResources().getString(R.string.accuracy_unknown);
+					break;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "message: " + message);
+			magnetic_accuracy_dialog.setMessage(message);
+		}
+		else {
+			magnetic_accuracy_dialog = null;
+		}
+	}
 
 	private boolean shown_magnetic_accuracy_dialog = false; // whether the dialog for poor magnetic accuracy has been shown since application start
 
@@ -965,8 +1008,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "show dialog for magnetic accuracy");
-				mainUI.showInfoDialog(R.string.magnetic_accuracy_title, R.string.magnetic_accuracy_info, PreferenceKeys.MagneticAccuracyPreferenceKey);
 				shown_magnetic_accuracy_dialog = true;
+				magnetic_accuracy_dialog = mainUI.showInfoDialog(R.string.magnetic_accuracy_title, 0, PreferenceKeys.MagneticAccuracyPreferenceKey);
+				setMagneticAccuracyDialogText();
 			}
 		}
 	}
@@ -1957,6 +2001,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		
 		initImmersiveMode();
 		camera_in_background = false;
+
+		magnetic_accuracy_dialog = null; // if the magnetic accuracy was opened, it must have been closed now
     }
     
     /** Sets the window flags for when the settings window is open.

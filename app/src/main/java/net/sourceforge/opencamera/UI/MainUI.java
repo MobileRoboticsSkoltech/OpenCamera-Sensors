@@ -1341,11 +1341,13 @@ public class MainUI {
 	 * @param info_id Resource id for dialog text string.
 	 * @param info_preference_key Preference key to set in SharedPreferences if the user selects to
 	 *                            not show the dialog again.
+	 * @return The AlertDialog that was created.
 	 */
-	public void showInfoDialog(int title_id, int info_id, final String info_preference_key) {
+	public AlertDialog showInfoDialog(int title_id, int info_id, final String info_preference_key) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(main_activity);
         alertDialog.setTitle(title_id);
-        alertDialog.setMessage(info_id);
+        if( info_id != 0 )
+        	alertDialog.setMessage(info_id);
         alertDialog.setPositiveButton(android.R.string.ok, null);
         alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
 			@Override
@@ -1374,6 +1376,7 @@ public class MainUI {
 			}
         });
 		main_activity.showAlert(alert);
+		return alert;
     }
 
 	/** Returns a (possibly translated) user readable string for a white balance preference value.
