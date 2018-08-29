@@ -908,9 +908,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	};
 	
+	private int magnetic_accuracy = -1;
+
 	private final SensorEventListener magneticListener = new SensorEventListener() {
+
 		@Override
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "magneticListener.onAccuracyChanged: " + accuracy);
+			//accuracy = SensorManager.SENSOR_STATUS_ACCURACY_LOW; // test
+			MainActivity.this.magnetic_accuracy = accuracy;
+			checkMagneticAccuracy();
 		}
 
 		@Override
@@ -918,6 +926,50 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			preview.onMagneticSensorChanged(event);
 		}
 	};
+
+	private boolean shown_magnetic_accuracy_dialog = false; // whether the dialog for poor magnetic accuracy has been shown since application start
+
+	/** Checks whether the user should be informed about poor magnetic sensor accuracy, and shows
+	 *  the dialog if so.
+	 */
+	private void checkMagneticAccuracy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "checkMagneticAccuracy(): " + magnetic_accuracy);
+		if( magnetic_accuracy != SensorManager.SENSOR_STATUS_UNRELIABLE && magnetic_accuracy != SensorManager.SENSOR_STATUS_ACCURACY_LOW ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "accuracy is good enough (or accuracy not yet known)");
+		}
+		else if( shown_magnetic_accuracy_dialog ) {
+			// if we've shown the dialog since application start, then don't show again even if the user didn't click to not show again
+			if( MyDebug.LOG )
+				Log.d(TAG, "already shown_magnetic_accuracy_dialog");
+		}
+		else if( preview.isTakingPhotoOrOnTimer() || preview.isVideoRecording() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "don't disturb whilst taking photo, on timer, or recording video");
+		}
+		else {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			if( !applicationInterface.getGeodirectionPref() &&
+					!sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false) &&
+					!sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't need magnetic sensor");
+				// note, we shouldn't set shown_magnetic_accuracy_dialog to true here, otherwise we won't pick up if the user enables one of these options
+			}
+			else if( sharedPreferences.contains(PreferenceKeys.MagneticAccuracyPreferenceKey) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "user selected to no longer show the dialog");
+				shown_magnetic_accuracy_dialog = true; // also set this flag, so future calls to checkMagneticAccuracy() will exit without needing to get/read the SharedPreferences
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "show dialog for magnetic accuracy");
+				mainUI.showInfoDialog(R.string.magnetic_accuracy_title, R.string.magnetic_accuracy_info, PreferenceKeys.MagneticAccuracyPreferenceKey);
+				shown_magnetic_accuracy_dialog = true;
+			}
+		}
+	}
 
 	/* To support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie .
 	 * Allows using the Mi Band 2 as a Bluetooth remote for Open Camera to take photos or start/stop
@@ -1307,8 +1359,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				case "preference_show_angle_line":
 				case "preference_show_pitch_lines":
 				case "preference_angle_highlight_color":
-				case "preference_show_geo_direction":
-				case "preference_show_geo_direction_lines":
+				//case "preference_show_geo_direction": // don't whitelist these, as if enabled we need to call checkMagneticAccuracy()
+				//case "preference_show_geo_direction_lines": // as above
 				case "preference_show_battery":
 				case "preference_show_time":
 				case "preference_free_memory":
@@ -1398,6 +1450,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());
 		putBundleExtra(bundle, "white_balances", this.preview.getSupportedWhiteBalances());
 		putBundleExtra(bundle, "isos", this.preview.getSupportedISOs());
+		bundle.putInt("magnetic_accuracy", magnetic_accuracy);
 		bundle.putString("iso_key", this.preview.getISOKey());
 		if( this.preview.getCameraController() != null ) {
 			bundle.putString("parameters_string", preview.getCameraController().getParametersString());
@@ -1689,6 +1742,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "switch focus back to: " + saved_focus_value);
     		preview.updateFocus(saved_focus_value, true, false);
     	}*/
+
+    	checkMagneticAccuracy();
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: done: " + (System.currentTimeMillis() - debug_time));

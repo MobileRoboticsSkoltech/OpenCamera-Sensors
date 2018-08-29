@@ -1027,6 +1027,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 							}
 						}
 
+						int magnetic_accuracy = bundle.getInt("magnetic_accuracy");
+						about_string.append("\nMagnetic accuracy?: ");
+						about_string.append(magnetic_accuracy);
+
 						about_string.append("\nUsing SAF?: ");
 						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
                 		String save_location = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");

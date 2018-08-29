@@ -7,7 +7,9 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.R;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -1331,6 +1333,48 @@ public class MainUI {
 		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
 			keydown_volume_down = false;
 	}
+
+	/** Shows an information dialog, with a button to request not to show again.
+	 *  Note it's up to the caller to check whether the info_preference_key (to not show again) was
+	 *  already set.
+	 * @param title_id Resource id for title string.
+	 * @param info_id Resource id for dialog text string.
+	 * @param info_preference_key Preference key to set in SharedPreferences if the user selects to
+	 *                            not show the dialog again.
+	 */
+	public void showInfoDialog(int title_id, int info_id, final String info_preference_key) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(main_activity);
+        alertDialog.setTitle(title_id);
+        alertDialog.setMessage(info_id);
+        alertDialog.setPositiveButton(android.R.string.ok, null);
+        alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "user clicked dont_show_again for info dialog");
+				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        		SharedPreferences.Editor editor = sharedPreferences.edit();
+        		editor.putBoolean(info_preference_key, true);
+        		editor.apply();
+			}
+        });
+
+		main_activity.showPreview(false);
+		main_activity.setWindowFlagsForSettings();
+
+		AlertDialog alert = alertDialog.create();
+		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "info dialog dismissed");
+        		main_activity.setWindowFlagsForCamera();
+        		main_activity.showPreview(true);
+			}
+        });
+		main_activity.showAlert(alert);
+    }
 
 	/** Returns a (possibly translated) user readable string for a white balance preference value.
 	 *  If the value is not recognised (this can happen for the old Camera API, some devices can

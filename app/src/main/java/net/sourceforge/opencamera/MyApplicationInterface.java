@@ -831,7 +831,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getBoolean(PreferenceKeys.RequireLocationPreferenceKey, false);
     }
     
-    private boolean getGeodirectionPref() {
+    boolean getGeodirectionPref() {
     	return sharedPreferences.getBoolean(PreferenceKeys.GPSDirectionPreferenceKey, false);
     }
     

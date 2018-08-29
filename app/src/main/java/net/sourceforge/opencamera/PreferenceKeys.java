@@ -27,6 +27,10 @@ public class PreferenceKeys {
 	 */
 	public static final String RawInfoPreferenceKey = "done_raw_info";
 
+    /** If this preference is set, no longer show the dialog for poor magnetic accuracy
+	 */
+	public static final String MagneticAccuracyPreferenceKey = "done_magnetic_accuracy";
+
 	public static final String UseCamera2PreferenceKey = "preference_use_camera2";
 
     public static String getFlashPreferenceKey(int cameraId) {
