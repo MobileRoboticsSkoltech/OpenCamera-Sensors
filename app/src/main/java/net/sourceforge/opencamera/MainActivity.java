@@ -1041,6 +1041,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "don't disturb whilst taking photo, on timer, or recording video");
 		}
+		else if( camera_in_background ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "don't show magnetic accuracy dialog due to camera in background");
+			// don't want to show dialog if another is open, or in settings, etc
+		}
 		else {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			if( !needsMagneticSensor(sharedPreferences) ) {
