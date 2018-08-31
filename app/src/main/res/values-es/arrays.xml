@@ -72,7 +72,7 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_burst_mode_entries">
-        <item>Off</item>
+        <item>Desactivado</item>
         <item>2x</item>
         <item>3x</item>
         <item>4x</item>
@@ -390,7 +390,7 @@
         <item>-2</item>
     </string-array>
     <string-array name="preference_video_max_filesize_entries">
-        <item>Device default</item>
+        <item>Predeterminado por el dispositivo</item>
         <item>100MB</item>
         <item>200MB</item>
         <item>300MB</item>
@@ -442,8 +442,8 @@
         <item>preference_front_camera_mirror_photo</item>
     </string-array>
     <string-array name="preference_video_subtitle_entries">
-        <item>No subtitles</item>
-        <item>Record subtitles</item>
+        <item>Sin subtítulos</item>
+        <item>Grabar subtítulos</item>
     </string-array>
     <string-array name="preference_video_subtitle_values">
         <item>preference_video_subtitle_no</item>

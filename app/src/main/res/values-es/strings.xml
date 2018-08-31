@@ -16,7 +16,7 @@
     <string name="choose_another_folder">Seleccione otra carpeta</string>
     <string name="changed_save_location">Cambiar ruta de guardado a:</string>
     <string name="stopped_recording_video">La grabación de video se ha detenido</string>
-    <string name="repeats_to_go">repeats to go</string> <!--  intentionally starts lower case -->
+    <string name="repeats_to_go">repite para ir</string> <!--  intentionally starts lower case -->
     <string name="failed_to_reconnect_camera">Error al volver a conectar a la cámara</string>
     <string name="video_may_be_corrupted">Error, el archivo de vídeo puede estar dañado</string>
     <string name="not_supported">no soportado en tu dispositivo</string> <!--  intentionally starts lower case -->
@@ -40,12 +40,12 @@
     <string name="failed_to_save_video">Error al guardar el video</string>
     <string name="failed_to_record_video">Error al grabar el video</string>
     <string name="started_recording_video">Grabando</string>
-    <string name="sorry">Lo sentimos</string>
+    <string name="sorry">Lo lamento</string>
     <string name="failed_to_save_photo">Error al guardar foto</string>
-    <string name="failed_to_save_photo_raw">Failed to save RAW photo</string>
-    <string name="failed_to_auto_stabilise">Failed to auto-level</string>
+    <string name="failed_to_save_photo_raw">Error al guardar la foto RAW</string>
+    <string name="failed_to_auto_stabilise">Error del nivel automático</string>
     <string name="failed_to_start_camera_preview">Error al iniciar la vista previa de la cámara</string>
-    <string name="taking_photo">Taking photo</string>
+    <string name="taking_photo">Tomando foto</string>
     <string name="failed_to_take_picture">Error al tomar foto</string>
     <string name="location_not_available">Ubicación GPS no está disponible</string>
     <string name="photo_deleted">Foto eliminada</string>
@@ -53,7 +53,7 @@
     <string name="screen_is_locked">La pantalla esta bloqueada\ndeslize el dedo por la\npantalla para desbloquear</string>
     <string name="unlocked">Desbloqueado</string>
     <string name="auto_stabilise_not_supported">Lo sentimos, auto-estabilizar no esta\nsoportado en este dispositivo</string>
-    <string name="audio_disabled">Audio disabled</string>
+    <string name="audio_disabled">Audio deshabilitado</string>
     <string name="max_duration">Duración máxima</string>
     <string name="color_effect">Efecto de color</string>
     <string name="scene_mode">Modo de escena</string>
@@ -155,7 +155,7 @@
     <string name="preference_show_battery">Mostrar batería</string>
     <string name="preference_show_battery_summary">Muestra el nivel actual de la batería en la pantalla</string>
     <string name="preference_grid">Mostrar cuadrícula</string>
-    <string name="grid">Grid</string> <!-- short form of Show a grid -->
+    <string name="grid">Cuadrícula</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostrar guía de recorte</string>
     <string name="preference_crop_guide_summary">Una guía de recorte muestra un rectángulo que indica la relación de aspecto especificada, útil si planea recortar la foto/video posteriormente con una relación de aspecto diferente. Requiere modo de foto WYSIWYG, o estar en modo de video\n%s</string>
     <string name="preference_show_toasts">Mostrar mensajes \"toast\"</string>
@@ -213,8 +213,8 @@
     <string name="preference_video_restart_summary">Si el video se ha detenido después de haber alcanzado la duración máxima (si se ha establecido), esta opción hará que el video se reinicie, hasta el número de veces especificado\n%s</string>
     <string name="preference_video_max_filesize">Máximo tamaño del archivo de video</string>
     <string name="preference_video_max_filesize_summary">La grabación de video se detendrá y/o se reiniciará (ver opción a continuación) cuando se alcance el tamaño máximo de archivo (aproximado). Tenga en cuenta que casi todos los dispositivos Android tienen un tamaño de archivo máximo para los videos (normalmente alrededor de 2 GB o 4 GB), pero esta opción permite establecer un valor específico\n%s</string>
-    <string name="preference_video_restart_max_filesize">Restart on maximum file size</string>
-    <string name="preference_video_restart_max_filesize_summary">Whether to automatically restart when the maximum file size is reached (whether the device default max file size, or user specified)</string>
+    <string name="preference_video_restart_max_filesize">Reiniciar tamaño máximo</string>
+    <string name="preference_video_restart_max_filesize_summary">La grabación de vídeo se reinicia de forma automática si el archivo alcanza el tamaño máximo especificado por el dispositivo o el definido por el usuario</string>
     <string name="preference_record_audio">Grabar audio</string>
     <string name="preference_record_audio_summary">Grabe audio durante la grabación del video</string>
     <string name="preference_record_audio_src">Fuente del audio</string>
@@ -242,16 +242,16 @@
     <string name="about_copy_to_clipboard">Copiar al portapapeles</string>
     
     <string name="take_photo">Tomar Foto</string>
-    <string name="gallery">Galeria</string>
+    <string name="gallery">Galería</string>
     <string name="exposure">Exposición</string>
     <string name="exposure_lock">Bloquear Exposición</string>
     <string name="focus_mode">Modo de Enfoque</string>
     <string name="flash_mode">Modo de Flash</string>
-    <string name="switch_to_front_camera">Switch to front camera</string>
-    <string name="switch_to_back_camera">Switch to back camera</string>
-    <string name="switch_to_video">Switch to video mode</string>
-    <string name="switch_to_photo">Switch to photo mode</string>
-    <string name="trash">Borrar Última Foto</string>
+    <string name="switch_to_front_camera">Cambiar a la cámara frontal</string>
+    <string name="switch_to_back_camera">Cambiar a la cámara trasera</string>
+    <string name="switch_to_video">Cambiar al modo de vídeo</string>
+    <string name="switch_to_photo">Cambiar al modo de foto</string>
+    <string name="trash">Borrar última foto</string>
     <string name="share">Compartir Foto</string>
     
     <string name="parent_folder">Subir Carpeta</string>
@@ -264,74 +264,86 @@
 
     <string name="saf_select_save_location">Selecciona el lugar de guardado</string>
     <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>
-    
+	<string name="saf_permission_failed">No se puede guardar en esta carpeta</string>
+
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
-    <string name="permission_record_audio_not_available">Microphone permission is not available</string>
-    <string name="permission_location_not_available">Location permission is not available</string>
+    <string name="permission_record_audio_not_available">El permiso de micrófono no está disponible</string>
+    <string name="permission_location_not_available">El permiso de ubicación no está disponible</string>
 
-    <string name="start_video">Start recording video</string>
-    <string name="stop_video">Stop recording video</string>
+    <string name="start_video">Iniciar la grabación de vídeo</string>
+    <string name="stop_video">Detener la grabación de vídeo</string>
 
-    <string name="max_filesize">Max file size</string>
+    <string name="max_filesize">Máximo tamaño de archivo</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
     <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
 
-    <string name="audio_control_start">Start audio listening</string>
-    <string name="audio_control_stop">Stop audio listening</string>
-    <string name="speech_recognizer_started">Say \"cheese\"</string>
-    <string name="audio_listener_started">Make a loud noise</string>
+    <string name="audio_control_start">Comenzar a escuchar el audio</string>
+    <string name="audio_control_stop">Detener la escucha de audio</string>
+    <string name="speech_recognizer_started">Decir \"cheese\"</string>
+    <string name="audio_listener_started">Introducir un ruido fuerte</string>
 
-    <string name="auto_stabilise_info">Auto-level will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
-    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nMost gallery apps won\'t recognise DNG, instead they should be used with specialised apps like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-level" will only apply to the JPEG images, and not the DNG images.\n\nDNG files take up a lot of space; a file explorer app may be useful for transferring or deleting them.\n\nDNG files are only saved in Standard or DRO photo modes.</string>
-    <string name="hdr_info">HDR mode is useful for shots with a large variation in brightness. It works by taking multiple shots at different exposures, and combining them to create the final image.\n\nNote that HDR is not suitable for scenes with fast movement, and may result in less accurate colour reproduction.\n\nTaking photos in HDR mode will be slower.</string>
+    <string name="auto_stabilise_info">El nivel automático rotará ligeramente las fotos para que aparezcan niveladas.\n\nTenga en cuenta que las imágenes saldrán con una resolución ligeramente menor (debido a la rotación y al recorte que se requiere).</string>
+    <string name="raw_info">Los archivos DNG contienen la información completa sin comprimir y sin procesar de su cámara.\n\nLa mayoría de las aplicaciones de la galería no reconocerán DNG, sino que se deben usar con aplicaciones especializadas como Snapseed o Lightroom.\n\nTenga en cuenta que varias opciones de procesamiento, como el estampado de las fotos y el nivel automático, solo se aplicarán a las imágenes JPEG, y no a las imágenes DNG\n\nLos archivos DNG ocupan mucho espacio; una aplicación de explorador de archivos puede ser útil para transferirlos o eliminarlos.\n\nLos archivos DNG solo se guardan en los modos de fotografía estándar o DRO (D-Range Optimise).</string>
+    <string name="hdr_info">El modo HDR es útil para tomas con una gran variación de brillo. Funciona tomando múltiples tomas con diferentes exposiciones y combinándolas para crear la imagen final.\n\nTenga en cuenta que el HDR no es adecuado para escenas con movimiento rápido y puede dar como resultado una reproducción de color menos precisa.\n\nTomar fotos en modo HDR será más lento.</string>
 
-    <string name="dont_show_again">Don\'t show again</string>
+    <string name="dont_show_again">No mostrar de nuevo</string>
 
-    <string name="photo_mode">Photo Mode</string>
+    <string name="photo_mode">Modo de foto</string>
     <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_standard_full">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing">BKT {}</string>
     <string name="photo_mode_expo_bracketing_full">Horquillado de exposición</string>
+    <string name="photo_mode_fast_burst">[]]]</string>
+    <string name="photo_mode_fast_burst_full">Ráfaga rápida</string>
+    <string name="photo_mode_noise_reduction">NR</string>
+    <string name="photo_mode_noise_reduction_full">Reducción de ruido</string>
     <string name="preference_category_stamp">Estampado en fotos</string>
     <string name="preference_hdr_save_expo">Guardar todas las imágenes en el modo HDR</string>
     <string name="preference_hdr_save_expo_summary">Si se activa, cuando se utilice el modo de foto HDR, se guardarán las tres imágenes de exposición base, así como la foto HDR final. Tenga en cuenta que esto hará que guardar sea más lento, especialmente si también se usan opciones como \"Estampar fotos\" o Nivel automático</string>
 
-    <string name="no_permission">PERMISSIONS NOT AVAILABLE</string>
-    <string name="permission_rationale_title">Permission required</string>
-    <string name="permission_rationale_camera">Camera permission is required to enable the camera</string>
-    <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
-    <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
-    <string name="permission_rationale_location">Location permission is required for geotagging</string>
+    <string name="no_permission">PERMISOS NO DISPONIBLES</string>
+    <string name="permission_rationale_title">Permiso requerido</string>
+    <string name="permission_rationale_camera">Se requiere el permiso de la cámara para habilitarla</string>
+    <string name="permission_rationale_storage">Permiso de lectura / escritura de almacenamiento para guardar fotos</string>
+    <string name="permission_rationale_record_audio">Se requiere el permiso de micrófono para grabar vídeo con audio</string>
+    <string name="permission_rationale_location">Se requiere el permiso de ubicación para geoetiquetar</string>
 
     <string name="preference_category_photo_debugging">Opciones de depuración</string>
     <string name="preference_category_video_debugging">Opciones de depuración</string>
-    <string name="preference_camera2_fake_flash">Use alternative flash method</string>
-    <string name="preference_camera2_fake_flash_summary">Enable this if your device has buggy flash behaviour with Camera2 API</string>
+    <string name="preference_camera2_fake_flash">Utilizar un método de flash alternativo</string>
+    <string name="preference_camera2_fake_flash_summary">Habilitar si su dispositivo tiene un comportamiento erróneo del flash con la API Camera2</string>
 
-    <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode\n%s</string>
-    <string name="preference_expo_bracketing_stops">Pausas de horquillado de exposición</string>
-    <string name="preference_expo_bracketing_stops_summary">¿Cuántas pausas para disminuir/añadir a la imagen más oscura/más brillante\n%s</string>
+    <string name="preference_expo_bracketing_n_images">Horquillado de exposición</string>
+    <string name="preference_expo_bracketing_n_images_summary">Número de imágenes para el modo de horquillado de exposición\n%s</string>
+    <string name="preference_expo_bracketing_stops">Pasos de horquillado de exposición BKT</string>
+    <string name="preference_expo_bracketing_stops_summary">Establece el rango de pasos (F/Stop) para el aumento y disminución de luminosidad a realizar en las diferentes imágenes del horquillado\n%s</string>
+
+    <string name="preference_nr_save">Reducción de ruido original de imágenes</string>
+    <string name="preference_nr_save_summary">Guardar las imágenes originales en modo de reducción de ruido. Esto puede hacer que el ahorro de fotos sea mucho más lento.\n%s</string>
+
+    <string name="preference_nr_save_no">No guardear las imágenes originales</string>
+    <string name="preference_nr_save_single">Guardar una sola imagen original</string>
+    <string name="preference_nr_save_all">Guardar todas las imágenes originales (lento)</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
-    <string name="video_no_free_space">Not enough free space to record video</string>
-    <string name="video_power_critical">Video stopped\nBattery level critically low</string>
+    <string name="video_no_free_space">No hay suficiente espacio libre para grabar vídeo</string>
+    <string name="video_power_critical">Vídeo detenido.\nNivel de la batería demasiado bajo</string>
     <string name="preference_video_low_power_check">Comprobar batería crítica</string>
     <string name="preference_video_low_power_check_summary">Detenga la grabación de vídeo si el nivel de la batería es críticamente bajo. Esto ayuda a reducir el riesgo de que se corrompan los videos si el dispositivo se apaga repentinamente debido a la falta de energía.</string>
 
-    <string name="dark">Dark</string> <!-- exposure compensation dark -->
-    <string name="bright">Bright</string> <!-- exposure compensation bright -->
-    <string name="exposure_shutter_speed">Shutter speed</string>
+    <string name="dark">Oscuro</string> <!-- exposure compensation dark -->
+    <string name="bright">Brillante</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Velocidad de obturación</string>
 
-    <string name="camera_error">Serious camera error</string>
+    <string name="camera_error">Error grave de la cámara</string>
 
-    <string name="preference_camera2_fast_burst">Enable fast HDR/expo burst</string>
-    <string name="preference_camera2_fast_burst_summary">Allows faster capture of the HDR/expo shots. Disable this if your device has problems when taking photos with HDR or Expo photo modes.</string>
+    <string name="preference_camera2_fast_burst">Habilitar ráfagas HDR / exposiciones rápidas</string>
+    <string name="preference_camera2_fast_burst_summary">Permite una captura más rápida de las tomas HDR / modo de exposición. Inhabilítelo si su dispositivo tiene problemas al tomar fotografías con los Modos de fotografía HDR o Modos de Exposición.</string>
 
-    <string name="camera">Camera</string>
-    <string name="record_video">Record video</string>
+    <string name="camera">Cámara</string>
+    <string name="record_video">Grabar vídeo</string>
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Reflejo en cámara frontal</string>
@@ -349,8 +361,8 @@
 
     <string name="preference_show_pitch_lines">Mostrar líneas de paso</string>
     <string name="preference_show_pitch_lines_summary">Muestra líneas horizontales de paso</string>
-    <string name="preference_show_geo_direction_lines">Show compass direction lines</string>
-    <string name="preference_show_geo_direction_lines_summary">Display compass direction lines</string>
+    <string name="preference_show_geo_direction_lines">Mostrar líneas de dirección</string>
+    <string name="preference_show_geo_direction_lines_summary">Muestra líneas de dirección de la brújula</string>
     <string name="preference_video_subtitle">Subtítulos en video</string>
     <string name="preference_video_subtitle_summary">Cree un archivo de subtítulos (.SRT) almacenando la fecha y la hora; y también información del GPS si los datos de la ubicación/dirección están permitidos\n%s</string>
 
@@ -382,15 +394,55 @@
     <string name="preference_show_take_photo">Mostra icono para tomar foto</string>
     <string name="preference_show_take_photo_summary">Muestra el icono para tomar fotos y grabar videos. Útil si su dispositivo tiene un botón de obturador de hardware y prefiere usarlo.</string>
 
-    <string name="video_pause">Video paused</string>
-    <string name="video_resume">Video resumed</string>
-    <string name="pause_video">Pause video recording</string>
-    <string name="resume_video">Resume video recording</string>
+    <string name="video_pause">Vídeo en pausa</string>
+    <string name="video_resume">Vídeo reanudado</string>
+    <string name="pause_video">Pausar la grabación de vídeo</string>
+    <string name="resume_video">Reanudar la grabación de vídeo</string>
 
     <string name="capturing">Capturando…</string>
 
-    <string name="audio_listener_failed">Failed to initalise audio listening</string>
-    <string name="failed_to_process_hdr">Failed to create HDR image</string>
+    <string name="audio_listener_failed">Error al inicializar la escucha de audio</string>
+    <string name="failed_to_process_hdr">Error al crear la imagen HDR</string>
+
+    <string name="white_balance_auto">Auto (AWB)</string>
+    <string name="white_balance_cloudy">Nublado</string>
+    <string name="white_balance_daylight">Luz día</string>
+    <string name="white_balance_fluorescent">Fluorescente</string>
+    <string name="white_balance_incandescent">Tungsteno</string>
+    <string name="white_balance_manual">Manual</string>
+    <string name="white_balance_shade">Sombra</string>
+    <string name="white_balance_twilight">Atardecer</string>
+    <string name="white_balance_warm">Luz cálida</string>
+
+    <string name="scene_mode_action">Acción</string>
+    <string name="scene_mode_auto">Auto</string>
+    <string name="scene_mode_barcode">Código de barras (Barcode)</string>
+    <string name="scene_mode_beach">Playa</string>
+    <string name="scene_mode_candlelight">Luz de las velas</string>
+    <string name="scene_mode_fireworks">Fuegos artificiales</string>
+    <string name="scene_mode_landscape">Paisaje</string>
+    <string name="scene_mode_night">Nocturno</string>
+    <string name="scene_mode_night_portrait">Retrato nocturno</string>
+    <string name="scene_mode_party">Fiesta</string>
+    <string name="scene_mode_portrait">Retrato</string>
+    <string name="scene_mode_snow">Nieve</string>
+    <string name="scene_mode_sports">Deportes</string>
+    <string name="scene_mode_steady_photo">Estabilizador</string>
+    <string name="scene_mode_sunset">Puesta de sol</string>
+    <string name="scene_mode_theatre">Teatro</string>
+
+    <string name="color_effect_aqua">Agua</string>
+    <string name="color_effect_blackboard">Pizarra negra</string>
+    <string name="color_effect_mono">Monocromo</string>
+    <string name="color_effect_negative">Negativo</string>
+    <string name="color_effect_none">Ninguno</string>
+    <string name="color_effect_posterize">Posterizar</string>
+    <string name="color_effect_sepia">Sepia</string>
+    <string name="color_effect_solarize">Solarizar</string>
+    <string name="color_effect_whiteboard">Pizarra blanca</string>
+
+    <string name="whats_new">Qué hay de nuevo:</string>
+    <string name="donate">Donar</string>
 
     <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
     <string name="face_detected">cara detectada</string>
@@ -401,14 +453,57 @@
     <string name="bottom_of_screen">abajo de la pantalla</string>
     <string name="centre_of_screen">en el centro de la pantalla</string>
 
+    <string name="high_speed">Alta velocidad</string>
+
+    <string name="preference_exif_artist">Autor</string>
+    <string name="preference_exif_artist_summary">Texto para almacenar en los metadatos de la imagen para la etiqueta del Autor (formato JPEG solamente). (Déjelo en blanco para ninguno)</string>
+    <string name="preference_exif_copyright">Copyright</string>
+    <string name="preference_exif_copyright_summary">Texto para almacenar en los metadatos de la imagen para la etiqueta de Copyright (formato JPEG solamente). (Déjelo en blanco para ninguno)</string>
+
+    <string name="processing">Procesando…</string>
+
+    <string name="preference_raw_no">JPEG sólo</string>
+    <string name="preference_raw_yes">JPEG y DNG (RAW)</string>
+    <string name="preference_raw_only">DNG (RAW) sólo</string>
+
     <string name="preference_stamp_dateformat_default">Defecto</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">yyyy-mm-dd</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">yyyy-mm-dd (ISO 8601)</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/yyyy</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Ninguno</string>
 
+    <string name="preference_fast_burst_n_images">Número de fotos</string>
+    <string name="preference_fast_burst_n_images_entries_10">10</string>
+    <string name="preference_fast_burst_n_images_entries_12">12</string>
+    <string name="preference_fast_burst_n_images_entries_15">15</string>
+    <string name="preference_fast_burst_n_images_entries_2">2</string>
+    <string name="preference_fast_burst_n_images_entries_20">20</string>
+    <string name="preference_fast_burst_n_images_entries_3">3</string>
+    <string name="preference_fast_burst_n_images_entries_4">4</string>
+    <string name="preference_fast_burst_n_images_entries_5">5</string>
+    <string name="preference_fast_burst_n_images_entries_6">6</string>
+    <string name="preference_fast_burst_n_images_entries_8">8</string>
+
+    <string name="preference_video_capture_rate">Velocidad</string>
+    <string name="preference_video_capture_rate_normal">Normal</string>
+    <string name="slow_motion_enabled">Cámara lenta habilitada</string>
+    <string name="slow_motion_disabled">Cámara lenta deshabilitada</string>
+
+    <string name="flash_off">Flash Off</string>
+    <string name="flash_auto">Flash Auto</string>
+    <string name="flash_on">Flash On</string>
     <string name="flash_torch">Linterna</string>
     <string name="flash_red_eye">Ojos Rojos</string>
+    <string name="flash_frontscreen_auto">Pantalla Flash Auto</string>
+    <string name="flash_frontscreen_on">Pantalla Flash ON</string>
+    <string name="flash_frontscreen_torch">Pantalla de la Linterna</string>
+
+    <string name="preference_antibanding">Reductor de parpadeo</string>
+    <string name="preference_antibanding_summary">Algoritmos para reducir el parpadeo de la luz.\n%s</string>
+    <string name="anti_banding_50hz">50Hz</string>
+    <string name="anti_banding_60hz">60Hz</string>
+    <string name="anti_banding_auto">Auto</string>
+    <string name="anti_banding_off">Apagado</string>
 
     <string name="preference_record_audio_src_camcorder">VideocÃ¡mara</string>
     <string name="preference_record_audio_src_mic">MicrÃ³fono Externo(si existe)</string>
