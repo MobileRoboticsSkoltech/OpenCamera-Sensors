@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
+    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Einstellungen</string>
     <string name="action_popup">Popup-Einstellungen</string>
     <string name="intro_text">Zum Fokussieren das Display berühren und den blauen Button drücken um Fotos zu machen. Mehr Hilfe erhalten Sie über Einstellungen-&gt;Online-Hilfe. Open Camera ist vollkommen frei. Wenn Sie diese App mögen, wäre es schön, wenn Sie meine Spenden-App kaufen :) (Link hierzu in den Einstellungen oder der Online-Hilfe)\n\nDatenschutz: Der Standortzugriff wird für das Geotagging gebraucht, was jedoch standardmäßig deaktiviert ist. Wenn aktiviert, wird Ihr Standort lediglich in den Aufnahmen gespeichert.</string>
@@ -119,11 +119,11 @@
     <string name="preference_save_photo_prefix_summary">Den Präfix für die Dateinamen der Fotos einstellen</string>
     <string name="preference_save_video_prefix">Video-Präfix</string>
     <string name="preference_save_video_prefix_summary">Den Präfix für die Dateinamen der Videos einstellen</string>
-    <string name="preference_save_zulu_time">Zeitformat im Filenamens</string>
+    <string name="preference_save_zulu_time">Zeitformat für den Dateinamen</string>
     <string name="preference_show_when_locked">Kamera trotz Sperre anzeigen</string>
     <string name="preference_show_when_locked_summary">Wenn aktiviert, wird Open Camera über dem Sperrbildschirm stehen (das Entsperren ist jedoch für den Zugriff auf Einstellungen, Galerie usw. nötig)</string>
-    <string name="preference_startup_focus">Auto-focus beim Hochfahren ausführen</string>
-    <string name="preference_startup_focus_summary">Legt fest, ob Open Camera mit Autofokus started. Wenn man dann Probleme mit aktivierter Blitz haben sollte, diese Option abschalten.</string>
+    <string name="preference_startup_focus">Verwende Auto-Fokus bei Start der App</string>
+    <string name="preference_startup_focus_summary">Beim Start von OpenCam automatisch fokussieren. Deaktiviere diese Option bei einem Problem mit dem Blitz.</string>
     <string name="preference_lock_video">Bildschirm bei Videoaufnahme sperren</string>
     <string name="preference_lock_video_summary">Wenn aktiviert, wird bei Videoaufnahmen die Oberfläche gesperrt, um versehentliches Stoppen zu verhindern. Zum Entsperren einfach wischen.</string>
     <string name="preference_rotate_preview">Vorschau drehen</string>
@@ -180,7 +180,7 @@
     <string name="preference_location">Geotagging</string>
     <string name="preference_location_summary">Wenn aktiviert, werden die GPS-Standortdaten in den Aufnahmen gespeichert.</string>
     <string name="preference_gps_direction">Himmelsrichtung</string>
-    <string name="preference_gps_direction_summary">Wenn aktiviert, wird die Kompassrichtung in den Fotoaufnahmen gespeichert.</string>
+    <string name="preference_gps_direction_summary">Speichere die GPS-Kompassrichtung in den Fotos (nur JPEG-Format)</string>
     <string name="preference_require_location">Standortdaten erforderlich</string>
     <string name="preference_require_location_summary">Wenn aktiviert, werden die Aufnahmen nur bei Verfügbarkeit der Standortdaten ausgelöst.</string>
     <string name="preference_stamp">Fotos stempeln</string>
@@ -264,6 +264,7 @@
 
     <string name="saf_select_save_location">Speicherort auswählen</string>
     <string name="saf_cancelled">Storage Access Framework abgebrochen</string>
+    <string name="saf_permission_failed">Kann nicht in diesem Verzeichnis speichern</string>
 
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Mikrofon Berechtigung nicht verfügbar</string>
@@ -278,7 +279,7 @@
 
     <string name="audio_control_start">Starte Sprach/Geräusch Steuerung</string>
     <string name="audio_control_stop">Stoppe Sprach/Geräusch Steuerung</string>
-    <string name="speech_recognizer_started">Sage \"cheese\"</string>
+    <string name="speech_recognizer_started">Sag \"cheese\"</string>
     <string name="audio_listener_started">Mache ein lautes Geräusch</string>
 
     <string name="auto_stabilise_info">Autostabilisierung rotiert die Fotos so, dass sie waagerecht erscheinen.\n\nDies bedeutet aber auch eine geringere Auflösung aufgrund von Rotation und Beschneidung.</string>
@@ -292,8 +293,9 @@
     <string name="photo_mode_standard_full">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- needs to not be too long, so this shows okay on the popup menu's photo mode buttons -->
-    <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
-    <string name="preference_category_stamp">Foto Stamp</string>
+    <string name="photo_mode_expo_bracketing_full">Belichtungsreihe</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="preference_category_stamp">Fotostempel</string>
     <string name="preference_hdr_save_expo">Alle Bilder der HDR Aufnahme speichern</string>
     <string name="preference_hdr_save_expo_summary">Wenn aktiviert, dann werden im HDR Modus die drei Basis Belichtungsbilder zusammen mit dem HDR Foto gespeichert. Beachte, dass die Aufnahmen verlangsamt, besonders wenn Optionen wie \"Stamp photos\" oder Autostabilisieung verwendet werden.</string>
 
@@ -309,10 +311,17 @@
     <string name="preference_camera2_fake_flash">Benutze alternative Blitz Methode</string>
     <string name="preference_camera2_fake_flash_summary">Aktiviere dies, wenn dein Geräte Probleme mit der Camera2 API hat</string>
 
-    <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
-    <string name="preference_expo_bracketing_n_images_summary">Anzahl der Bilder für Exposure Bracketing Modus\n%s</string>
-    <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
-    <string name="preference_expo_bracketing_stops_summary">Anzahl der Stops für jedes Bild\n%s</string>
+    <string name="preference_expo_bracketing_n_images">Belichtungsreihe</string>
+    <string name="preference_expo_bracketing_n_images_summary">Anzahl der Bilder für die Belichtungsreihe\n%s</string>
+    <string name="preference_expo_bracketing_stops">Blendenschritte in der Belichtungsreihe</string>
+    <string name="preference_expo_bracketing_stops_summary">Anzahl der Blendenschritte pro Foto\n%s</string>
+
+    <string name="preference_nr_save">Rauschminderung im Originalbild</string>
+    <string name="preference_nr_save_all">Speichere alle Originalbilder mit Rauschminderung (langsam)</string>
+
+    <string name="preference_nr_save_no">Keine Rauschminderung im Originalbild</string>
+    <string name="preference_nr_save_single">Speichere einzelnes Originalbild</string>
+    <string name="preference_nr_save_summary">Sollen Originalbilder mit Rauschminderung gespeichert werde? (Benötigt mehr Zeit)</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
@@ -349,7 +358,7 @@
 
     <string name="preference_show_pitch_lines">Zeige Neigungslinien</string>
     <string name="preference_show_pitch_lines_summary">Zeige horizontale Neigungsebene</string>
-    <string name="preference_show_geo_direction_lines">Zeige Kompass Richtung</string>
+    <string name="preference_show_geo_direction_lines">Zeige Kompass-Richtungslinien</string>
     <string name="preference_show_geo_direction_lines_summary">Zeige Kompass Richtungslinien</string>
     <string name="preference_video_subtitle">Video Untertitel</string>
     <string name="preference_video_subtitle_summary">Erzeuge ein Untertitel .SRT File um das Datum und Zeit zu speichern, sowie die GPS Daten sofern Orts- und Richtungsdaten aktiviert sind\n%s</string>
@@ -390,8 +399,66 @@
     <string name="capturing">Aufnahme läuft…</string>
 
     <string name="audio_listener_failed">Initialisierung der Audioaufnahme fehlgeschlagen</string>
+    <string name="failed_to_process_hdr">HDR-Bild konnte nicht erzeugt werden</string>
+
+    <string name="white_balance_auto">Auto</string>
+    <string name="white_balance_cloudy">Bewölkt</string>
+    <string name="white_balance_daylight">Tageslicht</string>
+    <string name="white_balance_fluorescent">Kühle Leuchtstofflampe</string>
+    <string name="white_balance_incandescent">Glühlampe</string>
+    <string name="white_balance_shade">Schatten</string>
+    <string name="white_balance_twilight">Zwielicht</string>
+    <string name="white_balance_warm">Warme Leuchtstofflampe</string>
+    <string name="white_balance_manual">Manuell</string>
+
+    <string name="scene_mode_action">Action</string>
+    <string name="scene_mode_barcode">Barcode</string>
+    <string name="scene_mode_beach">Strand</string>
+    <string name="scene_mode_candlelight">Kerzenschein</string>
+    <string name="scene_mode_auto">Auto</string>
+    <string name="scene_mode_fireworks">Feuerwerk</string>
+    <string name="scene_mode_landscape">Landschaft</string>
+    <string name="scene_mode_night">Nacht</string>
+    <string name="scene_mode_night_portrait">Nacht-Portrait</string>
+    <string name="scene_mode_party">Party</string>
+    <string name="scene_mode_portrait">Portrait</string>
+    <string name="scene_mode_snow">Schnee</string>
+    <string name="scene_mode_sports">Sport</string>
+    <string name="scene_mode_steady_photo">Langzeit</string>
+    <string name="scene_mode_sunset">Sonnenuntergang</string>
+    <string name="scene_mode_theatre">Theater</string>
+
+    <string name="color_effect_aqua">Wasser</string>
+    <string name="color_effect_blackboard">Schwarze Tafel</string>
+    <string name="color_effect_mono">Mono</string>
+    <string name="color_effect_negative">Negativ</string>
+    <string name="color_effect_none">Kein Effekt</string>
+    <string name="color_effect_posterize">Poster</string>
+    <string name="color_effect_sepia">Sepia</string>
+    <string name="color_effect_solarize">Solarisation</string>
+    <string name="color_effect_whiteboard">Weiße Tafel</string>
+
+    <string name="whats_new">Was ist neu?</string>
+    <string name="donate">Spenden</string>
+
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="face_detected">Gesicht</string>
+    <string name="faces_detected">Gesichter</string>
+    <string name="left_of_screen">links im Bild</string>
+    <string name="right_of_screen">rechts im Bild</string>
+    <string name="top_of_screen">oben im Bild</string>
+    <string name="bottom_of_screen">unten im Bild</string>
+    <string name="centre_of_screen">in der Mitte</string>
+
+    <string name="high_speed">High Speed</string>
 
     <string name="preference_video_fps_default">Standard</string>
+
+    <string name="preference_category_exif_tags">Spezifische EXIF-Kennungen</string>
+    <string name="preference_exif_artist">Ersteller</string>
+    <string name="preference_exif_artist_summary">Text für den "Ersteller"-Eintrag in den Foto-Metadaten (nur JPEG-Format, freilassen, falls nicht verwendet.)</string>
+    <string name="preference_exif_copyright">Copyright</string>
+    <string name="preference_exif_copyright_summary">Text für den "Copyright"-Eintrag in den Foto-Metadaten (nur JPEG-Format, freilassen, falls nicht verwendet.)</string>
 
     <string name="preference_raw_no">Nur JPEG</string>
     <string name="preference_raw_yes">JPEG und DNG (RAW)</string>
