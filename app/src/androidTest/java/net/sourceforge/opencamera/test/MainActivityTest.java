@@ -12543,6 +12543,56 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHistogramDetails(hdrHistogramDetails, 0, 67, 254);
 	}
 
+	/** Tests Avg algorithm on test samples "testAvg43".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg43() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg43");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg43/IMG_20180831_143226_0.jpg");
+		inputs.add(avg_images_path + "testAvg43/IMG_20180831_143226_1.jpg");
+		inputs.add(avg_images_path + "testAvg43/IMG_20180831_143226_2.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg43_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 0, 67, 254);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg44".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg44() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg44");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg44/IMG_20180830_133917_0.jpg");
+		inputs.add(avg_images_path + "testAvg44/IMG_20180830_133917_1.jpg");
+		inputs.add(avg_images_path + "testAvg44/IMG_20180830_133917_2.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg44_output.jpg", 40, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 0, 67, 254);
+	}
+
 	/** Tests Avg algorithm on test samples "testAvgtemp".
 	 *  Used for one-off testing, or to recreate NR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testAvgtemp/ .
