@@ -259,6 +259,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         rgb = sum / count;
     }
 
+    //if( false )
     {
         // sharpen
         // helps: testAvg12, testAvg16, testAvg23, testAvg30, testAvg32
@@ -354,6 +355,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
     float value = fmax(hdr.r, hdr.g);
     value = fmax(value, hdr.b);
     //hdr *= gain;
+    //hdr *= 2.0f;
     //const float alpha = 0.7f;
     //const saturation_level = 10;
     if( value <= low_x ) {
