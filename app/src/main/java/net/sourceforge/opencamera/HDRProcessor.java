@@ -2395,14 +2395,14 @@ public class HDRProcessor {
 		return new HistogramInfo(total, mean_brightness, median_brightness, max_brightness);
 	}
 
-	private static int getBrightnessTarget(int brightness, int max_gain_factor, int ideal_brightness) {
+	private static int getBrightnessTarget(int brightness, float max_gain_factor, int ideal_brightness) {
 		if( brightness <= 0 )
 			brightness = 1;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 			Log.d(TAG, "brightness: " + brightness);
 		}
-		int median_target = Math.min(ideal_brightness, max_gain_factor*brightness);
+		int median_target = Math.min(ideal_brightness, (int)(max_gain_factor*brightness));
 		return Math.max(brightness, median_target); // don't make darker
 	}
 
@@ -2423,13 +2423,17 @@ public class HDRProcessor {
 	/** Computes various factors used in the avg_brighten.rs script.
 	 */
 	public static BrightenFactors computeBrightenFactors(int iso, int brightness, int max_brightness) {
-		int max_gain_factor = 4;
+		float max_gain_factor = 4;
 		int ideal_brightness = 119;
-		if( iso <= 120 ) {
+		//if( iso <= 120 ) {
+		if( iso <= 150 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
 			ideal_brightness = 199;
 			// don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
-			max_gain_factor = 3;
+			// and having max_gain_factor at 1.5 prevents testAvg43, testAvg44 being too bright and oversaturated
+			//max_gain_factor = 3;
+			//max_gain_factor = 2;
+			max_gain_factor = 1.5f;
 		}
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
@@ -2700,9 +2704,23 @@ public class HDRProcessor {
 			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
 			// keep n_tiles==1 - get too much contrast enhancement with n_tiles==4 e.g. for testAvg34
+			// tests that are better at 25% (median brightness in brackets): testAvg16 (90), testAvg26 (117), testAvg30 (79),
+			//     testAvg43 (55), testAvg44 (82)
+			// tests that are better at 50%: testAvg12 (8), testAvg13 (38), testAvg15 (10), testAvg18 (39), testAvg19 (37)
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 4, time_s);
-			adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);
+			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);
+			//adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 1, time_s);
+			final int median_lo = 60, median_hi = 35;
+			float alpha = (histogramInfo.median_brightness - median_lo) / (float)(median_hi - median_lo);
+			alpha = Math.max(alpha, 0.0f);
+			alpha = Math.min(alpha, 1.0f);
+			float amount = (1.0f-alpha) * 0.25f + alpha * 0.5f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "dro alpha: " + alpha);
+				Log.d(TAG, "dro amount: " + amount);
+			}
+			adjustHistogram(allocation_out, allocation_out, width, height, amount, 1, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
