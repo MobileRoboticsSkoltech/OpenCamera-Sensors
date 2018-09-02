@@ -1254,10 +1254,11 @@ public class HDRProcessor {
 				int align_x = 0;
 				int align_y = 0;
 				if( !full_align ) {
-					align_width = width/4;
-					align_height = height/4;
-					//align_width = width/2;
-					//align_height = height/2;
+					// need to use /2 rather than /4 to prevent misalignment in testAvg26
+					//align_width = width/4;
+					//align_height = height/4;
+					align_width = width/2;
+					align_height = height/2;
 					align_x = (width - align_width)/2;
 					align_y = (height - align_height)/2;
 					crop_to_centre = false; // no need to crop in autoAlignment, as we're cropping here
@@ -1299,8 +1300,9 @@ public class HDRProcessor {
 				allocations[1] = allocation_new;
 			}
 
-			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
-			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, true, full_alignment_width, full_alignment_height, time_s);
+			// need to use try_harder to improve testAvg17, testAvg36
+			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, true, full_alignment_width, full_alignment_height, time_s);
 			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
 
 			/*
@@ -1821,7 +1823,6 @@ public class HDRProcessor {
 		// sampling - since we sample every step_size pixels - though there might be some overhead for every extra call
 		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
 		// to misidentify cases as needing a large offset.
-		// Update: use a smaller window for noise reduction (when try_harder==false)
 		int max_dim = Math.max(full_width, full_height); // n.b., use the full width and height here, not the mtb_width, height
 		int max_ideal_size = max_dim / (try_harder ? 150 : 300);
 		int initial_step_size = 1;

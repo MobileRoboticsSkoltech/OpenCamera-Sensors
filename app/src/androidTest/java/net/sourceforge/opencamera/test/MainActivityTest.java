@@ -10902,7 +10902,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -10, 0};
 					//int [] exp_offsets_x = {0, -15, 0};
 					//int [] exp_offsets_y = {0, -11, 0};
-					int [] exp_offsets_x = {0, -12, 0};
+					//int [] exp_offsets_x = {0, -12, 0};
+					//int [] exp_offsets_y = {0, -12, 0};
+					int [] exp_offsets_x = {0, -16, 0};
 					int [] exp_offsets_y = {0, -12, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
@@ -11015,7 +11017,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		checkHistogramDetails(hdrHistogramDetails, 0, 21, 177);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 21, 177);
+		checkHistogramDetails(hdrHistogramDetails, 0, 21, 152);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg4".
@@ -11275,7 +11278,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 0, 0};
 					//int [] exp_offsets_x = {0, 0, 0};
 					//int [] exp_offsets_y = {0, 0, 0};
-					int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
@@ -11480,8 +11485,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -16, 0};
 					//int [] exp_offsets_x = {0, -4, 0};
 					//int [] exp_offsets_y = {0, -10, 0};
+					//int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_y = {0, -8, 0};
 					int [] exp_offsets_x = {0, -4, 0};
-					int [] exp_offsets_y = {0, -8, 0};
+					int [] exp_offsets_y = {0, -12, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
@@ -11524,8 +11531,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 6, 0};
 					//int [] exp_offsets_x = {0, 4, 0};
 					//int [] exp_offsets_y = {0, 4, 0};
-					int [] exp_offsets_x = {0, 8, 0};
-					int [] exp_offsets_y = {0, 8, 0};
+					//int [] exp_offsets_x = {0, 8, 0};
+					//int [] exp_offsets_y = {0, 8, 0};
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 4, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
@@ -11621,7 +11630,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
+					int [] exp_offsets_x = {0, -8, 0};
+					int [] exp_offsets_y = {0, -8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+				else if( index == 7 ) {
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 28, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 			}
 		});
@@ -11710,7 +11727,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
+					int [] exp_offsets_x = {0, -8, 0};
+					int [] exp_offsets_y = {0, 4, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+				else if( index == 7 ) {
+					int [] exp_offsets_x = {0, 12, 0};
+					int [] exp_offsets_y = {0, 28, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 			}
 		});
@@ -11719,7 +11744,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 0, 100, 236);
 		//checkHistogramDetails(hdrHistogramDetails, 0, 92, 234);
 		//checkHistogramDetails(hdrHistogramDetails, 0, 102, 241);
-		checkHistogramDetails(hdrHistogramDetails, 0, 102, 238);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 102, 238);
+		checkHistogramDetails(hdrHistogramDetails, 0, 103, 244);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg18".
@@ -12358,6 +12384,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, -12, 0};
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
+				}
+				else if( index == 3 ) {
+					int [] exp_offsets_x = {0, -28, 0};
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
+				}
 			}
 		});
 
