@@ -12,6 +12,7 @@ int offset_x_new = 0, offset_y_new = 0;
 int scale_align_size = 1;
 float avg_factor = 1.0f;
 float wiener_C = 1024.0f;
+float wiener_C_cutoff = 1024.0f;
 
 float __attribute__((kernel)) compute_diff(uchar4 pixel_avg, uint32_t x, uint32_t y) {
     int32_t ix = x;
@@ -104,7 +105,7 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
         //L *= L_scale*L_scale;
         */
 
-        if( L > wiener_C ) {
+        if( L > wiener_C_cutoff ) {
             // error too large, so no contribution for new image pixel
             // reduces ghosting in: testAvg13, testAvg25, testAvg26, testAvg29, testAvg31
             return pixel_avg_f;

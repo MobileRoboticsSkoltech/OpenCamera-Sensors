@@ -1256,6 +1256,8 @@ public class HDRProcessor {
 				if( !full_align ) {
 					align_width = width/4;
 					align_height = height/4;
+					//align_width = width/2;
+					//align_height = height/2;
 					align_x = (width - align_width)/2;
 					align_y = (height - align_height)/2;
 					crop_to_centre = false; // no need to crop in autoAlignment, as we're cropping here
@@ -1298,6 +1300,7 @@ public class HDRProcessor {
 			}
 
 			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
+			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, false, floating_point_align, 1, crop_to_centre, true, full_alignment_width, full_alignment_height, time_s);
 			//autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, align_bitmaps, 0, true, null, true, floating_point_align, 1, crop_to_centre, false, full_alignment_width, full_alignment_height, time_s);
 
 			/*
@@ -1400,18 +1403,29 @@ public class HDRProcessor {
 
 		// if changing this, pay close attention to tests testAvg6, testAvg8, testAvg17, testAvg23
 		float limited_iso = Math.min(iso, 400);
+		float wiener_cutoff_factor = 1.0f;
 		if( iso >= 700 ) {
-		    // helps reduce speckles in testAvg17, testAvg23, testAvg33, testAvg38
+		    // helps reduce speckles in testAvg17, testAvg23, testAvg33, testAvg36, testAvg38
 			// using this level for testAvg31 (ISO 609) would increase ghosting
-		    limited_iso = 500;
+		    //limited_iso = 500;
+		    limited_iso = 800;
+			if( iso >= 1100 ) {
+				// helps further reduce speckles in testAvg17, testAvg38
+				// but don't do for iso >= 700 as makes "vicks" text in testAvg23 slightly more blurred
+				wiener_cutoff_factor = 8.0f;
+			}
         }
 		limited_iso = Math.max(limited_iso, 100);
 		float wiener_C = 10.0f * limited_iso;
 		//float wiener_C = 1000.0f;
 		//float wiener_C = 4000.0f;
-		if( MyDebug.LOG )
+		float wiener_C_cutoff = wiener_cutoff_factor * wiener_C;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "wiener_C: " + wiener_C);
+			Log.d(TAG, "wiener_cutoff_factor: " + wiener_cutoff_factor);
+		}
 		processAvgScript.set_wiener_C(wiener_C);
+		processAvgScript.set_wiener_C_cutoff(wiener_C_cutoff);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processAvgScript");
@@ -1930,6 +1944,11 @@ public class HDRProcessor {
 						Log.d(TAG, "offsets_y is now: " + offsets_y[i]);
 					}
 				}
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "resultant offsets for image: " + i);
+				Log.d(TAG, "resultant offsets_x: " + offsets_x[i]);
+				Log.d(TAG, "resultant offsets_y: " + offsets_y[i]);
 			}
 		}
 
