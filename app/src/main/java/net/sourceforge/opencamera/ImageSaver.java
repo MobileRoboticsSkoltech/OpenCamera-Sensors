@@ -1938,7 +1938,7 @@ public class ImageSaver extends Thread {
     		    matrix.postScale(scale, scale);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    scale: " + scale);
-				if( width > 0 && height > 0 ) {
+				try {
 					thumbnail = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "thumbnail width: " + thumbnail.getWidth());
@@ -1946,11 +1946,15 @@ public class ImageSaver extends Thread {
 					}
 					// don't need to rotate for exif, as we already did that when creating the bitmap
 				}
-				else {
+				catch(IllegalArgumentException e) {
 					// received IllegalArgumentException on Google Play from Bitmap.createBitmap; documentation suggests this
-					// means width or height are 0
-					if( MyDebug.LOG )
-						Log.e(TAG, "bitmap has zero width or height?!");
+					// means width or height are 0 - but trapping that didn't fix the problem
+					// or "the x, y, width, height values are outside of the dimensions of the source bitmap", but that can't be
+					// true here
+					// crashes seem to all be Android 7.1 or earlier, so maybe this is a bug that's been fixed - but catch it anyway
+					// as it's grown popular
+					Log.e(TAG, "can't create thumbnail bitmap due to IllegalArgumentException?!");
+					e.printStackTrace();
 					thumbnail = null;
 				}
 			}
