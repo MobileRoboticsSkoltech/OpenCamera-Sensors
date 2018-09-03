@@ -1673,8 +1673,11 @@ public class CameraController2 extends CameraController {
 		try {
 			configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 		}
-		catch(IllegalArgumentException e) {
-			// have had crashes from Google Play - unclear what the cause is, but at least fail gracefully
+		catch(IllegalArgumentException | NullPointerException e) {
+			// have had IllegalArgumentException crashes from Google Play - unclear what the cause is, but at least fail gracefully
+			// similarly for NullPointerException - note, these aren't from characteristics being null, but from
+			// com.android.internal.util.Preconditions.checkArrayElementsNotNull (Preconditions.java:395) - all are from
+			// Nexus 7 (2013)s running Android 8.1, but again better to fail gracefully
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
