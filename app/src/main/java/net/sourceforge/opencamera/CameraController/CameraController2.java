@@ -899,7 +899,9 @@ public class CameraController2 extends CameraController {
 							{
 
 							try {
-								captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
+									captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								}
 							}
 							catch(CameraAccessException e) {
 								if( MyDebug.LOG ) {
@@ -949,8 +951,8 @@ public class CameraController2 extends CameraController {
 									@Override
 									public void run(){
 										if( MyDebug.LOG )
-											Log.d(TAG, "take picture after delay for next expo");
-										if( camera != null ) { // make sure camera wasn't released in the meantime
+											Log.d(TAG, "take picture after delay for next focus bracket");
+										if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
 											try {
 												captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
 											}
