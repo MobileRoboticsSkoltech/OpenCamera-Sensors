@@ -895,28 +895,25 @@ public class CameraController2 extends CameraController {
 								Log.d(TAG, "need to execute the next capture");
 								Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
 							}
-							if( burst_type != BurstType.BURSTTYPE_FOCUS )
-							{
-
-							try {
-								if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-									captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+							if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
+								try {
+									if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
+										captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+									}
 								}
-							}
-							catch(CameraAccessException e) {
-								if( MyDebug.LOG ) {
-									Log.e(TAG, "failed to take next burst");
-									Log.e(TAG, "reason: " + e.getReason());
-									Log.e(TAG, "message: " + e.getMessage());
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to take next burst");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+									jpeg_cb = null;
+									if( take_picture_error_cb != null ) {
+										take_picture_error_cb.onError();
+										take_picture_error_cb = null;
+									}
 								}
-								e.printStackTrace();
-								jpeg_cb = null;
-								if( take_picture_error_cb != null ) {
-									take_picture_error_cb.onError();
-									take_picture_error_cb = null;
-								}
-							}
-
 							}
 							else {
 								if( MyDebug.LOG )
