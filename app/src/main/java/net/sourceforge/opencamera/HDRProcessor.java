@@ -2443,17 +2443,21 @@ public class HDRProcessor {
 	/** Computes various factors used in the avg_brighten.rs script.
 	 */
 	public static BrightenFactors computeBrightenFactors(int iso, int brightness, int max_brightness) {
-		float max_gain_factor = 4;
+		// for iso <= 150, don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
+		// and having max_gain_factor at 1.5 prevents testAvg43, testAvg44 being too bright and oversaturated
+		// for iso > 150, we also don't want max_gain_factor 4, as makes cases too bright and overblown if it would
+		// take the max_possible_value over 255. Especially testAvg46, but also testAvg25, testAvg31, testAvg38,
+		// testAvg39
+		//float max_gain_factor = 4;
+		float max_gain_factor = 1.5f;
 		int ideal_brightness = 119;
 		//if( iso <= 120 ) {
 		if( iso <= 150 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
 			ideal_brightness = 199;
-			// don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
-			// and having max_gain_factor at 1.5 prevents testAvg43, testAvg44 being too bright and oversaturated
 			//max_gain_factor = 3;
 			//max_gain_factor = 2;
-			max_gain_factor = 1.5f;
+			//max_gain_factor = 1.5f;
 		}
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
@@ -2514,15 +2518,16 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use piecewise gain/gamma");
 			// use piecewise function with gain and gamma
-			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6
-			float mid_y = 0.6f*255.0f;
+			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6; using 0.8 helps testAvg46 further
+			float mid_y = iso <= 150 ? 0.6f*255.0f : 0.8f*255.0f;
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
 		else if( max_possible_value < 255.0f && max_brightness > 0 ) {
-		    // slightly brightens testAvg17
+		    // slightly brightens testAvg17; also brightens testAvg8 to be clearer
 			float alt_gain = 255.0f / max_brightness;
-			alt_gain = Math.min(alt_gain, max_gain_factor);
+			// okay to allow higher max than max_gain_factor, when it isn't going to take us over 255
+			alt_gain = Math.min(alt_gain, 4.0f);
 			if( MyDebug.LOG )
 				Log.d(TAG, "alt_gain: " + alt_gain);
 			if( alt_gain > gain ) {
