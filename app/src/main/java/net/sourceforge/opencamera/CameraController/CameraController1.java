@@ -1349,8 +1349,7 @@ public class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	public 
-	void reconnect() throws CameraControllerException {
+	public void reconnect() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
 		try {
