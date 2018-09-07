@@ -421,7 +421,15 @@ public class CameraController1 extends CameraController {
 	 */
 	@Override
 	public SupportedValues setSceneMode(String value) {
-		Camera.Parameters parameters = this.getParameters();
+		Camera.Parameters parameters;
+		try {
+			parameters = this.getParameters();
+		}
+		catch(RuntimeException e) {
+			Log.e(TAG, "exception from getParameters");
+			e.printStackTrace();
+			return null;
+		}
 		List<String> values = parameters.getSupportedSceneModes();
 		/*{
 			// test
@@ -843,12 +851,18 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public void setZoom(int value) {
-		Camera.Parameters parameters = this.getParameters();
-		if( MyDebug.LOG )
-			Log.d(TAG, "zoom was: " + parameters.getZoom());
-		this.current_zoom_value = value;
-		parameters.setZoom(value);
-    	setCameraParameters(parameters);
+    	try {
+			Camera.Parameters parameters = this.getParameters();
+			if( MyDebug.LOG )
+				Log.d(TAG, "zoom was: " + parameters.getZoom());
+			this.current_zoom_value = value;
+			parameters.setZoom(value);
+			setCameraParameters(parameters);
+		}
+		catch(RuntimeException e) {
+    		Log.e(TAG, "failed to set parameters for zoom");
+    		e.printStackTrace();
+		}
 	}
 
 	public int getExposureCompensation() {
