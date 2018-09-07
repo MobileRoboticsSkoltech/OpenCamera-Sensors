@@ -6099,20 +6099,23 @@ public class CameraController2 extends CameraController {
 				}
 			}*/
 
-			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
-				Rect sensor_rect = getViewableRect();
-				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
-				if( camera_faces != null ) {
-					if( camera_faces.length == 0 && last_faces_detected == 0 ) {
-						// no point continually calling the callback if 0 faces detected (same behaviour as CameraController1)
-					}
-					else {
-						last_faces_detected = camera_faces.length;
-						CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
-						for(int i=0;i<camera_faces.length;i++) {
-							faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+			if( face_detection_listener != null && previewBuilder != null ) {
+				Integer face_detect_mode = previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE);
+				if( face_detect_mode != null && face_detect_mode != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
+					Rect sensor_rect = getViewableRect();
+					android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
+					if( camera_faces != null ) {
+						if( camera_faces.length == 0 && last_faces_detected == 0 ) {
+							// no point continually calling the callback if 0 faces detected (same behaviour as CameraController1)
 						}
-						face_detection_listener.onFaceDetection(faces);
+						else {
+							last_faces_detected = camera_faces.length;
+							CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
+							for(int i=0;i<camera_faces.length;i++) {
+								faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+							}
+							face_detection_listener.onFaceDetection(faces);
+						}
 					}
 				}
 			}
