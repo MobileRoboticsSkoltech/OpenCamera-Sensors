@@ -12698,7 +12698,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 
-		//checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+		checkHistogramDetails(hdrHistogramDetails, 0, 30, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvgtemp".
