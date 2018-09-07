@@ -11329,7 +11329,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 0, 10, 60);
 		//checkHistogramDetails(hdrHistogramDetails, 1, 8, 72);
 		//checkHistogramDetails(hdrHistogramDetails, 1, 6, 64);
-		checkHistogramDetails(hdrHistogramDetails, 1, 15, 75);
+		//checkHistogramDetails(hdrHistogramDetails, 1, 15, 75);
+		checkHistogramDetails(hdrHistogramDetails, 1, 16, 78);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg9".

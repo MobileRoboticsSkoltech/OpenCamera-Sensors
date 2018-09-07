@@ -2643,6 +2643,12 @@ public class HDRProcessor {
 		}
 		avgBrightenScript.invoke_setBlackLevel(black_level);
 
+		// use a lower medial filter strength for pixel binned images, so that we don't blur testAvg46 so much (especially sign text)
+		float median_filter_strength = (cached_avg_sample_size >= 2) ? 0.5f : 1.0f;
+		if( MyDebug.LOG )
+			Log.d(TAG, "median_filter_strength: " + median_filter_strength);
+		avgBrightenScript.set_median_filter_strength(median_filter_strength);
+
 		avgBrightenScript.set_gamma(gamma);
 		avgBrightenScript.set_gain(gain);
 		avgBrightenScript.set_low_x(low_x);

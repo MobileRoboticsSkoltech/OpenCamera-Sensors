@@ -4,6 +4,8 @@
 
 rs_allocation bitmap;
 
+float median_filter_strength = 1.0f; // from 0 to 1
+
 static float black_level;
 static float white_level;
 
@@ -112,7 +114,8 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
             p4 = temp_p;
         }
         // don't care about sorting p3 and p4
-        rgb = p2.rgb;
+        //rgb = p2.rgb;
+        rgb = (1.0f - median_filter_strength) * rgb + median_filter_strength * p2.rgb;
     }
     if( false )
     {
