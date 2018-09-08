@@ -2454,6 +2454,7 @@ public class HDRProcessor {
 		//if( iso <= 120 ) {
 		if( iso <= 150 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
+			// but note we use 119 for iso > 150, otherwise testAvg17, testAvg23, testAvg36 are too bright
 			ideal_brightness = 199;
 			//max_gain_factor = 3;
 			//max_gain_factor = 2;
