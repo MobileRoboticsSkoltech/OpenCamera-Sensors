@@ -15,6 +15,10 @@ public class PreferenceKeys {
 	 */
 	public static final String LatestVersionPreferenceKey = "latest_version";
 
+	/** This preference stores whether to allow showing the "What's New" dialog.
+	 */
+	public static final String ShowWhatsNewPreferenceKey = "preference_show_whats_new";
+
 	/** If this preference is set, no longer show the auto-stabilise info dialog.
 	 */
 	public static final String AutoStabiliseInfoPreferenceKey = "done_auto_stabilise_info";

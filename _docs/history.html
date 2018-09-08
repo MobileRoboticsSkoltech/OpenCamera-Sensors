@@ -55,8 +55,8 @@ FIXED   Crash if camera reopened 128 times in a single instance of the applicati
 FIXED   Fixed some crashes for old camera API.
 FIXED   Fixed crash with Camera2 API when using expo/HDR if fast burst disabled, and camera
 FIXED   In Camera2 API mode, wasn't checking to see if video stabilization option is supported.
-FIXED   Preview size/"Maximise preview size" option didn't always work correctly on some devices
-        (e.g., Nokia 8).
+FIXED   Settings/Preview size/"Maximise preview size" option didn't always work correctly on some
+        devices (e.g., Nokia 8).
 FIXED   Fixed a crash related to failing to save with storage access framework.
 FIXED   Switching from slow motion back to regular speed wouldn't reset exposure level on some
         devices.
@@ -70,13 +70,14 @@ FIXED   Norwegian strings for video bitrate preferences were incorrect.
 ADDED   New photo mode "NR" Noise Reduction, takes a burst of photos and aligns and merges to reduce
         noise. (Camera2 API only, only supported on high end devices.)
 ADDED   New photo mode "Focus {}" to enable Focus Bracketing. (Camera2 API only.)
-ADDED   New option "Ghost image", to overlay either last photo taken, or a selected image on your
-        device.
-ADDED   New option On screen GUI/"Show audio level meter", to display on-screen audio level when
-        recording video.
-ADDED   New option to record video with a flat (log) profile. (Camera2 API only.)
-ADDED   New option Photo settings/"Distance unit" to allow using feet instead of metres for GPS
-        altitude on photo stamp and video subtitles.
+ADDED   New option Settings/"Ghost image", to overlay either last photo taken, or a selected image
+        on your device.
+ADDED   New option Settings/On screen GUI/"Show audio level meter", to display on-screen audio level
+        when recording video.
+ADDED   New option Settings/Video settings/"Video flat (log) profile" to record video with a flat
+        profile. (Camera2 API only.)
+ADDED   New option Settings/Photo settings/"Distance unit" to allow using feet instead of metres for
+        GPS altitude on photo stamp and video subtitles.
 ADDED   On-screen flash icon (to show whether flash will fire or not) now supported for front screen
         flash.
 ADDED   New Camera2 API debug option under Settings/"Photo settings" to disable taking photos whilst
@@ -90,6 +91,8 @@ ADDED   Launching from intent now recognises request for front or back camera
 ADDED   Video bitrate options for 150Mbps and 200Mbps (may not work on all devices).
 ADDED   New video audio source options: UNPROCESSED (requires Android 7) and VOICE_RECOGNITION.
 ADDED   Partial Greek translation (thanks to Wasilis Mandratzis-Walz).
+ADDED   New option to disable ever showing the "What's New" dialog (under Settings/On screen GUI/
+        "Show What's New dialog").
 UPDATED No longer wait for image queue to be saved to go to settings, or background.
 UPDATED On Android 8+ when restarting video due to hitting maximum filesize, transition to new file
         is now seamless.

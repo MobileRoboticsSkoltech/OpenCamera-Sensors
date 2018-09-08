@@ -603,6 +603,9 @@
     <string name="preference_units_distance_ft">Feet</string>
     <string name="feet_abbreviation">ft</string> <!-- symbol short for feet -->
 
+    <string name="preference_show_whats_new">Shows What\'s New dialog</string>
+    <string name="preference_show_whats_new_summary">Whether to display information on new features and improvements when the application has updated</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>
@@ -613,5 +616,7 @@
             <li>HDR improvements (ghost removal, and brightening of too dark images).\n</li>
             <li>Performance improvements and bug fixes.\n</li>
         </ul>
+        \nThis dialog is shown when Open Camera is updated. You can disable it from showing under
+        Settings/On screen GUI/Show What\'s New dialog.
     </string>
 </resources>

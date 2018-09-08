@@ -408,11 +408,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "latest_version: " + latest_version);
 				}
 				final boolean whats_new_enabled = false;
+				//final boolean whats_new_enabled = true;
 				if( whats_new_enabled ) {
 					final boolean force_whats_new = false;
 					//final boolean force_whats_new = true; // for testing
+					boolean allow_show_whats_new = sharedPreferences.getBoolean(PreferenceKeys.ShowWhatsNewPreferenceKey, true);
+					if( MyDebug.LOG )
+						Log.d(TAG, "allow_show_whats_new: " + allow_show_whats_new);
 					// don't show What's New if this is the first time the user has run
-					if( has_done_first_time && ( force_whats_new || version_code > latest_version ) ) {
+					if( has_done_first_time && allow_show_whats_new && ( force_whats_new || version_code > latest_version ) ) {
 						AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 						alertDialog.setTitle(R.string.whats_new);
 						alertDialog.setMessage(R.string.whats_new_text);
@@ -429,8 +433,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						alertDialog.show();
 					}
 				}
-				// we set the latest_version whether or not the dialog is shown - if we showed the irst time dialog, we don't
-				// want to then show the What's New dialog next time we run!
+				// We set the latest_version whether or not the dialog is shown - if we showed the first time dialog, we don't
+				// want to then show the What's New dialog next time we run! Similarly if the user had disabled showing the dialog,
+				// but then enables it, we still shouldn't show the dialog until the new time Open Camera upgrades.
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putInt(PreferenceKeys.LatestVersionPreferenceKey, version_code);
 				editor.apply();
