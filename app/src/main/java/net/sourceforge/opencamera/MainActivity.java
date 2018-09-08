@@ -89,7 +89,7 @@ import android.widget.ZoomControls;
 
 /** The main Activity for Open Camera.
  */
-public class MainActivity extends Activity implements AudioListener.AudioListenerCallback {
+public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager;
 	private Sensor mSensorAccelerometer;
@@ -118,9 +118,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	private TextToSpeech textToSpeech;
 	private boolean textToSpeechSuccess;
-	
+
 	private AudioListener audio_listener;
-	private int audio_noise_sensitivity = -1;
 	private SpeechRecognizer speechRecognizer;
 	private boolean speechRecognizerIsStarted;
 	
@@ -749,92 +748,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		launchOnlineHelp("");
 	}
 
-	// for audio "noise" trigger option
-	private int last_level = -1;
-	private long time_quiet_loud = -1;
-	private long time_last_audio_trigger_photo = -1;
-
-	/** Listens to audio noise and decides when there's been a "loud" noise to trigger taking a photo.
-	 */
-	public void onAudio(int level) {
-		boolean audio_trigger = false;
-		/*if( level > 150 ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "loud noise!: " + level);
-			audio_trigger = true;
-		}*/
-
-		if( last_level == -1 ) {
-			last_level = level;
-			return;
-		}
-		int diff = level - last_level;
-		
-		if( MyDebug.LOG )
-			Log.d(TAG, "noise_sensitivity: " + audio_noise_sensitivity);
-
-		if( diff > audio_noise_sensitivity ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "got louder!: " + last_level + " to " + level + " , diff: " + diff);
-			time_quiet_loud = System.currentTimeMillis();
-			if( MyDebug.LOG )
-				Log.d(TAG, "    time: " + time_quiet_loud);
-		}
-		else if( diff < -audio_noise_sensitivity && time_quiet_loud != -1 ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "got quieter!: " + last_level + " to " + level + " , diff: " + diff);
-			long time_now = System.currentTimeMillis();
-			long duration = time_now - time_quiet_loud;
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "stopped being loud - was loud since :" + time_quiet_loud);
-				Log.d(TAG, "    time_now: " + time_now);
-				Log.d(TAG, "    duration: " + duration);
-			}
-			if( duration < 1500 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "audio_trigger set");
-				audio_trigger = true;
-			}
-			time_quiet_loud = -1;
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.d(TAG, "audio level: " + last_level + " to " + level + " , diff: " + diff);
-		}
-
-		last_level = level;
-
-		if( audio_trigger ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "audio trigger");
-			// need to run on UI thread so that this function returns quickly (otherwise we'll have lag in processing the audio)
-			// but also need to check we're not currently taking a photo or on timer, so we don't repeatedly queue up takePicture() calls, or cancel a timer
-			long time_now = System.currentTimeMillis();
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("noise");
-			if( time_last_audio_trigger_photo != -1 && time_now - time_last_audio_trigger_photo < 5000 ) {
-				// avoid risk of repeatedly being triggered - as well as problem of being triggered again by the camera's own "beep"!
-				if( MyDebug.LOG )
-					Log.d(TAG, "ignore loud noise due to too soon since last audio triggerred photo:" + (time_now - time_last_audio_trigger_photo));
-			}
-			else if( !want_audio_listener ) {
-				// just in case this is a callback from an AudioListener before it's been freed (e.g., if there's a loud noise when exiting settings after turning the option off
-				if( MyDebug.LOG )
-					Log.d(TAG, "ignore loud noise due to audio listener option turned off");
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "audio trigger from loud noise");
-				time_last_audio_trigger_photo = time_now;
-				audioTrigger();
-			}
-		}
-	}
-	
 	/* Audio trigger - either loud sound, or speech recognition.
 	 * This performs some additional checks before taking a photo.
 	 */
-	private void audioTrigger() {
+	void audioTrigger() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ignore audio trigger due to popup open");
 		if( popupIsOpen() ) {
@@ -3679,11 +3596,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private void startAudioListener() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startAudioListener");
-		audio_listener = new AudioListener(this);
+		MyAudioTriggerListenerCallback callback = new MyAudioTriggerListenerCallback(this);
+		audio_listener = new AudioListener(callback);
 		if( audio_listener.status() ) {
 			audio_listener.start();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.AudioNoiseControlSensitivityPreferenceKey, "0");
+			int audio_noise_sensitivity;
 			switch(sensitivity_pref) {
 				case "3":
 					audio_noise_sensitivity = 50;
@@ -3705,6 +3624,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					audio_noise_sensitivity = 100;
 					break;
 			}
+			callback.setAudioNoiseSensitivity(audio_noise_sensitivity);
 			mainUI.audioControlStarted();
 		}
 		else {
