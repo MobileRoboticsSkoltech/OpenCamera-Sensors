@@ -2247,10 +2247,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		subTestISOButtonAvailability();
 
-		final int manual_n = 1000; // should match MainActivity.manual_n
+		/*final int manual_n = 1000; // should match MainActivity.manual_n
 	    assertTrue( isoSeekBar.getMax() == manual_n );
 	    if( mPreview.supportsExposureTime() )
-		    assertTrue( exposureTimeSeekBar.getMax() == manual_n );
+		    assertTrue( exposureTimeSeekBar.getMax() == manual_n );*/
 
 		Log.d(TAG, "change ISO to min");
 	    isoSeekBar.setProgress(0);
@@ -2267,7 +2267,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		Log.d(TAG, "camera_controller ISO: " + mPreview.getCameraController().getISO());
 		Log.d(TAG, "change ISO to max");
-	    isoSeekBar.setProgress(manual_n);
+	    isoSeekBar.setProgress(isoSeekBar.getMax());
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "camera_controller ISO: " + mPreview.getCameraController().getISO());
 		Log.d(TAG, "reported max ISO: " + mPreview.getMaximumISO());
@@ -2276,14 +2276,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T)
 	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
-		    exposureTimeSeekBar.setProgress(manual_n);
+		    exposureTimeSeekBar.setProgress(exposureTimeSeekBar.getMax());
 			this.getInstrumentation().waitForIdleSync();
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 	    }
 	    else {
-            Log.d(TAG, "change exposure time to 1s");
-            mActivity.setProgressSeekbarExponential(exposureTimeSeekBar, mPreview.getMinimumExposureTime(), mPreview.getMaximumExposureTime(), 1000000000);
+            Log.d(TAG, "change exposure time to middle");
+            //mActivity.setProgressSeekbarExponential(exposureTimeSeekBar, mPreview.getMinimumExposureTime(), mPreview.getMaximumExposureTime(), 1000000000);
+		    exposureTimeSeekBar.setProgress(exposureTimeSeekBar.getMax()/2);
             this.getInstrumentation().waitForIdleSync();
             assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
             assertTrue( mPreview.getCameraController().getExposureTime() != mPreview.getMaximumExposureTime() );

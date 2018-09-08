@@ -451,12 +451,12 @@ public class UnitTest {
 		assertEquals( 0.5, CameraController2.getScaleForExposureTime(1000000000L/240, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale), delta );
 	}
 
-	@Test
+	/*@Test
 	public void testExponentialScaling() {
 		Log.d(TAG, "testExponentialScaling");
 		assertEquals(100, (int)MainActivity.exponentialScaling(0.0f, 100, 1600));
 		assertEquals(1600, (int)MainActivity.exponentialScaling(1.0f, 100, 1600));
-	}
+	}*/
 
 	@Test
 	public void testFormatLevelAngle() {

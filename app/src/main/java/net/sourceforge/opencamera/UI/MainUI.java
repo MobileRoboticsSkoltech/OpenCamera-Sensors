@@ -412,7 +412,7 @@ public class MainUI {
 				width_dp = 350;
 			}
 			else {
-				width_dp = 200;
+				width_dp = 250;
 			}
 			int height_dp = 50;
 			final float scale = main_activity.getResources().getDisplayMetrics().density;

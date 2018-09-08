@@ -6,6 +6,7 @@ import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.MainUI;
+import net.sourceforge.opencamera.UI.ManualSeekbars;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,6 +95,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private Sensor mSensorAccelerometer;
 	private Sensor mSensorMagnetic;
 	private MainUI mainUI;
+	private ManualSeekbars manualSeekbars;
 	private TextFormatter textFormatter;
 	private MyApplicationInterface applicationInterface;
 	private Preview preview;
@@ -130,8 +132,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private final ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
-
-	private final int manual_n = 1000; // the number of values on the seekbar used for manual focus distance, ISO or exposure speed
 
 	// application shortcuts:
 	static private final String ACTION_SHORTCUT_CAMERA = "net.sourceforge.opencamera.SHORTCUT_CAMERA";
@@ -215,6 +215,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		// set up components
 		mainUI = new MainUI(this);
+		manualSeekbars = new ManualSeekbars();
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
@@ -1326,54 +1327,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.toggleExposureUI();
     }
     
-    private static double seekbarScaling(double frac) {
-    	// For various seekbars, we want to use a non-linear scaling, so user has more control over smaller values
-    	return (Math.pow(100.0, frac) - 1.0) / 99.0;
-    }
-
-    private static double seekbarScalingInverse(double scaling) {
-    	return Math.log(99.0*scaling + 1.0) / Math.log(100.0);
-    }
-
-	private void setProgressSeekbarScaled(SeekBar seekBar, double min_value, double max_value, double value) {
-		seekBar.setMax(manual_n);
-		double scaling = (value - min_value)/(max_value - min_value);
-		double frac = MainActivity.seekbarScalingInverse(scaling);
-		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
-		if( new_value < 0 )
-			new_value = 0;
-		else if( new_value > manual_n )
-			new_value = manual_n;
-		seekBar.setProgress(new_value);
-	}
-    
-    public static long exponentialScaling(double frac, double min, double max) {
-		/* We use S(frac) = A * e^(s * frac)
-		 * We want S(0) = min, S(1) = max
-		 * So A = min
-		 * and Ae^s = max
-		 * => s = ln(max/min)
-		 */
-		double s = Math.log(max / min);
-		return (long)(min * Math.exp(s * frac) + 0.5f); // add 0.5f so we round to nearest
-	}
-
-    private static double exponentialScalingInverse(double value, double min, double max) {
-		double s = Math.log(max / min);
-		return Math.log(value / min) / s;
-	}
-
-	public void setProgressSeekbarExponential(SeekBar seekBar, double min_value, double max_value, double value) {
-		seekBar.setMax(manual_n);
-		double frac = exponentialScalingInverse(value, min_value, max_value);
-		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
-		if( new_value < 0 )
-			new_value = 0;
-		else if( new_value > manual_n )
-			new_value = manual_n;
-		seekBar.setProgress(new_value);
-	}
-
     public void clickedExposureLock(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposureLock");
@@ -3146,27 +3099,28 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( preview.supportsISORange()) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set up iso");
-				SeekBar iso_seek_bar = findViewById(R.id.iso_seekbar);
+				final SeekBar iso_seek_bar = findViewById(R.id.iso_seekbar);
 			    iso_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-				setProgressSeekbarExponential(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+				//setProgressSeekbarExponential(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+				manualSeekbars.setProgressSeekbarISO(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
 				iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-						double frac = progress/(double)manual_n;
+						/*double frac = progress/(double)iso_seek_bar.getMax();
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time frac: " + frac);
-						/*double scaling = MainActivity.seekbarScaling(frac);
+						double scaling = MainActivity.seekbarScaling(frac);
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time scaling: " + scaling);
 						int min_iso = preview.getMinimumISO();
 						int max_iso = preview.getMaximumISO();
 						int iso = min_iso + (int)(scaling * (max_iso - min_iso));*/
-						int min_iso = preview.getMinimumISO();
+						/*int min_iso = preview.getMinimumISO();
 						int max_iso = preview.getMaximumISO();
-						int iso = (int)exponentialScaling(frac, min_iso, max_iso);
-						preview.setISO(iso);
+						int iso = (int)exponentialScaling(frac, min_iso, max_iso);*/
+						preview.setISO( manualSeekbars.getISO(progress) );
 						mainUI.updateSelectedISOButton();
 					}
 
@@ -3181,31 +3135,22 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( preview.supportsExposureTime() ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "set up exposure time");
-					SeekBar exposure_time_seek_bar = findViewById(R.id.exposure_time_seekbar);
+					final SeekBar exposure_time_seek_bar = findViewById(R.id.exposure_time_seekbar);
 					exposure_time_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-					setProgressSeekbarExponential(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					//setProgressSeekbarExponential(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					manualSeekbars.setProgressSeekbarShutterSpeed(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
 					exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
-							double frac = progress/(double)manual_n;
+							/*double frac = progress/(double)exposure_time_seek_bar.getMax();
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time frac: " + frac);
-							//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));
-							//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
-							//long exposure_time = (long)(1.0 / exposure_time_r);
-							// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
-							/*double scaling = MainActivity.seekbarScaling(frac);
-							if( MyDebug.LOG )
-								Log.d(TAG, "exposure_time scaling: " + scaling);
 							long min_exposure_time = preview.getMinimumExposureTime();
 							long max_exposure_time = preview.getMaximumExposureTime();
-							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));*/
-							long min_exposure_time = preview.getMinimumExposureTime();
-							long max_exposure_time = preview.getMaximumExposureTime();
-							long exposure_time = exponentialScaling(frac, min_exposure_time, max_exposure_time);
-							preview.setExposureTime(exposure_time);
+							long exposure_time = exponentialScaling(frac, min_exposure_time, max_exposure_time);*/
+							preview.setExposureTime( manualSeekbars.getExposureTime(progress) );
 						}
 
 						@Override
@@ -3295,14 +3240,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private void setManualFocusSeekbar(final boolean is_target_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setManualFocusSeekbar");
-		SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
+		final SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
 		focusSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-		setProgressSeekbarScaled(focusSeekBar, 0.0, preview.getMinimumFocusDistance(), is_target_distance ? preview.getCameraController().getFocusBracketingTargetDistance() : preview.getCameraController().getFocusDistance());
+		ManualSeekbars.setProgressSeekbarScaled(focusSeekBar, 0.0, preview.getMinimumFocusDistance(), is_target_distance ? preview.getCameraController().getFocusBracketingTargetDistance() : preview.getCameraController().getFocusDistance());
 		focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				double frac = progress/(double)manual_n;
-				double scaling = MainActivity.seekbarScaling(frac);
+				double frac = progress/(double)focusSeekBar.getMax();
+				double scaling = ManualSeekbars.seekbarScaling(frac);
 				float focus_distance = (float)(scaling * preview.getMinimumFocusDistance());
 				preview.setFocusDistance(focus_distance, is_target_distance);
 			}
@@ -3339,16 +3284,20 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			white_balance_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
 			final int minimum_temperature = preview.getMinimumWhiteBalanceTemperature();
 			final int maximum_temperature = preview.getMaximumWhiteBalanceTemperature();
+			/*
 			// white balance should use linear scaling
 			white_balance_seek_bar.setMax(maximum_temperature - minimum_temperature);
 			white_balance_seek_bar.setProgress(preview.getCameraController().getWhiteBalanceTemperature() - minimum_temperature);
+			*/
+			manualSeekbars.setProgressSeekbarWhiteBalance(white_balance_seek_bar, minimum_temperature, maximum_temperature, preview.getCameraController().getWhiteBalanceTemperature());
 			white_balance_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "white balance seekbar onProgressChanged: " + progress);
-					int temperature = minimum_temperature + progress;
-					preview.setWhiteBalanceTemperature(temperature);
+					//int temperature = minimum_temperature + progress;
+					//preview.setWhiteBalanceTemperature(temperature);
+					preview.setWhiteBalanceTemperature( manualSeekbars.getWhiteBalanceTemperature(progress) );
 				}
 
 				@Override
