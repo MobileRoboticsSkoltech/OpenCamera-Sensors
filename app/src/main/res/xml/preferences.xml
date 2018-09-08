@@ -626,6 +626,15 @@
 		            android:defaultValue="preference_stamp_gpsformat_default"
 		            />
 	
+				<ListPreference
+					android:key="preference_units_distance"
+					android:title="@string/preference_units_distance"
+					android:summary="@string/preference_units_distance_summary"
+					android:entries="@array/preference_units_distance_entries"
+					android:entryValues="@array/preference_units_distance_values"
+					android:defaultValue="preference_units_distance_m"
+					/>
+
 		      	<EditTextPreference
 		            android:key="preference_textstamp"
 		            android:title="@string/preference_textstamp"
@@ -888,7 +897,7 @@
 	            android:summary="@string/preference_require_location_summary"
 	            android:defaultValue="false"
 	            />
-		    
+
 	    </PreferenceScreen>
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->

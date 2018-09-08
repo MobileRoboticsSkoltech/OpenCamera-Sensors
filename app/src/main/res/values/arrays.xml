@@ -755,4 +755,12 @@
         <item>150000000</item>
         <item>200000000</item>
     </string-array>
+    <string-array name="preference_units_distance_entries">
+        <item>@string/preference_units_distance_m</item>
+        <item>@string/preference_units_distance_ft</item>
+    </string-array>
+    <string-array name="preference_units_distance_values">
+        <item>preference_units_distance_m</item>
+        <item>preference_units_distance_ft</item>
+    </string-array>
 </resources>

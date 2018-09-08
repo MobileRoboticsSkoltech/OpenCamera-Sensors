@@ -68,11 +68,21 @@ public class TextFormatter {
         return time_stamp;
     }
 
+    private String getDistanceString(double distance, String preference_units_distance) {
+        double converted_distance = distance;
+        String units = context.getResources().getString(R.string.metres_abbreviation);
+        if( preference_units_distance.equals("preference_units_distance_ft") ) {
+            converted_distance = 3.28084 * distance;
+            units = context.getResources().getString(R.string.feet_abbreviation);
+        }
+        return decimalFormat.format(converted_distance) + units;
+    }
+
     /** Formats the GPS information according to the user preference_stamp_gpsformat preference_stamp_timeformat.
      *  Returns "" if preference_stamp_gpsformat is "preference_stamp_gpsformat_none", or both store_location and
      *  store_geo_direction are false.
      */
-    public String getGPSString(String preference_stamp_gpsformat, boolean store_location, Location location, boolean store_geo_direction, double geo_direction) {
+    public String getGPSString(String preference_stamp_gpsformat, String preference_units_distance, boolean store_location, Location location, boolean store_geo_direction, double geo_direction) {
         String gps_stamp = "";
         if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
             if( store_location ) {
@@ -83,7 +93,7 @@ public class TextFormatter {
                 else
                     gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
                 if( location.hasAltitude() ) {
-                    gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + context.getResources().getString(R.string.metres_abbreviation);
+                    gps_stamp += ", " + getDistanceString(location.getAltitude(), preference_units_distance);
                 }
             }
             if( store_geo_direction ) {
