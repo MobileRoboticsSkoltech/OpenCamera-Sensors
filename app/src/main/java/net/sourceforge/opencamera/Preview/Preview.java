@@ -173,6 +173,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private boolean is_preview_started;
 
+	private OrientationEventListener orientationEventListener;
 	private int current_orientation; // orientation received by onOrientationChanged
 	private int current_rotation; // orientation relative to camera's orientation (used for parameters.setRotation())
 	private boolean has_level_angle;
@@ -1154,6 +1155,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				closeCameraCallback.onClosed();
 			}
 		}
+
+		if( orientationEventListener != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "free orientationEventListener");
+			orientationEventListener.disable();
+			orientationEventListener = null;
+		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera: total time: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -1537,12 +1545,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "take_photo?: " + take_photo);
 
 			setCameraDisplayOrientation();
-			new OrientationEventListener(activity) {
-				@Override
-				public void onOrientationChanged(int orientation) {
-					Preview.this.onOrientationChanged(orientation);
-				}
-			}.enable();
+			if( orientationEventListener == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "create orientationEventListener");
+				orientationEventListener = new OrientationEventListener(activity) {
+					@Override
+					public void onOrientationChanged(int orientation) {
+						Preview.this.onOrientationChanged(orientation);
+					}
+				};
+				orientationEventListener.enable();
+			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "openCamera: time after setting orientation: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -3459,11 +3472,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    	new_rotation = (camera_orientation + orientation) % 360;
 	    }
 	    if( new_rotation != current_rotation ) {
-			/*if( MyDebug.LOG ) {
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "    current_orientation is " + current_orientation);
 				Log.d(TAG, "    info orientation is " + camera_orientation);
 				Log.d(TAG, "    set Camera rotation from " + current_rotation + " to " + new_rotation);
-			}*/
+			}
 	    	this.current_rotation = new_rotation;
 	    }
 	}

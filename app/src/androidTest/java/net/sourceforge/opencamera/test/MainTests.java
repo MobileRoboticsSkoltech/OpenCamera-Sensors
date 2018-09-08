@@ -52,6 +52,7 @@ public class MainTests {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraIdle"));
 		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTouchFocusQuick"));
 		if( !MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGallery"));

@@ -7685,7 +7685,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
-	/** Tests trying to switch camera repeatedly.
+	/** Tests trying to switch camera repeatedly, without waiting for camera to open.
 	 */
 	public void testSwitchCameraRepeat() {
 		Log.d(TAG, "testSwitchCameraRepeat");
@@ -7703,6 +7703,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		waitUntilCameraOpened();
 		// n.b., don't check the new camera Id, as it's ill-defined which camera will be open
 		// the main point of this test is to check we don't crash due to opening camera on background thread
+	}
+
+	/* Tests repeatedly switching camera, waiting for camera to reopen each time.
+	 * Guards agains a bug fixed in 1.44 where we would crash due to memory leak in
+	 * OrientationEventListener.enable() (from Preview.cameraOpened()) when called too many times.
+	 */
+	public void testSwitchCameraRepeat2() throws InterruptedException {
+		Log.d(TAG, "testSwitchCameraRepeat2");
+		setToDefault();
+
+		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
+			return;
+		}
+
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		int cameraId = mPreview.getCameraId();
+
+		for(int i=0;i<130;i++) {
+			Log.d(TAG, "i = " + i);
+
+			clickView(switchCameraButton);
+			waitUntilCameraOpened();
+
+			int new_cameraId = mPreview.getCameraId();
+			assertTrue(new_cameraId != cameraId);
+			cameraId = new_cameraId;
+		}
 	}
 
 	/* Tests going to gallery.
