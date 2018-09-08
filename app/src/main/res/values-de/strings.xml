@@ -42,7 +42,7 @@
     <string name="started_recording_video">Videoaufnahme gestartet</string>
     <string name="sorry">Entschuldigung</string>
     <string name="failed_to_save_photo">Fehler beim Speichern des Fotos</string>
-    <string name="failed_to_save_photo_raw">Fehler beim Speichern des RAW Fotos</string>
+    <string name="failed_to_save_photo_raw">Fehler beim Speichern des RAW-Fotos</string>
     <string name="failed_to_auto_stabilise">Fehler bei der Bildlagekorrektur</string>
     <string name="failed_to_start_camera_preview">Fehler beim Starten der Kameravorschau</string>
     <string name="taking_photo">Foto wird aufgenommen</string>
@@ -294,7 +294,10 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- needs to not be too long, so this shows okay on the popup menu's photo mode buttons -->
     <string name="photo_mode_expo_bracketing_full">Belichtungsreihe</string>
+    <string name="photo_mode_fast_burst">[]]]</string>
+    <string name="photo_mode_fast_burst_full">Schnelle Fotofolge</string>
     <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_noise_reduction_full">Rauschunterdrückung</string>
     <string name="preference_category_stamp">Fotostempel</string>
     <string name="preference_hdr_save_expo">Alle Bilder der HDR Aufnahme speichern</string>
     <string name="preference_hdr_save_expo_summary">Wenn aktiviert, dann werden im HDR Modus die drei Basis Belichtungsbilder zusammen mit dem HDR Foto gespeichert. Beachte, dass die Aufnahmen verlangsamt, besonders wenn Optionen wie \"Stamp photos\" oder Autostabilisieung verwendet werden.</string>
@@ -332,7 +335,7 @@
 
     <string name="dark">Dunkel</string> <!-- exposure compensation dark -->
     <string name="bright">Hell</string> <!-- exposure compensation bright -->
-    <string name="exposure_shutter_speed">Verschlußgeschwindigkeit</string>
+    <string name="exposure_shutter_speed">Verschlusszeit</string>
 
     <string name="camera_error">Ernsthafter Kamera Fehler</string>
 
@@ -460,8 +463,11 @@
     <string name="preference_exif_copyright">Copyright</string>
     <string name="preference_exif_copyright_summary">Text für den "Copyright"-Eintrag in den Foto-Metadaten (nur JPEG-Format, freilassen, falls nicht verwendet.)</string>
 
+    <string name="processing">Bearbeitung…</string>
+	
     <string name="preference_raw_no">Nur JPEG</string>
     <string name="preference_raw_yes">JPEG und DNG (RAW)</string>
+    <string name="preference_raw_only">Nur DNG (RAW)</string>
 
     <string name="preference_stamp_dateformat_default">Standard</string>
     <string name="preference_stamp_dateformat_yyyymmdd">JJJJ-MM-TT</string>
@@ -469,6 +475,14 @@
     <string name="preference_stamp_dateformat_mmddyyyy">MM/TT/JJJJ</string>
     <string name="preference_stamp_dateformat_none">Kein Datum-Stempel</string>
 
+    <string name="preference_fast_burst_n_images">Anzahl Fotos</string>
+    <string name="preference_focus_bracketing_n_images">Anzahl Fotos</string>
+
+    <string name="preference_video_capture_rate">Geschwindigkeit</string>
+    <string name="preference_video_capture_rate_normal">Normal</string>
+    <string name="slow_motion_disabled">Zeitlupe aus</string>
+    <string name="slow_motion_enabled">Zeitlupe ein</string>
+	
     <string name="flash_off">Ohne Blitz</string>
     <string name="flash_auto">Automatischer Blitz</string>
     <string name="flash_on">Mit Blitz</string>
@@ -476,11 +490,42 @@
     <string name="flash_red_eye">Rote-Augen-Reduktion</string>
     <string name="flash_frontscreen_auto">Frontblitz Auto</string>
     <string name="flash_frontscreen_on">Frontblitz ein</string>
+    <string name="flash_frontscreen_torch">Bildschirmleuchte</string>
+
+    <string name="preference_antibanding">Anti-Banding</string>
+    <string name="preference_antibanding_summary">Algorithmen gegen Flackern.\n%s</string>
+    <string name="anti_banding_auto">Auto</string>
+    <string name="anti_banding_50hz">50 Hz</string>
+    <string name="anti_banding_60hz">60 Hz</string>
+    <string name="anti_banding_off">Aus</string>
+
+    <string name="preference_ghost_image">Geisterbilder</string>
+    <string name="preference_ghost_image_summary">Überlagere ein Bild zwecks Ausrichtung.\n%s</string>
+    <string name="preference_ghost_image_off">Aus</string>
+    <string name="preference_ghost_image_last">Zuletzt aufgenommenes Foto</string>
+    <string name="preference_ghost_image_selected">Ausgewähltes Bild</string>
+
+    <string name="open_files_saf_exception_ghost">Kein Datei-Dialog möglich, die Geisterbilder-Option wird nicht unterstützt</string>
+    <string name="saf_permission_failed_open_image">Bild kann nicht geöffnet werden</string>
+
+    <string name="preference_camera2_photo_video_recording">Ermögliche Fotos während der Videoaudnahme</string>
+    <string name="preference_camera2_photo_video_recording_summary">Ermögliche Fotos während der Videoaudnahme. Diese Option ausschalten, falls Probleme mit dem Camera-2-API auftreten.</string>
+
+    <string name="preference_video_log">Flaches (Log-) Video-Profil</string>
+    <string name="preference_video_log_summary">Aktiviere ein flaches (Log-) Profil für den Video-Modus\n%s</string>
+    <string name="preference_video_log_off">Aus</string>
+    <string name="preference_video_log_low">Schwach</string>
+    <string name="preference_video_log_medium">Mittel</string>
+    <string name="preference_video_log_strong">Stark</string>
+    <string name="preference_video_log_extra_strong">Extra stark</string>
+    <string name="video_log">Log-Profil</string>
 
     <string name="preference_record_audio_src_camcorder">Camcorder</string>
     <string name="preference_record_audio_src_mic">Externes Mikrofon</string>
     <string name="preference_record_audio_src_default">Standard-Audioquelle</string>
     <string name="preference_record_audio_src_voice_communication">Optimiert für Stimme</string>
+    <string name="preference_record_audio_src_voice_recognition">Optimiert für Stimmerkennung</string>
+    <string name="preference_record_audio_src_unprocessed">Unbearbeitet</string>
 
     <string name="preference_video_bitrate_default">Standard</string>
     <string name="preference_video_bitrate_100000">100 kbit/s</string>
@@ -506,5 +551,30 @@
     <string name="preference_video_bitrate_80000000">80 Mbit/s</string>
     <string name="preference_video_bitrate_90000000">90 Mbit/s</string>
     <string name="preference_video_bitrate_100000000">100 Mbit/s</string>
+    <string name="preference_video_bitrate_150000000">150Mbps</string>
+    <string name="preference_video_bitrate_200000000">200Mbps</string>
 
+    <string name="no_burst">Kein Burst</string> <!-- string for burst mode not being supported for a resolution -->
+
+    <string name="preference_show_video_max_amp">Anzeige der Lautstärke</string>
+    <string name="preference_show_video_max_amp_summary">Anzeige der Lautstärke bei der Video-Aufnahme</string>
+
+    <string name="photo_mode_focus_bracketing">Focus {}</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_focus_bracketing_full">Focus Bracketing</string>
+
+    <string name="focus_bracketing_source_distance">Focus Bracketing Quell-Entfernung</string>
+    <string name="focus_bracketing_target_distance">Focus Bracketing Ziel-Entfernung</string>
+
+    <string name="focus_bracketing_add_infinity">Füge unendlich hinzu</string>
+
+    <string name="magnetic_accuracy_info">Dein Kompass muss kalibriert werden, um die Genauigkeit zu verbessern. Dazu bewege Dein Handy in der Bahn einer Acht.\n\nAktuelle Präzision:</string>
+    <string name="magnetic_accuracy_title">Kompassausrichtung</string>
+
+    <string name="accuracy_unreliable">Ungenau</string>
+    <string name="accuracy_low">Niedrig</string>
+    <string name="accuracy_medium">Mittel</string>
+    <string name="accuracy_high">Hoch</string>
+    <string name="accuracy_unknown">Unbekannt</string>
+
+	
 </resources>
