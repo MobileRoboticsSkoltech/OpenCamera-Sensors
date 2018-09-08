@@ -8873,25 +8873,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Location location1 = new Location("");
 		location1.setLatitude(0.0);
 		location1.setLongitude(0.0);
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location1, true, Math.toRadians(180)), "");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, true, Math.toRadians(180)), "0, 0, 180°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, true, Math.toRadians(180)), "0°0'0\", 0°0'0\", 180°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, false, Math.toRadians(180)), "0, 0");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, false, Math.toRadians(180)), "0°0'0\", 0°0'0\"");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(180)), "180°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(180)), "180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", "preference_units_distance_m", true, location1, true, Math.toRadians(180)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", true, location1, true, Math.toRadians(180)), "0, 0, 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", true, location1, true, Math.toRadians(180)), "0°0'0\", 0°0'0\", 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", true, location1, false, Math.toRadians(180)), "0, 0");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", true, location1, false, Math.toRadians(180)), "0°0'0\", 0°0'0\"");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", false, null, true, Math.toRadians(180)), "180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", false, null, true, Math.toRadians(180)), "180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_ft", true, location1, true, Math.toRadians(180)), "0, 0, 180°");
 
 		Location location2 = new Location("");
 		location2.setLatitude(-29.3);
 		location2.setLongitude(47.6173);
 		location2.setAltitude(106.5);
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location2, true, Math.toRadians(74)), "");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 106.5m, 74°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, true, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m, 74°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, false, Math.toRadians(74)), "-29.3, 47.6173, 106.5m");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, false, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(74)), "74°");
-		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", "preference_units_distance_m", true, location2, true, Math.toRadians(74)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", true, location2, true, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", true, location2, false, Math.toRadians(74)), "-29.3, 47.6173, 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", true, location2, false, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", false, null, true, Math.toRadians(74)), "74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", false, null, true, Math.toRadians(74)), "74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_ft", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 349.4ft, 74°");
 	}
 
 	private static class HistogramDetails {
