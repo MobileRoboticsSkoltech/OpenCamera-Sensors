@@ -75,9 +75,11 @@
 <li><a href="#quickstart">Quickstart</a></li>
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-level feature</a></li>
+<li><a href="#noise_reduction">Noise Reduction</a></li>
 <li><a href="#dro">DRO</a></li>
 <li><a href="#hdr">HDR</a></li>
 <li><a href="#dro_vs_hdr">DRO vs HDR</a></li>
+<li><a href="#nr_vs_hdr">NR vs HDR</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#widgets">Widgets and tiles</a></li>
 <li><a href="#faq">FAQ</a></li>
@@ -190,7 +192,9 @@ will be available which instead work by making the screen light up (note, front 
 	</li>
 </ul></li>
 <li><b>Photo Mode</b> - You can also choose different photo modes:<ul>
-	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
+	<li><b>STD</b> - Standard operation: takes a single photo.</li>
+	<li><b>NR</b> - Enables <a href="#noise_reduction">Noise Reduction</a> mode. (Only available on some devices,
+	and if Camera2 API is used.)</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
 	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode (requires Android 5).</li>
 	<li><b>[]]]</b> - Enables Fast Burst mode. Takes multiple images in quick succession. (Only available on some
@@ -297,6 +301,26 @@ feature.</p>
 
 <p>Note that auto-stabilising will not occur if the device is pointing up or down.</p>
 
+<p><a name="noise_reduction"></a><b>Noise Reduction</b></p>
+
+<p>In Noise Reduction photo mode, Open Camera takes a burst of photos which are then automatically merged, to improve photo quality.
+This is particularly useful in low light scenes to reduce noise.
+</p>
+
+<p>Some things to note about Open Camera's NR feature:</p>
+<ul>
+<li>In dark scenes, NR will also apply pixel binning, merging 4 pixels into 1 to reduce noise. Therefore in such cases , the
+resultant photo resolution will be halved in width and height.</li>
+<li>In bright scenes where there is a high dynamic range, NR mode will perform better than Standard at capturing the dynamic range.
+This is similar to what Open Camera's <a href="#hdr">HDR</a> mode can achieve. Also see <a href="#nr_vs_hdr">NR vs HDR</a>.</li>
+<li>Taking photos with NR is significantly slower than regular photos.</li>
+<li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
+being taken.</li>
+<li>If you have a Google Pixel (2), you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
+is generally little benefit to using Open Camera's NR mode on these devices. See "Does Open Camera support HDR+" in the
+<a href="#faq">FAQ</a> for more details.</li>
+</ul>
+
 <p><a name="dro"></a><b>DRO</b></p>
 
 <p>Dynamic Range Optimisation (DRO) is a technique that optimises the dynamic range available in the image. In particular, dark
@@ -349,6 +373,15 @@ is generally little benefit to using Open Camera's HDR mode on these devices. Se
 <li>HDR will in general be better at scenes with a high range of brightness values. It can take advantage of the information from
 three separate images, rather than reprocessing a single image.</li>
 </ul>
+
+<p><a name="nr_vs_hdr"></a><b>NR vs HDR</b></p>
+
+<p>In scenes with high dynamic range, HDR should do better at capturing the high dynamic range (although NR should still be better
+than Standard photo mode). Though NR still has the advantage that it is less prone to ghosting and misalignment. NR is also better
+suited to working in a wide range of scenes.</p>
+
+<p>In summary: NR is better if you just want a "works best in most cases" option. HDR may be a better choice specifically in
+scenes with high dynamic range, that also don't have movement in the scene.</p>
 
 <p><a name="settings"></a><b>Settings</b></p>
 
@@ -602,6 +635,9 @@ to a particular aspect ratio. For photos, the crop-guide requires "Preview size"
 
 <p><b>Show border when taking photo</b> - Whether to display a border effect when taking a photo.</p>
 
+<p><b>Show What's New dialog</b> - When updating to a major new version, Open Camera displays a dialog explaining the new
+features and other options. You can disable this dialog from being displayed if you prefer.</p>
+
 <p><b>Keep display on</b> - Whether to force keeping the screen display on, while the main Open Camera UI is active.</p>
 
 <p><b>Force maximum brightness</b> - Whether to force the screen display to maximum brightness.</p>
@@ -651,6 +687,15 @@ uncompressed and unprocessed information from your camera. Please note the follo
 	<li>RAW images will only be saved in the Standard or DRO photo modes.</li>
 </ul>
 
+<p><b>Noise Reduction original images</b> - When using <a href="#noise_reduction">Noise Reduction</a> mode, if
+	this option is enabled, then the input images from the burst of images taken will be saved, as well as the
+	final NR photo. You can choose to save either a single image from the burst, or all images. This may be useful
+	if you want to use external image stacking applications to merge the images. Note that these images will
+	typically be noisier than a typical photo from Standard mode, because the device's noise reduction algorithms
+	are disabled (this seems counter-intuitive, but in order to improve quality by merging multiple images, noise
+	reduction algorithms need to be applied after the merging, not before).
+</p>
+
 <p><b>Save all images for HDR mode</b> - When using <a href="#hdr">HDR</a> mode, if this option is enabled,
 then the three base exposure images will be saved as well as the final HDR photo. This is useful if you want
 to use external HDR applications (such as my own
@@ -685,10 +730,13 @@ Similarly for "Store compass direction". Note that if this option is enabled, th
 longer to save the photo. Also see "Video subtitles".</p>
 
 <p><b>Datestamp format, Timestamp format</b> - If "Stamp photos" is enabled, these options allow
-extra control over the date and time formatting.</p>
+extra control over the date and time formatting. Also used for Video settings/"Video subtitles".</p>
 
 <p><b>GPS stamp format</b> - If "Stamp photos" is enabled, this allows extra control over the GPS
-formatting.</p>
+formatting. Also used for Video settings/"Video subtitles".</p>
+
+<p><b>Distance unit</b> - If "Stamp photos" is enabled, this controls whether to use metres (m) or
+feet (ft) when recording the GPS altitude. Also used for Video settings/"Video subtitles".</p>
 
 <p><b>Custom text</b> - Here you can enter some text to be stamped onto resultant photos (e.g.,
 this could be used for a copyright image). Note that if this option is enabled, then it will take
@@ -800,7 +848,7 @@ SRT files, and use them to display the information as subtitles (for Android,
 does not seem to support subtitles). The subtitles will record the date and time. If "Store location data" is enabled (see
 "Location settings" below), then the current location latitude and longitude coordinates will also be recorded (if the location is
 known). Similarly for "Store compass direction". Note that you can control the formatting style for date, time and location using
-the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format).</p>
+the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format, Distance unit).</p>
 
 <p><b>Force 4K UHD video (may not work on all devices)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked,
 this overrides the setting in "Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps
@@ -1061,7 +1109,8 @@ to use methods that Google now discourage. The fault is with the device for not 
 Android's standard method for disabling the shutter sound. In particular, if under Settings/About
 you see that "Can disable shutter sound?" says No, it means the device's camera API is telling 3rd
 party camera apps that shutter sound can't be disabled (so either it can't do it, or the API is lying
-- either way, this should be reported to your manufacturer).</p>
+- either way, this should be reported to your manufacturer). Also note that this doesn't apply if using
+Camera2 API - if Camera2 is enabled, then all devices should support disabling the shutter sound.</p>
 
 <p><b>Why does Open Camera have ads?</b> - Open Camera does <i>not</i> have ads (there may be ads on the online
 webpage you're reading now, but not in the app). There are however some clones on Google Play with ads inserted.
