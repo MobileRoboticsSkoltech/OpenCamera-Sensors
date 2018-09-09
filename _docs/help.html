@@ -304,8 +304,15 @@ feature.</p>
 <p><a name="noise_reduction"></a><b>Noise Reduction</b></p>
 
 <p>In Noise Reduction photo mode, Open Camera takes a burst of photos which are then automatically merged, to improve photo quality.
-This is particularly useful in low light scenes to reduce noise.
+This is particularly useful in low light scenes to reduce noise. The image below shows an example with one of the input burst photos
+on the left, and the resultant merged photo on the right:
 </p>
+
+<p><a href="avg_image_test17.jpg">
+<img src="avg_image_test17_thumb.jpg" style="max-width:100%" alt="Screenshots demonstrating Noise Reduction" title="Screenshots demonstrating Noise Reduction">
+</a></p>
+
+<p>Also see a <a href="avg_image_test17_zoomed.jpg">zoomed in section.</a></p>
 
 <p>Some things to note about Open Camera's NR feature:</p>
 <ul>
@@ -315,7 +322,8 @@ resultant photo resolution will be halved in width and height.</li>
 This is similar to what Open Camera's <a href="#hdr">HDR</a> mode can achieve. Also see <a href="#nr_vs_hdr">NR vs HDR</a>.</li>
 <li>Taking photos with NR is significantly slower than regular photos.</li>
 <li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
-being taken.</li>
+being taken. Aside from reducing the risk of ghosting effects, the more steady the camera is, the more effective the noise reduction
+algorithm is in reducing noise and enhancing detail.</li>
 <li>If you have a Google Pixel (2), you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
 is generally little benefit to using Open Camera's NR mode on these devices. See "Does Open Camera support HDR+" in the
 <a href="#faq">FAQ</a> for more details.</li>
@@ -379,6 +387,14 @@ three separate images, rather than reprocessing a single image.</li>
 <p>In scenes with high dynamic range, HDR should do better at capturing the high dynamic range (although NR should still be better
 than Standard photo mode). Though NR still has the advantage that it is less prone to ghosting and misalignment. NR is also better
 suited to working in a wide range of scenes.</p>
+
+<p>The set of images below shows: Standard photo on the left, Noise Reduction in the middle, HDR on the right. There is less overexposure
+in the sky in the Noise Reduction result, but the HDR mode does even better.</p>
+
+<p><a href="avg_image_test45.jpg">
+<img src="avg_image_test45_thumb.jpg" style="max-width:100%" alt="Screenshots demonstrating Noise Reduction vs HDR" title="Screenshots demonstrating Noise Reduction vs HDR">
+</a></p>
+
 
 <p>In summary: NR is better if you just want a "works best in most cases" option. HDR may be a better choice specifically in
 scenes with high dynamic range, that also don't have movement in the scene.</p>
