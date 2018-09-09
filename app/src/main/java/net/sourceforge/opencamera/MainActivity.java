@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -32,9 +31,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -56,7 +52,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -69,7 +64,6 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -95,6 +89,7 @@ public class MainActivity extends Activity {
 	private Sensor mSensorMagnetic;
 	private MainUI mainUI;
 	private PermissionHandler permissionHandler;
+	private SoundPoolManager soundPoolManager;
 	private ManualSeekbars manualSeekbars;
 	private TextFormatter textFormatter;
 	private MyApplicationInterface applicationInterface;
@@ -113,9 +108,6 @@ public class MainActivity extends Activity {
     private final Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
 	private ValueAnimator gallery_save_anim;
 
-    private SoundPool sound_pool;
-	private SparseIntArray sound_ids;
-	
 	private TextToSpeech textToSpeech;
 	private boolean textToSpeechSuccess;
 
@@ -220,6 +212,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
 		textFormatter = new TextFormatter(this);
+		soundPoolManager = new SoundPoolManager(this);
 
 		// determine whether we support Camera2 API
 		initCamera2Support();
@@ -1037,9 +1030,9 @@ public class MainActivity extends Activity {
 
         initSpeechRecognizer();
         initLocation();
-        initSound();
-    	loadSound(R.raw.beep);
-    	loadSound(R.raw.beep_hi);
+        soundPoolManager.initSound();
+    	soundPoolManager.loadSound(R.raw.beep);
+    	soundPoolManager.loadSound(R.raw.beep_hi);
 
 		mainUI.layoutUI();
 
@@ -1090,7 +1083,7 @@ public class MainActivity extends Activity {
         freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		applicationInterface.getGyroSensor().stopRecording();
-		releaseSound();
+		soundPoolManager.releaseSound();
 		applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
 		applicationInterface.getDrawPreview().clearGhostImage();
 		preview.onPause();
@@ -3358,7 +3351,11 @@ public class MainActivity extends Activity {
 	public TextFormatter getTextFormatter() {
 		return this.textFormatter;
 	}
-    
+
+	SoundPoolManager getSoundPoolManager() {
+    	return this.soundPoolManager;
+	}
+
     public LocationSupplier getLocationSupplier() {
     	return this.applicationInterface.getLocationSupplier();
     }
@@ -3807,66 +3804,6 @@ public class MainActivity extends Activity {
     			Log.d(TAG, "location permission not available, so request permission");
     		permissionHandler.requestLocationPermission();
         }
-	}
-	
-	@SuppressWarnings("deprecation")
-	private void initSound() {
-		if( sound_pool == null ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "create new sound_pool");
-	        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-	        	AudioAttributes audio_attributes = new AudioAttributes.Builder()
-	        		.setLegacyStreamType(AudioManager.STREAM_SYSTEM)
-	        		.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-	        		.build();
-	        	sound_pool = new SoundPool.Builder()
-	        		.setMaxStreams(1)
-	        		.setAudioAttributes(audio_attributes)
-        			.build();
-	        }
-	        else {
-				sound_pool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
-	        }
-			sound_ids = new SparseIntArray();
-		}
-	}
-	
-	private void releaseSound() {
-        if( sound_pool != null ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "release sound_pool");
-            sound_pool.release();
-        	sound_pool = null;
-    		sound_ids = null;
-        }
-	}
-	
-	// must be called before playSound (allowing enough time to load the sound)
-	private void loadSound(int resource_id) {
-		if( sound_pool != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "loading sound resource: " + resource_id);
-			int sound_id = sound_pool.load(this, resource_id, 1);
-			if( MyDebug.LOG )
-				Log.d(TAG, "    loaded sound: " + sound_id);
-			sound_ids.put(resource_id, sound_id);
-		}
-	}
-	
-	// must call loadSound first (allowing enough time to load the sound)
-	void playSound(int resource_id) {
-		if( sound_pool != null ) {
-			if( sound_ids.indexOfKey(resource_id) < 0 ) {
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "resource not loaded: " + resource_id);
-			}
-			else {
-				int sound_id = sound_ids.get(resource_id);
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "play sound: " + sound_id);
-				sound_pool.play(sound_id, 1.0f, 1.0f, 0, 0, 1);
-			}
-		}
 	}
 	
 	@SuppressWarnings("deprecation")
