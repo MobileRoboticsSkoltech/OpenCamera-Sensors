@@ -517,6 +517,16 @@
 	            />
 
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference
+	            android:key="preference_nr_save"
+	            android:title="@string/preference_nr_save"
+	            android:summary="@string/preference_nr_save_summary"
+	            android:entries="@array/preference_nr_save_entries"
+	            android:entryValues="@array/preference_nr_save_values"
+	            android:defaultValue="preference_nr_save_no"
+	            />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 	        <SwitchPreference
 	            android:key="preference_hdr_save_expo"
 	            android:title="@string/preference_hdr_save_expo"
@@ -542,16 +552,6 @@
 	            android:entries="@array/preference_expo_bracketing_stops_entries"
 	            android:entryValues="@array/preference_expo_bracketing_stops_values"
 	            android:defaultValue="2"
-	            />
-
-            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
-	        <ListPreference
-	            android:key="preference_nr_save"
-	            android:title="@string/preference_nr_save"
-	            android:summary="@string/preference_nr_save_summary"
-	            android:entries="@array/preference_nr_save_entries"
-	            android:entryValues="@array/preference_nr_save_values"
-	            android:defaultValue="preference_nr_save_no"
 	            />
 
 			<ListPreference
