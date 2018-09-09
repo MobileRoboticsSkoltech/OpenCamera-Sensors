@@ -44,34 +44,36 @@ public class PermissionHandler {
 		boolean ok = true;
 		String [] permissions = null;
 		int message_id = 0;
-		if( permission_code == MY_PERMISSIONS_REQUEST_CAMERA ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for camera permission");
-			permissions = new String[]{Manifest.permission.CAMERA};
-			message_id = R.string.permission_rationale_camera;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_STORAGE ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for storage permission");
-			permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-			message_id = R.string.permission_rationale_storage;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_RECORD_AUDIO ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for record audio permission");
-			permissions = new String[]{Manifest.permission.RECORD_AUDIO};
-			message_id = R.string.permission_rationale_record_audio;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_LOCATION ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for location permission");
-			permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-			message_id = R.string.permission_rationale_location;
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.e(TAG, "showRequestPermissionRational unknown permission_code: " + permission_code);
-			ok = false;
+		switch (permission_code) {
+			case MY_PERMISSIONS_REQUEST_CAMERA:
+				if (MyDebug.LOG)
+					Log.d(TAG, "display rationale for camera permission");
+				permissions = new String[]{Manifest.permission.CAMERA};
+				message_id = R.string.permission_rationale_camera;
+				break;
+			case MY_PERMISSIONS_REQUEST_STORAGE:
+				if (MyDebug.LOG)
+					Log.d(TAG, "display rationale for storage permission");
+				permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+				message_id = R.string.permission_rationale_storage;
+				break;
+			case MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
+				if (MyDebug.LOG)
+					Log.d(TAG, "display rationale for record audio permission");
+				permissions = new String[]{Manifest.permission.RECORD_AUDIO};
+				message_id = R.string.permission_rationale_record_audio;
+				break;
+			case MY_PERMISSIONS_REQUEST_LOCATION:
+				if (MyDebug.LOG)
+					Log.d(TAG, "display rationale for location permission");
+				permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+				message_id = R.string.permission_rationale_location;
+				break;
+			default:
+				if (MyDebug.LOG)
+					Log.e(TAG, "showRequestPermissionRational unknown permission_code: " + permission_code);
+				ok = false;
+				break;
 		}
 
 		if( ok ) {
