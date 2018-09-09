@@ -15,6 +15,7 @@ import java.util.TimerTask;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.RawImage;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
+import net.sourceforge.opencamera.Preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.UI.DrawPreview;
@@ -49,7 +50,7 @@ import android.widget.ImageButton;
 
 /** Our implementation of ApplicationInterface, see there for details.
  */
-public class MyApplicationInterface implements ApplicationInterface {
+public class MyApplicationInterface extends BasicApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 
 	// note, okay to change the order of enums in future versions, as getPhotoMode() does not rely on the order for the saved photo mode
