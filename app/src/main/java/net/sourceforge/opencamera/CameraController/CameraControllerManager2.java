@@ -79,6 +79,9 @@ public class CameraControllerManager2 extends CameraControllerManager {
 				case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL:
 					Log.d(TAG, "Camera has FULL Camera2 support");
 					break;
+				case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_3:
+					Log.d(TAG, "Camera has Level 3 Camera2 support");
+					break;
 				default:
 					Log.d(TAG, "Camera has unknown Camera2 support: " + deviceLevel);
 					break;
