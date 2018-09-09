@@ -673,7 +673,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 								if( MyDebug.LOG )
 									Log.d(TAG, "user clicked calibrate level");
 								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-								if( main_activity.getPreview().hasLevelAngle() ) {
+								if( main_activity.getPreview().hasLevelAngleStable() ) {
 									double current_level_angle = main_activity.getPreview().getLevelAngleUncalibrated();
 									SharedPreferences.Editor editor = sharedPreferences.edit();
 									editor.putFloat(PreferenceKeys.CalibratedLevelAnglePreferenceKey, (float)current_level_angle);

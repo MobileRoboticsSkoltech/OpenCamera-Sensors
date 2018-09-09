@@ -5989,20 +5989,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "pitch: " + pitch_angle);*/
 
-			if( !is_test && Math.abs(pitch_angle) > 70.0 ) {
-				// level angle becomes unstable when device is near vertical
-				// note that if is_test, we always set the level angle - since the device typically lies face down when running tests...
-				this.has_level_angle = false;
+			this.has_level_angle = true;
+			this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
+			if( this.natural_level_angle < -0.0 ) {
+				this.natural_level_angle += 360.0;
 			}
-			else {
-				this.has_level_angle = true;
-				this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
-				if( this.natural_level_angle < -0.0 ) {
-					this.natural_level_angle += 360.0;
-				}
 
-				updateLevelAngles();
-			}
+			updateLevelAngles();
 		}
 		else {
 			Log.e(TAG, "accel sensor has zero mag: " + mag);
@@ -6033,6 +6026,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
     
     public boolean hasLevelAngle() {
+    	return this.has_level_angle;
+    }
+
+    /* Returns true if we have the level angle ("roll"), but the pitch is not near vertically up or down (70 degrees to level).
+	 * This is useful as the level angle becomes unstable when device is near vertical
+     */
+    public boolean hasLevelAngleStable() {
+		if( !is_test && has_pitch_angle && Math.abs(pitch_angle) > 70.0 ) {
+			// note that if is_test, we always set the level angle - since the device typically lies face down when running tests...
+			return false;
+		}
     	return this.has_level_angle;
     }
 

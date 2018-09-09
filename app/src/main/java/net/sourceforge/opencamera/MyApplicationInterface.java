@@ -2202,7 +2202,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		int image_quality = getSaveImageQualityPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "image_quality: " + image_quality);
-        boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngle();
+        boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngleStable();
 		double level_angle = do_auto_stabilise ? main_activity.getPreview().getLevelAngle() : 0.0;
 		if( do_auto_stabilise && main_activity.test_have_angle )
 			level_angle = main_activity.test_angle;

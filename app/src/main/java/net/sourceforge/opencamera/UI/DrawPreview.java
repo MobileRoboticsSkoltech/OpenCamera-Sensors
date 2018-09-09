@@ -1064,7 +1064,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( auto_stabilise_pref ) { // auto-level is supported for photos taken in video mode
+			if( auto_stabilise_pref && preview.hasLevelAngleStable() ) { // auto-level is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -1610,7 +1610,7 @@ public class DrawPreview {
 			int cy = canvas.getHeight()/2;
 
 			boolean is_level = false;
-			if( Math.abs(level_angle) <= close_level_angle ) { // n.b., use level_angle, not angle or orig_level_angle
+			if( has_level_angle && Math.abs(level_angle) <= close_level_angle ) { // n.b., use level_angle, not angle or orig_level_angle
 				is_level = true;
 			}
 
@@ -1624,7 +1624,8 @@ public class DrawPreview {
 			final int line_alpha = 160;
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
 			p.setStyle(Paint.Style.FILL);
-			if( show_angle_line_pref ) {
+			if( show_angle_line_pref && preview.hasLevelAngleStable() ) {
+				// only show the angle line if level angle "stable" (i.e., not pointing near vertically up or down)
 				// draw outline
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
@@ -1705,6 +1706,12 @@ public class DrawPreview {
 						p.setColor(Color.WHITE);
 						p.setTextAlign(Paint.Align.LEFT);
 						if( latitude_angle == 0 && Math.abs(pitch_angle) < 1.0 ) {
+							p.setAlpha(255);
+						}
+						else if( latitude_angle == 90 && Math.abs(pitch_angle - 90) < 3.0 ) {
+							p.setAlpha(255);
+						}
+						else if( latitude_angle == -90 && Math.abs(pitch_angle + 90) < 3.0 ) {
 							p.setAlpha(255);
 						}
 						else {
