@@ -2017,21 +2017,21 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void requestCameraPermission() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestCameraPermission");
-		main_activity.requestCameraPermission();
+		main_activity.getPermissionHandler().requestCameraPermission();
     }
     
     @Override
 	public void requestStoragePermission() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestStoragePermission");
-		main_activity.requestStoragePermission();
+		main_activity.getPermissionHandler().requestStoragePermission();
     }
     
     @Override
 	public void requestRecordAudioPermission() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestRecordAudioPermission");
-		main_activity.requestRecordAudioPermission();
+		main_activity.getPermissionHandler().requestRecordAudioPermission();
     }
     
     @Override

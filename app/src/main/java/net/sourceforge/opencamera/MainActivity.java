@@ -68,7 +68,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Display;
@@ -95,6 +94,7 @@ public class MainActivity extends Activity {
 	private Sensor mSensorAccelerometer;
 	private Sensor mSensorMagnetic;
 	private MainUI mainUI;
+	private PermissionHandler permissionHandler;
 	private ManualSeekbars manualSeekbars;
 	private TextFormatter textFormatter;
 	private MyApplicationInterface applicationInterface;
@@ -213,6 +213,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
 		// set up components
+		permissionHandler = new PermissionHandler(this);
 		mainUI = new MainUI(this);
 		manualSeekbars = new ManualSeekbars();
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
@@ -3341,8 +3342,12 @@ public class MainActivity extends Activity {
     public Preview getPreview() {
     	return this.preview;
     }
-    
-    public MainUI getMainUI() {
+
+	public PermissionHandler getPermissionHandler() {
+		return permissionHandler;
+	}
+
+	public MainUI getMainUI() {
     	return this.mainUI;
     }
     
@@ -3794,13 +3799,13 @@ public class MainActivity extends Activity {
         }
 	}
 	
-	private void initLocation() {
+	void initLocation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initLocation");
         if( !applicationInterface.getLocationSupplier().setupLocationListener() ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "location permission not available, so request permission");
-    		requestLocationPermission();
+    		permissionHandler.requestLocationPermission();
         }
 	}
 	
@@ -3871,274 +3876,11 @@ public class MainActivity extends Activity {
         }
 	}
 
-	// Android 6+ permission handling:
-	
-	final private int MY_PERMISSIONS_REQUEST_CAMERA = 0;
-	final private int MY_PERMISSIONS_REQUEST_STORAGE = 1;
-	final private int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
-	final private int MY_PERMISSIONS_REQUEST_LOCATION = 3;
-
-	/** Show a "rationale" to the user for needing a particular permission, then request that permission again
-	 *  once they close the dialog.
-	 */
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	private void showRequestPermissionRationale(final int permission_code) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "showRequestPermissionRational: " + permission_code);
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		boolean ok = true;
-		String [] permissions = null;
-		int message_id = 0;
-		if( permission_code == MY_PERMISSIONS_REQUEST_CAMERA ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for camera permission");
-			permissions = new String[]{Manifest.permission.CAMERA};
-			message_id = R.string.permission_rationale_camera;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_STORAGE ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for storage permission");
-			permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-			message_id = R.string.permission_rationale_storage;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_RECORD_AUDIO ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for record audio permission");
-			permissions = new String[]{Manifest.permission.RECORD_AUDIO};
-			message_id = R.string.permission_rationale_record_audio;
-		}
-		else if( permission_code == MY_PERMISSIONS_REQUEST_LOCATION ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "display rationale for location permission");
-			permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-			message_id = R.string.permission_rationale_location;
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.e(TAG, "showRequestPermissionRational unknown permission_code: " + permission_code);
-			ok = false;
-		}
-
-		if( ok ) {
-			final String [] permissions_f = permissions;
-			new AlertDialog.Builder(this)
-			.setTitle(R.string.permission_rationale_title)
-			.setMessage(message_id)
-			.setIcon(android.R.drawable.ic_dialog_alert)
-        	.setPositiveButton(android.R.string.ok, null)
-			.setOnDismissListener(new OnDismissListener() {
-				public void onDismiss(DialogInterface dialog) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "requesting permission...");
-					ActivityCompat.requestPermissions(MainActivity.this, permissions_f, permission_code); 
-				}
-			}).show();
-		}
-	}
-
-	void requestCameraPermission() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "requestCameraPermission");
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) ) {
-	        // Show an explanation to the user *asynchronously* -- don't block
-	        // this thread waiting for the user's response! After the user
-	        // sees the explanation, try again to request the permission.
-	    	showRequestPermissionRationale(MY_PERMISSIONS_REQUEST_CAMERA);
-	    }
-	    else {
-	    	// Can go ahead and request the permission
-			if( MyDebug.LOG )
-				Log.d(TAG, "requesting camera permission...");
-	        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_CAMERA);
-        }
-    }
-
-	void requestStoragePermission() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "requestStoragePermission");
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ) {
-	        // Show an explanation to the user *asynchronously* -- don't block
-	        // this thread waiting for the user's response! After the user
-	        // sees the explanation, try again to request the permission.
-	    	showRequestPermissionRationale(MY_PERMISSIONS_REQUEST_STORAGE);
-	    }
-	    else {
-	    	// Can go ahead and request the permission
-			if( MyDebug.LOG )
-				Log.d(TAG, "requesting storage permission...");
-	        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_STORAGE);
-        }
-    }
-
-	void requestRecordAudioPermission() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "requestRecordAudioPermission");
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO) ) {
-	        // Show an explanation to the user *asynchronously* -- don't block
-	        // this thread waiting for the user's response! After the user
-	        // sees the explanation, try again to request the permission.
-	    	showRequestPermissionRationale(MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-	    }
-	    else {
-	    	// Can go ahead and request the permission
-			if( MyDebug.LOG )
-				Log.d(TAG, "requesting record audio permission...");
-	        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }
-    }
-
-	private void requestLocationPermission() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "requestLocationPermission");
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
-				ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
-	        // Show an explanation to the user *asynchronously* -- don't block
-	        // this thread waiting for the user's response! After the user
-	        // sees the explanation, try again to request the permission.
-	    	showRequestPermissionRationale(MY_PERMISSIONS_REQUEST_LOCATION);
-	    }
-	    else {
-	    	// Can go ahead and request the permission
-			if( MyDebug.LOG )
-				Log.d(TAG, "requesting loacation permissions...");
-	        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
-        }
-    }
-
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
-			return;
-		}
-
-		switch( requestCode ) {
-	        case MY_PERMISSIONS_REQUEST_CAMERA:
-	        {
-	            // If request is cancelled, the result arrays are empty.
-	            if( grantResults.length > 0
-	                && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-	                // permission was granted, yay! Do the
-	                // contacts-related task you need to do.
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "camera permission granted");
-	            	preview.retryOpenCamera();
-	            }
-	            else {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "camera permission denied");
-	                // permission denied, boo! Disable the
-	                // functionality that depends on this permission.
-	            	// Open Camera doesn't need to do anything: the camera will remain closed
-	            }
-	            return;
-	        }
-	        case MY_PERMISSIONS_REQUEST_STORAGE:
-	        {
-	            // If request is cancelled, the result arrays are empty.
-	            if( grantResults.length > 0
-	                && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-	                // permission was granted, yay! Do the
-	                // contacts-related task you need to do.
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "storage permission granted");
-	            	preview.retryOpenCamera();
-	            }
-	            else {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "storage permission denied");
-	                // permission denied, boo! Disable the
-	                // functionality that depends on this permission.
-	            	// Open Camera doesn't need to do anything: the camera will remain closed
-	            }
-	            return;
-	        }
-	        case MY_PERMISSIONS_REQUEST_RECORD_AUDIO:
-	        {
-	            // If request is cancelled, the result arrays are empty.
-	            if( grantResults.length > 0
-	                && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-	                // permission was granted, yay! Do the
-	                // contacts-related task you need to do.
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "record audio permission granted");
-	        		// no need to do anything
-	            }
-	            else {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "record audio permission denied");
-	                // permission denied, boo! Disable the
-	                // functionality that depends on this permission.
-	        		// no need to do anything
-	        		// note that we don't turn off record audio option, as user may then record video not realising audio won't be recorded - best to be explicit each time
-	            }
-	            return;
-	        }
-	        case MY_PERMISSIONS_REQUEST_LOCATION:
-	        {
-	            // If request is cancelled, the result arrays are empty.
-	            if( grantResults.length > 0
-	                && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-	                // permission was granted, yay! Do the
-	                // contacts-related task you need to do.
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "location permission granted");
-	                initLocation();
-	            }
-	            else {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "location permission denied");
-	                // permission denied, boo! Disable the
-	                // functionality that depends on this permission.
-	        		// for location, seems best to turn the option back off
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "location permission not available, so switch location off");
-		    		preview.showToast(null, R.string.permission_location_not_available);
-					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-					SharedPreferences.Editor editor = settings.edit();
-					editor.putBoolean(PreferenceKeys.LocationPreferenceKey, false);
-					editor.apply();
-	            }
-	            return;
-	        }
-	        default:
-	        {
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "unknown requestCode " + requestCode);
-	        }
-	    }
+		permissionHandler.onRequestPermissionsResult(requestCode, grantResults);
 	}
 
 	// for testing:
