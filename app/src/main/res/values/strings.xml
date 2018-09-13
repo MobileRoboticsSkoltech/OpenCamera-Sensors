@@ -606,6 +606,19 @@
     <string name="preference_show_whats_new">Shows What\'s New dialog</string>
     <string name="preference_show_whats_new_summary">Whether to display information on new features and improvements when the application has updated</string>
 
+    <string name="preference_edge_mode">Edge mode algorithm</string>
+    <string name="preference_edge_mode_summary">Algorithm that the camera driver should use for applying edge enhancement. Edge enhancement improves sharpness and details in the captured image. (This setting is ignored in NR photo mode.)\n%s</string>
+
+    <string name="preference_screen_processing_settings">Processing settings…</string>
+
+    <string name="preference_noise_reduction_mode">Noise reduction algorithm</string>
+    <string name="preference_noise_reduction_mode_summary">Algorithm that the camera driver should use for applying noise reduction. The noise reduction algorithm attempts to improve image quality by removing excessive noise added by the capture process, especially in dark conditions. (Note that this is not related to the Noise Reduction photo mode, and in fact this setting is ignored in NR photo mode.)\n%s</string>
+    <string name="noise_reduction_mode_default">Default</string>
+    <string name="noise_reduction_mode_off">Off</string>
+    <string name="noise_reduction_mode_minimal">Minimal</string>
+    <string name="noise_reduction_mode_fast">Fast</string>
+    <string name="noise_reduction_mode_high_quality">High Quality</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

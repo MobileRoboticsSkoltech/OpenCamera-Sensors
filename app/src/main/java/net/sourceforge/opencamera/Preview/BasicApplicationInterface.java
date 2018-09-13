@@ -71,6 +71,16 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
+	public String getEdgeModePref() {
+		return CameraController.EDGE_MODE_DEFAULT;
+	}
+
+	@Override
+	public String getNoiseReductionModePref() {
+		return CameraController.NOISE_REDUCTION_MODE_DEFAULT;
+	}
+
+	@Override
 	public String getISOPref() {
 		return CameraController.ISO_DEFAULT;
 	}

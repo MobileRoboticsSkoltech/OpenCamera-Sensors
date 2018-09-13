@@ -99,7 +99,7 @@ public class CameraController2 extends CameraController {
 	private float focus_bracketing_target_distance = 0.0f;
 	private boolean focus_bracketing_add_infinity = false;
 	// for BURSTTYPE_NORMAL:
-	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for noise reduction mode
+	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for Open Camera's noise reduction (NR) photo mode
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
 
 	private boolean optimise_ae_for_dro = false;
@@ -198,6 +198,12 @@ public class CameraController2 extends CameraController {
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
 		private boolean has_antibanding;
 		private int antibanding = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO;
+		private boolean has_edge_mode;
+		private int edge_mode = CameraMetadata.EDGE_MODE_FAST;
+		private Integer default_edge_mode;
+		private boolean has_noise_reduction_mode;
+		private int noise_reduction_mode = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
+		private Integer default_noise_reduction_mode;
 		private int white_balance_temperature = 5000; // used for white_balance == CONTROL_AWB_MODE_OFF
 		private String flash_value = "flash_off";
 		private boolean has_iso;
@@ -290,16 +296,8 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);
 			}
 
-			if( is_samsung_s7 ) {
-				// see https://sourceforge.net/p/opencamera/discussion/general/thread/48bd836b/ ,
-				// https://stackoverflow.com/questions/36028273/android-camera-api-glossy-effect-on-galaxy-s7
-				// need EDGE_MODE_OFF to avoid a "glow" effect
-				// need NOISE_REDUCTION_MODE_OFF to avoid excessive blurring
-				if( MyDebug.LOG )
-					Log.d(TAG, "set EDGE_MODE_OFF");
-				builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
-				builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
-			}
+			setEdgeMode(builder);
+			setNoiseReductionMode(builder);
 
 			/*builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
 			builder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
@@ -427,6 +425,88 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "setting antibanding: " + antibanding);
 					builder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, antibanding);
+					changed = true;
+				}
+			}
+			return changed;
+		}
+
+		private boolean setEdgeMode(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "setEdgeMode");
+				Log.d(TAG, "default_edge_mode: " + default_edge_mode);
+			}
+			boolean changed = false;
+			if( has_edge_mode ) {
+				if( default_edge_mode == null ) {
+					// save the default_edge_mode edge_mode
+					default_edge_mode = builder.get(CaptureRequest.EDGE_MODE);
+					if( MyDebug.LOG )
+						Log.d(TAG, "default_edge_mode: " + default_edge_mode);
+				}
+				if( builder.get(CaptureRequest.EDGE_MODE) == null || builder.get(CaptureRequest.EDGE_MODE) != edge_mode ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting edge_mode: " + edge_mode);
+					builder.set(CaptureRequest.EDGE_MODE, edge_mode);
+					changed = true;
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "edge_mode was already set: " + edge_mode);
+				}
+			}
+			else if( is_samsung_s7 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set EDGE_MODE_OFF");
+				// see https://sourceforge.net/p/opencamera/discussion/general/thread/48bd836b/ ,
+				// https://stackoverflow.com/questions/36028273/android-camera-api-glossy-effect-on-galaxy-s7
+				// need EDGE_MODE_OFF to avoid a "glow" effect
+				builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
+            }
+			else if( default_edge_mode != null ) {
+				if( builder.get(CaptureRequest.EDGE_MODE) != null && builder.get(CaptureRequest.EDGE_MODE) != default_edge_mode ) {
+					builder.set(CaptureRequest.EDGE_MODE, default_edge_mode);
+					changed = true;
+				}
+			}
+			return changed;
+		}
+
+		private boolean setNoiseReductionMode(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "setNoiseReductionMode");
+				Log.d(TAG, "default_noise_reduction_mode: " + default_noise_reduction_mode);
+			}
+			boolean changed = false;
+			if( has_noise_reduction_mode ) {
+				if( default_noise_reduction_mode == null ) {
+					// save the default_noise_reduction_mode noise_reduction_mode
+					default_noise_reduction_mode = builder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+					if( MyDebug.LOG )
+						Log.d(TAG, "default_noise_reduction_mode: " + default_noise_reduction_mode);
+				}
+				if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) == null || builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != noise_reduction_mode ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting noise_reduction_mode: " + noise_reduction_mode);
+					builder.set(CaptureRequest.NOISE_REDUCTION_MODE, noise_reduction_mode);
+					changed = true;
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "noise_reduction_mode was already set: " + noise_reduction_mode);
+				}
+			}
+			else if( is_samsung_s7 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set NOISE_REDUCTION_MODE_OFF");
+				// see https://sourceforge.net/p/opencamera/discussion/general/thread/48bd836b/ ,
+				// https://stackoverflow.com/questions/36028273/android-camera-api-glossy-effect-on-galaxy-s7
+				// need NOISE_REDUCTION_MODE_OFF to avoid excessive blurring
+				builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
+            }
+			else if( default_noise_reduction_mode != null ) {
+				if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != null && builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != default_noise_reduction_mode ) {
+					builder.set(CaptureRequest.NOISE_REDUCTION_MODE, default_noise_reduction_mode);
 					changed = true;
 				}
 			}
@@ -697,7 +777,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
 				test_used_tonemap_curve = true;
 			}
-			else {
+			else if( default_tonemap_mode != null ) {
 				builder.set(CaptureRequest.TONEMAP_MODE, default_tonemap_mode);
 			}
 		}
@@ -2520,6 +2600,220 @@ public class CameraController2 extends CameraController {
 			return null;
 		int value2 = previewBuilder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE);
 		return convertAntiBanding(value2);
+	}
+
+	private String convertEdgeMode(int value2) {
+		String value;
+		switch( value2 ) {
+		case CameraMetadata.EDGE_MODE_FAST:
+			value = "fast";
+			break;
+		case CameraMetadata.EDGE_MODE_HIGH_QUALITY:
+			value = "high_quality";
+			break;
+		case CameraMetadata.EDGE_MODE_OFF:
+			value = "off";
+			break;
+		case CameraMetadata.EDGE_MODE_ZERO_SHUTTER_LAG:
+			// we don't make use of zero shutter lag
+			value = null;
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown edge_mode: " + value2);
+			value = null;
+			break;
+		}
+		return value;
+	}
+
+	@Override
+	public SupportedValues setEdgeMode(String value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setEdgeMode: " + value);
+		int [] values2 = characteristics.get(CameraCharacteristics.EDGE_AVAILABLE_EDGE_MODES);
+		if( values2 == null ) {
+			return null;
+		}
+		List<String> values = new ArrayList<>();
+		values.add(EDGE_MODE_DEFAULT);
+		for(int value2 : values2) {
+			String this_value = convertEdgeMode(value2);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, EDGE_MODE_DEFAULT);
+		if( supported_values != null ) {
+			// for edge mode, if the requested value isn't available, we don't modify it at all
+			if( supported_values.selected_value.equals(value) ) {
+				boolean has_edge_mode = false;
+				int selected_value2 = CameraMetadata.EDGE_MODE_FAST;
+				// if EDGE_MODE_DEFAULT, this means to stick with the device default
+				if( !value.equals(EDGE_MODE_DEFAULT) ) {
+					switch(supported_values.selected_value) {
+						case "fast":
+							has_edge_mode = true;
+							selected_value2 = CameraMetadata.EDGE_MODE_FAST;
+							break;
+						case "high_quality":
+							has_edge_mode = true;
+							selected_value2 = CameraMetadata.EDGE_MODE_HIGH_QUALITY;
+							break;
+						case "off":
+							has_edge_mode = true;
+							selected_value2 = CameraMetadata.EDGE_MODE_OFF;
+							break;
+						default:
+							if( MyDebug.LOG )
+								Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+							break;
+					}
+				}
+
+				if( camera_settings.has_edge_mode != has_edge_mode || camera_settings.edge_mode != selected_value2 ) {
+					camera_settings.has_edge_mode = has_edge_mode;
+					camera_settings.edge_mode = selected_value2;
+					if( camera_settings.setEdgeMode(previewBuilder) ) {
+						try {
+							setRepeatingRequest();
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to set edge_mode");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return supported_values;
+	}
+
+	@Override
+	public String getEdgeMode() {
+		if( previewBuilder.get(CaptureRequest.EDGE_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.EDGE_MODE);
+		return convertEdgeMode(value2);
+	}
+
+	private String convertNoiseReductionMode(int value2) {
+		String value;
+		switch( value2 ) {
+		case CameraMetadata.NOISE_REDUCTION_MODE_FAST:
+			value = "fast";
+			break;
+		case CameraMetadata.NOISE_REDUCTION_MODE_HIGH_QUALITY:
+			value = "high_quality";
+			break;
+		case CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL:
+			value = "minimal";
+			break;
+		case CameraMetadata.NOISE_REDUCTION_MODE_OFF:
+			value = "off";
+			break;
+		case CameraMetadata.NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG:
+			// we don't make use of zero shutter lag
+			value = null;
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown noise_reduction_mode: " + value2);
+			value = null;
+			break;
+		}
+		return value;
+	}
+
+	@Override
+	public SupportedValues setNoiseReductionMode(String value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setNoiseReductionMode: " + value);
+		int [] values2 = characteristics.get(CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES );
+		if( values2 == null ) {
+			return null;
+		}
+		List<String> values = new ArrayList<>();
+		values.add(NOISE_REDUCTION_MODE_DEFAULT);
+		for(int value2 : values2) {
+			String this_value = convertNoiseReductionMode(value2);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, NOISE_REDUCTION_MODE_DEFAULT);
+		if( supported_values != null ) {
+			// for noise reduction, if the requested value isn't available, we don't modify it at all
+			if( supported_values.selected_value.equals(value) ) {
+				boolean has_noise_reduction_mode = false;
+				int selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
+				// if NOISE_REDUCTION_MODE_DEFAULT, this means to stick with the device default
+				if( !value.equals(NOISE_REDUCTION_MODE_DEFAULT) ) {
+					switch(supported_values.selected_value) {
+						case "fast":
+							has_noise_reduction_mode = true;
+							selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
+							break;
+						case "high_quality":
+							has_noise_reduction_mode = true;
+							selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_HIGH_QUALITY;
+							break;
+						case "minimal":
+							if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+								has_noise_reduction_mode = true;
+								selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL;
+							}
+							else {
+								// shouldn't ever be here, as NOISE_REDUCTION_MODE_MINIMAL shouldn't be a supported value!
+								// treat as fast instead
+								Log.e(TAG, "noise reduction minimal, but pre-Android M!");
+								has_noise_reduction_mode = true;
+								selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
+							}
+							break;
+						case "off":
+							has_noise_reduction_mode = true;
+							selected_value2 = CameraMetadata.NOISE_REDUCTION_MODE_OFF;
+							break;
+						default:
+							if( MyDebug.LOG )
+								Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+							break;
+					}
+				}
+
+				if( camera_settings.has_noise_reduction_mode != has_noise_reduction_mode || camera_settings.noise_reduction_mode != selected_value2 ) {
+					camera_settings.has_noise_reduction_mode = has_noise_reduction_mode;
+					camera_settings.noise_reduction_mode = selected_value2;
+					if( camera_settings.setNoiseReductionMode(previewBuilder) ) {
+						try {
+							setRepeatingRequest();
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to set noise_reduction_mode");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return supported_values;
+	}
+
+	@Override
+	public String getNoiseReductionMode() {
+		if( previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+		return convertNoiseReductionMode(value2);
 	}
 
 	@Override
@@ -4890,6 +5184,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			if( burst_for_noise_reduction ) {
+				// must be done after calling setupBuilder(), so we override the default EDGE_MODE and NOISE_REDUCTION_MODE
 				if( MyDebug.LOG )
 					Log.d(TAG, "optimise settings for burst_for_noise_reduction");
 				stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);

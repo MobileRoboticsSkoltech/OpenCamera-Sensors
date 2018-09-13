@@ -553,6 +553,26 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public SupportedValues setEdgeMode(String value) {
+		return null;
+	}
+
+	@Override
+	public String getEdgeMode() {
+		return null;
+	}
+
+	@Override
+	public SupportedValues setNoiseReductionMode(String value) {
+		return null;
+	}
+
+	@Override
+	public String getNoiseReductionMode() {
+		return null;
+	}
+
+	@Override
 	public SupportedValues setISO(String value) {
     	Camera.Parameters parameters = this.getParameters();
 		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting

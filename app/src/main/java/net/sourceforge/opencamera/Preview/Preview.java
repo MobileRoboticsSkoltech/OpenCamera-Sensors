@@ -208,6 +208,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> scene_modes;
 	private List<String> white_balances;
 	private List<String> antibanding;
+	private List<String> edge_modes;
+	private List<String> noise_reduction_modes; // n.b., this is for the Camera2 API setting, not for Open Camera's Noise Reduction photo mode
 	private List<String> isos;
 	private boolean supports_white_balance_temperature;
 	private int min_temperature;
@@ -1288,6 +1290,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		color_effects = null;
 		white_balances = null;
 		antibanding = null;
+		edge_modes = null;
+		noise_reduction_modes = null;
 		isos = null;
 		supports_white_balance_temperature = false;
 		min_temperature = 0;
@@ -2247,6 +2251,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             // write it back to the user preference
 			if( supported_values != null ) {
                 antibanding = supported_values.values;
+            }
+		}
+
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up edge_mode");
+			String value = applicationInterface.getEdgeModePref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved edge_mode: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setEdgeMode(value);
+            // for edge mode, if the stored preference wasn't supported, we stick with the device default - but don't
+            // write it back to the user preference
+			if( supported_values != null ) {
+                edge_modes = supported_values.values;
+            }
+		}
+
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up noise_reduction_mode");
+			String value = applicationInterface.getNoiseReductionModePref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved noise_reduction_mode: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setNoiseReductionMode(value);
+            // for noise reduction mode, if the stored preference wasn't supported, we stick with the device default - but don't
+            // write it back to the user preference
+			if( supported_values != null ) {
+                noise_reduction_modes = supported_values.values;
             }
 		}
 
@@ -6218,6 +6252,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return this.antibanding;
     }
     
+    public List<String> getSupportedEdgeModes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedEdgeModes");
+		return this.edge_modes;
+    }
+
+    public List<String> getSupportedNoiseReductionModes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedNoiseReductionModes");
+		return this.noise_reduction_modes;
+    }
+
     public String getISOKey() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getISOKey");

@@ -1572,6 +1572,41 @@ public class MainUI {
 		return entry;
 	}
 
+	/** Returns a (possibly translated) user readable string for an noise reduction mode preference value.
+	 *  If the value is not recognised, then the received value is returned.
+	 *  Also used for edge mode.
+	 */
+	public String getEntryForNoiseReductionMode(String value) {
+		int id = -1;
+		switch( value ) {
+			case CameraController.NOISE_REDUCTION_MODE_DEFAULT:
+				id = R.string.noise_reduction_mode_default;
+				break;
+			case "off":
+				id = R.string.noise_reduction_mode_off;
+				break;
+			case "minimal":
+				id = R.string.noise_reduction_mode_minimal;
+				break;
+			case "fast":
+				id = R.string.noise_reduction_mode_fast;
+				break;
+			case "high_quality":
+				id = R.string.noise_reduction_mode_high_quality;
+				break;
+			default:
+				break;
+		}
+		String entry;
+		if( id != -1 ) {
+			entry = main_activity.getResources().getString(id);
+		}
+		else {
+			entry = value;
+		}
+		return entry;
+	}
+
     // for testing
     public View getUIButton(String key) {
 		if( MyDebug.LOG ) {

@@ -67,6 +67,10 @@ public class PreferenceKeys {
 
 	public static final String AntiBandingPreferenceKey = "preference_antibanding";
 
+	public static final String EdgeModePreferenceKey = "preference_edge_mode";
+
+	public static final String NoiseReductionModePreferenceKey = "preference_noise_reduction_mode";
+
 	public static final String ISOPreferenceKey = "preference_iso";
 
 	public static final String ExposureTimePreferenceKey = "preference_exposure_time";

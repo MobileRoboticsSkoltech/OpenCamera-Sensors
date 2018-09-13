@@ -1443,6 +1443,28 @@ public class MainActivity extends Activity {
 			}
 			bundle.putStringArray("antibanding_entries", entries_arr);
 		}
+		List<String> edge_modes = this.preview.getSupportedEdgeModes();
+		putBundleExtra(bundle, "edge_modes", edge_modes);
+		if( edge_modes != null ) {
+			String [] entries_arr = new String[edge_modes.size()];
+			int i=0;
+			for(String value: edge_modes) {
+				entries_arr[i] = getMainUI().getEntryForNoiseReductionMode(value);
+				i++;
+			}
+			bundle.putStringArray("edge_modes_entries", entries_arr);
+		}
+		List<String> noise_reduction_modes = this.preview.getSupportedNoiseReductionModes();
+		putBundleExtra(bundle, "noise_reduction_modes", noise_reduction_modes);
+		if( noise_reduction_modes != null ) {
+			String [] entries_arr = new String[noise_reduction_modes.size()];
+			int i=0;
+			for(String value: noise_reduction_modes) {
+				entries_arr[i] = getMainUI().getEntryForNoiseReductionMode(value);
+				i++;
+			}
+			bundle.putStringArray("noise_reduction_modes_entries", entries_arr);
+		}
 
 		List<CameraController.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
 		if( preview_sizes != null ) {

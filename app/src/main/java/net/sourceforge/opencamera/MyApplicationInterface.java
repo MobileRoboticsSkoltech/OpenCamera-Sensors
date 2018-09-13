@@ -324,6 +324,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
+	public String getEdgeModePref() {
+		return sharedPreferences.getString(PreferenceKeys.EdgeModePreferenceKey, CameraController.EDGE_MODE_DEFAULT);
+	}
+
+	@Override
+	public String getNoiseReductionModePref() {
+		return sharedPreferences.getString(PreferenceKeys.NoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT);
+	}
+
+	@Override
 	public String getISOPref() {
     	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
     }
