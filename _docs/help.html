@@ -900,6 +900,8 @@ Not supported for RAW photos (DNG format) or videos.</p>
 photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
 have location data in them).</p>
 
+<p><b>Processing settings</b> - Select to access the following controls:</p>
+
 <p><b>Anti-banding</b> - Some kinds of lighting, such as some fluorescent lights, flicker at the rate of the power supply
 frequency (60Hz or 50Hz, depending on country). While this is typically not noticeable to a person, it can be visible to
 a camera. If a camera sets its exposure time to the wrong value, the flicker may become visible in the viewfinder as flicker
@@ -907,6 +909,16 @@ or in a final captured image, as a set of variable-brightness bands across the i
 of the camera include antibanding routines that ensure that the chosen exposure value will not cause such banding. The choice
 of exposure time depends on the rate of flicker, which the camera can detect automatically, or the expected rate can be
 specified by using this option.</p>
+
+<p><b>Edge mode algorithm</b> - Only available if Camera2 API is used. Allows control over the algorithm used by the camera
+	driver for applying edge enhancement. Edge enhancement improves sharpness and details in the captured image, though on
+	some devices you may prefer to turn it off if it introduces undesirable effects. Note that this setting is ignored in
+	Noise Reduction (NR) photo mode.</p>
+
+<p><b>Noise reduction mode algorithm</b> - Only available if Camera2 API is used. Allows control over the algorithm used by the camera
+	driver for applying noise reduction. On some devices you may prefer to turn it off if it introduces undesirable effects.
+	Note that this setting is not related to Open Camera's Noise Reduction (NR) photo mode (and in fact this setting is ignored
+	in NR photo mode).</p>
 
 <p><b>Misc:</b></p>
 
