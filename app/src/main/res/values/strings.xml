@@ -620,16 +620,19 @@
     <string name="noise_reduction_mode_high_quality">High Quality</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
-    <string name="whats_new_text"><b>v1.41:</b>\n\n
+    <string name="whats_new_text">
+        [This dialog is shown when Open Camera is updated. You can disable it under
+        Settings/On screen GUI/Show What\'s New dialog.]
+        \n\n<b>v1.44:</b>\n\n
         <ul>
-            <li>User interface improvements: icons to switch photo/video mode, and switch camera, are
-                next to the shutter button for easier one-handed use; ISO controls are now moved
-                entirely to the exposure icon.\n</li>
-            <li>Take photos while recording video (on supported devices).\n</li>
-            <li>HDR improvements (ghost removal, and brightening of too dark images).\n</li>
-            <li>Performance improvements and bug fixes.\n</li>
+            <li>New photo modes (if Camera2 API is enabled): NR noise reduction (only supported on high end devices), and focus bracketing.\n</li>
+            <li>New "Ghost image" option, to overlap the last photo or a selected image.\n</li>
+            <li>New option to show audio level meter when recording video.\n</li>
+            <li>New option to record video with flat (log) profile. (Camera2 API only.)\n</li>
+            <li>New option to choose metres or feet for photo stamp.\n</li>
+            <li>Improved behaviour of seekbars for manual ISO, shutter speed, white balance.\n</li>
+            <li>If an option that requires compass direction is set, Open Camera will warn you if the device\'s compass is unreliable.\n</li>
+            <li>Other improvements and bug fixes.\n</li>
         </ul>
-        \nThis dialog is shown when Open Camera is updated. You can disable it from showing under
-        Settings/On screen GUI/Show What\'s New dialog.
     </string>
 </resources>

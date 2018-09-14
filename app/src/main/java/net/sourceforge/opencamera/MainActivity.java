@@ -400,8 +400,8 @@ public class MainActivity extends Activity {
 					Log.d(TAG, "version_code: " + version_code);
 					Log.d(TAG, "latest_version: " + latest_version);
 				}
-				final boolean whats_new_enabled = false;
-				//final boolean whats_new_enabled = true;
+				//final boolean whats_new_enabled = false;
+				final boolean whats_new_enabled = true;
 				if( whats_new_enabled ) {
 					final boolean force_whats_new = false;
 					//final boolean force_whats_new = true; // for testing
