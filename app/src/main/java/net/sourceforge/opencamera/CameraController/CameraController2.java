@@ -3278,6 +3278,10 @@ public class CameraController2 extends CameraController {
 
 	/** For testing.
 	 */
+	public CaptureRequest.Builder testGetPreviewBuilder() {
+	    return previewBuilder;
+	}
+
 	public TonemapCurve testGetTonemapCurve() {
 		return previewBuilder.get(CaptureRequest.TONEMAP_CURVE);
 	}

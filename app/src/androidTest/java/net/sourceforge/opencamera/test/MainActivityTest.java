@@ -36,6 +36,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.CamcorderProfile;
@@ -5988,6 +5990,51 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
 
 		assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
+	}
+
+	/* Test recording video with non-default edge and noise reduction modes.
+	 */
+	public void testVideoEdgeModeNoiseReductionMode() throws InterruptedException {
+		Log.d(TAG, "testVideoEdgeModeNoiseReductionMode");
+
+		setToDefault();
+
+		if( !mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test requires camera2 api");
+			return;
+		}
+
+		CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+		CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+		Integer default_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
+		Integer default_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.EdgeModePreferenceKey, "off");
+		editor.putString(PreferenceKeys.NoiseReductionModePreferenceKey, "fast");
+		editor.apply();
+		updateForSettings();
+
+		Integer new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
+		Integer new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+		assertEquals(CameraMetadata.EDGE_MODE_OFF, new_edge_mode.intValue());
+		assertEquals(CameraMetadata.NOISE_REDUCTION_MODE_FAST, new_noise_reduction_mode.intValue());
+
+		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
+
+		editor = settings.edit();
+		editor.putString(PreferenceKeys.EdgeModePreferenceKey, "default");
+		editor.putString(PreferenceKeys.NoiseReductionModePreferenceKey, "default");
+		editor.apply();
+		updateForSettings();
+
+		camera_controller2 = (CameraController2)mPreview.getCameraController();
+		previewBuilder = camera_controller2.testGetPreviewBuilder();
+		new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
+		new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+		assertEquals(default_edge_mode, new_edge_mode);
+		assertEquals(default_noise_reduction_mode, new_noise_reduction_mode);
 	}
 
 	private void subTestTakeVideoMaxDuration(boolean restart, boolean interrupt) throws InterruptedException {

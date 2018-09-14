@@ -54,6 +54,7 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));
 		if( MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoLogProfile"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoEdgeModeNoiseReductionMode"));
 		}
 		// put tests which change bitrate, fps or test 4K at end
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPS"));
