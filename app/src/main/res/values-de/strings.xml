@@ -551,8 +551,8 @@
     <string name="preference_video_bitrate_80000000">80 Mbit/s</string>
     <string name="preference_video_bitrate_90000000">90 Mbit/s</string>
     <string name="preference_video_bitrate_100000000">100 Mbit/s</string>
-    <string name="preference_video_bitrate_150000000">150Mbps</string>
-    <string name="preference_video_bitrate_200000000">200Mbps</string>
+    <string name="preference_video_bitrate_150000000">150 Mbit/s</string>
+    <string name="preference_video_bitrate_200000000">200 Mbit/s</string>
 
     <string name="no_burst">Kein Burst</string> <!-- string for burst mode not being supported for a resolution -->
 
@@ -575,6 +575,14 @@
     <string name="accuracy_medium">Mittel</string>
     <string name="accuracy_high">Hoch</string>
     <string name="accuracy_unknown">Unbekannt</string>
+
+    <string name="preference_units_distance">Entfernungseinheit</string>
+    <string name="preference_units_distance_ft">Fuß</string>
+    <string name="preference_units_distance_m">Meter</string>
+    <string name="preference_units_distance_summary">Verwendet für GPS-Höhe, Fotostempel und Video-Untertitel\n%s</string>
+
+    <string name="preference_show_whats_new">Zeigt den What\'s-New-Dialog</string>
+    <string name="preference_show_whats_new_summary">Zeigt Info zu neuen Features und Verbesserungen wenn die App upgedatet wurde</string>
 
 	
 </resources>
