@@ -6691,13 +6691,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testPopupLayout");
 		setToDefault();
 
-	    for(int i=0;i<100;i++) {
+	    for(int i=0;i<50;i++) {
             View popup_container = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup_container);
             View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
             final float scale = mActivity.getResources().getDisplayMetrics().density;
             int max_width = (int) (280 * scale + 0.5f); // convert dps to pixels;
 
-			Thread.sleep(500);
+			Thread.sleep(400);
 
 	    	// open popup
 			assertTrue(!mActivity.popupIsOpen());
