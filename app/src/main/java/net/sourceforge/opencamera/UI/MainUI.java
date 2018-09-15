@@ -47,6 +47,7 @@ public class MainUI {
 	private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
     private PopupView popup_view;
 	private final static boolean cache_popup = true; // if false, we recreate the popup each time
+	private boolean force_destroy_popup = false; // if true, then the popup isn't cached for only the next time the popup is closed
 
     private int current_orientation;
 	private boolean ui_placement_right = true;
@@ -478,16 +479,26 @@ public class MainUI {
 				Log.d(TAG, "popup_width: " + popup_width);
 				Log.d(TAG, "popup_height: " + popup_height);
 			}
-			/*if( popup_view != null && popup_width > popup_view.getTotalWidth() ) {
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "### fixed popup view width: " + popup_width);
-				}
-				popup_width = popup_view.getTotalWidth();
+			if( popup_view != null && popup_width > popup_view.getTotalWidth()*1.2  ) {
+				// This is a workaround for the rare but annoying bug where the popup window is too large
+				// (and appears partially off-screen). Unfortunately have been unable to fix - and trying
+				// to force the popup container to have a particular width just means some of the contents
+				// (e.g., Timer) are missing. But at least stop caching it, so that reopening the popup
+				// should fix it, rather than having to restart or pause/resume Open Camera.
+				// Also note, normally we should expect popup_width == popup_view.getTotalWidth(), but
+				// have put a fudge factor of 1.2 just in case it's normally slightly larger on some
+				// devices.
+				Log.e(TAG, "### popup view is too big?!");
+				force_destroy_popup = true;
+				/*popup_width = popup_view.getTotalWidth();
 				ViewGroup.LayoutParams params = new RelativeLayout.LayoutParams(
 						popup_width,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				view.setLayoutParams(params);
-			}*/
+				view.setLayoutParams(params);*/
+			}
+			else {
+				force_destroy_popup = false;
+			}
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
 				view.setPivotX(popup_width/2.0f);
 				view.setPivotY(popup_height/2.0f);
@@ -1091,7 +1102,7 @@ public class MainUI {
 			 *     MainActivity.updateForSettings(), but doing so makes the popup close when checking photo or video resolutions!
 			 *     See test testSwitchResolution().
 			 */
-			if( cache_popup ) {
+			if( cache_popup && !force_destroy_popup ) {
 				popup_view.setVisibility(View.GONE);
 			}
 			else {
@@ -1108,6 +1119,7 @@ public class MainUI {
     public void destroyPopup() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "destroyPopup");
+		force_destroy_popup = false;
 		if( popupIsOpen() ) {
 			closePopup();
 		}
