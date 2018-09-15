@@ -471,28 +471,41 @@ public class MainUI {
 			// reset:
 			view.setTranslationX(0.0f);
 			view.setTranslationY(0.0f);
+
+			int popup_width = view.getWidth();
+			int popup_height = view.getHeight();
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "popup view width: " + view.getWidth());
-				Log.d(TAG, "popup view height: " + view.getHeight());
+				Log.d(TAG, "popup_width: " + popup_width);
+				Log.d(TAG, "popup_height: " + popup_height);
 			}
+			/*if( popup_view != null && popup_width > popup_view.getTotalWidth() ) {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "### fixed popup view width: " + popup_width);
+				}
+				popup_width = popup_view.getTotalWidth();
+				ViewGroup.LayoutParams params = new RelativeLayout.LayoutParams(
+						popup_width,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				view.setLayoutParams(params);
+			}*/
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
-				view.setPivotX(view.getWidth()/2.0f);
-				view.setPivotY(view.getHeight()/2.0f);
+				view.setPivotX(popup_width/2.0f);
+				view.setPivotY(popup_height/2.0f);
 			}
 			else {
-				view.setPivotX(view.getWidth());
-				view.setPivotY(ui_placement_right ? 0.0f : view.getHeight());
+				view.setPivotX(popup_width);
+				view.setPivotY(ui_placement_right ? 0.0f : popup_height);
 				if( ui_placement_right ) {
 					if( ui_rotation == 90 )
-						view.setTranslationY( view.getWidth() );
+						view.setTranslationY( popup_width );
 					else if( ui_rotation == 270 )
-						view.setTranslationX( - view.getHeight() );
+						view.setTranslationX( - popup_height );
 				}
 				else {
 					if( ui_rotation == 90 )
-						view.setTranslationX( - view.getHeight() );
+						view.setTranslationX( - popup_height );
 					else if( ui_rotation == 270 )
-						view.setTranslationY( - view.getWidth() );
+						view.setTranslationY( - popup_width );
 				}
 			}
 		}

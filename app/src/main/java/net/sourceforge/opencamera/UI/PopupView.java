@@ -71,7 +71,6 @@ public class PopupView extends LinearLayout {
 			Log.d(TAG, "PopupView time 1: " + (System.nanoTime() - debug_time));
 		this.setOrientation(LinearLayout.VERTICAL);
 
-
 		final float scale = getResources().getDisplayMetrics().density;
 		total_width_dp = 280;
 		{
@@ -95,6 +94,16 @@ public class PopupView extends LinearLayout {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "total_width_dp: " + total_width_dp);
+
+		/*{
+			int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+			if( MyDebug.LOG )
+				Log.d(TAG, "total_width: " + total_width);
+			ViewGroup.LayoutParams params = new LayoutParams(
+					total_width,
+					LayoutParams.WRAP_CONTENT);
+			this.setLayoutParams(params);
+		}*/
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
@@ -903,6 +912,11 @@ public class PopupView extends LinearLayout {
 
 		}
 	}
+
+	/*int getTotalWidth() {
+		final float scale = getResources().getDisplayMetrics().density;
+		return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+	}*/
 
 	private void changePhotoMode(List<String> photo_modes, List<MyApplicationInterface.PhotoMode> photo_mode_values, String option) {
 		if( MyDebug.LOG )
