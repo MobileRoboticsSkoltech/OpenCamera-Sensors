@@ -426,8 +426,8 @@
         android:id="@+id/popup_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/settings"
-        android:layout_below="@+id/settings"
+        android:layout_alignRight="@+id/popup"
+        android:layout_below="@+id/popup"
         android:fadeScrollbars="false"
         />
     
