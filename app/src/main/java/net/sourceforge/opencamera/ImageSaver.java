@@ -347,25 +347,27 @@ public class ImageSaver extends Thread {
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
 				boolean success;
-				if( request.type == Request.Type.RAW ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "request is raw");
-					success = saveImageNowRaw(request);
-				}
-				else if( request.type == Request.Type.JPEG ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "request is jpeg");
-					success = saveImageNow(request);
-				}
-				else if( request.type == Request.Type.DUMMY ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "request is dummy");
-					success = true;
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.e(TAG, "request is unknown type!");
-					success = false;
+				switch (request.type) {
+					case RAW:
+						if (MyDebug.LOG)
+							Log.d(TAG, "request is raw");
+						success = saveImageNowRaw(request);
+						break;
+					case JPEG:
+						if (MyDebug.LOG)
+							Log.d(TAG, "request is jpeg");
+						success = saveImageNow(request);
+						break;
+					case DUMMY:
+						if (MyDebug.LOG)
+							Log.d(TAG, "request is dummy");
+						success = true;
+						break;
+					default:
+						if (MyDebug.LOG)
+							Log.e(TAG, "request is unknown type!");
+						success = false;
+						break;
 				}
 				if( MyDebug.LOG ) {
 					if( success )
@@ -2510,25 +2512,28 @@ public class ImageSaver extends Thread {
 			int exif_orientation = 0;
 			// from http://jpegclub.org/exif_orientation.html
 			// and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
-			if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
-				// leave unchanged
-			}
-			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
-				needs_tf = true;
-				exif_orientation = 180;
-			}
-			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
-				needs_tf = true;
-				exif_orientation = 90;
-			}
-			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
-				needs_tf = true;
-				exif_orientation = 270;
-			}
-			else {
-				// just leave unchanged for now
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+			switch (exif_orientation_s) {
+				case ExifInterface.ORIENTATION_UNDEFINED:
+				case ExifInterface.ORIENTATION_NORMAL:
+					// leave unchanged
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_180:
+					needs_tf = true;
+					exif_orientation = 180;
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_90:
+					needs_tf = true;
+					exif_orientation = 90;
+					break;
+				case ExifInterface.ORIENTATION_ROTATE_270:
+					needs_tf = true;
+					exif_orientation = 270;
+					break;
+				default:
+					// just leave unchanged for now
+					if (MyDebug.LOG)
+						Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+					break;
 			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "    exif orientation: " + exif_orientation);

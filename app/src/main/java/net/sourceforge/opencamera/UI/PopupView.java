@@ -923,42 +923,51 @@ public class PopupView extends LinearLayout {
 		else {
 			MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
 			String toast_message = option;
-			if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard )
-				toast_message = getResources().getString(R.string.photo_mode_standard_full);
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
-				toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing )
-				toast_message = getResources().getString(R.string.photo_mode_focus_bracketing_full);
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst )
-				toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction )
-				toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
+			switch (new_photo_mode) {
+				case Standard:
+					toast_message = getResources().getString(R.string.photo_mode_standard_full);
+					break;
+				case ExpoBracketing:
+					toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+					break;
+				case FocusBracketing:
+					toast_message = getResources().getString(R.string.photo_mode_focus_bracketing_full);
+					break;
+				case FastBurst:
+					toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
+					break;
+				case NoiseReduction:
+					toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
+					break;
+			}
 			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
-			}
-			else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-				editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
+			switch (new_photo_mode) {
+				case Standard:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
+					break;
+				case DRO:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
+					break;
+				case HDR:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+					break;
+				case ExpoBracketing:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+					break;
+				case FocusBracketing:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+					break;
+				case FastBurst:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
+					break;
+				case NoiseReduction:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
+					break;
+				default:
+					if (MyDebug.LOG)
+						Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
+					break;
 			}
 			editor.apply();
 

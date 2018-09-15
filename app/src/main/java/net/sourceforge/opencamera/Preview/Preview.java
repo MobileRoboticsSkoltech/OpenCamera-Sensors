@@ -3026,7 +3026,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			record_audio = false;
 		}
 
-		video_profile.videoSource = using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA;
+		// we repeat the Build.VERSION check to avoid Android Lint warning; also needs to be an "if" statement rather than using the
+		// "?" operator, otherwise we still get the Android Lint warning
+		if( using_android_l && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			video_profile.videoSource = MediaRecorder.VideoSource.SURFACE;
+		}
+		else {
+			video_profile.videoSource = MediaRecorder.VideoSource.CAMERA;
+		}
 
 		// Done with video
 
@@ -4077,7 +4084,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( selected_fps != null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "set preview fps range: " + selected_fps);
+				Log.d(TAG, "set preview fps range: " + Arrays.toString(selected_fps));
             camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
         }
         else if( using_android_l ) {

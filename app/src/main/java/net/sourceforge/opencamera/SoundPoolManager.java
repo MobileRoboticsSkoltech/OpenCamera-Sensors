@@ -10,7 +10,7 @@ import android.util.SparseIntArray;
 
 /**	Manages loading and playing sounds, via SoundPool.
  */
-public class SoundPoolManager {
+class SoundPoolManager {
 	private static final String TAG = "SoundPoolManager";
 
 	private final Context context;

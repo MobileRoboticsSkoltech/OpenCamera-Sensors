@@ -47,7 +47,6 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 /** Fragment to handle the Settings UI. Note that originally this was a
@@ -973,7 +972,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						}
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
-						about_string.append("\nTonemap max curve points: " + tonemap_max_curve_points);
+						about_string.append("\nTonemap max curve points: ");
+						about_string.append(tonemap_max_curve_points);
 						about_string.append("\nCan disable shutter sound?: ");
 						about_string.append(getString(can_disable_shutter_sound ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFlash modes: ");

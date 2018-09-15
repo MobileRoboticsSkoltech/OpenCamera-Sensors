@@ -7,7 +7,6 @@ import net.sourceforge.opencamera.CameraController.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
-import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoQualityHandler;
 import net.sourceforge.opencamera.TextFormatter;
@@ -500,7 +499,7 @@ public class UnitTest {
 	}
 
 	private class float4 {
-		float r, g, b, a;
+		final float r, g, b, a;
 
 		float4(float r, float g, float b, float a) {
 			this.r = r;

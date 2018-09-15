@@ -199,7 +199,7 @@
     <string name="preference_video_max_duration">ビデオの最大撮影時間</string>
     <string name="preference_video_max_duration_summary">指定した時間が経過するとビデオ撮影が自動的に停止します\n%s</string>
     <string name="preference_video_restart">ビデオの最大撮影回数</string>
-    <string name="preference_video_restart_summary">最大撮影時間の経過後に指定した回数だけ撮影を繰り返します(有効時のみ)</string>
+    <string name="preference_video_restart_summary">最大撮影時間の経過後に指定した回数だけ撮影を繰り返します(有効時のみ)\n%s</string>
 
     <string name="preference_record_audio">音声録音</string>
     <string name="preference_record_audio_summary">ビデオの撮影時に音声も録音します</string>

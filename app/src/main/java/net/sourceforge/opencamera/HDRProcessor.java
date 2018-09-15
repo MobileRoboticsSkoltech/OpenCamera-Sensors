@@ -1044,7 +1044,7 @@ public class HDRProcessor {
 	public class AvgData {
 		public Allocation allocation_out;
 		Bitmap bitmap_avg_align;
-		public Allocation allocation_avg_align;
+		Allocation allocation_avg_align;
 
 		AvgData(Allocation allocation_out, Bitmap bitmap_avg_align, Allocation allocation_avg_align) {
 			this.allocation_out = allocation_out;
@@ -2378,10 +2378,10 @@ public class HDRProcessor {
 	}
 
 	private static class HistogramInfo {
-		public final int total;
-		public final int mean_brightness;
-		public final int median_brightness;
-		public final int max_brightness;
+		final int total;
+		final int mean_brightness;
+		final int median_brightness;
+		final int max_brightness;
 
 		HistogramInfo(int total, int mean_brightness, int median_brightness, int max_brightness) {
 			this.total = total;

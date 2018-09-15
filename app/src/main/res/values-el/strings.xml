@@ -87,7 +87,7 @@
     <string name="preference_exposure">Ρυθμίστε την αντιστάθμιση έκθεσης</string>
     <string name="preference_exposure_summary">Ορισμός σε 0 για την προεπιλογή αντιστάθμισης έκθεσης</string>
     <string name="preference_lock_orientation">Κλείδωμα φωτογραφιών/βίντεο προσανατολισμού</string>
-    <string name="preference_lock_orientation_summary">Αν ορίσετε τον προσανατολισμό της συσκευής θα πρέπει να αγνοηθεί, και ο προσανατολισμός της φωτογραφίας/βίντεο θα αλληλοσχετίζεται με τον συγκεκριμένο προσανατολισμό</string>
+    <string name="preference_lock_orientation_summary">Αν ορίσετε τον προσανατολισμό της συσκευής θα πρέπει να αγνοηθεί, και ο προσανατολισμός της φωτογραφίας/βίντεο θα αλληλοσχετίζεται με τον συγκεκριμένο προσανατολισμό\n%s</string>
     <string name="preference_face_detection">Ανίχνευση προσώπου</string>
     <string name="preference_face_detection_summary">Χρήση της ανίχνευσης προσώπου στις περιοχές εστίασης</string>
 
@@ -103,7 +103,7 @@
     <string name="preference_touch_capture">Αγγιγμα για λήψη</string>
     <string name="preference_touch_capture_summary">Λήψη μιας φωτογραφίας, απλά αγγίζοντας η με διπλό άγγιγμα της προεπισκόπησης</string>
     <string name="preference_pause_preview">Παύση μετά τη λήψη φωτογραφιών</string>
-    <string name="preference_pause_preview_summary">Παύση στην οθόνη μετά την λήψη μιας φωτογραφίας, με την επιλογή για κοινοποίηση η διαγραφή της φωτογραφίας</string>
+    <string name="preference_pause_preview_summary">Παύση στην οθόνη μετά την λήψη μιας φωτογραφίας, με την επιλογή για κοινοποίηση η διαγραφή της φωτογραφίας\n%s</string>
     <string name="preference_shutter_sound">Ηχος κλείστρου</string>
     <string name="preference_shutter_sound_summary">Αναπαραγωγή ήχου κατά την λήψη φωτογραφίας</string>
     <string name="preference_volume_keys">Πλήκτρα ρύθμισης ήχου</string>
@@ -157,7 +157,7 @@
     <string name="preference_grid">Εμφάνιση πλέγματος</string>
     <string name="grid">Πλέγμα</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Εμφάνιση οδηγιών αποκοπής</string>
-    <string name="preference_crop_guide_summary">Εμφάνιση ορθογώνιου όταν εμφανίζεται οτι μία συγκεκριμένη αναλογία διαστάσεων μοιάζει χρήσιμη αν σκοπεύετε να περικόψετε την φωτογραφία/το βίντεο σε διαφορετική αναλογία. Απαιτείται η WYSIWYG λειτουργία "φωτογραφία", ή να είναι σε λειτουργία βίντεο.</string>
+    <string name="preference_crop_guide_summary">Εμφάνιση ορθογώνιου όταν εμφανίζεται οτι μία συγκεκριμένη αναλογία διαστάσεων μοιάζει χρήσιμη αν σκοπεύετε να περικόψετε την φωτογραφία/το βίντεο σε διαφορετική αναλογία. Απαιτείται η WYSIWYG λειτουργία "φωτογραφία", ή να είναι σε λειτουργία βίντεο.\n%s</string>
     <string name="preference_show_toasts">Εμφάνιση \"toast\" μυνημάτων</string>
     <string name="preference_show_toasts_summary">Αν θέλετε να εμφανίσετε τα αναδυόμενα \"toast\" μηνύματα</string>
     <string name="preference_thumbnail_animation">Εμφάνιση κινούμενων μικρογραφιών</string>
@@ -175,7 +175,7 @@
     <string name="preference_screen_location_settings">Ρυθμίσεις τοποθεσίας…</string>
     <string name="preference_resolution">Ανάλυση κάμερας</string>
     <string name="preference_quality">Ποιότητα εικόνας</string>
-    <string name="preference_quality_summary">Ορισμός της ποιότητας αποθηκευμένων εικόνων JPEG (προεπιλογή είναι 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_quality_summary">Ορισμός της ποιότητας αποθηκευμένων εικόνων JPEG (προεπιλογή είναι 90%%)\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_location">Θέση αποθήκευσης δεδομένων (Geotagging)</string>
     <string name="preference_location_summary">Αποθήκευση δεδομένων θέσεων GPS στις φωτογραφίες/βίντεο</string>
@@ -184,7 +184,7 @@
     <string name="preference_require_location">Απαιτούνται δεδομένα τοποθεσίας</string>
     <string name="preference_require_location_summary">Αν τα δεδομένα τοποθεσίας είναι ενεργοποιημένα, μόνο για λήψη φωτογραφίας/βίντεο, τα δεδομένα θα είναι διαθέσιμα</string>
     <string name="preference_stamp">Σφραγίδα φωτογραφιών</string>
-    <string name="preference_stamp_summary">Προσθήκη σφραγίδα στις φωτογραφιες με ημερομηνία και ώρα, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη</string>
+    <string name="preference_stamp_summary">Προσθήκη σφραγίδα στις φωτογραφιες με ημερομηνία και ώρα, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη\n%s</string>
     <string name="preference_stamp_dateformat">Μορφή σφραγίδας ημερομηνίας</string>
     <string name="preference_stamp_timeformat">Μορφή σφραγίδας ώρας</string>
     <string name="preference_stamp_gpsformat">Μορφή σφραγίδας GPS</string>
@@ -204,21 +204,21 @@
     <string name="preference_video_stabilization">Ενεργοποίηση βίντεο σταθεροποίησης</string>
     <string name="preference_video_stabilization_summary">Η σταθεροποίηση βίντεο, μειώνει το κούνημα λόγω της κίνησης της κάμερας, τόσο στην προεπισκόπηση αλλά και στην καταγραφή των βίντεο</string>
     <string name="preference_video_bitrate">Βίντεο bitrate (περ.)</string>
-    <string name="preference_video_bitrate_summary">Ρύθμιση της κατά προσέγγισης bitrate του βίντεο (υψηλότερη σημαίνει καλύτερη ποιότητα, αλλά καταλαμβάνει περισσότερο χώρο στον δίσκο, καί μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο αν το επιλεγμένο bitrate δεν υποστηρίζεται)</string>
+    <string name="preference_video_bitrate_summary">Ρύθμιση της κατά προσέγγισης bitrate του βίντεο (υψηλότερη σημαίνει καλύτερη ποιότητα, αλλά καταλαμβάνει περισσότερο χώρο στον δίσκο, καί μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο αν το επιλεγμένο bitrate δεν υποστηρίζεται)\n%s</string>
     <string name="preference_video_fps">Ρυθμός καρέ βίντεο (περ.)</string>
-    <string name="preference_video_fps_summary">Ρύθξμιση καρέ τού βίντεο (μπορεί να είναι περίπου, δεν είναι εγγυημένο να επιτευχθεί και μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο, εάν το καρέ δεν υποστηρίζεται)</string>
+    <string name="preference_video_fps_summary">Ρύθξμιση καρέ τού βίντεο (μπορεί να είναι περίπου, δεν είναι εγγυημένο να επιτευχθεί και μπορεί να προκαλέσει αποτυχία καταγραφής των βίντεο, εάν το καρέ δεν υποστηρίζεται)\n%s</string>
     <string name="preference_video_max_duration">Μέγιστη διάρκεια του βίντεο</string>
-    <string name="preference_video_max_duration_summary">Η καταγραφή τού βίντεο θα σταματήσει μετά την καθορισμένη διάρκεια</string>
+    <string name="preference_video_max_duration_summary">Η καταγραφή τού βίντεο θα σταματήσει μετά την καθορισμένη διάρκεια\n%s</string>
     <string name="preference_video_restart">Επανεκκίνηση του βίντεο μετά από την ανώτατη διάρκεια</string>
-    <string name="preference_video_restart_summary">Αν το βίντεο έχει σταματήσει μετά την μέγιστη διάρκεια (αν έχει ρυθμιστεί), η επιλογή αυτή θα επανεκκινήση το βίντεο, μέχρι τον καθορισμένο αριθμό διάρκειας</string>
+    <string name="preference_video_restart_summary">Αν το βίντεο έχει σταματήσει μετά την μέγιστη διάρκεια (αν έχει ρυθμιστεί), η επιλογή αυτή θα επανεκκινήση το βίντεο, μέχρι τον καθορισμένο αριθμό διάρκειας\n%s</string>
     <string name="preference_video_max_filesize">Μέγιστο μέγεθος αρχείου βίντεο</string>
-    <string name="preference_video_max_filesize_summary">Η καταγραφή τού βίντεο θα σταματήσει και/η την επανεκκίνηση του (βλ. παρακάτω επιλογή) όταν το (κατά προσέγγιση) μέγιστο μέγεθος του αρχείου έχει επιτευχθεί. Σημειώστε ότι σχεδόν όλες η Android συσκευές έχουν ένα μέγιστο μέγεθος αρχείου για βίντεο (συνήθως γύρω στα 2GB ή 4GB), αλλά αυτή η επιλογή σας επιτρέπει να ορίσετε μια συγκεκριμένη τιμή</string>
+    <string name="preference_video_max_filesize_summary">Η καταγραφή τού βίντεο θα σταματήσει και/η την επανεκκίνηση του (βλ. παρακάτω επιλογή) όταν το (κατά προσέγγιση) μέγιστο μέγεθος του αρχείου έχει επιτευχθεί. Σημειώστε ότι σχεδόν όλες η Android συσκευές έχουν ένα μέγιστο μέγεθος αρχείου για βίντεο (συνήθως γύρω στα 2GB ή 4GB), αλλά αυτή η επιλογή σας επιτρέπει να ορίσετε μια συγκεκριμένη τιμή\n%s</string>
     <string name="preference_video_restart_max_filesize">Επανεκκίνηση στο μέγιστο μέγεθος αρχείου</string>
     <string name="preference_video_restart_max_filesize_summary">Αυτόματη επανεκκίνηση καταγραφής των βίντεο όταν το μέγιστο μέγεθος του αρχείου είναι προσβάσιμο (αν η συσκευή έχει προεπιλεγμένο μέγιστο μέγεθος του αρχείου, η έχει οριστεί από τούς χρήστες)</string>
     <string name="preference_record_audio">Καταγραφή ήχου</string>
     <string name="preference_record_audio_summary">Καταγραφή ήχου κατά την καταγραφή ενός βίντεο</string>
     <string name="preference_record_audio_src">Πηγή ήχου</string>
-    <string name="preference_record_audio_src_summary">Χρήση μικροφώνου για την καταγραφή ήχου</string>
+    <string name="preference_record_audio_src_summary">Χρήση μικροφώνου για την καταγραφή ήχου\n%s</string>
     <string name="preference_record_audio_channels">Κανάλια ήχου</string>
     <string name="preference_record_audio_channels_summary">Καθορισμός μονοφωνικής ή στερεοφωνικής καταγραφής ήχου (ο ήχος στέρεο υποστηρίζεται μόνο σε ορισμένες συσκευές)</string>
     <string name="preference_video_flash">Φλας κατά την καταγραφή βίντεο</string>
@@ -311,12 +311,12 @@
     <string name="preference_camera2_fake_flash_summary">Ενεργοποιήστε αυτό αν η συσκευή σας έχει λανθασμένη συμπεριφορά σε σχέση με το Camera2 API</string>
 
     <string name="preference_expo_bracketing_n_images">Εκθεση υποστηρίγματος</string>
-    <string name="preference_expo_bracketing_n_images_summary">Αριθμός των εικόνων σε έκθεση υποστηρίγματος</string>
+    <string name="preference_expo_bracketing_n_images_summary">Αριθμός των εικόνων σε έκθεση υποστηρίγματος\n%s</string>
     <string name="preference_expo_bracketing_stops">Τέλος έκθεσης υποστηρίγματος</string>
-    <string name="preference_expo_bracketing_stops_summary">Πόσες στάσεις να αφαιρεθούν/προστεθούν για την πιο σκοτεινή/φωτεινή εικόνα</string>
+    <string name="preference_expo_bracketing_stops_summary">Πόσες στάσεις να αφαιρεθούν/προστεθούν για την πιο σκοτεινή/φωτεινή εικόνα\n%s</string>
 
     <string name="preference_nr_save">Μείωση θορύβου αυθεντικών εικόνων</string>
-    <string name="preference_nr_save_summary">Αν θέλετε αποθηκεύστε τις αυθεντικές εικόνες με μείωση θορύβου λειτουργίας. Σημείωση αυτό μπορεί να κάνει την αποθήκευση φωτογραφιών πολύ πιο αργή.</string>
+    <string name="preference_nr_save_summary">Αν θέλετε αποθηκεύστε τις αυθεντικές εικόνες με μείωση θορύβου λειτουργίας. Σημείωση αυτό μπορεί να κάνει την αποθήκευση φωτογραφιών πολύ πιο αργή.\n%s</string>
 
     <string name="preference_nr_save_no">Οχι αποθήκευση αυθεντικών φωτογραφιών</string>
     <string name="preference_nr_save_single">Αποθήκευση μίας αυθεντικής φωτογραφίας</string>
@@ -343,7 +343,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Μπροστινός φακός κάμερας</string>
-    <string name="preference_front_camera_mirror_summary">Λήψη φωτογραφιών από τον μπροστινό φακό της κάμερας.</string>
+    <string name="preference_front_camera_mirror_summary">Λήψη φωτογραφιών από τον μπροστινό φακό της κάμερας.\n%s</string>
 
     <string name="preference_calibrate_level">Βαθμονόμηση τού επιπέδου της γωνίας</string>
     <string name="preference_calibrate_level_summary">Αυτή η επιλογή βαθμονομεί την συσκευή σας\'sΑν το αυτόματο επίπεδο και το επίπεδο οθόνης/γωνίας λειτουργούν σωστά.</string>
@@ -360,7 +360,7 @@
     <string name="preference_show_geo_direction_lines">Εμφάνιση ευθυγραμμικών γραμμών</string>
     <string name="preference_show_geo_direction_lines_summary">Εμφάνιση ευθυγραμμικών γραμμών</string>
     <string name="preference_video_subtitle">Βίντεο υπότιτλοι</string>
-    <string name="preference_video_subtitle_summary">Δημιουργία αρχείου υποτίτλων (.SRT) που αποθηκεύει την ημερομηνία και την ώρα, και, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη</string>
+    <string name="preference_video_subtitle_summary">Δημιουργία αρχείου υποτίτλων (.SRT) που αποθηκεύει την ημερομηνία και την ώρα, και, επίσης, πληροφορίες GPS και αν η θέση/κατεύθυνση δεδομένων είναι ενεργοποιημένη\n%s</string>
 
     <string name="duration_unlimited">Απεριόριστα</string>
     <string name="duration_3s">3 δευτερόλεπτα</string>
@@ -452,14 +452,5 @@
     <string name="high_speed">Υψηλή Ταχύτητα</string> <!-- in the sense of high speed video frame rates -->
 
     <string name="preference_video_fps_default">Προεπιλογή</string>
-    <string name="preference_video_fps_15">15</string>
-    <string name="preference_video_fps_24">24</string>
-    <string name="preference_video_fps_25">25</string>
-    <string name="preference_video_fps_30">30</string>
-    <string name="preference_video_fps_60">60</string>
-    <string name="preference_video_fps_96">96</string>
-    <string name="preference_video_fps_100">100</string>
-    <string name="preference_video_fps_120">120</string>
-    <string name="preference_video_fps_240">240</string>
 
 </resources>

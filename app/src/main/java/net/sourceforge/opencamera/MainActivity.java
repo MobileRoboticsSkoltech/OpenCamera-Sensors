@@ -3495,27 +3495,31 @@ public class MainActivity extends Activity {
 				simple = false;
 			}
 			String photo_mode_string = null;
-			if( photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_dro);
-			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
-			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
-			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
-				int n_images = applicationInterface.getFocusBracketingNImagesPref();
-				photo_mode_string += " (" + n_images + ")";
-			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);
-				int n_images = applicationInterface.getBurstNImages();
-				photo_mode_string += " (" + n_images + ")";
-			}
-			else if( photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
+			switch (photo_mode) {
+				case DRO:
+					photo_mode_string = getResources().getString(R.string.photo_mode_dro);
+					break;
+				case HDR:
+					photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
+					break;
+				case ExpoBracketing:
+					photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+					break;
+				case FocusBracketing: {
+					photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
+					int n_images = applicationInterface.getFocusBracketingNImagesPref();
+					photo_mode_string += " (" + n_images + ")";
+					break;
+				}
+				case FastBurst: {
+					photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);
+					int n_images = applicationInterface.getBurstNImages();
+					photo_mode_string += " (" + n_images + ")";
+					break;
+				}
+				case NoiseReduction:
+					photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
+					break;
 			}
 			if( photo_mode_string != null ) {
 				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;

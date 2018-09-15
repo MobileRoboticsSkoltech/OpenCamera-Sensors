@@ -410,14 +410,16 @@ public class StorageUtils {
 			final String type = split[0];
 
 			Uri contentUri = null;
-			if ("image".equals(type)) {
-				contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-			}
-			else if ("video".equals(type)) {
-				contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-			}
-			else if ("audio".equals(type)) {
-				contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+			switch (type) {
+				case "image":
+					contentUri = Images.Media.EXTERNAL_CONTENT_URI;
+					break;
+				case "video":
+					contentUri = Video.Media.EXTERNAL_CONTENT_URI;
+					break;
+				case "audio":
+					contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+					break;
 			}
 
 			final String selection = "_id=?";
@@ -478,20 +480,23 @@ public class StorageUtils {
 			timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
 		}
 		String mediaFilename;
-        if( type == MEDIA_TYPE_IMAGE ) {
-    		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
-        }
-        else if( type == MEDIA_TYPE_VIDEO ) {
-    		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
-        }
-        else {
-        	// throw exception as this is a programming error
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "unknown type: " + type);
-        	throw new RuntimeException();
-        }
+		switch (type) {
+			case MEDIA_TYPE_IMAGE: {
+				String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
+				mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
+				break;
+			}
+			case MEDIA_TYPE_VIDEO: {
+				String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
+				mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
+				break;
+			}
+			default:
+				// throw exception as this is a programming error
+				if (MyDebug.LOG)
+					Log.e(TAG, "unknown type: " + type);
+				throw new RuntimeException();
+		}
         return mediaFilename;
     }
     
@@ -575,22 +580,22 @@ public class StorageUtils {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
 		String mimeType;
-		if( type == MEDIA_TYPE_IMAGE ) {
-			if( extension.equals("dng") ) {
-				mimeType = "image/dng";
-				//mimeType = "image/x-adobe-dng";
-			}
-			else
-				mimeType = "image/jpeg";
-		}
-		else if( type == MEDIA_TYPE_VIDEO ) {
-			mimeType = "video/mp4";
-		}
-		else {
-			// throw exception as this is a programming error
-			if( MyDebug.LOG )
-				Log.e(TAG, "unknown type: " + type);
-			throw new RuntimeException();
+		switch (type) {
+			case MEDIA_TYPE_IMAGE:
+				if (extension.equals("dng")) {
+					mimeType = "image/dng";
+					//mimeType = "image/x-adobe-dng";
+				} else
+					mimeType = "image/jpeg";
+				break;
+			case MEDIA_TYPE_VIDEO:
+				mimeType = "video/mp4";
+				break;
+			default:
+				// throw exception as this is a programming error
+				if (MyDebug.LOG)
+					Log.e(TAG, "unknown type: " + type);
+				throw new RuntimeException();
 		}
 		// note that DocumentsContract.createDocument will automatically append to the filename if it already exists
 		String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
