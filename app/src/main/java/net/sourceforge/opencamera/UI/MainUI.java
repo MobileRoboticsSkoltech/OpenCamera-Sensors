@@ -455,6 +455,7 @@ public class MainUI {
 			view.setLayoutParams(lp);
 		}
 
+		if( popupIsOpen() )
 		{
 			View view = main_activity.findViewById(R.id.popup_container);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -1092,6 +1093,8 @@ public class MainUI {
     }
     
     public void destroyPopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "destroyPopup");
 		if( popupIsOpen() ) {
 			closePopup();
 		}
