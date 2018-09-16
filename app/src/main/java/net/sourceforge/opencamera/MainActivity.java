@@ -1678,16 +1678,6 @@ public class MainActivity extends Activity {
 					}
 				}
 			}
-
-			if( !need_reopen ) {
-				if( preview.getCameraController().isLogProfile() && !applicationInterface.useVideoLogProfile() ) {
-					// needed for Nexus 6, but not OnePlus 3T, Nokia 8, so this may be a device specific bug: problem that
-					// turning off log profile in settings doesn't take effect until the camera is reopened
-					if( MyDebug.LOG )
-						Log.d(TAG, "turning off log profile");
-					need_reopen = true;
-				}
-			}
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: time after check need_reopen: " + (System.currentTimeMillis() - debug_time));
