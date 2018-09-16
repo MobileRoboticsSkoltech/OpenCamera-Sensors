@@ -478,6 +478,8 @@ public class MainUI {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "popup_width: " + popup_width);
 				Log.d(TAG, "popup_height: " + popup_height);
+				if( popup_view != null )
+					Log.d(TAG, "popup total width: " + popup_view.getTotalWidth());
 			}
 			if( popup_view != null && popup_width > popup_view.getTotalWidth()*1.2  ) {
 				// This is a workaround for the rare but annoying bug where the popup window is too large
