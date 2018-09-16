@@ -8544,6 +8544,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Standard );
 
+		if( !mActivity.supportsHDR() ) {
+			return;
+		}
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
