@@ -1098,7 +1098,17 @@ public class CameraController2 extends CameraController {
 				if( image != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "can now process the image");
-					processImage();
+					// should call processImage() on UI thread, to be consistent with onImageAvailable()->processImage()
+					// important to avoid crash when pause preview is option, tested in testTakePhotoRawWaitCaptureResult()
+					final Activity activity = (Activity)context;
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if( MyDebug.LOG )
+								Log.d(TAG, "setCaptureResult UI thread call processImage()");
+							processImage();
+						}
+					});
 				}
 			}
 		}
@@ -1166,7 +1176,7 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 			synchronized( image_reader_lock ) {
-				// see comment above in setCaptureResult() for why we sychonize
+				// see comment above in setCaptureResult() for why we synchronize
 				image = reader.acquireNextImage();
 				processImage();
 			}
@@ -6472,6 +6482,7 @@ public class CameraController2 extends CameraController {
 				test_capture_results++;
 				modified_from_camera_settings = false;
 				if( onRawImageAvailableListener != null ) {
+				    //test_wait_capture_result = true;
 					if( test_wait_capture_result ) {
 						// for RAW capture, we require the capture result before creating DngCreator
 						// but for testing purposes, we need to test the possibility where onImageAvailable() for

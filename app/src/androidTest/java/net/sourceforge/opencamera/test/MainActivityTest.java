@@ -2818,18 +2818,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 
 		// trash/share only shown when preview is paused after taking a photo
-
-		assertTrue(mPreview.isPreviewStarted()); // check preview restarted
-		assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
-		assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
-		if( !immersive_mode ) {
-			assertTrue(exposureButton.getVisibility() == exposureVisibility);
-			assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
-		}
-		assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
-		assertTrue(popupButton.getVisibility() == View.VISIBLE);
-		assertTrue(trashButton.getVisibility() == View.GONE);
-		assertTrue(shareButton.getVisibility() == View.GONE);
+		boolean pause_preview =  sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
+		if( pause_preview ) {
+            assertFalse(mPreview.isPreviewStarted());
+            assertTrue(switchCameraButton.getVisibility() == View.GONE);
+            assertTrue(switchVideoButton.getVisibility() == View.GONE);
+            assertTrue(exposureButton.getVisibility() == View.GONE);
+            assertTrue(exposureLockButton.getVisibility() == View.GONE);
+            assertTrue(audioControlButton.getVisibility() == View.GONE);
+            assertTrue(popupButton.getVisibility() == View.GONE);
+            assertTrue(trashButton.getVisibility() == View.VISIBLE);
+            assertTrue(shareButton.getVisibility() == View.VISIBLE);
+        }
+        else {
+            assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+            assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+            assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+            if( !immersive_mode ) {
+                assertTrue(exposureButton.getVisibility() == exposureVisibility);
+                assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
+            }
+            assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
+            assertTrue(popupButton.getVisibility() == View.VISIBLE);
+            assertTrue(trashButton.getVisibility() == View.GONE);
+            assertTrue(shareButton.getVisibility() == View.GONE);
+        }
 	}
 
 	/*
@@ -3019,6 +3032,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		mPreview.getCameraController().test_wait_capture_result = true;
+		subTestTakePhoto(false, false, true, true, false, false, true, true);
+
+		// now repeat with pause preview (guards against crash fixed in 1.44.1 where we got CalledFromWrongThreadException when
+		// setting visibility for icons with pause preview mode with test_wait_capture_result
+		editor = settings.edit();
+		editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
+		editor.apply();
 		subTestTakePhoto(false, false, true, true, false, false, true, true);
 	}
 
