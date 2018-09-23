@@ -506,7 +506,18 @@ public class DrawPreview {
     private Bitmap loadBitmap(Uri uri, File file) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "loadBitmap: " + uri);
-        Bitmap bitmap = MediaStore.Images.Media.getBitmap(main_activity.getContentResolver(), uri);
+        Bitmap bitmap;
+        try {
+			bitmap = MediaStore.Images.Media.getBitmap(main_activity.getContentResolver(), uri);
+		}
+		catch(Exception e) {
+        	// Although Media.getBitmap() is documented as only throwing FileNotFoundException, IOException
+			// (with the former being a subset of IOException anyway), I've had SecurityException from
+			// Google Play - best to catch everything just in case.
+            Log.e(TAG, "MediaStore.Images.Media.getBitmap exception");
+        	e.printStackTrace();
+            throw new IOException();
+		}
         if( bitmap == null ) {
             // just in case!
             Log.e(TAG, "MediaStore.Images.Media.getBitmap returned null");
