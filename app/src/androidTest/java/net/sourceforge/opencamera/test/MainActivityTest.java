@@ -7825,6 +7825,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/* Tests repeatedly switching camera, waiting for camera to reopen each time.
 	 * Guards agains a bug fixed in 1.44 where we would crash due to memory leak in
 	 * OrientationEventListener.enable() (from Preview.cameraOpened()) when called too many times.
+	 * Note, takes a while (over 1m) to run, test may look like it's hung whilst running!
 	 */
 	public void testSwitchCameraRepeat2() throws InterruptedException {
 		Log.d(TAG, "testSwitchCameraRepeat2");
