@@ -403,13 +403,23 @@ public class MainActivity extends Activity {
 				//final boolean whats_new_enabled = false;
 				final boolean whats_new_enabled = true;
 				if( whats_new_enabled ) {
+					// whats_new_version is the version code that the What's New text is written for. Normally it will equal the
+					// current release (version_code), but it some cases we may want to leave it unchanged.
+					// E.g., we have a "What's New" for 1.44 (64), but then push out a quick fix for 1.44.1 (65). We don't want to
+					// show the dialog again to people who alreaddy received 1.44 (64), but we still want to show the dialog to people
+					// upgrading from earlier versions.
+					int whats_new_version = 64; // 1.44
+					whats_new_version = Math.min(whats_new_version, version_code); // whats_new_version should always be <= version_code, but just in case!
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "whats_new_version: " + whats_new_version);
+					}
 					final boolean force_whats_new = false;
 					//final boolean force_whats_new = true; // for testing
 					boolean allow_show_whats_new = sharedPreferences.getBoolean(PreferenceKeys.ShowWhatsNewPreferenceKey, true);
 					if( MyDebug.LOG )
 						Log.d(TAG, "allow_show_whats_new: " + allow_show_whats_new);
 					// don't show What's New if this is the first time the user has run
-					if( has_done_first_time && allow_show_whats_new && ( force_whats_new || version_code > latest_version ) ) {
+					if( has_done_first_time && allow_show_whats_new && ( force_whats_new || whats_new_version > latest_version ) ) {
 						AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 						alertDialog.setTitle(R.string.whats_new);
 						alertDialog.setMessage(R.string.whats_new_text);
