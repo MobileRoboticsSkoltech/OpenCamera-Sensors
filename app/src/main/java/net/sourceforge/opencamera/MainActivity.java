@@ -1985,18 +1985,30 @@ public class MainActivity extends Activity {
 		magnetic_accuracy_dialog = null; // if the magnetic accuracy was opened, it must have been closed now
     }
     
-    /** Sets the window flags for when the settings window is open.
-     */
     public void setWindowFlagsForSettings() {
+		setWindowFlagsForSettings(true);
+    }
+
+    /** Sets the window flags for when the settings window is open.
+	 * @param set_lock_protect If true, then window flags will be set to protect by screen lock, no
+	 *                         matter what the preference setting
+	 *                         PreferenceKeys.getShowWhenLockedPreferenceKey() is set to. This
+	 *                         should be true for the Settings window, and anything else that might
+	 *                         need protecting. But some callers use this method for opening other
+	 *                         things (such as info dialogs).
+	 */
+	public void setWindowFlagsForSettings(boolean set_lock_protect) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setWindowFlagsForSettings");
+			Log.d(TAG, "setWindowFlagsForSettings: " + set_lock_protect);
 		// allow screen rotation
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
 		// revert to standard screen blank behaviour
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        // settings should still be protected by screen lock
-		showWhenLocked(false);
+        if( set_lock_protect ) {
+			// settings should still be protected by screen lock
+			showWhenLocked(false);
+		}
 
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();

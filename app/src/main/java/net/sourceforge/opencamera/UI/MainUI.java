@@ -1435,7 +1435,7 @@ public class MainUI {
         });
 
 		main_activity.showPreview(false);
-		main_activity.setWindowFlagsForSettings();
+		main_activity.setWindowFlagsForSettings(false); // set set_lock_protect to false, otherwise if screen is locked, user will need to unlock to see the info dialog!
 
 		AlertDialog alert = alertDialog.create();
 		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
