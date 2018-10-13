@@ -178,6 +178,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		final int [] video_widths = bundle.getIntArray("video_widths");
 		final int [] video_heights = bundle.getIntArray("video_heights");
 		final int [] video_fps = bundle.getIntArray("video_fps");
+		final boolean [] video_fps_high_speed = bundle.getBooleanArray("video_fps_high_speed");
 
 		final int resolution_width = bundle.getInt("resolution_width");
 		final int resolution_height = bundle.getInt("resolution_height");
@@ -223,8 +224,15 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			entries[i] = getResources().getString(R.string.preference_video_fps_default);
 			values[i] = "default";
 			i++;
-			for(int fps : video_fps) {
-				entries[i] = "" + fps;
+			final String high_speed_append = " [" + getResources().getString(R.string.high_speed) + "]";
+			for(int k=0;k<video_fps.length;k++) {
+				int fps = video_fps[k];
+				if( video_fps_high_speed != null && video_fps_high_speed[k] ) {
+					entries[i] = fps + high_speed_append;
+				}
+				else {
+					entries[i] = "" + fps;
+				}
 				values[i] = "" + fps;
 				i++;
 			}
@@ -420,6 +428,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			// normal and high speed frame rates
 			lp.setKey(video_quality_preference_key);
 			lp.setValue(video_quality_value);
+
+			boolean is_high_speed = bundle.getBoolean("video_is_high_speed");
+			String title = is_high_speed ? getResources().getString(R.string.video_quality) + " [" + getResources().getString(R.string.high_speed) + "]" : getResources().getString(R.string.video_quality);
+			lp.setTitle(title);
+			lp.setDialogTitle(title);
 		}
 		else {
 			Preference pref = findPreference("preference_video_quality");

@@ -1539,7 +1539,9 @@ public class MainActivity extends Activity {
 			bundle.putStringArray("video_quality", video_quality_arr);
 			bundle.putStringArray("video_quality_string", video_quality_string_arr);
 
-			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(this.preview.getCameraId(), this.preview.fpsIsHighSpeed(fps_value));
+			boolean is_high_speed = this.preview.fpsIsHighSpeed(fps_value);
+			bundle.putBoolean("video_is_high_speed", is_high_speed);
+			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(this.preview.getCameraId(), is_high_speed);
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_quality_preference_key: " + video_quality_preference_key);
 			bundle.putString("video_quality_preference_key", video_quality_preference_key);
@@ -1576,24 +1578,38 @@ public class MainActivity extends Activity {
 			// with Camera2, we know what frame rates are supported
 			int [] candidate_fps = {15, 24, 25, 30, 60, 96, 100, 120, 240};
 			List<Integer> video_fps = new ArrayList<>();
+			List<Boolean> video_fps_high_speed = new ArrayList<>();
 			for(int fps : candidate_fps) {
-				if( this.preview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps) ||
-						this.preview.getVideoQualityHander().videoSupportsFrameRate(fps) ) {
+				if( preview.fpsIsHighSpeed("" + fps) ) {
 					video_fps.add(fps);
+					video_fps_high_speed.add(true);
+				}
+				else if( this.preview.getVideoQualityHander().videoSupportsFrameRate(fps) ) {
+					video_fps.add(fps);
+					video_fps_high_speed.add(false);
 				}
 			}
 			int [] video_fps_array = new int[video_fps.size()];
-			int i=0;
-			for(Integer fps : video_fps) {
-				video_fps_array[i++] = fps;
+			for(int i=0;i<video_fps.size();i++) {
+				video_fps_array[i] = video_fps.get(i);
 			}
 			bundle.putIntArray("video_fps", video_fps_array);
+			boolean [] video_fps_high_speed_array = new boolean[video_fps_high_speed.size()];
+			for(int i=0;i<video_fps_high_speed.size();i++) {
+				video_fps_high_speed_array[i] = video_fps_high_speed.get(i);
+			}
+			bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
 		}
 		else {
 			// with old API, we don't know what frame rates are supported, so we make it up and let the user try
 			// probably shouldn't allow 120fps, but we did in the past, and there may be some devices where this did work?
 			int [] video_fps = {15, 24, 25, 30, 60, 96, 100, 120};
 			bundle.putIntArray("video_fps", video_fps);
+			boolean [] video_fps_high_speed_array = new boolean[video_fps.length];
+			for(int i=0;i<video_fps.length;i++) {
+				video_fps_high_speed_array[i] = false; // no concept of high speed frame rates in old API
+			}
+			bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
 		}
 		
 		putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());

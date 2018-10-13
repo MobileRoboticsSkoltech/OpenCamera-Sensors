@@ -731,9 +731,9 @@
 	        android:persistent="false">
 
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
-	        <ListPreference 
+			<!-- title set programmatically -->
+	        <ListPreference
 	            android:key="preference_video_quality"
-	            android:title="@string/video_quality"
 	            android:summary="%s"
 	            />
 

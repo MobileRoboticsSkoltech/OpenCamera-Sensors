@@ -1028,10 +1028,13 @@ dual back-facing cameras - in some cases the extra camera isn't made available t
 possible for Open Camera to support them. Even where they are, since there is no current standard on what the extra
 cameras are used for, it can't do anything with them other than allowing you to switch between them.</p>
 
-<p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
-have for some reason not exposed this through the Android API to 3rd party camera apps. (In some cases the "Force 4K"
-option can make this work anyway, but it's unreliable - ultimately the fault is with the device manufacturer for not
-supporting third party camera applications.)</p>
+<p><b>Why doesn't Open Camera support the maximum video resolution on my device?</b> - If you have
+Settings/"Use Camera2 API" enabled, make sure that you're not in slow motion mode (see "Speed" under
+the popup menu), and you don't have a non-default frame rate set (under Settings/Video settings). If
+a high speed frame rate is in use, then this usually limits the maximum video resolution. If this
+isn't the case, then it may be that the device isn't exposing the highest video resolution to third
+party applications (e.g., this is common for 4K/UHD video resolutions on older devices, especially
+if Camera2 API isn't enabled).</p>
 
 <p><b>Why doesn't the FPS/bitrate setting for video work?</b> - These settings only give "recommendations" to the
 camera, and there is no guarantee that they will be met. For best chance of success, try with Settings/"Use Camera2 API"
