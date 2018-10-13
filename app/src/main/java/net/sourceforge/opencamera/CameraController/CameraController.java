@@ -135,7 +135,9 @@ public abstract class CameraController {
 		}
 	}
 
-    // Android docs and FindBugs recommend that Comparators also be Serializable
+	/* Sorts resolutions from highest to lowest, by area.
+	 * Android docs and FindBugs recommend that Comparators also be Serializable
+	 */
 	public static class SizeSorter implements Comparator<Size>, Serializable {
 		private static final long serialVersionUID = 5802214721073718212L;
 

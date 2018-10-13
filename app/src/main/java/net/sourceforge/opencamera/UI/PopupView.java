@@ -10,6 +10,7 @@ import net.sourceforge.opencamera.Preview.Preview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -301,8 +302,10 @@ public class PopupView extends LinearLayout {
 			if( !preview.isVideo() ) {
 				// only show photo resolutions in photo mode - even if photo snapshots whilst recording video is supported, the
 				// resolutions for that won't match what the user has requested for photo mode resolutions
-				final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes(true);
-				//picture_size_index = preview.getCurrentPictureSizeIndex();
+				final List<CameraController.Size> picture_sizes = new ArrayList<>(preview.getSupportedPictureSizes(true));
+				// take a copy so that we can reorder
+				// picture_sizes is sorted high to low, but we want to order low to high
+				Collections.reverse(picture_sizes);
 				picture_size_index = -1;
 				CameraController.Size current_picture_size = preview.getCurrentPictureSize();
 				final List<String> picture_size_strings = new ArrayList<>();
@@ -382,6 +385,11 @@ public class PopupView extends LinearLayout {
 					// fall back to unfiltered list
 					video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
 				}
+				// take a copy so that we can reorder
+				video_sizes = new ArrayList<>(video_sizes);
+				// video_sizes is sorted high to low, but we want to order low to high
+				Collections.reverse(video_sizes);
+
 				final List<String> video_sizes_f = video_sizes;
 				video_size_index = 0; // default to largest
 				for(int i=0;i<video_sizes.size();i++) {

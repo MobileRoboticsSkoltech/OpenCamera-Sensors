@@ -4,6 +4,7 @@ import net.sourceforge.opencamera.MyDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -331,6 +332,9 @@ public class CameraController1 extends CameraController {
 			// with CameraController1 anyway
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
+		// sizes are usually already sorted from high to low, but sort just in case
+		// note some devices do have sizes in a not fully sorted order (e.g., Nokia 8)
+		Collections.sort(camera_features.picture_sizes, new CameraController.SizeSorter());
 
         //camera_features.supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
         List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
@@ -364,6 +368,8 @@ public class CameraController1 extends CameraController {
 		for(Camera.Size camera_size : camera_video_sizes) {
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
+		// sizes are usually already sorted from high to low, but sort just in case
+		Collections.sort(camera_features.video_sizes, new CameraController.SizeSorter());
 
 		List<Camera.Size> camera_preview_sizes = parameters.getSupportedPreviewSizes();
 		camera_features.preview_sizes = new ArrayList<>();

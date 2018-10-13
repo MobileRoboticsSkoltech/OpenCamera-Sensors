@@ -1801,6 +1801,9 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
+		// sizes are usually already sorted from high to low, but sort just in case
+		// note some devices do have sizes in a not fully sorted order (e.g., Nokia 8)
+		Collections.sort(camera_features.picture_sizes, new CameraController.SizeSorter());
 		// test high resolution modes not supporting burst:
 		//camera_features.picture_sizes.get(0).supports_burst = false;
 
