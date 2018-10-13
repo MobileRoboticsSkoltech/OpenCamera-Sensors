@@ -4,4 +4,6 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- used for the on-screen icons, e.g., Settings etc -->
+	<dimen name="onscreen_button_size">60dp</dimen>
 </resources>

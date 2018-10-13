@@ -136,8 +136,8 @@
 
     <ImageButton
         android:id="@+id/gallery"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="8dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/gallery"
@@ -147,8 +147,8 @@
 
     <ImageButton
         android:id="@+id/settings"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/action_settings"
@@ -158,8 +158,8 @@
 
     <ImageButton
         android:id="@+id/popup"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/action_popup"
@@ -169,8 +169,8 @@
     
     <ImageButton
         android:id="@+id/exposure_lock"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure_lock"
@@ -180,8 +180,8 @@
 
     <ImageButton
         android:id="@+id/exposure"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure"
@@ -191,8 +191,8 @@
 
     <!--<ImageButton
         android:id="@+id/switch_video"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/switch_to_video"
@@ -202,8 +202,8 @@
 
     <!--<ImageButton
         android:id="@+id/switch_camera"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/switch_to_front_camera"
@@ -213,8 +213,8 @@
 
     <ImageButton
         android:id="@+id/audio_control"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/audio_control_start"
@@ -226,8 +226,8 @@
     <!-- should be at left-most -->
     <ImageButton
         android:id="@+id/trash"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/trash"
@@ -238,8 +238,8 @@
 
     <ImageButton
         android:id="@+id/share"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+		android:layout_width="@dimen/onscreen_button_size"
+		android:layout_height="@dimen/onscreen_button_size"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/share"

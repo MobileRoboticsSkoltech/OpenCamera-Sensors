@@ -51,6 +51,15 @@ public class PopupView extends LinearLayout {
 	public static final float ALPHA_BUTTON_SELECTED = 1.0f;
 	public static final float ALPHA_BUTTON = 0.6f; // 0.4f tends to be hard to see in bright light
 
+	private static final float button_text_size_dip = 12.0f;
+	private static final float title_text_size_dip = 17.0f;
+	private static final float standard_text_size_dip = 16.0f;
+	private static final float arrow_text_size_dip = 16.0f;
+	private static final float arrow_button_w_dp = 60.0f;
+	private static final float arrow_button_h_dp = 48.0f; // should be at least 48.0 (Google Play's prelaunch warnings)
+	private final int arrow_button_w;
+	private final int arrow_button_h;
+
 	private int total_width_dp;
 
 	private int picture_size_index = -1;
@@ -72,6 +81,10 @@ public class PopupView extends LinearLayout {
 		this.setOrientation(LinearLayout.VERTICAL);
 
 		final float scale = getResources().getDisplayMetrics().density;
+
+		arrow_button_w = (int) (arrow_button_w_dp * scale + 0.5f); // convert dps to pixels
+		arrow_button_h = (int) (arrow_button_h_dp * scale + 0.5f); // convert dps to pixels
+
 		total_width_dp = 280;
 		{
 			Activity activity = (Activity)this.getContext();
@@ -253,6 +266,7 @@ public class PopupView extends LinearLayout {
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
+				checkBox.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
         		checkBox.setTextColor(Color.WHITE);
 				{
 					// align the checkbox a bit better
@@ -1210,13 +1224,13 @@ public class PopupView extends LinearLayout {
         		}
         		else {
         			Button button = new Button(context);
-        			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
+        			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash! Also looks nicer anyway...
         			view = button;
 					buttons.add(view);
         			ll2.addView(view);
 
         			button.setText(button_string);
-        			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+        			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, button_text_size_dip);
         			button.setTextColor(Color.WHITE);
         			// need 0 padding so we have enough room to display text for ISO buttons, when there are 6 ISO settings
         			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
@@ -1229,7 +1243,7 @@ public class PopupView extends LinearLayout {
     			params.width = button_width;
     			// be careful of making the height too smaller, as harder to touch buttons; remember that this also affects the
 				// ISO buttons on exposure panel, and not just the main popup!
-    			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+    			params.height = (int) (55 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
     			view.setContentDescription(button_string);
@@ -1310,6 +1324,7 @@ public class PopupView extends LinearLayout {
 		text_view.setText(title + ":");
 		text_view.setTextColor(Color.WHITE);
 		text_view.setGravity(Gravity.CENTER);
+		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
 		text_view.setTypeface(null, Typeface.BOLD);
 		//text_view.setBackgroundColor(Color.GRAY); // debug
     	this.addView(text_view);
@@ -1353,10 +1368,11 @@ public class PopupView extends LinearLayout {
 			final MainActivity main_activity = (MainActivity)this.getContext();
 	    	final long debug_time = System.nanoTime();
 
-    		//addTitleToPopup(title);
 			final Button button = new Button(this.getContext());
 			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			button.setText(title + "...");
+			button.setAllCaps(false);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
 			this.addView(button);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
@@ -1451,6 +1467,7 @@ public class PopupView extends LinearLayout {
 			button.setId(count);
 
 			button.setText(supported_option_entry);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
 			button.setTextColor(Color.WHITE);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 3: " + (System.nanoTime() - debug_time));
@@ -1542,42 +1559,43 @@ public class PopupView extends LinearLayout {
 			LinearLayout ll2 = new LinearLayout(this.getContext());
             ll2.setOrientation(LinearLayout.HORIZONTAL);
             
-			final TextView resolution_text_view = new TextView(this.getContext());
-			setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, current_index);
-			resolution_text_view.setTextColor(Color.WHITE);
-			resolution_text_view.setGravity(Gravity.CENTER);
+			final TextView text_view = new TextView(this.getContext());
+			setArrayOptionsText(supported_options, title, text_view, title_in_options, title_in_options_first_only, current_index);
+			text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
+			text_view.setTextColor(Color.WHITE);
+			text_view.setGravity(Gravity.CENTER);
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-			resolution_text_view.setLayoutParams(params);
+			text_view.setLayoutParams(params);
 
 			final float scale = getResources().getDisplayMetrics().density;
 			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
-			final int button_w = (int) (60 * scale + 0.5f); // convert dps to pixels
-			final int button_h = (int) (30 * scale + 0.5f); // convert dps to pixels
 			final Button prev_button = new Button(this.getContext());
 			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			ll2.addView(prev_button);
 			prev_button.setText("<");
-			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, arrow_text_size_dip);
+			prev_button.setTypeface(null, Typeface.BOLD);
 			prev_button.setPadding(padding, padding, padding, padding);
 			ViewGroup.LayoutParams vg_params = prev_button.getLayoutParams();
-			vg_params.width = button_w;
-			vg_params.height = button_h;
+			vg_params.width = arrow_button_w;
+			vg_params.height = arrow_button_h;
 			prev_button.setLayoutParams(vg_params);
 			prev_button.setVisibility( (cyclic || current_index > 0) ? View.VISIBLE : View.INVISIBLE);
 			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_PREV", prev_button);
 
-        	ll2.addView(resolution_text_view);
-			main_activity.getMainUI().getTestUIButtonsMap().put(test_key, resolution_text_view);
+        	ll2.addView(text_view);
+			main_activity.getMainUI().getTestUIButtonsMap().put(test_key, text_view);
 
 			final Button next_button = new Button(this.getContext());
 			next_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			ll2.addView(next_button);
 			next_button.setText(">");
-			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, arrow_text_size_dip);
+			next_button.setTypeface(null, Typeface.BOLD);
 			next_button.setPadding(padding, padding, padding, padding);
 			vg_params = next_button.getLayoutParams();
-			vg_params.width = button_w;
-			vg_params.height = button_h;
+			vg_params.width = arrow_button_w;
+			vg_params.height = arrow_button_h;
 			next_button.setLayoutParams(vg_params);
 			next_button.setVisibility( (cyclic || current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
 			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_NEXT", next_button);
@@ -1587,7 +1605,7 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickPrev();
         			if( new_index != -1 ) {
-						setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, new_index);
+						setArrayOptionsText(supported_options, title, text_view, title_in_options, title_in_options_first_only, new_index);
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
@@ -1598,7 +1616,7 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickNext();
         			if( new_index != -1 ) {
-						setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, new_index);
+						setArrayOptionsText(supported_options, title, text_view, title_in_options, title_in_options_first_only, new_index);
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}

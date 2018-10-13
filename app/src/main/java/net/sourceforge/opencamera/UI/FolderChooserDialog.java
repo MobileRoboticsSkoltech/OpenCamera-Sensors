@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -286,6 +287,7 @@ public class FolderChooserDialog extends DialogFragment {
 		if( canWrite() ) {
 			final EditText edit_text = new EditText(getActivity());  
 			edit_text.setSingleLine();
+			edit_text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20.0f);
         	InputFilter filter = new NewFolderInputFilter();
         	edit_text.setFilters(new InputFilter[]{filter});         	
 
