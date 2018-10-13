@@ -1041,7 +1041,7 @@ public class HDRProcessor {
 		return cached_avg_sample_size;
 	}
 
-	public class AvgData {
+	public static class AvgData {
 		public Allocation allocation_out;
 		Bitmap bitmap_avg_align;
 		Allocation allocation_avg_align;
