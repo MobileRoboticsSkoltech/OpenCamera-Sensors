@@ -217,6 +217,12 @@ public class MainActivity extends Activity {
 		// determine whether we support Camera2 API
 		initCamera2Support();
 
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+			// no point having talkback care about this - and (hopefully) avoid Google Play pre-launch accessibility warnings
+			View container = findViewById(R.id.hide_container);
+			container.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+		}
+
 		// set up window flags for normal operation
         setWindowFlagsForCamera();
 		if( MyDebug.LOG )
@@ -741,15 +747,17 @@ public class MainActivity extends Activity {
 		editor.apply();
 	}
 
-	void launchOnlineHelp(String append) {
+	static String getOnlineHelpUrl(String append) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "launchOnlineHelp: " + append);
-		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/"+ append));
-		startActivity(browserIntent);
+			Log.d(TAG, "getOnlineHelpUrl: " + append);
+		return "https://opencamera.sourceforge.io/"+ append;
 	}
 
 	void launchOnlineHelp() {
-		launchOnlineHelp("");
+		if( MyDebug.LOG )
+			Log.d(TAG, "launchOnlineHelp");
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getOnlineHelpUrl("")));
+		startActivity(browserIntent);
 	}
 
 	/* Audio trigger - either loud sound, or speech recognition.

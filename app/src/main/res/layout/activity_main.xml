@@ -51,6 +51,7 @@
         android:visibility="gone"
         />
 
+    <!-- alpha of 0.5 flags up Google Play prelaunch warning about contrast ratio too low (2.92; should be at least 3)-->
     <ImageButton
         android:id="@+id/switch_video"
         android:layout_width="60dp"
@@ -59,7 +60,7 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/switch_to_video"
         android:src="@drawable/take_video"
-        android:alpha="0.5"
+        android:alpha="0.55"
         android:onClick="clickedSwitchVideo"
         android:layout_below="@+id/take_photo"
         android:background="@null"

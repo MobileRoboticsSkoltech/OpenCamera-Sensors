@@ -288,6 +288,7 @@ public class FolderChooserDialog extends DialogFragment {
 			final EditText edit_text = new EditText(getActivity());  
 			edit_text.setSingleLine();
 			edit_text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20.0f);
+			edit_text.setContentDescription(getResources().getString(R.string.enter_new_folder));
         	InputFilter filter = new NewFolderInputFilter();
         	edit_text.setFilters(new InputFilter[]{filter});         	
 

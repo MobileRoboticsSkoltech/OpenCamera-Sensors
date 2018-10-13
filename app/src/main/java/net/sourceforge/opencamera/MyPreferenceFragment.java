@@ -37,6 +37,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -1097,24 +1098,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		}
 
                 		SpannableString span = new SpannableString(about_string);
-					    span.setSpan(new ClickableSpan() {
-					        @Override
-        					public void onClick(View v) {
-                        		if( MyDebug.LOG )
-	            					Log.d(TAG, "gpl link clicked");
-								Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.gnu.org/copyleft/gpl.html"));
-								startActivity(browserIntent);
-					        }
-						}, about_string.indexOf(gpl_link), about_string.indexOf(gpl_link) + gpl_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-					    span.setSpan(new ClickableSpan() {
-					        @Override
-        					public void onClick(View v) {
-                        		if( MyDebug.LOG )
-	            					Log.d(TAG, "online help link clicked for licence");
-								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-								main_activity.launchOnlineHelp("#licence");
-					        }
-						}, about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                		// Google Play prelaunch accessibility warnings suggest using URLSpan instead of ClickableSpan
+                		span.setSpan(new URLSpan("http://www.gnu.org/copyleft/gpl.html"), about_string.indexOf(gpl_link), about_string.indexOf(gpl_link) + gpl_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                		span.setSpan(new URLSpan(MainActivity.getOnlineHelpUrl("#licence")), about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
 					    // clickable text is only supported if we call setMovementMethod on the TextView - which means we need to create
 						// our own for the AlertDialog!
