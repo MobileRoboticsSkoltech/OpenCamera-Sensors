@@ -85,26 +85,12 @@ public class PopupView extends LinearLayout {
 		arrow_button_w = (int) (arrow_button_w_dp * scale + 0.5f); // convert dps to pixels
 		arrow_button_h = (int) (arrow_button_h_dp * scale + 0.5f); // convert dps to pixels
 
-		total_width_dp = 280;
-		{
-			Activity activity = (Activity)this.getContext();
-			Display display = activity.getWindowManager().getDefaultDisplay();
-			// ensure we have display for landscape orientation (even if we ever allow Open Camera
-			DisplayMetrics outMetrics = new DisplayMetrics();
-			display.getMetrics(outMetrics);
+		final MainActivity main_activity = (MainActivity)this.getContext();
 
-			// normally we should always have heightPixels < widthPixels, but good not to assume we're running in landscape orientation
-			int smaller_dim = Math.min(outMetrics.widthPixels, outMetrics.heightPixels);
-			// the smaller dimension should limit the width, due to when held in portrait
-			int dpHeight = (int)(smaller_dim / scale);
-			if( MyDebug.LOG ) {
-    			Log.d(TAG, "display size: " + outMetrics.widthPixels + " x " + outMetrics.heightPixels);
-				Log.d(TAG, "dpHeight: " + dpHeight);
-			}
-			dpHeight -= 50; // allow space for the icons at top/right of screen
-			if( total_width_dp > dpHeight )
-				total_width_dp = dpHeight;
-		}
+		total_width_dp = 280;
+		int max_width_dp = main_activity.getMainUI().getMaxHeightDp(false);
+		if( total_width_dp > max_width_dp )
+			total_width_dp = max_width_dp;
 		if( MyDebug.LOG )
 			Log.d(TAG, "total_width_dp: " + total_width_dp);
 
@@ -118,7 +104,6 @@ public class PopupView extends LinearLayout {
 			this.setLayoutParams(params);
 		}*/
 
-		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
 		if( MyDebug.LOG )
 			Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));

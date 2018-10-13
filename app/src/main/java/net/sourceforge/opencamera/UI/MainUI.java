@@ -7,6 +7,7 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.R;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +17,9 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -414,7 +417,13 @@ public class MainUI {
 			}
 			else {
 				width_dp = 250;
+				// prevent being too large on smaller devices (e.g., Galaxy Nexus or smaller)
+				int max_width_dp = getMaxHeightDp(true);
+				if( width_dp > max_width_dp )
+					width_dp = max_width_dp;
 			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "width_dp: " + width_dp);
 			int height_dp = 50;
 			final float scale = main_activity.getResources().getDisplayMetrics().density;
 			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
@@ -796,6 +805,31 @@ public class MainUI {
 		}
     }
 
+	/** Returns the height of the device in dp (or width in portrait mode), allowing for space for the
+	 *  on-screen UI icons.
+	 * @param centred If true, then find the max height for a view that will be centred.
+	 */
+	int getMaxHeightDp(boolean centred) {
+		Display display = main_activity.getWindowManager().getDefaultDisplay();
+		// ensure we have display for landscape orientation (even if we ever allow Open Camera
+		DisplayMetrics outMetrics = new DisplayMetrics();
+		display.getMetrics(outMetrics);
+
+		// normally we should always have heightPixels < widthPixels, but good not to assume we're running in landscape orientation
+		int smaller_dim = Math.min(outMetrics.widthPixels, outMetrics.heightPixels);
+		// the smaller dimension should limit the width, due to when held in portrait
+		final float scale = main_activity.getResources().getDisplayMetrics().density;
+		int dpHeight = (int)(smaller_dim / scale);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "display size: " + outMetrics.widthPixels + " x " + outMetrics.heightPixels);
+			Log.d(TAG, "dpHeight: " + dpHeight);
+		}
+		// allow space for the icons at top/right of screen
+		int margin = centred ? 120 : 50;
+		dpHeight -= margin;
+		return dpHeight;
+	}
+
     private List<View> iso_buttons;
 	private int iso_button_manual_index = -1;
 	private final static String manual_iso_value = "m";
@@ -838,8 +872,17 @@ public class MainUI {
 		// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
 		if( !current_iso.equals(CameraController.ISO_DEFAULT) && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
 			current_iso = manual_iso_value;
+
+
+		int total_width_dp = 280;
+		int max_width_dp = getMaxHeightDp(true);
+		if( total_width_dp > max_width_dp )
+			total_width_dp = max_width_dp;
+		if( MyDebug.LOG )
+			Log.d(TAG, "total_width_dp: " + total_width_dp);
+
 		// n.b., we hardcode the string "ISO" as this isn't a user displayed string, rather it's used to filter out "ISO" included in old Camera API parameters
-		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, 280, test_ui_buttons, supported_isos, -1, -1, "ISO", false, current_iso, 0, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
+		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, total_width_dp, test_ui_buttons, supported_isos, -1, -1, "ISO", false, current_iso, 0, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
 			@Override
 			public void onClick(String option) {
 				if( MyDebug.LOG )
