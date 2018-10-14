@@ -386,12 +386,19 @@ public class StorageUtils {
 					file = new File(filename);
                 }
                 else {
-					final Uri contentUri = ContentUris.withAppendedId(
-							Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
+					try {
+						final Uri contentUri = ContentUris.withAppendedId(
+								Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
 
-					String filename = getDataColumn(contentUri, null, null);
-					if( filename != null )
-						file = new File(filename);
+						String filename = getDataColumn(contentUri, null, null);
+						if( filename != null )
+							file = new File(filename);
+					}
+					catch(NumberFormatException e) {
+						// have had crashes from Google Play from Long.parseLong(id)
+						Log.e(TAG,"failed to parse id: " + id);
+						e.printStackTrace();
+					}
 				}
 			}
 			else {
@@ -455,6 +462,9 @@ public class StorageUtils {
 				final int column_index = cursor.getColumnIndexOrThrow(column);
 				return cursor.getString(column_index);
 			}
+		}
+		catch(IllegalArgumentException e) {
+			e.printStackTrace();
 		}
 		finally {
 			if (cursor != null)
