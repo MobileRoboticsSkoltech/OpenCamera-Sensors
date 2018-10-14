@@ -295,7 +295,15 @@ public class CameraController1 extends CameraController {
 	public CameraFeatures getCameraFeatures() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
-	    Camera.Parameters parameters = this.getParameters();
+	    Camera.Parameters parameters;
+	    try {
+			parameters = this.getParameters();
+		}
+		catch(RuntimeException e) {
+			Log.e(TAG, "failed to get camera parameters");
+	    	e.printStackTrace();
+	    	throw new CameraControllerException();
+		}
 	    CameraFeatures camera_features = new CameraFeatures();
 		camera_features.is_zoom_supported = parameters.isZoomSupported();
 		if( camera_features.is_zoom_supported ) {

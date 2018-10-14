@@ -3639,24 +3639,30 @@ public class MainActivity extends Activity {
 				simple = false;
 			}
 		}
-		String scene_mode = camera_controller.getSceneMode();
-    	if( scene_mode != null && !scene_mode.equals(CameraController.SCENE_MODE_DEFAULT) ) {
-    		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + mainUI.getEntryForSceneMode(scene_mode);
-			simple = false;
-    	}
-		String white_balance = camera_controller.getWhiteBalance();
-    	if( white_balance != null && !white_balance.equals(CameraController.WHITE_BALANCE_DEFAULT) ) {
-    		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + mainUI.getEntryForWhiteBalance(white_balance);
-			if( white_balance.equals("manual") && preview.supportsWhiteBalanceTemperature() ) {
-				toast_string += " " + camera_controller.getWhiteBalanceTemperature();
+		try {
+			String scene_mode = camera_controller.getSceneMode();
+			String white_balance = camera_controller.getWhiteBalance();
+			String color_effect = camera_controller.getColorEffect();
+			if( scene_mode != null && !scene_mode.equals(CameraController.SCENE_MODE_DEFAULT) ) {
+				toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + mainUI.getEntryForSceneMode(scene_mode);
+				simple = false;
 			}
-			simple = false;
-    	}
-		String color_effect = camera_controller.getColorEffect();
-    	if( color_effect != null && !color_effect.equals(CameraController.COLOR_EFFECT_DEFAULT) ) {
-    		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + mainUI.getEntryForColorEffect(color_effect);
-			simple = false;
-    	}
+			if( white_balance != null && !white_balance.equals(CameraController.WHITE_BALANCE_DEFAULT) ) {
+				toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + mainUI.getEntryForWhiteBalance(white_balance);
+				if( white_balance.equals("manual") && preview.supportsWhiteBalanceTemperature() ) {
+					toast_string += " " + camera_controller.getWhiteBalanceTemperature();
+				}
+				simple = false;
+			}
+			if( color_effect != null && !color_effect.equals(CameraController.COLOR_EFFECT_DEFAULT) ) {
+				toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + mainUI.getEntryForColorEffect(color_effect);
+				simple = false;
+			}
+		}
+		catch(RuntimeException e) {
+			// catch runtime error from camera_controller old API from camera.getParameters()
+			e.printStackTrace();
+		}
 		String lock_orientation = applicationInterface.getLockOrientationPref();
 		if( !lock_orientation.equals("none") ) {
 			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
