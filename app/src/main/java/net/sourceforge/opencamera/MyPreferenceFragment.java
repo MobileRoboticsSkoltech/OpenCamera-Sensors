@@ -1306,13 +1306,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				Log.d(TAG, "dismiss dialog: " + dialog);
 			dialog.dismiss();
 		}
-		// similarly dimissed any dialog fragments still opened
+		// similarly dimiss any dialog fragments still opened
 	    Fragment folder_fragment = getFragmentManager().findFragmentByTag("FOLDER_FRAGMENT");
     	if( folder_fragment != null ) {
 	        DialogFragment dialogFragment = (DialogFragment)folder_fragment;
 			if( MyDebug.LOG )
 				Log.d(TAG, "dismiss dialogFragment: " + dialogFragment);
-	        dialogFragment.dismiss();
+	        dialogFragment.dismissAllowingStateLoss();
     	}
 	}
 
