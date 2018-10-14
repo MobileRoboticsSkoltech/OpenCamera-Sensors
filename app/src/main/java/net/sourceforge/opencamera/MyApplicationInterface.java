@@ -568,6 +568,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			rates.add(20.0f);
 			rates.add(30.0f);
 			rates.add(60.0f);
+			rates.add(120.0f);
+			rates.add(240.0f);
 		}
 		return rates;
 	}
