@@ -148,7 +148,7 @@
     <string name="preference_keep_display_on">Manter a tela ligada</string>
     <string name="preference_keep_display_on_summary">Se habilitada, a tela não desligará enquanto a IU do Open Camera estiver aberta</string>
     <string name="preference_max_brightness">Forçar brilho máximo</string>
-    <string name="preference_max_brightness_summary">Força a exibição da tela a ser em brilho máximo, em vez no padrão do dispositivo</string>
+    <string name="preference_max_brightness_summary">Força a exibição da tela a ser em brilho máximo, em vez de no padrão do dispositivo</string>
 	
     <string name="preference_category_camera_quality">Configurações de Foto e Vídeo</string>
     <string name="preference_screen_photo_settings">Configurações de Foto</string>
@@ -159,8 +159,8 @@
     <string name="preference_quality_summary">Defina a qualidade da imagem das fotos salvas (90%% é recomendado)\n%s</string>
     <string name="preference_location">Geotag</string>
     <string name="preference_location_summary">Armazena a localização de GPS no arquivo de fotos/vídeos</string>
-    <string name="preference_gps_direction">Salvar direções de compasso</string>
-    <string name="preference_gps_direction_summary">Salva direções de compasso em fotos</string>
+    <string name="preference_gps_direction">Salvar direções da bússola</string>
+    <string name="preference_gps_direction_summary">Salva direções da bússola em fotos</string>
     <string name="preference_require_location">Somente com Geotag</string>
     <string name="preference_require_location_summary">Se o Geotag estiver habilitado, só capturará fotos/vídeos se o GPS estiver disponível</string>
     <string name="preference_stamp">Marca d\'água</string>
