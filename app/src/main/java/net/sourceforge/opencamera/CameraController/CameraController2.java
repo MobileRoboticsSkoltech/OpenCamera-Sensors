@@ -101,6 +101,9 @@ public class CameraController2 extends CameraController {
 	// for BURSTTYPE_NORMAL:
 	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for Open Camera's noise reduction (NR) photo mode
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
+	//for BURSTTYPE_CONTINUOUS:
+	private boolean continuous_burst_in_progress; // whether we're currently taking a continuous burst
+	private boolean continuous_burst_requested_last_capture; // whether we've requested the last capture
 
 	private boolean optimise_ae_for_dro = false;
 	private boolean want_raw;
@@ -180,7 +183,7 @@ public class CameraController2 extends CameraController {
 	private float capture_result_focus_distance_max;*/
 	
 	private enum RequestTag {
-		CAPTURE
+		CAPTURE // request is either for a regular non-burst capture, or the last of a burst capture
 	}
 
 	private final static int min_white_balance_temperature_c = 1000;
@@ -913,8 +916,11 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new still image available");
 			if( jpeg_cb == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "no picture callback available");
+				// in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
+				// or strange behaviour where an old image appears when the user next takes a photo
+				Log.e(TAG, "no picture callback available");
+				Image image = reader.acquireNextImage();
+				image.close();
 				return;
 			}
 			synchronized( image_reader_lock ) {
@@ -1058,7 +1064,14 @@ public class CameraController2 extends CameraController {
 					n_burst--;
 					if( MyDebug.LOG )
 						Log.d(TAG, "n_burst is now " + n_burst);
-					if( n_burst == 0 ) {
+					if( burst_type == BurstType.BURSTTYPE_CONTINUOUS && !continuous_burst_requested_last_capture ) {
+						// even if n_burst is 0, we don't want to give up if we're still in continuous burst mode
+						// also note if we do have continuous_burst_requested_last_capture==true, we still check for
+						// n_burst==0 below (as there may have been more than one image still to be received)
+						if( MyDebug.LOG )
+							Log.d(TAG, "continuous burst mode still in progress");
+					}
+					else if( n_burst == 0 ) {
 						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
 						PictureCallback cb = jpeg_cb;
 						jpeg_cb = null;
@@ -1171,8 +1184,11 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new still raw image available");
 			if( raw_cb == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "no picture callback available");
+				// in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
+				// or strange behaviour where an old image appears when the user next takes a photo
+				Log.e(TAG, "no picture callback available");
+				Image this_image = reader.acquireNextImage();
+				this_image.close();
 				return;
 			}
 			synchronized( image_reader_lock ) {
@@ -3043,16 +3059,21 @@ public class CameraController2 extends CameraController {
 		if( this.burst_type == burst_type ) {
 			return;
 		}
-		if( captureSession != null ) {
+		/*if( captureSession != null ) {
 			// can only call this when captureSession not created - as it affects how we create the imageReader
 			if( MyDebug.LOG )
 				Log.e(TAG, "can't set burst type when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
-		}
+		}*/
 		this.burst_type = burst_type;
 		updateUseFakePrecaptureMode(camera_settings.flash_value);
 		camera_settings.setAEMode(previewBuilder, false); // may need to set the ae mode, as flash is disabled for burst modes
 	}
+
+	@Override
+	public BurstType getBurstType() {
+	    return burst_type;
+    }
 
 	@Override
 	public void setExpoBracketingNImages(int n_images) {
@@ -3095,6 +3116,7 @@ public class CameraController2 extends CameraController {
 		// not supported for CameraController1
 		return this.burst_type != BurstType.BURSTTYPE_NONE;
 	}
+
 	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		if( MyDebug.LOG )
@@ -3124,6 +3146,18 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setBurstForNoiseReduction: " + burst_for_noise_reduction);
 		this.burst_for_noise_reduction = burst_for_noise_reduction;
+	}
+
+	@Override
+	public boolean isContinuousBurstInProgress() {
+		return continuous_burst_in_progress;
+	}
+
+	@Override
+	public void stopContinuousBurst() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "stopContinuousBurst");
+		continuous_burst_in_progress = false;
 	}
 
 	@Override
@@ -4747,8 +4781,8 @@ public class CameraController2 extends CameraController {
 				takePictureBurstBracketing();
 				return;
 			}
-			else if( burst_type == BurstType.BURSTTYPE_NORMAL ) {
-				takePictureBurst();
+			else if( burst_type == BurstType.BURSTTYPE_NORMAL || burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
+				takePictureBurst(false);
 				return;
 			}
 		}
@@ -5170,10 +5204,10 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
-	private void takePictureBurst() {
+	private void takePictureBurst(boolean continuing_fast_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurst");
-		if( burst_type != BurstType.BURSTTYPE_NORMAL ) {
+		if( burst_type != BurstType.BURSTTYPE_NORMAL && burst_type != BurstType.BURSTTYPE_CONTINUOUS ) {
 			Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
         }
 		if( camera == null || captureSession == null ) {
@@ -5200,7 +5234,7 @@ public class CameraController2 extends CameraController {
 				test_fake_flash_photo++;
 			}
 
-			if( burst_for_noise_reduction ) {
+			if( burst_type == BurstType.BURSTTYPE_NORMAL && burst_for_noise_reduction ) {
 				// must be done after calling setupBuilder(), so we override the default EDGE_MODE and NOISE_REDUCTION_MODE
 				if( MyDebug.LOG )
 					Log.d(TAG, "optimise settings for burst_for_noise_reduction");
@@ -5209,7 +5243,9 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
 			}
 
-			clearPending();
+			if( !continuing_fast_burst ) {
+				clearPending();
+			}
 			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
@@ -5221,7 +5257,26 @@ public class CameraController2 extends CameraController {
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
-			if( burst_for_noise_reduction ) {
+            if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "continuous burst mode");
+				if( continuing_fast_burst ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "continuing fast burst");
+					n_burst++;
+                    /*if( !continuous_burst_in_progress ) // test bug where we call callback onCompleted() before all burst images are received
+                    	n_burst = 1;*/
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "start continuous burst");
+					continuous_burst_in_progress = true;
+					n_burst = 1;
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "n_burst is now " + n_burst);
+            }
+			else if( burst_for_noise_reduction ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "choose n_burst for burst_for_noise_reduction");
 				n_burst = 4;
@@ -5297,7 +5352,33 @@ public class CameraController2 extends CameraController {
 			final boolean use_burst = true;
 			//final boolean use_burst = false;
 
-			if( use_burst ) {
+            if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
+				if( MyDebug.LOG ) {
+                    Log.d(TAG, "continuous capture");
+                    if( !continuous_burst_in_progress )
+                        Log.d(TAG, "    last continuous capture");
+                }
+                continuous_burst_requested_last_capture = !continuous_burst_in_progress;
+				captureSession.capture(continuous_burst_in_progress ? request : last_request, previewCaptureCallback, handler);
+
+				if( continuous_burst_in_progress ) {
+					// also take the next burst after a delay
+					handler.postDelayed(new Runnable(){
+						@Override
+						public void run() {
+							// note, even if continuous_burst_in_progress has become false by this point, still take one last
+							// photo, as need to ensure that we have a request with RequestTag.CAPTURE, as well as ensuring
+							// we call the onCompleted() method of the callback
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "take next continuous burst");
+								Log.d(TAG, "continuous_burst_in_progress: " + continuous_burst_in_progress);
+							}
+							takePictureBurst(true);
+					   }
+					}, 100);
+				}
+            }
+			else if( use_burst ) {
 				List<CaptureRequest> requests = new ArrayList<>();
 				for(int i=0;i<n_burst-1;i++)
 					requests.add(request);
@@ -5347,7 +5428,7 @@ public class CameraController2 extends CameraController {
 				}.run();
 			}
 
-			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+			if( sounds_enabled && !continuing_fast_burst ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 		}
 		catch(CameraAccessException e) {

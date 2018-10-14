@@ -1323,7 +1323,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "TargetCallback.onAchieved");
 				clearPanoramaPoint();
-				main_activity.takePicturePressed(false);
+				main_activity.takePicturePressed(false, false);
 			}
 		});
 		drawPreview.setGyroDirectionMarker(x, y, z);

@@ -772,12 +772,28 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public BurstType getBurstType() {
+	    return want_expo_bracketing ? BurstType.BURSTTYPE_EXPO : BurstType.BURSTTYPE_NONE;
+    }
+
+	@Override
 	public void setBurstNImages(int burst_requested_n_images) {
 		// not supported
 	}
 
 	@Override
 	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
+		// not supported
+	}
+
+	@Override
+	public boolean isContinuousBurstInProgress() {
+		// not supported
+		return false;
+	}
+
+	@Override
+	public void stopContinuousBurst() {
 		// not supported
 	}
 

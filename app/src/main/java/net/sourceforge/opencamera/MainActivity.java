@@ -310,6 +310,29 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting orientation event listener: " + (System.currentTimeMillis() - debug_time));
 
+		// set up take photo long click
+        takePhotoButton.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				longClickedTakePhoto();
+				return true;
+			}
+        });
+        // set up on touch listener so we can detect if we've released frm a long click
+        takePhotoButton.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent motionEvent) {
+				if( motionEvent.getAction() == MotionEvent.ACTION_UP ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "takePhotoButton ACTION_UP");
+					if( preview.getCameraController() != null && preview.getCameraController().isContinuousBurstInProgress() ) {
+						preview.getCameraController().stopContinuousBurst();
+					}
+				}
+				return false;
+			}
+		});
+
 		// set up gallery button long click
         View galleryButton = findViewById(R.id.gallery);
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
@@ -321,7 +344,7 @@ public class MainActivity extends Activity {
 			}
         });
 		if( MyDebug.LOG )
-			Log.d(TAG, "onCreate: time after setting gallery long click listener: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "onCreate: time after setting long click listeners: " + (System.currentTimeMillis() - debug_time));
 
 		// listen for gestures
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -1126,7 +1149,16 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "waitUntilImageQueueEmpty");
         applicationInterface.getImageSaver().waitUntilDone();
     }
-    
+
+    public void longClickedTakePhoto() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "longClickedTakePhoto");
+		MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
+		if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
+			this.takePicturePressed(false, true);
+		}
+	}
+
     public void clickedTakePhoto(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTakePhoto");
@@ -2841,15 +2873,16 @@ public class MainActivity extends Activity {
 			}
 		}
 
-		this.takePicturePressed(photo_snapshot);
+		this.takePicturePressed(photo_snapshot, false);
     }
 
 	/**
 	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
 	 *                       recording. If false, either take a photo or start/stop video depending
 	 *                       on the current mode.
+	 * @param continuous_fast_burst If true, then start a continuous fast burst.
 	 */
-	void takePicturePressed(boolean photo_snapshot) {
+	void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
 
@@ -2861,7 +2894,7 @@ public class MainActivity extends Activity {
 			applicationInterface.setNextPanoramaPoint();
 		}
 
-    	this.preview.takePicturePressed(photo_snapshot);
+    	this.preview.takePicturePressed(photo_snapshot, continuous_fast_burst);
 	}
     
     /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,

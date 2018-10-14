@@ -594,7 +594,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "touch to capture");
 			// interpret as if user had clicked take photo/video button, except that we set the focus/metering areas
-	    	this.takePicturePressed(false);
+	    	this.takePicturePressed(false, false);
 	    	return true;
 		}
 
@@ -623,7 +623,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "double-tap to capture");
 			// interpret as if user had clicked take photo/video button (don't need to set focus/metering, as this was done in touchEvent() for the first touch of the double-tap)
-	    	takePicturePressed(false);
+	    	takePicturePressed(false, false);
 		}
 		return true;
 	}
@@ -968,7 +968,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					String toast = null;
 					if( !due_to_max_filesize )
 						toast = remaining_restart_video + " " + getContext().getResources().getString(R.string.repeats_to_go);
-					takePicture(due_to_max_filesize, false);
+					takePicture(due_to_max_filesize, false, false);
 					if( !due_to_max_filesize ) {
 						showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to start up
 						// must decrement after calling takePicture(), so that takePicture() doesn't reset the value of remaining_restart_video
@@ -1752,36 +1752,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setRaw(false, 0);
 		}
 
-		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
-			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_EXPO);
-			camera_controller.setExpoBracketingNImages( applicationInterface.getExpoBracketingNImagesPref() );
-			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
-			// setUseExpoFastBurst called when taking a photo
-		}
-		else if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() ) {
-			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_FOCUS);
-			camera_controller.setFocusBracketingNImages( applicationInterface.getFocusBracketingNImagesPref() );
-			camera_controller.setFocusBracketingAddInfinity( applicationInterface.getFocusBracketingAddInfinityPref() );
-		}
-		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
-			if( applicationInterface.getBurstForNoiseReduction() ) {
-				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
-					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
-					camera_controller.setBurstForNoiseReduction(true);
-				}
-				else {
-					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
-				}
-			}
-			else {
-				camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
-				camera_controller.setBurstForNoiseReduction(false);
-				camera_controller.setBurstNImages(applicationInterface.getBurstNImages());
-			}
-		}
-		else {
-			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
-		}
+		setupBurstMode();
 
 		if( camera_controller.isBurstOrExpo() ) {
 			// check photo resolution supports burst
@@ -1870,7 +1841,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				public void run() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "do automatic take picture");
-					takePicture(false, false);
+					takePicture(false, false, false);
 				}
 			}, delay);
 		}
@@ -1889,6 +1860,41 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	    if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCamera: total time after setupCamera: " + (System.currentTimeMillis() - debug_time));
+		}
+	}
+
+	private void setupBurstMode() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupBurstMode()");
+		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_EXPO);
+			camera_controller.setExpoBracketingNImages( applicationInterface.getExpoBracketingNImagesPref() );
+			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
+			// setUseExpoFastBurst called when taking a photo
+		}
+		else if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() ) {
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_FOCUS);
+			camera_controller.setFocusBracketingNImages( applicationInterface.getFocusBracketingNImagesPref() );
+			camera_controller.setFocusBracketingAddInfinity( applicationInterface.getFocusBracketingAddInfinityPref() );
+		}
+		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
+			if( applicationInterface.getBurstForNoiseReduction() ) {
+				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
+					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
+					camera_controller.setBurstForNoiseReduction(true);
+				}
+				else {
+					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
+				}
+			}
+			else {
+				camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
+				camera_controller.setBurstForNoiseReduction(false);
+				camera_controller.setBurstNImages(applicationInterface.getBurstNImages());
+			}
+		}
+		else {
+			camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
 		}
 	}
 
@@ -4569,8 +4575,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
 	 *                       recording. If false, either take a photo or start/stop video depending
 	 *                       on the current mode.
+	 * @param continuous_fast_burst If true, then start a continuous fast burst.
 	 */
-	public void takePicturePressed(boolean photo_snapshot) {
+	public void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
 		if( camera_controller == null ) {
@@ -4582,6 +4589,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
+			this.phase = PHASE_NORMAL;
+			return;
+		}
+		if( is_video && continuous_fast_burst ) {
+			Log.e(TAG, "continuous_fast_burst not supported for video mode");
 			this.phase = PHASE_NORMAL;
 			return;
 		}
@@ -4630,9 +4642,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	// make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
 
-		if( photo_snapshot ) {
+		if( photo_snapshot || continuous_fast_burst ) {
 			// go straight to taking a photo, ignore timer or repeat options
-			takePicture(false, photo_snapshot);
+			takePicture(false, photo_snapshot, continuous_fast_burst);
 			return;
 		}
 
@@ -4661,7 +4673,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		if( timer_delay == 0 ) {
-			takePicture(false, photo_snapshot);
+			takePicture(false, photo_snapshot, continuous_fast_burst);
 		}
 		else {
 			takePictureOnTimer(timer_delay, false);
@@ -4688,7 +4700,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						// we run on main thread to avoid problem of camera closing at the same time
 						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
 						if( camera_controller != null && takePictureTimerTask != null )
-							takePicture(false, false);
+							takePicture(false, false, false);
 						else {
 							if( MyDebug.LOG )
 								Log.d(TAG, "takePictureTimerTask: don't take picture, as already cancelled");
@@ -4869,8 +4881,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
 	 *                       recording. If false, either take a photo or start/stop video depending
 	 *                       on the current mode.
+	 * @param continuous_fast_burst If true, then start a continuous fast burst.
 	 */
-	private void takePicture(boolean max_filesize_restart, boolean photo_snapshot) {
+	private void takePicture(boolean max_filesize_restart, boolean photo_snapshot, boolean continuous_fast_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		//this.thumbnail_anim = false;
@@ -4931,7 +4944,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	return;
 		}
 
-		takePhoto(false);
+		takePhoto(false, continuous_fast_burst);
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
 	}
@@ -5372,7 +5385,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	/** Take photo. The caller should aready have set the phase to PHASE_TAKING_PHOTO.
 	 */
-	private void takePhoto(boolean skip_autofocus) {
+	private void takePhoto(boolean skip_autofocus, final boolean continuous_fast_burst) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
 		if( camera_controller == null ) {
@@ -5399,7 +5412,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// when autofocus_in_continuous_mode==true, it means the user recently touched to focus in continuous focus mode, so don't do another focus
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus_in_continuous_mode: no need to refocus");
-					takePhotoWhenFocused();
+					takePhotoWhenFocused(continuous_fast_burst);
 				}
 			}
 		}
@@ -5414,7 +5427,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				public void onAutoFocus(boolean success) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "continuous mode autofocus complete: " + success);
-					takePhotoWhenFocused();
+					takePhotoWhenFocused(continuous_fast_burst);
 				}
 	        };
 			camera_controller.autoFocus(autoFocusCallback, true);
@@ -5428,7 +5441,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "recently focused successfully, so no need to refocus");
 				}
 			}
-			takePhotoWhenFocused();
+			takePhotoWhenFocused(continuous_fast_burst);
 		}
 		else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
 			// n.b., we check focus_value rather than camera_controller.supportsAutoFocus(), as we want to discount focus_mode_locked
@@ -5450,7 +5463,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 								Log.d(TAG, "autofocus complete: " + success);
 							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
 							prepareAutoFocusPhoto();
-							takePhotoWhenFocused();
+							takePhotoWhenFocused(continuous_fast_burst);
 						}
 			        };
 					if( MyDebug.LOG )
@@ -5461,7 +5474,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		else {
-			takePhotoWhenFocused();
+			takePhotoWhenFocused(continuous_fast_burst);
 		}
 	}
 	
@@ -5496,7 +5509,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 *  Note that even if a caller wants to take a photo without focusing, you probably want to call takePhoto() with skip_autofocus
 	 *  set to true (so that things work okay in continuous picture focus mode).
 	 */
-	private void takePhotoWhenFocused() {
+	private void takePhotoWhenFocused(boolean continuous_fast_burst) {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhotoWhenFocused");
@@ -5599,6 +5612,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				camera_controller.cancelAutoFocus(); // needed to restart continuous focusing
     			}
 
+    			if( camera_controller != null && camera_controller.getBurstType() == CameraController.BurstType.BURSTTYPE_CONTINUOUS ) {
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "continuous burst mode ended, so revert to standard mode");
+					setupBurstMode();
+				}
+
     			if( MyDebug.LOG )
     				Log.d(TAG, "do we need to take another photo? remaining_repeat_photos: " + remaining_repeat_photos);
 				if( remaining_repeat_photos == -1 || remaining_repeat_photos > 0 ) {
@@ -5689,6 +5708,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "use_camera2_fast_burst? " + use_camera2_fast_burst);
 				camera_controller.setUseExpoFastBurst( use_camera2_fast_burst );
 			}
+			if( continuous_fast_burst ) {
+				camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_CONTINUOUS);
+			}
+
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
 			camera_controller.takePicture(pictureCallback, errorCallback);
@@ -5732,7 +5755,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
 					// need to manually set the phase
 					phase = PHASE_TAKING_PHOTO;
-					takePhoto(true);
+					takePhoto(true, false);
 				}
 				else {
 					takePictureOnTimer(timer_delay, true);
@@ -5937,7 +5960,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "take_photo_after_autofocus is set");
 				take_photo_after_autofocus = false;
 				prepareAutoFocusPhoto();
-				takePhotoWhenFocused();
+				takePhotoWhenFocused(false);
 			}
 		}
 		if( MyDebug.LOG )

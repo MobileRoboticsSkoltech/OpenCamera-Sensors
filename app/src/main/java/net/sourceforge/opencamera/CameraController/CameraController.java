@@ -348,9 +348,11 @@ public abstract class CameraController {
 		BURSTTYPE_NONE, // no burst
 		BURSTTYPE_EXPO, // enable expo bracketing mode
 		BURSTTYPE_FOCUS, // enable focus bracketing mode;
-		BURSTTYPE_NORMAL // take a regular burst
+		BURSTTYPE_NORMAL, // take a regular burst
+		BURSTTYPE_CONTINUOUS // as BURSTTYPE_NORMAL, but bursts will fire continually until stopContinuousBurst() is called.
 	}
 	public abstract void setBurstType(BurstType new_burst_type);
+	public abstract BurstType getBurstType();
 	/** Only relevant if setBurstType() is also called with BURSTTYPE_NORMAL. Sets the number of
 	 *  images to take in the burst.
 	 */
@@ -360,6 +362,8 @@ public abstract class CameraController {
 	 *  will be set for noise reduction mode (and setBurstNImages() is ignored).
 	 */
 	public abstract void setBurstForNoiseReduction(boolean burst_for_noise_reduction);
+	public abstract boolean isContinuousBurstInProgress();
+	public abstract void stopContinuousBurst();
 	/** Only relevant if setBurstType() is also called with BURSTTYPE_EXPO. Sets the number of
 	 *  images to take in the expo burst.
 	 * @param n_images Must be an odd number greater than 1.
