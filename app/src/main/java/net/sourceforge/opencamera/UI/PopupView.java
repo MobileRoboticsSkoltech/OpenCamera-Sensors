@@ -660,6 +660,16 @@ public class PopupView extends LinearLayout {
 					addArrayOptionsToPopup(capture_rate_str, getResources().getString(R.string.preference_video_capture_rate), true, false, video_capture_rate_index, false, "VIDEOCAPTURERATE", new ArrayOptionsPopupListener() {
 						private int old_video_capture_rate_index = video_capture_rate_index;
 
+						final Handler handler = new Handler();
+						final Runnable update_runnable = new Runnable() {
+							@Override
+							public void run() {
+								if (MyDebug.LOG)
+									Log.d(TAG, "update settings due to resolution change");
+								main_activity.updateForSettings("", true); // keep the popupview open
+							}
+						};
+
 						private void update() {
 							if( video_capture_rate_index == -1 )
 								return;
@@ -668,6 +678,7 @@ public class PopupView extends LinearLayout {
 							SharedPreferences.Editor editor = sharedPreferences.edit();
 							editor.putFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), new_capture_rate_value);
 							editor.apply();
+
 							float old_capture_rate_value = capture_rate_values.get(old_video_capture_rate_index);
 							boolean old_slow_motion = (old_capture_rate_value < 1.0f-1.0e-5f);
 							boolean new_slow_motion = (new_capture_rate_value < 1.0f-1.0e-5f);
@@ -694,7 +705,14 @@ public class PopupView extends LinearLayout {
 							}
 							old_video_capture_rate_index = video_capture_rate_index;
 
-							main_activity.updateForSettings(toast_message, keep_popup);
+    						if( keep_popup ) {
+								// make it easier to scroll through the list of resolutions without a pause each time
+								handler.removeCallbacks(update_runnable);
+								handler.postDelayed(update_runnable, 400);
+							}
+							else {
+								main_activity.updateForSettings(toast_message, keep_popup);
+							}
 						}
 						@Override
 						public int onClickPrev() {
