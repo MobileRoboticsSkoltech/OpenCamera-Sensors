@@ -625,6 +625,8 @@
     <string name="preference_focus_assist_2x">2x</string>
     <string name="preference_focus_assist_4x">4x</string>
 
+    <string name="exposure_compensation_zoom">Increase or decrease exposure compensation</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

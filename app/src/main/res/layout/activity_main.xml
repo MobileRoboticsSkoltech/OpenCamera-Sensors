@@ -335,7 +335,7 @@
 
             <ZoomControls
                 android:id="@+id/exposure_seekbar_zoom"
-                android:contentDescription="@string/exposure_compensation"
+                android:contentDescription="@string/exposure_compensation_zoom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -379,7 +379,7 @@
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
             <SeekBar
                 android:id="@+id/exposure_time_seekbar"
-                android:contentDescription="@string/exposure"
+                android:contentDescription="@string/exposure_shutter_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/exposure_time_seekbar_text"
