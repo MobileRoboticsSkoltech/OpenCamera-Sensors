@@ -360,9 +360,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "setSceneMode");
 				Log.d(TAG, "builder: " + builder);
 			}
+			Integer current_scene_mode = builder.get(CaptureRequest.CONTROL_SCENE_MODE);
 			if( has_face_detect_mode ) {
 				// face detection mode overrides scene mode
-				if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != CameraMetadata.CONTROL_SCENE_MODE_FACE_PRIORITY ) {
+				if( current_scene_mode == null || current_scene_mode != CameraMetadata.CONTROL_SCENE_MODE_FACE_PRIORITY ) {
 					if (MyDebug.LOG)
 						Log.d(TAG, "setting scene mode for face detection");
 					builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE);
@@ -370,7 +371,7 @@ public class CameraController2 extends CameraController {
 					return true;
 				}
 			}
-			else if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
+			else if( current_scene_mode == null || current_scene_mode != scene_mode ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting scene mode: " + scene_mode);
 				if( scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
