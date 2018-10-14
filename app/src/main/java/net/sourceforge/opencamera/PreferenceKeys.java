@@ -45,6 +45,8 @@ public class PreferenceKeys {
     	return "focus_value_" + cameraId + "_" + is_video;
     }
 
+	public static final String FocusAssistPreferenceKey = "preference_focus_assist";
+
     public static String getResolutionPreferenceKey(int cameraId) {
     	return "camera_resolution_" + cameraId;
     }

@@ -93,6 +93,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		final String camera_api = bundle.getString("camera_api");
 		
+		final boolean using_android_l = bundle.getBoolean("using_android_l");
+		if( MyDebug.LOG )
+			Log.d(TAG, "using_android_l: " + using_android_l);
+
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
 		final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
@@ -494,7 +498,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
-        
+
+        if( !using_android_l ) {
+        	Preference pref = findPreference("preference_focus_assist");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
+        }
+
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
         	// the required ExifInterface tags requires Android N or greater
         	Preference pref = findPreference("preference_category_exif_tags");
@@ -510,18 +520,15 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		setSummary("preference_save_video_prefix");
 		setSummary("preference_textstamp");
 
-		final boolean using_android_l = bundle.getBoolean("using_android_l");
-		if( MyDebug.LOG )
-			Log.d(TAG, "using_android_l: " + using_android_l);
-		final boolean supports_photo_video_recording = bundle.getBoolean("supports_photo_video_recording");
-		if( MyDebug.LOG )
-			Log.d(TAG, "supports_photo_video_recording: " + supports_photo_video_recording);
-
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_show_iso");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
+
+		final boolean supports_photo_video_recording = bundle.getBoolean("supports_photo_video_recording");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_photo_video_recording: " + supports_photo_video_recording);
 
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_camera2_fake_flash");

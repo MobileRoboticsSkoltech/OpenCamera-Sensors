@@ -763,4 +763,14 @@
         <item>preference_units_distance_m</item>
         <item>preference_units_distance_ft</item>
     </string-array>
+    <string-array name="preference_focus_assist_entries">
+        <item>@string/preference_focus_assist_off</item>
+        <item>@string/preference_focus_assist_2x</item>
+        <item>@string/preference_focus_assist_4x</item>
+    </string-array>
+    <string-array name="preference_focus_assist_values">
+        <item>0</item>
+        <item>2</item>
+        <item>4</item>
+    </string-array>
 </resources>

@@ -293,6 +293,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
+    public int getFocusAssistPref() {
+		String focus_assist_value = sharedPreferences.getString(PreferenceKeys.FocusAssistPreferenceKey, "0");
+		int focus_assist;
+		try {
+			focus_assist = Integer.parseInt(focus_assist_value);
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse focus_assist_value: " + focus_assist_value);
+    		e.printStackTrace();
+    		focus_assist = 0;
+        }
+		return focus_assist;
+    }
+
     @Override
 	public boolean isVideoPref() {
 		return sharedPreferences.getBoolean(PreferenceKeys.IsVideoPreferenceKey, false);

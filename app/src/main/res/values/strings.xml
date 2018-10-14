@@ -619,6 +619,12 @@
     <string name="noise_reduction_mode_fast">Fast</string>
     <string name="noise_reduction_mode_high_quality">High Quality</string>
 
+    <string name="preference_focus_assist">Focus assist</string>
+    <string name="preference_focus_assist_summary">Whether to zoom in when adjusting manual focus distance\n%s</string>
+    <string name="preference_focus_assist_off">Off</string>
+    <string name="preference_focus_assist_2x">2x</string>
+    <string name="preference_focus_assist_4x">4x</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

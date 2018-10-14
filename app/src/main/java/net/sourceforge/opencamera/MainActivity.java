@@ -3252,6 +3252,9 @@ public class MainActivity extends Activity {
 		focusSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
 		ManualSeekbars.setProgressSeekbarScaled(focusSeekBar, 0.0, preview.getMinimumFocusDistance(), is_target_distance ? preview.getCameraController().getFocusBracketingTargetDistance() : preview.getCameraController().getFocusDistance());
 		focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			private boolean has_saved_zoom;
+			private int saved_zoom_factor;
+
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				double frac = progress/(double)focusSeekBar.getMax();
@@ -3262,10 +3265,27 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
+				has_saved_zoom = false;
+				if( preview.supportsZoom() ) {
+					int focus_assist = applicationInterface.getFocusAssistPref();
+					if( focus_assist > 0 ) {
+						has_saved_zoom = true;
+						saved_zoom_factor = preview.getCameraController().getZoom();
+						if( MyDebug.LOG )
+							Log.d(TAG, "zoom by " + focus_assist + " for focus assist, zoom factor was: " + saved_zoom_factor);
+						int new_zoom_factor = preview.getScaledZoomFactor(focus_assist);
+						preview.getCameraController().setZoom(new_zoom_factor);
+					}
+				}
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
+				if( has_saved_zoom ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "unzoom for focus assist, zoom factor was: " + saved_zoom_factor);
+					preview.getCameraController().setZoom(saved_zoom_factor);
+				}
 				preview.stoppedSettingFocusDistance(is_target_distance);
 			}
 		});

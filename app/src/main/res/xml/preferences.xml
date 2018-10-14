@@ -301,6 +301,16 @@
                 android:defaultValue="immersive_mode_low_profile"
                 />
     
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
+                android:key="preference_focus_assist"
+                android:title="@string/preference_focus_assist"
+                android:summary="@string/preference_focus_assist_summary"
+                android:entries="@array/preference_focus_assist_entries"
+                android:entryValues="@array/preference_focus_assist_values"
+                android:defaultValue="0"
+                />
+
             <CheckBoxPreference
                 android:key="preference_show_zoom"
                 android:title="@string/preference_show_zoom"
