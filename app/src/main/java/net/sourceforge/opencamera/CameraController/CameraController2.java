@@ -2300,6 +2300,9 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "setColorEffect: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
+		if( values2 == null ) {
+			return null;
+		}
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
 			String this_value = convertColorEffect(value2);
@@ -2423,6 +2426,9 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "setWhiteBalance: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
+		if( values2 == null ) {
+			return null;
+		}
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
 			String this_value = convertWhiteBalance(value2);
@@ -2571,6 +2577,9 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "setAntiBanding: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES );
+		if( values2 == null ) {
+			return null;
+		}
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
 			String this_value = convertAntiBanding(value2);
