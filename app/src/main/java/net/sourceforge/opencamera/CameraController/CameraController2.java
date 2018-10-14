@@ -3590,8 +3590,9 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	public String getFocusValue() {
-		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) != null ?
-				previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) : CaptureRequest.CONTROL_AF_MODE_AUTO;
+		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == null )
+			focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
 		return convertFocusModeToValue(focus_mode);
 	}
 
@@ -3997,9 +3998,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean supportsAutoFocus() {
-		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+		if( previewBuilder == null )
 			return false;
-		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == null )
+			return false;
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
 			return true;
 		return false;
@@ -4007,9 +4010,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean focusIsContinuous() {
-		if( previewBuilder == null || previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+		if( previewBuilder == null )
 			return false;
-		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == null )
+			return false;
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE || focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO )
 			return true;
 		return false;
@@ -4017,9 +4022,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean focusIsVideo() {
-		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+		if( previewBuilder == null )
 			return false;
-		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == null )
+			return false;
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
 			return true;
 		}
