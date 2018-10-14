@@ -955,7 +955,7 @@ public class CameraController2 extends CameraController {
 						pending_burst_images.clear();
 						cb.onCompleted();
 
-						if( burst_type == BurstType.BURSTTYPE_FOCUS ) {
+						if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
 							if( MyDebug.LOG )
 								Log.d(TAG, "focus bracketing complete, reset manual focus");
 							camera_settings.setFocusDistance(previewBuilder);
@@ -1001,7 +1001,7 @@ public class CameraController2 extends CameraController {
 									}
 								}
 							}
-							else {
+							else if( previewBuilder != null ) { // make sure camera wasn't released in the meantime
 								if( MyDebug.LOG )
 									Log.d(TAG, "focus bracketing");
 
