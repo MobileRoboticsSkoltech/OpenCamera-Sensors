@@ -1592,6 +1592,7 @@ public class PopupView extends LinearLayout {
 			vg_params.height = arrow_button_h;
 			prev_button.setLayoutParams(vg_params);
 			prev_button.setVisibility( (cyclic || current_index > 0) ? View.VISIBLE : View.INVISIBLE);
+			prev_button.setContentDescription( getResources().getString(R.string.previous) + " " + title);
 			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_PREV", prev_button);
 
         	ll2.addView(text_view);
@@ -1609,7 +1610,14 @@ public class PopupView extends LinearLayout {
 			vg_params.height = arrow_button_h;
 			next_button.setLayoutParams(vg_params);
 			next_button.setVisibility( (cyclic || current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+			next_button.setContentDescription( getResources().getString(R.string.next) + " " + title);
 			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_NEXT", next_button);
+
+			// test:
+			/*prev_button.setText(prev_button.getContentDescription());
+			prev_button.setAllCaps(false);
+			next_button.setText(next_button.getContentDescription());
+			next_button.setAllCaps(false);*/
 
 			prev_button.setOnClickListener(new View.OnClickListener() {
 				@Override

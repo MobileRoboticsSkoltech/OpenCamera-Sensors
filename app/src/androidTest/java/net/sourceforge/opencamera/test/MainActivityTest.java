@@ -1421,9 +1421,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	private void subTestPopupButtonContentDescription(int title_id, String test_key, boolean next, boolean expected) {
+		Log.d(TAG, "subTestPopupButtonContentDescription");
+		String title = mActivity.getResources().getString(title_id);
+		Log.d(TAG, "title: " + title);
+		Log.d(TAG, "test_key: " + test_key);
+		Log.d(TAG, "next: " + next);
+		Log.d(TAG, "expected: " + expected);
+		View main_button = mActivity.getUIButton(test_key);
+		assertTrue(main_button != null);
+		View button = mActivity.getUIButton(test_key + (next ? "_NEXT" : "_PREV"));
+		if( expected ) {
+			assertTrue(button != null);
+		}
+		if( button != null ) {
+			assertTrue(button.getContentDescription() != null);
+			String content_description = button.getContentDescription().toString();
+			assertTrue(content_description.length() > 0);
+			String next_string = mActivity.getResources().getString(next ? net.sourceforge.opencamera.R.string.next : net.sourceforge.opencamera.R.string.previous);
+			assertTrue(next_string.length() > 0);
+			assertTrue(content_description.startsWith(next_string + " " + title));
+		}
+		else {
+			Log.d(TAG, "no button found");
+		}
+	}
+
 	/* Tests switching to/from video mode, for front and back cameras, and tests the focus mode changes as expected.
 	 * If this test fails with nullpointerexception on preview.getCameraController() after switching to video mode, check
 	 * that record audio permission is granted!
+	 * Also tests content descriptions of <> buttons on the popup menu.
 	 */
 	public void testSwitchVideo() throws InterruptedException {
 		Log.d(TAG, "testSwitchVideo");
@@ -1431,6 +1458,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		assertTrue(!mPreview.isVideo());
 		String photo_focus_value = mPreview.getCameraController().getFocusValue();
+
+		// test popup buttons for photo mode:
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", false, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", true, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", true, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", false, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", true, true);
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
@@ -1441,6 +1478,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    if( mPreview.supportsFocus() ) {
 	    	assertTrue(focus_value.equals("focus_mode_continuous_video"));
 	    }
+
+		// test popup buttons for video mode:
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		clickView(popupButton);
+		Log.d(TAG, "wait for popup to open");
+		while( !mActivity.popupIsOpen() ) {
+		}
+		Log.d(TAG, "popup is now open");
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", false, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", true, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", true, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", false, true);
+		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", true, true);
 
 	    int saved_count = mPreview.count_cameraAutoFocus;
 	    Log.d(TAG, "0 count_cameraAutoFocus: " + saved_count);
@@ -1470,6 +1525,21 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	assertTrue(focus_value.equals(photo_focus_value));
 		    }
 
+			// test popup buttons for photo mode:
+			clickView(popupButton);
+			Log.d(TAG, "wait for popup to open");
+			while( !mActivity.popupIsOpen() ) {
+			}
+			Log.d(TAG, "popup is now open");
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", false, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", true, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", true, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", false, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", true, true);
+
 		    clickView(switchVideoButton);
 			waitUntilCameraOpened();
 			assertTrue(mPreview.isVideo());
@@ -1478,6 +1548,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    if( mPreview.supportsFocus() ) {
 		    	assertTrue(focus_value.equals("focus_mode_continuous_video"));
 		    }
+
+			// test popup buttons for video mode:
+			clickView(popupButton);
+			Log.d(TAG, "wait for popup to open");
+			while( !mActivity.popupIsOpen() ) {
+			}
+			Log.d(TAG, "popup is now open");
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", false, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", true, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", true, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", false, true);
+			subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.grid, "GRID", true, true);
 
 		    clickView(switchVideoButton);
 			waitUntilCameraOpened();
