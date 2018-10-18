@@ -71,64 +71,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
-    <string-array name="preference_burst_mode_entries">
-        <item>Off</item>
-        <item>2x</item>
-        <item>3x</item>
-        <item>4x</item>
-        <item>5x</item>
-        <item>10x</item>
-        <item>Unlimited</item>
-    </string-array>
-    <string-array name="preference_burst_mode_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>10</item>
-        <item>unlimited</item>
-    </string-array>
-    <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
-    <string-array name="preference_burst_interval_entries">
-        <item>No delay</item>
-        <item>1s</item>
-        <item>2s</item>
-        <item>3s</item>
-        <item>5s</item>
-        <item>10s</item>
-        <item>15s</item>
-        <item>20s</item>
-        <item>30s</item>
-        <item>1m</item>
-        <item>2m</item>
-        <item>5m</item>
-        <item>10m</item>
-        <item>20m</item>
-        <item>30m</item>
-        <item>1h</item>
-        <item>2h</item>
-    </string-array>
-    <string-array name="preference_burst_interval_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>300</item>
-        <item>600</item>
-        <item>1200</item>
-        <item>1800</item>
-        <item>3600</item>
-        <item>7200</item>
-    </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Maximise preview size</item>
         <item>Match photo size (WYSIWYG)</item>
@@ -390,22 +332,6 @@
         <item>0</item>
         <item>-1</item>
         <item>-2</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_entries">
-        <item>Device default</item>
-        <item>100MB</item>
-        <item>200MB</item>
-        <item>300MB</item>
-        <item>500MB</item>
-        <item>1GB</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_values">
-        <item>0</item>
-        <item>104857600</item>
-        <item>209715200</item>
-        <item>314572800</item>
-        <item>524288000</item>
-        <item>1073741824</item>
     </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>Local Time</item>
@@ -772,5 +698,79 @@
         <item>0</item>
         <item>2</item>
         <item>4</item>
+    </string-array>
+    <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
+    <string-array name="preference_burst_mode_entries">
+        <item>@string/preference_burst_mode_off</item>
+        <item>@string/preference_burst_mode_2x</item>
+        <item>@string/preference_burst_mode_3x</item>
+        <item>@string/preference_burst_mode_4x</item>
+        <item>@string/preference_burst_mode_5x</item>
+        <item>@string/preference_burst_mode_10x</item>
+        <item>@string/preference_burst_mode_unlimited</item>
+    </string-array>
+    <string-array name="preference_burst_mode_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>10</item>
+        <item>unlimited</item>
+    </string-array>
+    <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
+    <string-array name="preference_burst_interval_entries">
+        <item>@string/preference_burst_interval_no_delay</item>
+        <item>@string/preference_burst_interval_1s</item>
+        <item>@string/preference_burst_interval_2s</item>
+        <item>@string/preference_burst_interval_3s</item>
+        <item>@string/preference_burst_interval_5s</item>
+        <item>@string/preference_burst_interval_10s</item>
+        <item>@string/preference_burst_interval_15s</item>
+        <item>@string/preference_burst_interval_20s</item>
+        <item>@string/preference_burst_interval_30s</item>
+        <item>@string/preference_burst_interval_1m</item>
+        <item>@string/preference_burst_interval_2m</item>
+        <item>@string/preference_burst_interval_5m</item>
+        <item>@string/preference_burst_interval_10m</item>
+        <item>@string/preference_burst_interval_20m</item>
+        <item>@string/preference_burst_interval_30m</item>
+        <item>@string/preference_burst_interval_1h</item>
+        <item>@string/preference_burst_interval_2h</item>
+    </string-array>
+    <string-array name="preference_burst_interval_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>300</item>
+        <item>600</item>
+        <item>1200</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>7200</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>@string/preference_video_max_filesize_default</item>
+        <item>@string/preference_video_max_filesize_100mb</item>
+        <item>@string/preference_video_max_filesize_200mb</item>
+        <item>@string/preference_video_max_filesize_300mb</item>
+        <item>@string/preference_video_max_filesize_500mb</item>
+        <item>@string/preference_video_max_filesize_1gb</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
     </string-array>
 </resources>

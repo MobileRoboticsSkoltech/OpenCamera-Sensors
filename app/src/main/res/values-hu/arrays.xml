@@ -71,62 +71,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <string-array name="preference_burst_mode_entries">
-        <item>Ki</item>
-        <item>2x</item>
-        <item>3x</item>
-        <item>4x</item>
-        <item>5x</item>
-        <item>10x</item>
-        <item>Korlátlan</item>
-    </string-array>
-    <string-array name="preference_burst_mode_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>10</item>
-        <item>unlimited</item>
-    </string-array>
-    <string-array name="preference_burst_interval_entries">
-        <item>Nincs késleltetés</item>
-        <item>1mp</item>
-        <item>2mp</item>
-        <item>3mp</item>
-        <item>5mp</item>
-        <item>10mp</item>
-        <item>15mp</item>
-        <item>20mp</item>
-        <item>30mp</item>
-        <item>1p</item>
-        <item>2p</item>
-        <item>5p</item>
-        <item>10p</item>
-        <item>20p</item>
-        <item>30p</item>
-        <item>1ó</item>
-        <item>2ó</item>
-    </string-array>
-    <string-array name="preference_burst_interval_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>300</item>
-        <item>600</item>
-        <item>1200</item>
-        <item>1800</item>
-        <item>3600</item>
-        <item>7200</item>
-    </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Előnézet méretének maximalizálása</item>
         <item>Fotóméret illesztése (WYSIWYG)</item>
@@ -388,22 +332,6 @@
         <item>0</item>
         <item>-1</item>
         <item>-2</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_entries">
-        <item>Készülék alapértelmezett</item>
-        <item>100MB</item>
-        <item>200MB</item>
-        <item>300MB</item>
-        <item>500MB</item>
-        <item>1GB</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_values">
-        <item>0</item>
-        <item>104857600</item>
-        <item>209715200</item>
-        <item>314572800</item>
-        <item>524288000</item>
-        <item>1073741824</item>
     </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>Helyi idő</item>

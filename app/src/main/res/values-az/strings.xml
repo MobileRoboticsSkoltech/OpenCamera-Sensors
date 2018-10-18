@@ -270,4 +270,31 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+
+    <string name="preference_burst_mode_off">Bağla</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">Sonsuz</string>
+
+    <string name="preference_burst_interval_no_delay">Fasiləsiz</string>
+    <string name="preference_burst_interval_1s">1 saniyə</string>
+    <string name="preference_burst_interval_2s">2 saniyə</string>
+    <string name="preference_burst_interval_3s">3 saniyə</string>
+    <string name="preference_burst_interval_5s">5 saniyə</string>
+    <string name="preference_burst_interval_10s">10 saniyə</string>
+    <string name="preference_burst_interval_15s">15 saniyə</string>
+    <string name="preference_burst_interval_20s">20 saniyə</string>
+    <string name="preference_burst_interval_30s">30 saniyə</string>
+    <string name="preference_burst_interval_1m">1 dəqiqə</string>
+    <string name="preference_burst_interval_2m">2 dəqiqə</string>
+    <string name="preference_burst_interval_5m">5 dəqiqə</string>
+    <string name="preference_burst_interval_10m">10 dəqiqə</string>
+    <string name="preference_burst_interval_20m">20 dəqiqə</string>
+    <string name="preference_burst_interval_30m">30 dəqiqə</string>
+    <string name="preference_burst_interval_1h">1 saat</string>
+    <string name="preference_burst_interval_2h">2 saat</string>
+
 </resources>

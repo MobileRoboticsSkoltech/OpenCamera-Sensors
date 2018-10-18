@@ -437,4 +437,38 @@
     <string name="preference_video_bitrate_80000000">80 Mbps</string>
     <string name="preference_video_bitrate_90000000">90 Mbps</string>
     <string name="preference_video_bitrate_100000000">100 Mbps</string>
+
+    <string name="preference_burst_mode_off">Выкл</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">Навсегда</string> <!-- Russian uses 'Forever' intead of 'Unlimited' (Неограниченно) so it's not too long for popup menu on small screens! -->
+
+    <string name="preference_burst_interval_no_delay">Без задержки</string>
+    <string name="preference_burst_interval_1s">1 секунда</string>
+    <string name="preference_burst_interval_2s">2 секунды</string>
+    <string name="preference_burst_interval_3s">3 секунды</string>
+    <string name="preference_burst_interval_5s">5 секунд</string>
+    <string name="preference_burst_interval_10s">10 секунд</string>
+    <string name="preference_burst_interval_15s">15 секунд</string>
+    <string name="preference_burst_interval_20s">20 секунд</string>
+    <string name="preference_burst_interval_30s">30 секунд</string>
+    <string name="preference_burst_interval_1m">1 минута</string>
+    <string name="preference_burst_interval_2m">2 минуты</string>
+    <string name="preference_burst_interval_5m">5 минут</string>
+    <string name="preference_burst_interval_10m">10 минут</string>
+    <string name="preference_burst_interval_20m">20 минут</string>
+    <string name="preference_burst_interval_30m">30 минут</string>
+    <string name="preference_burst_interval_1h">1 час</string>
+    <string name="preference_burst_interval_2h">2 часа</string>
+
+    <string name="preference_video_max_filesize_default">По умолчанию (зависит от устройства)</string>
+    <string name="preference_video_max_filesize_100mb">100 Мб</string>
+    <string name="preference_video_max_filesize_200mb">200 Мб</string>
+    <string name="preference_video_max_filesize_300mb">300 Мб</string>
+    <string name="preference_video_max_filesize_500mb">500 Мб</string>
+    <string name="preference_video_max_filesize_1gb">1 Гб</string>
+
 </resources>

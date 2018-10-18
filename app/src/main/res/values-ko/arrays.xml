@@ -71,62 +71,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <string-array name="preference_burst_mode_entries">
-        <item>사용 안함</item>
-        <item>2x</item>
-        <item>3x</item>
-        <item>4x</item>
-        <item>5x</item>
-        <item>10x</item>
-        <item>무제한</item>
-    </string-array>
-    <string-array name="preference_burst_mode_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>10</item>
-        <item>unlimited</item>
-    </string-array>
-    <string-array name="preference_burst_interval_entries">
-        <item>지연 없음</item>
-        <item>1초</item>
-        <item>2초</item>
-        <item>3초</item>
-        <item>5초</item>
-        <item>10초</item>
-        <item>15초</item>
-        <item>20초</item>
-        <item>30초</item>
-        <item>1분</item>
-        <item>2분</item>
-        <item>5분</item>
-        <item>10분</item>
-        <item>20분</item>
-		<item>30분</item>
-		<item>60분</item>
-		<item>120분</item>
-    </string-array>
-    <string-array name="preference_burst_interval_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>300</item>
-        <item>600</item>
-        <item>1200</item>
-        <item>1800</item>
-        <item>3600</item>
-        <item>7200</item>
-    </string-array>
     <string-array name="preference_preview_size_entries">
         <item>미리보기 화면 크기 최대화</item>
         <item>사진 크기에 맞추기 (WYSIWYG)</item>

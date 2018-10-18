@@ -439,4 +439,38 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+
+    <string name="preference_burst_mode_off">Ki</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">Korlátlan</string>
+
+    <string name="preference_burst_interval_no_delay">Nincs késleltetés</string>
+    <string name="preference_burst_interval_1s">1mp</string>
+    <string name="preference_burst_interval_2s">2mp</string>
+    <string name="preference_burst_interval_3s">3mp</string>
+    <string name="preference_burst_interval_5s">5mp</string>
+    <string name="preference_burst_interval_10s">10mp</string>
+    <string name="preference_burst_interval_15s">15mp</string>
+    <string name="preference_burst_interval_20s">20mp</string>
+    <string name="preference_burst_interval_30s">30mp</string>
+    <string name="preference_burst_interval_1m">1p</string>
+    <string name="preference_burst_interval_2m">2p</string>
+    <string name="preference_burst_interval_5m">5p</string>
+    <string name="preference_burst_interval_10m">10p</string>
+    <string name="preference_burst_interval_20m">20p</string>
+    <string name="preference_burst_interval_30m">30p</string>
+    <string name="preference_burst_interval_1h">1ó</string>
+    <string name="preference_burst_interval_2h">2ó</string>
+
+    <string name="preference_video_max_filesize_default">Készülék alapértelmezett</string>
+    <string name="preference_video_max_filesize_100mb">100MB</string>
+    <string name="preference_video_max_filesize_200mb">200MB</string>
+    <string name="preference_video_max_filesize_300mb">300MB</string>
+    <string name="preference_video_max_filesize_500mb">500MB</string>
+    <string name="preference_video_max_filesize_1gb">1GB</string>
+
 </resources>

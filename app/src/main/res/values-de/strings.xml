@@ -584,5 +584,37 @@
     <string name="preference_show_whats_new">Zeigt den What\'s-New-Dialog</string>
     <string name="preference_show_whats_new_summary">Zeigt Info zu neuen Features und Verbesserungen wenn die App upgedatet wurde</string>
 
-	
+    <string name="preference_burst_mode_off">Aus</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">Unbegrenzt</string>
+
+    <string name="preference_burst_interval_no_delay">Keine Verzögerung</string>
+    <string name="preference_burst_interval_1s">1 s</string>
+    <string name="preference_burst_interval_2s">2 s</string>
+    <string name="preference_burst_interval_3s">3 s</string>
+    <string name="preference_burst_interval_5s">5 s</string>
+    <string name="preference_burst_interval_10s">10 s</string>
+    <string name="preference_burst_interval_15s">15 s</string>
+    <string name="preference_burst_interval_20s">20 s</string>
+    <string name="preference_burst_interval_30s">30 s</string>
+    <string name="preference_burst_interval_1m">1 min</string>
+    <string name="preference_burst_interval_2m">2 min</string>
+    <string name="preference_burst_interval_5m">5 min</string>
+    <string name="preference_burst_interval_10m">10 min</string>
+    <string name="preference_burst_interval_20m">20 min</string>
+    <string name="preference_burst_interval_30m">30 min</string>
+    <string name="preference_burst_interval_1h">1 h</string>
+    <string name="preference_burst_interval_2h">2 h</string>
+
+    <string name="preference_video_max_filesize_default">Standard</string>
+    <string name="preference_video_max_filesize_100mb">100 MB</string>
+    <string name="preference_video_max_filesize_200mb">200 MB</string>
+    <string name="preference_video_max_filesize_300mb">300 MB</string>
+    <string name="preference_video_max_filesize_500mb">500 MB</string>
+    <string name="preference_video_max_filesize_1gb">1 GB</string>
+
 </resources>

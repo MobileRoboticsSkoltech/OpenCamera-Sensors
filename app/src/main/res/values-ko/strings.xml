@@ -282,4 +282,31 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+
+    <string name="preference_burst_mode_off">사용 안함</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">무제한</string>
+
+    <string name="preference_burst_interval_no_delay">지연 없음</string>
+    <string name="preference_burst_interval_1s">1초</string>
+    <string name="preference_burst_interval_2s">2초</string>
+    <string name="preference_burst_interval_3s">3초</string>
+    <string name="preference_burst_interval_5s">5초</string>
+    <string name="preference_burst_interval_10s">10초</string>
+    <string name="preference_burst_interval_15s">15s</string>
+    <string name="preference_burst_interval_20s">20초</string>
+    <string name="preference_burst_interval_30s">30초</string>
+    <string name="preference_burst_interval_1m">1분</string>
+    <string name="preference_burst_interval_2m">2분</string>
+    <string name="preference_burst_interval_5m">5분</string>
+    <string name="preference_burst_interval_10m">10분</string>
+    <string name="preference_burst_interval_20m">20분</string>
+    <string name="preference_burst_interval_30m">30분</string>
+    <string name="preference_burst_interval_1h">60분</string>
+    <string name="preference_burst_interval_2h">120분</string>
+
 </resources>

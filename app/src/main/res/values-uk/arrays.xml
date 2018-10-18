@@ -71,62 +71,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <string-array name="preference_burst_mode_entries">
-        <item>Вимкнуто</item>
-        <item>2x</item>
-        <item>3x</item>
-        <item>4x</item>
-        <item>5x</item>
-        <item>10x</item>
-        <item>Постійно</item>
-    </string-array>
-    <string-array name="preference_burst_mode_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>10</item>
-        <item>unlimited</item>
-    </string-array>
-    <string-array name="preference_burst_interval_entries">
-        <item>Без затримки</item>
-        <item>Секунда</item>
-        <item>2 секунди</item>
-        <item>3 секунди</item>
-        <item>5 секунд</item>
-        <item>10 секунд</item>
-        <item>15 секунд</item>
-        <item>20 секунд</item>
-        <item>30 секунд</item>
-        <item>Хвилина</item>
-        <item>2 хвилини</item>
-        <item>5 хвилин</item>
-        <item>10 хвилин</item>
-        <item>20 хвилин</item>
-        <item>30 хвилин</item>
-        <item>Година</item>
-        <item>2 години</item>
-    </string-array>
-    <string-array name="preference_burst_interval_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>300</item>
-        <item>600</item>
-        <item>1200</item>
-        <item>1800</item>
-        <item>3600</item>
-        <item>7200</item>
-    </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Максимальний</item>
         <item>Розмір фото (WYSIWYG)</item>
@@ -388,22 +332,6 @@
         <item>0</item>
         <item>-1</item>
         <item>-2</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_entries">
-        <item>Типово для пристрою</item>
-        <item>100МБ</item>
-        <item>200МБ</item>
-        <item>300МБ</item>
-        <item>500МБ</item>
-        <item>1ГБ</item>
-    </string-array>
-    <string-array name="preference_video_max_filesize_values">
-        <item>0</item>
-        <item>104857600</item>
-        <item>209715200</item>
-        <item>314572800</item>
-        <item>524288000</item>
-        <item>1073741824</item>
     </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>Локальний час</item>

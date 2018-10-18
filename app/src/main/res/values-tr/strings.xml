@@ -316,4 +316,31 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+
+    <string name="preference_burst_mode_off">Kapalı</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_unlimited">Sınırsız</string>
+
+    <string name="preference_burst_interval_no_delay">Gecikmesiz</string>
+    <string name="preference_burst_interval_1s">1sn</string>
+    <string name="preference_burst_interval_2s">2sn</string>
+    <string name="preference_burst_interval_3s">3sn</string>
+    <string name="preference_burst_interval_5s">5sn</string>
+    <string name="preference_burst_interval_10s">10sn</string>
+    <string name="preference_burst_interval_15s">15sn</string>
+    <string name="preference_burst_interval_20s">20sn</string>
+    <string name="preference_burst_interval_30s">30sn</string>
+    <string name="preference_burst_interval_1m">1da</string>
+    <string name="preference_burst_interval_2m">2da</string>
+    <string name="preference_burst_interval_5m">5da</string>
+    <string name="preference_burst_interval_10m">10da</string>
+    <string name="preference_burst_interval_20m">20da</string>
+    <string name="preference_burst_interval_30m">30da</string>
+    <string name="preference_burst_interval_1h">1sa</string>
+    <string name="preference_burst_interval_2h">2sa</string>
+
 </resources>

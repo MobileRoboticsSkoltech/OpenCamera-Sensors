@@ -71,62 +71,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <string-array name="preference_burst_mode_entries">
-        <item>Выключана</item>
-        <item>2x</item>
-        <item>3x</item>
-        <item>4x</item>
-        <item>5x</item>
-        <item>10x</item>
-        <item>Не абмежавана</item>
-    </string-array>
-    <string-array name="preference_burst_mode_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>10</item>
-        <item>unlimited</item>
-    </string-array>
-    <string-array name="preference_burst_interval_entries">
-        <item>Без затрымкі</item>
-        <item>1 с</item>
-        <item>2 с</item>
-        <item>3 с</item>
-        <item>5 с</item>
-        <item>10 с</item>
-        <item>15 с</item>
-        <item>20 с</item>
-        <item>30 с</item>
-        <item>1 хв</item>
-        <item>2 хв</item>
-        <item>5 хв</item>
-        <item>10 хв</item>
-        <item>20 хв</item>
-        <item>30 хв</item>
-        <item>1 г</item>
-        <item>2 г</item>
-    </string-array>
-    <string-array name="preference_burst_interval_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>300</item>
-        <item>600</item>
-        <item>1200</item>
-        <item>1800</item>
-        <item>3600</item>
-        <item>7200</item>
-    </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Максімальны памер пры папярэднім праглядзе</item>
         <item>Адпаведны памер (WYSIWYG)</item>

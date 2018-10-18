@@ -312,4 +312,31 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+
+    <string name="preference_burst_mode_off">なし</string>
+    <string name="preference_burst_mode_2x">2倍</string>
+    <string name="preference_burst_mode_3x">3倍</string>
+    <string name="preference_burst_mode_4x">4倍</string>
+    <string name="preference_burst_mode_5x">5倍</string>
+    <string name="preference_burst_mode_10x">10倍</string>
+    <string name="preference_burst_mode_unlimited">無制限</string>
+
+    <string name="preference_burst_interval_no_delay">なし</string>
+    <string name="preference_burst_interval_1s">1秒</string>
+    <string name="preference_burst_interval_2s">2秒</string>
+    <string name="preference_burst_interval_3s">3秒</string>
+    <string name="preference_burst_interval_5s">5秒</string>
+    <string name="preference_burst_interval_10s">10秒</string>
+    <string name="preference_burst_interval_15s">15秒</string>
+    <string name="preference_burst_interval_20s">20秒</string>
+    <string name="preference_burst_interval_30s">30秒</string>
+    <string name="preference_burst_interval_1m">1分</string>
+    <string name="preference_burst_interval_2m">2分</string>
+    <string name="preference_burst_interval_5m">5分</string>
+    <string name="preference_burst_interval_10m">10分</string>
+    <string name="preference_burst_interval_20m">20分</string>
+    <string name="preference_burst_interval_30m">30分</string>
+    <string name="preference_burst_interval_1h">1時間</string>
+    <string name="preference_burst_interval_2h">2時間</string>
+
 </resources>
