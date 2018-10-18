@@ -707,6 +707,10 @@
         <item>@string/preference_burst_mode_4x</item>
         <item>@string/preference_burst_mode_5x</item>
         <item>@string/preference_burst_mode_10x</item>
+        <item>@string/preference_burst_mode_20x</item>
+        <item>@string/preference_burst_mode_30x</item>
+        <item>@string/preference_burst_mode_40x</item>
+        <item>@string/preference_burst_mode_50x</item>
         <item>@string/preference_burst_mode_unlimited</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
@@ -716,11 +720,16 @@
         <item>4</item>
         <item>5</item>
         <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
         <item>unlimited</item>
     </string-array>
     <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
     <string-array name="preference_burst_interval_entries">
         <item>@string/preference_burst_interval_no_delay</item>
+        <item>@string/preference_burst_interval_0.5s</item>
         <item>@string/preference_burst_interval_1s</item>
         <item>@string/preference_burst_interval_2s</item>
         <item>@string/preference_burst_interval_3s</item>
@@ -740,6 +749,7 @@
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
+        <item>0.5</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>

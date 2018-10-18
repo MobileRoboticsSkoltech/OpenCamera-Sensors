@@ -838,7 +838,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getRepeatIntervalPreferenceKey(), "0");
 		long timer_delay;
 		try {
-			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
+			float timer_delay_s = Float.parseFloat(timer_value);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "timer_delay_s: " + timer_delay_s);
+			timer_delay = (long)(timer_delay_s * 1000);
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
