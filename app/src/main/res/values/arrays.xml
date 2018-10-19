@@ -774,6 +774,9 @@
         <item>@string/preference_video_max_filesize_300mb</item>
         <item>@string/preference_video_max_filesize_500mb</item>
         <item>@string/preference_video_max_filesize_1gb</item>
+        <item>@string/preference_video_max_filesize_2gb</item>
+        <item>@string/preference_video_max_filesize_5gb</item>
+        <item>@string/preference_video_max_filesize_9gb</item> <!-- requested due to Google Photo's 10GB limit for videos, see https://sourceforge.net/p/opencamera/discussion/features/thread/af7e5c1212/ -->
     </string-array>
     <string-array name="preference_video_max_filesize_values">
         <item>0</item>
@@ -782,5 +785,8 @@
         <item>314572800</item>
         <item>524288000</item>
         <item>1073741824</item>
+        <item>2147483648</item>
+        <item>5368709120</item>
+        <item>9663676416</item>
     </string-array>
 </resources>

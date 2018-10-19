@@ -667,6 +667,9 @@
     <string name="preference_video_max_filesize_300mb">300MB</string>
     <string name="preference_video_max_filesize_500mb">500MB</string>
     <string name="preference_video_max_filesize_1gb">1GB</string>
+    <string name="preference_video_max_filesize_2gb">2GB</string>
+    <string name="preference_video_max_filesize_5gb">5GB</string>
+    <string name="preference_video_max_filesize_9gb">9GB</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">

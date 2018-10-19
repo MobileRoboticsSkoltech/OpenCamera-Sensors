@@ -662,7 +662,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
 		long video_max_filesize;
 		try {
-			video_max_filesize = Integer.parseInt(video_max_filesize_value);
+			video_max_filesize = Long.parseLong(video_max_filesize_value);
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )

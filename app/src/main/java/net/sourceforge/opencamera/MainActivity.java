@@ -3557,8 +3557,15 @@ public class MainActivity extends Activity {
 			}
 			long max_filesize = applicationInterface.getVideoMaxFileSizeUserPref();
 			if( max_filesize != 0 ) {
-				long max_filesize_mb = max_filesize/(1024*1024);
-				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": " + max_filesize_mb + getResources().getString(R.string.mb_abbreviation);
+				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": ";
+				if( max_filesize >= 1024*1024*1024 ) {
+					long max_filesize_gb = max_filesize/(1024*1024*1024);
+					toast_string += max_filesize_gb + getResources().getString(R.string.gb_abbreviation);
+				}
+				else {
+					long max_filesize_mb = max_filesize/(1024*1024);
+					toast_string += max_filesize_mb + getResources().getString(R.string.mb_abbreviation);
+				}
 				simple = false;
 			}
 			if( applicationInterface.getVideoFlashPref() && preview.supportsFlash() ) {
