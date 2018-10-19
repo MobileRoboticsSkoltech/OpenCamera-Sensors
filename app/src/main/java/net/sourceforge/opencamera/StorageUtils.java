@@ -493,12 +493,12 @@ public class StorageUtils {
 		switch (type) {
 			case MEDIA_TYPE_IMAGE: {
 				String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-				mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
+				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
 			case MEDIA_TYPE_VIDEO: {
 				String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-				mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
+				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
 			default:
@@ -528,8 +528,30 @@ public class StorageUtils {
         // Create a media file name
         File mediaFile = null;
         for(int count=0;count<100;count++) {
-        	String mediaFilename = createMediaFilename(type, suffix, count, extension, current_date);
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
+        	/*final boolean use_burst_folder = true;
+        	if( use_burst_folder ) {
+				String burstFolderName = createMediaFilename(type, "", count, "", current_date);
+				File burstFolder = new File(mediaStorageDir.getPath() + File.separator + burstFolderName);
+				if( !burstFolder.exists() ) {
+					if( !burstFolder.mkdirs() ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "failed to create burst sub-directory");
+						throw new IOException();
+					}
+					broadcastFile(burstFolder, false, false, false);
+				}
+
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+				String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
+				//String mediaFilename = prefix + suffix + "." + extension;
+				String suffix_alt = suffix.substring(1);
+				String mediaFilename = suffix_alt + prefix + suffix_alt + "BURST" + "." + extension;
+				mediaFile = new File(burstFolder.getPath() + File.separator + mediaFilename);
+			}
+			else*/ {
+				String mediaFilename = createMediaFilename(type, suffix, count, "." + extension, current_date);
+				mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
+			}
             if( !mediaFile.exists() ) {
             	break;
             }
@@ -608,7 +630,7 @@ public class StorageUtils {
 				throw new RuntimeException();
 		}
 		// note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-		String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
+		String mediaFilename = createMediaFilename(type, suffix, 0, "." + extension, current_date);
 		return createOutputFileSAF(mediaFilename, mimeType);
     }
 
