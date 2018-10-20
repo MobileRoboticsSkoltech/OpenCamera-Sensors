@@ -1354,7 +1354,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    	// return for now - the application should try to reopen the camera if permission is granted
 				return;
 			}
-			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+			if( applicationInterface.needsStoragePermission() && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "storage permission not available");
 				has_permissions = false;

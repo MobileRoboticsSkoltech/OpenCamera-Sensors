@@ -2052,6 +2052,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
     
     @Override
+	public boolean needsStoragePermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "needsStoragePermission");
+		return true;
+	}
+
+    @Override
 	public void requestStoragePermission() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestStoragePermission");
