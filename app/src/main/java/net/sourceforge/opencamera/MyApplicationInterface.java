@@ -2265,11 +2265,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		String custom_tag_copyright = sharedPreferences.getString(PreferenceKeys.ExifCopyrightPreferenceKey, "");
 
 		int iso = 800; // default value if we can't get ISO
+		long exposure_time = 1000000000L/30; // default value if we can't get shutter speed
 		if( main_activity.getPreview().getCameraController() != null ) {
 			if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
 				iso = main_activity.getPreview().getCameraController().captureResultIso();
 				if( MyDebug.LOG )
 					Log.d(TAG, "iso: " + iso);
+			}
+			if( main_activity.getPreview().getCameraController().captureResultHasExposureTime() ) {
+				exposure_time = main_activity.getPreview().getCameraController().captureResultExposureTime();
+				if( MyDebug.LOG )
+					Log.d(TAG, "exposure_time: " + exposure_time);
 			}
 		}
 
@@ -2323,6 +2329,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					mirror,
 					current_date,
 					iso,
+					exposure_time,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
@@ -2344,6 +2351,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					mirror,
 					current_date,
 					iso,
+					exposure_time,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,

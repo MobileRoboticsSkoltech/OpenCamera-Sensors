@@ -2419,8 +2419,9 @@ public class HDRProcessor {
 		if( brightness <= 0 )
 			brightness = 1;
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 			Log.d(TAG, "brightness: " + brightness);
+			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
+			Log.d(TAG, "ideal_brightness: " + ideal_brightness);
 		}
 		int median_target = Math.min(ideal_brightness, (int)(max_gain_factor*brightness));
 		return Math.max(brightness, median_target); // don't make darker
@@ -2442,23 +2443,19 @@ public class HDRProcessor {
 
 	/** Computes various factors used in the avg_brighten.rs script.
 	 */
-	public static BrightenFactors computeBrightenFactors(int iso, int brightness, int max_brightness) {
-		// for iso <= 150, don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
+	public static BrightenFactors computeBrightenFactors(int iso, long exposure_time, int brightness, int max_brightness) {
+		// for outdoor/bright images, don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
 		// and having max_gain_factor at 1.5 prevents testAvg43, testAvg44 being too bright and oversaturated
-		// for iso > 150, we also don't want max_gain_factor 4, as makes cases too bright and overblown if it would
+		// for other images, we also don't want max_gain_factor 4, as makes cases too bright and overblown if it would
 		// take the max_possible_value over 255. Especially testAvg46, but also testAvg25, testAvg31, testAvg38,
 		// testAvg39
-		//float max_gain_factor = 4;
 		float max_gain_factor = 1.5f;
 		int ideal_brightness = 119;
-		//if( iso <= 120 ) {
-		if( iso <= 150 ) {
+		//if( iso <= 150 ) {
+		if( iso < 1100 && exposure_time < 1000000000L/60 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
-			// but note we use 119 for iso > 150, otherwise testAvg17, testAvg23, testAvg36 are too bright
+			// but note we don't want to treat the following as "bright": testAvg17, testAvg23, testAvg36, testAvg37, testAvg50
 			ideal_brightness = 199;
-			//max_gain_factor = 3;
-			//max_gain_factor = 2;
-			//max_gain_factor = 1.5f;
 		}
 		int brightness_target = getBrightnessTarget(brightness, max_gain_factor, ideal_brightness);
 		//int max_target = Math.min(255, (int)((max_brightness*brightness_target)/(float)brightness + 0.5f) );
@@ -2519,8 +2516,9 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use piecewise gain/gamma");
 			// use piecewise function with gain and gamma
-			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6; using 0.8 helps testAvg46 further
-			float mid_y = iso <= 150 ? 0.6f*255.0f : 0.8f*255.0f;
+			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6; using 0.8 helps testAvg46 and testAvg50 further
+			//float mid_y = iso <= 150 ? 0.6f*255.0f : 0.8f*255.0f;
+			float mid_y = ( iso < 1100 && exposure_time < 1000000000L/60 ) ? 0.6f*255.0f : 0.8f*255.0f;
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
@@ -2563,13 +2561,15 @@ public class HDRProcessor {
 	 * @param width         Width of the input.
 	 * @param height        Height of the input.
 	 * @param iso           ISO used for the original images.
+	 * @param exposure_time Exposure time used for the original images.
 	 * @return              Resultant bitmap.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
+	public Bitmap avgBrighten(Allocation input, int width, int height, int iso, long exposure_time) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "avgBrighten");
 			Log.d(TAG, "iso: " + iso);
+			Log.d(TAG, "exposure_time: " + exposure_time);
 		}
         initRenderscript();
 
@@ -2588,7 +2588,7 @@ public class HDRProcessor {
 			Log.d(TAG, "max brightness: " + max_brightness);
 		}
 
-		BrightenFactors brighten_factors = computeBrightenFactors(iso, brightness, max_brightness);
+		BrightenFactors brighten_factors = computeBrightenFactors(iso, exposure_time, brightness, max_brightness);
 		float gain = brighten_factors.gain;
 		float low_x = brighten_factors.low_x;
 		float mid_x = brighten_factors.mid_x;
@@ -2732,13 +2732,15 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
-		if( iso <= 150 ) {
-			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
+		//if( iso <= 150 ) {
+		if( iso < 1100 && exposure_time < 1000000000L/60 ) {
+			// for bright scenes, contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
 			// keep n_tiles==1 - get too much contrast enhancement with n_tiles==4 e.g. for testAvg34
 			// tests that are better at 25% (median brightness in brackets): testAvg16 (90), testAvg26 (117), testAvg30 (79),
 			//     testAvg43 (55), testAvg44 (82)
 			// tests that are better at 50%: testAvg12 (8), testAvg13 (38), testAvg15 (10), testAvg18 (39), testAvg19 (37)
+			// other tests improved by doing contrast enhancement: testAvg32, testAvg40
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 4, time_s);
 			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);

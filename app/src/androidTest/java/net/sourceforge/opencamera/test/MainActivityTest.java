@@ -10954,7 +10954,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  time to transfer to the device everytime we run the tests.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private HistogramDetails subTestAvg(List<String> inputs, String output_name, int iso, TestAvgCallback cb) throws IOException, InterruptedException {
+	private HistogramDetails subTestAvg(List<String> inputs, String output_name, int iso, long exposure_time, TestAvgCallback cb) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestAvg");
 
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
@@ -11027,7 +11027,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 
 			time_s = System.currentTimeMillis();
-            nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height, iso);
+            nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height, iso, exposure_time);
 			avg_data.destroy();
 			avg_data = null;
 			times.add(System.currentTimeMillis() - time_s);
@@ -11077,7 +11077,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", 1600, 1000000000L/17, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11132,7 +11132,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", 1600, 1000000000L/17, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11187,7 +11187,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", 1600, 1000000000L/16, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11279,7 +11279,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", 1600, 1000000000L/16, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11346,7 +11346,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", 1600, 1000000000L/16, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11418,7 +11418,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", 1600, 1000000000L/17, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11503,7 +11503,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", 1600, 1000000000L/16, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11553,7 +11553,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", 1600, 1000000000L/16, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11610,7 +11610,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1600, use_auto_photos ? 1000000000L/16 : 1000000000L/11, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11659,7 +11659,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		String out_filename = use_auto_photos ? "testAvg10_auto_output.jpg" : "testAvg10_output.jpg";
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1196, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, 1196, use_auto_photos ? 1000000000L/12 : 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11694,7 +11694,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg11/input6.jpg");
 		inputs.add(avg_images_path + "testAvg11/input7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg11_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg11_output.jpg", 100, 1000000000L/338, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11801,7 +11801,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg12/input0.jpg");
 		inputs.add(avg_images_path + "testAvg12/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg12_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg12_output.jpg", 100, 1000000000L/1617, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11831,7 +11831,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg13/input0.jpg");
 		inputs.add(avg_images_path + "testAvg13/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg13_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg13_output.jpg", 100, 1000000000L/2482, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11866,7 +11866,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg14_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg14_output.jpg", 1600, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11901,7 +11901,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg15/input0.jpg");
 		inputs.add(avg_images_path + "testAvg15/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg15_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg15_output.jpg", 100, 1000000000L/1525, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11928,7 +11928,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg16/input0.jpg");
 		inputs.add(avg_images_path + "testAvg16/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg16_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg16_output.jpg", 100, 1000000000L/293, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -11963,7 +11963,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// the input images record ISO=800, but they were taken with OnePlus 3T which has bug where ISO is reported as max
 		// of 800; in reality for a scene this dark, it was probably more like ISO 1600
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 1600, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 1600, 1000000000L/17, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12003,7 +12003,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg18/input0.jpg");
 		inputs.add(avg_images_path + "testAvg18/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg18_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg18_output.jpg", 100, 1000000000L/591, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12031,7 +12031,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg19/input0.jpg");
 		inputs.add(avg_images_path + "testAvg19/input0.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg19_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg19_output.jpg", 100, 1000000000L/2483, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12063,7 +12063,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg20/input0.jpg");
 		inputs.add(avg_images_path + "testAvg20/input0.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg20_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg20_output.jpg", 100, 1000000000L/3124, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12091,7 +12091,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg21/input0.jpg");
 		inputs.add(avg_images_path + "testAvg21/input0.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg21_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg21_output.jpg", 102, 1000000000L/6918, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12119,7 +12119,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg22/input0.jpg");
 		inputs.add(avg_images_path + "testAvg22/input0.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg22_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg22_output.jpg", 100, 1000000000L/3459, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12153,7 +12153,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_6.jpg");
 		inputs.add(avg_images_path + "testAvg23/IMG_20180520_111250_7.jpg");*/
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg23_output.jpg", 1044, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg23_output.jpg", 1044, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12216,7 +12216,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg24/input0.jpg");
 		inputs.add(avg_images_path + "testAvg24/input1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg24_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg24_output.jpg", 100, 1000000000L/2421, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12247,7 +12247,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg25/input2.jpg");
 		inputs.add(avg_images_path + "testAvg25/input3.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, 1000000000L/20, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12275,7 +12275,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg26/input2.jpg");
 		inputs.add(avg_images_path + "testAvg26/input3.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg26_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg26_output.jpg", 100, 1000000000L/365, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12317,7 +12317,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg27/IMG_20180610_205929_0.jpg");
 		inputs.add(avg_images_path + "testAvg27/IMG_20180610_205929_1.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg27_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg27_output.jpg", 100, 1000000000L/482, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12350,7 +12350,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg28/input007.jpg");
 		inputs.add(avg_images_path + "testAvg28/input008.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg28_output.jpg", 811, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg28_output.jpg", 811, 1000000000L/21, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12386,7 +12386,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg29/input008.jpg");
 		inputs.add(avg_images_path + "testAvg29/input009.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg29_output.jpg", 40, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg29_output.jpg", 40, 1000000000L/2660, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12415,7 +12415,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg30/input002.jpg");
 		inputs.add(avg_images_path + "testAvg30/input003.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg30_output.jpg", 60, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg30_output.jpg", 60, 1000000000L/411, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12470,7 +12470,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg31/input009.jpg");
 		inputs.add(avg_images_path + "testAvg31/input010.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg31_output.jpg", 609, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg31_output.jpg", 609, 1000000000L/25, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12503,7 +12503,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg32/input006.jpg");
 		inputs.add(avg_images_path + "testAvg32/input007.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg32_output.jpg", 335, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg32_output.jpg", 335, 1000000000L/120, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12511,7 +12511,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 0, 34, 255);
-		checkHistogramDetails(hdrHistogramDetails, 0, 13, 255);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 13, 255);
+		checkHistogramDetails(hdrHistogramDetails, 0, 36, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg33".
@@ -12539,7 +12540,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg33/input009.jpg");
 		inputs.add(avg_images_path + "testAvg33/input010.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg33_output.jpg", 948, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg33_output.jpg", 948, 1000000000L/18, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12565,7 +12566,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg34/IMG_20180627_121959_1.jpg");
 		inputs.add(avg_images_path + "testAvg34/IMG_20180627_121959_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg34_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg34_output.jpg", 100, 1000000000L/289, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12593,7 +12594,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg35/IMG_20180711_144453_1.jpg");
 		inputs.add(avg_images_path + "testAvg35/IMG_20180711_144453_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg35_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg35_output.jpg", 100, 1000000000L/2549, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12619,13 +12620,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_1.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_2.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_3.jpg");
-		// only test 4 images, to reflect latest behaviour that we take 4 images for this ISO
+		// only test 4 images, to reflect latest behaviour that we take 4 images for this ISO/exposure time
 		/*inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_4.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_5.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_6.jpg");
 		inputs.add(avg_images_path + "testAvg36/IMG_20180709_114831_7.jpg");*/
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg36_output.jpg", 752, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg36_output.jpg", 752, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12661,7 +12662,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg37/IMG_20180715_173155_2.jpg");
 		inputs.add(avg_images_path + "testAvg37/IMG_20180715_173155_3.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg37_output.jpg", 131, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg37_output.jpg", 131, 1000000000L/50, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12671,7 +12672,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 12, 109, 255);
 		//checkHistogramDetails(hdrHistogramDetails, 3, 99, 255);
 		//checkHistogramDetails(hdrHistogramDetails, 0, 99, 255);
-		checkHistogramDetails(hdrHistogramDetails, 0, 125, 255);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 125, 255);
+		checkHistogramDetails(hdrHistogramDetails, 0, 94, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg38".
@@ -12694,7 +12696,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg38/IMG_20180716_232102_6.jpg");
 		inputs.add(avg_images_path + "testAvg38/IMG_20180716_232102_7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg38_output.jpg", 1505, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg38_output.jpg", 1505, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12727,7 +12729,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg39/input009.jpg");
 		inputs.add(avg_images_path + "testAvg39/input010.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg39_output.jpg", 521, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg39_output.jpg", 521, 1000000000L/27, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12762,7 +12764,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg40/input008.jpg");
 		inputs.add(avg_images_path + "testAvg40/input009.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg40_output.jpg", 199, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg40_output.jpg", 199, 1000000000L/120, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12770,7 +12772,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 0, 50, 255);
-		checkHistogramDetails(hdrHistogramDetails, 0, 19, 255);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 19, 255);
+		checkHistogramDetails(hdrHistogramDetails, 0, 50, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvg41".
@@ -12798,7 +12801,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg41/input009.jpg");
 		inputs.add(avg_images_path + "testAvg41/input010.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg41_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg41_output.jpg", 100, 1000000000L/869, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12824,7 +12827,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg42/IMG_20180822_145152_1.jpg");
 		inputs.add(avg_images_path + "testAvg42/IMG_20180822_145152_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg42_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg42_output.jpg", 100, 1000000000L/2061, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12850,7 +12853,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg43/IMG_20180831_143226_1.jpg");
 		inputs.add(avg_images_path + "testAvg43/IMG_20180831_143226_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg43_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg43_output.jpg", 100, 1000000000L/2152, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12875,7 +12878,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg44/IMG_20180830_133917_1.jpg");
 		inputs.add(avg_images_path + "testAvg44/IMG_20180830_133917_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg44_output.jpg", 40, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg44_output.jpg", 40, 1000000000L/2130, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12900,7 +12903,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg45/IMG_20180719_133947_1.jpg");
 		inputs.add(avg_images_path + "testAvg45/IMG_20180719_133947_2.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg45_output.jpg", 100, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg45_output.jpg", 100, 1000000000L/865, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12930,7 +12933,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg46/IMG_20180903_203141_6.jpg");
 		inputs.add(avg_images_path + "testAvg46/IMG_20180903_203141_7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg46_output.jpg", 1505, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg46_output.jpg", 1505, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12956,7 +12959,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg47/IMG_20180911_114752_2.jpg");
 		inputs.add(avg_images_path + "testAvg47/IMG_20180911_114752_3.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg47_output.jpg", 749, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg47_output.jpg", 749, 1000000000L/12, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -12986,7 +12989,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg48/IMG_20180911_110520_6.jpg");
 		inputs.add(avg_images_path + "testAvg48/IMG_20180911_110520_7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg48_output.jpg", 1196, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg48_output.jpg", 1196, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -13016,7 +13019,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg49/IMG_20180911_120200_6.jpg");
 		inputs.add(avg_images_path + "testAvg49/IMG_20180911_120200_7.jpg");
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg49_output.jpg", 1505, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg49_output.jpg", 1505, 1000000000L/10, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
@@ -13024,6 +13027,32 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 0, 30, 255);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg50".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg50() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg50");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg50/IMG_20181015_144335_0.jpg");
+		inputs.add(avg_images_path + "testAvg50/IMG_20181015_144335_1.jpg");
+		inputs.add(avg_images_path + "testAvg50/IMG_20181015_144335_2.jpg");
+		inputs.add(avg_images_path + "testAvg50/IMG_20181015_144335_3.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg50_output.jpg", 114, 1000000000L/33, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 91, 255);
 	}
 
 	/** Tests Avg algorithm on test samples "testAvgtemp".
@@ -13049,7 +13078,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvgtemp/input6.jpg");
 		inputs.add(avg_images_path + "testAvgtemp/input7.jpg");*/
 
-		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvgtemp_output.jpg", 250, new TestAvgCallback() {
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvgtemp_output.jpg", 250, 1000000000L/33, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);

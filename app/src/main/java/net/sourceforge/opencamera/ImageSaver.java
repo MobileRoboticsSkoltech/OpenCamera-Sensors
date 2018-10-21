@@ -110,6 +110,7 @@ public class ImageSaver extends Thread {
 		final boolean mirror;
 		final Date current_date;
 		final int iso; // not applicable for RAW image
+		final long exposure_time; // not applicable for RAW image
 		final String preference_stamp;
 		final String preference_textstamp;
 		final int font_size;
@@ -141,6 +142,7 @@ public class ImageSaver extends Thread {
 			boolean mirror,
 			Date current_date,
 			int iso,
+			long exposure_time,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -163,6 +165,7 @@ public class ImageSaver extends Thread {
 			this.mirror = mirror;
 			this.current_date = current_date;
 			this.iso = iso;
+			this.exposure_time = exposure_time;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
 			this.font_size = font_size;
@@ -419,6 +422,7 @@ public class ImageSaver extends Thread {
 			boolean mirror,
 			Date current_date,
 			int iso,
+			long exposure_time,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -444,6 +448,7 @@ public class ImageSaver extends Thread {
 				mirror,
 				current_date,
 				iso,
+				exposure_time,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -479,6 +484,7 @@ public class ImageSaver extends Thread {
 				false,
 				current_date,
 				0,
+				0,
 				null, null, 0, 0, null, null, null, null, null,
 				false, null, false, 0.0,
 				null, null,
@@ -496,6 +502,7 @@ public class ImageSaver extends Thread {
 			boolean mirror,
 			Date current_date,
 			int iso,
+			long exposure_time,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -519,6 +526,7 @@ public class ImageSaver extends Thread {
 				mirror,
 				current_date,
 				iso,
+				exposure_time,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -577,6 +585,7 @@ public class ImageSaver extends Thread {
 			boolean mirror,
 			Date current_date,
 			int iso,
+			long exposure_time,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -604,6 +613,7 @@ public class ImageSaver extends Thread {
 				mirror,
 				current_date,
 				iso,
+				exposure_time,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -705,6 +715,7 @@ public class ImageSaver extends Thread {
 			false,
 			false,
 			null,
+			0,
 			0,
 			null, null, 0, 0, null, null, null, null, null,
 			false, null, false, 0.0,
@@ -1049,7 +1060,7 @@ public class ImageSaver extends Thread {
 					}
 
 					this_time_s = System.currentTimeMillis();
-					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, request.iso);
+					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, request.iso, request.exposure_time);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "*** time for brighten: " + (System.currentTimeMillis() - this_time_s));
 					}
