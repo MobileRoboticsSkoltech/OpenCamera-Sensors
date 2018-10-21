@@ -10830,6 +10830,46 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHistogramDetails(hdrHistogramDetails, 0, 72, 244);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR50".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR50() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR50");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR50/IMG_20180626_221357_0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR50/IMG_20180626_221357_1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR50/IMG_20180626_221357_2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR50_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR51".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR51() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR51");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR51/IMG_20180323_104702_0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR51/IMG_20180323_104702_1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR51/IMG_20180323_104702_2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR51_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .

@@ -66,6 +66,8 @@ public class HDRTests {
 		// don't include testHDR47, this is tested as part of HDRNTests
 		// don't include testHDR48, this is tested as part of HDRNTests
 		// don't include testHDR49, this is tested as part of HDRNTests
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR50"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR51"));
         return suite;
     }
 }
