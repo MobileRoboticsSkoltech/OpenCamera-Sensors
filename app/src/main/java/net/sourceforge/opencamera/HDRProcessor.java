@@ -2212,8 +2212,10 @@ public class HDRProcessor {
 					// clip histogram, for Contrast Limited AHE algorithm
 					int n_pixels = (stop_x - start_x) * (stop_y - start_y);
 					int clip_limit = (5 * n_pixels) / 256;
-						/*if( MyDebug.LOG )
-							Log.d(TAG, "clip_limit: " + clip_limit);*/
+					/*if( MyDebug.LOG ) {
+                        Log.d(TAG, "clip_limit: " + clip_limit);
+                        Log.d(TAG, "    relative clip limit: " + clip_limit*256.0f/n_pixels);
+                    }*/
 					{
 						// find real clip limit
 						int bottom = 0, top = clip_limit;
@@ -2231,12 +2233,17 @@ public class HDRProcessor {
 								bottom = middle;
 						}
 						clip_limit = (top + bottom)/2;
-							/*if( MyDebug.LOG )
-								Log.d(TAG, "updated clip_limit: " + clip_limit);*/
+                        /*if( MyDebug.LOG ) {
+                            Log.d(TAG, "updated clip_limit: " + clip_limit);
+                            Log.d(TAG, "    relative updated clip limit: " + clip_limit*256.0f/n_pixels);
+                        }*/
 					}
 					int n_clipped = 0;
 					for(int x=0;x<256;x++) {
 						if( histogram[x] > clip_limit ) {
+                            /*if( MyDebug.LOG ) {
+                                Log.d(TAG, "    " + x + " : " + histogram[x] + " : " + (histogram[x]*256.0f/n_pixels));
+                            }*/
 							n_clipped += (histogram[x] - clip_limit);
 							histogram[x] = clip_limit;
 						}
