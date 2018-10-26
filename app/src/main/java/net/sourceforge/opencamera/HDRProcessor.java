@@ -1082,9 +1082,10 @@ public class HDRProcessor {
 	 * @param bitmap_new     The other input image. The bitmap is recycled.
 	 * @param avg_factor     The weighting factor for bitmap_avg.
 	 * @param iso            The ISO used to take the photos.
+	 * @param zoom_factor    The digital zoom factor used to take the photos.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public AvgData processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
+	public AvgData processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso, float zoom_factor) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -1139,7 +1140,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
-		AvgData avg_data = processAvgCore(null, null, bitmap_avg, bitmap_new, width, height, avg_factor, iso, null, null, time_s);
+		AvgData avg_data = processAvgCore(null, null, bitmap_avg, bitmap_new, width, height, avg_factor, iso, zoom_factor, null, null, time_s);
 
 		//allocation_avg.copyTo(bitmap_avg);
 
@@ -1156,9 +1157,10 @@ public class HDRProcessor {
 	 * @param bitmap_new     The new input image. The bitmap is recycled.
 	 * @param avg_factor     The weighting factor for bitmap_avg.
 	 * @param iso            The ISO used to take the photos.
+	 * @param zoom_factor    The digital zoom factor used to take the photos.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void updateAvg(AvgData avg_data, int width, int height, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
+	public void updateAvg(AvgData avg_data, int width, int height, Bitmap bitmap_new, float avg_factor, int iso, float zoom_factor) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -1178,7 +1180,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));*/
 
-		processAvgCore(avg_data.allocation_out, avg_data.allocation_out, null, bitmap_new, width, height, avg_factor, iso, avg_data.allocation_avg_align, avg_data.bitmap_avg_align, time_s);
+		processAvgCore(avg_data.allocation_out, avg_data.allocation_out, null, bitmap_new, width, height, avg_factor, iso, zoom_factor, avg_data.allocation_avg_align, avg_data.bitmap_avg_align, time_s);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for updateAvg: " + (System.currentTimeMillis() - time_s));
@@ -1196,6 +1198,7 @@ public class HDRProcessor {
 	 * @param height         The height of the bitmaps.
 	 * @param avg_factor     The averaging factor.
 	 * @param iso            The ISO used for the photos.
+	 * @param zoom_factor    The digital zoom factor used to take the photos.
 	 * @param allocation_avg_align If non-null, use this allocation for alignment for averaged image.
 	 * @param bitmap_avg_align Should be supplied if allocation_avg_align is non-null, and stores
 	 *                         the bitmap corresponding to the allocation_avg_align.
@@ -1203,10 +1206,11 @@ public class HDRProcessor {
 	 * @throws HDRProcessorException
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
+	private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, float zoom_factor, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgCore");
 			Log.d(TAG, "iso: " + iso);
+			Log.d(TAG, "zoom_factor: " + zoom_factor);
 		}
 
 		Allocation allocation_new = null;
@@ -1234,12 +1238,14 @@ public class HDRProcessor {
 			//final int scale_align_size = 2;
 			//final int scale_align_size = 4;
 			//final int scale_align_size = Math.max(4 / this.cached_avg_sample_size, 1);
-			final int scale_align_size = Math.max(4 / this.getAvgSampleSize(iso), 1);
+			final int scale_align_size = (zoom_factor > 3.9f) ?
+					1 :
+					Math.max(4 / this.getAvgSampleSize(iso), 1);
 			if( MyDebug.LOG )
 				Log.d(TAG, "scale_align_size: " + scale_align_size);
 			boolean crop_to_centre = true;
 			if( scale_align ) {
-			    // use scaled down bitmaps for alignment
+			    // use scaled down and/or cropped bitmaps for alignment
 				if( MyDebug.LOG )
 					Log.d(TAG, "### time before creating allocations for autoalignment: " + (System.currentTimeMillis() - time_s));
                 Matrix align_scale_matrix = new Matrix();
@@ -1824,7 +1830,8 @@ public class HDRProcessor {
 		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
 		// to misidentify cases as needing a large offset.
 		int max_dim = Math.max(full_width, full_height); // n.b., use the full width and height here, not the mtb_width, height
-		int max_ideal_size = max_dim / (try_harder ? 150 : 300);
+        int max_ideal_size = max_dim / (try_harder ? 150 : 300);
+        //int max_ideal_size = max_dim / (try_harder ? 75 : 300);
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
 			initial_step_size *= 2;

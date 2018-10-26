@@ -111,6 +111,7 @@ public class ImageSaver extends Thread {
 		final Date current_date;
 		final int iso; // not applicable for RAW image
 		final long exposure_time; // not applicable for RAW image
+		final float zoom_factor; // not applicable for RAW image
 		final String preference_stamp;
 		final String preference_textstamp;
 		final int font_size;
@@ -143,6 +144,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			int iso,
 			long exposure_time,
+			float zoom_factor,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -166,6 +168,7 @@ public class ImageSaver extends Thread {
 			this.current_date = current_date;
 			this.iso = iso;
 			this.exposure_time = exposure_time;
+			this.zoom_factor = zoom_factor;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
 			this.font_size = font_size;
@@ -423,6 +426,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			int iso,
 			long exposure_time,
+			float zoom_factor,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -449,6 +453,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				iso,
 				exposure_time,
+				zoom_factor,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -485,6 +490,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				0,
 				0,
+				1.0f,
 				null, null, 0, 0, null, null, null, null, null,
 				false, null, false, 0.0,
 				null, null,
@@ -503,6 +509,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			int iso,
 			long exposure_time,
+			float zoom_factor,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -527,6 +534,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				iso,
 				exposure_time,
+				zoom_factor,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -586,6 +594,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			int iso,
 			long exposure_time,
+			float zoom_factor,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_units_distance,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			String custom_tag_artist,
@@ -614,6 +623,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				iso,
 				exposure_time,
+				zoom_factor,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 				store_location, location, store_geo_direction, geo_direction,
 				custom_tag_artist,
@@ -717,6 +727,7 @@ public class ImageSaver extends Thread {
 			null,
 			0,
 			0,
+			1.0f,
 			null, null, 0, 0, null, null, null, null, null,
 			false, null, false, 0.0,
 			null, null,
@@ -997,7 +1008,7 @@ public class ImageSaver extends Thread {
 					int height = bitmap0.getHeight();
 					float avg_factor = 1.0f;
 					this_time_s = System.currentTimeMillis();
-					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, request.iso);
+					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, request.iso, request.zoom_factor);
 					if( bitmaps != null ) {
 						bitmaps.set(0, null);
 						bitmaps.set(1, null);
@@ -1049,7 +1060,7 @@ public class ImageSaver extends Thread {
 						}
 						avg_factor = (float)i;
 						this_time_s = System.currentTimeMillis();
-						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, request.iso);
+						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, request.iso, request.zoom_factor);
 						// updateAvg recycles new_bitmap
 						if( bitmaps != null ) {
 							bitmaps.set(i, null);

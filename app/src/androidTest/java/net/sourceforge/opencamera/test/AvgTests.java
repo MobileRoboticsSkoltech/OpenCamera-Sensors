@@ -62,6 +62,7 @@ public class AvgTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg48"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg49"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg50"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAvg51"));
         return suite;
     }
 }

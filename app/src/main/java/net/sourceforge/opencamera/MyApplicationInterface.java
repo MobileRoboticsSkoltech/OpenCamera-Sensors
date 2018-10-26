@@ -2278,6 +2278,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					Log.d(TAG, "exposure_time: " + exposure_time);
 			}
 		}
+		float zoom_factor = main_activity.getPreview().getZoomRatio();
 
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
@@ -2330,6 +2331,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					current_date,
 					iso,
 					exposure_time,
+					zoom_factor,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
@@ -2352,6 +2354,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					current_date,
 					iso,
 					exposure_time,
+					zoom_factor,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
