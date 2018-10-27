@@ -845,6 +845,21 @@ public class CameraController1 extends CameraController {
 		return false;
 	}
 
+    @Override
+    public boolean isCapturingBurst() {
+        return getBurstTotal() > 0 && getNBurstTaken() < getBurstTotal();
+    }
+
+    @Override
+	public int getNBurstTaken() {
+		return pending_burst_images.size();
+	}
+
+    @Override
+    public int getBurstTotal() {
+        return n_burst;
+    }
+
 	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		// not supported for CameraController1

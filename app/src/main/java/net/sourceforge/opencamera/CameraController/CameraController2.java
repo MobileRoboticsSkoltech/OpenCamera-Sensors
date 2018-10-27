@@ -115,7 +115,9 @@ public class CameraController2 extends CameraController {
 	private PictureCallback jpeg_cb;
 	private PictureCallback raw_cb;
 	//private CaptureRequest pending_request_when_ready;
-	private int n_burst; // number of expected burst images in this capture
+	private int n_burst; // number of expected (remaining) burst images in this capture
+	private int n_burst_taken; // number of burst images taken so far in this capture
+    private int n_burst_total; // total number of expected burst images in this capture (if known)
 	private boolean burst_single_request; // if n_burst > 1: if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (e.g., when use_expo_fast_burst==false, or for focus bracketing)
@@ -938,6 +940,9 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "read " + bytes.length + " bytes");
 				buffer.get(bytes);
 				image.close();
+				n_burst_taken++;
+				if( MyDebug.LOG )
+					Log.d(TAG, "n_burst_taken is now: " + n_burst_taken);
 				if( burst_single_request && n_burst > 1 ) {
 					pending_burst_images.add(bytes);
 					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
@@ -3128,6 +3133,24 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean isCapturingBurst() {
+		if( burst_type == BurstType.BURSTTYPE_CONTINUOUS )
+			return continuous_burst_in_progress;
+		return getBurstTotal() > 0 && getNBurstTaken() < getBurstTotal();
+	}
+
+    @Override
+    public int getNBurstTaken() {
+        return n_burst_taken;
+    }
+
+	@Override
+	public int getBurstTotal() {
+		if( burst_type == BurstType.BURSTTYPE_CONTINUOUS )
+			return 0; // total burst size is unknown
+		return n_burst_total;
+	}
+    @Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setOptimiseAEForDRO: " + optimise_ae_for_dro);
@@ -3237,6 +3260,8 @@ public class CameraController2 extends CameraController {
 		}
 		slow_burst_capture_requests = null;
 		n_burst = 0;
+		n_burst_taken = 0;
+        n_burst_total = 0;
 		burst_single_request = false;
 		slow_burst_start_ms = 0;
 	}
@@ -4865,6 +4890,8 @@ public class CameraController2 extends CameraController {
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			n_burst = 1;
+			n_burst_taken = 0;
+            n_burst_total = n_burst;
 			burst_single_request = false;
 			if( !previewIsVideoMode ) {
 				// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
@@ -5173,6 +5200,8 @@ public class CameraController2 extends CameraController {
 			*/
 
 			n_burst = requests.size();
+            n_burst_total = n_burst;
+			n_burst_taken = 0;
 			burst_single_request = true;
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
@@ -5289,6 +5318,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "start continuous burst");
 					continuous_burst_in_progress = true;
 					n_burst = 1;
+					n_burst_taken = 0;
 				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "n_burst is now " + n_burst);
@@ -5297,6 +5327,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "choose n_burst for burst_for_noise_reduction");
 				n_burst = 4;
+				n_burst_taken = 0;
 
 				if( capture_result_has_iso ) {
 					// For Nexus 6, max reported ISO is 1196, so the limit for dark scenes shouldn't be more than this
@@ -5346,7 +5377,9 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "user requested n_burst");
 				n_burst = burst_requested_n_images;
+				n_burst_taken = 0;
 			}
+			n_burst_total = n_burst;
 			burst_single_request = false;
 
 			if( MyDebug.LOG )

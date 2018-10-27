@@ -374,6 +374,17 @@ public abstract class CameraController {
 	public abstract void setExpoBracketingStops(double stops);
 	public abstract void setUseExpoFastBurst(boolean use_expo_fast_burst);
 	public abstract boolean isBurstOrExpo();
+    /** If true, then the camera controller is currently capturing a burst of images.
+     */
+    public abstract boolean isCapturingBurst();
+    /** If isCapturingBurst() is true, then this returns the number of images in the current burst
+     *  captured so far.
+     */
+	public abstract int getNBurstTaken();
+    /** If isCapturingBurst() is true, then this returns the total number of images in the current
+     *  burst if known. If not known (e.g., for continuous burst mode), returns 0.
+     */
+	public abstract int getBurstTotal();
 	/** If optimise_ae_for_dro is true, then this is a hint that if in auto-exposure mode and flash/torch
 	 *  is not on, the CameraController should try to optimise for a DRO (dynamic range optimisation) mode.
 	 */
