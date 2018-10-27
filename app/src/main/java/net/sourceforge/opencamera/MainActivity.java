@@ -314,8 +314,7 @@ public class MainActivity extends Activity {
         takePhotoButton.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				longClickedTakePhoto();
-				return true;
+				return longClickedTakePhoto();
 			}
         });
         // set up on touch listener so we can detect if we've released from a long click
@@ -1150,13 +1149,32 @@ public class MainActivity extends Activity {
         applicationInterface.getImageSaver().waitUntilDone();
     }
 
-    public void longClickedTakePhoto() {
+    public boolean longClickedTakePhoto() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedTakePhoto");
-		MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
-		if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
-			this.takePicturePressed(false, true);
+		// need to check whether fast burst is supported (including for the current resolution),
+		// in case we're in Standard photo mode
+		if( supportsFastBurst() ) {
+			CameraController.Size current_size = preview.getCurrentPictureSize();
+			if( current_size != null && current_size.supports_burst ) {
+				MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
+				if( photo_mode == MyApplicationInterface.PhotoMode.Standard ||
+						photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
+					this.takePicturePressed(false, true);
+					return true;
+				}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "fast burst not supported for this resolution");
+			}
 		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "fast burst not supported");
+		}
+		// return false, so a regular click will still be triggered when the user releases the touch
+		return false;
 	}
 
     public void clickedTakePhoto(View view) {
