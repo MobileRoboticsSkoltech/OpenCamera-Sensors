@@ -1473,24 +1473,17 @@ public class DrawPreview {
 				}
 			}
 			else if( taking_picture && capture_started ) {
-				if( photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
-						photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
-						photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
-						photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ||
-						camera_controller.isContinuousBurstInProgress()
-						) {
-					if( camera_controller.isCapturingBurst() ) {
-						int n_burst_taken = camera_controller.getNBurstTaken() + 1;
-						int n_burst_total = camera_controller.getBurstTotal();
-						p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-						p.setTextAlign(Paint.Align.CENTER);
-						int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
-						String text = getContext().getResources().getString(R.string.capturing) + " " + n_burst_taken;
-						if( n_burst_total > 0 ) {
-							text += " / " + n_burst_total;
-						}
-						applicationInterface.drawTextWithBackground(canvas, p, text, Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				if( camera_controller.isCapturingBurst() ) {
+					int n_burst_taken = camera_controller.getNBurstTaken() + 1;
+					int n_burst_total = camera_controller.getBurstTotal();
+					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.CENTER);
+					int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
+					String text = getContext().getResources().getString(R.string.capturing) + " " + n_burst_taken;
+					if( n_burst_total > 0 ) {
+						text += " / " + n_burst_total;
 					}
+					applicationInterface.drawTextWithBackground(canvas, p, text, Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 				}
 				else if( camera_controller.isManualISO() ) {
 					// only show "capturing" text with time for manual exposure time >= 0.5s

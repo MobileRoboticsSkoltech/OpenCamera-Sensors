@@ -3128,15 +3128,16 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean isBurstOrExpo() {
-		// not supported for CameraController1
 		return this.burst_type != BurstType.BURSTTYPE_NONE;
 	}
 
 	@Override
 	public boolean isCapturingBurst() {
+		if( !isBurstOrExpo() )
+			return false;
 		if( burst_type == BurstType.BURSTTYPE_CONTINUOUS )
-			return continuous_burst_in_progress;
-		return getBurstTotal() > 0 && getNBurstTaken() < getBurstTotal();
+			return continuous_burst_in_progress || n_burst > 0;
+		return getBurstTotal() > 1 && getNBurstTaken() < getBurstTotal();
 	}
 
     @Override

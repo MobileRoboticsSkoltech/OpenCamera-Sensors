@@ -847,7 +847,7 @@ public class CameraController1 extends CameraController {
 
     @Override
     public boolean isCapturingBurst() {
-        return getBurstTotal() > 0 && getNBurstTaken() < getBurstTotal();
+        return getBurstTotal() > 1 && getNBurstTaken() < getBurstTotal();
     }
 
     @Override
