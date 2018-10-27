@@ -318,7 +318,7 @@ public class MainActivity extends Activity {
 				return true;
 			}
         });
-        // set up on touch listener so we can detect if we've released frm a long click
+        // set up on touch listener so we can detect if we've released from a long click
         takePhotoButton.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
