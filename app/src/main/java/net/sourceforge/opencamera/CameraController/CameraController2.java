@@ -4896,6 +4896,7 @@ public class CameraController2 extends CameraController {
 			if( !previewIsVideoMode ) {
 				// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 				// but don't do this in video mode - if we're taking photo snapshots while video recording, we don't want to pause video!
+				// update: bug with flash may have been device specific (things are fine with Nokia 8)
 				captureSession.stopRepeating();
 			}
 			if( jpeg_cb != null ) {
@@ -5389,9 +5390,7 @@ public class CameraController2 extends CameraController {
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			final CaptureRequest last_request = stillBuilder.build();
 
-			if( !previewIsVideoMode ) {
-				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
-			}
+			// n.b., don't stop the preview with stop.Repeating when capturing a burst
 
 			if( jpeg_cb != null ) {
 				if( MyDebug.LOG )
