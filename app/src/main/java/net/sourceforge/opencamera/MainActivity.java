@@ -1339,12 +1339,14 @@ public class MainActivity extends Activity {
 	class PreferencesListener implements SharedPreferences.OnSharedPreferenceChangeListener {
 		private static final String TAG = "PreferencesListener";
 
-		private boolean any; // whether any changes that require update have been made since startListening()
+		private boolean any_significant_change; // whether any changes that require updateForSettings have been made since startListening()
+		private boolean any_change; // whether any changes that require updateForSettings have been made since startListening()
 
 		void startListening() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "startListening");
-			any = false;
+			any_significant_change = false;
+			any_change = false;
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 			// n.b., registerOnSharedPreferenceChangeListener warns that we must keep a reference to the listener (which
@@ -1363,6 +1365,9 @@ public class MainActivity extends Activity {
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onSharedPreferenceChanged: " + key);
+
+			any_change = true;
+
 			switch( key ) {
 				// we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
 				case "preference_timer":
@@ -1423,13 +1428,17 @@ public class MainActivity extends Activity {
 				default:
 					if( MyDebug.LOG )
 						Log.d(TAG, "this change does require update");
-					any = true;
+					any_significant_change = true;
 					break;
 			}
 		}
 
-		boolean anyChanges() {
-			return any;
+		boolean anyChange() {
+			return any_change;
+		}
+
+		boolean anySignificantChange() {
+			return any_significant_change;
 		}
 	}
     
@@ -1833,12 +1842,17 @@ public class MainActivity extends Activity {
 		// to avoid reading the preferences in every single frame).
 		applicationInterface.getDrawPreview().updateSettings();
 
-		if( preferencesListener.anyChanges() ) {
+		if( preferencesListener.anySignificantChange() ) {
 			updateForSettings();
 		}
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
+			if( preferencesListener.anyChange() ) {
+				// however we should still destroy cached popup, in case UI settings need to be kept in
+				// sync (e.g., changing the Repeat Mode)
+				mainUI.destroyPopup();
+			}
 		}
 	}
 
