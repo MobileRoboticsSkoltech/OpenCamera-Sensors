@@ -3391,17 +3391,22 @@ public class MainActivity extends Activity {
     }
     
     public boolean supportsExpoBracketing() {
+		if( applicationInterface.isImageCaptureIntent() )
+			return false; // don't support expo bracketing mode if called from image capture intent
 		return preview.supportsExpoBracketing();
     }
 
     public boolean supportsFocusBracketing() {
+		if( applicationInterface.isImageCaptureIntent() )
+			return false; // don't support focus bracketing mode if called from image capture intent
 		return preview.supportsFocusBracketing();
     }
 
     public boolean supportsFastBurst() {
+		if( applicationInterface.isImageCaptureIntent() )
+			return false; // don't support burst mode if called from image capture intent
 		// require 512MB just to be safe, due to the large number of images that may be created
 		return( preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() );
-		//return false; // currently blocked for release
 	}
 
     public boolean supportsNoiseReduction() {

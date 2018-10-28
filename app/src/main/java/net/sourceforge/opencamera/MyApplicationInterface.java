@@ -2205,7 +2205,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return do_in_background;
 	}
 	
-	private boolean isImageCaptureIntent() {
+	boolean isImageCaptureIntent() {
 		boolean image_capture_intent = false;
 		String action = main_activity.getIntent().getAction();
 		if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
@@ -2266,6 +2266,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
 		int iso = 800; // default value if we can't get ISO
 		long exposure_time = 1000000000L/30; // default value if we can't get shutter speed
+        float zoom_factor = 1.0f;
 		if( main_activity.getPreview().getCameraController() != null ) {
 			if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
 				iso = main_activity.getPreview().getCameraController().captureResultIso();
@@ -2277,8 +2278,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "exposure_time: " + exposure_time);
 			}
+
+            zoom_factor = main_activity.getPreview().getZoomRatio();
 		}
-		float zoom_factor = main_activity.getPreview().getZoomRatio();
 
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
