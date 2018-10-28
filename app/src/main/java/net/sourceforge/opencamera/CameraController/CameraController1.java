@@ -806,6 +806,11 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public void stopFocusBracketingBurst() {
+		// not supported
+	}
+
+	@Override
 	public void setExpoBracketingNImages(int n_images) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExpoBracketingNImages: " + n_images);

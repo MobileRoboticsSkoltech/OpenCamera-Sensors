@@ -3212,6 +3212,22 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void stopFocusBracketingBurst() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "stopFocusBracketingBurst");
+		if( burst_type == BurstType.BURSTTYPE_FOCUS ) {
+			if( n_burst > 0 ) {
+				n_burst = pending_burst_images.size();
+				if( MyDebug.LOG )
+					Log.d(TAG, "n_burst now set to: " + n_burst);
+			}
+		}
+		else {
+			Log.d(TAG, "stopFocusBracketingBurst burst_type is: " + burst_type);
+		}
+	}
+
+	@Override
 	public void setUseCamera2FakeFlash(boolean use_fake_precapture) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUseCamera2FakeFlash: " + use_fake_precapture);

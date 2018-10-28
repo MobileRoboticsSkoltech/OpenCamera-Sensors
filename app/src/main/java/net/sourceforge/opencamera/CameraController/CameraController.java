@@ -364,6 +364,7 @@ public abstract class CameraController {
 	public abstract void setBurstForNoiseReduction(boolean burst_for_noise_reduction);
 	public abstract boolean isContinuousBurstInProgress();
 	public abstract void stopContinuousBurst();
+	public abstract void stopFocusBracketingBurst();
 	/** Only relevant if setBurstType() is also called with BURSTTYPE_EXPO. Sets the number of
 	 *  images to take in the expo burst.
 	 * @param n_images Must be an odd number greater than 1.

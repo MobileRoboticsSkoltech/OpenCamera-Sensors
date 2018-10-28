@@ -4638,6 +4638,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				cancelRepeat();
 				showToast(take_photo_toast, R.string.cancelled_repeat_mode);
 			}
+			else if( !is_video && camera_controller.getBurstType() == CameraController.BurstType.BURSTTYPE_FOCUS && camera_controller.isCapturingBurst() ) {
+				camera_controller.stopFocusBracketingBurst();
+				showToast(take_photo_toast, R.string.cancelled_focus_bracketing);
+			}
 			return;
 		}
 
