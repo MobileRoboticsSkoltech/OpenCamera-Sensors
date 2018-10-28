@@ -956,29 +956,7 @@ public class CameraController2 extends CameraController {
 						jpeg_cb.onBurstPictureTaken(images);
 						pending_burst_images.clear();
 
-						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
-						PictureCallback cb = jpeg_cb;
-						jpeg_cb = null;
-						// no need to check raw_cb, as raw not supported for burst
-						cb.onCompleted();
-
-						if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
-							if( MyDebug.LOG )
-								Log.d(TAG, "focus bracketing complete, reset manual focus");
-							camera_settings.setFocusDistance(previewBuilder);
-							try {
-								setRepeatingRequest();
-							}
-							catch(CameraAccessException e) {
-								if( MyDebug.LOG ) {
-									Log.e(TAG, "failed to set focus distance");
-									Log.e(TAG, "reason: " + e.getReason());
-									Log.e(TAG, "message: " + e.getMessage());
-								}
-								e.printStackTrace();
-							}
-						}
-
+						takePhotoCompleted();
 					}
 					else {
 						if( MyDebug.LOG )
@@ -1079,26 +1057,49 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "continuous burst mode still in progress");
 					}
 					else if( n_burst == 0 ) {
-						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
-						PictureCallback cb = jpeg_cb;
-						jpeg_cb = null;
-						if( raw_cb == null ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "all image callbacks now completed");
-						}
-						else if( pending_raw_image != null ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "can now call pending raw callback");
-							takePendingRaw();
-							if( MyDebug.LOG )
-								Log.d(TAG, "all image callbacks now completed");
-						}
-						cb.onCompleted();
+						takePhotoCompleted();
 					}
 				}
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "done onImageAvailable");
+		}
+
+		private void takePhotoCompleted() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "takePhotoCompleted");
+			// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
+			PictureCallback cb = jpeg_cb;
+			jpeg_cb = null;
+			if( raw_cb == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "all image callbacks now completed");
+			}
+			else if( pending_raw_image != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can now call pending raw callback");
+				takePendingRaw();
+				if( MyDebug.LOG )
+					Log.d(TAG, "all image callbacks now completed");
+			}
+			cb.onCompleted();
+
+			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus bracketing complete, reset manual focus");
+				camera_settings.setFocusDistance(previewBuilder);
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set focus distance");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
