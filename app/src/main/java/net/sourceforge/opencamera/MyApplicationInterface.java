@@ -2341,10 +2341,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			success = true;
 		}
 		else {
+            // fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
+		    boolean force_suffix = photo_mode == PhotoMode.FastBurst || main_activity.getPreview().getCameraController().isCapturingBurst();
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
-					// fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
-					photo_mode == PhotoMode.FastBurst,
-					photo_mode == PhotoMode.FastBurst ? n_capture_images : 0, // n.b., n_capture_images will be 1 for first image, not 0, but this is fine for naming of burst images
+					force_suffix,
+                    force_suffix ? n_capture_images : 0, // n.b., n_capture_images will be 1 for first image, not 0, but this is fine for naming of burst images
 					save_expo, images,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
@@ -2385,7 +2386,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( main_activity.getPreview().isVideo() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "snapshop mode");
+				Log.d(TAG, "snapshot mode");
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}

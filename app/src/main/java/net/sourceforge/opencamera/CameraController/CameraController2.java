@@ -5305,6 +5305,8 @@ public class CameraController2 extends CameraController {
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
+            boolean is_new_burst = true;
+
             if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "continuous burst mode");
@@ -5312,6 +5314,7 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "continuing fast burst");
 					n_burst++;
+					is_new_burst = false;
                     /*if( !continuous_burst_in_progress ) // test bug where we call callback onCompleted() before all burst images are received
                     	n_burst = 1;*/
 				}
@@ -5393,7 +5396,7 @@ public class CameraController2 extends CameraController {
 
 			// n.b., don't stop the preview with stop.Repeating when capturing a burst
 
-			if( jpeg_cb != null ) {
+			if( jpeg_cb != null && is_new_burst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "call onStarted() in callback");
 				jpeg_cb.onStarted();
