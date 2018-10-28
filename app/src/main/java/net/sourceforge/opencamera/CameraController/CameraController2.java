@@ -951,14 +951,15 @@ public class CameraController2 extends CameraController {
 						if( pending_burst_images.size() > n_burst ) {
 							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
 						}
-						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+						// take a copy, so that we can clear pending_burst_images
+						List<byte []> images = new ArrayList<>(pending_burst_images);
+						jpeg_cb.onBurstPictureTaken(images);
+						pending_burst_images.clear();
+
+						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
 						PictureCallback cb = jpeg_cb;
 						jpeg_cb = null;
 						// no need to check raw_cb, as raw not supported for burst
-						// take a copy, so that we can clear pending_burst_images
-						List<byte []> images = new ArrayList<>(pending_burst_images);
-						cb.onBurstPictureTaken(images);
-						pending_burst_images.clear();
 						cb.onCompleted();
 
 						if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
@@ -1084,7 +1085,6 @@ public class CameraController2 extends CameraController {
 						if( raw_cb == null ) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "all image callbacks now completed");
-							cb.onCompleted();
 						}
 						else if( pending_raw_image != null ) {
 							if( MyDebug.LOG )
@@ -1092,8 +1092,8 @@ public class CameraController2 extends CameraController {
 							takePendingRaw();
 							if( MyDebug.LOG )
 								Log.d(TAG, "all image callbacks now completed");
-							cb.onCompleted();
 						}
+						cb.onCompleted();
 					}
 				}
 			}
