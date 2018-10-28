@@ -961,87 +961,7 @@ public class CameraController2 extends CameraController {
 					else {
 						if( MyDebug.LOG )
 							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
-						if( slow_burst_capture_requests != null ) {
-							if( MyDebug.LOG ) {
-								Log.d(TAG, "need to execute the next capture");
-								Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
-							}
-							if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
-								try {
-									if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-										captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-									}
-								}
-								catch(CameraAccessException e) {
-									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next burst");
-										Log.e(TAG, "reason: " + e.getReason());
-										Log.e(TAG, "message: " + e.getMessage());
-									}
-									e.printStackTrace();
-									jpeg_cb = null;
-									if( take_picture_error_cb != null ) {
-										take_picture_error_cb.onError();
-										take_picture_error_cb = null;
-									}
-								}
-							}
-							else if( previewBuilder != null ) { // make sure camera wasn't released in the meantime
-								if( MyDebug.LOG )
-									Log.d(TAG, "focus bracketing");
-
-								// code for focus bracketing
-								try {
-									float focus_distance = slow_burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
-									if( MyDebug.LOG ) {
-										Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
-									}
-									previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-									previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
-
-									setRepeatingRequest(previewBuilder.build());
-									//captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-								}
-								catch(CameraAccessException e) {
-									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next burst");
-										Log.e(TAG, "reason: " + e.getReason());
-										Log.e(TAG, "message: " + e.getMessage());
-									}
-									e.printStackTrace();
-									jpeg_cb = null;
-									if( take_picture_error_cb != null ) {
-										take_picture_error_cb.onError();
-										take_picture_error_cb = null;
-									}
-								}
-								handler.postDelayed(new Runnable(){
-									@Override
-									public void run(){
-										if( MyDebug.LOG )
-											Log.d(TAG, "take picture after delay for next focus bracket");
-										if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-											try {
-												captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-											}
-											catch(CameraAccessException e) {
-												if( MyDebug.LOG ) {
-													Log.e(TAG, "failed to take next burst");
-													Log.e(TAG, "reason: " + e.getReason());
-													Log.e(TAG, "message: " + e.getMessage());
-												}
-												e.printStackTrace();
-												jpeg_cb = null;
-												if( take_picture_error_cb != null ) {
-													take_picture_error_cb.onError();
-													take_picture_error_cb = null;
-												}
-											}
-										}
-								   }
-								}, 500);
-							}
-						}
+						takePhotoPartial();
 					}
 				}
 				else {
@@ -1055,9 +975,13 @@ public class CameraController2 extends CameraController {
 						// n_burst==0 below (as there may have been more than one image still to be received)
 						if( MyDebug.LOG )
 							Log.d(TAG, "continuous burst mode still in progress");
+						takePhotoPartial();
 					}
 					else if( n_burst == 0 ) {
 						takePhotoCompleted();
+					}
+					else {
+						takePhotoPartial();
 					}
 				}
 			}
@@ -1065,6 +989,98 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "done onImageAvailable");
 		}
 
+		/** Called when an image has been received, but we're in a burst mode, and not all images have
+		 *  been received.
+		 */
+		private void takePhotoPartial() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "takePhotoPartial");
+			if( slow_burst_capture_requests != null ) {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "need to execute the next capture");
+					Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
+				}
+				if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
+					try {
+						if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
+							captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+						}
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to take next burst");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						jpeg_cb = null;
+						if( take_picture_error_cb != null ) {
+							take_picture_error_cb.onError();
+							take_picture_error_cb = null;
+						}
+					}
+				}
+				else if( previewBuilder != null ) { // make sure camera wasn't released in the meantime
+					if( MyDebug.LOG )
+						Log.d(TAG, "focus bracketing");
+
+					// code for focus bracketing
+					try {
+						float focus_distance = slow_burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
+						}
+						previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+						previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+
+						setRepeatingRequest(previewBuilder.build());
+						//captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to take next burst");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						jpeg_cb = null;
+						if( take_picture_error_cb != null ) {
+							take_picture_error_cb.onError();
+							take_picture_error_cb = null;
+						}
+					}
+					handler.postDelayed(new Runnable(){
+						@Override
+						public void run(){
+							if( MyDebug.LOG )
+								Log.d(TAG, "take picture after delay for next focus bracket");
+							if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
+								try {
+									captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								}
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to take next burst");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+									jpeg_cb = null;
+									if( take_picture_error_cb != null ) {
+										take_picture_error_cb.onError();
+										take_picture_error_cb = null;
+									}
+								}
+							}
+						}
+					}, 500);
+				}
+			}
+		}
+
+		/** Called when an image has been received, but either we're not in a burst mode, or we are
+		 *  but all images have been received.
+		 */
 		private void takePhotoCompleted() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "takePhotoCompleted");
