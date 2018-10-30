@@ -84,7 +84,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
 		if( test_camera2 ) {
-			MainActivity.test_force_supports_camera2 = true;
 			editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
 		}
 		editor.apply();
@@ -1742,7 +1741,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// wait until photos taken
 		// wait, and test that we've taken the photos by then
+		long time_s = System.currentTimeMillis();
 		while( mPreview.count_cameraTakePicture < 3 ) {
+			assertTrue( System.currentTimeMillis() - time_s < 20000 );
 		}
 		Thread.sleep(2000); // allow pictures to save
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
