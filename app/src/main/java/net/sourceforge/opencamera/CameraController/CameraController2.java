@@ -1782,11 +1782,22 @@ public class CameraController2 extends CameraController {
 		}
 
 		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+		boolean capabilities_manual_sensor = false;
+		boolean capabilities_manual_post_processing = false;
 		boolean capabilities_raw = false;
 		boolean capabilities_high_speed_video = false;
 		for(int capability : capabilities) {
-			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
+			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ) {
+				capabilities_manual_sensor = true;
+			}
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ) {
+				capabilities_manual_post_processing = true;
+			}
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
 				capabilities_raw = true;
+			}
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE ) {
+				camera_features.supports_burst = true;
 			}
 			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 				// we test for at least Android M just to be safe (this is needed for createConstrainedHighSpeedCaptureSession())
@@ -1794,7 +1805,10 @@ public class CameraController2 extends CameraController {
 			}
 		}
 		if( MyDebug.LOG ) {
+			Log.d(TAG, "capabilities_manual_sensor?: " + capabilities_manual_sensor);
+			Log.d(TAG, "capabilities_manual_post_processing?: " + capabilities_manual_post_processing);
 			Log.d(TAG, "capabilities_raw?: " + capabilities_raw);
+			Log.d(TAG, "supports_burst?: " + camera_features.supports_burst);
 			Log.d(TAG, "capabilities_high_speed_video?: " + capabilities_high_speed_video);
 		}
 
@@ -1814,7 +1828,6 @@ public class CameraController2 extends CameraController {
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 		camera_features.picture_sizes = new ArrayList<>();
 		if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
-			// we add the high resolutions first, so that the camera_features.picture_sizes is sorted from high to low
 			android.util.Size [] camera_picture_sizes_hires = configs.getHighResolutionOutputSizes(ImageFormat.JPEG);
 			if( camera_picture_sizes_hires != null ) {
 				for(android.util.Size camera_size : camera_picture_sizes_hires) {
@@ -1877,8 +1890,6 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "RAW capability not supported");
 			want_raw = false; // just in case it got set to true somehow
     	}
-
-		camera_features.supports_burst = true;
 
     	ae_fps_ranges = new ArrayList<>();
 		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
@@ -2030,7 +2041,7 @@ public class CameraController2 extends CameraController {
 		int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		if( white_balance_modes != null ) {
 			for(int value : white_balance_modes) {
-				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF && allowManualWB() ) {
+				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF && capabilities_manual_post_processing && allowManualWB() ) {
 					camera_features.supports_white_balance_temperature = true;
 					camera_features.min_temperature = min_white_balance_temperature_c;
 					camera_features.max_temperature = max_white_balance_temperature_c;
@@ -2038,19 +2049,21 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
-		if( iso_range != null ) {
-			camera_features.supports_iso_range = true;
-			camera_features.min_iso = iso_range.getLower();
-			camera_features.max_iso = iso_range.getUpper();
-			// we only expose exposure_time if iso_range is supported
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
-			if( exposure_time_range != null ) {
-				camera_features.supports_exposure_time = true;
-				camera_features.supports_expo_bracketing = true;
-				camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
-				camera_features.min_exposure_time = exposure_time_range.getLower();
-				camera_features.max_exposure_time = exposure_time_range.getUpper();
+		if( capabilities_manual_sensor ) {
+			Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
+			if( iso_range != null ) {
+				camera_features.supports_iso_range = true;
+				camera_features.min_iso = iso_range.getLower();
+				camera_features.max_iso = iso_range.getUpper();
+				// we only expose exposure_time if iso_range is supported
+				Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
+				if( exposure_time_range != null ) {
+					camera_features.supports_exposure_time = true;
+					camera_features.supports_expo_bracketing = true;
+					camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
+					camera_features.min_exposure_time = exposure_time_range.getLower();
+					camera_features.max_exposure_time = exposure_time_range.getUpper();
+				}
 			}
 		}
 
@@ -2061,16 +2074,18 @@ public class CameraController2 extends CameraController {
 
 		camera_features.can_disable_shutter_sound = true;
 
-		Integer tonemap_max_curve_points = characteristics.get(CameraCharacteristics.TONEMAP_MAX_CURVE_POINTS);
-		if( tonemap_max_curve_points != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "tonemap_max_curve_points: " + tonemap_max_curve_points);
-			camera_features.tonemap_max_curve_points = tonemap_max_curve_points;
-			camera_features.supports_tonemap_curve = tonemap_max_curve_points >= tonemap_max_curve_points_c;
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.d(TAG, "tonemap_max_curve_points is null");
+		if( capabilities_manual_post_processing ) {
+			Integer tonemap_max_curve_points = characteristics.get(CameraCharacteristics.TONEMAP_MAX_CURVE_POINTS);
+			if( tonemap_max_curve_points != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemap_max_curve_points: " + tonemap_max_curve_points);
+				camera_features.tonemap_max_curve_points = tonemap_max_curve_points;
+				camera_features.supports_tonemap_curve = tonemap_max_curve_points >= tonemap_max_curve_points_c;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemap_max_curve_points is null");
+			}
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_tonemap_curve?: " + camera_features.supports_tonemap_curve);
@@ -6250,7 +6265,6 @@ public class CameraController2 extends CameraController {
 				}
 				else if( af_state != last_af_state ) {
 					// check for autofocus completing
-					// need to check that af_state != last_af_state, except for continuous focus mode where if we're already focused, should return immediately
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED /*||
 							af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED*/
 							) {
