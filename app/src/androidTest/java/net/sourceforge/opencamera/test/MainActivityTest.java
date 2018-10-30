@@ -84,6 +84,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
 		if( test_camera2 ) {
+			MainActivity.test_force_supports_camera2 = true;
 			editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
 		}
 		editor.apply();
@@ -8485,10 +8486,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
 	    // change photo resolution
-	    View photoResolutionNextButton = mActivity.getUIButton("PHOTO_RESOLUTIONS_NEXT");
-	    assertTrue(photoResolutionNextButton != null);
+	    View photoResolutionChangeButton = mActivity.getUIButton("PHOTO_RESOLUTIONS_PREV");
+	    assertTrue(photoResolutionChangeButton != null);
 		this.getInstrumentation().waitForIdleSync();
-	    clickView(photoResolutionNextButton);
+	    clickView(photoResolutionChangeButton);
 
 	    // check
 	    Thread.sleep(2000);
@@ -8520,9 +8521,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    CharSequence oldVideoResolutionString = videoResolutionButton.getText();
 
 	    // change video resolution
-	    View videoResolutionNextButton = mActivity.getUIButton("VIDEO_RESOLUTIONS_NEXT");
-	    assertTrue(videoResolutionNextButton != null);
-	    clickView(videoResolutionNextButton);
+	    View videoResolutionChangeButton = mActivity.getUIButton("VIDEO_RESOLUTIONS_PREV");
+	    assertTrue(videoResolutionChangeButton != null);
+	    clickView(videoResolutionChangeButton);
 
 	    // check
 	    Thread.sleep(500);
