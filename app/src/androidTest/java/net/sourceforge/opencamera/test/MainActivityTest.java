@@ -1459,6 +1459,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.isVideo());
 		String photo_focus_value = mPreview.getCameraController().getFocusValue();
 
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		clickView(popupButton);
+		Log.d(TAG, "wait for popup to open");
+		while( !mActivity.popupIsOpen() ) {
+		}
+		Log.d(TAG, "popup is now open");
+
 		// test popup buttons for photo mode:
 		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", false, true);
 		subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_resolution, "PHOTO_RESOLUTIONS", true, false);
@@ -1480,7 +1487,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		// test popup buttons for video mode:
-		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 		clickView(popupButton);
 		Log.d(TAG, "wait for popup to open");
 		while( !mActivity.popupIsOpen() ) {
