@@ -1090,6 +1090,7 @@ public class CameraController2 extends CameraController {
 			if( raw_cb == null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "all image callbacks now completed");
+    			cb.onCompleted();
 			}
 			else if( pending_raw_image != null ) {
 				if( MyDebug.LOG )
@@ -1097,8 +1098,9 @@ public class CameraController2 extends CameraController {
 				takePendingRaw();
 				if( MyDebug.LOG )
 					Log.d(TAG, "all image callbacks now completed");
+    			cb.onCompleted();
 			}
-			cb.onCompleted();
+			// else we *shouldn't* call cb.onCompleted() as still waiting for RAW image
 
 			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
 				if( MyDebug.LOG )
