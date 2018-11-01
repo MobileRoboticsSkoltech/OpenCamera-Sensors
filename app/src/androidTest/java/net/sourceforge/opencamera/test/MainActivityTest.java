@@ -3116,7 +3116,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoRaw");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -3134,7 +3134,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoRawWaitCaptureResult");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -3160,7 +3160,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoRawMulti");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -3203,7 +3203,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoRawRepeat");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 
@@ -3250,7 +3250,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoRawOnly");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 
@@ -3666,7 +3666,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoManualFocus");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.getSupportedFocusValues().contains("focus_mode_manual2") ) {
 			return;
 		}
 	    SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
@@ -4312,7 +4312,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoPreviewPausedTrashRaw");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -4331,7 +4331,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoPreviewPausedTrashRaw2");
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
+		if( !mPreview.supportsRaw() ) {
 			return;
 		}
 
