@@ -1707,12 +1707,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		return files == null ? 0 : files.length;
 	}
 
-	/* Tests continuous picture focus with repeat mode.
-	 */
-	public void testContinuousPictureFocusRepeat() throws InterruptedException {
-		Log.d(TAG, "testContinuousPictureFocusRepeat");
-
-		setToDefault();
+	public void subTestContinuousPictureFocusRepeat() throws InterruptedException {
+		Log.d(TAG, "subTestContinuousPictureFocusRepeat");
 
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
@@ -1752,6 +1748,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 3);
+	}
+
+	/* Tests continuous picture focus with repeat mode.
+	 */
+	public void testContinuousPictureFocusRepeat() throws InterruptedException {
+		Log.d(TAG, "testContinuousPictureFocusRepeat");
+
+		setToDefault();
+
+		subTestContinuousPictureFocusRepeat();
+	}
+
+	/* As testContinuousPictureFocusRepeat, but with test_wait_capture_result flag set.
+	 */
+	public void testContinuousPictureFocusRepeatWaitCaptureResult() throws InterruptedException {
+		Log.d(TAG, "testContinuousPictureFocusRepeatWaitCaptureResult");
+
+		setToDefault();
+
+		mPreview.getCameraController().test_wait_capture_result = true;
+		subTestContinuousPictureFocusRepeat();
 	}
 
 	/* Test for continuous picture photo mode.
@@ -6145,8 +6162,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-		if( !mPreview.usingCamera2API() ) {
-			Log.d(TAG, "test requires camera2 api");
+		if( !mPreview.supportsTonemapCurve() ) {
+			Log.d(TAG, "test requires tonemap curve");
 			return;
 		}
 
@@ -6185,10 +6202,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		Integer new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
-		Integer new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
-		assertEquals(CameraMetadata.EDGE_MODE_OFF, new_edge_mode.intValue());
-		assertEquals(CameraMetadata.NOISE_REDUCTION_MODE_FAST, new_noise_reduction_mode.intValue());
+		if( mPreview.getSupportedEdgeModes() != null ) {
+			Integer new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
+			assertEquals(CameraMetadata.EDGE_MODE_OFF, new_edge_mode.intValue());
+		}
+		if( mPreview.getSupportedNoiseReductionModes() != null ) {
+			Integer new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+			assertEquals(CameraMetadata.NOISE_REDUCTION_MODE_FAST, new_noise_reduction_mode.intValue());
+		}
 
 		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
 
@@ -6200,10 +6221,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		camera_controller2 = (CameraController2)mPreview.getCameraController();
 		previewBuilder = camera_controller2.testGetPreviewBuilder();
-		new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
-		new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
-		assertEquals(default_edge_mode, new_edge_mode);
-		assertEquals(default_noise_reduction_mode, new_noise_reduction_mode);
+		if( mPreview.getSupportedEdgeModes() != null ) {
+			Integer new_edge_mode = previewBuilder.get(CaptureRequest.EDGE_MODE);
+			assertEquals(default_edge_mode, new_edge_mode);
+		}
+		if( mPreview.getSupportedNoiseReductionModes() != null ) {
+			Integer new_noise_reduction_mode = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
+			assertEquals(default_noise_reduction_mode, new_noise_reduction_mode);
+		}
 	}
 
 	private void subTestTakeVideoMaxDuration(boolean restart, boolean interrupt) throws InterruptedException {

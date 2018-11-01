@@ -6667,21 +6667,30 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "capture request completed");
 				test_capture_results++;
 				modified_from_camera_settings = false;
-				if( onRawImageAvailableListener != null ) {
-				    //test_wait_capture_result = true;
-					if( test_wait_capture_result ) {
-						// for RAW capture, we require the capture result before creating DngCreator
-						// but for testing purposes, we need to test the possibility where onImageAvailable() for
-						// the RAW image is called before we receive the capture result here
-						try {
-							if( MyDebug.LOG )
-								Log.d(TAG, "test_wait_capture_result: waiting...");
-							Thread.sleep(500); // 200ms is enough to test the problem on Nexus 6, but use 500ms to be sure
-						}
-						catch(InterruptedException e) {
-							e.printStackTrace();
-						}
+
+				//test_wait_capture_result = true;
+				if( test_wait_capture_result ) {
+					// For RAW capture, we require the capture result before creating DngCreator
+					// but for testing purposes, we need to test the possibility where onImageAvailable() for
+					// the RAW image is called before we receive the capture result here.
+					// Also with JPEG only capture, there are problems with repeat mode and continuous focus if
+					// onImageAvailable() is called before this code is called, because it means here we cancel the
+					// focus and lose the focus callback that was going to trigger the next repeat photo! This shows
+					// up on testContinuousPictureFocusRepeat() on Nexus 7, but can be autotested on other devices
+					// with the flag, see testContinuousPictureFocusRepeatWaitCaptureResult().
+					try {
+						if( MyDebug.LOG )
+							Log.d(TAG, "test_wait_capture_result: waiting...");
+						// 200ms is enough to test the problem with testTakePhotoRawWaitCaptureResult() on Nexus 6, but use 500ms to be sure
+						// 200ms is enough to test the problem with testContinuousPictureFocusRepeatWaitCaptureResult() on Nokia 8, but use 500ms to be sure
+						Thread.sleep(500);
 					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+				if( onRawImageAvailableListener != null ) {
 					onRawImageAvailableListener.setCaptureResult(result);
 				}
 				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
