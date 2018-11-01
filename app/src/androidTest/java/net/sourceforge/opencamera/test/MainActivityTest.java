@@ -3180,6 +3180,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(n_new_files == 2*n_photos); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
 	}
 
+	/** Test taking photo with JPEG + DNG (RAW) and repeat mode.
+	 */
+	public void testTakePhotoRawRepeat() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoRawRepeat");
+		setToDefault();
+
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+
+		final int n_repeat = 10;
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
+		editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "" + n_repeat);
+		editor.apply();
+		updateForSettings();
+
+		// count initial files in folder
+		File folder = mActivity.getImageFolder();
+		int n_files = getNFiles(folder);
+		Log.d(TAG, "n_files at start: " + n_files);
+
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		Log.d(TAG, "about to click take photo");
+		clickView(takePhotoButton);
+		Log.d(TAG, "wait until finished taking photo");
+		waitForTakePhoto();
+		Log.d(TAG, "done taking photo");
+		this.getInstrumentation().waitForIdleSync();
+
+		// wait until photos taken
+		// wait, and test that we've taken the photos by then
+		long time_s = System.currentTimeMillis();
+		while( mPreview.count_cameraTakePicture < n_repeat ) {
+			assertTrue( System.currentTimeMillis() - time_s < 22000 );
+		}
+		Thread.sleep(5000); // allow pictures to save
+	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
+		assertTrue(mPreview.count_cameraTakePicture==n_repeat);
+
+		int n_new_files = getNFiles(folder) - n_files;
+		Log.d(TAG, "n_new_files: " + n_new_files);
+		assertTrue(n_new_files == 2*n_repeat); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
+	}
+
 	/** Test taking photo with DNG (RAW) only.
 	 */
 	public void testTakePhotoRawOnly() throws InterruptedException {
