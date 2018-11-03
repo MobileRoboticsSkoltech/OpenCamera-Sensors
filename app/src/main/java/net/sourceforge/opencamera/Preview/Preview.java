@@ -5703,6 +5703,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
 					Log.e(TAG, "error from takePicture");
         		count_cameraTakePicture--; // cancel out the increment from after the takePicture() call
+    			if( MyDebug.LOG ) {
+					Log.d(TAG, "count_cameraTakePicture is now: " + count_cameraTakePicture);
+				}
 	            applicationInterface.onPhotoError();
 				phase = PHASE_NORMAL;
 	            startCameraPreview();
@@ -5732,6 +5735,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "about to call takePicture");
 			camera_controller.takePicture(pictureCallback, errorCallback);
     		count_cameraTakePicture++;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "count_cameraTakePicture is now: " + count_cameraTakePicture);
+			}
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhotoWhenFocused exit");
@@ -5765,6 +5771,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 				if( remaining_repeat_photos > 0 )
 					remaining_repeat_photos--;
+				if( MyDebug.LOG )
+					Log.d(TAG, "takeRemainingRepeatPhotos: remaining_repeat_photos is now: " + remaining_repeat_photos);
 
 				long timer_delay = applicationInterface.getRepeatIntervalPref();
 				if( timer_delay == 0 ) {
