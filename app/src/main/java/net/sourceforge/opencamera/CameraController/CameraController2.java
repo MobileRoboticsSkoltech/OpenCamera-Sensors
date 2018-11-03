@@ -112,8 +112,10 @@ public class CameraController2 extends CameraController {
 	private android.util.Size raw_size;
 	private ImageReader imageReaderRaw;
 	private OnRawImageAvailableListener onRawImageAvailableListener;
-	private PictureCallback jpeg_cb;
-	private PictureCallback raw_cb;
+	private PictureCallback picture_cb;
+	private boolean jpeg_todo; // whether we are still waiting for JPEG images
+	private boolean raw_todo; // whether we are still waiting for RAW images
+	private boolean done_all_captures; // whether we've received the capture for the image (or all images if a burst)
 	//private CaptureRequest pending_request_when_ready;
 	private int n_burst; // number of expected (remaining) burst images in this capture
 	private int n_burst_taken; // number of burst images taken so far in this capture
@@ -918,7 +920,7 @@ public class CameraController2 extends CameraController {
 		public void onImageAvailable(ImageReader reader) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new still image available");
-			if( jpeg_cb == null ) {
+			if( picture_cb == null || !jpeg_todo ) {
 				// in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
 				// or strange behaviour where an old image appears when the user next takes a photo
 				Log.e(TAG, "no picture callback available");
@@ -928,8 +930,7 @@ public class CameraController2 extends CameraController {
 			}
 			synchronized( image_reader_lock ) {
 				/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
-				 * also, we may process the RAW image when the capture result is available (see
-				 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separate thread.
+				 * also, we may process the RAW image when the capture result is available, which may be in a separate thread.
 				 */
 				Image image = reader.acquireNextImage();
 				if( MyDebug.LOG )
@@ -953,7 +954,7 @@ public class CameraController2 extends CameraController {
 						}
 						// take a copy, so that we can clear pending_burst_images
 						List<byte []> images = new ArrayList<>(pending_burst_images);
-						jpeg_cb.onBurstPictureTaken(images);
+						picture_cb.onBurstPictureTaken(images);
 						pending_burst_images.clear();
 
 						takePhotoCompleted();
@@ -965,7 +966,7 @@ public class CameraController2 extends CameraController {
 					}
 				}
 				else {
-					jpeg_cb.onPictureTaken(bytes);
+					picture_cb.onPictureTaken(bytes);
 					n_burst--;
 					if( MyDebug.LOG )
 						Log.d(TAG, "n_burst is now " + n_burst);
@@ -1013,7 +1014,9 @@ public class CameraController2 extends CameraController {
 							Log.e(TAG, "message: " + e.getMessage());
 						}
 						e.printStackTrace();
-						jpeg_cb = null;
+						jpeg_todo = false;
+						raw_todo = false;
+						picture_cb = null;
 						if( take_picture_error_cb != null ) {
 							take_picture_error_cb.onError();
 							take_picture_error_cb = null;
@@ -1038,12 +1041,14 @@ public class CameraController2 extends CameraController {
 					}
 					catch(CameraAccessException e) {
 						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to take next burst");
+							Log.e(TAG, "failed to take set focus distance for next focus bracketing burst");
 							Log.e(TAG, "reason: " + e.getReason());
 							Log.e(TAG, "message: " + e.getMessage());
 						}
 						e.printStackTrace();
-						jpeg_cb = null;
+						jpeg_todo = false;
+						raw_todo = false;
+						picture_cb = null;
 						if( take_picture_error_cb != null ) {
 							take_picture_error_cb.onError();
 							take_picture_error_cb = null;
@@ -1060,12 +1065,14 @@ public class CameraController2 extends CameraController {
 								}
 								catch(CameraAccessException e) {
 									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next burst");
+										Log.e(TAG, "failed to take next focus bracket");
 										Log.e(TAG, "reason: " + e.getReason());
 										Log.e(TAG, "message: " + e.getMessage());
 									}
 									e.printStackTrace();
-									jpeg_cb = null;
+									jpeg_todo = false;
+									raw_todo = false;
+									picture_cb = null;
 									if( take_picture_error_cb != null ) {
 										take_picture_error_cb.onError();
 										take_picture_error_cb = null;
@@ -1084,23 +1091,9 @@ public class CameraController2 extends CameraController {
 		private void takePhotoCompleted() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "takePhotoCompleted");
-			// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
-			PictureCallback cb = jpeg_cb;
-			jpeg_cb = null;
-			if( raw_cb == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "all image callbacks now completed");
-    			cb.onCompleted();
-			}
-			else if( pending_raw_image != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "can now call pending raw callback");
-				takePendingRaw();
-				if( MyDebug.LOG )
-					Log.d(TAG, "all image callbacks now completed");
-    			cb.onCompleted();
-			}
-			// else we *shouldn't* call cb.onCompleted() as still waiting for RAW image
+			// need to set jpeg_todo to false before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
+			jpeg_todo = false;
+			checkImagesCompleted();
 
 			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
 				if( MyDebug.LOG )
@@ -1124,7 +1117,7 @@ public class CameraController2 extends CameraController {
 	private class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
 		private CaptureResult capture_result;
 		private Image image;
-		
+
 		void setCaptureResult(CaptureResult capture_result) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "setCaptureResult()");
@@ -1144,7 +1137,10 @@ public class CameraController2 extends CameraController {
 						public void run() {
 							if( MyDebug.LOG )
 								Log.d(TAG, "setCaptureResult UI thread call processImage()");
-							processImage();
+							// need to synchronize again
+							synchronized( image_reader_lock ) {
+								processImage();
+							}
 						}
 					});
 				}
@@ -1160,7 +1156,9 @@ public class CameraController2 extends CameraController {
 				image = null;
 			}
 		}
-		
+
+		/** Calls to this method should synchronize on image_reader_lock.
+		 */
 		private void processImage() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "processImage()");
@@ -1187,19 +1185,7 @@ public class CameraController2 extends CameraController {
 
 			pending_raw_image = new RawImage(dngCreator, image);
 
-            PictureCallback cb = raw_cb;
-            if( jpeg_cb == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "jpeg callback already done, so can go ahead with raw callback");
-				takePendingRaw();
-				if( MyDebug.LOG )
-					Log.d(TAG, "all image callbacks now completed");
-				cb.onCompleted();
-            }
-            else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "need to wait for jpeg callback");
-            }
+			checkImagesCompleted();
 			if( MyDebug.LOG )
 				Log.d(TAG, "done processImage");
 		}
@@ -1208,7 +1194,7 @@ public class CameraController2 extends CameraController {
 		public void onImageAvailable(ImageReader reader) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new still raw image available");
-			if( raw_cb == null ) {
+			if( picture_cb == null || !raw_todo ) {
 				// in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
 				// or strange behaviour where an old image appears when the user next takes a photo
 				Log.e(TAG, "no picture callback available");
@@ -3321,9 +3307,8 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePendingRaw");
 		if( pending_raw_image != null ) {
-            PictureCallback cb = raw_cb;
-            raw_cb = null;
-            cb.onRawPictureTaken(pending_raw_image);
+            raw_todo = false;
+            picture_cb.onRawPictureTaken(pending_raw_image);
             // pending_raw_image should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
 			pending_raw_image = null;
 			if( onRawImageAvailableListener != null ) {
@@ -3331,7 +3316,46 @@ public class CameraController2 extends CameraController {
 			}
 		}
 	}
-	
+
+	private void checkImagesCompleted() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "checkImagesCompleted");
+		synchronized( image_reader_lock ) {
+			if( !done_all_captures  ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "still waiting for captures");
+			}
+			else if( picture_cb == null ) {
+				// just in case?
+				if( MyDebug.LOG )
+					Log.d(TAG, "no picture_cb");
+			}
+			else if( !jpeg_todo && !raw_todo ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "all image callbacks now completed");
+				// need to set picture_cb to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
+				PictureCallback cb = picture_cb;
+				picture_cb = null;
+				cb.onCompleted();
+			}
+			else if( !jpeg_todo && pending_raw_image != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "jpeg callback already done, can now call pending raw callback");
+				takePendingRaw();
+				if( MyDebug.LOG )
+					Log.d(TAG, "all image callbacks now completed");
+				// need to set picture_cb to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
+				PictureCallback cb = picture_cb;
+				picture_cb = null;
+				cb.onCompleted();
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "need to wait for jpeg and/or raw callback");
+			}
+		}
+	}
+
 	@Override
 	public Size getPreviewSize() {
 		return new Size(preview_width, preview_height);
@@ -4372,7 +4396,9 @@ public class CameraController2 extends CameraController {
 								Log.e(TAG, "message: " + e.getMessage());
 							}
 							e.printStackTrace();
-							jpeg_cb = null;
+							jpeg_todo = false;
+							raw_todo = false;
+							picture_cb = null;
 							if( take_picture_error_cb != null ) {
 								take_picture_error_cb.onError();
 								take_picture_error_cb = null;
@@ -4950,10 +4976,10 @@ public class CameraController2 extends CameraController {
 				// update: bug with flash may have been device specific (things are fine with Nokia 8)
 				captureSession.stopRepeating();
 			}
-			if( jpeg_cb != null ) {
+			if( picture_cb != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "call onStarted() in callback");
-				jpeg_cb.onStarted();
+				picture_cb.onStarted();
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture with stillBuilder");
@@ -4971,7 +4997,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			jpeg_cb = null;
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
 			if( take_picture_error_cb != null ) {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
@@ -5064,7 +5092,7 @@ public class CameraController2 extends CameraController {
 			// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
-			raw_cb = null; // raw not supported for burst
+			raw_todo = false; // raw not supported for burst
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
@@ -5262,10 +5290,10 @@ public class CameraController2 extends CameraController {
 				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
 			}
 
-			if( jpeg_cb != null ) {
+			if( picture_cb != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "call onStarted() in callback");
-				jpeg_cb.onStarted();
+				picture_cb.onStarted();
 			}
 
 			modified_from_camera_settings = true;
@@ -5294,7 +5322,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			jpeg_cb = null;
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
 			if( take_picture_error_cb != null ) {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
@@ -5347,7 +5377,7 @@ public class CameraController2 extends CameraController {
 			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
-			raw_cb = null; // raw not supported for burst
+			raw_todo = false; // raw not supported for burst
 
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
@@ -5446,10 +5476,10 @@ public class CameraController2 extends CameraController {
 
 			// n.b., don't stop the preview with stop.Repeating when capturing a burst
 
-			if( jpeg_cb != null && is_new_burst ) {
+			if( picture_cb != null && is_new_burst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "call onStarted() in callback");
-				jpeg_cb.onStarted();
+				picture_cb.onStarted();
 			}
 
 			final boolean use_burst = true;
@@ -5521,7 +5551,9 @@ public class CameraController2 extends CameraController {
 								Log.e(TAG, "message: " + e.getMessage());
 							}
 							e.printStackTrace();
-							jpeg_cb = null;
+							jpeg_todo = false;
+							raw_todo = false;
+							picture_cb = null;
 							if( take_picture_error_cb != null ) {
 								take_picture_error_cb.onError();
 								take_picture_error_cb = null;
@@ -5541,7 +5573,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			jpeg_cb = null;
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
 			if( take_picture_error_cb != null ) {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
@@ -5590,7 +5624,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			jpeg_cb = null;
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
 			if( take_picture_error_cb != null ) {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
@@ -5613,14 +5649,14 @@ public class CameraController2 extends CameraController {
 				break;
 			case "flash_frontscreen_auto":
 			case "flash_frontscreen_on":
-				if(jpeg_cb != null) {
+				if(picture_cb != null) {
 					if(MyDebug.LOG)
 						Log.d(TAG, "request screen turn on for frontscreen flash");
-					jpeg_cb.onFrontScreenTurnOn();
+					picture_cb.onFrontScreenTurnOn();
 				}
 				else {
 					if (MyDebug.LOG)
-						Log.e(TAG, "can't request screen turn on for frontscreen flash, as no jpeg_cb");
+						Log.e(TAG, "can't request screen turn on for frontscreen flash, as no picture_cb");
 				}
 				break;
 			default:
@@ -5647,7 +5683,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			jpeg_cb = null;
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
 			if( take_picture_error_cb != null ) {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
@@ -5721,12 +5759,10 @@ public class CameraController2 extends CameraController {
 			error.onError();
 			return;
 		}
-		// we store as two identical callbacks, so we can independently set each to null as the two callbacks occur
-		this.jpeg_cb = picture;
-		if( imageReaderRaw != null )
-			this.raw_cb = picture;
-		else
-			this.raw_cb = null;
+		this.picture_cb = picture;
+		this.jpeg_todo = true;
+		this.raw_todo = imageReaderRaw != null;
+		this.done_all_captures = false;
 		this.take_picture_error_cb = error;
 		this.fake_precapture_torch_performed = false; // just in case still on?
 		if( !ready_for_capture ) {
@@ -6740,6 +6776,26 @@ public class CameraController2 extends CameraController {
 					}
 				}
 				fake_precapture_torch_performed = false;
+
+				// Important that we only call the picture onCompleted callback after we've received the capture request, so
+				// we need to check if we already received all the images.
+				// Also needs to be run on UI thread.
+				// Needed for testContinuousPictureFocusRepeat on Nexus 7; also testable on other devices via
+				// testContinuousPictureFocusRepeatWaitCaptureResult.
+				final Activity activity = (Activity)context;
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "processCompleted UI thread call checkImagesCompleted()");
+						synchronized( image_reader_lock ) {
+							done_all_captures = true;
+							if( MyDebug.LOG )
+								Log.d(TAG, "done all captures");
+							checkImagesCompleted();
+						}
+					}
+				});
 			}
 		}
 	};
