@@ -9,9 +9,9 @@ android {
         minSdkVersion 15
         targetSdkVersion 27
 
-		renderscriptTargetApi 20
-		//renderscriptSupportModeEnabled true // don't use support library as it bloats the APK, and we don't need pre-4.4 support
-		//need build tools higher than 20 at least to support ScriptIntrinsicHistogram
+        renderscriptTargetApi 20
+        //renderscriptSupportModeEnabled true // don't use support library as it bloats the APK, and we don't need pre-4.4 support
+        //need build tools higher than 20 at least to support ScriptIntrinsicHistogram
 
         testApplicationId "net.sourceforge.opencamera.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"

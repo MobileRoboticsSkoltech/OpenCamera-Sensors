@@ -9,19 +9,19 @@ import android.util.Log;
  *  but Google consider this a low priority despite calling these "bad behaviours" in applications!
  */
 public class OpenCameraApplication extends Application {
-	private static final String TAG = "OpenCameraApplication";
+    private static final String TAG = "OpenCameraApplication";
 
     @Override
     public void onCreate() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "onCreate");
+        if( MyDebug.LOG )
+            Log.d(TAG, "onCreate");
         super.onCreate();
         checkAppReplacingState();
     }
 
     private void checkAppReplacingState() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "checkAppReplacingState");
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkAppReplacingState");
         if( getResources() == null ) {
             Log.e(TAG, "app is replacing, kill");
             Process.killProcess(Process.myPid());
