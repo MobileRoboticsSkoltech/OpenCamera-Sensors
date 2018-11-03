@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera.test;
 
+import android.os.Build;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -53,7 +55,6 @@ public class MainTests {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraIdle"));
 		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTouchFocusQuick"));
 		if( !MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGallery"));
@@ -75,6 +76,11 @@ public class MainTests {
 		}
 		if( MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoFPSHighSpeed"));
+		}
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+			// intensive test, can crash when run as suite on older devices (Nexus 6, Nexus 7) with Camera2 at least
+			// also run this test last, just in case
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat2"));
 		}
         return suite;
     }
