@@ -3089,8 +3089,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Thread.sleep(10);
 				int allowed_time_ms = 8000;
 				if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo || is_focus_bracketing ) ) {
-					// some devices need longer time
-					allowed_time_ms = 10000;
+					// some devices need longer time (especially Nexus 6)
+					allowed_time_ms = 12000;
 				}
 				assertTrue( System.currentTimeMillis() - time_s < allowed_time_ms );
 			}
