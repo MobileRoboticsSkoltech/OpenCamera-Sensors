@@ -13,7 +13,7 @@ General advice
 
 If you want to build an application using the Open Camera source code, there are various levels you might like to do this at.
 
-CameraController: The classes in the CameraController/ folder encapsultate the Android camera API (both the original, and the Camera2 API introduced in Android 5). So one level is to use these classes, to build a new application. These classes are still fairly low level (and you'll still have to do work such as setting up things like the camera preview), but avoid having to deal with Android's camera API directly. They combine the 2 camera APIs under a single interface (though some features are Camera2 specific). They also encapsulate code that covers driver specific behaviours (or driver bug workarounds!), to hide this from the outside world.
+CameraController: The classes in the CameraController/ folder encapsulate the Android camera API (both the original, and the Camera2 API introduced in Android 5). So one level is to use these classes, to build a new application. These classes are still fairly low level (and you'll still have to do work such as setting up things like the camera preview), but avoid having to deal with Android's camera API directly. They combine the 2 camera APIs under a single interface (though some features are Camera2 specific). They also encapsulate code that covers driver specific behaviours (or driver bug workarounds!), to hide this from the outside world.
 
 Preview: At a higher level, you might want to take the classes in Preview/ as well as CameraController/. Note the Preview class is a bit of a misnomer - as well as the camera preview, it also includes much of the functionality required to operate the camera. This level would provide you with a camera, but still leave you to define all the higher level parts of the application, such as user-interface, preferences, image processing and saving. As well as controlling the Preview by calling its methods, an instance of ApplicationInterface must be supplied, to allow the Preview to communicate to the application. It is recommended to subclass BasicApplicationInterface, which provides a dummy default implementation of many of the methods. (As an alternative, you may prefer to start with Open Camera's MyApplicationInterface as a sample, and modify it to your needs.)
 
@@ -22,7 +22,7 @@ Application: You might prefer to use Open Camera in its entirety, as an Activity
 Licence
 =======
 
-This source is released under the GPL v3 or later. Please see the licence in gpl-3.0.txt (or http://www.gnu.org/copyleft/gpl.html ). If you would like to use the Open Camera in a closed source app, please contact me for a closed source commercial licence, with details on your company and app.
+This source is released under the GPL v3 or later. Please see the licence in gpl-3.0.txt (or https://www.gnu.org/copyleft/gpl.html ). If you would like to use the Open Camera in a closed source app, please contact me for a closed source commercial licence, with details on your company and app.
 
 Please contact me if you have suggestions, bug fixes, or whatever: mark DOT harman DOT apps AT gmail DOT com .
 
