@@ -6886,6 +6886,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	/* Tests layout bug with popup menu.
 	 * Note, in practice this doesn't seem to reproduce the problem, but keep the test anyway.
+	 * Currently not autotested as the problem isn't fixed, and this would just be a test that
+	 * occasionally fails (instead we work round the problem but not caching the popup when the
+	 * bug occurs).
 	 */
 	public void testPopupLayout() throws InterruptedException {
 		Log.d(TAG, "testPopupLayout");
