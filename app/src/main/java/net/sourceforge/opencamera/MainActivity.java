@@ -672,19 +672,23 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "initCamera2Support");
     	supports_camera2 = false;
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+        	// originally we allowed Camera2 if all cameras support at least LIMITED
+        	// as of 1.45, we allow Camera2 if at least one camera supports at least LIMITED - this
+			// is to support devices that might have a camera with LIMITED or better support, but
+			// also a LEGACY camera
         	CameraControllerManager2 manager2 = new CameraControllerManager2(this);
-        	supports_camera2 = true;
+        	supports_camera2 = false;
 			int n_cameras = manager2.getNumberOfCameras();
         	if( n_cameras == 0 ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "Camera2 reports 0 cameras");
             	supports_camera2 = false;
         	}
-        	for(int i=0;i<n_cameras && supports_camera2;i++) {
-        		if( !manager2.allowCamera2Support(i) ) {
+        	for(int i=0;i<n_cameras && !supports_camera2;i++) {
+        		if( manager2.allowCamera2Support(i) ) {
         			if( MyDebug.LOG )
-        				Log.d(TAG, "camera " + i + " doesn't have limited or full support for Camera2 API");
-                	supports_camera2 = false;
+        				Log.d(TAG, "camera " + i + " has at least limited support for Camera2 API");
+                	supports_camera2 = true;
         		}
         	}
         }
