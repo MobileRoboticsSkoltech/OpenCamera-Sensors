@@ -3069,6 +3069,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			suffix = "_" + (n_fast_burst_images); // when burst numbering starts from _1
 			max_time_s = 3; // takes longer to save 20 images!
 		}
+
+		boolean pause_preview =  sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
+		if( pause_preview ) {
+			max_time_s += 3; // need to allow longer for testTakePhotoRawWaitCaptureResult with Nexus 6 at least
+		}
+
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		Log.d(TAG, "take picture count: " + mPreview.count_cameraTakePicture);
@@ -3232,9 +3238,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// wait, and test that we've taken the photos by then
 		long time_s = System.currentTimeMillis();
 		while( mPreview.count_cameraTakePicture < n_repeat ) {
-			assertTrue( System.currentTimeMillis() - time_s < 22000 );
+			// Nexus 6 needs a lot more time than OnePlus 3T or Nokia 8! Needs more like 50s rather than 22s.
+			assertTrue( System.currentTimeMillis() - time_s < 52000 );
 		}
-		Thread.sleep(5000); // allow pictures to save
+		// since we're in repeat mode, the original waitForTakePhoto() call above will only have waited for the first photo
+		Log.d(TAG, "wait until finished taking final photo");
+		waitForTakePhoto();
+		Log.d(TAG, "done taking final photo");
+		this.getInstrumentation().waitForIdleSync();
+		mActivity.waitUntilImageQueueEmpty();
+		//Thread.sleep(500); // wait a bit longer just in case
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==n_repeat);
