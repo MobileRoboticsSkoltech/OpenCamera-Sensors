@@ -142,6 +142,7 @@ public class MainActivity extends Activity {
 	public volatile boolean test_have_angle;
 	public volatile float test_angle;
 	public volatile String test_last_saved_image;
+	public static boolean test_force_supports_camera2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -687,10 +688,20 @@ public class MainActivity extends Activity {
         		}
         	}
         }
+
+        //test_force_supports_camera2 = true; // test
+        if( test_force_supports_camera2 ) {
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "forcing supports_camera2");
+				supports_camera2 = true;
+			}
+		}
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_camera2? " + supports_camera2);
 	}
-	
+
 	private void preloadIcons(int icons_id) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {

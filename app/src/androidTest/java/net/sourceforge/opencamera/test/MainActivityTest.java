@@ -84,6 +84,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
 		if( test_camera2 ) {
+			MainActivity.test_force_supports_camera2 = true;
 			editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
 		}
 		editor.apply();
