@@ -756,6 +756,7 @@
         <item>@string/preference_crop_guide_1_5</item>
         <item>@string/preference_crop_guide_1_78</item>
         <item>@string/preference_crop_guide_1_85</item>
+        <item>@string/preference_crop_guide_2</item>
         <item>@string/preference_crop_guide_2_33</item>
         <item>@string/preference_crop_guide_2_35</item>
         <item>@string/preference_crop_guide_2_4</item>
@@ -769,6 +770,7 @@
         <item>crop_guide_1.5</item>
         <item>crop_guide_1.78</item>
         <item>crop_guide_1.85</item>
+        <item>crop_guide_2</item>
         <item>crop_guide_2.33</item>
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>

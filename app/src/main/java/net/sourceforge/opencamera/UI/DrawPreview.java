@@ -800,6 +800,9 @@ public class DrawPreview {
 					case "crop_guide_1.85":
 						crop_ratio = 1.85;
 						break;
+					case "crop_guide_2":
+						crop_ratio = 2.0;
+						break;
 					case "crop_guide_2.33":
 						crop_ratio = 2.33333333;
 						break;

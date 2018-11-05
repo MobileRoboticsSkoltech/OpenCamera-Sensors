@@ -347,6 +347,7 @@
     <string name="preference_crop_guide_1_5">1.5 (3対2)</string>
     <string name="preference_crop_guide_1_78">1.78 (16対9)</string>
     <string name="preference_crop_guide_1_85">1.85 (37対20)</string>
+    <string name="preference_crop_guide_2">2.00 (2対1)</string>
     <string name="preference_crop_guide_2_33">2.33 (21対9)</string>
     <string name="preference_crop_guide_2_35">2.35 (47対20)</string>
     <string name="preference_crop_guide_2_4">2.4 (12対5)</string>
