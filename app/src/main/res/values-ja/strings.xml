@@ -339,4 +339,16 @@
     <string name="preference_burst_interval_1h">1時間</string>
     <string name="preference_burst_interval_2h">2時間</string>
 
+    <string name="preference_crop_guide_none">なし</string>
+    <string name="preference_crop_guide_1">1.00 (1対1)</string>
+    <string name="preference_crop_guide_1_25">1.25 (5対4)</string>
+    <string name="preference_crop_guide_1_33">1.33 (4対3)</string>
+    <string name="preference_crop_guide_1_4">1.4 (7対4)</string>
+    <string name="preference_crop_guide_1_5">1.5 (3対2)</string>
+    <string name="preference_crop_guide_1_78">1.78 (16対9)</string>
+    <string name="preference_crop_guide_1_85">1.85 (37対20)</string>
+    <string name="preference_crop_guide_2_33">2.33 (21対9)</string>
+    <string name="preference_crop_guide_2_35">2.35 (47対20)</string>
+    <string name="preference_crop_guide_2_4">2.4 (12対5)</string>
+
 </resources>

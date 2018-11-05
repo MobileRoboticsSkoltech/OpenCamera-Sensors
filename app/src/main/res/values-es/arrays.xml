@@ -179,32 +179,6 @@
         <item>preference_grid_golden_triangle_2</item>
         <item>preference_grid_diagonals</item>
     </string-array>
-    <string-array name="preference_crop_guide_entries">
-        <item>Ninguno</item>
-        <item>1 (1:1)</item>
-        <item>1.25 (5:4)</item>
-        <item>1.33 (4:3)</item>
-        <item>1.4 (7:4)</item>
-        <item>1.5 (3:2)</item>
-        <item>1.78 (16:9)</item>
-        <item>1.85 (37:20)</item>
-        <item>2.33 (21:9)</item>
-        <item>2.35 (47:20)</item>
-        <item>2.4 (12:5)</item>
-    </string-array>
-    <string-array name="preference_crop_guide_values">
-        <item>crop_guide_none</item>
-        <item>crop_guide_1</item>
-        <item>crop_guide_1.25</item>
-        <item>crop_guide_1.33</item>
-        <item>crop_guide_1.4</item>
-        <item>crop_guide_1.5</item>
-        <item>crop_guide_1.78</item>
-        <item>crop_guide_1.85</item>
-        <item>crop_guide_2.33</item>
-        <item>crop_guide_2.35</item>
-        <item>crop_guide_2.4</item>
-    </string-array>
     <string-array name="preference_stamp_entries">
         <item>No estampar</item>
         <item>Estampar fotos</item>
@@ -316,22 +290,6 @@
         <item>none</item>
         <item>noise</item>
         <item>voice</item>
-    </string-array>
-    <string-array name="preference_audio_noise_control_sensitivity_entries">
-        <item>+3 (alta sensibilidad)</item>
-        <item>+2</item>
-        <item>+1</item>
-        <item>0 (defecto)</item>
-        <item>-1</item>
-        <item>-2 (baja sensibilidad)</item>
-    </string-array>
-    <string-array name="preference_audio_noise_control_sensitivity_values">
-        <item>3</item>
-        <item>2</item>
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-        <item>-2</item>
     </string-array>
     <string-array name="preference_save_zulu_time_entries">
         <item>Hora local</item>

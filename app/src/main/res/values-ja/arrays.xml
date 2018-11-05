@@ -179,32 +179,6 @@
         <item>preference_grid_golden_triangle_2</item>
         <item>preference_grid_diagonals</item>
     </string-array>
-    <string-array name="preference_crop_guide_entries">
-        <item>なし</item>
-        <item>1.00 (1対1)</item>
-        <item>1.25 (5対4)</item>
-        <item>1.33 (4対3)</item>
-        <item>1.40 (7対4)</item>
-        <item>1.50 (3対2)</item>
-        <item>1.78 (16対9)</item>
-        <item>1.85 (37対20)</item>
-        <item>2.33 (21対9)</item>
-        <item>2.35 (47対20)</item>
-        <item>2.40 (12対5)</item>
-    </string-array>
-    <string-array name="preference_crop_guide_values">
-        <item>crop_guide_none</item>
-        <item>crop_guide_1</item>
-        <item>crop_guide_1.25</item>
-        <item>crop_guide_1.33</item>
-        <item>crop_guide_1.4</item>
-        <item>crop_guide_1.5</item>
-        <item>crop_guide_1.78</item>
-        <item>crop_guide_1.85</item>
-        <item>crop_guide_2.33</item>
-        <item>crop_guide_2.35</item>
-        <item>crop_guide_2.4</item>
-    </string-array>
     <string-array name="preference_stamp_entries">
         <item>スタンプなし</item>
         <item>スタンプあり</item>
