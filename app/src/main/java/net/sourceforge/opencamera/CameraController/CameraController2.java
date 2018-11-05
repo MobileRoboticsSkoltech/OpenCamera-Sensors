@@ -472,7 +472,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
             }
 			else if( default_edge_mode != null ) {
-				if( builder.get(CaptureRequest.EDGE_MODE) != null && builder.get(CaptureRequest.EDGE_MODE) != default_edge_mode ) {
+				if( builder.get(CaptureRequest.EDGE_MODE) != null && !builder.get(CaptureRequest.EDGE_MODE).equals(default_edge_mode) ) {
 					builder.set(CaptureRequest.EDGE_MODE, default_edge_mode);
 					changed = true;
 				}
@@ -513,7 +513,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
             }
 			else if( default_noise_reduction_mode != null ) {
-				if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != null && builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != default_noise_reduction_mode ) {
+				if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != null && !builder.get(CaptureRequest.NOISE_REDUCTION_MODE).equals(default_noise_reduction_mode)) {
 					builder.set(CaptureRequest.NOISE_REDUCTION_MODE, default_noise_reduction_mode);
 					changed = true;
 				}
