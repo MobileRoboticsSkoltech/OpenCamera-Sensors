@@ -954,8 +954,11 @@ public class MainUI {
 						int iso = preview.parseManualISOValue(option);
 						if( iso >= 0 ) {
 							// if changing between manual ISOs, no need to call updateForSettings, just change the ISO directly (as with changing the ISO via manual slider)
-							preview.setISO(iso);
-							updateSelectedISOButton();
+							//preview.setISO(iso);
+							//updateSelectedISOButton();
+							// rather than set ISO directly, we move the seekbar, and the ISO will be changed via the seekbar listener
+							SeekBar iso_seek_bar = main_activity.findViewById(R.id.iso_seekbar);
+							main_activity.getManualSeekbars().setISOProgressBarToClosest(iso_seek_bar, iso);
 						}
 					}
 				}

@@ -85,7 +85,7 @@ public class ManualSeekbars {
 		long min_dist = 0;
 		for(int i=0;i<seekbar_values.size();i++) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "seekbar_values_iso[" + i + "]: " + seekbar_values.get(i));
+				Log.d(TAG, "seekbar_values[" + i + "]: " + seekbar_values.get(i));
 			long dist = Math.abs(seekbar_values.get(i) - current_value);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    dist: " + dist);
@@ -98,6 +98,10 @@ public class ManualSeekbars {
 			Log.d(TAG, "closest_indx: " + closest_indx);
 		if( closest_indx != -1 )
 			seekBar.setProgress(closest_indx);
+	}
+
+	void setISOProgressBarToClosest(SeekBar seekBar, long current_iso) {
+		setProgressBarToClosest(seekBar, seekbar_values_iso, current_iso);
 	}
 
 	public void setProgressSeekbarWhiteBalance(SeekBar seekBar, long min_white_balance, long max_white_balance, long current_white_balance) {

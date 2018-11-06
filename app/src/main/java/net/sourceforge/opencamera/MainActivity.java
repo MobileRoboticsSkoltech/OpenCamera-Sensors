@@ -3175,6 +3175,8 @@ public class MainActivity extends Activity {
 						/*int min_iso = preview.getMinimumISO();
 						int max_iso = preview.getMaximumISO();
 						int iso = (int)exponentialScaling(frac, min_iso, max_iso);*/
+						// n.b., important to update even if fromUser==false (e.g., so this works when user changes ISO via clicking
+						// the ISO buttons rather than moving the slider directly, see MainUI.setupExposureUI())
 						preview.setISO( manualSeekbars.getISO(progress) );
 						mainUI.updateSelectedISOButton();
 					}
@@ -3507,7 +3509,11 @@ public class MainActivity extends Activity {
 	public MainUI getMainUI() {
     	return this.mainUI;
     }
-    
+
+    public ManualSeekbars getManualSeekbars() {
+    	return this.manualSeekbars;
+	}
+
     public MyApplicationInterface getApplicationInterface() {
     	return this.applicationInterface;
     }
