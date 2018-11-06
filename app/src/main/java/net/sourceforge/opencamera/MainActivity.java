@@ -3809,6 +3809,9 @@ public class MainActivity extends Activity {
 				case "-2":
 					audio_noise_sensitivity = 200;
 					break;
+				case "-3":
+					audio_noise_sensitivity = 400;
+					break;
 				default:
 					// default
 					audio_noise_sensitivity = 100;

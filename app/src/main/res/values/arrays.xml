@@ -782,6 +782,7 @@
         <item>@string/preference_audio_noise_control_sensitivity_0</item>
         <item>@string/preference_audio_noise_control_sensitivity_m1</item>
         <item>@string/preference_audio_noise_control_sensitivity_m2</item>
+        <item>@string/preference_audio_noise_control_sensitivity_m3</item>
     </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_values">
         <item>3</item>
@@ -790,5 +791,6 @@
         <item>0</item>
         <item>-1</item>
         <item>-2</item>
+        <item>-3</item>
     </string-array>
 </resources>

@@ -585,6 +585,7 @@
     <string name="preference_audio_noise_control_sensitivity_1">+1</string>
     <string name="preference_audio_noise_control_sensitivity_0">0 (defecto)</string>
     <string name="preference_audio_noise_control_sensitivity_m1">-1</string>
-    <string name="preference_audio_noise_control_sensitivity_m2">-2 (baja sensibilidad)</string>
+    <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
+    <string name="preference_audio_noise_control_sensitivity_m3">-3 (baja sensibilidad)</string>
 
 </resources>

@@ -466,6 +466,7 @@
     <string name="preference_audio_noise_control_sensitivity_1">+1</string>
     <string name="preference_audio_noise_control_sensitivity_0">0 (domyślnie)</string>
     <string name="preference_audio_noise_control_sensitivity_m1">-1</string>
-    <string name="preference_audio_noise_control_sensitivity_m2">-2 (nika czułość)</string>
+    <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
+    <string name="preference_audio_noise_control_sensitivity_m3">-3 (nika czułość)</string>
 
 </resources>

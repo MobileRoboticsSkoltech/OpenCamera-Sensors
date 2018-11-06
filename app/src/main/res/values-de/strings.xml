@@ -634,6 +634,7 @@
     <string name="preference_audio_noise_control_sensitivity_1">+1</string>
     <string name="preference_audio_noise_control_sensitivity_0">0 (Standard)</string>
     <string name="preference_audio_noise_control_sensitivity_m1">-1</string>
-    <string name="preference_audio_noise_control_sensitivity_m2">-2 (Niedrige Empfindlichkeit)</string>
+    <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
+    <string name="preference_audio_noise_control_sensitivity_m3">-3 (Niedrige Empfindlichkeit)</string>
 
 </resources>
