@@ -41,8 +41,10 @@ public class MyAudioTriggerListenerCallback implements AudioListener.AudioListen
         }
         int diff = level - last_level;
 
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
             Log.d(TAG, "noise_sensitivity: " + audio_noise_sensitivity);
+            Log.d(TAG, "diff: " + diff);
+        }
 
         if( diff > audio_noise_sensitivity ) {
             if( MyDebug.LOG )
