@@ -10987,6 +10987,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
     }
 
+    /** Tests HDR algorithm on test samples "testHDR53".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testHDR53() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR53");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR53/IMG_20181106_135411_EXP0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR53/IMG_20181106_135411_EXP1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR53/IMG_20181106_135411_EXP2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR53_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
     /** Tests HDR algorithm on test samples "testHDRtemp".
      *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
