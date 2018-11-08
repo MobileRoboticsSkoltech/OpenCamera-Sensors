@@ -11007,6 +11007,66 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
     }
 
+    /** Tests HDR algorithm on test samples "testHDR54".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testHDR54() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR54");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR54/IMG_20181107_115508_EXP0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR54/IMG_20181107_115508_EXP1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR54/IMG_20181107_115508_EXP2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR54_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR55".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testHDR55() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR55");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR55/IMG_20181107_115608_EXP0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR55/IMG_20181107_115608_EXP1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR55/IMG_20181107_115608_EXP2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR55_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR56".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testHDR56() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR56");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR56/180502_141722_OC_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR56/180502_141722_OC_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR56/180502_141722_OC_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR56_output.jpg", false);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
     /** Tests HDR algorithm on test samples "testHDRtemp".
      *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
