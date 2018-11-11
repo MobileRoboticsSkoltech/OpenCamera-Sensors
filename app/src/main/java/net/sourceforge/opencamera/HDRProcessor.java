@@ -1162,7 +1162,7 @@ public class HDRProcessor {
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public void updateAvg(AvgData avg_data, int width, int height, Bitmap bitmap_new, float avg_factor, int iso, float zoom_factor) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "processAvg");
+			Log.d(TAG, "updateAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
 		}
 		if( width != bitmap_new.getWidth() ||
@@ -1427,6 +1427,20 @@ public class HDRProcessor {
 		float wiener_C = 10.0f * limited_iso;
 		//float wiener_C = 1000.0f;
 		//float wiener_C = 4000.0f;
+
+		// Tapering the wiener scale means that we do more averaging for earlier images in the stack, the
+		// logic being we'll have more chance of ghosting or misalignment with later images.
+		// This helps: testAvg31, testAvg33.
+		// Also slightly helps testAvg17, testAvg23 (slightly less white speckle on tv), testAvg28
+		// (one less white speckle on face).
+		// Note that too much tapering risks increasing ghosting in testAvg26, testAvg39.
+		float tapered_wiener_scale = 1.0f - (float)Math.pow(0.5, avg_factor);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "avg_factor: " + avg_factor);
+			Log.d(TAG, "tapered_wiener_scale: " + tapered_wiener_scale);
+		}
+		wiener_C /= tapered_wiener_scale;
+
 		float wiener_C_cutoff = wiener_cutoff_factor * wiener_C;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "wiener_C: " + wiener_C);
