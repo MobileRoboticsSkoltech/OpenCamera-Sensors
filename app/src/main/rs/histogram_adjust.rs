@@ -5,6 +5,8 @@
 rs_allocation c_histogram;
 
 float hdr_alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
+//bool smart_contrast_enhancement = true;
+//bool smart_contrast_enhancement = false;
 
 // Global histogram equalisation:
 
@@ -100,8 +102,12 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 		int histogram_offset = 256*(this_x*n_tiles+this_y);
 		equal_value = getEqualValue(histogram_offset, value);
 	}
-	
+
 	int new_value = (int)( (1.0f-hdr_alpha) * value + hdr_alpha * equal_value );
+
+    //float use_hdr_alpha = smart_contrast_enhancement ? hdr_alpha*((float)value/255.0f) : hdr_alpha;
+    //float use_hdr_alpha = smart_contrast_enhancement ? hdr_alpha*pow(((float)value/255.0f), 0.5f) : hdr_alpha;
+	//int new_value = (int)( (1.0f-use_hdr_alpha) * value + use_hdr_alpha * equal_value );
 
 	float scale = ((float)new_value) / (float)value;
 
