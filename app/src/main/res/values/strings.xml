@@ -694,6 +694,12 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (low sensitivity)</string>
 
+    <string name="preference_hdr_contrast_enhancement">HDR contrast enhancement</string>
+    <string name="preference_hdr_contrast_enhancement_summary">When to use a contrast enhancement algorithm for HDR. This can improve the appearance in cases where there is a very high dynamic range in the scene, and also gives a "HDR look" to the results.\n%s</string>
+    <string name="preference_hdr_contrast_enhancement_off">Off</string>
+    <string name="preference_hdr_contrast_enhancement_smart">Smart</string>
+    <string name="preference_hdr_contrast_enhancement_always">Always</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

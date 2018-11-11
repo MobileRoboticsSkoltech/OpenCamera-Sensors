@@ -411,6 +411,16 @@
         <item>preference_nr_save_single</item>
         <item>preference_nr_save_all</item>
     </string-array>
+    <string-array name="preference_hdr_contrast_enhancement_entries">
+        <item>@string/preference_hdr_contrast_enhancement_off</item>
+        <item>@string/preference_hdr_contrast_enhancement_smart</item>
+        <item>@string/preference_hdr_contrast_enhancement_always</item>
+    </string-array>
+    <string-array name="preference_hdr_contrast_enhancement_values">
+        <item>preference_hdr_contrast_enhancement_off</item>
+        <item>preference_hdr_contrast_enhancement_smart</item>
+        <item>preference_hdr_contrast_enhancement_always</item>
+    </string-array>
     <string-array name="preference_raw_entries">
         <item>@string/preference_raw_no</item>
         <item>@string/preference_raw_yes</item>

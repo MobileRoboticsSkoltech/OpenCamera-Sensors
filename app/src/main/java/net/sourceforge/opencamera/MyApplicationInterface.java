@@ -2263,6 +2263,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 		String custom_tag_artist = sharedPreferences.getString(PreferenceKeys.ExifArtistPreferenceKey, "");
 		String custom_tag_copyright = sharedPreferences.getString(PreferenceKeys.ExifCopyrightPreferenceKey, "");
+		String preference_hdr_contrast_enhancement = sharedPreferences.getString(PreferenceKeys.HDRContrastEnhancementPreferenceKey, "preference_hdr_contrast_enhancement_smart");
 
 		int iso = 800; // default value if we can't get ISO
 		long exposure_time = 1000000000L/30; // default value if we can't get shutter speed
@@ -2355,6 +2356,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					is_front_facing,
 					mirror,
 					current_date,
+					preference_hdr_contrast_enhancement,
 					iso,
 					exposure_time,
 					zoom_factor,

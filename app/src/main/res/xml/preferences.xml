@@ -544,6 +544,17 @@
 	            android:defaultValue="false"
 	            />
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference
+	            android:key="preference_hdr_contrast_enhancement"
+	            android:title="@string/preference_hdr_contrast_enhancement"
+	            android:summary="@string/preference_hdr_contrast_enhancement_summary"
+	            android:entries="@array/preference_hdr_contrast_enhancement_entries"
+	            android:entryValues="@array/preference_hdr_contrast_enhancement_values"
+	            android:defaultValue="preference_hdr_contrast_enhancement_smart"
+	            />
+
+
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 	        <ListPreference
 	            android:key="preference_expo_bracketing_n_images"

@@ -109,6 +109,7 @@ public class ImageSaver extends Thread {
 		final boolean is_front_facing;
 		final boolean mirror;
 		final Date current_date;
+		final String preference_hdr_contrast_enhancement; // for HDR
 		final int iso; // not applicable for RAW image
 		final long exposure_time; // not applicable for RAW image
 		final float zoom_factor; // not applicable for RAW image
@@ -142,6 +143,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			String preference_hdr_contrast_enhancement,
 			int iso,
 			long exposure_time,
 			float zoom_factor,
@@ -166,6 +168,7 @@ public class ImageSaver extends Thread {
 			this.is_front_facing = is_front_facing;
 			this.mirror = mirror;
 			this.current_date = current_date;
+			this.preference_hdr_contrast_enhancement = preference_hdr_contrast_enhancement;
 			this.iso = iso;
 			this.exposure_time = exposure_time;
 			this.zoom_factor = zoom_factor;
@@ -424,6 +427,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			String preference_hdr_contrast_enhancement,
 			int iso,
 			long exposure_time,
 			float zoom_factor,
@@ -451,6 +455,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				preference_hdr_contrast_enhancement,
 				iso,
 				exposure_time,
 				zoom_factor,
@@ -488,6 +493,7 @@ public class ImageSaver extends Thread {
 				false,
 				false,
 				current_date,
+				null,
 				0,
 				0,
 				1.0f,
@@ -532,6 +538,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				null,
 				iso,
 				exposure_time,
 				zoom_factor,
@@ -592,6 +599,7 @@ public class ImageSaver extends Thread {
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
+			String preference_hdr_contrast_enhancement,
 			int iso,
 			long exposure_time,
 			float zoom_factor,
@@ -621,6 +629,7 @@ public class ImageSaver extends Thread {
 				is_front_facing,
 				mirror,
 				current_date,
+				preference_hdr_contrast_enhancement,
 				iso,
 				exposure_time,
 				zoom_factor,
@@ -724,6 +733,7 @@ public class ImageSaver extends Thread {
 			false, 0.0,
 			false,
 			false,
+			null,
 			null,
 			0,
 			0,
@@ -898,6 +908,38 @@ public class ImageSaver extends Thread {
 		}
 
 		return bitmaps;
+	}
+
+	/** Chooses the hdr_alpha to use for contrast enhancement in the HDR algorithm, based on the user
+	 *  preferences and scene details.
+	 */
+	public static float getHDRAlpha(String preference_hdr_contrast_enhancement, long exposure_time) {
+		boolean use_hdr_alpha;
+		switch( preference_hdr_contrast_enhancement ) {
+			case "preference_hdr_contrast_enhancement_off":
+				use_hdr_alpha = false;
+				break;
+			case "preference_hdr_contrast_enhancement_smart":
+			default:
+				// Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
+				// a short exposure time, due to fixing problems where some regions are too dark.
+				// This helps: testHDR11, testHDR19, testHDR34, testHDR53.
+				// Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
+				// (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
+				// testHDR54, testHDR55, testHDR56.
+				use_hdr_alpha = (exposure_time < 1000000000L/59);
+				break;
+			case "preference_hdr_contrast_enhancement_always":
+				use_hdr_alpha = true;
+				break;
+		}
+		float hdr_alpha = use_hdr_alpha ? 0.5f : 0.0f;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "preference_hdr_contrast_enhancement: " + preference_hdr_contrast_enhancement);
+			Log.d(TAG, "exposure_time: " + exposure_time);
+			Log.d(TAG, "hdr_alpha: " + hdr_alpha);
+		}
+		return hdr_alpha;
 	}
 	
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
@@ -1147,11 +1189,12 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
     		}
+    		float hdr_alpha = getHDRAlpha(request.preference_hdr_contrast_enhancement, request.exposure_time);
 			if( MyDebug.LOG )
 				Log.d(TAG, "before HDR first bitmap: " + bitmaps.get(0) + " is mutable? " + bitmaps.get(0).isMutable());
 			try {
 				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-					hdrProcessor.processHDR(bitmaps, true, null, true, null, 0.5f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
+					hdrProcessor.processHDR(bitmaps, true, null, true, null, hdr_alpha, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
 				}
 				else {
 					Log.e(TAG, "shouldn't have offered HDR as an option if not on Android 5");
