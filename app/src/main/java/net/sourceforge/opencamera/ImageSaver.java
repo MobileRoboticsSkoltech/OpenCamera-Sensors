@@ -2405,6 +2405,7 @@ public class ImageSaver extends Thread {
 			}
 
 			modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
+			setDateTimeExif(exif_new);
 			exif_new.saveAttributes();
 	}
 
@@ -2684,8 +2685,9 @@ public class ImageSaver extends Thread {
 	/** Makes various modifications to the exif data, if necessary.
 	 */
     private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "modifyExif");
 		setGPSDirectionExif(exif, store_geo_direction, geo_direction);
-		setDateTimeExif(exif);
 		setCustomExif(exif, custom_tag_artist, custom_tag_copyright);
 		if( needGPSTimestampHack(is_jpeg, using_camera2, store_location) ) {
 			fixGPSTimestamp(exif, current_date);
@@ -2693,6 +2695,8 @@ public class ImageSaver extends Thread {
 	}
 
 	private void setGPSDirectionExif(ExifInterface exif, boolean store_geo_direction, double geo_direction) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setGPSDirectionExif");
     	if( store_geo_direction ) {
 			float geo_angle = (float)Math.toDegrees(geo_direction);
 			if( geo_angle < 0.0f ) {
@@ -2722,6 +2726,8 @@ public class ImageSaver extends Thread {
 	/** Applies the custom exif tags to the ExifInterface.
 	 */
 	private void setCustomExif(ExifInterface exif, String custom_tag_artist, String custom_tag_copyright) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setCustomExif");
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && custom_tag_artist != null && custom_tag_artist.length() > 0 ) {
         	if( MyDebug.LOG )
     			Log.d(TAG, "apply TAG_ARTIST: " + custom_tag_artist);
@@ -2734,7 +2740,16 @@ public class ImageSaver extends Thread {
 		}
 	}
 
+	/** This fixes a problem when we save from a bitmap - we need to set extra exiftags.
+	 *  Exiftool shows these tags as "Date/Time Original" and "Create Date".
+	 *  Without these tags, Windows properties for the image doesn't show anything for
+	 *  Origin/"Date taken".
+	 *  N.B., this is probably redundant on Android 7+, where we'll have transferred these tags
+	 *  across from the original JPEG in setExif().
+	 */
 	private void setDateTimeExif(ExifInterface exif) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setDateTimeExif");
     	String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
     	if( exif_datetime != null ) {
         	if( MyDebug.LOG )
