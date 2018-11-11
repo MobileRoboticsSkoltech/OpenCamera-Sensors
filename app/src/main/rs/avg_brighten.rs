@@ -29,7 +29,7 @@ float max_x;
 uchar4 __attribute__((kernel)) avg_brighten_gain(uchar4 in) {
     float3 value = gain*convert_float3(in.rgb);
 
-	uchar4 out;
+    uchar4 out;
     out.rgb = convert_uchar3(clamp(value+0.5f, 0.f, 255.f));
     out.a = 255;
     return out;
@@ -37,7 +37,7 @@ uchar4 __attribute__((kernel)) avg_brighten_gain(uchar4 in) {
 
 uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y) {
     /*{
-    	uchar4 out;
+        uchar4 out;
         out.rgb = convert_uchar3(clamp(rgb + 0.5f, 0.f, 255.f));
         out.a = 255;
         return out;
@@ -299,7 +299,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
 
     /*float3 hdr = gain*rgb;
 
-	uchar4 out;
+    uchar4 out;
     {
         float value = fmax(hdr.r, hdr.g);
         value = fmax(value, hdr.b);
@@ -318,7 +318,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
 
     /*float3 hdr = rgb;
 
-	uchar4 out;
+    uchar4 out;
     {
         float value = fmax(hdr.r, hdr.g);
         value = fmax(value, hdr.b);
@@ -336,7 +336,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
 
     /*rgb *= gain;
     float3 hdr = powr(rgb/255.0f, gamma) * 255.0f;
-	uchar4 out;
+    uchar4 out;
     out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
     out.a = 255;*/
 
@@ -395,7 +395,7 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
     // apply gamma correction
     //hdr = powr(hdr/255.0f, 0.454545454545f) * 255.0f;
 
-	uchar4 out;
+    uchar4 out;
     out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
     out.a = 255;
 

@@ -11,8 +11,8 @@ int off_x = 0, off_y = 0;
 int32_t *errors;
 
 void init_errors() {
-	for(int i=0;i<9;i++)
-		errors[i] = 0;
+    for(int i=0;i<9;i++)
+        errors[i] = 0;
 }
 
 void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
@@ -30,11 +30,11 @@ void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
         int c=0;
         for(int dy=-1;dy<=1;dy++) {
             for(int dx=-1;dx<=1;dx++) {
-            	uchar pixel1 = rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
-            	if( pixel0 != pixel1 ) {
-            	    if( pixel0 != 127 && pixel1 != 127 ) // ignore noise - see create_mtb.rs
-                    	rsAtomicInc(&errors[c]);
-            	}
+                uchar pixel1 = rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
+                if( pixel0 != pixel1 ) {
+                    if( pixel0 != 127 && pixel1 != 127 ) // ignore noise - see create_mtb.rs
+                        rsAtomicInc(&errors[c]);
+                }
                 c++;
             }
         }
@@ -56,11 +56,11 @@ void __attribute__((kernel)) align(uchar in, uint32_t x, uint32_t y) {
         int c=0;
         for(int dy=-1;dy<=1;dy++) {
             for(int dx=-1;dx<=1;dx++) {
-            	float pixel1 = (float)rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
-            	float diff = pixel1 - pixel0;
-            	float diff2 = diff*diff;
-            	if( errors[c] < 2000000000 ) { // avoid risk of overflow
-                	rsAtomicAdd(&errors[c], diff2);
+                float pixel1 = (float)rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
+                float diff = pixel1 - pixel0;
+                float diff2 = diff*diff;
+                if( errors[c] < 2000000000 ) { // avoid risk of overflow
+                    rsAtomicAdd(&errors[c], diff2);
                 }
                 c++;
             }

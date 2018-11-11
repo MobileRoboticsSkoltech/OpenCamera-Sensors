@@ -13,8 +13,8 @@ int32_t *sums;
 int width;
 
 void init_sums() {
-	for(int i=0;i<width;i++)
-		sums[i] = 0;
+    for(int i=0;i<width;i++)
+        sums[i] = 0;
 }
 
 void __attribute__((kernel)) calculate_sharpness(uchar4 in, uint32_t x, uint32_t y) {
@@ -40,5 +40,5 @@ void __attribute__((kernel)) calculate_sharpness(uchar4 in, uint32_t x, uint32_t
     // uses a laplacian filter https://en.wikipedia.org/wiki/Discrete_Laplace_operator
     int this_sum = abs((left + right + top + bottom - 4 * centre)/4);
 
-	rsAtomicAdd(&sums[x], this_sum);
+    rsAtomicAdd(&sums[x], this_sum);
 }

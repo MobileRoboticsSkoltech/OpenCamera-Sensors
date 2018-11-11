@@ -19,12 +19,12 @@ float __attribute__((kernel)) compute_diff(uchar4 pixel_avg, uint32_t x, uint32_
     int32_t iy = y;
     uchar4 pixel_new;
 
-	if( ix+offset_x_new >= 0 && iy+offset_y_new >= 0 && ix+offset_x_new < rsAllocationGetDimX(bitmap_align_new) && iy+offset_y_new < rsAllocationGetDimY(bitmap_align_new) ) {
-    	pixel_new = rsGetElementAt_uchar4(bitmap_align_new, x+offset_x_new, y+offset_y_new);
-	}
-	else {
-	    return 0.0f;
-	}
+    if( ix+offset_x_new >= 0 && iy+offset_y_new >= 0 && ix+offset_x_new < rsAllocationGetDimX(bitmap_align_new) && iy+offset_y_new < rsAllocationGetDimY(bitmap_align_new) ) {
+        pixel_new = rsGetElementAt_uchar4(bitmap_align_new, x+offset_x_new, y+offset_y_new);
+    }
+    else {
+        return 0.0f;
+    }
     float3 pixel_avg_f = convert_float3(pixel_avg.rgb);
     float3 pixel_new_f = convert_float3(pixel_new.rgb);
     float3 diff = pixel_avg_f - pixel_new_f;
@@ -37,14 +37,14 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
     int32_t iy = y;
     uchar4 pixel_new;
 
-	if( ix+offset_x_new >= 0 && iy+offset_y_new >= 0 && ix+offset_x_new < rsAllocationGetDimX(bitmap_new) && iy+offset_y_new < rsAllocationGetDimY(bitmap_new) ) {
-    	pixel_new = rsGetElementAt_uchar4(bitmap_new, x+offset_x_new, y+offset_y_new);
-	}
-	else {
-	    return pixel_avg_f;
-	    //return convert_float3(pixel_avg.rgb);
-	    //return convert_uchar4(pixel_avg);
-	}
+    if( ix+offset_x_new >= 0 && iy+offset_y_new >= 0 && ix+offset_x_new < rsAllocationGetDimX(bitmap_new) && iy+offset_y_new < rsAllocationGetDimY(bitmap_new) ) {
+        pixel_new = rsGetElementAt_uchar4(bitmap_new, x+offset_x_new, y+offset_y_new);
+    }
+    else {
+        return pixel_avg_f;
+        //return convert_float3(pixel_avg.rgb);
+        //return convert_uchar4(pixel_avg);
+    }
 
     float3 pixel_new_f = convert_float3(pixel_new.rgb);
 
@@ -117,14 +117,14 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
 
     pixel_avg_f = (avg_factor*pixel_avg_f + pixel_new_f)/(avg_factor+1.0f);
 
-	/*uchar4 out;
+    /*uchar4 out;
     out.r = (uchar)clamp(pixel_avg_f.r+0.5f, 0.0f, 255.0f);
     out.g = (uchar)clamp(pixel_avg_f.g+0.5f, 0.0f, 255.0f);
     out.b = (uchar)clamp(pixel_avg_f.b+0.5f, 0.0f, 255.0f);
     out.a = 255;
 
-	return out;*/
-	return pixel_avg_f;
+    return out;*/
+    return pixel_avg_f;
 }
 
 float3 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
@@ -154,13 +154,13 @@ int offset_x7 = 0, offset_y7 = 0;
 
 static uchar4 read_aligned_pixel(rs_allocation bitmap, int32_t ix, int32_t iy, int offset_x, int offset_y, uchar4 def) {
     uchar4 out;
-	if( ix+offset_x >= 0 && iy+offset_y >= 0 && ix+offset_x < rsAllocationGetDimX(bitmap) && iy+offset_y < rsAllocationGetDimY(bitmap) ) {
-    	out = rsGetElementAt_uchar4(bitmap, ix+offset_x, iy+offset_y);
-	}
-	else {
-    	out = def;
-	}
-	return out;
+    if( ix+offset_x >= 0 && iy+offset_y >= 0 && ix+offset_x < rsAllocationGetDimX(bitmap) && iy+offset_y < rsAllocationGetDimY(bitmap) ) {
+        out = rsGetElementAt_uchar4(bitmap, ix+offset_x, iy+offset_y);
+    }
+    else {
+        out = def;
+    }
+    return out;
 }
 
 uchar4 __attribute__((kernel)) avg_multi(uchar4 in, uint32_t x, uint32_t y) {
@@ -175,22 +175,22 @@ uchar4 __attribute__((kernel)) avg_multi(uchar4 in, uint32_t x, uint32_t y) {
     uchar4 pixel6 = read_aligned_pixel(bitmap6, ix, iy, offset_x6, offset_y6, in);
     uchar4 pixel7 = read_aligned_pixel(bitmap7, ix, iy, offset_x7, offset_y7, in);
 
-	float3 result = convert_float3(pixel0.rgb);
-	result += convert_float3(pixel1.rgb);
-	result += convert_float3(pixel2.rgb);
-	result += convert_float3(pixel3.rgb);
-	result += convert_float3(pixel4.rgb);
-	result += convert_float3(pixel5.rgb);
-	result += convert_float3(pixel6.rgb);
-	result += convert_float3(pixel7.rgb);
+    float3 result = convert_float3(pixel0.rgb);
+    result += convert_float3(pixel1.rgb);
+    result += convert_float3(pixel2.rgb);
+    result += convert_float3(pixel3.rgb);
+    result += convert_float3(pixel4.rgb);
+    result += convert_float3(pixel5.rgb);
+    result += convert_float3(pixel6.rgb);
+    result += convert_float3(pixel7.rgb);
 
-	result /= 8.0f;
+    result /= 8.0f;
 
-	uchar4 out;
+    uchar4 out;
     out.r = (uchar)clamp(result.r+0.5f, 0.0f, 255.0f);
     out.g = (uchar)clamp(result.g+0.5f, 0.0f, 255.0f);
     out.b = (uchar)clamp(result.b+0.5f, 0.0f, 255.0f);
     out.a = 255;
 
-	return out;
+    return out;
 }

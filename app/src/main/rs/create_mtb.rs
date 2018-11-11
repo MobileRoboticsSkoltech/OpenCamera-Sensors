@@ -8,8 +8,8 @@ int median_value = 0;
 int start_x = 0, start_y = 0;
 
 void __attribute__((kernel)) create_mtb(uchar4 in, uint32_t x, uint32_t y) {
-	uchar value = max(in.r, in.g);
-	value = max(value, in.b);
+    uchar value = max(in.r, in.g);
+    value = max(value, in.b);
 
     uchar out;
     // take care of being unsigned!
@@ -26,12 +26,12 @@ void __attribute__((kernel)) create_mtb(uchar4 in, uint32_t x, uint32_t y) {
     else
         out = 255;
     rsSetElementAt_uchar(out_bitmap, out, x - start_x, y - start_y);
-	//return out;
+    //return out;
 }
 
 void __attribute__((kernel)) create_greyscale(uchar4 in, uint32_t x, uint32_t y) {
-	uchar value = max(in.r, in.g);
-	value = max(value, in.b);
+    uchar value = max(in.r, in.g);
+    value = max(value, in.b);
 
     rsSetElementAt_uchar(out_bitmap, value, x - start_x, y - start_y);
 }
@@ -42,8 +42,8 @@ void __attribute__((kernel)) create_greyscale_f(float3 in_f, uint32_t x, uint32_
     in.g = (uchar)clamp(in_f.g+0.5f, 0.0f, 255.0f);
     in.b = (uchar)clamp(in_f.b+0.5f, 0.0f, 255.0f);
 
-	uchar value = max(in.r, in.g);
-	value = max(value, in.b);
+    uchar value = max(in.r, in.g);
+    value = max(value, in.b);
 
     rsSetElementAt_uchar(out_bitmap, value, x - start_x, y - start_y);
 }
