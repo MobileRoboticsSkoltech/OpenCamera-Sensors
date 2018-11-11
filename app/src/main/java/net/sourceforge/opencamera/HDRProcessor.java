@@ -2462,7 +2462,7 @@ public class HDRProcessor {
 		float max_gain_factor = 1.5f;
 		int ideal_brightness = 119;
 		//if( iso <= 150 ) {
-		if( iso < 1100 && exposure_time < 1000000000L/60 ) {
+		if( iso < 1100 && exposure_time < 1000000000L/59 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
 			// but note we don't want to treat the following as "bright": testAvg17, testAvg23, testAvg36, testAvg37, testAvg50
 			ideal_brightness = 199;
@@ -2528,7 +2528,7 @@ public class HDRProcessor {
 			// use piecewise function with gain and gamma
 			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6; using 0.8 helps testAvg46 and testAvg50 further
 			//float mid_y = iso <= 150 ? 0.6f*255.0f : 0.8f*255.0f;
-			float mid_y = ( iso < 1100 && exposure_time < 1000000000L/60 ) ? 0.6f*255.0f : 0.8f*255.0f;
+			float mid_y = ( iso < 1100 && exposure_time < 1000000000L/59 ) ? 0.6f*255.0f : 0.8f*255.0f;
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
@@ -2743,7 +2743,7 @@ public class HDRProcessor {
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
 		//if( iso <= 150 ) {
-		if( iso < 1100 && exposure_time < 1000000000L/60 ) {
+		if( iso < 1100 && exposure_time < 1000000000L/59 ) {
 			// for bright scenes, contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
 			// keep n_tiles==1 - get too much contrast enhancement with n_tiles==4 e.g. for testAvg34
