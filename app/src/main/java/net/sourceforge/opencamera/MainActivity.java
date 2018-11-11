@@ -108,6 +108,7 @@ public class MainActivity extends Activity {
     private boolean screen_is_locked; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
     private final Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
 	private ValueAnimator gallery_save_anim;
+    private boolean last_continuous_fast_burst; // whether the last photo operation was a continuous_fast_burst
 
 	private TextToSpeech textToSpeech;
 	private boolean textToSpeechSuccess;
@@ -2923,6 +2924,12 @@ public class MainActivity extends Activity {
 		this.takePicturePressed(photo_snapshot, false);
     }
 
+	/** Returns whether the last photo operation was a continuous fast burst.
+	 */
+	boolean lastContinuousFastBurst() {
+		return this.last_continuous_fast_burst;
+	}
+
 	/**
 	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
 	 *                       recording. If false, either take a photo or start/stop video depending
@@ -2941,6 +2948,7 @@ public class MainActivity extends Activity {
 			applicationInterface.setNextPanoramaPoint();
 		}
 
+		this.last_continuous_fast_burst = continuous_fast_burst;
     	this.preview.takePicturePressed(photo_snapshot, continuous_fast_burst);
 	}
     

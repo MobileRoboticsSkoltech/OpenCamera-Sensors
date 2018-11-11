@@ -790,6 +790,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			// don't pause preview when taking photos while recording video!
 			return false;
 		}
+		else if( main_activity.lastContinuousFastBurst() ) {
+			// Don't use pause preview mode when doing a continuous fast burst
+			// Firstly due to not using background thread for pause preview mode, this will be
+			// sluggish anyway, but even when this is fixed, I'm not sure it makes sense to use
+			// pause preview in this mode.
+			return false;
+		}
     	return sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
     }
 
