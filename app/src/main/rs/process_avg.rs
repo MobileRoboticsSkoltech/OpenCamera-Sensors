@@ -111,7 +111,7 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
             // reduces ghosting in: testAvg13, testAvg25, testAvg26, testAvg29, testAvg31
             return pixel_avg_f;
         }
-        float weight = L/(L+wiener_C);
+        float weight = L/(L+wiener_C); // lower weight means more averaging
         pixel_new_f = weight * pixel_avg_f + (1.0-weight) * pixel_new_f;
     }
 
