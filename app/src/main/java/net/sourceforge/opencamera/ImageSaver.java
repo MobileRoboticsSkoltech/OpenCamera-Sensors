@@ -2642,11 +2642,13 @@ public class ImageSaver extends Thread {
     }
 
 	/** Makes various modifications to the saved image file, according to the preferences in request.
+	 *  This method is used when saving directly from the JPEG data rather than a bitmap.
 	 */
     private void updateExif(Request request, File picFile) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateExif: " + picFile);
 		if( request.store_geo_direction || hasCustomExif(request.custom_tag_artist, request.custom_tag_copyright) ) {
+			long time_s = System.currentTimeMillis();
 			if( MyDebug.LOG )
 				Log.d(TAG, "add additional exif info");
 			try {
@@ -2660,6 +2662,8 @@ public class ImageSaver extends Thread {
 					Log.e(TAG, "exif orientation NoClassDefFoundError");
 				exception.printStackTrace();
 			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "*** time to add additional exif info: " + (System.currentTimeMillis() - time_s));
 		}
 		else if( needGPSTimestampHack(request.type == Request.Type.JPEG, request.using_camera2, request.store_location) ) {
 			if( MyDebug.LOG )
