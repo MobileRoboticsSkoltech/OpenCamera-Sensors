@@ -234,6 +234,10 @@ public abstract class CameraController {
 		 * (for flash_frontscreen_auto it will only be called if the scene is considered dark enough to require the screen flash).
 		 * The screen flash can be removed when or after onCompleted() is called.
 		 */
+		/* This is called for when burst mode is BURSTTYPE_FOCUS or BURSTTYPE_CONTINUOUS, to ask whether it's safe to take
+		 * n_jpegs extra images, or whether to wait.
+		 */
+		boolean imageQueueWouldBlock(int n_jpegs);
 		void onFrontScreenTurnOn();
 	}
 	

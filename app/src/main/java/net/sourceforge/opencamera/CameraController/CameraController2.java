@@ -5500,8 +5500,9 @@ public class CameraController2 extends CameraController {
 				captureSession.capture(continuous_burst_in_progress ? request : last_request, previewCaptureCallback, handler);
 
 				if( continuous_burst_in_progress ) {
+				    final int continuous_burst_rate_ms = 100;
 					// also take the next burst after a delay
-					handler.postDelayed(new Runnable(){
+					handler.postDelayed(new Runnable() {
 						@Override
 						public void run() {
 							// note, even if continuous_burst_in_progress has become false by this point, still take one last
@@ -5510,10 +5511,29 @@ public class CameraController2 extends CameraController {
 							if( MyDebug.LOG ) {
 								Log.d(TAG, "take next continuous burst");
 								Log.d(TAG, "continuous_burst_in_progress: " + continuous_burst_in_progress);
+								Log.d(TAG, "n_burst: " + n_burst);
 							}
-							takePictureBurst(true);
+							if( n_burst >= 10 ) {
+								// Nokia 8 in std mode without post-processing options doesn't hit this limit (we only hit this
+								// if it's set to "n_burst >= 5")
+                                if( MyDebug.LOG ) {
+                                    Log.d(TAG, "...but wait for continuous burst, as waiting for too many photos");
+                                }
+                                //throw new RuntimeException(); // test
+								handler.postDelayed(this, continuous_burst_rate_ms);
+                            }
+                            else if( picture_cb.imageQueueWouldBlock(n_burst+1) ) {
+                                if( MyDebug.LOG ) {
+                                    Log.d(TAG, "...but wait for continuous burst, as image queue would block");
+                                }
+                                //throw new RuntimeException(); // test
+								handler.postDelayed(this, continuous_burst_rate_ms);
+							}
+                            else {
+    							takePictureBurst(true);
+                            }
 					   }
-					}, 100);
+					}, continuous_burst_rate_ms);
 				}
             }
 			else if( use_burst ) {

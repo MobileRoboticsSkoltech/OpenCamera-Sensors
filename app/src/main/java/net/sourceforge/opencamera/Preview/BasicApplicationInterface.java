@@ -274,6 +274,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
+	public boolean imageQueueWouldBlock(boolean has_raw, int n_jpegs) {
+		return false;
+	}
+
+	@Override
 	public long getExposureTimePref() {
 		return CameraController.EXPOSURE_TIME_DEFAULT;
 	}

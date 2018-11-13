@@ -295,6 +295,15 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
+	 * @param has_raw Whether this is RAW+JPEG or RAW only.
+	 * @param n_jpegs If has_raw is false, the number of JPEGs that will be taken.
+	 */
+	boolean queueWouldBlock(boolean has_raw, int n_jpegs) {
+		int photo_cost = this.computePhotoCost(has_raw, n_jpegs);
+    	return this.queueWouldBlock(photo_cost);
+	}
+
+	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
 	 * @param photo_cost The result returned by computePhotoCost().
 	 */
 	synchronized boolean queueWouldBlock(int photo_cost) {

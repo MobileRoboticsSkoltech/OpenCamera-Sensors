@@ -1051,6 +1051,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
+	public boolean imageQueueWouldBlock(boolean has_raw, int n_jpegs) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "imageQueueWouldBlock");
+		return imageSaver.queueWouldBlock(has_raw, n_jpegs);
+	}
+
+	@Override
     public long getExposureTimePref() {
     	return sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
     }

@@ -5692,6 +5692,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
     	    }
 
+			public boolean imageQueueWouldBlock(int n_jpegs) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "imageQueueWouldBlock");
+				return applicationInterface.imageQueueWouldBlock(false, n_jpegs);
+			}
+
 			public void onFrontScreenTurnOn() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onFrontScreenTurnOn");
