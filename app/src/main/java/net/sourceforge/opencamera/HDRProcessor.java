@@ -1449,6 +1449,12 @@ public class HDRProcessor {
 		processAvgScript.set_wiener_C(wiener_C);
 		processAvgScript.set_wiener_C_cutoff(wiener_C_cutoff);
 
+		/*final float max_weight = 0.9375f;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "max_weight: " + max_weight);
+		}
+		processAvgScript.set_max_weight(max_weight);*/
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processAvgScript");
 		if( MyDebug.LOG )

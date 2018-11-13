@@ -13,6 +13,7 @@ int scale_align_size = 1;
 float avg_factor = 1.0f;
 float wiener_C = 1024.0f;
 float wiener_C_cutoff = 1024.0f;
+//float max_weight = 1.0f;
 
 float __attribute__((kernel)) compute_diff(uchar4 pixel_avg, uint32_t x, uint32_t y) {
     int32_t ix = x;
@@ -113,6 +114,15 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
         }
         float weight = L/(L+wiener_C); // lower weight means more averaging
         pixel_new_f = weight * pixel_avg_f + (1.0-weight) * pixel_new_f;
+
+        /*float weight = L/(L+wiener_C); // lower weight means more averaging
+        weight = fmin(weight, max_weight);
+        if( L > wiener_C_cutoff ) {
+            // error too large, so no contribution for new image pixel
+            // reduces ghosting in: testAvg13, testAvg25, testAvg26, testAvg29, testAvg31
+            weight = max_weight;
+        }
+        pixel_new_f = weight * pixel_avg_f + (1.0-weight) * pixel_new_f;*/
     }
 
     pixel_avg_f = (avg_factor*pixel_avg_f + pixel_new_f)/(avg_factor+1.0f);
