@@ -1064,7 +1064,7 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG )
 							Log.d(TAG, "focus bracketing was cancelled");
 						// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
-						// RequestTag.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
+						// RequestTagType.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
 						slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
 						if( MyDebug.LOG )
 							Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
@@ -1142,23 +1142,6 @@ public class CameraController2 extends CameraController {
 
 			if( burst_type == BurstType.BURSTTYPE_FOCUS )
 				focus_bracketing_in_progress = false;
-
-			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
-				if( MyDebug.LOG )
-					Log.d(TAG, "focus bracketing complete, reset manual focus");
-				camera_settings.setFocusDistance(previewBuilder);
-				try {
-					setRepeatingRequest();
-				}
-				catch(CameraAccessException e) {
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "failed to set focus distance");
-						Log.e(TAG, "reason: " + e.getReason());
-						Log.e(TAG, "message: " + e.getMessage());
-					}
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 
@@ -5129,7 +5112,7 @@ public class CameraController2 extends CameraController {
 
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
+			// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
 			clearPending();
 			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
@@ -5257,12 +5240,12 @@ public class CameraController2 extends CameraController {
 					}
 					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 					if( i == n_half_images - 1 ) {
-						// RequestTag.CAPTURE should only be set for the last request, otherwise we'll may do things like turning
+						// RequestTagType.CAPTURE should only be set for the last request, otherwise we'll may do things like turning
 						// off torch (for fake flash) before all images are received
 						// More generally, doesn't seem a good idea to be doing the post-capture commands (resetting ae state etc)
 						// multiple times, and before all captures are complete!
 						if( MyDebug.LOG )
-							Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
+							Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
 						stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 					}
 					requests.add( stillBuilder.build() );
@@ -5324,7 +5307,7 @@ public class CameraController2 extends CameraController {
 			requests.add( stillBuilder.build() );
 			requests.add( stillBuilder.build() );
 			if( MyDebug.LOG )
-				Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
+				Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
 			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 			requests.add( stillBuilder.build() );
 			*/
@@ -5401,7 +5384,7 @@ public class CameraController2 extends CameraController {
 
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
+			// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				if( MyDebug.LOG )
@@ -5551,7 +5534,7 @@ public class CameraController2 extends CameraController {
 						@Override
 						public void run() {
 							// note, even if continuous_burst_in_progress has become false by this point, still take one last
-							// photo, as need to ensure that we have a request with RequestTag.CAPTURE, as well as ensuring
+							// photo, as need to ensure that we have a request with RequestTagType.CAPTURE, as well as ensuring
 							// we call the onCompleted() method of the callback
 							if( MyDebug.LOG ) {
 								Log.d(TAG, "take next continuous burst");
@@ -6137,7 +6120,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
 				}
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
-				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTag.CAPTURE for the last image)
+				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTagType.CAPTURE for the last image)
 			}
 			/*else {
 				if( MyDebug.LOG ) {
@@ -6854,6 +6837,24 @@ public class CameraController2 extends CameraController {
 					}
 				}
 				fake_precapture_torch_performed = false;
+
+				if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
+					if( MyDebug.LOG )
+						Log.d(TAG, "focus bracketing complete, reset manual focus");
+					camera_settings.setFocusDistance(previewBuilder);
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to set focus distance");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					}
+				}
+
 
 				// Important that we only call the picture onCompleted callback after we've received the capture request, so
 				// we need to check if we already received all the images.
