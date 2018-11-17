@@ -922,25 +922,32 @@ public class ImageSaver extends Thread {
 	/** Chooses the hdr_alpha to use for contrast enhancement in the HDR algorithm, based on the user
 	 *  preferences and scene details.
 	 */
-	public static float getHDRAlpha(String preference_hdr_contrast_enhancement, long exposure_time) {
+	public static float getHDRAlpha(String preference_hdr_contrast_enhancement, long exposure_time, int n_bitmaps) {
 		boolean use_hdr_alpha;
-		switch( preference_hdr_contrast_enhancement ) {
-			case "preference_hdr_contrast_enhancement_off":
-				use_hdr_alpha = false;
-				break;
-			case "preference_hdr_contrast_enhancement_smart":
-			default:
-				// Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
-				// a short exposure time, due to fixing problems where some regions are too dark.
-				// This helps: testHDR11, testHDR19, testHDR34, testHDR53.
-				// Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
-				// (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
-				// testHDR54, testHDR55, testHDR56.
-				use_hdr_alpha = (exposure_time < 1000000000L/59);
-				break;
-			case "preference_hdr_contrast_enhancement_always":
-				use_hdr_alpha = true;
-				break;
+		if( n_bitmaps == 1 ) {
+			// DRO always applies hdr_alpha
+			use_hdr_alpha = true;
+		}
+		else {
+			// else HDR
+			switch( preference_hdr_contrast_enhancement ) {
+				case "preference_hdr_contrast_enhancement_off":
+					use_hdr_alpha = false;
+					break;
+				case "preference_hdr_contrast_enhancement_smart":
+				default:
+					// Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
+					// a short exposure time, due to fixing problems where some regions are too dark.
+					// This helps: testHDR11, testHDR19, testHDR34, testHDR53.
+					// Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
+					// (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
+					// testHDR54, testHDR55, testHDR56.
+					use_hdr_alpha = (exposure_time < 1000000000L/59);
+					break;
+				case "preference_hdr_contrast_enhancement_always":
+					use_hdr_alpha = true;
+					break;
+			}
 		}
 		float hdr_alpha = use_hdr_alpha ? 0.5f : 0.0f;
 		if( MyDebug.LOG ) {
@@ -1198,7 +1205,7 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
     		}
-    		float hdr_alpha = getHDRAlpha(request.preference_hdr_contrast_enhancement, request.exposure_time);
+    		float hdr_alpha = getHDRAlpha(request.preference_hdr_contrast_enhancement, request.exposure_time, bitmaps.size());
 			if( MyDebug.LOG )
 				Log.d(TAG, "before HDR first bitmap: " + bitmaps.get(0) + " is mutable? " + bitmaps.get(0).isMutable());
 			try {
