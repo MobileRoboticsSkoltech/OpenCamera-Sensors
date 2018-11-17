@@ -94,6 +94,7 @@ public class CameraController2 extends CameraController {
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
 	// for BURSTTYPE_FOCUS:
+	private boolean focus_bracketing_in_progress; // whether focus bracketing in progress; set back to false to cancel
 	private int focus_bracketing_n_images = 3;
 	private float focus_bracketing_source_distance = 0.0f;
 	private float focus_bracketing_target_distance = 0.0f;
@@ -186,8 +187,29 @@ public class CameraController2 extends CameraController {
 	private float capture_result_focus_distance_min;
 	private float capture_result_focus_distance_max;*/
 	
-	private enum RequestTag {
-		CAPTURE // request is either for a regular non-burst capture, or the last of a burst capture
+	private enum RequestTagType {
+		CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture
+		NONE // should be treated the same as if no tag had been set on the request
+	}
+
+	/* The class that we use for setTag() and getTag() for capture requests.
+	   We use this class instead of assigning the RequestTagType directly, so we can modify it
+	   (even though CaptureRequest only has a getTag() method).
+	 */
+	private class RequestTagObject {
+		private RequestTagType type;
+
+		private RequestTagObject(RequestTagType type) {
+			this.type = type;
+		}
+
+		private RequestTagType getType() {
+			return type;
+		}
+
+		private void setType(RequestTagType type) {
+			this.type = type;
+		}
 	}
 
 	private final static int min_white_balance_temperature_c = 1000;
@@ -957,11 +979,11 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "pending_burst_images size is now: " + pending_burst_images.size());
 					}
-					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
+					if( pending_burst_images.size() >= slow_burst_capture_requests.size() ) { // shouldn't ever be greater, but just in case
 						if( MyDebug.LOG )
 							Log.d(TAG, "all burst images available");
-						if( pending_burst_images.size() > n_burst ) {
-							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
+						if( pending_burst_images.size() > slow_burst_capture_requests.size() ) {
+							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than slow_burst_capture_requests size " + slow_burst_capture_requests.size());
 						}
 						// take a copy, so that we can clear pending_burst_images
 						List<byte []> images = new ArrayList<>(pending_burst_images);
@@ -1015,7 +1037,7 @@ public class CameraController2 extends CameraController {
 				if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
 					try {
 						if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-							captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+							captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
 						}
 					}
 					catch(CameraAccessException e) {
@@ -1038,9 +1060,21 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "focus bracketing");
 
+					if( !focus_bracketing_in_progress ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "focus bracketing was cancelled");
+						// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
+						// RequestTag.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
+						slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
+						if( MyDebug.LOG )
+							Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
+						RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
+						requestTag.setType(RequestTagType.CAPTURE);
+					}
+
 					// code for focus bracketing
 					try {
-						float focus_distance = slow_burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+						float focus_distance = slow_burst_capture_requests.get(n_burst_taken).get(CaptureRequest.LENS_FOCUS_DISTANCE);
 						if( MyDebug.LOG ) {
 							Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
 						}
@@ -1048,7 +1082,7 @@ public class CameraController2 extends CameraController {
 						previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
 
 						setRepeatingRequest(previewBuilder.build());
-						//captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+						//captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
 					}
 					catch(CameraAccessException e) {
 						if( MyDebug.LOG ) {
@@ -1072,7 +1106,7 @@ public class CameraController2 extends CameraController {
 								Log.d(TAG, "take picture after delay for next focus bracket");
 							if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
 								try {
-									captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+									captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
 								}
 								catch(CameraAccessException e) {
 									if( MyDebug.LOG ) {
@@ -1105,6 +1139,9 @@ public class CameraController2 extends CameraController {
 			// need to set jpeg_todo to false before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
 			jpeg_todo = false;
 			checkImagesCompleted();
+
+			if( burst_type == BurstType.BURSTTYPE_FOCUS )
+				focus_bracketing_in_progress = false;
 
 			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
 				if( MyDebug.LOG )
@@ -3230,14 +3267,10 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopFocusBracketingBurst");
 		if( burst_type == BurstType.BURSTTYPE_FOCUS ) {
-			if( n_burst > 0 ) {
-				n_burst = pending_burst_images.size();
-				if( MyDebug.LOG )
-					Log.d(TAG, "n_burst now set to: " + n_burst);
-			}
+			focus_bracketing_in_progress = false;
 		}
 		else {
-			Log.d(TAG, "stopFocusBracketingBurst burst_type is: " + burst_type);
+			Log.e(TAG, "stopFocusBracketingBurst burst_type is: " + burst_type);
 		}
 	}
 
@@ -4934,7 +4967,7 @@ public class CameraController2 extends CameraController {
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			stillBuilder.setTag(RequestTag.CAPTURE);
+			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 			camera_settings.setupBuilder(stillBuilder, true);
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				if( MyDebug.LOG )
@@ -5230,7 +5263,7 @@ public class CameraController2 extends CameraController {
 						// multiple times, and before all captures are complete!
 						if( MyDebug.LOG )
 							Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
-						stillBuilder.setTag(RequestTag.CAPTURE);
+						stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 					}
 					requests.add( stillBuilder.build() );
 				}
@@ -5272,9 +5305,15 @@ public class CameraController2 extends CameraController {
 				for(int i=0;i<focus_distances.size();i++) {
 					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distances.get(i));
 					if( i == focus_distances.size()-1 ) {
-						stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
+						stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE)); // set capture tag for last only
+					}
+					else {
+						// but to cancel focus bracketing, we need to set a NONE tag on every other capture
+						stillBuilder.setTag(new RequestTagObject(RequestTagType.NONE));
 					}
 					requests.add( stillBuilder.build() );
+
+					focus_bracketing_in_progress = true;
 				}
 			}
 
@@ -5286,7 +5325,7 @@ public class CameraController2 extends CameraController {
 			requests.add( stillBuilder.build() );
 			if( MyDebug.LOG )
 				Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
-			stillBuilder.setTag(RequestTag.CAPTURE);
+			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 			requests.add( stillBuilder.build() );
 			*/
 
@@ -5482,7 +5521,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "n_burst: " + n_burst);
 
 			final CaptureRequest request = stillBuilder.build();
-			stillBuilder.setTag(RequestTag.CAPTURE);
+			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 			final CaptureRequest last_request = stillBuilder.build();
 
 			// n.b., don't stop the preview with stop.Repeating when capturing a burst
@@ -6044,6 +6083,14 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
+		private RequestTagType getRequestTagType(@NonNull CaptureRequest request) {
+			Object tag = request.getTag();
+			if( tag == null )
+				return null;
+			RequestTagObject requestTag = (RequestTagObject)tag;
+			return requestTag.getType();
+		}
+
 		@Override
 		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
 			if( MyDebug.LOG )
@@ -6083,7 +6130,7 @@ public class CameraController2 extends CameraController {
 
 		@Override
 		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-			if( request.getTag() == RequestTag.CAPTURE ) {
+			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureStarted: capture");
 					Log.d(TAG, "frameNumber: " + frameNumber);
@@ -6118,7 +6165,7 @@ public class CameraController2 extends CameraController {
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
-			if( request.getTag() == RequestTag.CAPTURE ) {
+			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureCompleted: capture");
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
@@ -6728,8 +6775,8 @@ public class CameraController2 extends CameraController {
 					e.printStackTrace();
 				} 
 			}*/
-			
-			if( request.getTag() == RequestTag.CAPTURE ) {
+
+			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "capture request completed");
 				test_capture_results++;

@@ -8984,10 +8984,65 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         focusTargetSeekBar.setProgress( (int)(0.5*(focusTargetSeekBar.getMax()-1)) );
 
         subTestTakePhoto(false, false, true, true, false, false, false, false);
-        if( mPreview.usingCamera2API() ) {
-            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == 1);
+    }
+
+    /** Tests taking a photo in focus bracketing mode, but with cancelling.
+     */
+    public void testTakePhotoFocusBracketingCancel() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoFocusBracketingCancel");
+
+        setToDefault();
+
+        if( !mActivity.supportsFocusBracketing() ) {
+            return;
         }
+
+        SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        assertTrue(focusSeekBar.getVisibility() == View.GONE);
+        SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+        assertTrue(focusTargetSeekBar.getVisibility() == View.GONE);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+        editor.putString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "255");
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing );
+        assertTrue(focusSeekBar.getVisibility() == View.VISIBLE);
+        focusSeekBar.setProgress( (int)(0.75*(focusSeekBar.getMax()-1)) );
+        assertTrue(focusTargetSeekBar.getVisibility() == View.VISIBLE);
+        focusTargetSeekBar.setProgress( (int)(0.5*(focusTargetSeekBar.getMax()-1)) );
+
+        assertFalse( mPreview.isTakingPhoto() );
+        assertTrue( mActivity.getApplicationInterface().canTakeNewPhoto() );
+
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        Log.d(TAG, "about to click take photo");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take photo");
+        assertTrue( mPreview.isTakingPhoto() );
+
+        Thread.sleep(500); // wait a short amount
+        assertTrue( mPreview.isTakingPhoto() );
+
+        Log.d(TAG, "about to click take photo to cancel");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take photo cancel");
+
+        // need to wait until cancelled
+        Thread.sleep(5000);
+        assertFalse( mPreview.isTakingPhoto() );
+        assertTrue( mActivity.getApplicationInterface().canTakeNewPhoto() );
+
+        assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+        Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
+        assertTrue(mPreview.count_cameraTakePicture==1);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == 1);
     }
 
     /** Tests NR photo mode.
