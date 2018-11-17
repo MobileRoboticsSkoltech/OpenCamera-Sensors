@@ -8955,6 +8955,51 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /* Sets focus bracketing seek bars to some test positions.
+     */
+    private void setUpFocusBracketing() throws InterruptedException {
+        SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing );
+        assertTrue(focusSeekBar.getVisibility() == View.VISIBLE);
+        focusSeekBar.setProgress( (int)(0.9*(focusSeekBar.getMax()-1)) );
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "source focus_distance: " + mPreview.getCameraController().getFocusDistance());
+        mPreview.stoppedSettingFocusDistance(false); // hack, since onStopTrackingTouch() isn't called programmatically!
+        this.getInstrumentation().waitForIdleSync();
+        Thread.sleep(500);
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
+
+        assertTrue(focusTargetSeekBar.getVisibility() == View.VISIBLE);
+        focusTargetSeekBar.setProgress( (int)(0.25*(focusTargetSeekBar.getMax()-1)) );
+        this.getInstrumentation().waitForIdleSync();
+        // test that we temporarily set the focus to the target distance
+        float target_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "target_actual_focus_distance: " + target_actual_focus_distance);
+        assertTrue(Math.abs(initial_focus_distance - target_actual_focus_distance) > 1.0e-5f); // no assertNotEquals!
+        mPreview.stoppedSettingFocusDistance(true); // hack, since onStopTrackingTouch() isn't called programmatically!
+        this.getInstrumentation().waitForIdleSync();
+        Thread.sleep(500); // wait for initial focus to be set
+
+        // test that we've reset back to the source distance
+        float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+        assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+        float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+        assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
+    }
+
     /** Tests taking a photo in focus bracketing mode.
      */
     public void testTakePhotoFocusBracketing() throws InterruptedException {
@@ -8977,15 +9022,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.apply();
         updateForSettings();
 
-        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing );
-        assertTrue(focusSeekBar.getVisibility() == View.VISIBLE);
-        focusSeekBar.setProgress( (int)(0.75*(focusSeekBar.getMax()-1)) );
-        assertTrue(focusTargetSeekBar.getVisibility() == View.VISIBLE);
-        focusTargetSeekBar.setProgress( (int)(0.5*(focusTargetSeekBar.getMax()-1)) );
+        setUpFocusBracketing();
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
 
         subTestTakePhoto(false, false, true, true, false, false, false, false);
         Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
         assertTrue(mPreview.getCameraController().test_capture_results == 1);
+
+        float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+        assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+        float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+        assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
     }
 
     /** Tests taking a photo in focus bracketing mode, but with cancelling.
@@ -9011,38 +9069,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.apply();
         updateForSettings();
 
-        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing );
-        assertTrue(focusSeekBar.getVisibility() == View.VISIBLE);
-        focusSeekBar.setProgress( (int)(0.75*(focusSeekBar.getMax()-1)) );
-        assertTrue(focusTargetSeekBar.getVisibility() == View.VISIBLE);
-        focusTargetSeekBar.setProgress( (int)(0.5*(focusTargetSeekBar.getMax()-1)) );
+        setUpFocusBracketing();
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
 
         assertFalse( mPreview.isTakingPhoto() );
         assertTrue( mActivity.getApplicationInterface().canTakeNewPhoto() );
 
-        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-        Log.d(TAG, "about to click take photo");
-        clickView(takePhotoButton);
-        Log.d(TAG, "done clicking take photo");
-        assertTrue( mPreview.isTakingPhoto() );
+        for(int i=0;i<2;i++) {
+            View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+            Log.d(TAG, "about to click take photo");
+            clickView(takePhotoButton);
+            Log.d(TAG, "done clicking take photo");
+            assertTrue( mPreview.isTakingPhoto() );
 
-        Thread.sleep(500); // wait a short amount
-        assertTrue( mPreview.isTakingPhoto() );
+            Thread.sleep(i==0 ? 500 : 3000); // wait before cancelling
+            assertTrue( mPreview.isTakingPhoto() );
 
-        Log.d(TAG, "about to click take photo to cancel");
-        clickView(takePhotoButton);
-        Log.d(TAG, "done clicking take photo cancel");
+            Log.d(TAG, "about to click take photo to cancel");
+            clickView(takePhotoButton);
+            Log.d(TAG, "done clicking take photo cancel");
 
-        // need to wait until cancelled
-        Thread.sleep(5000);
-        assertFalse( mPreview.isTakingPhoto() );
-        assertTrue( mActivity.getApplicationInterface().canTakeNewPhoto() );
+            // need to wait until cancelled
+            Thread.sleep(3000);
+            assertFalse( mPreview.isTakingPhoto() );
+            assertTrue( mActivity.getApplicationInterface().canTakeNewPhoto() );
 
-        assertTrue(mPreview.isPreviewStarted()); // check preview restarted
-        Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
-        assertTrue(mPreview.count_cameraTakePicture==1);
-        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-        assertTrue(mPreview.getCameraController().test_capture_results == 1);
+            assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+            Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
+            assertTrue(mPreview.count_cameraTakePicture==i+1);
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == i+1);
+
+            float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+            Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+            assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+            float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+            Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+            assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
+        }
     }
 
     /** Tests NR photo mode.
