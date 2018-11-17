@@ -9421,7 +9421,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         HistogramDetails hdrHistogramDetails = null;
         if( inputs.size() > 1 ) {
             String preference_hdr_contrast_enhancement = (iso==-1) ? "preference_hdr_contrast_enhancement_always" : "preference_hdr_contrast_enhancement_smart";
-    		float hdr_alpha = ImageSaver.getHDRAlpha(preference_hdr_contrast_enhancement, exposure_time);
+    		float hdr_alpha = ImageSaver.getHDRAlpha(preference_hdr_contrast_enhancement, exposure_time, inputs.size());
             long time_s = System.currentTimeMillis();
             try {
                 mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, hdr_alpha, 4, tonemapping_algorithm);
