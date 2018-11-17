@@ -3322,6 +3322,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "manual focus seekbar: onStartTrackingTouch");
 				has_saved_zoom = false;
 				if( preview.supportsZoom() ) {
 					int focus_assist = applicationInterface.getFocusAssistPref();
@@ -3338,6 +3340,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "manual focus seekbar: onStopTrackingTouch");
 				if( has_saved_zoom ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "unzoom for focus assist, zoom factor was: " + saved_zoom_factor);
