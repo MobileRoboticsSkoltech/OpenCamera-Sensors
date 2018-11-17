@@ -954,6 +954,9 @@ public class CameraController2 extends CameraController {
 				}
 				if( burst_single_request && n_burst > 1 ) {
 					pending_burst_images.add(bytes);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "pending_burst_images size is now: " + pending_burst_images.size());
+					}
 					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
 						if( MyDebug.LOG )
 							Log.d(TAG, "all burst images available");
