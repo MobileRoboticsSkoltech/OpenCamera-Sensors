@@ -121,7 +121,7 @@ public class CameraController2 extends CameraController {
 	private int n_burst; // number of expected (remaining) burst images in this capture
 	private int n_burst_taken; // number of burst images taken so far in this capture
     private int n_burst_total; // total number of expected burst images in this capture (if known)
-	private boolean burst_single_request; // if n_burst > 1: if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
+	private boolean burst_single_request; // if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (e.g., when use_expo_fast_burst==false, or for focus bracketing)
 	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using captureBurst())
@@ -974,16 +974,16 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "n_burst: " + n_burst);
 					Log.d(TAG, "burst_single_request: " + burst_single_request);
 				}
-				if( burst_single_request && n_burst > 1 ) {
+				if( burst_single_request ) {
 					pending_burst_images.add(bytes);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "pending_burst_images size is now: " + pending_burst_images.size());
 					}
-					if( pending_burst_images.size() >= slow_burst_capture_requests.size() ) { // shouldn't ever be greater, but just in case
+					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
 						if( MyDebug.LOG )
 							Log.d(TAG, "all burst images available");
-						if( pending_burst_images.size() > slow_burst_capture_requests.size() ) {
-							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than slow_burst_capture_requests size " + slow_burst_capture_requests.size());
+						if( pending_burst_images.size() > n_burst ) {
+							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
 						}
 						// take a copy, so that we can clear pending_burst_images
 						List<byte []> images = new ArrayList<>(pending_burst_images);
@@ -1066,6 +1066,7 @@ public class CameraController2 extends CameraController {
 						// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
 						// RequestTagType.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
 						slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
+						n_burst = slow_burst_capture_requests.size();
 						if( MyDebug.LOG )
 							Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
 						RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
