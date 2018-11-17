@@ -2229,8 +2229,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		}
 		return image_capture_intent;
 	}
-	
-	private boolean saveImage(boolean is_hdr, boolean save_expo, List<byte []> images, Date current_date) {
+
+    /** Saves the supplied image(s)
+     * @param save_expo If the photo mode is one where multiple images are saved to a single
+	 *                  resultant image, this indicates if all the base images should also be saved
+	 *                  as separate images.
+     * @param images The set of images.
+     * @param current_date The current date/time stamp for the images.
+     * @return Whether saving was successful.
+     */
+	private boolean saveImage(boolean save_expo, List<byte []> images, Date current_date) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImage");
 
@@ -2360,6 +2368,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		else {
             // fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
 		    boolean force_suffix = photo_mode == PhotoMode.FastBurst || main_activity.getPreview().getCameraController().isCapturingBurst();
+		    boolean is_hdr = photo_mode == PhotoMode.DRO || photo_mode == PhotoMode.HDR;
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
 					force_suffix,
                     force_suffix ? n_capture_images : 0, // n.b., n_capture_images will be 1 for first image, not 0, but this is fine for naming of burst images
@@ -2398,20 +2407,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		List<byte []> images = new ArrayList<>();
 		images.add(data);
 
-		boolean is_hdr = false;
-		// note, multi-image HDR and expo is handled under onBurstPictureTaken; here we look for DRO, as that's the photo mode to set
-		// single image HDR
-		PhotoMode photo_mode = getPhotoMode();
-		if( main_activity.getPreview().isVideo() ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "snapshot mode");
-			// must be in photo snapshot while recording video mode, only support standard photo mode
-			photo_mode = PhotoMode.Standard;
-		}
-		if( photo_mode == PhotoMode.DRO ) {
-			is_hdr = true;
-		}
-		boolean success = saveImage(is_hdr, false, images, current_date);
+		boolean success = saveImage(false, images, current_date);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete, success: " + success);
@@ -2439,7 +2435,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			if( MyDebug.LOG )
 				Log.d(TAG, "save_expo: " + save_expo);
 
-			success = saveImage(true, save_expo, images, current_date);
+			success = saveImage(save_expo, images, current_date);
 		}
 		else {
 			if( MyDebug.LOG ) {
@@ -2448,7 +2444,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					Log.e(TAG, "onBurstPictureTaken called with unexpected photo mode?!: " + photo_mode);
 			}
 			
-			success = saveImage(false, true, images, current_date);
+			success = saveImage(true, images, current_date);
 		}
 		return success;
     }
