@@ -1065,10 +1065,22 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "focus bracketing was cancelled");
 						// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
 						// RequestTagType.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "slow_burst_capture_requests size was: " + slow_burst_capture_requests.size());
+							Log.d(TAG, "n_burst size was: " + n_burst);
+							Log.d(TAG, "n_burst_taken: " + n_burst_taken);
+						}
 						slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
-						n_burst = slow_burst_capture_requests.size();
-						if( MyDebug.LOG )
+						// if burst_single_request==true, n_burst is constant and we stop when pending_burst_images.size() >= n_burst
+						// if burst_single_request==false, n_burst counts down and we stop when n_burst==0
+						if( burst_single_request )
+							n_burst = slow_burst_capture_requests.size();
+						else
+							n_burst = 1;
+						if( MyDebug.LOG ) {
 							Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
+							Log.d(TAG, "n_burst is now: " + n_burst);
+						}
 						RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
 						requestTag.setType(RequestTagType.CAPTURE);
 					}
@@ -5253,6 +5265,7 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
+			burst_single_request = true;
 			}
 			else {
 				// BURSTTYPE_FOCUS
@@ -5299,6 +5312,9 @@ public class CameraController2 extends CameraController {
 
 					focus_bracketing_in_progress = true;
 				}
+
+				burst_single_request = false; // we set to false for focus bracketing, as we support bracketing with large numbers of images in this mode
+				//burst_single_request = true; // test
 			}
 
 			/*
@@ -5316,9 +5332,10 @@ public class CameraController2 extends CameraController {
 			n_burst = requests.size();
             n_burst_total = n_burst;
 			n_burst_taken = 0;
-			burst_single_request = true;
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "n_burst: " + n_burst);
+				Log.d(TAG, "burst_single_request: " + burst_single_request);
+			}
 
 			if( !previewIsVideoMode ) {
 				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()

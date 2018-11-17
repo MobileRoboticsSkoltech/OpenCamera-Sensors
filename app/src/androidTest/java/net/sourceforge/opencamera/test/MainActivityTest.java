@@ -3062,9 +3062,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else if( is_nr ) {
             suffix = "_NR";
         }
-        else if( is_expo || is_focus_bracketing ) {
-            //suffix = "_EXP" + (n_expo_images-1);
+        else if( is_expo ) {
             suffix = "_" + (n_expo_images-1);
+        }
+        else if( is_focus_bracketing ) {
+            //suffix = "_" + (n_expo_images-1); // when focus bracketing starts from _0
+            suffix = "_" + (n_expo_images); // when focus bracketing starts from _1
+            max_time_s = 3; // takes longer to save in focus bracketing mode!
         }
         else if( is_fast_burst ) {
             //suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
