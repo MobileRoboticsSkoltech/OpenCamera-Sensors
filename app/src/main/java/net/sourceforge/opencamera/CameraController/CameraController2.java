@@ -947,8 +947,11 @@ public class CameraController2 extends CameraController {
 				buffer.get(bytes);
 				image.close();
 				n_burst_taken++;
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "n_burst_taken is now: " + n_burst_taken);
+					Log.d(TAG, "n_burst: " + n_burst);
+					Log.d(TAG, "burst_single_request: " + burst_single_request);
+				}
 				if( burst_single_request && n_burst > 1 ) {
 					pending_burst_images.add(bytes);
 					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
