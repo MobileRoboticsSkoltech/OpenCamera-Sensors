@@ -488,6 +488,12 @@
         <item>@string/preference_focus_bracketing_n_images_entries_12</item>
         <item>@string/preference_focus_bracketing_n_images_entries_15</item>
         <item>@string/preference_focus_bracketing_n_images_entries_20</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_25</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_30</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_40</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_50</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_100</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_200</item>
     </string-array>
     <string-array name="preference_focus_bracketing_n_images_values">
         <item>2</item>
@@ -500,6 +506,12 @@
         <item>12</item>
         <item>15</item>
         <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>100</item>
+        <item>200</item>
     </string-array>
     <string-array name="flash_icons">
         <item>drawable/flash_off</item>

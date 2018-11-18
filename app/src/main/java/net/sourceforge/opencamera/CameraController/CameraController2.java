@@ -1126,6 +1126,12 @@ public class CameraController2 extends CameraController {
 									//throw new RuntimeException(); // test
 								}
 								else {
+									// For focus bracketing mode, we play the shutter sound per shot (so the user can tell when the sequence is complete).
+									// From a user mode, the gap between shots in focus bracketing mode makes this more analogous to the auto-repeat mode
+									// (at the Preview level), which makes the shutter sound per shot.
+
+									if( sounds_enabled )
+										media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 									try {
 										captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
 									}

@@ -498,6 +498,12 @@
     <string name="preference_focus_bracketing_n_images_entries_12">12</string>
     <string name="preference_focus_bracketing_n_images_entries_15">15</string>
     <string name="preference_focus_bracketing_n_images_entries_20">20</string>
+    <string name="preference_focus_bracketing_n_images_entries_25">25</string>
+    <string name="preference_focus_bracketing_n_images_entries_30">30</string>
+    <string name="preference_focus_bracketing_n_images_entries_40">40</string>
+    <string name="preference_focus_bracketing_n_images_entries_50">50</string>
+    <string name="preference_focus_bracketing_n_images_entries_100">100</string>
+    <string name="preference_focus_bracketing_n_images_entries_200">200</string>
 
     <string name="preference_video_capture_rate">Speed</string>
     <string name="preference_video_capture_rate_normal">Normal</string>

@@ -954,6 +954,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	public boolean canTakeNewPhoto() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "canTakeNewPhoto");
+
     	int n_raw, n_jpegs;
     	if( main_activity.getPreview().isVideo() ) {
     		// video snapshot mode
@@ -978,8 +979,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 				n_jpegs = this.getExpoBracketingNImagesPref();
 			}
 			else if( main_activity.getPreview().supportsFocusBracketing() && this.isFocusBracketingPref() ) {
+				// focus bracketing mode always avoids blocking the image queue, no matter how many images are being taken
+				// so all that matters is that we can take at least 1 photo (for the first shot)
 				n_raw = 0;
-				n_jpegs = this.getFocusBracketingNImagesPref();
+				//n_jpegs = this.getFocusBracketingNImagesPref();
+				n_jpegs = 1;
 			}
 			else if( main_activity.getPreview().supportsBurst() && this.isCameraBurstPref() ) {
 				n_raw = 0;
