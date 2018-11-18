@@ -1025,7 +1025,7 @@ public class PopupView extends LinearLayout {
 			}
 
 			main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the photomode
-			main_activity.updateForSettings(toast_message);
+			main_activity.updateForSettings(toast_message); // need to setup the camera again, as options may change (e.g., required burst mode, or whether RAW is allowed in this mode)
 			main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
 		}
 	}
