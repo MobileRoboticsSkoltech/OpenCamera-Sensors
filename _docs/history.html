@@ -66,6 +66,8 @@ FIXED   Don't support expo bracketing, focus bracketing or fast burst photo mode
 FIXED   Taking photos could hang on some devices with Camera2 API when using repeat mode and
         continuous focus.
 FIXED   ISO manual slider wasn't updating when ISO was changed by using the ISO buttons.
+FIXED   Code meant to increase exposure time for dark scenes in Noise Reduction mode could end up
+        reducing exposure time in some cases.
 ADDED   Continuous burst mode: holding down shutter button in standard or fast burst photo modes
         will now enable a continuous burst. (Camera2 API only.)
 ADDED   Timelapse capture rates of 120x and 240x.
@@ -79,8 +81,7 @@ UPDATED Improved HDR algorithm to avoid increasing noise in darker scenes. If yo
 UPDATED Improvement to Noise Reduction mode colours for some scenes.
 UPDATED Improved quality of deghosting algorithm for Noise Reduction mode (manages to deghost with
         less loss of quality).
-UPDATED Improved auto-alignment for Noise Reduction mode for dark scenes.
-UPDATED Improved auto-alignment for Noise Reduction mode when zoomed in.
+UPDATED Improved auto-alignment for Noise Reduction mode for dark scenes or when zoomed in.
 UPDATED Made user interface buttons larger.
 UPDATED Focus bracketing mode now supports up to 200 images.
 UPDATED Focus bracketing mode can now be cancelled by pressing the take photo button again.

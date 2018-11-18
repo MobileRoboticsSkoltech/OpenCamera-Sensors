@@ -5493,10 +5493,16 @@ public class CameraController2 extends CameraController {
 						// so no point enabling this code, which is meant to brighten the scene, not make it darker!
 						if( !camera_settings.has_iso && !is_oneplus ) {
 							long exposure_time = 1000000000L/10;
-							if( MyDebug.LOG )
-								Log.d(TAG, "also set 100ms exposure time");
-							modified_from_camera_settings = true;
-							setManualExposureTime(stillBuilder, exposure_time);
+							if( !capture_result_has_exposure_time || capture_result_exposure_time < exposure_time ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "also set 100ms exposure time");
+								modified_from_camera_settings = true;
+								setManualExposureTime(stillBuilder, exposure_time);
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "no need to extend exposure time for dark scene, already long enough: " + exposure_time);
+							}
 						}
 					}
 					else if( capture_result_has_exposure_time ) {
