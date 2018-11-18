@@ -72,6 +72,11 @@ public class ImageSaver extends Thread {
 	private final static int queue_cost_dng_c = 6;
 	//private final static int queue_cost_dng_c = 1;
 
+	// for testing:
+	public static volatile boolean test_small_queue_size;
+	public static volatile boolean test_slow_saving;
+	public volatile boolean test_queue_blocked;
+
 	static class Request {
 		enum Type {
 			JPEG,
@@ -218,6 +223,10 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
 		int max_queue_size;
+		if( test_small_queue_size ) {
+			large_heap_memory = 0;
+		}
+
 		if( large_heap_memory >= 512 ) {
 			// This should be at least 5*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a burst of 5 photos
 			// (e.g., in expo mode) with RAW+JPEG without blocking (we subtract 1, as the first image can be immediately
@@ -319,6 +328,8 @@ public class ImageSaver extends Thread {
 			// In theory, we should never have the extra_cost large enough to block the queue even when no images are being
 			// saved - but we have this just in case. This means taking the photo will likely block the UI, but we don't want
 			// to disallow ever taking photos!
+			if( MyDebug.LOG )
+				Log.d(TAG, "queue is empty");
 			return false;
 		}
 		else if( n_images_to_save + photo_cost > queue_capacity + 1 ) {
@@ -326,6 +337,8 @@ public class ImageSaver extends Thread {
 				Log.d(TAG, "queue would block");
 			return true;
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "queue would not block");
 		return false;
 	}
 
@@ -386,6 +399,9 @@ public class ImageSaver extends Thread {
 							Log.e(TAG, "request is unknown type!");
 						success = false;
 						break;
+				}
+				if( test_slow_saving ) {
+					Thread.sleep(2000);
 				}
 				if( MyDebug.LOG ) {
 					if( success )
@@ -702,9 +718,10 @@ public class ImageSaver extends Thread {
 						}
 					});
 				}
-				if( queue.size() + 1 >= queue_capacity ) {
+				if( queue.size() + 1 > queue_capacity ) {
 					Log.e(TAG, "ImageSaver thread is going to block, queue already full: " + queue.size());
-					//throw new RuntimeException();
+					test_queue_blocked = true;
+					//throw new RuntimeException(); // test
 				}
 				queue.put(request); // if queue is full, put() blocks until it isn't full
 				if( MyDebug.LOG ) {

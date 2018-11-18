@@ -2650,13 +2650,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
         View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
         View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        boolean is_focus_bracketing = mActivity.supportsFocusBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_focus_bracketing");
 
         Log.d(TAG, "wait until finished taking photo");
         long time_s = System.currentTimeMillis();
         while( mPreview.isTakingPhoto() || !mActivity.getApplicationInterface().canTakeNewPhoto() ) {
             // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
             // also see note at end of setToDefault for Nokia 8, need to sleep briefly to avoid hanging here
-            assertTrue( System.currentTimeMillis() - time_s < 20000 );
+            if( !is_focus_bracketing ) {
+                assertTrue(System.currentTimeMillis() - time_s < 20000);
+            }
             assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
             assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
             //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
@@ -2846,8 +2850,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     else if( is_expo || is_focus_bracketing ) {
                         if( filename_jpeg != null ) {
                             // check same root
-                            String filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-5);
-                            String filename_base = filename.substring(0, filename.length()-5);
+                            int last_underscore_jpeg = filename_jpeg.lastIndexOf('_');
+                            assertTrue(last_underscore_jpeg != -1);
+                            String filename_base_jpeg = filename_jpeg.substring(0, last_underscore_jpeg+1);
+
+                            int last_underscore = filename.lastIndexOf('_');
+                            assertTrue(last_underscore != -1);
+                            String filename_base = filename.substring(0, last_underscore+1);
+                            Log.d(TAG, "filename_base: " + filename_base);
+
                             assertTrue( filename_base_jpeg.equals(filename_base) );
                         }
                         filename_jpeg = filename; // store the last name, to match mActivity.test_last_saved_image
@@ -2976,6 +2987,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
         String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
         int n_expo_images = Integer.parseInt(n_expo_images_s);
+        String n_focus_bracketing_images_s = sharedPreferences.getString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "3");
+        int n_focus_bracketing_images = Integer.parseInt(n_focus_bracketing_images_s);
         String n_fast_burst_images_s = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
         int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
@@ -3066,9 +3079,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             suffix = "_" + (n_expo_images-1);
         }
         else if( is_focus_bracketing ) {
-            //suffix = "_" + (n_expo_images-1); // when focus bracketing starts from _0
-            suffix = "_" + (n_expo_images); // when focus bracketing starts from _1
-            max_time_s = 3; // takes longer to save in focus bracketing mode!
+            //suffix = "_" + (n_focus_bracketing_images-1); // when focus bracketing starts from _0
+            suffix = "_" + (n_focus_bracketing_images); // when focus bracketing starts from _1
+            max_time_s = 60; // can take much longer to save in focus bracketing mode!
         }
         else if( is_fast_burst ) {
             //suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
@@ -3088,13 +3101,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         if( test_wait_capture_result ) {
             // if test_wait_capture_result, then we'll have waited too long for thumbnail animation
         }
+        else if( is_focus_bracketing ) {
+            // thumbnail animation may have already occurred (e.g., see testTakePhotoFocusBracketingHeavy()
+        }
         else if( has_thumbnail_anim ) {
             long time_s = System.currentTimeMillis();
             while( !mActivity.hasThumbnailAnimation() ) {
                 Log.d(TAG, "waiting for thumbnail animation");
                 Thread.sleep(10);
                 int allowed_time_ms = 8000;
-                if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo || is_focus_bracketing ) ) {
+                if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo ) ) {
                     // some devices need longer time (especially Nexus 6)
                     allowed_time_ms = 12000;
                 }
@@ -9050,6 +9066,60 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
     }
 
+    /** Tests taking a photo in focus bracketing mode, with auto-level and 50 images.
+     */
+    public void testTakePhotoFocusBracketingHeavy() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoFocusBracketingHeavy");
+
+        setToDefault();
+
+        if( !mActivity.supportsFocusBracketing() ) {
+            return;
+        }
+
+        ImageSaver.test_small_queue_size = true;
+        ImageSaver.test_slow_saving = true;
+        // need to restart for test_small_queue_size to take effect
+        restart();
+
+        SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        assertTrue(focusSeekBar.getVisibility() == View.GONE);
+        SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+        assertTrue(focusTargetSeekBar.getVisibility() == View.GONE);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+        editor.putString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "20");
+        editor.apply();
+        updateForSettings();
+
+        setUpFocusBracketing();
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
+
+        subTestTakePhoto(false, false, true, true, false, false, false, false);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == 1);
+
+        assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
+
+        float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+        assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+        float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+        assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
+    }
+
     /** Tests taking a photo in focus bracketing mode, but with cancelling.
      */
     public void testTakePhotoFocusBracketingCancel() throws InterruptedException {
@@ -9069,7 +9139,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
-        editor.putString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "255");
+        editor.putString(PreferenceKeys.FocusBracketingNImagesPreferenceKey, "200");
         editor.apply();
         updateForSettings();
 
