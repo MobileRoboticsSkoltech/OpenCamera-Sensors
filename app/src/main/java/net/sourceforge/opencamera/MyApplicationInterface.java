@@ -1227,6 +1227,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return( photo_mode == PhotoMode.DRO );
 	}
 
+	private static boolean photoModeSupportsRaw(PhotoMode photo_mode) {
+    	// RAW only supported for Std or DRO modes
+	    return photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO;
+    }
+
 	/** Return whether to capture JPEG, or RAW+JPEG.
 	 *  Note even if in RAW only mode, we still capture RAW+JPEG - the JPEG is needed for things like
 	 *  getting the bitmap for the thumbnail and pause preview option; we simply don't do any post-
@@ -1239,14 +1244,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( main_activity.getPreview().isVideo() )
     		return RawPref.RAWPREF_JPEG_ONLY; // video snapshot mode
     	PhotoMode photo_mode = getPhotoMode();
-    	if( photo_mode == PhotoMode.FastBurst ) {
-    		// don't allow fast burst with RAW!
-    		return RawPref.RAWPREF_JPEG_ONLY;
-		}
-		switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
-			case "preference_raw_yes":
-			case "preference_raw_only":
-				return RawPref.RAWPREF_JPEG_DNG;
+    	if( photoModeSupportsRaw(photo_mode) ) {
+			switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
+				case "preference_raw_yes":
+				case "preference_raw_only":
+					return RawPref.RAWPREF_JPEG_DNG;
+			}
 		}
 		return RawPref.RAWPREF_JPEG_ONLY;
     }
@@ -1266,7 +1269,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     		return false;
 		if( main_activity.getPreview().isVideo() )
     		return false; // video snapshot mode
-    	if( photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO ) {
+    	if( photoModeSupportsRaw(photo_mode) ) {
 			switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
 				case "preference_raw_only":
 					return true;
