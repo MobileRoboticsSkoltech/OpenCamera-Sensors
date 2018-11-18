@@ -1118,22 +1118,31 @@ public class CameraController2 extends CameraController {
 							if( MyDebug.LOG )
 								Log.d(TAG, "take picture after delay for next focus bracket");
 							if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-								try {
-									captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
-								}
-								catch(CameraAccessException e) {
+								if( picture_cb.imageQueueWouldBlock(1) ) {
 									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next focus bracket");
-										Log.e(TAG, "reason: " + e.getReason());
-										Log.e(TAG, "message: " + e.getMessage());
+										Log.d(TAG, "...but wait for next focus bracket, as image queue would block");
 									}
-									e.printStackTrace();
-									jpeg_todo = false;
-									raw_todo = false;
-									picture_cb = null;
-									if( take_picture_error_cb != null ) {
-										take_picture_error_cb.onError();
-										take_picture_error_cb = null;
+									handler.postDelayed(this, 100);
+									//throw new RuntimeException(); // test
+								}
+								else {
+									try {
+										captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
+									}
+									catch(CameraAccessException e) {
+										if( MyDebug.LOG ) {
+											Log.e(TAG, "failed to take next focus bracket");
+											Log.e(TAG, "reason: " + e.getReason());
+											Log.e(TAG, "message: " + e.getMessage());
+										}
+										e.printStackTrace();
+										jpeg_todo = false;
+										raw_todo = false;
+										picture_cb = null;
+										if( take_picture_error_cb != null ) {
+											take_picture_error_cb.onError();
+											take_picture_error_cb = null;
+										}
 									}
 								}
 							}
