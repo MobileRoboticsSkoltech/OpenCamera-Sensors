@@ -42,7 +42,7 @@ public abstract class CameraController {
 	int count_camera_parameters_exception;
 	public int count_precapture_timeout;
 	public boolean test_wait_capture_result; // whether to test delayed capture result in Camera2 API
-	public volatile int test_capture_results; // for Camera2 API, how many capture requests completed with RequestTag.CAPTURE
+	public volatile int test_capture_results; // for Camera2 API, how many capture requests completed with RequestTagType.CAPTURE
 	public volatile int test_fake_flash_focus; // for Camera2 API, records torch turning on for fake flash during autofocus
 	public volatile int test_fake_flash_precapture; // for Camera2 API, records torch turning on for fake flash during precapture
 	public volatile int test_fake_flash_photo; // for Camera2 API, records torch turning on for fake flash for photo capture
