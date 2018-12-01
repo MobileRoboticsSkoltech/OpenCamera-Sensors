@@ -325,11 +325,15 @@ public class HDRProcessor {
 	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
 	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
 	 * @param n_tiles       A value of 1 or greater indicating how local the contrast enhancement algorithm should be.
+	 * @param ce_preserve_blacks
+	 * 						If true (recommended), then we apply a modification to the contrast enhancement algorithm to avoid
+	 *                      making darker pixels too dark. A value of false gives more contrast on the darker regions of the
+	 *                      resultant image.
 	 * @param tonemapping_algorithm
 	 *                      Algorithm to use for tonemapping (if multiple images are received).
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		if( !assume_sorted && !release_bitmaps ) {
@@ -368,10 +372,10 @@ public class HDRProcessor {
 				sort_order.add(0);
 				sort_cb.sortOrder(sort_order);
 			}
-			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha, n_tiles);
+			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha, n_tiles, ce_preserve_blacks);
 			break;
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, n_tiles, tonemapping_algorithm);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, n_tiles, ce_preserve_blacks, tonemapping_algorithm);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -510,7 +514,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, TonemappingAlgorithm tonemapping_algorithm) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, TonemappingAlgorithm tonemapping_algorithm) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 
@@ -891,7 +895,7 @@ public class HDRProcessor {
 		}
 
 		if( hdr_alpha != 0.0f ) {
-			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
+			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, n_tiles, ce_preserve_blacks, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
@@ -926,7 +930,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles) {
+	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processSingleImage");
 
@@ -988,7 +992,7 @@ public class HDRProcessor {
 			}
 		}*/
 
-		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
+		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, n_tiles, ce_preserve_blacks, time_s);
 
 		if( release_bitmaps ) {
 			allocation.copyTo(bitmaps.get(0));
@@ -1497,7 +1501,7 @@ public class HDRProcessor {
 	 *                the other input bitmaps will be recycled.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void processAvgMulti(List<Bitmap> bitmaps, float hdr_alpha, int n_tiles) throws HDRProcessorException {
+	public void processAvgMulti(List<Bitmap> bitmaps, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgMulti");
 			Log.d(TAG, "hdr_alpha: " + hdr_alpha);
@@ -1600,7 +1604,7 @@ public class HDRProcessor {
 		}
 
 		if( hdr_alpha != 0.0f ) {
-			adjustHistogram(allocation0, allocation0, width, height, hdr_alpha, n_tiles, time_s);
+			adjustHistogram(allocation0, allocation0, width, height, hdr_alpha, n_tiles, ce_preserve_blacks, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
@@ -2075,7 +2079,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, int n_tiles, long time_s) {
+	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "adjustHistogram");
 		final boolean adjust_histogram = false;
@@ -2151,11 +2155,12 @@ public class HDRProcessor {
 		final boolean adjust_histogram_local = true;
 
 		if( adjust_histogram_local ) {
-			// Contrast Limited Adaptive Histogram Equalisation
+			// Contrast Limited Adaptive Histogram Equalisation (CLAHE)
 			// Note we don't fully equalise the histogram, rather the resultant image is the mid-point of the non-equalised and fully-equalised images
 			// See https://en.wikipedia.org/wiki/Adaptive_histogram_equalization#Contrast_Limited_AHE
 			// Also see "Adaptive Histogram Equalization and its Variations" ( http://www.cs.unc.edu/Research/MIDAG/pubs/papers/Adaptive%20Histogram%20Equalization%20and%20Its%20Variations.pdf ),
 			// Pizer, Amburn, Austin, Cromartie, Geselowitz, Greer, ter Haar Romeny, Zimmerman, Zuiderveld (1987).
+			// Also note that if ce_preserve_blacks is true, we apply a modification to this algorithm, see below.
 
 			// create histograms
 			Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
@@ -2175,6 +2180,7 @@ public class HDRProcessor {
 			//final int n_tiles_c = 4;
 			//final int n_tiles_c = 1;
 			int [] c_histogram = new int[n_tiles*n_tiles*256];
+			int [] temp_c_histogram = new int[256];
 			for(int i=0;i<n_tiles;i++) {
 				double a0 = ((double)i)/(double)n_tiles;
 				double a1 = ((double)i+1.0)/(double)n_tiles;
@@ -2280,16 +2286,82 @@ public class HDRProcessor {
 						histogram[x] += n_clipped_per_bucket;
 					}
 
+                    if( ce_preserve_blacks ) {
+						// This helps tests such as testHDR52, testHDR57, testAvg26, testAvg30
+						// The basic idea is that we want to avoid making darker pixels darker (by too
+						// much). We do this by adjusting the histogram:
+						// * We can set a minimum value of each histogram value. E.g., if we set all
+						//   pixels up to a certain brightness to a value equal to n_pixels/256, then
+						//   we prevent those pixels from being made darker. In practice, we choose
+						//   a tapered minimum, starting at (n_pixels/256) for black pixels, linearly
+						//   interpolating to no minimum at brightness 128 (dark_threshold_c).
+						// * For any adjusted value of the histogram, we redistribute, by reducing
+						//   the histogram values of brighter pixels with values larger than (n_pixels/256),
+						//   reducing them to a minimum of (n_pixels/256).
+						// * Lastly, we only modify a given histogram value if pixels of that brightness
+						//   would be made darker by the CLAHE algorithm. We can do this by looking at
+						//   the cumulative histogram (as computed before modifying any values).
+						if( MyDebug.LOG ) {
+							for(int x=0;x<256;x++) {
+								Log.d(TAG, "pre-brighten histogram[" + x + "] = " + histogram[x]);
+							}
+						}
+
+						temp_c_histogram[0] = histogram[0];
+						for(int x=1;x<256;x++) {
+							temp_c_histogram[x] = temp_c_histogram[x-1] + histogram[x];
+						}
+
+    					// avoid making pixels too dark
+						int equal_limit = n_pixels / 256;
+						if( MyDebug.LOG )
+							Log.d(TAG, "equal_limit: " + equal_limit);
+						//final int dark_threshold_c = 64;
+						final int dark_threshold_c = 128;
+						//final int dark_threshold_c = 256;
+                        for(int x=0;x<dark_threshold_c;x++) {
+                        	int c_equal_limit = equal_limit * (x+1);
+                        	if( temp_c_histogram[x] >= c_equal_limit ) {
+								continue;
+							}
+                        	float alpha = 1.0f - ((float)x)/((float)dark_threshold_c);
+                        	//float alpha = 1.0f - ((float)x)/256.0f;
+                        	int limit = (int)(alpha * equal_limit);
+							//int limit = equal_limit;
+							if( MyDebug.LOG )
+								Log.d(TAG, "x: " + x + " ; limit: " + limit);
+                            /*histogram[x] = Math.max(histogram[x], limit);
+							if( MyDebug.LOG )
+								Log.d(TAG, "    histogram pulled up to: "  + histogram[x]);*/
+                        	if( histogram[x] < limit ) {
+                        	    // top up by redistributing later values
+                                for(int y=x+1;y<256 && histogram[x] < limit;y++) {
+                                    if( histogram[y] > equal_limit ) {
+                                        int move = histogram[y] - equal_limit;
+                                        move = Math.min(move, limit - histogram[x]);
+                                        histogram[x] += move;
+                                        histogram[y] -= move;
+                                    }
+                                }
+								if( MyDebug.LOG )
+									Log.d(TAG, "    histogram pulled up to: "  + histogram[x]);
+	                        	/*if( temp_c_histogram[x] >= c_equal_limit )
+                        			throw new RuntimeException(); // test*/
+                            }
+                        }
+                    }
+
+					// compute cumulative histogram
 					int histogram_offset = 256*(i*n_tiles+j);
 					c_histogram[histogram_offset] = histogram[0];
 					for(int x=1;x<256;x++) {
 						c_histogram[histogram_offset+x] = c_histogram[histogram_offset+x-1] + histogram[x];
 					}
-						/*if( MyDebug.LOG ) {
-							for(int x=0;x<256;x++) {
-								Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[histogram_offset+x]);
-							}
-						}*/
+					if( MyDebug.LOG ) {
+						for(int x=0;x<256;x++) {
+							Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[histogram_offset+x]);
+						}
+					}
 				}
 			}
 
@@ -2309,7 +2381,7 @@ public class HDRProcessor {
 			histogramAdjustScript.set_height(height);
 
 			if( MyDebug.LOG )
-				Log.d(TAG, "call histogramAdjustScript");
+				Log.d(TAG, "time before histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 			histogramAdjustScript.forEach_histogram_adjust(allocation_in, allocation_out);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
@@ -2784,7 +2856,7 @@ public class HDRProcessor {
 				Log.d(TAG, "dro alpha: " + alpha);
 				Log.d(TAG, "dro amount: " + amount);
 			}
-			adjustHistogram(allocation_out, allocation_out, width, height, amount, 1, time_s);
+			adjustHistogram(allocation_out, allocation_out, width, height, amount, 1, true, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}

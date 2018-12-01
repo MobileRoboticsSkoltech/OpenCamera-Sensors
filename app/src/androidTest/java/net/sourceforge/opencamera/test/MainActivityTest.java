@@ -9498,7 +9498,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     		float hdr_alpha = ImageSaver.getHDRAlpha(preference_hdr_contrast_enhancement, exposure_time, inputs.size());
             long time_s = System.currentTimeMillis();
             try {
-                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, hdr_alpha, 4, tonemapping_algorithm);
+                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, hdr_alpha, 4, true, tonemapping_algorithm);
             }
             catch(HDRProcessorException e) {
                 e.printStackTrace();
@@ -9520,7 +9520,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             inputs.add(dro_bitmap_in);
             long time_s = System.currentTimeMillis();
             try {
-                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
             }
             catch(HDRProcessorException e) {
                 e.printStackTrace();
@@ -9625,7 +9625,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 3, 43, 251);
+        //checkHistogramDetails(hdrHistogramDetails, 3, 43, 251);
+        checkHistogramDetails(hdrHistogramDetails, 6, 42, 251);
     }
 
     /** Tests HDR algorithm on test samples "stlouis".
@@ -9673,7 +9674,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 3, 104, 255);
-        checkHistogramDetails(hdrHistogramDetails, 4, 113, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 4, 113, 255);
+        checkHistogramDetails(hdrHistogramDetails, 8, 113, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR4".
@@ -10018,7 +10020,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 1, 113, 254);
-        checkHistogramDetails(hdrHistogramDetails, 1, 119, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 1, 119, 255);
+        checkHistogramDetails(hdrHistogramDetails, 5, 120, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR19".
@@ -10134,7 +10137,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 13, 72, 250);
+        //checkHistogramDetails(hdrHistogramDetails, 13, 72, 250);
+        checkHistogramDetails(hdrHistogramDetails, 24, 72, 250);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 2 images, and greater exposure gap.
@@ -10156,8 +10160,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_x = {0, 0};
         int [] exp_offsets_y = {0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
-
-        checkHistogramDetails(hdrHistogramDetails, 39, 116, 251);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23".
@@ -10208,7 +10210,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 15, 69, 254);
+        //checkHistogramDetails(hdrHistogramDetails, 15, 69, 254);
+        checkHistogramDetails(hdrHistogramDetails, 24, 70, 254);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 5 images.
@@ -10234,7 +10237,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+        checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 6 images.
@@ -10261,7 +10265,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 15, 70, 254);
+        //checkHistogramDetails(hdrHistogramDetails, 15, 70, 254);
+        checkHistogramDetails(hdrHistogramDetails, 25, 71, 254);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 7 images.
@@ -10289,7 +10294,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+        checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR24".
@@ -10501,7 +10507,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 3, 101, 251);
-        checkHistogramDetails(hdrHistogramDetails, 3, 109, 251);
+        //checkHistogramDetails(hdrHistogramDetails, 3, 109, 251);
+        checkHistogramDetails(hdrHistogramDetails, 6, 111, 252);
     }
 
     /** Tests HDR algorithm on test samples "testHDR33".
@@ -10851,8 +10858,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6315.jpg") );
 
         HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR45_exp5_output.jpg", false, -1, -1);
-
-        checkHistogramDetails(hdrHistogramDetails, 6, 129, 237);
     }
 
     /** Tests HDR algorithm on test samples "testHDR45".
@@ -10875,8 +10880,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6315.jpg") );
 
         HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR45_exp7_output.jpg", false, -1, -1);
-
-        checkHistogramDetails(hdrHistogramDetails, 10, 129, 229);
     }
 
     /** Tests HDR algorithm on test samples "testHDR46".
@@ -10920,8 +10923,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 01.jpg") );
 
         HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR46_exp5_output.jpg", false, -1, -1);
-
-        checkHistogramDetails(hdrHistogramDetails, 3, 146, 243);
     }
 
     /** Tests HDR algorithm on test samples "testHDR47".
@@ -11285,6 +11286,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
     }
 
+    /** Tests HDR algorithm on test samples "testHDR57".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testHDR57() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR57");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR57/IMG_20181119_145313_EXP0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR57/IMG_20181119_145313_EXP1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR57/IMG_20181119_145313_EXP2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR57_output.jpg", true, 100, 1000000000L/204);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
     /** Tests HDR algorithm on test samples "testHDRtemp".
      *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
@@ -11356,7 +11377,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         List<Bitmap> inputs = new ArrayList<>();
         inputs.add(bitmap);
         try {
-            mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+            mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
         }
         catch(HDRProcessorException e) {
             e.printStackTrace();
@@ -13553,6 +13574,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     int [] exp_offsets_y = {0, 28, 0};
                     checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
                 }
+            }
+        });
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 91, 255);
+    }
+
+    /** Tests Avg algorithm on test samples "testAvg52".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testAvg52() throws IOException, InterruptedException {
+        Log.d(TAG, "testAvg52");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+        inputs.add(avg_images_path + "testAvg52/IMG_20181119_144836_0.jpg");
+        inputs.add(avg_images_path + "testAvg52/IMG_20181119_144836_1.jpg");
+        inputs.add(avg_images_path + "testAvg52/IMG_20181119_144836_2.jpg");
+
+        HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg52_output.jpg", 100, 1000000000L/297, 1.0f, new TestAvgCallback() {
+            @Override
+            public void doneProcessAvg(int index) {
+                Log.d(TAG, "doneProcessAvg: " + index);
             }
         });
 
