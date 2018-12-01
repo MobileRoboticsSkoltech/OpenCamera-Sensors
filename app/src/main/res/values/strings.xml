@@ -347,7 +347,7 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Front camera mirror</string>
-    <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera\n%s</string>
+    <string name="preference_front_camera_mirror_summary">Whether to mirror the resultant photos when using the front camera\n%s</string>
 
     <string name="preference_calibrate_level">Calibrate level angle</string>
     <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-level and on-screen level/angle options work correctly</string>
