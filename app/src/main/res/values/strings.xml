@@ -306,7 +306,7 @@
     <string name="permission_rationale_title">Permission required</string>
     <string name="permission_rationale_camera">Camera permission is required to enable the camera</string>
     <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
-    <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
+    <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio, as well as use the \"Audio control\" options</string>
     <string name="permission_rationale_location">Location permission is required for geotagging</string>
 
     <string name="preference_category_photo_debugging">Debugging options</string>

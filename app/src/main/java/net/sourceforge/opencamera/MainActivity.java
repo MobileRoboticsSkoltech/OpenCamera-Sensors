@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -64,6 +65,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -1234,11 +1236,25 @@ public class MainActivity extends Activity {
             	speechRecognizerStopped();
         	}
         	else {
-		    	preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
-            	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            	intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
-            	speechRecognizer.startListening(intent);
-            	speechRecognizerStarted();
+        		boolean has_audio_permission = true;
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+					// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+					if( MyDebug.LOG )
+						Log.d(TAG, "check for record audio permission");
+					if( ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "record audio permission not available");
+						applicationInterface.requestRecordAudioPermission();
+						has_audio_permission = false;
+					}
+				}
+				if( has_audio_permission ) {
+					preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
+					Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+					intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
+					speechRecognizer.startListening(intent);
+					speechRecognizerStarted();
+				}
         	}
         }
         else if( audio_control.equals("noise") ){
@@ -1246,7 +1262,6 @@ public class MainActivity extends Activity {
         		freeAudioListener(false);
         	}
         	else {
-		    	preview.showToast(audio_control_toast, R.string.audio_listener_started);
         		startAudioListener();
         	}
         }
@@ -3798,9 +3813,23 @@ public class MainActivity extends Activity {
 	private void startAudioListener() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startAudioListener");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+			// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+			if( MyDebug.LOG )
+				Log.d(TAG, "check for record audio permission");
+			if( ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "record audio permission not available");
+				applicationInterface.requestRecordAudioPermission();
+				return;
+			}
+		}
+
 		MyAudioTriggerListenerCallback callback = new MyAudioTriggerListenerCallback(this);
 		audio_listener = new AudioListener(callback);
 		if( audio_listener.status() ) {
+			preview.showToast(audio_control_toast, R.string.audio_listener_started);
+
 			audio_listener.start();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.AudioNoiseControlSensitivityPreferenceKey, "0");
