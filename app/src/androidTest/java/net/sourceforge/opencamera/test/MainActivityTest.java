@@ -2975,6 +2975,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     private void subTestTakePhoto(boolean locked_focus, boolean immersive_mode, boolean touch_to_focus, boolean wait_after_focus, boolean single_tap_photo, boolean double_tap_photo, boolean is_raw, boolean test_wait_capture_result) throws InterruptedException {
         assertTrue(mPreview.isPreviewStarted());
+        assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
         boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, true);
@@ -3130,6 +3131,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkFocusAfterTakePhoto2(touch_to_focus, test_wait_capture_result, locked_focus, can_auto_focus, can_focus_area, saved_count);
 
         postTakePhotoChecks(immersive_mode, exposureVisibility, exposureLockVisibility);
+
+        assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
     }
 
     public void testTakePhoto() throws InterruptedException {
@@ -9108,8 +9111,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhoto(false, false, true, true, false, false, false, false);
         Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
         assertTrue(mPreview.getCameraController().test_capture_results == 1);
-
-        assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
 
         float new_focus_distance = mPreview.getCameraController().getFocusDistance();
         Log.d(TAG, "new_focus_distance: " + new_focus_distance);
