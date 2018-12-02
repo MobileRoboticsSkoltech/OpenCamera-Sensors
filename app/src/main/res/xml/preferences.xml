@@ -766,7 +766,16 @@
                 android:defaultValue="false"
                 />
 
-	        <ListPreference 
+	        <ListPreference
+                android:key="preference_video_output_format"
+                android:title="@string/preference_video_output_format"
+                android:summary="@string/preference_video_output_format_summary"
+                android:entries="@array/preference_video_output_format_entries"
+                android:entryValues="@array/preference_video_output_format_values"
+                android:defaultValue="preference_video_output_format_default"
+                />
+
+	        <ListPreference
                 android:key="preference_video_bitrate"
                 android:title="@string/preference_video_bitrate"
                 android:summary="@string/preference_video_bitrate_summary"

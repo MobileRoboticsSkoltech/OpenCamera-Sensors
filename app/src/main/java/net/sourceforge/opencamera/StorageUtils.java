@@ -614,14 +614,26 @@ public class StorageUtils {
 		String mimeType;
 		switch (type) {
 			case MEDIA_TYPE_IMAGE:
-				if (extension.equals("dng")) {
+				if( extension.equals("dng") ) {
 					mimeType = "image/dng";
 					//mimeType = "image/x-adobe-dng";
-				} else
+				}
+				else {
 					mimeType = "image/jpeg";
+				}
 				break;
 			case MEDIA_TYPE_VIDEO:
-				mimeType = "video/mp4";
+				switch( extension ) {
+					case "3gp":
+						mimeType = "video/3gpp";
+						break;
+					case "webm":
+						mimeType = "video/webm";
+						break;
+					default:
+						mimeType = "video/mp4";
+						break;
+				}
 				break;
 			default:
 				// throw exception as this is a programming error

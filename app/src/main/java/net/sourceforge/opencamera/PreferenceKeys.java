@@ -252,7 +252,9 @@ public class PreferenceKeys {
     public static String getForceVideo4KPreferenceKey() {
     	return "preference_force_video_4k";
     }
-    
+
+    public static final String VideoFormatPreferenceKey = "preference_video_output_format";
+
     public static String getVideoBitratePreferenceKey() {
     	return "preference_video_bitrate";
     }

@@ -3592,6 +3592,12 @@ public class MainActivity extends Activity {
 		boolean video_high_speed = preview.isVideoHighSpeed();
 		if( preview.isVideo() ) {
 			VideoProfile profile = preview.getVideoProfile();
+
+			String extension_string = profile.fileExtension;
+			if( !profile.fileExtension.equals("mp4") ) {
+				simple = false;
+			}
+
 			String bitrate_string;
 			if( profile.videoBitRate >= 10000000 )
 				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
@@ -3606,7 +3612,7 @@ public class MainActivity extends Activity {
 
 			double capture_rate = profile.videoCaptureRate;
 			String capture_rate_string = (capture_rate < 9.5f) ? new DecimalFormat("#0.###").format(capture_rate) : "" + (int)(profile.videoCaptureRate+0.5);
-			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + capture_rate_string + getResources().getString(R.string.fps) + (video_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string;
+			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + capture_rate_string + getResources().getString(R.string.fps) + (video_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string + " (" + extension_string + ")";
 
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( !fps_value.equals("default") || video_high_speed ) {

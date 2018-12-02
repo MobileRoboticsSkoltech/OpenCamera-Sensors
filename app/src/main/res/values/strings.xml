@@ -706,6 +706,15 @@
     <string name="preference_hdr_contrast_enhancement_smart">Smart</string>
     <string name="preference_hdr_contrast_enhancement_always">Always</string>
 
+    <string name="preference_video_output_format">Video format</string>
+    <string name="preference_video_output_format_summary">Video and audio file format and codecs\n%s</string>
+
+    <string name="preference_video_output_format_default">Default</string>
+    <string name="preference_video_output_format_mpeg4_h264">MPEG4 H264</string>
+    <string name="preference_video_output_format_mpeg4_hevc">MPEG4 HEVC</string>
+    <string name="preference_video_output_format_3gpp">3GPP</string>
+    <string name="preference_video_output_format_webm">WebM (audio not supported)</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

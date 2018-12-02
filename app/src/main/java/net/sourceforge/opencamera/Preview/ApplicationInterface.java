@@ -37,8 +37,8 @@ public interface ApplicationInterface {
 	boolean useCamera2(); // should Android 5's Camera 2 API be used?
 	Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
 	int createOutputVideoMethod(); // return a VIDEOMETHOD_* value to specify how to create a video file
-	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE
-	Uri createOutputVideoSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF
+	File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE; extension is the recommended filename extension for the chosen video type
+	Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF; extension is the recommended filename extension for the chosen video type
 	Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
@@ -62,6 +62,7 @@ public interface ApplicationInterface {
 	String getVideoQualityPref(); // should be one of Preview.getSupportedVideoQuality() (use Preview.getCamcorderProfile() or Preview.getCamcorderProfileDescription() for details); or return "" to let Preview choose quality
 	boolean getVideoStabilizationPref(); // whether to use video stabilization for video
 	boolean getForce4KPref(); // whether to force 4K mode - experimental, only really available for some devices that allow 4K recording but don't return it as an available resolution - not recommended for most uses
+	String getRecordVideoOutputFormatPref(); // preference_video_output_format_default, preference_video_output_format_mpeg4_h264, preference_video_output_format_mpeg4_hevc, preference_video_output_format_3gpp, preference_video_output_format_webm
 	String getVideoBitratePref(); // return "default" to let Preview choose
 	String getVideoFPSPref(); // return "default" to let Preview choose; if getVideoCaptureRateFactor() returns a value other than 1.0, this is the capture fps; the resultant video's fps will be getVideoFPSPref()*getVideoCaptureRateFactor()
     float getVideoCaptureRateFactor(); // return 1.0f for standard operation, less than 1.0 for slow motion, more than 1.0 for timelapse; consider using a higher fps for slow motion, see getVideoFPSPref()

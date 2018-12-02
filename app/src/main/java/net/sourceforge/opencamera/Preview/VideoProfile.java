@@ -20,6 +20,7 @@ public class VideoProfile {
     public int audioBitRate;
     public int audioSampleRate;
     public int fileFormat;
+    public String fileExtension = "mp4";
     public int videoSource;
     public int videoCodec;
     public int videoFrameRate;
@@ -55,6 +56,7 @@ public class VideoProfile {
         return ("\nAudioSource:        " + this.audioSource +
                 "\nVideoSource:        " + this.videoSource +
                 "\nFileFormat:         " + this.fileFormat +
+                "\nFileExtension:         " + this.fileExtension +
                 "\nAudioCodec:         " + this.audioCodec +
                 "\nAudioChannels:      " + this.audioChannels +
                 "\nAudioBitrate:       " + this.audioBitRate +

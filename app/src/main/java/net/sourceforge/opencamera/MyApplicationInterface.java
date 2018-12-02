@@ -244,14 +244,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
-	public File createOutputVideoFile() throws IOException {
-		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+	public File createOutputVideoFile(String extension) throws IOException {
+		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
 		return last_video_file;
 	}
 
 	@Override
-	public Uri createOutputVideoSAF() throws IOException {
-		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+	public Uri createOutputVideoSAF(String extension) throws IOException {
+		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
 		return last_video_file_saf;
 	}
 
@@ -484,6 +484,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K();
 	}
     
+	@Override
+	public String getRecordVideoOutputFormatPref() {
+    	return sharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default");
+	};
+
     @Override
     public String getVideoBitratePref() {
     	return sharedPreferences.getString(PreferenceKeys.getVideoBitratePreferenceKey(), "default");

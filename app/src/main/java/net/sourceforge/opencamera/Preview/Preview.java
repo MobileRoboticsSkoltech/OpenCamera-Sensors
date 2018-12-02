@@ -3104,35 +3104,49 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// else keep with the value already stored in VideoProfile (set from the CamcorderProfile)
 		}
 
-		/*
 		String pref_video_output_format = applicationInterface.getRecordVideoOutputFormatPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "pref_video_output_format: " + pref_video_output_format);
-		if( pref_video_output_format.equals("output_format_default") ) {
-			// n.b., although there is MediaRecorder.OutputFormat.DEFAULT, we don't explicitly set that - rather stick with what is default in the CamcorderProfile
+		switch( pref_video_output_format ) {
+			case "preference_video_output_format_default":
+				// n.b., although there is MediaRecorder.OutputFormat.DEFAULT, we don't explicitly set that - rather stick with what is default in the CamcorderProfile
+				break;
+			case "preference_video_output_format_mpeg4_h264":
+				video_profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+				video_profile.videoCodec = MediaRecorder.VideoEncoder.H264;
+				video_profile.audioCodec = MediaRecorder.AudioEncoder.AAC;
+				break;
+			case "preference_video_output_format_mpeg4_hevc":
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+					video_profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+					video_profile.videoCodec = MediaRecorder.VideoEncoder.HEVC;
+					video_profile.audioCodec = MediaRecorder.AudioEncoder.AAC;
+				}
+				// else treat as default
+				break;
+			case "preference_video_output_format_3gpp":
+				video_profile.fileFormat = MediaRecorder.OutputFormat.THREE_GPP;
+				video_profile.fileExtension = "3gp";
+				// leave others at default
+				break;
+			case "preference_video_output_format_webm":
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+					// n.b., audio isn't recorded on any device I've tested with WEBM, seems this may
+					// not be supported yet, see:
+					// https://developer.android.com/guide/topics/media/media-formats#audio-formats
+					// https://stackoverflow.com/questions/42857584/recording-webm-with-android-mediarecorder
+					video_profile.fileFormat = MediaRecorder.OutputFormat.WEBM;
+					video_profile.videoCodec = MediaRecorder.VideoEncoder.VP8;
+					video_profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
+					video_profile.fileExtension = "webm";
+				}
+				// else treat as default
+				break;
+			default:
+				// treat as default
+				Log.e(TAG, "unknown pref_video_output_format: " + pref_video_output_format);
+				break;
 		}
-		else if( pref_video_output_format.equals("output_format_aac_adts") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.AAC_ADTS;
-		}
-		else if( pref_video_output_format.equals("output_format_amr_nb") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.AMR_NB;
-		}
-		else if( pref_video_output_format.equals("output_format_amr_wb") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.AMR_WB;
-		}
-		else if( pref_video_output_format.equals("output_format_mpeg4") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
-			//video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264 );
-			//video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC );
-		}
-		else if( pref_video_output_format.equals("output_format_3gpp") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.THREE_GPP;
-		}
-		else if( pref_video_output_format.equals("output_format_webm") ) {
-			profile.fileFormat = MediaRecorder.OutputFormat.WEBM;
-			profile.videoCodec = MediaRecorder.VideoEncoder.VP8;
-			profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
-		}*/
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "returning video_profile: " + video_profile);
@@ -4815,8 +4829,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "don't call setNextOutputFile, not enough space remaining");
 				}
 
-				if( has_free_space ) {
-					VideoFileInfo info = createVideoFile();
+				final VideoProfile profile = getVideoProfile();
+				if( profile.fileExtension.equals("3gp") ) {
+					// at least on Nokia 8 with Camera2, 3gpp format crashes with IllegalStateException in setNextOutputFile below
+					// if we try to do seamless restart
+					if( MyDebug.LOG )
+						Log.d(TAG, "seamless restart not supported for 3gpp");
+				}
+				else if( has_free_space ) {
+					VideoFileInfo info = createVideoFile(profile.fileExtension);
 					// only assign to videoFileInfo after setNextOutputFile in case it throws an exception (in which case,
 					// we don't want to overwrite the current videoFileInfo).
 					if( info != null ) {
@@ -4965,7 +4986,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "takePicture exit");
 	}
 
-	private VideoFileInfo createVideoFile() {
+	private VideoFileInfo createVideoFile(String extension) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createVideoFile");
 		try {
@@ -4978,7 +4999,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( method == ApplicationInterface.VIDEOMETHOD_FILE ) {
     			/*if( true )
     				throw new IOException(); // test*/
-    			File videoFile = applicationInterface.createOutputVideoFile();
+    			File videoFile = applicationInterface.createOutputVideoFile(extension);
 				video_filename = videoFile.getAbsolutePath();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + video_filename);
@@ -4986,7 +5007,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		else {
     			Uri uri;
 	    		if( method == ApplicationInterface.VIDEOMETHOD_SAF ) {
-	    			uri = applicationInterface.createOutputVideoSAF();
+	    			uri = applicationInterface.createOutputVideoSAF(extension);
 	    		}
 	    		else {
 	    			uri = applicationInterface.createOutputVideoUri();
@@ -5014,7 +5035,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "startVideoRecording");
 		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-		VideoFileInfo info = createVideoFile();
+		final VideoProfile profile = getVideoProfile();
+		VideoFileInfo info = createVideoFile(profile.fileExtension);
 		if( info == null ) {
 			videoFileInfo = new VideoFileInfo();
             applicationInterface.onFailedCreateVideoFileError();
@@ -5022,7 +5044,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		else {
 			videoFileInfo = info;
-        	final VideoProfile profile = getVideoProfile();
     		if( MyDebug.LOG ) {
 				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
 				if (this.video_quality_handler.getCurrentVideoQualityIndex() != -1)

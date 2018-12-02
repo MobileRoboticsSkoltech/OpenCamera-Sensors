@@ -36,18 +36,18 @@ import android.preference.TwoStatePreference;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 /** Fragment to handle the Settings UI. Note that originally this was a
@@ -474,6 +474,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Preference pref = findPreference("preference_video_stabilization");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
         	pg.removePreference(pref);
+		}
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+			filterArrayEntry("preference_video_output_format", "preference_video_output_format_mpeg4_hevc");
+		}
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			filterArrayEntry("preference_video_output_format", "preference_video_output_format_webm");
 		}
 
 		{
@@ -1213,6 +1220,33 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }
+	}
+
+	/** Removes an entry and value pair from a ListPreference, if it exists.
+	 * @param preference_key Key of the ListPreference to remove the supplied entry/value.
+	 * @param filter_value The value to remove from the list.
+	 */
+	private void filterArrayEntry(String preference_key, String filter_value) {
+		{
+        	ListPreference pref = (ListPreference)findPreference(preference_key);
+        	CharSequence [] orig_entries = pref.getEntries();
+        	CharSequence [] orig_values = pref.getEntryValues();
+        	List<CharSequence> new_entries = new ArrayList<>();
+        	List<CharSequence> new_values = new ArrayList<>();
+        	for(int i=0;i<orig_entries.length;i++) {
+        		CharSequence value = orig_values[i];
+        		if( !value.equals(filter_value) ) {
+        			new_entries.add(orig_entries[i]);
+        			new_values.add(value);
+				}
+			}
+			CharSequence [] new_entries_arr = new CharSequence[new_entries.size()];
+        	new_entries.toArray(new_entries_arr);
+			CharSequence [] new_values_arr = new CharSequence[new_values.size()];
+        	new_values.toArray(new_values_arr);
+        	pref.setEntries(new_entries_arr);
+        	pref.setEntryValues(new_values_arr);
+		}
 	}
 
 	private void restartOpenCamera() {
