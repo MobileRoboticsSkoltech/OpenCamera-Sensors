@@ -2383,7 +2383,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		    boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst || main_activity.getPreview().getCameraController().isCapturingBurst();
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
 					force_suffix,
-                    force_suffix ? n_capture_images : 0, // n.b., n_capture_images will be 1 for first image, not 0, but this is fine for naming of burst images
+					// N.B., n_capture_images will be 1 for first image, not 0, so subtract 1 so we start off from _0.
+					// (It wouldn't be a huge problem if we did start from _1, but it would be inconsistent with the naming
+					// of images where images.size() > 1 (e.g., expo bracketing mode) where we also start from _0.)
+                    force_suffix ? (n_capture_images-1) : 0,
 					save_expo, images,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,

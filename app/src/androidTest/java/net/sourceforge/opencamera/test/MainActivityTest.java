@@ -3080,13 +3080,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             suffix = "_" + (n_expo_images-1);
         }
         else if( is_focus_bracketing ) {
-            //suffix = "_" + (n_focus_bracketing_images-1); // when focus bracketing starts from _0
-            suffix = "_" + (n_focus_bracketing_images); // when focus bracketing starts from _1
+            suffix = "_" + (n_focus_bracketing_images-1); // when focus bracketing starts from _0
+            //suffix = "_" + (n_focus_bracketing_images); // when focus bracketing starts from _1
             max_time_s = 60; // can take much longer to save in focus bracketing mode!
         }
         else if( is_fast_burst ) {
-            //suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
-            suffix = "_" + (n_fast_burst_images); // when burst numbering starts from _1
+            suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
+            //suffix = "_" + (n_fast_burst_images); // when burst numbering starts from _1
             max_time_s = 3; // takes longer to save 20 images!
         }
 
