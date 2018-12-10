@@ -2520,21 +2520,7 @@ public class ImageSaver extends Thread {
             	storageUtils.broadcastFile(picFile, true, false, false);
     		}
     		else {
-	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-				if( MyDebug.LOG )
-					Log.d(TAG, "real_file: " + real_file);
-                if( real_file != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "broadcast file");
-	        		//Uri media_uri = storageUtils.broadcastFileRaw(real_file, current_date, location);
-	    		    //storageUtils.announceUri(media_uri, true, false);
-	    		    storageUtils.broadcastFile(real_file, true, false, false);
-                }
-                else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "announce SAF uri");
-	    		    storageUtils.announceUri(saveUri, true, false);
-                }
+	            storageUtils.broadcastUri(saveUri, true, false, false);
             }
         }
         catch(FileNotFoundException e) {

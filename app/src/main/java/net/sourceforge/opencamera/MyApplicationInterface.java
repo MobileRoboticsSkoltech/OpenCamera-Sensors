@@ -1614,16 +1614,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		else {
 			if( uri != null ) {
 				// see note in onPictureTaken() for where we call broadcastFile for SAF photos
-				File real_file = storageUtils.getFileFromDocumentUriSAF(uri, false);
-				if( MyDebug.LOG )
-					Log.d(TAG, "real_file: " + real_file);
+	            File real_file = storageUtils.broadcastUri(uri, false, true, true);
 				if( real_file != null ) {
-					storageUtils.broadcastFile(real_file, false, true, true);
 					main_activity.test_last_saved_image = real_file.getAbsolutePath();
-				}
-				else {
-					// announce the SAF Uri
-					storageUtils.announceUri(uri, false, true);
 				}
 				done = true;
 			}

@@ -41,6 +41,7 @@ public class StorageUtils {
 
     static final int MEDIA_TYPE_IMAGE = 1;
     static final int MEDIA_TYPE_VIDEO = 2;
+    static final int MEDIA_TYPE_PREFS = 3;
 
 	private final Context context;
 	private final MyApplicationInterface applicationInterface;
@@ -253,6 +254,30 @@ public class StorageUtils {
     			}
     		);
     	}
+	}
+
+	/** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
+	 */
+    public File broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "broadcastUri: " + uri);
+		File real_file = getFileFromDocumentUriSAF(uri, false);
+		if( MyDebug.LOG )
+			Log.d(TAG, "real_file: " + real_file);
+		if( real_file != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "broadcast file");
+			//Uri media_uri = broadcastFileRaw(real_file, current_date, location);
+			//announceUri(media_uri, is_new_picture, is_new_video);
+			broadcastFile(real_file, is_new_picture, is_new_video, set_last_scanned);
+			return real_file;
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "announce SAF uri");
+			announceUri(uri, is_new_picture, is_new_video);
+		}
+		return null;
 	}
 
     boolean isUsingSAF() {
@@ -501,6 +526,11 @@ public class StorageUtils {
 				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
+			case MEDIA_TYPE_PREFS: {
+				String prefix = "PREFS_";
+				mediaFilename = prefix + timeStamp + suffix + index + extension;
+				break;
+			}
 			default:
 				// throw exception as this is a programming error
 				if (MyDebug.LOG)
@@ -634,6 +664,9 @@ public class StorageUtils {
 						mimeType = "video/mp4";
 						break;
 				}
+				break;
+			case MEDIA_TYPE_PREFS:
+				mimeType = "application/xml";
 				break;
 			default:
 				// throw exception as this is a programming error
