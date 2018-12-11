@@ -8080,6 +8080,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     }
 
+    /* Tests save and load settings.
+     */
+    public void testSettingsSaveLoad() throws InterruptedException {
+        Log.d(TAG, "testSettingsSaveLoad");
+        setToDefault();
+
+        final String test_string = "Test stamp!£$ <&"; // intentionally include characters that need escaping in xml
+
+        // set a non-default setting
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.TextStampPreferenceKey, test_string);
+            editor.apply();
+            updateForSettings();
+        }
+
+        mActivity.getSettingsManager().saveSettings();
+        assertTrue(mActivity.test_save_settings_file != null);
+
+        // now modify the aforementioned setting
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.TextStampPreferenceKey, "");
+            editor.apply();
+            updateForSettings();
+        }
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        String new_string = settings.getString(PreferenceKeys.TextStampPreferenceKey, "");
+        assertEquals("", new_string);
+
+        // now load settings
+        assertTrue( mActivity.getSettingsManager().loadSettings(mActivity.test_save_settings_file) );
+
+        // wait for restart
+        Thread.sleep(3000);
+        Log.d(TAG, "mActivity is now: " + mActivity);
+        mPreview = mActivity.getPreview();
+        Log.d(TAG, "mPreview is now: " + mPreview);
+
+        // now check setting is as expected
+        settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        new_string = settings.getString(PreferenceKeys.TextStampPreferenceKey, "");
+        assertEquals(test_string, new_string);
+    }
+
     private void subTestCreateSaveFolder(boolean use_saf, String save_folder, boolean delete_folder) {
         setToDefault();
 

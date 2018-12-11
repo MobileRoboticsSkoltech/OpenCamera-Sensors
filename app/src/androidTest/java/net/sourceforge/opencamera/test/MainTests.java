@@ -59,6 +59,7 @@ public class MainTests {
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGallery"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSettings"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSettingsSaveLoad"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFolderChooserNew"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFolderChooserInvalid"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistory"));
