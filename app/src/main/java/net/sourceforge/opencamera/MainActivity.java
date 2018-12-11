@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
 	private Sensor mSensorMagnetic;
 	private MainUI mainUI;
 	private PermissionHandler permissionHandler;
+	private SettingsManager settingsManager;
 	private SoundPoolManager soundPoolManager;
 	private ManualSeekbars manualSeekbars;
 	private TextFormatter textFormatter;
@@ -137,6 +138,7 @@ public class MainActivity extends Activity {
 
     private static final int CHOOSE_SAVE_FOLDER_SAF_CODE = 42;
     private static final int CHOOSE_GHOST_IMAGE_SAF_CODE = 43;
+    private static final int CHOOSE_LOAD_SETTINGS_SAF_CODE = 44;
 
 	// for testing; must be volatile for test project reading the state
 	public boolean is_test; // whether called from OpenCamera.test testing
@@ -146,6 +148,7 @@ public class MainActivity extends Activity {
 	public volatile float test_angle;
 	public volatile String test_last_saved_image;
 	public static boolean test_force_supports_camera2;
+	public volatile String test_save_settings_file;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -211,6 +214,7 @@ public class MainActivity extends Activity {
 
 		// set up components
 		permissionHandler = new PermissionHandler(this);
+		settingsManager = new SettingsManager(this);
 		mainUI = new MainUI(this);
 		manualSeekbars = new ManualSeekbars();
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
@@ -2527,6 +2531,28 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Opens the Storage Access Framework dialog to select a file for loading settings.
+     * @param from_preferences Whether called from the Preferences
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    void openLoadSettingsChooserDialogSAF(boolean from_preferences) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openLoadSettingsChooserDialogSAF: " + from_preferences);
+		this.saf_dialog_from_preferences = from_preferences;
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/xml"); // note that application/xml doesn't work (can't select the xml files)!
+        try {
+			startActivityForResult(intent, CHOOSE_LOAD_SETTINGS_SAF_CODE);
+        }
+        catch(ActivityNotFoundException e) {
+            // see https://stackoverflow.com/questions/34021039/action-open-document-not-working-on-miui/34045627
+			preview.showToast(null, R.string.open_files_saf_exception_generic);
+            Log.e(TAG, "ActivityNotFoundException from startActivityForResult");
+            e.printStackTrace();
+        }
+    }
+
     /** Call when the SAF save history has been updated.
      *  This is only public so we can call from testing.
      * @param save_folder The new SAF save folder Uri.
@@ -2663,6 +2689,39 @@ public class MainActivity extends Activity {
 					editor.putString(PreferenceKeys.GhostImagePreferenceKey, "preference_ghost_image_off");
 	    			editor.apply();
 	    		}
+	        }
+
+            if( !saf_dialog_from_preferences ) {
+				setWindowFlagsForCamera();
+				showPreview(true);
+            }
+			break;
+		case CHOOSE_LOAD_SETTINGS_SAF_CODE:
+            if( resultCode == RESULT_OK && resultData != null ) {
+	            Uri fileUri = resultData.getData();
+				if( MyDebug.LOG )
+					Log.d(TAG, "returned single fileUri: " + fileUri);
+				// persist permission just in case?
+	    		final int takeFlags = resultData.getFlags()
+	    	            & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+	    	            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+				try {
+					/*if( true )
+						throw new SecurityException(); // test*/
+					// Check for the freshest data.
+					getContentResolver().takePersistableUriPermission(fileUri, takeFlags);
+
+					settingsManager.loadSettings(fileUri);
+				}
+				catch(SecurityException e) {
+					Log.e(TAG, "SecurityException failed to take permission");
+					e.printStackTrace();
+					preview.showToast(null, R.string.restore_settings_failed);
+				}
+			}
+	        else {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "SAF dialog cancelled");
 	        }
 
             if( !saf_dialog_from_preferences ) {
@@ -3533,6 +3592,10 @@ public class MainActivity extends Activity {
 		return permissionHandler;
 	}
 
+	public SettingsManager getSettingsManager() {
+		return settingsManager;
+	}
+
 	public MainUI getMainUI() {
     	return this.mainUI;
     }
@@ -4056,6 +4119,16 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
 		permissionHandler.onRequestPermissionsResult(requestCode, grantResults);
+	}
+
+	public void restartOpenCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "restartOpenCamera");
+		this.waitUntilImageQueueEmpty();
+		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
+		Intent i = this.getBaseContext().getPackageManager().getLaunchIntentForPackage( this.getBaseContext().getPackageName() );
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(i);
 	}
 
 	// for testing:

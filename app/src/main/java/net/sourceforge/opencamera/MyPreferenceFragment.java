@@ -597,7 +597,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	if( pref.getKey().equals("preference_use_camera2") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked camera2 API - need to restart");
-                		restartOpenCamera();
+	            		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                		main_activity.restartOpenCamera();
 	                	return false;
                 	}
                 	return false;
@@ -1165,13 +1166,44 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
+            final Preference pref = findPreference("preference_restore_settings");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+				@Override
+				public boolean onPreferenceClick(Preference arg0) {
+					if( pref.getKey().equals("preference_restore_settings") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "user clicked restore settings");
+
+						loadSettings();
+					}
+					return false;
+				}
+			});
+        }
+        {
+            final Preference pref = findPreference("preference_save_settings");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+				@Override
+				public boolean onPreferenceClick(Preference arg0) {
+					if( pref.getKey().equals("preference_save_settings") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "user clicked save settings");
+
+						MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+						main_activity.getSettingsManager().saveSettings();
+					}
+					return false;
+				}
+			});
+        }
+        {
             final Preference pref = findPreference("preference_reset");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
                 	if( pref.getKey().equals("preference_reset") ) {
                 		if( MyDebug.LOG )
-                			Log.d(TAG, "user clicked reset");
+                			Log.d(TAG, "user clicked reset settings");
     				    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
 			        	alertDialog.setIcon(android.R.drawable.ic_dialog_alert);
 			        	alertDialog.setTitle(R.string.preference_reset);
@@ -1199,7 +1231,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 								main_activity.setDeviceDefaults();
 		                		if( MyDebug.LOG )
 		                			Log.d(TAG, "user clicked reset - need to restart");
-		                		restartOpenCamera();
+		                		main_activity.restartOpenCamera();
 					        }
 			        	});
 			        	alertDialog.setNegativeButton(android.R.string.no, null);
@@ -1249,17 +1281,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		}
 	}
 
-	private void restartOpenCamera() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "restartOpenCamera");
-		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-		main_activity.waitUntilImageQueueEmpty();
-		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
-		Intent i = getActivity().getBaseContext().getPackageManager().getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName() );
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(i);
-	}
-
 	public static class SaveFolderChooserDialog extends FolderChooserDialog {
 		@Override
 		public void onDismiss(DialogInterface dialog) {
@@ -1271,6 +1292,26 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			if( main_activity != null ) { // main_activity may be null if this is being closed via MainActivity.onNewIntent()
 				String new_save_location = this.getChosenFolder();
 				main_activity.updateSaveFolder(new_save_location);
+			}
+			super.onDismiss(dialog);
+		}
+	}
+
+	public static class LoadSettingsFileChooserDialog extends FolderChooserDialog {
+		@Override
+		public void onDismiss(DialogInterface dialog) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "FolderChooserDialog dismissed");
+			// n.b., fragments have to be static (as they might be inserted into a new Activity - see http://stackoverflow.com/questions/15571010/fragment-inner-class-should-be-static),
+			// so we access the MainActivity via the fragment's getActivity().
+			MainActivity main_activity = (MainActivity)this.getActivity();
+			if( main_activity != null ) { // main_activity may be null if this is being closed via MainActivity.onNewIntent()
+				String settings_file = this.getChosenFile();
+				if( MyDebug.LOG )
+					Log.d(TAG, "settings_file: " + settings_file);
+				if( settings_file != null ) {
+					main_activity.getSettingsManager().loadSettings(settings_file);
+				}
 			}
 			super.onDismiss(dialog);
 		}
@@ -1421,4 +1462,44 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			}
 		}
 	}
+
+	void loadSettings() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "loadSettings");
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+		alertDialog.setIcon(android.R.drawable.ic_dialog_alert);
+		alertDialog.setTitle(R.string.preference_restore_settings);
+		alertDialog.setMessage(R.string.preference_restore_settings_question);
+		alertDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "user confirmed to restore settings");
+				MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+				if( main_activity.getStorageUtils().isUsingSAF() ) {
+					main_activity.openLoadSettingsChooserDialogSAF(true);
+				}
+				else {
+					FolderChooserDialog fragment = new LoadSettingsFileChooserDialog();
+					fragment.setShowNewFolderButton(false);
+					fragment.setModeFolder(false);
+					fragment.setExtension(".xml");
+					fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+				}
+			}
+		});
+		alertDialog.setNegativeButton(android.R.string.no, null);
+		final AlertDialog alert = alertDialog.create();
+		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "reset dialog dismissed");
+				dialogs.remove(alert);
+			}
+		});
+		alert.show();
+		dialogs.add(alert);
+    }
 }

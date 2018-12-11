@@ -527,7 +527,9 @@ public class StorageUtils {
 				break;
 			}
 			case MEDIA_TYPE_PREFS: {
-				String prefix = "PREFS_";
+				// good to use a prefix that sorts before IMG_ and VID_: annoyingly when using SAF, it doesn't seem possible to
+				// only show the xml files, and it always defaults to sorting alphabetically...
+				String prefix = "BACKUP_OC_";
 				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
@@ -666,7 +668,7 @@ public class StorageUtils {
 				}
 				break;
 			case MEDIA_TYPE_PREFS:
-				mimeType = "application/xml";
+				mimeType = "text/xml";
 				break;
 			default:
 				// throw exception as this is a programming error

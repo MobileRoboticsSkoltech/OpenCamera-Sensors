@@ -973,6 +973,23 @@ Please see <a href="devices.html">here</a> for more details on device compatibil
 <p><b>About</b> - Provides various debug information about the app and your device's camera. You can also copy
 this information to the clipboard.</p>
 
+<p><b>Settings manager</b> - Select to access the following controls:</p>
+
+<p><b>Save settings</b> - Open Camera supports saving all of its settings to a file, so that you can
+    restore them later. This could potentially be used for saving different profiles or presets. The
+    files will be stored in the same save location as selected for photos and videos. By default, this
+	is in DCIM/OpenCamera, but can be changed under
+	<a href="#save_location">Settings/More camera controls/Save location</a>.</p>
+
+<p><b>Restore settings</b> - Restores all settings from a previously saved settings file (see
+	"Save settings"). A file dialog will appear allowing you to choose the settings file. Be warned
+	that selecting a file will mean all of Open Camera's settings will be overwritten with the
+	saved version! Also beware of using this to transfer settings between different devices - there
+	is the risk that settings on some devices may be incompatible with other devices. Also if the
+	saved settings file specificed a save location, this may not be valid on the new device (or if
+	using "Storage Access Framework", you may have to reselect the folder in Open Camera, to grant
+	write permission for the folder).</p>
+
 <p><b>Reset settings</b> - Resets all Open Camera settings to their default. Selecting this option will cause
 Open Camera to restart.</p>
 
@@ -1107,7 +1124,7 @@ device, try other camera applications in case the camera is faulty.</p>
 
 <p><b>Why has Open Camera stopped working properly?</b> - If something stops working in Open Camera
 first try a reboot of your device. If that doesn't resolve the problem, try resetting
-the settings to the defaults (under Settings/"Reset settings"), or try reinstalling
+the settings to the defaults (under Settings/Settings manager/"Reset settings"), or try reinstalling
 the app (or go to your device's App Settings and select "Clear data" for Open Camera) to
 reset it to its initial conditions. Obviously ideally this shouldn't happen, but can be a way of
 working around any unresolved bugs that appear. If something stops working in an upgrade to a new
@@ -1262,7 +1279,7 @@ please see <a href="https://f-droid.org/wiki/page/Getting_logcat_messages_after_
 
 <p>If you have a question or what seems to be a bug, please first read <a href="#faq">FAQ</a>. Also if something
 no longer seems to work properly, try a reboot of your device, or if that fails to fix, try resetting Open Camera
-settings to the defaults (under Settings/"Reset settings").</p>
+settings to the defaults (under Settings/Settings manager/"Reset settings").</p>
 
 <p>If there's still a problem, please check other <i>third party</i> camera applications to see if they have the same
 	problem or not. (It's not enough to try your device's "stock" camera - in some cases, devices may have bugs for

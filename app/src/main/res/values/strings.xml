@@ -715,6 +715,20 @@
     <string name="preference_video_output_format_3gpp">3GPP</string>
     <string name="preference_video_output_format_webm">WebM (audio not supported)</string>
 
+    <string name="preference_screen_settings_manager">Settings manager</string>
+
+    <string name="preference_save_settings">Save settings</string>
+    <string name="preference_save_settings_summary">Saves all of Open Camera\'s settings to a file, located in the current photo/video folder.</string>
+
+    <string name="preference_restore_settings">Restore settings</string>
+    <string name="preference_restore_settings_summary">Restores previously saved settings. This will overwrite all current settings with the saved settings!</string>
+    <string name="preference_restore_settings_question">This option allows you to select one of the settings files that you previously saved. Be warned that selecting a file to load will overwrite all current settings!</string>
+
+    <string name="saved_settings">Saved settings</string>
+    <string name="save_settings_failed">Failed to save settings</string>
+    <string name="restore_settings_failed">Failed to restore settings</string>
+    <string name="open_files_saf_exception_generic">No file dialog found on this device, option is not supported</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under
