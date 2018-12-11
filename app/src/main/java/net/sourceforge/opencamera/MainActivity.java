@@ -332,9 +332,7 @@ public class MainActivity extends Activity {
 				if( motionEvent.getAction() == MotionEvent.ACTION_UP ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "takePhotoButton ACTION_UP");
-					if( preview.getCameraController() != null && preview.getCameraController().isContinuousBurstInProgress() ) {
-						preview.getCameraController().stopContinuousBurst();
-					}
+					takePhotoButtonLongClickCancelled();
 				}
 				return false;
 			}
@@ -4129,6 +4127,14 @@ public class MainActivity extends Activity {
 		Intent i = this.getBaseContext().getPackageManager().getLaunchIntentForPackage( this.getBaseContext().getPackageName() );
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(i);
+	}
+
+	public void takePhotoButtonLongClickCancelled() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePhotoButtonLongClickCancelled");
+		if( preview.getCameraController() != null && preview.getCameraController().isContinuousBurstInProgress() ) {
+			preview.getCameraController().stopContinuousBurst();
+		}
 	}
 
 	// for testing:

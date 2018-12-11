@@ -9321,6 +9321,94 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    public void subTestTakePhotoContinuousBurst(boolean is_slow) throws InterruptedException {
+        Log.d(TAG, "subTestTakePhotoContinuousBurst");
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        Log.d(TAG, "folder: " + folder);
+        File [] files = folder.listFiles();
+        int n_files = files == null ? 0 : files.length;
+        Log.d(TAG, "n_files at start: " + n_files);
+
+        final View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        Log.d(TAG, "about to click take photo");
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                assertTrue(takePhotoButton.performLongClick());
+            }
+        });
+        this.getInstrumentation().waitForIdleSync();
+
+        Thread.sleep(3000);
+
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                mActivity.takePhotoButtonLongClickCancelled();
+            }
+        });
+        this.getInstrumentation().waitForIdleSync();
+
+        waitForTakePhoto();
+
+        if( mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        }
+
+        assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
+
+        File [] files2 = folder.listFiles();
+        int n_new_files = (files2 == null ? 0 : files2.length) - n_files;
+        Log.d(TAG, "n_new_files: " + n_new_files);
+        if( is_slow ) {
+            // with limited queue, won't be able to save as many files
+            assertTrue(n_new_files >= 3 && n_new_files <= 31);
+        }
+        else {
+            // at one photo per 100ms, should have approximately 30
+            assertTrue(n_new_files >= 27 && n_new_files <= 31);
+        }
+    }
+
+    /** Tests continuous burst.
+     */
+    public void testTakePhotoContinuousBurst() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoContinuousBurst");
+
+        setToDefault();
+
+        if( !mActivity.supportsFastBurst() ) {
+            return;
+        }
+
+        subTestTakePhotoContinuousBurst(false);
+
+        Thread.sleep(1000);
+
+        // now take a regular photo
+        subTestTakePhoto(false, false, false, false, false, false, false, false);
+    }
+
+    /** Tests continuous burst, but with flags set for slow saving and shorter queue.
+     */
+    public void testTakePhotoContinuousBurstSlow() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoContinuousBurstSlow");
+
+        setToDefault();
+
+        if( !mActivity.supportsFastBurst() ) {
+            return;
+        }
+
+        ImageSaver.test_small_queue_size = true;
+        ImageSaver.test_slow_saving = true;
+        // need to restart for test_small_queue_size to take effect
+        restart();
+
+        subTestTakePhotoContinuousBurst(true);
+    }
+
     /*private Bitmap getBitmapFromAssets(String filename) throws IOException {
         Log.d(TAG, "getBitmapFromAssets: " + filename);
         AssetManager assetManager = getInstrumentation().getContext().getResources().getAssets();
