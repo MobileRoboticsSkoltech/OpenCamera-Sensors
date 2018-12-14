@@ -9366,8 +9366,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(n_new_files >= 3 && n_new_files <= 31);
         }
         else {
-            // at one photo per 100ms, should have approximately 30
-            assertTrue(n_new_files >= 27 && n_new_files <= 31);
+            // at one photo per 100ms, should have approximately 30 - note that long press can take longer to kick in on some devices, e.g., OnePlus 3T
+            assertTrue(n_new_files >= 12 && n_new_files <= 31);
         }
     }
 
