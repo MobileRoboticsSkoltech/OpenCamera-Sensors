@@ -2781,7 +2781,11 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "openFolderChooserDialog");
 		showPreview(false);
 		setWindowFlagsForSettings();
+
+		File start_folder = getStorageUtils().getImageFolder();
+
 		FolderChooserDialog fragment = new MyFolderChooserDialog();
+		fragment.setStartFolder(start_folder);
 		// use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
 		// see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
 		//fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");

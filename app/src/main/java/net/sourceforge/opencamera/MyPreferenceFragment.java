@@ -40,12 +40,16 @@ import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -680,7 +684,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             			return true;
                     }
             		else {
+						File start_folder = main_activity.getStorageUtils().getImageFolder();
+
 						FolderChooserDialog fragment = new SaveFolderChooserDialog();
+						fragment.setStartFolder(start_folder);
                 		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
                     	return true;
             		}
@@ -1189,8 +1196,60 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						if( MyDebug.LOG )
 							Log.d(TAG, "user clicked save settings");
 
-						MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-						main_activity.getSettingsManager().saveSettings();
+            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+                        alertDialog.setTitle(R.string.preference_save_settings_filename);
+
+                        final EditText editText = new EditText(getActivity());
+						alertDialog.setView(editText);
+
+						final MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+						try {
+							// find a default name - although we're only interested in the name rather than full path, this still
+							// requires checking the folder, so that we don't reuse an existing filename
+							String mediaFilename = main_activity.getStorageUtils().createOutputMediaFile(
+									main_activity.getStorageUtils().getSettingsFolder(),
+									StorageUtils.MEDIA_TYPE_PREFS, "", "xml", new Date()
+							).getName();
+							if( MyDebug.LOG )
+								Log.d(TAG, "mediaFilename: " + mediaFilename);
+							int index = mediaFilename.lastIndexOf('.');
+							if( index != -1 ) {
+								// remove extension
+								mediaFilename = mediaFilename.substring(0, index);
+							}
+							editText.setText(mediaFilename);
+							editText.setSelection(mediaFilename.length());
+						}
+						catch(IOException e) {
+							Log.e(TAG, "failed to obtain a filename");
+							e.printStackTrace();
+						}
+
+                        alertDialog.setPositiveButton(android.R.string.ok, new OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialogInterface, int i) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "save settings clicked okay");
+
+								String filename = editText.getText().toString() + ".xml";
+								main_activity.getSettingsManager().saveSettings(filename);
+							}
+						});
+						alertDialog.setNegativeButton(android.R.string.cancel, null);
+						final AlertDialog alert = alertDialog.create();
+						// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+						alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface arg0) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "save settings dialog dismissed");
+								dialogs.remove(alert);
+							}
+						});
+						alert.show();
+						dialogs.add(alert);
+						//MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+						//main_activity.getSettingsManager().saveSettings();
 					}
 					return false;
 				}
@@ -1476,14 +1535,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				if( MyDebug.LOG )
 					Log.d(TAG, "user confirmed to restore settings");
 				MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-				if( main_activity.getStorageUtils().isUsingSAF() ) {
+				/*if( main_activity.getStorageUtils().isUsingSAF() ) {
 					main_activity.openLoadSettingsChooserDialogSAF(true);
 				}
-				else {
+				else*/ {
 					FolderChooserDialog fragment = new LoadSettingsFileChooserDialog();
+					fragment.setShowDCIMShortcut(false);
 					fragment.setShowNewFolderButton(false);
 					fragment.setModeFolder(false);
 					fragment.setExtension(".xml");
+					fragment.setStartFolder(main_activity.getStorageUtils().getSettingsFolder());
 					fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
 				}
 			}

@@ -1,16 +1,8 @@
 package net.sourceforge.opencamera;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.Xml;
 
@@ -26,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -173,12 +164,12 @@ public class SettingsManager {
 		}
 	}
 
-	public void saveSettings() {
+	public void saveSettings(String filename) {
         if( MyDebug.LOG )
-            Log.d(TAG, "saveSettings");
+            Log.d(TAG, "saveSettings: " + filename);
         try {
             StorageUtils storageUtils = main_activity.getStorageUtils();
-            OutputStream outputStream;
+            /*OutputStream outputStream;
             Uri uri = null;
             File file = null;
             if( storageUtils.isUsingSAF() ) {
@@ -189,7 +180,13 @@ public class SettingsManager {
                 file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_PREFS, "", "xml", new Date());
                 main_activity.test_save_settings_file = file.getAbsolutePath();
                 outputStream = new FileOutputStream(file);
-            }
+            }*/
+            File settings_folder = storageUtils.getSettingsFolder();
+            // in theory the folder should have been created when choosing a name, but just in case...
+			storageUtils.createFolderIfRequired(settings_folder);
+			File file = new File(settings_folder.getPath() + File.separator + filename);
+			main_activity.test_save_settings_file = file.getAbsolutePath();
+			OutputStream outputStream = new FileOutputStream(file);
 
             XmlSerializer xmlSerializer = Xml.newSerializer();
 
@@ -246,10 +243,10 @@ public class SettingsManager {
             outputStream.close();
 
 			main_activity.getPreview().showToast(null, R.string.saved_settings);
-            if( uri != null ) {
+            /*if( uri != null ) {
                 storageUtils.broadcastUri(uri, false, false, false);
             }
-            else {
+            else*/ {
                 storageUtils.broadcastFile(file, false, false, false);
             }
         }

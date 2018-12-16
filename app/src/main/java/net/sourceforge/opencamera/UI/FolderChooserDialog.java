@@ -1,7 +1,6 @@
 package net.sourceforge.opencamera.UI;
 
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.StorageUtils;
 
@@ -15,10 +14,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -40,9 +37,11 @@ public class FolderChooserDialog extends DialogFragment {
 	private static final String TAG = "FolderChooserFragment";
 
 	private boolean show_new_folder_button = true; // whether to show a button for creating a new folder
+    private boolean show_dcim_shortcut = true; // whether to show a shortcut to the DCIM/ folder
 	private boolean mode_folder = true; // if true, the dialog is for selecting a folder; if false, the dialog is for selecting a file
 	private String extension; // if non-null, and mode_folder==false, only show files matching this file extension
 
+    private File start_folder = new File("");
 	private File current_folder;
 	private AlertDialog folder_dialog;
 	private ListView list;
@@ -104,13 +103,8 @@ public class FolderChooserDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreateDialog");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
 		if( MyDebug.LOG )
-			Log.d(TAG, "folder_name: " + folder_name);
-		File new_folder = StorageUtils.getImageFolder(folder_name);
-		if( MyDebug.LOG )
-			Log.d(TAG, "start in folder: " + new_folder);
+			Log.d(TAG, "start in folder: " + start_folder);
 
 		list = new ListView(getActivity());
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -176,16 +170,16 @@ public class FolderChooserDialog extends DialogFragment {
 		    }
 		});
 
-		if( !new_folder.exists() ) {
+		if( !start_folder.exists() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "create new folder" + new_folder);
-			if( !new_folder.mkdirs() ) {
+				Log.d(TAG, "create new folder" + start_folder);
+			if( !start_folder.mkdirs() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "failed to create new folder");
 				// don't do anything yet, this is handled below
 			}
 		}
-		refreshList(new_folder);
+		refreshList(start_folder);
 		if( !canWrite() ) {
 			// see testFolderChooserInvalid()
 			if( MyDebug.LOG )
@@ -201,10 +195,18 @@ public class FolderChooserDialog extends DialogFragment {
         return folder_dialog;
     }
 
+	public void setStartFolder(File start_folder) {
+	    this.start_folder = start_folder;
+    }
+
     public void setShowNewFolderButton(boolean show_new_folder_button) {
 		this.show_new_folder_button = show_new_folder_button;
 	}
     
+    public void setShowDCIMShortcut(boolean show_dcim_shortcut) {
+		this.show_dcim_shortcut = show_dcim_shortcut;
+	}
+
     public void setModeFolder(boolean mode_folder) {
 		this.mode_folder = mode_folder;
 	}
@@ -236,9 +238,11 @@ public class FolderChooserDialog extends DialogFragment {
 		List<FileWrapper> listed_files = new ArrayList<>();
 		if( new_folder.getParentFile() != null )
 			listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
-		File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-		if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
-			listed_files.add(new FileWrapper(default_folder, null, 1));
+		if( show_dcim_shortcut ) {
+            File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
+                listed_files.add(new FileWrapper(default_folder, null, 1));
+        }
 		if( files != null ) {
 			for(File file : files) {
 				boolean accept = false;

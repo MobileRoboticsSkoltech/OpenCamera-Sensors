@@ -309,6 +309,10 @@ public class StorageUtils {
 		return Uri.parse(folder_name);
     }
 
+    File getSettingsFolder() {
+        return new File(context.getExternalFilesDir(null), "backups");
+   }
+
     // valid if whether or not isUsingSAF()
     // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -541,21 +545,36 @@ public class StorageUtils {
 		}
         return mediaFilename;
     }
-    
-    // only valid if !isUsingSAF()
-    @SuppressLint("SimpleDateFormat")
-	File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
-    	File mediaStorageDir = getImageFolder();
 
-        // Create the storage directory if it does not exist
-        if( !mediaStorageDir.exists() ) {
-            if( !mediaStorageDir.mkdirs() ) {
-        		if( MyDebug.LOG )
-        			Log.e(TAG, "failed to create directory");
+	private File createOutputMediaFile(String mediaFilename) {
+    	File mediaStorageDir = getImageFolder();
+		return new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
+	}
+
+    // only valid if !isUsingSAF()
+	File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
+        File mediaStorageDir = getImageFolder();
+        return createOutputMediaFile(mediaStorageDir, type, suffix, extension, current_date);
+    }
+
+    /** Create the folder if it does not exist.
+     */
+    void createFolderIfRequired(File folder) throws IOException {
+        if( !folder.exists() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "create directory: " + folder);
+            if( !folder.mkdirs() ) {
+                Log.e(TAG, "failed to create directory");
         		throw new IOException();
             }
-            broadcastFile(mediaStorageDir, false, false, false);
+            broadcastFile(folder, false, false, false);
         }
+    }
+
+    // only valid if !isUsingSAF()
+    @SuppressLint("SimpleDateFormat")
+	File createOutputMediaFile(File mediaStorageDir, int type, String suffix, String extension, Date current_date) throws IOException {
+        createFolderIfRequired(mediaStorageDir);
 
         // Create a media file name
         File mediaFile = null;
@@ -582,7 +601,7 @@ public class StorageUtils {
 			}
 			else*/ {
 				String mediaFilename = createMediaFilename(type, suffix, count, "." + extension, current_date);
-				mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
+				mediaFile = createOutputMediaFile(mediaFilename);
 			}
             if( !mediaFile.exists() ) {
             	break;

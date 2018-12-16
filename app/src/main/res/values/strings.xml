@@ -718,7 +718,8 @@
     <string name="preference_screen_settings_manager">Settings manager</string>
 
     <string name="preference_save_settings">Save settings</string>
-    <string name="preference_save_settings_summary">Saves all of Open Camera\'s settings to a file, located in the current photo/video folder.</string>
+    <string name="preference_save_settings_summary">Saves all of Open Camera\'s settings to a file</string>
+    <string name="preference_save_settings_filename">Saved settings name</string>
 
     <string name="preference_restore_settings">Restore settings</string>
     <string name="preference_restore_settings_summary">Restores previously saved settings. This will overwrite all current settings with the saved settings!</string>

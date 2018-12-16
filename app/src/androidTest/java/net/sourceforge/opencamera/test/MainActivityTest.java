@@ -8097,7 +8097,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             updateForSettings();
         }
 
-        mActivity.getSettingsManager().saveSettings();
+        mActivity.getSettingsManager().saveSettings("test_testSettingsSaveLoad.xml");
         assertTrue(mActivity.test_save_settings_file != null);
 
         // now modify the aforementioned setting
