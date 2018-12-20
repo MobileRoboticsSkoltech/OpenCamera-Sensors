@@ -68,7 +68,7 @@ public class ImageSaver extends Thread {
 	private int n_images_to_save = 0;
 	private final int queue_capacity;
 	private final BlockingQueue<Request> queue;
-	private final static int queue_cost_jpeg_c = 1;
+	private final static int queue_cost_jpeg_c = 1; // also covers WEBP
 	private final static int queue_cost_dng_c = 6;
 	//private final static int queue_cost_dng_c = 1;
 
@@ -79,17 +79,17 @@ public class ImageSaver extends Thread {
 
 	static class Request {
 		enum Type {
-			JPEG,
+			JPEG, // also covers WEBP
 			RAW,
 			DUMMY
 		}
-		Type type = Type.JPEG;
+		Type type;
 		enum ProcessType {
 			NORMAL,
 			HDR,
 			AVERAGE
 		}
-		final ProcessType process_type; // for jpeg
+		final ProcessType process_type; // for type==JPEG
 		final boolean force_suffix; // affects filename suffixes for saving jpeg_images: if true, filenames will always be appended with a suffix like _0, even if there's only 1 image in jpeg_images
 		final int suffix_offset; // affects filename suffixes for saving jpeg_images, when force_suffix is true or there are multiple images in jpeg_images: the suffixes will be offset by this number
 		enum SaveBase {
@@ -108,6 +108,14 @@ public class ImageSaver extends Thread {
 		final boolean image_capture_intent;
 		final Uri image_capture_intent_uri;
 		final boolean using_camera2;
+		/* image_format allows converting the standard JPEG image into another file format.
+#		 */
+		enum ImageFormat {
+			STD, // leave unchanged from the standard JPEG format
+			WEBP,
+			PNG
+		}
+		final ImageFormat image_format;
 		final int image_quality;
 		final boolean do_auto_stabilise;
 		final double level_angle;
@@ -143,7 +151,8 @@ public class ImageSaver extends Thread {
 			List<byte []> jpeg_images,
 			RawImage raw_image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
-			boolean using_camera2, int image_quality,
+			boolean using_camera2,
+			ImageFormat image_format, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
 			boolean mirror,
@@ -167,6 +176,7 @@ public class ImageSaver extends Thread {
 			this.image_capture_intent = image_capture_intent;
 			this.image_capture_intent_uri = image_capture_intent_uri;
 			this.using_camera2 = using_camera2;
+			this.image_format = image_format;
 			this.image_quality = image_quality;
 			this.do_auto_stabilise = do_auto_stabilise;
 			this.level_angle = level_angle;
@@ -447,7 +457,8 @@ public class ImageSaver extends Thread {
 			boolean save_expo,
 			List<byte []> images,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
-			boolean using_camera2, int image_quality,
+			boolean using_camera2,
+			Request.ImageFormat image_format, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
 			boolean mirror,
@@ -475,7 +486,8 @@ public class ImageSaver extends Thread {
 				images,
 				null,
 				image_capture_intent, image_capture_intent_uri,
-				using_camera2, image_quality,
+				using_camera2,
+				image_format, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
 				mirror,
@@ -513,7 +525,8 @@ public class ImageSaver extends Thread {
 				null,
 				raw_image,
 				false, null,
-				false, 0,
+				false,
+				Request.ImageFormat.STD, 0,
 				false, 0.0,
 				false,
 				false,
@@ -533,7 +546,8 @@ public class ImageSaver extends Thread {
 	void startImageAverage(boolean do_in_background,
 			Request.SaveBase save_base,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
-			boolean using_camera2, int image_quality,
+			boolean using_camera2,
+			Request.ImageFormat image_format, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
 			boolean mirror,
@@ -558,7 +572,8 @@ public class ImageSaver extends Thread {
 				new ArrayList<byte[]>(),
 				null,
 				image_capture_intent, image_capture_intent_uri,
-				using_camera2, image_quality,
+				using_camera2,
+				image_format, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
 				mirror,
@@ -619,7 +634,8 @@ public class ImageSaver extends Thread {
 			List<byte []> jpeg_images,
 			RawImage raw_image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
-			boolean using_camera2, int image_quality,
+			boolean using_camera2,
+			Request.ImageFormat image_format, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
 			boolean mirror,
@@ -649,7 +665,8 @@ public class ImageSaver extends Thread {
 				jpeg_images,
 				raw_image,
 				image_capture_intent, image_capture_intent_uri,
-				using_camera2, image_quality,
+				using_camera2,
+				image_format, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
 				mirror,
@@ -755,7 +772,8 @@ public class ImageSaver extends Thread {
 			null,
 			null,
 			false, null,
-			false, 0,
+			false,
+			Request.ImageFormat.STD, 0,
 			false, 0.0,
 			false,
 			false,
@@ -1357,17 +1375,11 @@ public class ImageSaver extends Thread {
 		if( bitmap == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "need to decode bitmap to auto-stabilise");
-			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
-			bitmap = loadBitmap(data, false, 1);
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap returned from the auto-stabilise code
+			bitmap = loadBitmapWithRotation(data, false, exifTempFile);
 			if( bitmap == null ) {
 				main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
 				System.gc();
-			}
-			if( bitmap != null ) {
-				// rotate the bitmap if necessary for exif tags
-				if( MyDebug.LOG )
-					Log.d(TAG, "rotate bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, data, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -1508,17 +1520,11 @@ public class ImageSaver extends Thread {
 		if( bitmap == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "need to decode bitmap to mirror");
-			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
-			bitmap = loadBitmap(data, false, 1);
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap returned from the mirroring code
+			bitmap = loadBitmapWithRotation(data, false, exifTempFile);
 			if( bitmap == null ) {
 				// don't bother warning to the user - we simply won't mirror the image
 				System.gc();
-			}
-			if( bitmap != null ) {
-				// rotate the bitmap if necessary for exif tags
-				if( MyDebug.LOG )
-					Log.d(TAG, "rotate bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, data, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -1556,16 +1562,10 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "decode bitmap in order to stamp info");
-				bitmap = loadBitmap(data, true, 1);
+				bitmap = loadBitmapWithRotation(data, true, exifTempFile);
 				if( bitmap == null ) {
 					main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
 					System.gc();
-				}
-				if( bitmap != null ) {
-					// rotate the bitmap if necessary for exif tags
-					if( MyDebug.LOG )
-						Log.d(TAG, "rotate bitmap for exif tags?");
-					bitmap = rotateForExif(bitmap, data, exifTempFile);
 				}
 			}
 			if( bitmap != null ) {
@@ -1667,7 +1667,7 @@ public class ImageSaver extends Thread {
 
 	/** Performs post-processing on the data, or bitmap if non-null, for saveSingleImageNow.
 	 */
-	private PostProcessBitmapResult postProcessBitmap(final Request request, byte [] data, Bitmap bitmap) {
+	private PostProcessBitmapResult postProcessBitmap(final Request request, byte [] data, Bitmap bitmap) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "postProcessBitmap");
     	long time_s = System.currentTimeMillis();
@@ -1675,7 +1675,7 @@ public class ImageSaver extends Thread {
 		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
 		boolean text_stamp = request.preference_textstamp.length() > 0;
 		File exifTempFile = null;
-		if( bitmap != null || request.do_auto_stabilise || request.mirror || dategeo_stamp || text_stamp ) {
+		if( bitmap != null || request.image_format != Request.ImageFormat.STD || request.do_auto_stabilise || request.mirror || dategeo_stamp || text_stamp ) {
 			// either we have a bitmap, or will need to decode the bitmap to do post-processing
 			// need to rotate the bitmap according to the exif orientation (which some devices use, e.g., Samsung)
 			// so need to write to a temp file for this - we also use this later on to transfer the exif tags
@@ -1719,6 +1719,20 @@ public class ImageSaver extends Thread {
 		if( request.mirror ) {
 			bitmap = mirrorImage(data, bitmap, exifTempFile);
 		}
+		if( request.image_format != Request.ImageFormat.STD && bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to decode bitmap to convert file format");
+			bitmap = loadBitmapWithRotation(data, true, exifTempFile);
+			if( bitmap == null ) {
+				// if we can't load bitmap for converting file formats, don't want to continue
+				System.gc();
+				if( exifTempFile != null && !exifTempFile.delete() ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to delete temp " + exifTempFile.getAbsolutePath());
+				}
+				throw new IOException();
+			}
+		}
 		bitmap = stampImage(request, data, bitmap, exifTempFile);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after photostamp: " + (System.currentTimeMillis() - time_s));
@@ -1761,19 +1775,34 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "raw_only: " + raw_only);
 		StorageUtils storageUtils = main_activity.getStorageUtils();
 		
+		String extension;
+		switch( request.image_format ) {
+			case WEBP:
+				extension = "webp";
+				break;
+			case PNG:
+				extension = "png";
+				break;
+			default:
+				extension = "jpg";
+				break;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "extension: " + extension);
+
 		main_activity.savingImage(true);
 
 		File exifTempFile = null;
 
-		if( !raw_only ) {
-			PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
-			bitmap = postProcessBitmapResult.bitmap;
-			exifTempFile = postProcessBitmapResult.exifTempFile;
-		}
-
 		File picFile = null;
 		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
         try {
+			if( !raw_only ) {
+				PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
+				bitmap = postProcessBitmapResult.bitmap;
+				exifTempFile = postProcessBitmapResult.exifTempFile;
+			}
+
         	if( raw_only ) {
         		// don't save the JPEG
 				success = true;
@@ -1798,13 +1827,7 @@ public class ImageSaver extends Thread {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "create bitmap");
 						// bitmap we return doesn't need to be mutable
-						bitmap = loadBitmap(data, false, 1);
-						if( bitmap != null ) {
-							// rotate the bitmap if necessary for exif tags
-							if( MyDebug.LOG )
-								Log.d(TAG, "rotate bitmap for exif tags?");
-							bitmap = rotateForExif(bitmap, data, exifTempFile);
-						}
+						bitmap = loadBitmapWithRotation(data, false, exifTempFile);
     				}
     				if( bitmap != null ) {
 	        			int width = bitmap.getWidth();
@@ -1848,10 +1871,10 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", request.current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", request.current_date);
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -1870,7 +1893,19 @@ public class ImageSaver extends Thread {
 		            if( bitmap != null ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "compress bitmap, quality " + request.image_quality);
-	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, request.image_quality, outputStream);
+	    	            Bitmap.CompressFormat compress_format;
+	    	            switch( request.image_format ) {
+							case WEBP:
+								compress_format = Bitmap.CompressFormat.WEBP;
+								break;
+							case PNG:
+								compress_format = Bitmap.CompressFormat.PNG;
+								break;
+							default:
+								compress_format = Bitmap.CompressFormat.JPEG;
+								break;
+						}
+						bitmap.compress(compress_format, request.image_quality, outputStream);
 		            }
 		            else {
 		            	outputStream.write(data);
@@ -1888,9 +1923,11 @@ public class ImageSaver extends Thread {
 	    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
 	    			success = true;
 	    		}
-	            if( picFile != null ) {
+
+	            if( picFile != null && request.image_format == Request.ImageFormat.STD ) {
+	    			// handle transferring/setting Exif tags (JPEG format only)
 	            	if( bitmap != null ) {
-	            		// need to update EXIF data!
+	            		// need to update EXIF data! (only supported for JPEG image formats)
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "set Exif tags from data");
@@ -1917,13 +1954,14 @@ public class ImageSaver extends Thread {
 							Log.d(TAG, "Save single image performance: time after updateExif: " + (System.currentTimeMillis() - time_s));
 						}
 					}
-
-    	            if( saveUri == null ) {
-    	            	// broadcast for SAF is done later, when we've actually written out the file
-    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail);
-    	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
-    	            }
 	            }
+
+				if( picFile != null && saveUri == null ) {
+					// broadcast for SAF is done later, when we've actually written out the file
+					storageUtils.broadcastFile(picFile, true, false, update_thumbnail);
+					main_activity.test_last_saved_image = picFile.getAbsolutePath();
+				}
+
 	            if( request.image_capture_intent ) {
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "finish activity due to being called from intent");
@@ -2660,6 +2698,24 @@ public class ImageSaver extends Thread {
 		}
 		return bitmap;
     }
+
+	/** Loads the bitmap from the supplied jpeg data, rotating if necessary according to the
+	 *  supplied EXIF orientation tag.
+	 * @param data The jpeg data.
+	 * @param mutable Whether to create a mutable bitmap.
+	 * @param exifTempFile Temporary file that can be used to read exif tags (for orientation).
+     * @return A bitmap representing the correctly rotated jpeg.
+	 */
+	private Bitmap loadBitmapWithRotation(byte [] data, boolean mutable, File exifTempFile) {
+		Bitmap bitmap = loadBitmap(data, mutable, 1);
+		if( bitmap != null ) {
+			// rotate the bitmap if necessary for exif tags
+			if( MyDebug.LOG )
+				Log.d(TAG, "rotate bitmap for exif tags?");
+			bitmap = rotateForExif(bitmap, data, exifTempFile);
+		}
+		return bitmap;
+	}
 
 	/** Makes various modifications to the saved image file, according to the preferences in request.
 	 *  This method is used when saving directly from the JPEG data rather than a bitmap.

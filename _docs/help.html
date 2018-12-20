@@ -689,10 +689,21 @@ yourself afterwards - but this will correct the preview so that you can still se
 <a href="#auto_stabilise">auto-level</a> is enabled, images will in general come out as a slightly lower resolution
 (due to the rotation and cropping that's required).</p>
 
-<p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
-more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum compression.</p>
+<p><b>Image quality</b> - The image quality of saved JPEG or WebP images. Higher means better quality, but the image files will take up
+more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum
+compression. Also note this option has no effect if "Image format" is set to PNG.</p>
 
-<p><b>RAW</b> - Only available if Camera2 API is used. If set to "JPEG and DNG (RAW)", then photos
+<p><b>Image format</b> - The image file format for saving photos:</p>
+<ul>
+	<li>JPEG - This is the fastest option. Also note that only JPEG supports saving various photo
+	metadata (Exif), including camera details, location, and artist/copyright tags.</li>
+	<li>WebP - This is an alternative (lossy) file format to JPEG. It offers smaller file sizes,
+	but saving takes longer, and some applications may not support WebP images.</li>
+	<li>PNG - This is a lossless format, but note that file sizes will be large, and saving will
+	take significantly longer.</li>
+</ul>
+
+<p><b>RAW</b> - Only available if Camera2 API is used. If set to "Stadnard and DNG (RAW)", then photos
 will also be saved in RAW (DNG) format. If set to "DNG (RAW) only" (requires Android 7), then photos
 will only be saved in DNG format. DNG stands for
 <a href="https://en.wikipedia.org/wiki/Digital_Negative">"digital negative"</a>, and contains the full
@@ -1212,7 +1223,7 @@ enabling Camera2 on such devices.</p>
 
 <p><b>Does Open Camera support HDR+, or use the Pixel 2's Visual Core?</b> If you have a Google Pixel (2), then Open Camera
 should be using HDR+ when the following settings are set: Photo Mode Standard, flash off (or auto if the flash doesn't fire),
-white balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW (JPEG only). HDR+ should be
+white balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW. HDR+ should be
 supported in both old and Camera2 API. See
 <a href="https://sourceforge.net/p/opencamera/discussion/general/thread/61950751/">this thread</a> for more discussion.</p>
 

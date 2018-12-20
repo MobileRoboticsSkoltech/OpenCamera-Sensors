@@ -829,4 +829,14 @@
         <item>preference_video_output_format_3gpp</item>
         <item>preference_video_output_format_webm</item>
     </string-array>
+    <string-array name="preference_image_format_entries">
+        <item>@string/preference_image_format_jpeg</item>
+        <item>@string/preference_image_format_webp</item>
+        <item>@string/preference_image_format_png</item>
+    </string-array>
+    <string-array name="preference_image_format_values">
+        <item>preference_image_format_jpeg</item>
+        <item>preference_image_format_webp</item>
+        <item>preference_image_format_png</item>
+    </string-array>
 </resources>

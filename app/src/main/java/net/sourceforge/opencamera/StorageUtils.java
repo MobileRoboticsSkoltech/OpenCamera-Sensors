@@ -669,6 +669,12 @@ public class StorageUtils {
 					mimeType = "image/dng";
 					//mimeType = "image/x-adobe-dng";
 				}
+				else if( extension.equals("webp") ) {
+					mimeType = "image/webp";
+				}
+				else if( extension.equals("png") ) {
+					mimeType = "image/png";
+				}
 				else {
 					mimeType = "image/jpeg";
 				}
@@ -737,8 +743,11 @@ public class StorageUtils {
 		final int column_data_c = 2; // full path and filename, including extension
 		final int column_orientation_c = 3; // for images only
 		String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.ORIENTATION};
-		// for images, we need to search for JPEG and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
-		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " + ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
+		// for images, we need to search for JPEG/etc and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
+		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
+				ImageColumns.MIME_TYPE + "='image/webp' OR " +
+				ImageColumns.MIME_TYPE + "='image/png' OR " +
+				ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
 		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
 		Cursor cursor = null;
 		try {
@@ -776,7 +785,7 @@ public class StorageUtils {
 				}
 				while( cursor.moveToNext() );
 				if( found ) {
-					// make sure we prefer JPEG if there's a JPEG version of this image
+					// make sure we prefer JPEG/etc (non RAW) if there's a JPEG/etc version of this image
 					// this is because we want to support RAW only and JPEG+RAW modes
 					String path = cursor.getString(column_data_c);
 					if( MyDebug.LOG )
@@ -784,9 +793,9 @@ public class StorageUtils {
 					// path may be null on Android 4.4, see above!
 					if( path != null && path.toLowerCase(Locale.US).endsWith(".dng") ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "try to find a JPEG version of the DNG");
+							Log.d(TAG, "try to find a non-RAW version of the DNG");
 						int dng_pos = cursor.getPosition();
-						boolean found_jpeg = false;
+						boolean found_non_raw = false;
 						String path_without_ext = path.toLowerCase(Locale.US);
 						if( path_without_ext.indexOf(".") > 0 )
 							path_without_ext = path_without_ext.substring(0, path_without_ext.lastIndexOf("."));
@@ -805,17 +814,29 @@ public class StorageUtils {
 								Log.d(TAG, "next_path_without_ext: " + next_path_without_ext);
 							if( !path_without_ext.equals(next_path_without_ext) )
 								break;
-							// so we've found another file with matching filename - is it a JPEG?
+							// so we've found another file with matching filename - is it a JPEG/etc?
 							if( next_path.toLowerCase(Locale.US).endsWith(".jpg") ) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "found equivalent jpeg");
-								found_jpeg = true;
+								found_non_raw = true;
+								break;
+							}
+							else if( next_path.toLowerCase(Locale.US).endsWith(".webp") ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "found equivalent webp");
+								found_non_raw = true;
+								break;
+							}
+							else if( next_path.toLowerCase(Locale.US).endsWith(".png") ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "found equivalent png");
+								found_non_raw = true;
 								break;
 							}
 						}
-						if( !found_jpeg ) {
+						if( !found_non_raw ) {
 							if( MyDebug.LOG )
-								Log.d(TAG, "can't find equivalent jpeg");
+								Log.d(TAG, "can't find equivalent jpeg/etc");
 							cursor.moveToPosition(dng_pos);
 						}
 					}

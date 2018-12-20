@@ -55,6 +55,8 @@ public class PreferenceKeys {
     	return "video_quality_" + cameraId + (high_speed ? "_highspeed" : "");
     }
     
+	public static final String ImageFormatPreferenceKey = "preference_image_format";
+
 	public static final String IsVideoPreferenceKey = "is_video";
 
 	public static final String ExposurePreferenceKey = "preference_exposure";

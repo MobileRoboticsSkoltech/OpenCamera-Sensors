@@ -452,6 +452,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			return 100;
 		else if( photo_mode == PhotoMode.NoiseReduction )
 			return 100;
+
+		if( getImageFormatPref() != ImageSaver.Request.ImageFormat.STD )
+			return 100;
+
 		return getSaveImageQualityPref();
     }
     
@@ -1231,6 +1235,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		return( photo_mode == PhotoMode.DRO );
 	}
+
+	private ImageSaver.Request.ImageFormat getImageFormatPref() {
+		switch( sharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg") ) {
+			case "preference_image_format_webp":
+				return ImageSaver.Request.ImageFormat.WEBP;
+			case "preference_image_format_png":
+				return ImageSaver.Request.ImageFormat.PNG;
+			default:
+				return ImageSaver.Request.ImageFormat.STD;
+		}
+    }
 
 	private static boolean photoModeSupportsRaw(PhotoMode photo_mode) {
     	// RAW only supported for Std or DRO modes
@@ -2263,6 +2278,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
 
         boolean using_camera2 = main_activity.getPreview().usingCamera2API();
+		ImageSaver.Request.ImageFormat image_format = getImageFormatPref();
 		int image_quality = getSaveImageQualityPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "image_quality: " + image_quality);
@@ -2354,7 +2370,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 				imageSaver.startImageAverage(true,
 					save_base,
 					image_capture_intent, image_capture_intent_uri,
-					using_camera2, image_quality,
+					using_camera2,
+					image_format, image_quality,
 					do_auto_stabilise, level_angle,
 					is_front_facing,
 					mirror,
@@ -2382,7 +2399,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     force_suffix ? (n_capture_images-1) : 0,
 					save_expo, images,
 					image_capture_intent, image_capture_intent_uri,
-					using_camera2, image_quality,
+					using_camera2,
+					image_format, image_quality,
 					do_auto_stabilise, level_angle,
 					is_front_facing,
 					mirror,
