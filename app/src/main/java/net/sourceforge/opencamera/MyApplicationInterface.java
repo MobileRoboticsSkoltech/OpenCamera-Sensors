@@ -2390,7 +2390,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		else {
 		    boolean is_hdr = photo_mode == PhotoMode.DRO || photo_mode == PhotoMode.HDR;
             // focus bracketing and fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
-		    boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst || main_activity.getPreview().getCameraController().isCapturingBurst();
+		    boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst ||
+					(
+						main_activity.getPreview().getCameraController() != null &&
+						main_activity.getPreview().getCameraController().isCapturingBurst()
+					);
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
 					force_suffix,
 					// N.B., n_capture_images will be 1 for first image, not 0, so subtract 1 so we start off from _0.
