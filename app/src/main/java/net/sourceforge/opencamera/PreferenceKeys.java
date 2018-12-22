@@ -73,7 +73,7 @@ public class PreferenceKeys {
 
 	public static final String EdgeModePreferenceKey = "preference_edge_mode";
 
-	public static final String NoiseReductionModePreferenceKey = "preference_noise_reduction_mode";
+	public static final String CameraNoiseReductionModePreferenceKey = "preference_noise_reduction_mode"; // n.b., this is for the Camera driver noise reduction mode, not Open Camera's NR photo mode
 
 	public static final String ISOPreferenceKey = "preference_iso";
 

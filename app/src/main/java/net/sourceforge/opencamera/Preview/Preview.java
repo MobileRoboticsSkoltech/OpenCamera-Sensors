@@ -1863,7 +1863,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	private void setupBurstMode() {
+	public void setupBurstMode() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupBurstMode()");
 		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
@@ -1880,8 +1880,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
 			if( applicationInterface.getBurstForNoiseReduction() ) {
 				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
+					ApplicationInterface.NRModePref nr_mode = applicationInterface.getNRModePref();
 					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
-					camera_controller.setBurstForNoiseReduction(true);
+					camera_controller.setBurstForNoiseReduction(true, nr_mode==ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT);
 				}
 				else {
 					camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NONE);
@@ -1889,7 +1890,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			else {
 				camera_controller.setBurstType(CameraController.BurstType.BURSTTYPE_NORMAL);
-				camera_controller.setBurstForNoiseReduction(false);
+				camera_controller.setBurstForNoiseReduction(false, false);
 				camera_controller.setBurstNImages(applicationInterface.getBurstNImages());
 			}
 		}
@@ -2278,7 +2279,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up noise_reduction_mode");
-			String value = applicationInterface.getNoiseReductionModePref();
+			String value = applicationInterface.getCameraNoiseReductionModePref();
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved noise_reduction_mode: " + value);
 

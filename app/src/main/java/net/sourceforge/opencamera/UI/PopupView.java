@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -23,10 +22,8 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +61,7 @@ public class PopupView extends LinearLayout {
 	private int total_width_dp;
 
 	private int picture_size_index = -1;
+	private int nr_mode_index = -1;
 	private int burst_n_images_index = -1;
 	private int video_size_index = -1;
 	private int video_capture_rate_index = -1;
@@ -248,6 +246,61 @@ public class PopupView extends LinearLayout {
     		}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 7: " + (System.nanoTime() - debug_time));
+
+			if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "add noise reduction options");
+
+				final String [] nr_mode_values = getResources().getStringArray(R.array.preference_nr_mode_values);
+				String [] nr_mode_entries = getResources().getStringArray(R.array.preference_nr_mode_entries);
+
+				if( nr_mode_values.length != nr_mode_entries.length ) {
+					Log.e(TAG, "preference_nr_mode_values and preference_nr_mode_entries are different lengths");
+					throw new RuntimeException();
+				}
+
+				//String nr_mode_value = sharedPreferences.getString(PreferenceKeys.NRModePreferenceKey, "preference_nr_mode_normal");
+				String nr_mode_value = main_activity.getApplicationInterface().getNRMode();
+				nr_mode_index = Arrays.asList(nr_mode_values).indexOf(nr_mode_value);
+				if( nr_mode_index == -1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "can't find nr_mode_value " + nr_mode_value + " in nr_mode_values!");
+					nr_mode_index = 0;
+				}
+				addArrayOptionsToPopup(Arrays.asList(nr_mode_entries), getResources().getString(R.string.preference_nr_mode), true, true, nr_mode_index, false, "NR_MODE", new ArrayOptionsPopupListener() {
+					private void update() {
+						if( nr_mode_index == -1 )
+							return;
+						String new_nr_mode_value = nr_mode_values[nr_mode_index];
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						//editor.putString(PreferenceKeys.NRModePreferenceKey, new_nr_mode_value);
+						main_activity.getApplicationInterface().setNRMode(new_nr_mode_value);
+						editor.apply();
+						if( preview.getCameraController() != null ) {
+							preview.setupBurstMode();
+						}
+					}
+					@Override
+					public int onClickPrev() {
+						if( nr_mode_index != -1 && nr_mode_index > 0 ) {
+							nr_mode_index--;
+							update();
+							return nr_mode_index;
+						}
+						return -1;
+					}
+					@Override
+					public int onClickNext() {
+						if( nr_mode_index != -1 && nr_mode_index < nr_mode_values.length-1 ) {
+							nr_mode_index++;
+							update();
+							return nr_mode_index;
+						}
+						return -1;
+					}
+				});
+			}
 
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);

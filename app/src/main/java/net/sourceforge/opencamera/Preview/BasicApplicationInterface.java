@@ -76,7 +76,7 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
-	public String getNoiseReductionModePref() {
+	public String getCameraNoiseReductionModePref() {
 		return CameraController.NOISE_REDUCTION_MODE_DEFAULT;
 	}
 
@@ -336,6 +336,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	@Override
 	public boolean getBurstForNoiseReduction() {
 		return false;
+	}
+
+    @Override
+    public NRModePref getNRModePref() {
+		return NRModePref.NRMODE_NORMAL;
 	}
 
 	@Override

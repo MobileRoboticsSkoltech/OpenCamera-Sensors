@@ -53,7 +53,7 @@ public interface ApplicationInterface {
 	int getWhiteBalanceTemperaturePref();
 	String getAntiBandingPref(); // "auto" for default (strings correspond to Android's antibanding constants in android.hardware.Camera.Parameters)
 	String getEdgeModePref(); // CameraController.EDGE_MODE_DEFAULT for device default, or "off", "fast", "high_quality"
-	String getNoiseReductionModePref(); // CameraController.NOISE_REDUCTION_MODE_DEFAULT for device default, or "off", "minimal", "fast", "high_quality"
+	String getCameraNoiseReductionModePref(); // CameraController.NOISE_REDUCTION_MODE_DEFAULT for device default, or "off", "minimal", "fast", "high_quality"
 	String getISOPref(); // "auto" for auto-ISO, otherwise a numerical value; see documentation for Preview.supportsISORange().
 	int getExposureCompensationPref(); // 0 for default
 	Pair<Integer, Integer> getCameraResolutionPref(); // return null to let Preview choose size
@@ -106,6 +106,11 @@ public interface ApplicationInterface {
 	boolean isCameraBurstPref(); // whether to shoot the camera in burst mode (n.b., not the same as the "auto-repeat" mode)
 	int getBurstNImages(); // only relevant if isCameraBurstPref() returns true; see CameraController doc for setBurstNImages().
 	boolean getBurstForNoiseReduction(); // only relevant if isCameraBurstPref() returns true; see CameraController doc for setBurstForNoiseReduction().
+	enum NRModePref {
+		NRMODE_NORMAL,
+		NRMODE_LOW_LIGHT
+	}
+	NRModePref getNRModePref();
 	boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
 	enum RawPref {
 		RAWPREF_JPEG_ONLY, // JPEG only

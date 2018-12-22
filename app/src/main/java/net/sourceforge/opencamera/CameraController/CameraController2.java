@@ -101,6 +101,7 @@ public class CameraController2 extends CameraController {
 	private boolean focus_bracketing_add_infinity = false;
 	// for BURSTTYPE_NORMAL:
 	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for Open Camera's noise reduction (NR) photo mode
+	private boolean noise_reduction_low_light; // if burst_for_noise_reduction==true, whether to optimise for low light scenes
 	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
 	//for BURSTTYPE_CONTINUOUS:
 	private boolean continuous_burst_in_progress; // whether we're currently taking a continuous burst
@@ -3255,10 +3256,13 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
-		if( MyDebug.LOG )
+	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction, boolean noise_reduction_low_light) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "setBurstForNoiseReduction: " + burst_for_noise_reduction);
+			Log.d(TAG, "noise_reduction_low_light: " + noise_reduction_low_light);
+		}
 		this.burst_for_noise_reduction = burst_for_noise_reduction;
+		this.noise_reduction_low_light = noise_reduction_low_light;
 	}
 
 	@Override
@@ -5487,15 +5491,15 @@ public class CameraController2 extends CameraController {
 					if( capture_result_iso >= 1100 ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "optimise for dark scene");
-						n_burst = 8;
+						n_burst = noise_reduction_low_light ? 15 : 8;
 						boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
 						// OnePlus 3T at least has bug where manual ISO can't be set to about 800, so dark images end up too dark -
 						// so no point enabling this code, which is meant to brighten the scene, not make it darker!
 						if( !camera_settings.has_iso && !is_oneplus ) {
-							long exposure_time = 1000000000L/10;
+							long exposure_time = noise_reduction_low_light ? 1000000000L/3 : 1000000000L/10;
 							if( !capture_result_has_exposure_time || capture_result_exposure_time < exposure_time ) {
 								if( MyDebug.LOG )
-									Log.d(TAG, "also set 100ms exposure time");
+									Log.d(TAG, "also set long exposure time");
 								modified_from_camera_settings = true;
 								setManualExposureTime(stillBuilder, exposure_time);
 							}

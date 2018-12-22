@@ -121,8 +121,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
-	// camera properties that aren't saved even in the bundle; these should also be reset in reset()
-	private int zoom_factor = 0; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
+	// camera properties that aren't saved even in the bundle; these should be initialised/reset in reset()
+	private int zoom_factor; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
+	private String nr_mode;
 
 	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
 		long debug_time = 0;
@@ -144,6 +145,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
 
+		this.reset();
         if( savedInstanceState != null ) {
 			// load the things we saved in onSaveInstanceState().
             if( MyDebug.LOG )
@@ -344,8 +346,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
-	public String getNoiseReductionModePref() {
-		return sharedPreferences.getString(PreferenceKeys.NoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT);
+	public String getCameraNoiseReductionModePref() {
+		return sharedPreferences.getString(PreferenceKeys.CameraNoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT);
 	}
 
 	@Override
@@ -1122,6 +1124,27 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	public boolean getBurstForNoiseReduction() {
     	PhotoMode photo_mode = getPhotoMode();
 		return photo_mode == PhotoMode.NoiseReduction;
+	}
+
+    public void setNRMode(String nr_mode) {
+		this.nr_mode = nr_mode;
+	}
+
+    public String getNRMode() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "nr_mode: " + nr_mode);
+		return nr_mode;
+	}
+
+    @Override
+    public NRModePref getNRModePref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "nr_mode: " + nr_mode);
+		switch( nr_mode ) {
+			case "preference_nr_mode_low_light":
+				return NRModePref.NRMODE_LOW_LIGHT;
+		}
+		return NRModePref.NRMODE_NORMAL;
 	}
 
     @Override
@@ -2139,6 +2162,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reset");
 		this.zoom_factor = 0;
+		this.nr_mode = "preference_nr_mode_normal";
 	}
 
     @Override

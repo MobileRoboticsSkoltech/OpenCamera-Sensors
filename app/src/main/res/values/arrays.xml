@@ -839,4 +839,12 @@
         <item>preference_image_format_webp</item>
         <item>preference_image_format_png</item>
     </string-array>
+    <string-array name="preference_nr_mode_entries">
+        <item>@string/preference_nr_mode_normal</item>
+        <item>@string/preference_nr_mode_low_light</item>
+    </string-array>
+    <string-array name="preference_nr_mode_values">
+        <item>preference_nr_mode_normal</item>
+        <item>preference_nr_mode_low_light</item>
+    </string-array>
 </resources>

@@ -158,14 +158,14 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( noise_reduction_mode_values != null && noise_reduction_mode_values.length > 0 ) {
 			String [] noise_reduction_mode_entries = bundle.getStringArray("noise_reduction_modes_entries");
 			if( noise_reduction_mode_entries != null && noise_reduction_mode_entries.length == noise_reduction_mode_values.length ) { // should always be true here, but just in case
-				readFromBundle(noise_reduction_mode_values, noise_reduction_mode_entries, PreferenceKeys.NoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT, "preference_screen_processing_settings");
+				readFromBundle(noise_reduction_mode_values, noise_reduction_mode_entries, PreferenceKeys.CameraNoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT, "preference_screen_processing_settings");
 				has_noise_reduction_mode = true;
 			}
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "has_noise_reduction_mode?: " + has_noise_reduction_mode);
 		if( !has_noise_reduction_mode ) {
-			Preference pref = findPreference(PreferenceKeys.NoiseReductionModePreferenceKey);
+			Preference pref = findPreference(PreferenceKeys.CameraNoiseReductionModePreferenceKey);
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_processing_settings");
         	pg.removePreference(pref);
 		}

@@ -365,7 +365,7 @@ public abstract class CameraController {
 	 *  called with burst_for_noise_reduction, then the number of burst images, and other settings,
 	 *  will be set for noise reduction mode (and setBurstNImages() is ignored).
 	 */
-	public abstract void setBurstForNoiseReduction(boolean burst_for_noise_reduction);
+	public abstract void setBurstForNoiseReduction(boolean burst_for_noise_reduction, boolean noise_reduction_low_light);
 	public abstract boolean isContinuousBurstInProgress();
 	public abstract void stopContinuousBurst();
 	public abstract void stopFocusBracketingBurst();

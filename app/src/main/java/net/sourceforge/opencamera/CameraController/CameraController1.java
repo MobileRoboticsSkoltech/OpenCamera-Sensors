@@ -790,7 +790,7 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
-	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
+	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction, boolean noise_reduction_low_light) {
 		// not supported
 	}
 
