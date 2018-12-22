@@ -7,7 +7,6 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.R;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,7 +52,11 @@ public class MainUI {
 	private boolean force_destroy_popup = false; // if true, then the popup isn't cached for only the next time the popup is closed
 
     private int current_orientation;
-	private boolean ui_placement_right = true;
+    enum UIPlacement {
+    	UIPLACEMENT_RIGHT,
+    	UIPLACEMENT_LEFT
+	};
+	private UIPlacement ui_placement = UIPlacement.UIPLACEMENT_RIGHT;
 	private boolean view_rotate_animation;
 
 	private boolean immersive_mode;
@@ -149,20 +152,29 @@ public class MainUI {
 		layoutUI(false);
 	}
 
+	private UIPlacement computeUIPlacement() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
+		switch( ui_placement_string ) {
+			case "ui_left":
+				return UIPlacement.UIPLACEMENT_LEFT;
+			default:
+				return UIPlacement.UIPLACEMENT_RIGHT;
+		}
+	}
+
     private void layoutUI(boolean popup_container_only) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "layoutUI");
 			debug_time = System.currentTimeMillis();
 		}
-		//main_activity.getPreview().updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-		String ui_placement = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
     	// we cache the preference_ui_placement to save having to check it in the draw() method
-		this.ui_placement_right = ui_placement.equals("ui_right");
+		this.ui_placement = computeUIPlacement();
 		if( MyDebug.LOG )
 			Log.d(TAG, "ui_placement: " + ui_placement);
-		// new code for orientation fixed to landscape	
+		// new code for orientation fixed to landscape
 		// the display orientation should be locked to landscape, but how many degrees is that?
 	    int rotation = main_activity.getWindowManager().getDefaultDisplay().getRotation();
 	    int degrees = 0;
@@ -197,7 +209,7 @@ public class MainUI {
 		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
 		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
 		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
-		if( !ui_placement_right ) {
+		if( ui_placement == UIPlacement.UIPLACEMENT_LEFT ) {
 			//align_top = RelativeLayout.ALIGN_BOTTOM;
 			//align_bottom = RelativeLayout.ALIGN_TOP;
 			above = RelativeLayout.BELOW;
@@ -516,8 +528,8 @@ public class MainUI {
 			}
 			else {
 				view.setPivotX(popup_width);
-				view.setPivotY(ui_placement_right ? 0.0f : popup_height);
-				if( ui_placement_right ) {
+				view.setPivotY(ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : popup_height);
+				if( ui_placement == UIPlacement.UIPLACEMENT_RIGHT ) {
 					if( ui_rotation == 90 )
 						view.setTranslationY( popup_width );
 					else if( ui_rotation == 270 )
@@ -620,8 +632,8 @@ public class MainUI {
 		pauseVideoButton.setContentDescription(main_activity.getResources().getString(content_description));
 	}
 
-    public boolean getUIPlacementRight() {
-    	return this.ui_placement_right;
+    public UIPlacement getUIPlacement() {
+    	return this.ui_placement;
     }
 
     public void onOrientationChanged(int orientation) {
@@ -1241,10 +1253,8 @@ public class MainUI {
 		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 		            }
 
-		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
-		    		boolean ui_placement_right = ui_placement.equals("ui_right");
-		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
+					UIPlacement ui_placement = computeUIPlacement();
+		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : 1.0f);
 		    		animation.setDuration(100);
 		    		popup_container.setAnimation(animation);
 		        }

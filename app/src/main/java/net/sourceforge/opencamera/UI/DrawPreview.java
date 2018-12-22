@@ -1250,7 +1250,7 @@ public class DrawPreview {
 		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
-		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
+		MainUI.UIPlacement ui_placement = main_activity.getMainUI().getUIPlacement();
 		boolean has_level_angle = preview.hasLevelAngle();
 		double level_angle = preview.getLevelAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
@@ -1265,10 +1265,10 @@ public class DrawPreview {
 			int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 			// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
 			int text_base_y = 0;
-			if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
+			if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 0 : 180 ) ) {
 				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
 			}
-			else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+			else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 180 : 0 ) ) {
 				text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
 			}
 			else if( ui_rotation == 90 || ui_rotation == 270 ) {
