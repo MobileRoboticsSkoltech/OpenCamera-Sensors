@@ -6236,7 +6236,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.EdgeModePreferenceKey, "off");
-        editor.putString(PreferenceKeys.NoiseReductionModePreferenceKey, "fast");
+        editor.putString(PreferenceKeys.CameraNoiseReductionModePreferenceKey, "fast");
         editor.apply();
         updateForSettings();
 
@@ -6253,7 +6253,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         editor = settings.edit();
         editor.putString(PreferenceKeys.EdgeModePreferenceKey, "default");
-        editor.putString(PreferenceKeys.NoiseReductionModePreferenceKey, "default");
+        editor.putString(PreferenceKeys.CameraNoiseReductionModePreferenceKey, "default");
         editor.apply();
         updateForSettings();
 
