@@ -1141,7 +1141,7 @@ public class MainActivity extends Activity {
         	e.printStackTrace();
 		}
         freeAudioListener(false);
-        freeSpeechRecognizer();
+        stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		applicationInterface.getGyroSensor().stopRecording();
 		soundPoolManager.releaseSound();
@@ -1252,9 +1252,7 @@ public class MainActivity extends Activity {
 				}
 				if( has_audio_permission ) {
 					preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
-					Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-					intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
-					speechRecognizer.startListening(intent);
+					startSpeechRecognizerIntent();
 					speechRecognizerStarted();
 				}
         	}
@@ -1268,6 +1266,16 @@ public class MainActivity extends Activity {
         	}
         }
     }
+
+    private void startSpeechRecognizerIntent() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startSpeechRecognizerIntent");
+		if( speechRecognizer != null ) {
+			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
+			speechRecognizer.startListening(intent);
+		}
+	}
     
     private void speechRecognizerStarted() {
 		if( MyDebug.LOG )
@@ -3978,7 +3986,7 @@ public class MainActivity extends Activity {
 						if( error != SpeechRecognizer.ERROR_NO_MATCH ) {
 							// we sometime receive ERROR_NO_MATCH straight after listening starts
 							// it seems that the end is signalled either by ERROR_SPEECH_TIMEOUT or onEndOfSpeech()
-				        	speechRecognizerStopped();
+							speechRecognizerStopped();
 						}
 					}
 
@@ -4040,6 +4048,7 @@ public class MainActivity extends Activity {
 					public void onRmsChanged(float rmsdB) {
 					}
 	        	});
+
 				if( !mainUI.inImmersiveMode() ) {
 		    	    View speechRecognizerButton = findViewById(R.id.audio_control);
 		    	    speechRecognizerButton.setVisibility(View.VISIBLE);
@@ -4048,28 +4057,34 @@ public class MainActivity extends Activity {
 		}
 		else if( speechRecognizer != null && !want_speech_recognizer ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "free existing SpeechRecognizer");
-			freeSpeechRecognizer();
+				Log.d(TAG, "stop existing SpeechRecognizer");
+			stopSpeechRecognizer();
 		}
 	}
 	
 	private void freeSpeechRecognizer() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeSpeechRecognizer");
+		speechRecognizer.cancel();
+		try {
+			speechRecognizer.destroy();
+		}
+		catch(IllegalArgumentException e) {
+			// reported from Google Play - unclear why this happens, but might as well catch
+			Log.e(TAG, "exception destroying speechRecognizer");
+			e.printStackTrace();
+		}
+		speechRecognizer = null;
+	}
+
+	private void stopSpeechRecognizer() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "stopSpeechRecognizer");
 		if( speechRecognizer != null ) {
         	speechRecognizerStopped();
     	    View speechRecognizerButton = findViewById(R.id.audio_control);
     	    speechRecognizerButton.setVisibility(View.GONE);
-			speechRecognizer.cancel();
-			try {
-				speechRecognizer.destroy();
-			}
-			catch(IllegalArgumentException e) {
-				// reported from Google Play - unclear why this happens, but might as well catch
-				Log.e(TAG, "exception destroying speechRecognizer");
-				e.printStackTrace();
-			}
-			speechRecognizer = null;
+    	    freeSpeechRecognizer();
 		}
 	}
 	
