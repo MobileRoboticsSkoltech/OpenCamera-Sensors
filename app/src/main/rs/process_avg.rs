@@ -2,6 +2,7 @@
 #pragma rs java_package_name(net.sourceforge.opencamera)
 #pragma rs_fp_relaxed
 
+//rs_allocation bitmap_avg;
 rs_allocation bitmap_new;
 
 rs_allocation bitmap_align_new;
@@ -59,6 +60,33 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
         // diff based on rgb
         float3 diff = pixel_avg_f - pixel_new_f;
         float L = dot(diff, diff);
+
+        // diff based on neighbourhood
+        /*float L = 0.0f;
+        const int radius = 0;
+        if( ix-radius >= 0 && ix+radius < rsAllocationGetDimX(bitmap_new) &&
+            iy-radius >= 0 && iy+radius < rsAllocationGetDimY(bitmap_new) &&
+            ix+offset_x_new-radius >= 0 && ix+offset_x_new+radius < rsAllocationGetDimX(bitmap_new) &&
+            iy+offset_y_new-radius >= 0 && iy+offset_y_new+radius < rsAllocationGetDimY(bitmap_new) ) {
+            for(int cy=iy-radius;cy<=iy+radius;cy++) {
+                for(int cx=ix-radius;cx<=ix+radius;cx++) {
+                    //uchar4 this_pixel_avg = rsGetElementAt_uchar4(bitmap_avg, cx, cy);
+                    float3 this_pixel_avg = rsGetElementAt_float3(bitmap_avg, cx, cy);
+                    uchar4 this_pixel_new = rsGetElementAt_uchar4(bitmap_new, cx+offset_x_new, cy+offset_y_new);
+                    float3 this_diff = this_pixel_avg - convert_float3(this_pixel_new.rgb);
+                    //float3 this_diff = pixel_avg_f - convert_float3(this_pixel_new.rgb);
+                    //float3 this_diff = pixel_avg_f - pixel_new_f;
+                    float this_L = dot(this_diff, this_diff);
+                    L += this_L;
+                }
+            }
+            const int size = 2*radius+1;
+            L /= (size*size);
+        }
+        else {
+            float3 diff = pixel_avg_f - pixel_new_f;
+            L = dot(diff, diff);
+        }*/
 
         // diff based on compute_diff (separate pass on scaled down alignment bitmaps)
         //int align_x = x/scale_align_size;

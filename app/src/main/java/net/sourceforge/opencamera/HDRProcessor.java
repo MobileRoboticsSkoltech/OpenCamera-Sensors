@@ -1403,6 +1403,7 @@ public class HDRProcessor {
 		}
 
 		// set allocations
+		//processAvgScript.set_bitmap_avg(allocation_avg);
 		processAvgScript.set_bitmap_new(allocation_new);
 
 		// set offsets
