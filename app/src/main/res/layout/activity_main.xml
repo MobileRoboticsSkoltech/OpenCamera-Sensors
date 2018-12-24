@@ -143,6 +143,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/gallery"
         android:src="@drawable/baseline_photo_library_white_48"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedGallery"
         />
 
@@ -154,6 +156,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/action_settings"
         android:src="@drawable/settings"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedSettings"
         />
 
@@ -165,6 +169,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/action_popup"
         android:src="@drawable/popup"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedPopupSettings"
         />
     
@@ -176,6 +182,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure_lock"
         android:src="@drawable/exposure_unlocked"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedExposureLock"
         />
 
@@ -187,6 +195,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure"
         android:src="@drawable/ic_exposure_white_48dp"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedExposure"
         />
 
@@ -198,6 +208,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/switch_to_video"
         android:src="@drawable/switch_video"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedSwitchVideo"
         />-->
 
@@ -209,6 +221,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/switch_to_front_camera"
         android:src="@drawable/switch_camera"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedSwitchCamera"
         />-->
 
@@ -220,6 +234,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/audio_control_start"
         android:src="@drawable/ic_mic_white_48dp"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedAudioControl"
         android:visibility="gone"
         />
@@ -233,6 +249,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/trash"
         android:src="@drawable/trash"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedTrash"
         android:visibility="gone"
         />
@@ -245,6 +263,8 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/share"
         android:src="@drawable/share"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
         android:onClick="clickedShare"
         android:visibility="gone"
         />

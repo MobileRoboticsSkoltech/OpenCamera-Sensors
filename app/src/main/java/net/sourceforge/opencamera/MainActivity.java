@@ -1810,7 +1810,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "updateForSettings: time after check need_reopen: " + (System.currentTimeMillis() - debug_time));
 		}
 
-		mainUI.layoutUI(); // needed in case we've changed left/right handed UI
+		mainUI.layoutUI(); // needed in case we've changed UI placement; or in "top" mode, if we've enabled/disabled on-screen UI icons
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: time after layoutUI: " + (System.currentTimeMillis() - debug_time));
 		}

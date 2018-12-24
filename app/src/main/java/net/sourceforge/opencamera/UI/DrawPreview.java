@@ -87,7 +87,7 @@ public class DrawPreview {
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF draw_rect = new RectF();
-	//private final int [] gui_location = new int[2];
+	private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float scale;
 	private final float stroke_width; // stroke_width used for various UI elements
@@ -840,7 +840,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_y, long time_ms) {
+	private void onDrawInfoLines(Canvas canvas, final int top_x, final int top_y, long time_ms) {
 		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -848,7 +848,7 @@ public class DrawPreview {
 		// set up text etc for the multiple lines of "info" (time, free mem, etc)
 		p.setTextSize(16 * scale + 0.5f); // convert dps to pixels
 		p.setTextAlign(Paint.Align.LEFT);
-		int location_x = (int) ((show_battery_pref ? 15 : 5) * scale + 0.5f); // convert dps to pixels
+		int location_x = top_x;
 		int location_y = top_y;
 		final int gap_y = (int) (0 * scale + 0.5f); // convert dps to pixels
 		if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -1265,7 +1265,10 @@ public class DrawPreview {
 			int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 			// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
 			int text_base_y = 0;
-			if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 0 : 180 ) ) {
+			if( ui_placement == MainUI.UIPlacement.UIPLACEMENT_TOP && ( ui_rotation == 0 || ui_rotation == 180 ) ) {
+				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
+            }
+			else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 0 : 180 ) ) {
 				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
 			}
 			else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 180 : 0 ) ) {
@@ -1544,9 +1547,25 @@ public class DrawPreview {
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 
-		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+		int top_x = (int) (5 * scale + 0.5f); // convert dps to pixels
+		int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+		int top_margin = main_activity.getMainUI().getTopMargin();
+		if( top_margin > 0 ) {
+			int preview_left = gui_location[0];
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "preview_left: " + preview_left);*/
+			int shift = top_margin - preview_left;
+			if( shift > 0 ) {
+				if( ui_rotation == 90 || ui_rotation == 270 ) {
+					top_y += shift;
+				}
+				else {
+					top_x += shift;
+				}
+			}
+		}
 
-		int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
+		int battery_x = top_x;
 		int battery_y = top_y + (int) (5 * scale + 0.5f);
 		int battery_width = (int) (5 * scale + 0.5f); // convert dps to pixels
 		int battery_height = 4*battery_width;
@@ -1591,9 +1610,10 @@ public class DrawPreview {
 					p.setAlpha(255);
 				}
 			}
+			top_x += (int) (10 * scale + 0.5f); // convert dps to pixels
 		}
 
-		onDrawInfoLines(canvas, top_y, time_ms);
+		onDrawInfoLines(canvas, top_x, top_y, time_ms);
 
 		canvas.restore();
 	}
@@ -1988,6 +2008,12 @@ public class DrawPreview {
 				return;
 			}
 		}
+
+		preview.getView().getLocationOnScreen(gui_location);
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "gui_location[0]: " + gui_location[0]);
+			Log.d(TAG, "gui_location[1]: " + gui_location[1]);
+		}*/
 
 		if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
 			p.setColor(Color.WHITE);

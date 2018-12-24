@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -54,9 +55,11 @@ public class MainUI {
     private int current_orientation;
     enum UIPlacement {
     	UIPLACEMENT_RIGHT,
-    	UIPLACEMENT_LEFT
+    	UIPLACEMENT_LEFT,
+    	UIPLACEMENT_TOP
 	};
 	private UIPlacement ui_placement = UIPlacement.UIPLACEMENT_RIGHT;
+	private int top_margin = 0;
 	private boolean view_rotate_animation;
 
 	private boolean immersive_mode;
@@ -91,8 +94,9 @@ public class MainUI {
 	private void setIcon(int id) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setIcon: " + id);
-	    ImageButton button = main_activity.findViewById(id);
-	    button.setBackgroundColor(Color.argb(63, 63, 63, 63)); // n.b., rgb color seems to be ignored for Android 6 onwards, but still relevant for older versions
+	    //ImageButton button = main_activity.findViewById(id);
+	    //button.setBackgroundColor(Color.argb(63, 63, 63, 63)); // n.b., rgb color seems to be ignored for Android 6 onwards, but still relevant for older versions
+		// no longer used - we use backgroundTint set in xml (so that we can set the rgb colour for the background)
 	}
 	
 	private void setSeekbarColors() {
@@ -153,11 +157,15 @@ public class MainUI {
 	}
 
 	private UIPlacement computeUIPlacement() {
+		/*if( true )
+			return UIPlacement.UIPLACEMENT_TOP; // test*/
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
 		switch( ui_placement_string ) {
 			case "ui_left":
 				return UIPlacement.UIPLACEMENT_LEFT;
+			case "ui_top":
+				return UIPlacement.UIPLACEMENT_TOP;
 			default:
 				return UIPlacement.UIPLACEMENT_RIGHT;
 		}
@@ -169,6 +177,10 @@ public class MainUI {
 			Log.d(TAG, "layoutUI");
 			debug_time = System.currentTimeMillis();
 		}
+
+		// reset:
+		top_margin = 0;
+
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     	// we cache the preference_ui_placement to save having to check it in the draw() method
 		this.ui_placement = computeUIPlacement();
@@ -203,81 +215,128 @@ public class MainUI {
 		//int align_bottom = RelativeLayout.ALIGN_BOTTOM;
 		int left_of = RelativeLayout.LEFT_OF;
 		int right_of = RelativeLayout.RIGHT_OF;
+		int iconpanel_left_of = left_of;
+		int iconpanel_right_of = right_of;
 		int above = RelativeLayout.ABOVE;
 		int below = RelativeLayout.BELOW;
 		int align_parent_left = RelativeLayout.ALIGN_PARENT_LEFT;
 		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
+		int iconpanel_align_parent_left = align_parent_left;
+		int iconpanel_align_parent_right = align_parent_right;
 		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
 		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
+		int iconpanel_align_parent_top = align_parent_top;
+		int iconpanel_align_parent_bottom = align_parent_bottom;
 		if( ui_placement == UIPlacement.UIPLACEMENT_LEFT ) {
-			//align_top = RelativeLayout.ALIGN_BOTTOM;
-			//align_bottom = RelativeLayout.ALIGN_TOP;
 			above = RelativeLayout.BELOW;
 			below = RelativeLayout.ABOVE;
 			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
 			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
+			iconpanel_align_parent_top = align_parent_top;
+			iconpanel_align_parent_bottom = align_parent_bottom;
 		}
+		else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+			iconpanel_left_of = RelativeLayout.BELOW;
+			iconpanel_right_of = RelativeLayout.ABOVE;
+			iconpanel_align_parent_left = RelativeLayout.ALIGN_PARENT_BOTTOM;
+			iconpanel_align_parent_right = RelativeLayout.ALIGN_PARENT_TOP;
+			iconpanel_align_parent_top = RelativeLayout.ALIGN_PARENT_LEFT;
+			iconpanel_align_parent_bottom = RelativeLayout.ALIGN_PARENT_RIGHT;
+		}
+
+		Point display_size = new Point();
+		Display display = main_activity.getWindowManager().getDefaultDisplay();
+		display.getSize(display_size);
+		int display_height = Math.min(display_size.x, display_size.y);
 
 		if( !popup_container_only )
 		{
+			List<View> buttons = new ArrayList<>();
+
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_left, 0);
+			layoutParams.addRule(iconpanel_align_parent_right, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, 0);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
-			view = main_activity.findViewById(R.id.gallery);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.gui_anchor);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
+			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+				// not part of the icon panel in TOP mode
+				view = main_activity.findViewById(R.id.gallery);
+				layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+				layoutParams.addRule(align_parent_left, 0);
+				layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+				layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+				layoutParams.addRule(align_parent_bottom, 0);
+				layoutParams.addRule(left_of, 0);
+				layoutParams.addRule(right_of, 0);
+				view.setLayoutParams(layoutParams);
+				setViewRotation(view, ui_rotation);
+			}
+			else {
+				view = main_activity.findViewById(R.id.gallery);
+				buttons.add(view);
+				layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+				layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+				layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+				layoutParams.addRule(iconpanel_left_of, R.id.gui_anchor);
+				layoutParams.addRule(iconpanel_right_of, 0);
+				view.setLayoutParams(layoutParams);
+				setViewRotation(view, ui_rotation);
+			}
+
 			view = main_activity.findViewById(R.id.settings);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.gallery);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+				layoutParams.addRule(iconpanel_left_of, R.id.gui_anchor);
+			}
+			else {
+				layoutParams.addRule(iconpanel_left_of, R.id.gallery);
+			}
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.popup);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.settings);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.settings);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.exposure_lock);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.popup);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.popup);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.exposure);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure_lock);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.exposure_lock);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
 			/*view = main_activity.findViewById(R.id.switch_video);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
@@ -287,6 +346,7 @@ public class MainUI {
 			setViewRotation(view, ui_rotation);*/
 	
 			/*view = main_activity.findViewById(R.id.switch_camera);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, 0);
@@ -299,34 +359,89 @@ public class MainUI {
 			setViewRotation(view, ui_rotation);*/
 
 			view = main_activity.findViewById(R.id.audio_control);
+			buttons.add(view);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
+			//layoutParams.addRule(iconpanel_align_parent_left, 0);
+			//layoutParams.addRule(iconpanel_align_parent_right, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
 			//layoutParams.addRule(left_of, R.id.switch_camera);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.exposure);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 
+			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+				int count = 0;
+				for(View this_view : buttons) {
+					if( this_view.getVisibility() == View.VISIBLE ) {
+						count++;
+					}
+				}
+				//count = 10; // test
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "count: " + count);
+					Log.d(TAG, "display_height: " + display_height);
+				}
+				if( count > 0 ) {
+					/*int button_size = display_height / count;
+					if( MyDebug.LOG )
+						Log.d(TAG, "button_size: " + button_size);
+					for(View this_view : buttons) {
+						if( this_view.getVisibility() == View.VISIBLE ) {
+							layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
+							layoutParams.width = button_size;
+							layoutParams.height = button_size;
+							this_view.setLayoutParams(layoutParams);
+						}
+					}*/
+					int button_size = main_activity.getResources().getDimensionPixelSize(R.dimen.onscreen_button_size);
+					int total_button_size = count*button_size;
+					int margin = 0;
+					if( total_button_size > display_height ) {
+						button_size = display_height / count;
+					}
+					else {
+						margin = (display_height - total_button_size) / count;
+					}
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "button_size: " + button_size);
+						Log.d(TAG, "total_button_size: " + total_button_size);
+						Log.d(TAG, "margin: " + margin);
+					}
+					for(View this_view : buttons) {
+						if( this_view.getVisibility() == View.VISIBLE ) {
+							//this_view.setPadding(0, margin/2, 0, margin/2);
+							layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
+							layoutParams.setMargins(0, margin/2, 0, margin/2);
+							layoutParams.width = button_size;
+							layoutParams.height = button_size;
+							this_view.setLayoutParams(layoutParams);
+						}
+					}
+					top_margin = button_size;
+				}
+			}
+
 			view = main_activity.findViewById(R.id.trash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.audio_control);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.audio_control);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.share);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.trash);
-			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_left_of, R.id.trash);
+			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
+
+			// end icon panel
 
 			view = main_activity.findViewById(R.id.take_photo);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -481,12 +596,21 @@ public class MainUI {
 		{
 			View view = main_activity.findViewById(R.id.popup_container);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			//layoutParams.addRule(left_of, R.id.popup);
-			layoutParams.addRule(align_right, R.id.popup);
-			layoutParams.addRule(below, R.id.popup);
-			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
-			layoutParams.addRule(above, 0);
-			layoutParams.addRule(align_parent_top, 0);
+			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+				layoutParams.addRule(align_right, 0);
+				layoutParams.addRule(below, 0);
+				layoutParams.addRule(left_of, 0);
+				layoutParams.addRule(right_of, R.id.popup);
+				layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+				layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			}
+			else {
+				layoutParams.addRule(align_right, R.id.popup);
+				layoutParams.addRule(above, 0);
+				layoutParams.addRule(below, R.id.popup);
+				layoutParams.addRule(align_parent_top, 0);
+				layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			}
 			view.setLayoutParams(layoutParams);
 
 			setViewRotation(view, ui_rotation);
@@ -522,9 +646,19 @@ public class MainUI {
 			else {
 				force_destroy_popup = false;
 			}
+
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
 				view.setPivotX(popup_width/2.0f);
 				view.setPivotY(popup_height/2.0f);
+			}
+			else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+				view.setPivotX(0);
+				view.setPivotY(0);
+				if( ui_rotation == 90 )
+					view.setTranslationX(popup_height);
+				else if( ui_rotation == 270 ) {
+					view.setTranslationY(display_height);
+				}
 			}
 			else {
 				view.setPivotX(popup_width);
@@ -781,6 +915,10 @@ public class MainUI {
 			    	closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
 			    }
 				popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
+
+				if( show_gui_photo && show_gui_video ) {
+		    	    layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
+				}
 			}
 		});
     }
@@ -1254,7 +1392,29 @@ public class MainUI {
 		            }
 
 					UIPlacement ui_placement = computeUIPlacement();
-		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : 1.0f);
+		            float pivot_x;
+		            float pivot_y;
+		            switch( ui_placement ) {
+						case UIPLACEMENT_TOP:
+							if( main_activity.getPreview().getUIRotation() == 270 ) {
+								pivot_x = 0.0f;
+								pivot_y = 1.0f;
+							}
+							else {
+								pivot_x = 0.0f;
+								pivot_y = 0.0f;
+							}
+							break;
+						case UIPLACEMENT_LEFT:
+							pivot_x = 1.0f;
+							pivot_y = 1.0f;
+							break;
+						default:
+							pivot_x = 1.0f;
+							pivot_y = 0.0f;
+							break;
+					}
+		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, pivot_x, Animation.RELATIVE_TO_SELF, pivot_y);
 		    		animation.setDuration(100);
 		    		popup_container.setAnimation(animation);
 		        }
@@ -1691,6 +1851,10 @@ public class MainUI {
 			entry = value;
 		}
 		return entry;
+	}
+
+	int getTopMargin() {
+		return this.top_margin;
 	}
 
     // for testing
