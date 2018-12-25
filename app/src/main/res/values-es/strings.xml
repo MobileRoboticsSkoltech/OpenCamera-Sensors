@@ -588,4 +588,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (baja sensibilidad)</string>
 
+    <string name="preference_ui_placement_left">Interfaz de usuario para zurdos</string>
+    <string name="preference_ui_placement_right">Interfaz de usuario para diestros</string>
+
 </resources>

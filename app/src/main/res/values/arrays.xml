@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Left-handed user interface</item>
-        <item>Right-handed user interface</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Off</item>
         <item>Only hide on-screen virtual navigation buttons</item>
@@ -846,5 +838,13 @@
     <string-array name="preference_nr_mode_values">
         <item>preference_nr_mode_normal</item>
         <item>preference_nr_mode_low_light</item>
+    </string-array>
+    <string-array name="preference_ui_placement_entries">
+        <item>@string/preference_ui_placement_left</item>
+        <item>@string/preference_ui_placement_right</item>
+    </string-array>
+    <string-array name="preference_ui_placement_values">
+        <item>ui_left</item>
+        <item>ui_right</item>
     </string-array>
 </resources>

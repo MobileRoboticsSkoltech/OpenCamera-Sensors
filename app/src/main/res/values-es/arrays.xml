@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Interfaz de usuario para zurdos</item>
-        <item>Interfaz de usuario para diestros</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Apagado</item>
         <item>Sólo ocultar los botones de navegación en pantalla</item>

@@ -105,14 +105,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>왼손잡이 사용자 인터페이스</item>
-        <item>오른손잡이 사용자 인터페이스</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>끄기</item>
         <item>화면상의 가상 탐색 버튼만 숨기기</item>

@@ -321,4 +321,7 @@
     <string name="preference_crop_guide_2_35">2.35 (47:20)</string>
     <string name="preference_crop_guide_2_4">2.4 (12:5)</string>
 
+    <string name="preference_ui_placement_left">Interface para canhoto</string>
+    <string name="preference_ui_placement_right">Interface para destro</string>
+
 </resources>

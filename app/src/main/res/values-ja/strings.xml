@@ -352,4 +352,7 @@
     <string name="preference_crop_guide_2_35">2.35 (47対20)</string>
     <string name="preference_crop_guide_2_4">2.4 (12対5)</string>
 
+    <string name="preference_ui_placement_left">左利き用</string>
+    <string name="preference_ui_placement_right">右利き用</string>
+
 </resources>

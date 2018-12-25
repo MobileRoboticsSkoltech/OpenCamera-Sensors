@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Venstrehendt grensesnitt</item>
-        <item>Høyrehendt grensesnitt</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Av</item>
         <item>Skjul bare de virtuelle navigasjonsknappene</item>

@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>左手使用者介面</item>
-        <item>右手使用者介面</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>關閉</item>
         <item>只隱藏螢幕上的虛擬按鈕</item>

@@ -469,4 +469,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (nika czułość)</string>
 
+    <string name="preference_ui_placement_left">Interfejs dla leworęcznych</string>
+    <string name="preference_ui_placement_right">Interfejs dla praworęcznych</string>
+
 </resources>

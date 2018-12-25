@@ -493,4 +493,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (низька чутливість)</string>
 
+    <string name="preference_ui_placement_left">Інтерфейс для лівші</string>
+    <string name="preference_ui_placement_right">Інтерфейс для правші</string>
+
 </resources>

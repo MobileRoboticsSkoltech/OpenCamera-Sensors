@@ -618,4 +618,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (低灵敏度)</string>
 
+    <string name="preference_ui_placement_left">左手用户界面</string>
+    <string name="preference_ui_placement_right">右手用户界面</string>
+
 </resources>

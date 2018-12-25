@@ -435,4 +435,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (peu sensible)</string>
 
+    <string name="preference_ui_placement_left">Interface utilisateur pour gaucher</string>
+    <string name="preference_ui_placement_right">Interface utilisateur pour droitier</string>
+
 </resources>

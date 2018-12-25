@@ -637,4 +637,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (Niedrige Empfindlichkeit)</string>
 
+    <string name="preference_ui_placement_left">Oberfläche für Linkshänder</string>
+    <string name="preference_ui_placement_right">Oberfläche für Rechtshänder</string>
+
 </resources>

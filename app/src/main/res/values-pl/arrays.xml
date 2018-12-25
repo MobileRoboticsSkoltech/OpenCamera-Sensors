@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Interfejs dla leworęcznych</item>
-        <item>Interfejs dla praworęcznych</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Wyłączone</item>
         <item>Ukryj tylko przyciski nawigacyjne</item>

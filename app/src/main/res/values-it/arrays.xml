@@ -115,14 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Interfaccia utente mancini</item>
-        <item>Interfaccia utente destrorsi</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Off</item>
         <item>Nascondi solamente i bottoni di navigazione virtuali on-screen</item>

@@ -355,4 +355,8 @@
     <string name="preference_crop_guide_2_33">2.33 (21:9)</string>
     <string name="preference_crop_guide_2_35">2.35 (47:20)</string>
     <string name="preference_crop_guide_2_4">2.4 (12:5)</string>
+
+    <string name="preference_ui_placement_left">Rohraní pro leváky</string>
+    <string name="preference_ui_placement_right">Rozhraní pro praváky</string>
+
 </resources>

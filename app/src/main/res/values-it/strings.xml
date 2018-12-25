@@ -521,4 +521,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (bassa sensibilità)</string>
 
+    <string name="preference_ui_placement_left">Interfaccia utente mancini</string>
+    <string name="preference_ui_placement_right">Interfaccia utente destrorsi</string>
+
 </resources>

@@ -493,4 +493,7 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (alacsony érzékenység)</string>
 
+    <string name="preference_ui_placement_left">Balkezes felhasználói felület</string>
+    <string name="preference_ui_placement_right">Jobbkezes felhasználói felület</string>
+
 </resources>
