@@ -217,6 +217,8 @@ public class MainUI {
 		int iconpanel_right_of = right_of;
 		int above = RelativeLayout.ABOVE;
 		int below = RelativeLayout.BELOW;
+		int iconpanel_above = above;
+		int iconpanel_below = below;
 		int align_parent_left = RelativeLayout.ALIGN_PARENT_LEFT;
 		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
 		int iconpanel_align_parent_left = align_parent_left;
@@ -236,6 +238,8 @@ public class MainUI {
 		else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
 			iconpanel_left_of = RelativeLayout.BELOW;
 			iconpanel_right_of = RelativeLayout.ABOVE;
+			iconpanel_above = RelativeLayout.LEFT_OF;
+			iconpanel_below = RelativeLayout.RIGHT_OF;
 			iconpanel_align_parent_left = RelativeLayout.ALIGN_PARENT_BOTTOM;
 			iconpanel_align_parent_right = RelativeLayout.ALIGN_PARENT_TOP;
 			iconpanel_align_parent_top = RelativeLayout.ALIGN_PARENT_LEFT;
@@ -256,6 +260,8 @@ public class MainUI {
 			layoutParams.addRule(iconpanel_align_parent_right, RelativeLayout.TRUE);
 			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+			layoutParams.addRule(iconpanel_above, 0);
+			layoutParams.addRule(iconpanel_below, 0);
 			layoutParams.addRule(iconpanel_left_of, 0);
 			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
@@ -271,6 +277,8 @@ public class MainUI {
                 layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
                 layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
                 layoutParams.addRule(align_parent_bottom, 0);
+                layoutParams.addRule(above, 0);
+                layoutParams.addRule(below, 0);
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, 0);
                 view.setLayoutParams(layoutParams);
@@ -295,8 +303,12 @@ public class MainUI {
 
 			for(View this_view : buttons_all) {
 				layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
+				layoutParams.addRule(iconpanel_align_parent_left, 0);
+				layoutParams.addRule(iconpanel_align_parent_right, 0);
 				layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
 				layoutParams.addRule(iconpanel_align_parent_bottom, 0);
+				layoutParams.addRule(iconpanel_above, 0);
+				layoutParams.addRule(iconpanel_below, 0);
 				layoutParams.addRule(iconpanel_left_of, previous_view.getId());
 				layoutParams.addRule(iconpanel_right_of, 0);
 				this_view.setLayoutParams(layoutParams);
@@ -304,6 +316,7 @@ public class MainUI {
 				previous_view = this_view;
 			}
 
+			int button_size = main_activity.getResources().getDimensionPixelSize(R.dimen.onscreen_button_size);
 			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
 			    // need to dynamically lay out the permanent icons
 
@@ -330,7 +343,6 @@ public class MainUI {
 							this_view.setLayoutParams(layoutParams);
 						}
 					}*/
-					int button_size = main_activity.getResources().getDimensionPixelSize(R.dimen.onscreen_button_size);
 					int total_button_size = count*button_size;
 					int margin = 0;
 					if( total_button_size > display_height ) {
@@ -355,6 +367,16 @@ public class MainUI {
 						}
 					}
 					top_margin = button_size;
+				}
+			}
+			else {
+				// need to reset size/margins to their default
+				for(View this_view : buttons_permanent) {
+					layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
+					layoutParams.setMargins(0, 0, 0, 0);
+					layoutParams.width = button_size;
+					layoutParams.height = button_size;
+					this_view.setLayoutParams(layoutParams);
 				}
 			}
 
