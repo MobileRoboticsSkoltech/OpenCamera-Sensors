@@ -842,9 +842,11 @@
     <string-array name="preference_ui_placement_entries">
         <item>@string/preference_ui_placement_left</item>
         <item>@string/preference_ui_placement_right</item>
+        <item>@string/preference_ui_placement_top</item>
     </string-array>
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
         <item>ui_right</item>
+        <item>ui_top</item>
     </string-array>
 </resources>
