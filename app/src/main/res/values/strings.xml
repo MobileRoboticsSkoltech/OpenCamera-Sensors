@@ -541,6 +541,7 @@
     <string name="preference_video_log">Video flat (log) profile</string>
     <string name="preference_video_log_summary">Enable a flat (log) profile for video mode\n%s</string>
     <string name="preference_video_log_off">Off</string>
+    <string name="preference_video_log_fine">Fine</string>
     <string name="preference_video_log_low">Low</string>
     <string name="preference_video_log_medium">Medium</string>
     <string name="preference_video_log_strong">Strong</string>

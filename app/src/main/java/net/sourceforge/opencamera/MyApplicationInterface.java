@@ -607,6 +607,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	switch( video_log ) {
 			case "off":
 				return false;
+			case "fine":
 			case "low":
 			case "medium":
 			case "strong":
@@ -623,6 +624,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	switch( video_log ) {
 			case "off":
 				return 0.0f;
+			case "fine":
+				return 1.0f;
 			case "low":
 				return 5.0f;
 			case "medium":
