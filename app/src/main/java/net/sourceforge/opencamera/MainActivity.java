@@ -3960,33 +3960,92 @@ public class MainActivity extends Activity {
 	        if( speechRecognizer != null ) {
 	        	speechRecognizerIsStarted = false;
 	        	speechRecognizer.setRecognitionListener(new RecognitionListener() {
+	        		private void restart() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: restart");
+						Handler handler = new Handler();
+						handler.postDelayed(new Runnable() {
+							public void run() {
+								startSpeechRecognizerIntent();
+							}
+						}, 250);
+
+						/*freeSpeechRecognizer();
+						Handler handler = new Handler();
+						handler.postDelayed(new Runnable() {
+							public void run() {
+								initSpeechRecognizer();
+								startSpeechRecognizerIntent();
+					        	speechRecognizerIsStarted = true;
+							}
+						}, 500);*/
+					}
+
 					@Override
 					public void onBeginningOfSpeech() {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onBeginningOfSpeech");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 					}
 
 					@Override
 					public void onBufferReceived(byte[] buffer) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onBufferReceived");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 					}
 
 					@Override
 					public void onEndOfSpeech() {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onEndOfSpeech");
-			        	speechRecognizerStopped();
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
+			        	//speechRecognizerStopped();
+						restart();
 					}
 
 					@Override
 					public void onError(int error) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onError: " + error);
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 						if( error != SpeechRecognizer.ERROR_NO_MATCH ) {
 							// we sometime receive ERROR_NO_MATCH straight after listening starts
 							// it seems that the end is signalled either by ERROR_SPEECH_TIMEOUT or onEndOfSpeech()
-							speechRecognizerStopped();
+							//speechRecognizerStopped();
+							/*if( error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "RecognitionListener: ERROR_RECOGNIZER_BUSY");
+								freeSpeechRecognizer();
+
+								Handler handler = new Handler();
+								handler.postDelayed(new Runnable() {
+									public void run() {
+										initSpeechRecognizer();
+										startSpeechRecognizerIntent();
+							        	speechRecognizerIsStarted = true;
+									}
+								}, 500);
+							}
+							else*/ {
+								restart();
+							}
 						}
 					}
 
@@ -3994,23 +4053,43 @@ public class MainActivity extends Activity {
 					public void onEvent(int eventType, Bundle params) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onEvent");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 					}
 
 					@Override
 					public void onPartialResults(Bundle partialResults) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onPartialResults");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 					}
 
 					@Override
 					public void onReadyForSpeech(Bundle params) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onReadyForSpeech");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 					}
 
 					public void onResults(Bundle results) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "RecognitionListener: onResults");
+						if( !speechRecognizerIsStarted ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "...but speech recognition already stopped");
+							return;
+						}
 			        	speechRecognizerStopped();
 						ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 						boolean found = false;
