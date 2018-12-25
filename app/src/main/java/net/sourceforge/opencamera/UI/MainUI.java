@@ -321,8 +321,13 @@ public class MainUI {
 			    // need to dynamically lay out the permanent icons
 
 				int count = 0;
+				View first_visible_view = null;
+				View last_visible_view = null;
 				for(View this_view : buttons_permanent) {
 					if( this_view.getVisibility() == View.VISIBLE ) {
+						if( first_visible_view == null )
+							first_visible_view = this_view;
+						last_visible_view = this_view;
 						count++;
 					}
 				}
@@ -349,7 +354,8 @@ public class MainUI {
 						button_size = display_height / count;
 					}
 					else {
-						margin = (display_height - total_button_size) / count;
+						if( count > 1 )
+							margin = (display_height - total_button_size) / (count-1);
 					}
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "button_size: " + button_size);
@@ -360,7 +366,11 @@ public class MainUI {
 						if( this_view.getVisibility() == View.VISIBLE ) {
 							//this_view.setPadding(0, margin/2, 0, margin/2);
 							layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
-							layoutParams.setMargins(0, margin/2, 0, margin/2);
+							// be careful if we change how the margins are laid out: it looks nicer when only the settings icon
+							// is displayed (when taking a photo) if it is still shown left-most, rather than centred; also
+							// needed for "pause preview" trash/icons to be shown properly (test by rotating the phone to update
+							// the layout)
+							layoutParams.setMargins(0, this_view==first_visible_view ? 0 : margin/2, 0, this_view==last_visible_view ? 0 : margin/2);
 							layoutParams.width = button_size;
 							layoutParams.height = button_size;
 							this_view.setLayoutParams(layoutParams);
