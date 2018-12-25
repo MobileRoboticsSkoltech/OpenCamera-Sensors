@@ -157,8 +157,6 @@ public class MainUI {
 	}
 
 	private UIPlacement computeUIPlacement() {
-		/*if( true )
-			return UIPlacement.UIPLACEMENT_TOP; // test*/
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
 		switch( ui_placement_string ) {
@@ -251,8 +249,6 @@ public class MainUI {
 
 		if( !popup_container_only )
 		{
-			List<View> buttons = new ArrayList<>();
-
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -264,116 +260,55 @@ public class MainUI {
 			layoutParams.addRule(iconpanel_right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
-	
+			View previous_view = view;
+
+			List<View> buttons_permanent = new ArrayList<>();
 			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
-				// not part of the icon panel in TOP mode
-				view = main_activity.findViewById(R.id.gallery);
-				layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-				layoutParams.addRule(align_parent_left, 0);
-				layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
-				layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-				layoutParams.addRule(align_parent_bottom, 0);
-				layoutParams.addRule(left_of, 0);
-				layoutParams.addRule(right_of, 0);
-				view.setLayoutParams(layoutParams);
-				setViewRotation(view, ui_rotation);
-			}
-			else {
-				view = main_activity.findViewById(R.id.gallery);
-				buttons.add(view);
-				layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+                // not part of the icon panel in TOP mode
+                view = main_activity.findViewById(R.id.gallery);
+                layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                layoutParams.addRule(align_parent_left, 0);
+                layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, 0);
+                layoutParams.addRule(left_of, 0);
+                layoutParams.addRule(right_of, 0);
+                view.setLayoutParams(layoutParams);
+                setViewRotation(view, ui_rotation);
+            }
+            else {
+                buttons_permanent.add(main_activity.findViewById(R.id.gallery));
+            }
+            buttons_permanent.add(main_activity.findViewById(R.id.settings));
+            buttons_permanent.add(main_activity.findViewById(R.id.popup));
+            buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
+            buttons_permanent.add(main_activity.findViewById(R.id.exposure));
+            //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
+            //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
+            buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
+
+			List<View> buttons_all = new ArrayList<>();
+			buttons_all.addAll(buttons_permanent);
+			// icons which only sometimes show on the icon panel:
+            buttons_all.add(main_activity.findViewById(R.id.trash));
+            buttons_all.add(main_activity.findViewById(R.id.share));
+
+			for(View this_view : buttons_all) {
+				layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
 				layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
 				layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-				layoutParams.addRule(iconpanel_left_of, R.id.gui_anchor);
+				layoutParams.addRule(iconpanel_left_of, previous_view.getId());
 				layoutParams.addRule(iconpanel_right_of, 0);
-				view.setLayoutParams(layoutParams);
-				setViewRotation(view, ui_rotation);
+				this_view.setLayoutParams(layoutParams);
+				setViewRotation(this_view, ui_rotation);
+				previous_view = this_view;
 			}
-
-			view = main_activity.findViewById(R.id.settings);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
-				layoutParams.addRule(iconpanel_left_of, R.id.gui_anchor);
-			}
-			else {
-				layoutParams.addRule(iconpanel_left_of, R.id.gallery);
-			}
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
-			view = main_activity.findViewById(R.id.popup);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			layoutParams.addRule(iconpanel_left_of, R.id.settings);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
-			view = main_activity.findViewById(R.id.exposure_lock);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			layoutParams.addRule(iconpanel_left_of, R.id.popup);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
-			view = main_activity.findViewById(R.id.exposure);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			layoutParams.addRule(iconpanel_left_of, R.id.exposure_lock);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
-			/*view = main_activity.findViewById(R.id.switch_video);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);*/
-	
-			/*view = main_activity.findViewById(R.id.switch_camera);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			//layoutParams.addRule(left_of, R.id.switch_video);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);*/
-
-			view = main_activity.findViewById(R.id.audio_control);
-			buttons.add(view);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			//layoutParams.addRule(iconpanel_align_parent_left, 0);
-			//layoutParams.addRule(iconpanel_align_parent_right, 0);
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			//layoutParams.addRule(left_of, R.id.switch_camera);
-			layoutParams.addRule(iconpanel_left_of, R.id.exposure);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
 
 			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+			    // need to dynamically lay out the permanent icons
+
 				int count = 0;
-				for(View this_view : buttons) {
+				for(View this_view : buttons_permanent) {
 					if( this_view.getVisibility() == View.VISIBLE ) {
 						count++;
 					}
@@ -409,7 +344,7 @@ public class MainUI {
 						Log.d(TAG, "total_button_size: " + total_button_size);
 						Log.d(TAG, "margin: " + margin);
 					}
-					for(View this_view : buttons) {
+					for(View this_view : buttons_permanent) {
 						if( this_view.getVisibility() == View.VISIBLE ) {
 							//this_view.setPadding(0, margin/2, 0, margin/2);
 							layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
@@ -422,24 +357,6 @@ public class MainUI {
 					top_margin = button_size;
 				}
 			}
-
-			view = main_activity.findViewById(R.id.trash);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			layoutParams.addRule(iconpanel_left_of, R.id.audio_control);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
-	
-			view = main_activity.findViewById(R.id.share);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(iconpanel_align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(iconpanel_align_parent_bottom, 0);
-			layoutParams.addRule(iconpanel_left_of, R.id.trash);
-			layoutParams.addRule(iconpanel_right_of, 0);
-			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
 
 			// end icon panel
 
