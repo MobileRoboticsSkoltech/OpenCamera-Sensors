@@ -744,6 +744,11 @@
     <string name="preference_ui_placement_right">Right-handed user interface</string>
     <string name="preference_ui_placement_top">Icons along top (portrait)</string>
 
+    <string name="preference_show_face_detection">Show face detection</string>
+    <string name="preference_show_face_detection_summary">Whether to show an on-screen icon for enabling or disabling face detection</string>
+    <string name="face_detection_enable">Enable face detection</string>
+    <string name="face_detection_disable">Enable face detection</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

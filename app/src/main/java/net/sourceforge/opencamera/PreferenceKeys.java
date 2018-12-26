@@ -211,6 +211,8 @@ public class PreferenceKeys {
 
 	public static final String ShowTakePhotoPreferenceKey = "preference_show_take_photo";
 
+	public static final String ShowFaceDetectionPreferenceKey = "preference_show_face_detection";
+
 	public static final String ShowZoomPreferenceKey = "preference_show_zoom";
 
 	public static final String ShowISOPreferenceKey = "preference_show_iso";

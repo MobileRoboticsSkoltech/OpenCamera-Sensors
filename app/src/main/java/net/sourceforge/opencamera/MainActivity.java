@@ -308,6 +308,9 @@ public class MainActivity extends Activity {
 	    View zoomSeekbar = findViewById(R.id.zoom_seekbar);
 		zoomSeekbar.setVisibility(View.INVISIBLE);
 
+		// initialise state of on-screen icons
+		mainUI.updateFaceDetectionIcon();
+
 		// listen for orientation event change
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -1220,6 +1223,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void clickedFaceDetection(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedFaceDetection");
+
+		this.closePopup();
+
+		boolean value = applicationInterface.getFaceDetectionPref();
+		value = !value;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(PreferenceKeys.FaceDetectionPreferenceKey, value);
+		editor.apply();
+
+		mainUI.updateFaceDetectionIcon();
+		preview.reopenCamera();
+	}
+
     public void clickedAudioControl(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedAudioControl");
@@ -1822,13 +1842,22 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: time after layoutUI: " + (System.currentTimeMillis() - debug_time));
 		}
+
+		// ensure icons visible if disabling them
+		// (if enabling them, we'll make the icon visible later on)
+		if( !mainUI.showFaceDetectionIcon() ) {
+			View button = findViewById(R.id.face_detection);
+			button.setVisibility(View.GONE);
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if( sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none") ) {
-			// ensure icon is invisible if switching from audio control enabled to disabled
-			// (if enabling it, we'll make the icon visible later on)
 			View speechRecognizerButton = findViewById(R.id.audio_control);
 			speechRecognizerButton.setVisibility(View.GONE);
 		}
+
+		// in case face detection enabled/disabled in settings:
+		mainUI.updateFaceDetectionIcon();
+
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
 		if( MyDebug.LOG ) {

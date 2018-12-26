@@ -86,6 +86,7 @@ public class MainUI {
 		this.setIcon(R.id.exposure);
 		//this.setIcon(R.id.switch_video);
 		//this.setIcon(R.id.switch_camera);
+		this.setIcon(R.id.face_detection);
 		this.setIcon(R.id.audio_control);
 		this.setIcon(R.id.trash);
 		this.setIcon(R.id.share);
@@ -293,6 +294,7 @@ public class MainUI {
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
+            buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
             buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
 
 			List<View> buttons_all = new ArrayList<>();
@@ -746,6 +748,11 @@ public class MainUI {
 		}
 	}
 
+	public boolean showFaceDetectionIcon() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowFaceDetectionPreferenceKey, false);
+	}
+
     public void setImmersiveMode(final boolean immersive_mode) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setImmersiveMode: " + immersive_mode);
@@ -763,6 +770,7 @@ public class MainUI {
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
 			    View galleryButton = main_activity.findViewById(R.id.gallery);
@@ -776,6 +784,8 @@ public class MainUI {
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility);
+			    if( showFaceDetectionIcon() )
+			    	faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
 			    	audioControlButton.setVisibility(visibility);
 		    	popupButton.setVisibility(visibility);
@@ -849,6 +859,7 @@ public class MainUI {
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
@@ -858,6 +869,8 @@ public class MainUI {
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
+			    if( showFaceDetectionIcon() )
+			    	faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
 			    	audioControlButton.setVisibility(visibility);
 			    if( !(show_gui_photo && show_gui_video) ) {
@@ -870,6 +883,13 @@ public class MainUI {
 				}
 			}
 		});
+    }
+
+    public void updateFaceDetectionIcon() {
+		ImageButton view = main_activity.findViewById(R.id.face_detection);
+		boolean enabled = main_activity.getApplicationInterface().getFaceDetectionPref();
+		view.setImageResource(enabled ? R.drawable.ic_face_red_48dp : R.drawable.ic_face_white_48dp);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.face_detection_disable : R.string.face_detection_enable) );
     }
 
     public void audioControlStarted() {
