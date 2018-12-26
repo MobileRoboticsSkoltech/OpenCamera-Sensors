@@ -315,10 +315,19 @@
                 android:key="preference_show_face_detection"
                 android:title="@string/preference_show_face_detection"
                 android:summary="@string/preference_show_face_detection_summary"
+				android:icon="@drawable/ic_face_white_48dp"
                 android:defaultValue="false"
                 />
 
-            <CheckBoxPreference
+			<CheckBoxPreference
+				android:key="preference_show_stamp"
+				android:title="@string/preference_show_stamp"
+				android:summary="@string/preference_show_stamp_summary"
+				android:icon="@drawable/ic_text_format_white_48dp"
+				android:defaultValue="false"
+				/>
+
+			<CheckBoxPreference
                 android:key="preference_show_zoom"
                 android:title="@string/preference_show_zoom"
                 android:summary="@string/preference_show_zoom_summary"

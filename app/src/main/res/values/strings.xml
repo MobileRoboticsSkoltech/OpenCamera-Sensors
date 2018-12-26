@@ -744,10 +744,15 @@
     <string name="preference_ui_placement_right">Right-handed user interface</string>
     <string name="preference_ui_placement_top">Icons along top (portrait)</string>
 
-    <string name="preference_show_face_detection">Show face detection</string>
+    <string name="preference_show_face_detection">Show face detection icon</string>
     <string name="preference_show_face_detection_summary">Whether to show an on-screen icon for enabling or disabling face detection</string>
     <string name="face_detection_enable">Enable face detection</string>
     <string name="face_detection_disable">Enable face detection</string>
+
+    <string name="preference_show_stamp">Show stamp photo icon</string>
+    <string name="preference_show_stamp_summary">Whether to show an on-screen icon for enabling or disabling photo stamp</string>
+    <string name="stamp_enable">Enable photo stamp</string>
+    <string name="stamp_disable">Disable photo stamp</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">

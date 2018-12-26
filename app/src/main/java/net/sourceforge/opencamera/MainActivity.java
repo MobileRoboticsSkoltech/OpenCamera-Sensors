@@ -309,7 +309,7 @@ public class MainActivity extends Activity {
 		zoomSeekbar.setVisibility(View.INVISIBLE);
 
 		// initialise state of on-screen icons
-		mainUI.updateFaceDetectionIcon();
+		mainUI.updateOnScreenIcons();
 
 		// listen for orientation event change
 	    orientationEventListener = new OrientationEventListener(this) {
@@ -1223,6 +1223,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void clickedStamp(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedStamp");
+
+		this.closePopup();
+
+		boolean value = applicationInterface.getStampPref().equals("preference_stamp_yes");
+		value = !value;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(PreferenceKeys.StampPreferenceKey, value ? "preference_stamp_yes" : "preference_stamp_no");
+		editor.apply();
+
+		mainUI.updateStampIcon();
+        applicationInterface.getDrawPreview().updateSettings();
+	}
+
 	public void clickedFaceDetection(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedFaceDetection");
@@ -1240,7 +1257,7 @@ public class MainActivity extends Activity {
 		preview.reopenCamera();
 	}
 
-    public void clickedAudioControl(View view) {
+	public void clickedAudioControl(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedAudioControl");
 		// check hasAudioControl just in case!
@@ -1845,6 +1862,10 @@ public class MainActivity extends Activity {
 
 		// ensure icons visible if disabling them
 		// (if enabling them, we'll make the icon visible later on)
+		if( !mainUI.showStampIcon() ) {
+			View button = findViewById(R.id.stamp);
+			button.setVisibility(View.GONE);
+		}
 		if( !mainUI.showFaceDetectionIcon() ) {
 			View button = findViewById(R.id.face_detection);
 			button.setVisibility(View.GONE);
@@ -1854,9 +1875,6 @@ public class MainActivity extends Activity {
 			View speechRecognizerButton = findViewById(R.id.audio_control);
 			speechRecognizerButton.setVisibility(View.GONE);
 		}
-
-		// in case face detection enabled/disabled in settings:
-		mainUI.updateFaceDetectionIcon();
 
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
@@ -1929,6 +1947,11 @@ public class MainActivity extends Activity {
 		// However, DrawPreview.updateSettings() should be a quick function (the main point is
 		// to avoid reading the preferences in every single frame).
 		applicationInterface.getDrawPreview().updateSettings();
+
+		if( preferencesListener.anyChange() ) {
+			// in case face detection etc enabled/disabled in settings:
+			mainUI.updateOnScreenIcons();
+		}
 
 		if( preferencesListener.anySignificantChange() ) {
 			updateForSettings();

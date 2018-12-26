@@ -227,6 +227,20 @@
         />-->
 
     <ImageButton
+        android:id="@+id/stamp"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/stamp_enable"
+        android:src="@drawable/ic_text_format_white_48dp"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedStamp"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/face_detection"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"
