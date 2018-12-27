@@ -1394,8 +1394,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposureLock");
     	this.preview.toggleExposureLock();
-	    ImageButton exposureLockButton = findViewById(R.id.exposure_lock);
-		exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+    	mainUI.updateExposureLockIcon();
 		preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);
     }
     
@@ -3416,7 +3415,7 @@ public class MainActivity extends Activity {
 	    ImageButton exposureLockButton = findViewById(R.id.exposure_lock);
 	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 	    if( preview.supportsExposureLock() ) {
-			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+			mainUI.updateExposureLockIcon();
 	    }
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting exposure lock button: " + (System.currentTimeMillis() - debug_time));

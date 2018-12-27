@@ -912,9 +912,15 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.face_detection_disable : R.string.face_detection_enable) );
 	}
 
+	public void updateExposureLockIcon() {
+        ImageButton exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+        exposureLockButton.setImageResource(main_activity.getPreview().isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+    }
+
 	public void updateOnScreenIcons() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateOnScreenIcons");
+		// don't need to call updateExposureLockIcon(), as this isn't determined via a saved preference
 		this.updateStampIcon();
 		this.updateFaceDetectionIcon();
 	}
