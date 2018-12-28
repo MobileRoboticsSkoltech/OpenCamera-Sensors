@@ -124,7 +124,9 @@ public class MainActivity extends Activity {
 
 	private final ToastBoxer switch_video_toast = new ToastBoxer();
     private final ToastBoxer screen_locked_toast = new ToastBoxer();
+    private final ToastBoxer stamp_toast = new ToastBoxer();
     private final ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
+    private final ToastBoxer white_balance_lock_toast = new ToastBoxer();
 	private final ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
@@ -1238,6 +1240,7 @@ public class MainActivity extends Activity {
 
 		mainUI.updateStampIcon();
         applicationInterface.getDrawPreview().updateSettings();
+		preview.showToast(stamp_toast, value ? R.string.stamp_enabled : R.string.stamp_disabled);
 	}
 
 	public void clickedAutoLevel(View view) {
@@ -1288,6 +1291,7 @@ public class MainActivity extends Activity {
 		editor.apply();
 
 		mainUI.updateFaceDetectionIcon();
+		preview.showToast(stamp_toast, value ? R.string.face_detection_enabled : R.string.face_detection_disabled);
 		preview.reopenCamera();
 	}
 
@@ -1423,6 +1427,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedWhiteBalanceLock");
     	this.preview.toggleWhiteBalanceLock();
     	mainUI.updateWhiteBalanceLockIcon();
+		preview.showToast(white_balance_lock_toast, preview.isExposureLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
 	}
 
     public void clickedExposure(View view) {

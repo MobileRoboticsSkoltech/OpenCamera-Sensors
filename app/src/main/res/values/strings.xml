@@ -32,7 +32,7 @@
     <string name="back_camera">Back Camera</string>
     <string name="photo">Photo</string>
     <string name="video">Video</string>
-    <string name="exposure_locked">Exposure Locked</string>
+    <string name="exposure_locked">Exposure locked</string>
     <string name="exposure_unlocked">Exposure unlocked</string>
     <string name="cancelled_timer">Cancelled timer</string>
     <string name="cancelled_repeat_mode">Cancelled repeat mode</string>
@@ -748,6 +748,8 @@
     <string name="preference_show_face_detection_summary">Whether to show an on-screen icon for enabling or disabling face detection</string>
     <string name="face_detection_enable">Enable face detection</string>
     <string name="face_detection_disable">Disable face detection</string>
+    <string name="face_detection_enabled">Face detection enabled</string>
+    <string name="face_detection_disabled">Face detection disabled</string>
 
     <string name="preference_show_auto_level">Show auto-level icon</string>
     <string name="preference_show_auto_level_summary">Whether to show an on-screen icon for enabling or disabling auto-level. When auto-level is enabled, photos will be rotated so they are automatically level with the horizon.</string>
@@ -758,11 +760,15 @@
     <string name="preference_show_stamp_summary">Whether to show an on-screen icon for enabling or disabling photo stamp</string>
     <string name="stamp_enable">Enable photo stamp</string>
     <string name="stamp_disable">Disable photo stamp</string>
+    <string name="stamp_enabled">Photo stamp enabled</string>
+    <string name="stamp_disabled">Photo stamp disabled</string>
 
     <string name="preference_show_white_balance_lock">Show auto white balance lock icon</string>
     <string name="preference_show_white_balance_lock_summary">Whether to show an on-screen icon for locking or unlocking auto white balance</string>
     <string name="white_balance_lock">Lock white balance</string>
     <string name="white_balance_unlock">Unlock white balance</string>
+    <string name="white_balance_locked">White balance locked</string>
+    <string name="white_balance_unlocked">White balance unlocked</string>
 
     <string name="exposure_unlock">Unlock exposure</string>
 
