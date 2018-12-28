@@ -1867,8 +1867,12 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "updateForSettings: time after layoutUI: " + (System.currentTimeMillis() - debug_time));
 		}
 
-		// ensure icons visible if disabling them
+		// ensure icons invisible if disabling them from showing from the Settings
 		// (if enabling them, we'll make the icon visible later on)
+		if( !mainUI.showWhiteBalanceLockIcon() ) {
+			View button = findViewById(R.id.white_balance_lock);
+			button.setVisibility(View.GONE);
+		}
 		if( !mainUI.showStampIcon() ) {
 			View button = findViewById(R.id.stamp);
 			button.setVisibility(View.GONE);
