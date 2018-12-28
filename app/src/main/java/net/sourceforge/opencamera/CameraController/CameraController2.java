@@ -249,6 +249,7 @@ public class CameraController2 extends CameraController {
 		private float focus_distance; // actual value passed to camera device (set to 0.0 if in infinity mode)
 		private float focus_distance_manual; // saved setting when in manual mode (so if user switches to infinity mode and back, we'll still remember the manual focus distance)
 		private boolean ae_lock;
+		private boolean wb_lock;
 		private MeteringRectangle [] af_regions; // no need for has_scalar_crop_region, as we can set to null instead
 		private MeteringRectangle [] ae_regions; // no need for has_scalar_crop_region, as we can set to null instead
 		private boolean has_face_detect_mode;
@@ -311,6 +312,7 @@ public class CameraController2 extends CameraController {
 			setFocusMode(builder);
 			setFocusDistance(builder);
 			setAutoExposureLock(builder);
+			setAutoWhiteBalanceLock(builder);
 			setAFRegions(builder);
 			setAERegions(builder);
 			setFaceDetectMode(builder);
@@ -687,7 +689,11 @@ public class CameraController2 extends CameraController {
 		}
 
 		private void setAutoExposureLock(CaptureRequest.Builder builder) {
-	    	builder.set(CaptureRequest.CONTROL_AE_LOCK, ae_lock);
+			builder.set(CaptureRequest.CONTROL_AE_LOCK, ae_lock);
+		}
+
+		private void setAutoWhiteBalanceLock(CaptureRequest.Builder builder) {
+			builder.set(CaptureRequest.CONTROL_AWB_LOCK, wb_lock);
 		}
 
 		private void setAFRegions(CaptureRequest.Builder builder) {
@@ -2068,6 +2074,8 @@ public class CameraController2 extends CameraController {
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 
 		camera_features.is_exposure_lock_supported = true;
+
+		camera_features.is_white_balance_lock_supported = true;
 
         camera_features.is_video_stabilization_supported = false;
 		int [] supported_video_stabilization_modes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
@@ -3932,6 +3940,30 @@ public class CameraController2 extends CameraController {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK) == null )
 			return false;
     	return previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK);
+	}
+
+	@Override
+	public void setAutoWhiteBalanceLock(boolean enabled) {
+		camera_settings.wb_lock = enabled;
+		camera_settings.setAutoWhiteBalanceLock(previewBuilder);
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set auto white balance lock");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public boolean getAutoWhiteBalanceLock() {
+		if( previewBuilder.get(CaptureRequest.CONTROL_AWB_LOCK) == null )
+			return false;
+		return previewBuilder.get(CaptureRequest.CONTROL_AWB_LOCK);
 	}
 
 	@Override

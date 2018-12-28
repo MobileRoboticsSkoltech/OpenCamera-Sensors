@@ -63,6 +63,7 @@ public abstract class CameraController {
 		public int max_num_focus_areas;
 		public float minimum_focus_distance;
 		public boolean is_exposure_lock_supported;
+		public boolean is_white_balance_lock_supported;
 		public boolean is_video_stabilization_supported;
 		public boolean is_photo_video_recording_supported;
 		public boolean supports_white_balance_temperature;
@@ -462,6 +463,8 @@ public abstract class CameraController {
 	public abstract void setRecordingHint(boolean hint);
 	public abstract void setAutoExposureLock(boolean enabled);
 	public abstract boolean getAutoExposureLock();
+	public abstract void setAutoWhiteBalanceLock(boolean enabled);
+	public abstract boolean getAutoWhiteBalanceLock();
 	public abstract void setRotation(int rotation);
 	public abstract void setLocationInfo(Location location);
 	public abstract void removeLocationInfo();

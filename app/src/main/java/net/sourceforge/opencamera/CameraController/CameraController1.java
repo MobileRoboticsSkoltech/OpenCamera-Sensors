@@ -354,6 +354,8 @@ public class CameraController1 extends CameraController {
 
         camera_features.is_exposure_lock_supported = parameters.isAutoExposureLockSupported();
 
+        camera_features.is_white_balance_lock_supported = parameters.isAutoWhiteBalanceLockSupported();
+
         camera_features.is_video_stabilization_supported = parameters.isVideoStabilizationSupported();
 
 		camera_features.is_photo_video_recording_supported = parameters.isVideoSnapshotSupported();
@@ -1271,17 +1273,34 @@ public class CameraController1 extends CameraController {
 		}
 	}
 
+	@Override
 	public void setAutoExposureLock(boolean enabled) {
 		Camera.Parameters parameters = this.getParameters();
 		parameters.setAutoExposureLock(enabled);
     	setCameraParameters(parameters);
 	}
-	
+
+	@Override
 	public boolean getAutoExposureLock() {
 		Camera.Parameters parameters = this.getParameters();
 		if( !parameters.isAutoExposureLockSupported() )
 			return false;
 		return parameters.getAutoExposureLock();
+	}
+
+	@Override
+	public void setAutoWhiteBalanceLock(boolean enabled) {
+		Camera.Parameters parameters = this.getParameters();
+		parameters.setAutoWhiteBalanceLock(enabled);
+		setCameraParameters(parameters);
+	}
+
+	@Override
+	public boolean getAutoWhiteBalanceLock() {
+		Camera.Parameters parameters = this.getParameters();
+		if( !parameters.isAutoWhiteBalanceLockSupported() )
+			return false;
+		return parameters.getAutoWhiteBalanceLock();
 	}
 
 	public void setRotation(int rotation) {
