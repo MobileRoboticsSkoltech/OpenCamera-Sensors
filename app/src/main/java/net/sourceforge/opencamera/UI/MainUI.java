@@ -82,11 +82,11 @@ public class MainUI {
 		this.setIcon(R.id.gallery);
 		this.setIcon(R.id.settings);
 		this.setIcon(R.id.popup);
-		this.setIcon(R.id.white_balance_lock);
-		this.setIcon(R.id.exposure_lock);
 		this.setIcon(R.id.exposure);
 		//this.setIcon(R.id.switch_video);
 		//this.setIcon(R.id.switch_camera);
+		this.setIcon(R.id.exposure_lock);
+		this.setIcon(R.id.white_balance_lock);
 		this.setIcon(R.id.text_stamp);
 		this.setIcon(R.id.stamp);
 		this.setIcon(R.id.auto_level);
@@ -294,11 +294,11 @@ public class MainUI {
             }
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
-            buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
-            buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
+            buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
+            buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
 			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
@@ -818,12 +818,12 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 		    	switchVideoButton.setVisibility(visibility);
-			    if( showWhiteBalanceLockIcon() )
-			    	whiteBalanceLockButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility);
+			    if( showWhiteBalanceLockIcon() )
+			    	whiteBalanceLockButton.setVisibility(visibility);
 			    if( showTextStampIcon() )
 			    	textStampButton.setVisibility(visibility);
 			    if( showStampIcon() )
@@ -915,12 +915,12 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 				switchVideoButton.setVisibility(visibility);
-			    if( showWhiteBalanceLockIcon() )
-			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
+			    if( showWhiteBalanceLockIcon() )
+			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
 			    if( showTextStampIcon() )
 			    	textStampButton.setVisibility(visibility);
 				if( showStampIcon() )
