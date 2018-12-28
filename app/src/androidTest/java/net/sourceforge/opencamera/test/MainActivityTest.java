@@ -563,19 +563,65 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
 
         View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+        assertTrue( exposureLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.exposure_lock) ) );
         clickView(exposureLockButton);
         assertTrue(mPreview.getCameraController().getAutoExposureLock());
+        assertTrue( exposureLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.exposure_unlock) ) );
 
         this.pauseAndResume();
         assertTrue(!mPreview.getCameraController().getAutoExposureLock());
+        assertTrue( exposureLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.exposure_lock) ) );
 
         // now with restart
 
         clickView(exposureLockButton);
         assertTrue(mPreview.getCameraController().getAutoExposureLock());
+        assertTrue( exposureLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.exposure_unlock) ) );
 
         restart();
         assertTrue(!mPreview.getCameraController().getAutoExposureLock());
+        exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+        assertTrue( exposureLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.exposure_lock) ) );
+    }
+
+    private void subTestWhiteBalanceLockNotSaved() {
+        Log.d(TAG, "subTestWhiteBalanceLockNotSaved");
+
+        if( !mPreview.supportsWhiteBalanceLock() ) {
+            return;
+        }
+
+        setToDefault();
+
+        View whiteBalanceLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_lock);
+        assertTrue( whiteBalanceLockButton.getVisibility() == View.GONE );
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+        assertTrue( whiteBalanceLockButton.getVisibility() == View.VISIBLE );
+
+        assertTrue( whiteBalanceLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.white_balance_lock) ) );
+        clickView(whiteBalanceLockButton);
+        assertTrue(mPreview.getCameraController().getAutoWhiteBalanceLock());
+        assertTrue( whiteBalanceLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.white_balance_unlock) ) );
+
+        this.pauseAndResume();
+        assertTrue(!mPreview.getCameraController().getAutoWhiteBalanceLock());
+        assertTrue( whiteBalanceLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.white_balance_lock) ) );
+
+        // now with restart
+
+        clickView(whiteBalanceLockButton);
+        assertTrue(mPreview.getCameraController().getAutoWhiteBalanceLock());
+        assertTrue( whiteBalanceLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.white_balance_unlock) ) );
+
+        restart();
+        assertTrue(!mPreview.getCameraController().getAutoWhiteBalanceLock());
+        whiteBalanceLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_lock);
+        assertTrue( whiteBalanceLockButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.white_balance_lock) ) );
     }
 
     /** Tests for things which should (or shouldn't) be saved.
@@ -586,6 +632,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestSaveFocusMode();
         subTestSaveFlashTorchQuit();
         subTestExposureLockNotSaved();
+        subTestWhiteBalanceLockNotSaved();
     }
 
     /* Ensures that the flash mode changes as expected when switching between photo and video modes.
