@@ -802,9 +802,9 @@ public class MainUI {
 		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
 			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
-			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
@@ -903,9 +903,9 @@ public class MainUI {
 		    	final int visibility_video = show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
 			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
-			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
