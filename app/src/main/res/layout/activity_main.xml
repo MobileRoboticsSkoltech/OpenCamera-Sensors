@@ -199,6 +199,7 @@
         android:backgroundTint="#3f000000"
         android:backgroundTintMode="src_in"
         android:onClick="clickedExposureLock"
+        android:visibility="gone"
         />
 
     <ImageButton
@@ -212,6 +213,7 @@
         android:backgroundTint="#3f000000"
         android:backgroundTintMode="src_in"
         android:onClick="clickedExposure"
+        android:visibility="gone"
         />
 
     <!--<ImageButton

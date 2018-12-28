@@ -178,6 +178,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Preference pref = findPreference("preference_face_detection");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_controls");
         	pg.removePreference(pref);
+
+			pref = findPreference("preference_show_face_detection");
+			pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
 		}
 
 		final int preview_width = bundle.getInt("preview_width");

@@ -752,12 +752,21 @@ public class MainUI {
 		}
 	}
 
+	public boolean showWhiteBalanceLockIcon() {
+		if( !main_activity.getPreview().supportsWhiteBalanceLock() )
+			return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, false);
+	}
+
 	public boolean showStampIcon() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
 	}
 
 	public boolean showFaceDetectionIcon() {
+		if( !main_activity.getPreview().supportsFaceDetection() )
+			return false;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowFaceDetectionPreferenceKey, false);
 	}
@@ -791,7 +800,7 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 		    	switchVideoButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsWhiteBalanceLock() )
+			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility);
@@ -882,7 +891,7 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 				switchVideoButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsWhiteBalanceLock() )
+			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video

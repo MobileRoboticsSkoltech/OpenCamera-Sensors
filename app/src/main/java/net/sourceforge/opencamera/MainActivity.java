@@ -3417,17 +3417,12 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting up exposure: " + (System.currentTimeMillis() - debug_time));
 
-	    ImageButton whiteBalanceLockButton = findViewById(R.id.white_balance_lock);
-	    whiteBalanceLockButton.setVisibility(preview.supportsWhiteBalanceLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+		// on-screen icons such as exposure lock, white balance lock, face detection etc are made visible if necessary in
+		// MainUI.showGUI()
 	    if( preview.supportsWhiteBalanceLock() ) {
 			mainUI.updateWhiteBalanceLockIcon();
 	    }
 
-		View exposureButton = findViewById(R.id.exposure);
-	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
-
-	    ImageButton exposureLockButton = findViewById(R.id.exposure_lock);
-	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 	    if( preview.supportsExposureLock() ) {
 			mainUI.updateExposureLockIcon();
 	    }

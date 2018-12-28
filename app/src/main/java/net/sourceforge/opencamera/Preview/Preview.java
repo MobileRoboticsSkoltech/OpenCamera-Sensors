@@ -6108,7 +6108,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*applicationInterface.cameraInOperation(false, false);
 			if( is_video )
 				applicationInterface.cameraInOperation(false, true);*/
-			applicationInterface.cameraInOperation(false, false); // needed for when taking photo with pause preview option
+			// Need to call camerainOperation for when taking photo with pause preview option;
+            // also needed so that the GUI is set up correctly (via MainUI.showGUI()), for things like on-screen icons that are
+            // only shown depending on user options and device support.
+			applicationInterface.cameraInOperation(false, false);
 		}
     }
 
