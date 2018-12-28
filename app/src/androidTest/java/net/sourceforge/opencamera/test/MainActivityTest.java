@@ -1274,6 +1274,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testFaceDetection");
         setToDefault();
 
+        View faceDetectionButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.face_detection);
+        assertTrue( faceDetectionButton.getVisibility() == View.GONE );
+
         if( !mPreview.supportsFaceDetection() ) {
             Log.d(TAG, "face detection not supported");
             return;
@@ -1284,6 +1287,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.putBoolean(PreferenceKeys.FaceDetectionPreferenceKey, true);
         editor.apply();
         updateForSettings();
+
+        assertTrue( faceDetectionButton.getVisibility() == View.GONE );
 
         int saved_count;
         Log.d(TAG, "0 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
@@ -1324,7 +1329,38 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 face_detection_started = true;
             }
             assertTrue(face_detection_started);
+
+            clickView(switchCameraButton);
+            waitUntilCameraOpened();
         }
+
+        // test show face detection icon
+
+        editor.putBoolean(PreferenceKeys.ShowFaceDetectionPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( faceDetectionButton.getVisibility() == View.VISIBLE );
+        assertTrue( faceDetectionButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.face_detection_disable) ) );
+
+        // restart and check still enabled
+        restart();
+        faceDetectionButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.face_detection);
+
+        assertTrue( faceDetectionButton.getVisibility() == View.VISIBLE );
+        assertTrue( faceDetectionButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.face_detection_disable) ) );
+
+        clickView(faceDetectionButton);
+        waitUntilCameraOpened();
+        assertFalse( settings.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false) );
+        assertTrue( faceDetectionButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.face_detection_enable) ) );
+
+        face_detection_started = false;
+        // check face detection not already started
+        if( !mPreview.getCameraController().startFaceDetection() ) {
+            face_detection_started = true;
+        }
+        assertFalse(face_detection_started);
     }
 
     private void subTestPopupButtonAvailability(String test_key, String option, boolean expected) {
