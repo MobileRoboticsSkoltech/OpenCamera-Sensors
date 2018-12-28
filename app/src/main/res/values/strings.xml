@@ -747,7 +747,12 @@
     <string name="preference_show_face_detection">Show face detection icon</string>
     <string name="preference_show_face_detection_summary">Whether to show an on-screen icon for enabling or disabling face detection</string>
     <string name="face_detection_enable">Enable face detection</string>
-    <string name="face_detection_disable">Enable face detection</string>
+    <string name="face_detection_disable">Disable face detection</string>
+
+    <string name="preference_show_auto_level">Show auto-level icon</string>
+    <string name="preference_show_auto_level_summary">Whether to show an on-screen icon for enabling or disabling auto-level. When auto-level is enabled, photos will be rotated so they are automatically level with the horizon.</string>
+    <string name="auto_level_enable">Enable face detection</string>
+    <string name="auto_level_disable">Disable face detection</string>
 
     <string name="preference_show_stamp">Show stamp photo icon</string>
     <string name="preference_show_stamp_summary">Whether to show an on-screen icon for enabling or disabling photo stamp</string>

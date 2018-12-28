@@ -257,6 +257,20 @@
         />
 
     <ImageButton
+        android:id="@+id/auto_level"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/auto_level_enable"
+        android:src="@drawable/auto_stabilise_icon"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedAutoLevel"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/face_detection"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"

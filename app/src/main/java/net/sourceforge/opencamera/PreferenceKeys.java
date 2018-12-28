@@ -213,6 +213,8 @@ public class PreferenceKeys {
 
 	public static final String ShowFaceDetectionPreferenceKey = "preference_show_face_detection";
 
+	public static final String ShowAutoLevelPreferenceKey = "preference_show_auto_level";
+
 	public static final String ShowStampPreferenceKey = "preference_show_stamp";
 
 	public static final String ShowWhiteBalanceLockPreferenceKey = "preference_show_white_balance_lock";

@@ -302,7 +302,8 @@ public class PopupView extends LinearLayout {
 				});
 			}
 
-        	if( main_activity.supportsAutoStabilise() ) {
+        	if( main_activity.supportsAutoStabilise() && !main_activity.getMainUI().showAutoLevelIcon() ) {
+				// don't show auto-stabilise checkbox on popup if there's an on-screen icon
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
 				checkBox.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
@@ -324,26 +325,7 @@ public class PopupView extends LinearLayout {
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
-	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, isChecked);
-						editor.apply();
-
-						boolean done_dialog = false;
-	            		if( isChecked ) {
-	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.AutoStabiliseInfoPreferenceKey);
-	            			if( !done_auto_stabilise_info ) {
-	            				main_activity.getMainUI().showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.AutoStabiliseInfoPreferenceKey);
-		        	    		done_dialog = true;
-	            			}
-	                    }
-
-	            		if( !done_dialog ) {
-	            			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
-	            			preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
-	            		}
-						main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the auto-stabilise setting
-						main_activity.closePopup(); // don't need to destroy popup
+						main_activity.clickedAutoLevel();
 					}
         		});
 

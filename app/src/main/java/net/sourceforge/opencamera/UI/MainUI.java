@@ -88,6 +88,7 @@ public class MainUI {
 		//this.setIcon(R.id.switch_video);
 		//this.setIcon(R.id.switch_camera);
 		this.setIcon(R.id.stamp);
+		this.setIcon(R.id.auto_level);
 		this.setIcon(R.id.face_detection);
 		this.setIcon(R.id.audio_control);
 		this.setIcon(R.id.trash);
@@ -298,6 +299,7 @@ public class MainUI {
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
+			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
 			buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
             buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
 
@@ -764,6 +766,13 @@ public class MainUI {
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
 	}
 
+	public boolean showAutoLevelIcon() {
+		if( !main_activity.supportsAutoStabilise() )
+			return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowAutoLevelPreferenceKey, false);
+	}
+
 	public boolean showFaceDetectionIcon() {
 		if( !main_activity.getPreview().supportsFaceDetection() )
 			return false;
@@ -790,6 +799,7 @@ public class MainUI {
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View stampButton = main_activity.findViewById(R.id.stamp);
+				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
@@ -808,6 +818,8 @@ public class MainUI {
 			    	exposureLockButton.setVisibility(visibility);
 			    if( showStampIcon() )
 			    	stampButton.setVisibility(visibility);
+			    if( showAutoLevelIcon() )
+			    	autoLevelButton.setVisibility(visibility);
 			    if( showFaceDetectionIcon() )
 			    	faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
@@ -885,6 +897,7 @@ public class MainUI {
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View stampButton = main_activity.findViewById(R.id.stamp);
+				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
@@ -899,6 +912,8 @@ public class MainUI {
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
 				if( showStampIcon() )
 					stampButton.setVisibility(visibility);
+			    if( showAutoLevelIcon() )
+			    	autoLevelButton.setVisibility(visibility);
 				if( showFaceDetectionIcon() )
 					faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
@@ -936,6 +951,13 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.stamp_disable : R.string.stamp_enable) );
 	}
 
+	public void updateAutoLevelIcon() {
+		ImageButton view = main_activity.findViewById(R.id.auto_level);
+		boolean enabled = main_activity.getApplicationInterface().getAutoStabilisePref();
+		view.setImageResource(enabled ? R.drawable.auto_stabilise_icon_red : R.drawable.auto_stabilise_icon);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.auto_level_disable : R.string.auto_level_enable) );
+	}
+
 	public void updateFaceDetectionIcon() {
 		ImageButton view = main_activity.findViewById(R.id.face_detection);
 		boolean enabled = main_activity.getApplicationInterface().getFaceDetectionPref();
@@ -949,6 +971,7 @@ public class MainUI {
 		this.updateWhiteBalanceLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
 		this.updateExposureLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
 		this.updateStampIcon();
+		this.updateAutoLevelIcon();
 		this.updateFaceDetectionIcon();
 	}
 

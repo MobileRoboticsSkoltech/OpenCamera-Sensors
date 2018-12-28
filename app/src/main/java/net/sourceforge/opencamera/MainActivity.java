@@ -1240,6 +1240,40 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings();
 	}
 
+	public void clickedAutoLevel(View view) {
+		clickedAutoLevel();
+	}
+
+	public void clickedAutoLevel() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedAutoLevel");
+		boolean value = applicationInterface.getAutoStabilisePref();
+		value = !value;
+
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, value);
+		editor.apply();
+
+		boolean done_dialog = false;
+		if( value ) {
+			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.AutoStabiliseInfoPreferenceKey);
+			if( !done_auto_stabilise_info ) {
+				mainUI.showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.AutoStabiliseInfoPreferenceKey);
+				done_dialog = true;
+			}
+		}
+
+		if( !done_dialog ) {
+			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(value ? R.string.on : R.string.off);
+			preview.showToast(this.getChangedAutoStabiliseToastBoxer(), message);
+		}
+
+		mainUI.updateAutoLevelIcon();
+		applicationInterface.getDrawPreview().updateSettings(); // because we cache the auto-stabilise setting
+		this.closePopup();
+	}
+
 	public void clickedFaceDetection(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedFaceDetection");
@@ -1875,6 +1909,10 @@ public class MainActivity extends Activity {
 		}
 		if( !mainUI.showStampIcon() ) {
 			View button = findViewById(R.id.stamp);
+			button.setVisibility(View.GONE);
+		}
+		if( !mainUI.showAutoLevelIcon() ) {
+			View button = findViewById(R.id.auto_level);
 			button.setVisibility(View.GONE);
 		}
 		if( !mainUI.showFaceDetectionIcon() ) {
