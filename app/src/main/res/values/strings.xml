@@ -773,6 +773,8 @@
     <string name="white_balance_locked">White balance locked</string>
     <string name="white_balance_unlocked">White balance unlocked</string>
 
+    <string name="preference_show_exposure_lock">Show auto exposure lock icon</string>
+    <string name="preference_show_exposure_lock_summary">Whether to show an on-screen icon for locking or unlocking exposure</string>
     <string name="exposure_unlock">Unlock exposure</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->

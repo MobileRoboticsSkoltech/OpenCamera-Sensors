@@ -756,6 +756,13 @@ public class MainUI {
 		}
 	}
 
+	public boolean showExposureLockIcon() {
+		if( !main_activity.getPreview().supportsExposureLock() )
+			return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowExposureLockPreferenceKey, true);
+	}
+
 	public boolean showWhiteBalanceLockIcon() {
 		if( !main_activity.getPreview().supportsWhiteBalanceLock() )
 			return false;
@@ -820,7 +827,7 @@ public class MainUI {
 		    	switchVideoButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsExposureLock() )
+			    if( showExposureLockIcon() )
 			    	exposureLockButton.setVisibility(visibility);
 			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility);
@@ -917,7 +924,7 @@ public class MainUI {
 				switchVideoButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
-			    if( main_activity.getPreview().supportsExposureLock() )
+			    if( showExposureLockIcon() )
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
 			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video

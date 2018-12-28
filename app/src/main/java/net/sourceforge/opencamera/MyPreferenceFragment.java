@@ -390,6 +390,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "exposure_time_max: " + exposure_time_max);
 		}
 
+		final boolean supports_exposure_lock = bundle.getBoolean("supports_exposure_lock");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_exposure_lock: " + supports_exposure_lock);
+
 		final boolean supports_white_balance_lock = bundle.getBoolean("supports_white_balance_lock");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_white_balance_lock: " + supports_white_balance_lock);
@@ -527,6 +531,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
+
+        if( !supports_exposure_lock ) {
+        	Preference pref = findPreference("preference_show_exposure_lock");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
+		}
 
         if( !supports_white_balance_lock ) {
         	Preference pref = findPreference("preference_show_white_balance_lock");

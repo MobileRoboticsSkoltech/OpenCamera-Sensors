@@ -221,6 +221,8 @@ public class PreferenceKeys {
 
 	public static final String ShowWhiteBalanceLockPreferenceKey = "preference_show_white_balance_lock";
 
+	public static final String ShowExposureLockPreferenceKey = "preference_show_exposure_lock";
+
 	public static final String ShowZoomPreferenceKey = "preference_show_zoom";
 
 	public static final String ShowISOPreferenceKey = "preference_show_iso";

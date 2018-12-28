@@ -1658,6 +1658,7 @@ public class MainActivity extends Activity {
 		bundle.putInt("iso_range_min", this.preview.getMinimumISO());
 		bundle.putInt("iso_range_max", this.preview.getMaximumISO());
 		bundle.putBoolean("supports_exposure_time", this.preview.supportsExposureTime());
+		bundle.putBoolean("supports_exposure_lock", this.preview.supportsExposureLock());
 		bundle.putBoolean("supports_white_balance_lock", this.preview.supportsWhiteBalanceLock());
 		bundle.putLong("exposure_time_min", this.preview.getMinimumExposureTime());
 		bundle.putLong("exposure_time_max", this.preview.getMaximumExposureTime());
@@ -1953,6 +1954,10 @@ public class MainActivity extends Activity {
 
 		// ensure icons invisible if disabling them from showing from the Settings
 		// (if enabling them, we'll make the icon visible later on)
+		if( !mainUI.showExposureLockIcon() ) {
+			View button = findViewById(R.id.exposure_lock);
+			button.setVisibility(View.GONE);
+		}
 		if( !mainUI.showWhiteBalanceLockIcon() ) {
 			View button = findViewById(R.id.white_balance_lock);
 			button.setVisibility(View.GONE);
