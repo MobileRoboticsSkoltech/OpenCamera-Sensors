@@ -243,6 +243,20 @@
         />-->
 
     <ImageButton
+        android:id="@+id/text_stamp"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/preference_textstamp_summary"
+        android:src="@drawable/baseline_text_fields_white_48"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedTextStamp"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/stamp"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"

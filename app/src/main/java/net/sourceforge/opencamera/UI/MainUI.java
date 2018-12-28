@@ -87,6 +87,7 @@ public class MainUI {
 		this.setIcon(R.id.exposure);
 		//this.setIcon(R.id.switch_video);
 		//this.setIcon(R.id.switch_camera);
+		this.setIcon(R.id.text_stamp);
 		this.setIcon(R.id.stamp);
 		this.setIcon(R.id.auto_level);
 		this.setIcon(R.id.face_detection);
@@ -298,6 +299,7 @@ public class MainUI {
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
+			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
 			buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
@@ -761,6 +763,11 @@ public class MainUI {
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, false);
 	}
 
+	public boolean showTextStampIcon() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
+	}
+
 	public boolean showStampIcon() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
@@ -798,6 +805,7 @@ public class MainUI {
 			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
@@ -816,6 +824,8 @@ public class MainUI {
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility);
+			    if( showTextStampIcon() )
+			    	textStampButton.setVisibility(visibility);
 			    if( showStampIcon() )
 			    	stampButton.setVisibility(visibility);
 			    if( showAutoLevelIcon() )
@@ -896,6 +906,7 @@ public class MainUI {
 			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
@@ -910,6 +921,8 @@ public class MainUI {
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
+			    if( showTextStampIcon() )
+			    	textStampButton.setVisibility(visibility);
 				if( showStampIcon() )
 					stampButton.setVisibility(visibility);
 			    if( showAutoLevelIcon() )
@@ -944,6 +957,12 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
     }
 
+	public void updateTextStampIcon() {
+		ImageButton view = main_activity.findViewById(R.id.text_stamp);
+		boolean enabled = !main_activity.getApplicationInterface().getTextStampPref().isEmpty();
+		view.setImageResource(enabled ? R.drawable.baseline_text_fields_red_48 : R.drawable.baseline_text_fields_white_48);
+	}
+
 	public void updateStampIcon() {
 		ImageButton view = main_activity.findViewById(R.id.stamp);
 		boolean enabled = main_activity.getApplicationInterface().getStampPref().equals("preference_stamp_yes");
@@ -968,8 +987,9 @@ public class MainUI {
 	public void updateOnScreenIcons() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateOnScreenIcons");
-		this.updateWhiteBalanceLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
-		this.updateExposureLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
+		this.updateWhiteBalanceLockIcon();
+		this.updateExposureLockIcon();
+		this.updateTextStampIcon();
 		this.updateStampIcon();
 		this.updateAutoLevelIcon();
 		this.updateFaceDetectionIcon();

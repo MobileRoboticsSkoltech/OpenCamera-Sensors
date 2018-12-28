@@ -78,6 +78,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -1225,6 +1226,50 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void clickedTextStamp(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTextStamp");
+		this.closePopup();
+
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		alertDialog.setTitle(R.string.preference_textstamp);
+
+		final EditText editText = new EditText(this);
+		editText.setText(applicationInterface.getTextStampPref());
+		alertDialog.setView(editText);
+		alertDialog.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "custom text stamp clicked okay");
+
+				String custom_text = editText.getText().toString();
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(PreferenceKeys.TextStampPreferenceKey, custom_text);
+				editor.apply();
+
+				mainUI.updateTextStampIcon();
+			}
+		});
+		alertDialog.setNegativeButton(android.R.string.cancel, null);
+
+		final AlertDialog alert = alertDialog.create();
+		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "custom stamp text dialog dismissed");
+		        setWindowFlagsForCamera();
+				showPreview(true);
+			}
+		});
+
+		showPreview(false);
+		setWindowFlagsForSettings();
+		showAlert(alert);
+	}
+
 	public void clickedStamp(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedStamp");
@@ -1910,6 +1955,10 @@ public class MainActivity extends Activity {
 		// (if enabling them, we'll make the icon visible later on)
 		if( !mainUI.showWhiteBalanceLockIcon() ) {
 			View button = findViewById(R.id.white_balance_lock);
+			button.setVisibility(View.GONE);
+		}
+		if( !mainUI.showTextStampIcon() ) {
+			View button = findViewById(R.id.text_stamp);
 			button.setVisibility(View.GONE);
 		}
 		if( !mainUI.showStampIcon() ) {
@@ -3466,15 +3515,9 @@ public class MainActivity extends Activity {
 
 		// on-screen icons such as exposure lock, white balance lock, face detection etc are made visible if necessary in
 		// MainUI.showGUI()
-	    if( preview.supportsWhiteBalanceLock() ) {
-			mainUI.updateWhiteBalanceLockIcon();
-	    }
 
-	    if( preview.supportsExposureLock() ) {
-			mainUI.updateExposureLockIcon();
-	    }
-		if( MyDebug.LOG )
-			Log.d(TAG, "cameraSetup: time after setting exposure lock button: " + (System.currentTimeMillis() - debug_time));
+		// need to update some icons, e.g., white balance and exposure lock due to them being turned off when pause/resuming
+		mainUI.updateOnScreenIcons();
 
 	    mainUI.setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 		if( MyDebug.LOG )

@@ -927,7 +927,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.UnitsDistancePreferenceKey, "preference_units_distance_m");
 	}
     
-    private String getTextStampPref() {
+    public String getTextStampPref() {
     	return sharedPreferences.getString(PreferenceKeys.TextStampPreferenceKey, "");
     }
     

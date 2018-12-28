@@ -763,6 +763,9 @@
     <string name="stamp_enabled">Photo stamp enabled</string>
     <string name="stamp_disabled">Photo stamp disabled</string>
 
+    <string name="preference_show_textstamp">Show custom text stamp photo icon</string>
+    <string name="preference_show_textstamp_summary">Whether to show an on-screen icon for specifying custom text to be stamped onto the photo</string>
+
     <string name="preference_show_white_balance_lock">Show auto white balance lock icon</string>
     <string name="preference_show_white_balance_lock_summary">Whether to show an on-screen icon for locking or unlocking auto white balance</string>
     <string name="white_balance_lock">Lock white balance</string>

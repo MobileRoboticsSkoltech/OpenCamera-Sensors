@@ -217,6 +217,8 @@ public class PreferenceKeys {
 
 	public static final String ShowStampPreferenceKey = "preference_show_stamp";
 
+	public static final String ShowTextStampPreferenceKey = "preference_show_textstamp";
+
 	public static final String ShowWhiteBalanceLockPreferenceKey = "preference_show_white_balance_lock";
 
 	public static final String ShowZoomPreferenceKey = "preference_show_zoom";
