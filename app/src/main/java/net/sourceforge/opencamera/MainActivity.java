@@ -4245,7 +4245,6 @@ public class MainActivity extends Activity {
 								Log.d(TAG, "...but speech recognition already stopped");
 							return;
 						}
-			        	speechRecognizerStopped();
 						ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 						boolean found = false;
 						final String trigger = "cheese";
