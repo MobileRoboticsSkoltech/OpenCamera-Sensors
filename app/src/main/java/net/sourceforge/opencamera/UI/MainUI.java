@@ -82,6 +82,7 @@ public class MainUI {
 		this.setIcon(R.id.gallery);
 		this.setIcon(R.id.settings);
 		this.setIcon(R.id.popup);
+		this.setIcon(R.id.white_balance_lock);
 		this.setIcon(R.id.exposure_lock);
 		this.setIcon(R.id.exposure);
 		//this.setIcon(R.id.switch_video);
@@ -291,6 +292,7 @@ public class MainUI {
             }
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
+            buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
@@ -775,6 +777,7 @@ public class MainUI {
 		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
 			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View stampButton = main_activity.findViewById(R.id.stamp);
@@ -788,6 +791,8 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 		    	switchVideoButton.setVisibility(visibility);
+			    if( main_activity.getPreview().supportsWhiteBalanceLock() )
+			    	whiteBalanceLockButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
@@ -867,6 +872,7 @@ public class MainUI {
 		    	final int visibility_video = show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
 			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View stampButton = main_activity.findViewById(R.id.stamp);
@@ -876,6 +882,8 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 				switchVideoButton.setVisibility(visibility);
+			    if( main_activity.getPreview().supportsWhiteBalanceLock() )
+			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
 			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
 			    if( main_activity.getPreview().supportsExposureLock() )
@@ -898,6 +906,18 @@ public class MainUI {
 		});
     }
 
+	public void updateWhiteBalanceLockIcon() {
+        ImageButton view = main_activity.findViewById(R.id.white_balance_lock);
+        boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
+        view.setImageResource(enabled ? R.drawable.white_balance_locked : R.drawable.white_balance_unlocked);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.white_balance_unlock : R.string.white_balance_lock) );
+    }
+
+	public void updateExposureLockIcon() {
+        ImageButton view = main_activity.findViewById(R.id.exposure_lock);
+        view.setImageResource(main_activity.getPreview().isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+    }
+
 	public void updateStampIcon() {
 		ImageButton view = main_activity.findViewById(R.id.stamp);
 		boolean enabled = main_activity.getApplicationInterface().getStampPref().equals("preference_stamp_yes");
@@ -912,15 +932,11 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.face_detection_disable : R.string.face_detection_enable) );
 	}
 
-	public void updateExposureLockIcon() {
-        ImageButton exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
-        exposureLockButton.setImageResource(main_activity.getPreview().isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
-    }
-
 	public void updateOnScreenIcons() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateOnScreenIcons");
-		// don't need to call updateExposureLockIcon(), as this isn't determined via a saved preference
+		this.updateWhiteBalanceLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
+		this.updateExposureLockIcon(); // not actually needed as exposure lock isn't a saved preference setting, but no harm calling it anyway for consistency
 		this.updateStampIcon();
 		this.updateFaceDetectionIcon();
 	}

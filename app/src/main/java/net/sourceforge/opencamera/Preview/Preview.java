@@ -204,6 +204,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean is_exposure_lock_supported;
 	private boolean is_exposure_locked;
 
+	private boolean is_white_balance_lock_supported;
+	private boolean is_white_balance_locked;
+
 	private List<String> color_effects;
 	private List<String> scene_modes;
 	private List<String> white_balances;
@@ -1952,6 +1955,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        supported_focus_values = camera_features.supported_focus_values;
 	        this.max_num_focus_areas = camera_features.max_num_focus_areas;
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
+	        this.is_white_balance_lock_supported = camera_features.is_white_balance_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 			this.supports_photo_video_recording = camera_features.is_photo_video_recording_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
@@ -2714,9 +2718,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up exposure lock");
-	    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
-	    	// also note that it isn't safe to lock the exposure before starting the preview
-	    	is_exposure_locked = false;
+			// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
+			// also note that it isn't safe to lock the exposure before starting the preview
+			is_exposure_locked = false;
+		}
+
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up white balance lock");
+			// same reasoning as exposure lock
+			is_white_balance_locked = false;
 		}
 
 		if( MyDebug.LOG ) {
@@ -4574,6 +4585,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "remove continuous picture focus move callback");
 			camera_controller.setContinuousFocusMoveCallback(null);
+		}
+	}
+
+	public void toggleWhiteBalanceLock() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "toggleWhiteBalanceLock()");
+		if( this.phase == PHASE_TAKING_PHOTO ) {
+			// just to be safe
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
+		if( camera_controller == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
+		if( is_white_balance_lock_supported ) {
+			is_white_balance_locked = !is_white_balance_locked;
+			cancelAutoFocus();
+	        camera_controller.setAutoWhiteBalanceLock(is_white_balance_locked);
 		}
 	}
 
@@ -7025,8 +7057,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean isExposureLocked() {
     	return this.is_exposure_locked;
     }
-    
-    public boolean supportsZoom() {
+
+	public boolean supportsWhiteBalanceLock() {
+		return this.is_white_balance_lock_supported;
+	}
+
+	public boolean isWhiteBalanceLocked() {
+		return this.is_white_balance_locked;
+	}
+
+	public boolean supportsZoom() {
     	return this.has_zoom;
     }
     

@@ -327,6 +327,15 @@
 				android:defaultValue="false"
 				/>
 
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+			<CheckBoxPreference
+				android:key="preference_show_white_balance_lock"
+				android:title="@string/preference_show_white_balance_lock"
+				android:summary="@string/preference_show_white_balance_lock_summary"
+				android:icon="@drawable/white_balance_unlocked"
+				android:defaultValue="false"
+				/>
+
 			<CheckBoxPreference
                 android:key="preference_show_zoom"
                 android:title="@string/preference_show_zoom"

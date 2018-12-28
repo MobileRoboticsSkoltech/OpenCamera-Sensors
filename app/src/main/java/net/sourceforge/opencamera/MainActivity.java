@@ -1384,6 +1384,13 @@ public class MainActivity extends Activity {
 		}
     }
 
+	public void clickedWhiteBalanceLock(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedWhiteBalanceLock");
+    	this.preview.toggleWhiteBalanceLock();
+    	mainUI.updateWhiteBalanceLockIcon();
+	}
+
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
@@ -1567,6 +1574,7 @@ public class MainActivity extends Activity {
 		bundle.putInt("iso_range_min", this.preview.getMinimumISO());
 		bundle.putInt("iso_range_max", this.preview.getMaximumISO());
 		bundle.putBoolean("supports_exposure_time", this.preview.supportsExposureTime());
+		bundle.putBoolean("supports_white_balance_lock", this.preview.supportsWhiteBalanceLock());
 		bundle.putLong("exposure_time_min", this.preview.getMinimumExposureTime());
 		bundle.putLong("exposure_time_max", this.preview.getMaximumExposureTime());
 		bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
@@ -3408,6 +3416,12 @@ public class MainActivity extends Activity {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting up exposure: " + (System.currentTimeMillis() - debug_time));
+
+	    ImageButton whiteBalanceLockButton = findViewById(R.id.white_balance_lock);
+	    whiteBalanceLockButton.setVisibility(preview.supportsWhiteBalanceLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    if( preview.supportsWhiteBalanceLock() ) {
+			mainUI.updateWhiteBalanceLockIcon();
+	    }
 
 		View exposureButton = findViewById(R.id.exposure);
 	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);

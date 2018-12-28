@@ -386,6 +386,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "exposure_time_max: " + exposure_time_max);
 		}
 
+		final boolean supports_white_balance_lock = bundle.getBoolean("supports_white_balance_lock");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_white_balance_lock: " + supports_white_balance_lock);
+
 		final boolean supports_white_balance_temperature = bundle.getBoolean("supports_white_balance_temperature");
 		final int white_balance_temperature_min = bundle.getInt("white_balance_temperature_min");
 		final int white_balance_temperature_max = bundle.getInt("white_balance_temperature_max");
@@ -519,6 +523,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
+
+        if( !supports_white_balance_lock ) {
+        	Preference pref = findPreference("preference_show_white_balance_lock");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
+		}
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
         	// the required ExifInterface tags requires Android N or greater

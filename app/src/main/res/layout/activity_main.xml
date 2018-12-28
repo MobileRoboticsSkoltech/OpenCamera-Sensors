@@ -175,6 +175,20 @@
         />
     
     <ImageButton
+        android:id="@+id/white_balance_lock"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/white_balance_lock"
+        android:src="@drawable/white_balance_unlocked"
+        android:backgroundTint="#3f000000"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedWhiteBalanceLock"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/exposure_lock"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"
