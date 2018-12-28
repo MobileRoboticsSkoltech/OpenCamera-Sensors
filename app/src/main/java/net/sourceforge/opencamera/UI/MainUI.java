@@ -915,7 +915,9 @@ public class MainUI {
 
 	public void updateExposureLockIcon() {
         ImageButton view = main_activity.findViewById(R.id.exposure_lock);
-        view.setImageResource(main_activity.getPreview().isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+        boolean enabled = main_activity.getPreview().isExposureLocked();
+        view.setImageResource(enabled ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
     }
 
 	public void updateStampIcon() {

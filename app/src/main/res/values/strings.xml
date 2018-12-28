@@ -244,7 +244,7 @@
     <string name="take_photo">Take Photo</string>
     <string name="gallery">Gallery</string>
     <string name="exposure">Exposure</string>
-    <string name="exposure_lock">Exposure Lock</string>
+    <string name="exposure_lock">Lock exposure</string>
     <string name="focus_mode">Focus Mode</string>
     <string name="flash_mode">Flash Mode</string>
     <string name="switch_to_front_camera">Switch to front camera</string>
@@ -758,6 +758,8 @@
     <string name="preference_show_white_balance_lock_summary">Whether to show an on-screen icon for locking or unlocking auto white balance</string>
     <string name="white_balance_lock">Lock white balance</string>
     <string name="white_balance_unlock">Unlock white balance</string>
+
+    <string name="exposure_unlock">Unlock exposure</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
