@@ -6471,8 +6471,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "getMaximumExposureTime: " + max_exposure_time);
 		long max = max_exposure_time;
 		if( applicationInterface.isExpoBracketingPref() || applicationInterface.isFocusBracketingPref() || applicationInterface.isCameraBurstPref() ) {
-			// doesn't make sense to allow exposure times more than 0.5s in these modes
-			max = Math.min(max_exposure_time, 1000000000L/2);
+			// doesn't make sense to allow long exposure times in these modes
+			if( applicationInterface.getBurstForNoiseReduction() )
+				max = Math.min(max_exposure_time, 1000000000L*2); // limit to 2s
+			else
+				max = Math.min(max_exposure_time, 1000000000L/2); // limit to 0.5s
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "max: " + max);
