@@ -173,7 +173,7 @@
     <string name="preference_screen_photo_settings">Configuración de fotos…</string>
     <string name="preference_screen_video_settings">Configuración de videos…</string>
     <string name="preference_screen_location_settings">Configuración de ubicación…</string>
-    <string name="preference_resolution">Resolución de la cámara</string>
+    <string name="preference_resolution">Resolución</string> <!-- keep string short due to fitting on popup menu on small devices of with large fonts -->
     <string name="preference_quality">Calidad de la imagen</string>
     <string name="preference_quality_summary">Establece la calidad JPEG de las imágenes fotográficas guardadas (el valor predeterminado es 90 %%)\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
