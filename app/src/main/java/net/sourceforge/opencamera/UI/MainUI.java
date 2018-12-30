@@ -553,7 +553,7 @@ public class MainUI {
 
 		if( popupIsOpen() )
 		{
-			View view = main_activity.findViewById(R.id.popup_container);
+			final View view = main_activity.findViewById(R.id.popup_container);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
 				layoutParams.addRule(align_right, 0);
@@ -589,6 +589,14 @@ public class MainUI {
 						// Top UI, reverse-portrait: Restart and open popup, it appears in wrong location.
 						// Top UI, reverse-landscape: Restart and open popup, it appears in wrong location.
 						setPopupViewRotation(ui_rotation, display_height);
+
+						// stop listening - only want to call this once!
+						if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
+							view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+						}
+						else {
+							view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+						}
 					}
 				}
 			);
