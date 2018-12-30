@@ -1472,7 +1472,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedWhiteBalanceLock");
     	this.preview.toggleWhiteBalanceLock();
     	mainUI.updateWhiteBalanceLockIcon();
-		preview.showToast(white_balance_lock_toast, preview.isExposureLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
+		preview.showToast(white_balance_lock_toast, preview.isWhiteBalanceLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
 	}
 
     public void clickedExposure(View view) {
