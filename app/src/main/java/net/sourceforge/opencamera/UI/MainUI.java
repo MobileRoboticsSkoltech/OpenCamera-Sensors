@@ -557,6 +557,7 @@ public class MainUI {
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
 				layoutParams.addRule(align_right, 0);
+				layoutParams.addRule(above, 0);
 				layoutParams.addRule(below, 0);
 				layoutParams.addRule(left_of, 0);
 				layoutParams.addRule(right_of, R.id.popup);
@@ -567,6 +568,8 @@ public class MainUI {
 				layoutParams.addRule(align_right, R.id.popup);
 				layoutParams.addRule(above, 0);
 				layoutParams.addRule(below, R.id.popup);
+				layoutParams.addRule(left_of, 0);
+				layoutParams.addRule(right_of, 0);
 				layoutParams.addRule(align_parent_top, 0);
 				layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
 			}
@@ -611,8 +614,8 @@ public class MainUI {
 				view.setPivotY(popup_height/2.0f);
 			}
 			else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
-				view.setPivotX(0);
-				view.setPivotY(0);
+				view.setPivotX(0.0f);
+				view.setPivotY(0.0f);
 				if( ui_rotation == 90 )
 					view.setTranslationX(popup_height);
 				else if( ui_rotation == 270 ) {
