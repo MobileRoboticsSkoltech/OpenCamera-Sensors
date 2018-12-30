@@ -210,7 +210,7 @@ public class MainUI {
 			Log.d(TAG, "    degrees = " + degrees);
 			Log.d(TAG, "    relative_orientation = " + relative_orientation);
 		}
-		int ui_rotation = (360 - relative_orientation) % 360;
+		final int ui_rotation = (360 - relative_orientation) % 360;
 		main_activity.getPreview().setUIRotation(ui_rotation);
 		int align_left = RelativeLayout.ALIGN_LEFT;
 		int align_right = RelativeLayout.ALIGN_RIGHT;
@@ -254,7 +254,7 @@ public class MainUI {
 		Point display_size = new Point();
 		Display display = main_activity.getWindowManager().getDefaultDisplay();
 		display.getSize(display_size);
-		int display_height = Math.min(display_size.x, display_size.y);
+		final int display_height = Math.min(display_size.x, display_size.y);
 
 		if( !popup_container_only )
 		{
@@ -575,69 +575,23 @@ public class MainUI {
 			}
 			view.setLayoutParams(layoutParams);
 
-			setViewRotation(view, ui_rotation);
-			// reset:
-			view.setTranslationX(0.0f);
-			view.setTranslationY(0.0f);
-
-			int popup_width = view.getWidth();
-			int popup_height = view.getHeight();
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "popup_width: " + popup_width);
-				Log.d(TAG, "popup_height: " + popup_height);
-				if( popup_view != null )
-					Log.d(TAG, "popup total width: " + popup_view.getTotalWidth());
-			}
-			if( popup_view != null && popup_width > popup_view.getTotalWidth()*1.2  ) {
-				// This is a workaround for the rare but annoying bug where the popup window is too large
-				// (and appears partially off-screen). Unfortunately have been unable to fix - and trying
-				// to force the popup container to have a particular width just means some of the contents
-				// (e.g., Timer) are missing. But at least stop caching it, so that reopening the popup
-				// should fix it, rather than having to restart or pause/resume Open Camera.
-				// Also note, normally we should expect popup_width == popup_view.getTotalWidth(), but
-				// have put a fudge factor of 1.2 just in case it's normally slightly larger on some
-				// devices.
-				Log.e(TAG, "### popup view is too big?!");
-				force_destroy_popup = true;
-				/*popup_width = popup_view.getTotalWidth();
-				ViewGroup.LayoutParams params = new RelativeLayout.LayoutParams(
-						popup_width,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				view.setLayoutParams(params);*/
-			}
-			else {
-				force_destroy_popup = false;
-			}
-
-			if( ui_rotation == 0 || ui_rotation == 180 ) {
-				view.setPivotX(popup_width/2.0f);
-				view.setPivotY(popup_height/2.0f);
-			}
-			else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
-				view.setPivotX(0.0f);
-				view.setPivotY(0.0f);
-				if( ui_rotation == 90 )
-					view.setTranslationX(popup_height);
-				else if( ui_rotation == 270 ) {
-					view.setTranslationY(display_height);
+			//setPopupViewRotation(ui_rotation, display_height);
+			view.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onGlobalLayout()");
+						// We need to call setPopupViewRotation after the above layout param changes
+						// have taken effect, otherwise we can have problems due to popup_height being incorrect.
+						// Example bugs:
+						// Left-handed UI, portrait: Restart and open popup, it doesn't appear until device is rotated.
+						// Top UI, reverse-portrait: Restart and open popup, it appears in wrong location.
+						// Top UI, reverse-landscape: Restart and open popup, it appears in wrong location.
+						setPopupViewRotation(ui_rotation, display_height);
+					}
 				}
-			}
-			else {
-				view.setPivotX(popup_width);
-				view.setPivotY(ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : popup_height);
-				if( ui_placement == UIPlacement.UIPLACEMENT_RIGHT ) {
-					if( ui_rotation == 90 )
-						view.setTranslationY( popup_width );
-					else if( ui_rotation == 270 )
-						view.setTranslationX( - popup_height );
-				}
-				else {
-					if( ui_rotation == 90 )
-						view.setTranslationX( - popup_height );
-					else if( ui_rotation == 270 )
-						view.setTranslationY( - popup_width );
-				}
-			}
+			);
 		}
 
 		if( !popup_container_only ) {
@@ -649,6 +603,75 @@ public class MainUI {
 			Log.d(TAG, "layoutUI: total time: " + (System.currentTimeMillis() - debug_time));
 		}
     }
+
+    private void setPopupViewRotation(int ui_rotation, int display_height) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPopupViewRotation");
+		View view = main_activity.findViewById(R.id.popup_container);
+		setViewRotation(view, ui_rotation);
+		// reset:
+		view.setTranslationX(0.0f);
+		view.setTranslationY(0.0f);
+
+		int popup_width = view.getWidth();
+		int popup_height = view.getHeight();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "popup_width: " + popup_width);
+			Log.d(TAG, "popup_height: " + popup_height);
+			if( popup_view != null )
+				Log.d(TAG, "popup total width: " + popup_view.getTotalWidth());
+		}
+		if( popup_view != null && popup_width > popup_view.getTotalWidth()*1.2  ) {
+			// This is a workaround for the rare but annoying bug where the popup window is too large
+			// (and appears partially off-screen). Unfortunately have been unable to fix - and trying
+			// to force the popup container to have a particular width just means some of the contents
+			// (e.g., Timer) are missing. But at least stop caching it, so that reopening the popup
+			// should fix it, rather than having to restart or pause/resume Open Camera.
+			// Also note, normally we should expect popup_width == popup_view.getTotalWidth(), but
+			// have put a fudge factor of 1.2 just in case it's normally slightly larger on some
+			// devices.
+			Log.e(TAG, "### popup view is too big?!");
+			force_destroy_popup = true;
+			/*popup_width = popup_view.getTotalWidth();
+			ViewGroup.LayoutParams params = new RelativeLayout.LayoutParams(
+					popup_width,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			view.setLayoutParams(params);*/
+		}
+		else {
+			force_destroy_popup = false;
+		}
+
+		if( ui_rotation == 0 || ui_rotation == 180 ) {
+			view.setPivotX(popup_width/2.0f);
+			view.setPivotY(popup_height/2.0f);
+		}
+		else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+			view.setPivotX(0.0f);
+			view.setPivotY(0.0f);
+			if( ui_rotation == 90 )
+				view.setTranslationX(popup_height);
+			else if( ui_rotation == 270 ) {
+				view.setTranslationY(display_height);
+			}
+		}
+		else {
+			view.setPivotX(popup_width);
+			view.setPivotY(ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : popup_height);
+			if( ui_placement == UIPlacement.UIPLACEMENT_RIGHT ) {
+				if( ui_rotation == 90 )
+					view.setTranslationY( popup_width );
+				else if( ui_rotation == 270 )
+					view.setTranslationX( - popup_height );
+			}
+			else {
+				if( ui_rotation == 90 )
+					view.setTranslationX( - popup_height );
+				else if( ui_rotation == 270 )
+					view.setTranslationY( - popup_width );
+			}
+		}
+	}
 
     /** Set icons for taking photos vs videos.
 	 *  Also handles content descriptions for the take photo button and switch video button.
