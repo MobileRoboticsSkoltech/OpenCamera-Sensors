@@ -6992,6 +6992,62 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /* Tests against a bug where popup wouldn't show with left UI placement, due to 0 popup view height.
+     */
+    public void testPopupLeftLayout() {
+        Log.d(TAG, "testPopupLeftLayout");
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.UIPlacementPreferenceKey, "ui_left");
+        editor.apply();
+        updateForSettings();
+
+        View popup_view = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup_container);
+
+        View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+        assertTrue(!mActivity.popupIsOpen());
+        clickView(popupButton);
+        while( !mActivity.popupIsOpen() ) {
+        }
+
+        int popup_width = popup_view.getWidth();
+        int popup_height = popup_view.getHeight();
+        int test_popup_width = mActivity.getMainUI().test_saved_popup_width;
+        int test_popup_height = mActivity.getMainUI().test_saved_popup_height;
+        Log.d(TAG, "popup_width: " + popup_width);
+        Log.d(TAG, "popup_height: " + popup_height);
+        Log.d(TAG, "test_popup_width: " + test_popup_width);
+        Log.d(TAG, "test_popup_height: " + test_popup_height);
+        assertTrue(popup_width > 0);
+        assertTrue(popup_height > 0);
+        assertEquals(popup_width, test_popup_width);
+        assertEquals(popup_height, test_popup_height);
+
+        // now reopen popup view, and check the same dimensions
+        clickView(popupButton);
+        while( mActivity.popupIsOpen() ) {
+        }
+
+        clickView(popupButton);
+        while( !mActivity.popupIsOpen() ) {
+        }
+
+        int new_popup_width = popup_view.getWidth();
+        int new_popup_height = popup_view.getHeight();
+        test_popup_width = mActivity.getMainUI().test_saved_popup_width;
+        test_popup_height = mActivity.getMainUI().test_saved_popup_height;
+        Log.d(TAG, "new_popup_width: " + new_popup_width);
+        Log.d(TAG, "new_popup_height: " + new_popup_height);
+        Log.d(TAG, "test_popup_width: " + test_popup_width);
+        Log.d(TAG, "test_popup_height: " + test_popup_height);
+        assertEquals(popup_width, new_popup_width);
+        assertEquals(popup_height, new_popup_height);
+        assertEquals(popup_width, test_popup_width);
+        assertEquals(popup_height, test_popup_height);
+    }
+
     /* Tests layout bug with popup menu.
      * Note, in practice this doesn't seem to reproduce the problem, but keep the test anyway.
      * Currently not autotested as the problem isn't fixed, and this would just be a test that

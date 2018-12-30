@@ -71,6 +71,8 @@ public class MainUI {
 
 	// for testing:
 	private final Map<String, View> test_ui_buttons = new Hashtable<>();
+	public int test_saved_popup_width;
+	public int test_saved_popup_height;
 
 	public MainUI(MainActivity main_activity) {
 		if( MyDebug.LOG )
@@ -623,6 +625,8 @@ public class MainUI {
 
 		int popup_width = view.getWidth();
 		int popup_height = view.getHeight();
+		test_saved_popup_width = popup_width;
+		test_saved_popup_height = popup_height;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "popup_width: " + popup_width);
 			Log.d(TAG, "popup_height: " + popup_height);

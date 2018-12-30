@@ -31,6 +31,7 @@ public class MainTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAutoFocus"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAutoFocusCorners"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPopup"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPopupLeftLayout"));
         //suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPopupLayout")); // don't autotest for now, see comments for the test
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchResolution"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFaceDetection"));
