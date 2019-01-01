@@ -874,7 +874,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(version);
                         about_string.append("\nCode: ");
                         about_string.append(version_code);
-                        about_string.append("\n(c) 2013-2018 Mark Harman");
+                        about_string.append("\n(c) 2013-2019 Mark Harman");
                         about_string.append("\nReleased under the ");
                         about_string.append(gpl_link);
                         about_string.append(" (Open Camera also uses additional third party files, see " + online_help_link + " for full licences and attributions.)");
