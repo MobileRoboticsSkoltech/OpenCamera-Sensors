@@ -97,7 +97,7 @@
     <string name="preference_timer_beep_summary">Ηχητικό σήμα όταν το χρονόμετρο μετράει αντίστροφα η για λειτουργία ριπής</string>
     <string name="preference_timer_speak">Εκφώνηση χρονομέτρου αντίστροφης μέτρησης</string>
     <string name="preference_timer_speak_summary">Εκφώνηση της αντίστροφης μέτρησης για το χρονόμετρο η την λειτουργία ριπής (από 60 δευτερόλεπτα)</string>
-    <string name="preference_burst_mode">Ριπή</string> <!-- also used in popup menu, so shouldn't be too long a string -->
+    <string name="preference_burst_mode">συνεχής λήψη</string> <!-- also used in popup menu, so shouldn't be too long a string -->
     <string name="preference_burst_interval">Διάστημα λειτουργίας ριπής</string>
     <string name="preference_screen_camera_controls_more">Περισσότερα στοιχεία ελέγχου της κάμερας…</string>
     <string name="preference_touch_capture">Αγγιγμα για λήψη</string>
