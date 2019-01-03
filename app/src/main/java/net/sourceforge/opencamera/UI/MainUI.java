@@ -80,30 +80,6 @@ public class MainUI {
 		this.main_activity = main_activity;
 		
 		this.setSeekbarColors();
-
-		this.setIcon(R.id.gallery);
-		this.setIcon(R.id.settings);
-		this.setIcon(R.id.popup);
-		this.setIcon(R.id.exposure);
-		//this.setIcon(R.id.switch_video);
-		//this.setIcon(R.id.switch_camera);
-		this.setIcon(R.id.exposure_lock);
-		this.setIcon(R.id.white_balance_lock);
-		this.setIcon(R.id.text_stamp);
-		this.setIcon(R.id.stamp);
-		this.setIcon(R.id.auto_level);
-		this.setIcon(R.id.face_detection);
-		this.setIcon(R.id.audio_control);
-		this.setIcon(R.id.trash);
-		this.setIcon(R.id.share);
-	}
-	
-	private void setIcon(int id) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setIcon: " + id);
-	    //ImageButton button = main_activity.findViewById(id);
-	    //button.setBackgroundColor(Color.argb(63, 63, 63, 63)); // n.b., rgb color seems to be ignored for Android 6 onwards, but still relevant for older versions
-		// no longer used - we use backgroundTint set in xml (so that we can set the rgb colour for the background)
 	}
 	
 	private void setSeekbarColors() {
