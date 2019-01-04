@@ -324,7 +324,7 @@
 
     <string name="preference_nr_save_no">Keine Rauschminderung im Originalbild</string>
     <string name="preference_nr_save_single">Speichere einzelnes Originalbild</string>
-    <string name="preference_nr_save_summary">Sollen Originalbilder mit Rauschminderung gespeichert werde? (Benötigt mehr Zeit)</string>
+    <string name="preference_nr_save_summary">Sollen Originalbilder mit Rauschminderung gespeichert werde? (Benötigt mehr Zeit)\n%s</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 

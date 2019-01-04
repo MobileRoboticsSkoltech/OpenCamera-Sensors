@@ -384,7 +384,7 @@
     <string name="noise_reduction_mode_minimal">小尺寸</string>
     <string name="noise_reduction_mode_default">默认</string>
     <string name="noise_reduction_mode_off">关闭</string>
-    <string name="preference_screen_processing_settings">处理设置...</string>
+    <string name="preference_screen_processing_settings">处理设置…</string>
     <string name="preference_noise_reduction_mode">降噪算法</string>
     <string name="processing">处理...</string>
     <string name="preference_raw_no">仅JPEG</string>

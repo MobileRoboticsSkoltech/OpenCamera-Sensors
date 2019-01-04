@@ -35,7 +35,6 @@
     <string name="exposure_locked">Κλείδωμα αντιστάθμισης</string>
     <string name="exposure_unlocked">Ξεκλείδωμα αντιστάθμισης</string>
     <string name="cancelled_timer">Ακύρωση χρονομέτρου</string>
-    <string name="cancelled_burst_mode">Ακύρωση λειτουργίας ριπής</string>
     <string name="started_timer">Εκκίνηση χρονομέτρου</string>
     <string name="failed_to_save_video">Η αποθήκευση του βίντεο απέτυχε</string>
     <string name="failed_to_record_video">Η εγγραφή του βίντεο απέτυχε</string>
@@ -103,7 +102,7 @@
     <string name="preference_touch_capture">Αγγιγμα για λήψη</string>
     <string name="preference_touch_capture_summary">Λήψη μιας φωτογραφίας, απλά αγγίζοντας η με διπλό άγγιγμα της προεπισκόπησης</string>
     <string name="preference_pause_preview">Παύση μετά τη λήψη φωτογραφιών</string>
-    <string name="preference_pause_preview_summary">Παύση στην οθόνη μετά την λήψη μιας φωτογραφίας, με την επιλογή για κοινοποίηση η διαγραφή της φωτογραφίας\n%s</string>
+    <string name="preference_pause_preview_summary">Παύση στην οθόνη μετά την λήψη μιας φωτογραφίας, με την επιλογή για κοινοποίηση η διαγραφή της φωτογραφίας</string>
     <string name="preference_shutter_sound">Ηχος κλείστρου</string>
     <string name="preference_shutter_sound_summary">Αναπαραγωγή ήχου κατά την λήψη φωτογραφίας</string>
     <string name="preference_volume_keys">Πλήκτρα ρύθμισης ήχου</string>
@@ -127,7 +126,7 @@
     <string name="preference_lock_video">Κλείδωμα της οθόνης κατά την εγγραφή βίντεο</string>
     <string name="preference_lock_video_summary">Κατά την εγγραφή βίντεο, το GUI θα πρέπει να κλειδωθεί για να αποτραπεί η ακούσια διακοπή της εγγραφής. Σύρετε την οθόνη για να την ξεκλειδώσετε. Σημειώστε ότι η εγγραφή βίντεο θα σταματήσει αν η εφαρμογή είναι στο παρασκήνιο, η η οθόνη σβήσει.</string>
     <string name="preference_rotate_preview">Περιστροφή προεπισκόπησης</string>
-    <string name="preference_rotate_preview_summary">Επιλογή για περιστροφή της προεπισκόπησης (δεν θα επηρεάσει τις επακόλουθες φωτογραφίες/βίντεο)</string>
+    <string name="preference_rotate_preview_summary">Επιλογή για περιστροφή της προεπισκόπησης (δεν θα επηρεάσει τις επακόλουθες φωτογραφίες/βίντεο)\n%s</string>
     <string name="preference_screen_gui">Στην οθόνη GUI…</string>
     <string name="preference_preview_size">Μέγεθος προεπισκόπησης</string>
     <string name="preference_ui_placement">UI τοποθέτηση</string>

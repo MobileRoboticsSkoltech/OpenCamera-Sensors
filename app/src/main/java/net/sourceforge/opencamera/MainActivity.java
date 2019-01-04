@@ -333,12 +333,19 @@ public class MainActivity extends Activity {
         });
         // set up on touch listener so we can detect if we've released from a long click
         takePhotoButton.setOnTouchListener(new View.OnTouchListener() {
+			// the suppressed warning ClickableViewAccessibility suggests calling view.performClick for ACTION_UP, but this
+			// results in an additional call to clickedTakePhoto() - that is, if there is no long press, we get two calls to
+			// clickedTakePhoto instead one one; and if there is a long press, we get one call to clickedTakePhoto where
+			// there should be none.
+			@SuppressLint("ClickableViewAccessibility")
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
 				if( motionEvent.getAction() == MotionEvent.ACTION_UP ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "takePhotoButton ACTION_UP");
 					takePhotoButtonLongClickCancelled();
+					if( MyDebug.LOG )
+						Log.d(TAG, "takePhotoButton ACTION_UP done");
 				}
 				return false;
 			}
