@@ -637,7 +637,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Ensures that the flash mode changes as expected when switching between photo and video modes.
      */
-    public void testFlashVideoMode() throws InterruptedException {
+    public void testFlashVideoMode() {
         Log.d(TAG, "testFlashVideoMode");
         setToDefault();
 
@@ -1537,7 +1537,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * that record audio permission is granted!
      * Also tests content descriptions of <> buttons on the popup menu.
      */
-    public void testSwitchVideo() throws InterruptedException {
+    public void testSwitchVideo() {
         Log.d(TAG, "testSwitchVideo");
 
         setToDefault();
@@ -1792,7 +1792,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         return files == null ? 0 : files.length;
     }
 
-    public void subTestContinuousPictureFocusRepeat() throws InterruptedException {
+    private void subTestContinuousPictureFocusRepeat() throws InterruptedException {
         Log.d(TAG, "subTestContinuousPictureFocusRepeat");
 
         if( !mPreview.supportsFocus() ) {
@@ -3313,7 +3313,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Test taking photo with JPEG + DNG (RAW) and repeat mode.
      */
-    public void testTakePhotoRawRepeat() throws InterruptedException {
+    public void testTakePhotoRawRepeat() {
         Log.d(TAG, "testTakePhotoRawRepeat");
         setToDefault();
 
@@ -6030,7 +6030,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Tests that video resolutions are stored separately for high speed fps, for Camera2.
      */
-    public void testVideoFPSHighSpeed() throws InterruptedException {
+    public void testVideoFPSHighSpeed() {
         Log.d(TAG, "testVideoFPSHighSpeed");
 
         setToDefault();
@@ -6698,38 +6698,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // wait until flash off
         long time_s = System.currentTimeMillis();
-        for(;;) {
-            if( !mPreview.getCameraController().getFlashValue().equals("flash_torch") ) {
-                break;
-            }
-            assertTrue( System.currentTimeMillis() - time_s <= 200 );
+        while (mPreview.getCameraController().getFlashValue().equals("flash_torch")) {
+            assertTrue(System.currentTimeMillis() - time_s <= 200);
         }
 
         // wait until flash on
         time_s = System.currentTimeMillis();
-        for(;;) {
-            if( mPreview.getCameraController().getFlashValue().equals("flash_torch") ) {
-                break;
-            }
-            assertTrue( System.currentTimeMillis() - time_s <= 1100 );
+        while (!mPreview.getCameraController().getFlashValue().equals("flash_torch")) {
+            assertTrue(System.currentTimeMillis() - time_s <= 1100);
         }
 
         // wait until flash off
         time_s = System.currentTimeMillis();
-        for(;;) {
-            if( !mPreview.getCameraController().getFlashValue().equals("flash_torch") ) {
-                break;
-            }
-            assertTrue( System.currentTimeMillis() - time_s <= 200 );
+        while (mPreview.getCameraController().getFlashValue().equals("flash_torch")) {
+            assertTrue(System.currentTimeMillis() - time_s <= 200);
         }
 
         // wait until flash on
         time_s = System.currentTimeMillis();
-        for(;;) {
-            if( mPreview.getCameraController().getFlashValue().equals("flash_torch") ) {
-                break;
-            }
-            assertTrue( System.currentTimeMillis() - time_s <= 1100 );
+        while (!mPreview.getCameraController().getFlashValue().equals("flash_torch")) {
+            assertTrue(System.currentTimeMillis() - time_s <= 1100);
         }
 
         Log.d(TAG, "about to click stop video");
@@ -7724,7 +7712,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     /* Tests we can stamp date/time and location to photo.
      * May fail on devices without mobile network, especially if we don't even have wifi.
      */
-    public void testPhotoStamp() throws IOException {
+    public void testPhotoStamp() {
         Log.d(TAG, "testPhotoStamp");
 
         setToDefault();
@@ -7825,7 +7813,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests we can stamp custom text to photo.
      */
-    public void testCustomTextStamp() throws IOException {
+    public void testCustomTextStamp() {
         Log.d(TAG, "testCustomTextStamp");
 
         setToDefault();
@@ -8174,7 +8162,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * OrientationEventListener.enable() (from Preview.cameraOpened()) when called too many times.
      * Note, takes a while (over 1m) to run, test may look like it's hung whilst running!
      */
-    public void testSwitchCameraRepeat2() throws InterruptedException {
+    public void testSwitchCameraRepeat2() {
         Log.d(TAG, "testSwitchCameraRepeat2");
         setToDefault();
 
@@ -9460,7 +9448,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
-    public void subTestTakePhotoContinuousBurst(boolean is_slow) throws InterruptedException {
+    private void subTestTakePhotoContinuousBurst(boolean is_slow) throws InterruptedException {
         Log.d(TAG, "subTestTakePhotoContinuousBurst");
 
         // count initial files in folder
@@ -14132,7 +14120,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * @throws IOException
      * @throws InterruptedException
      */
-    public void testPanorama1() throws IOException, InterruptedException {
+    public void testPanorama1() throws IOException {
         Log.d(TAG, "testPanorama1");
 
         setToDefault();

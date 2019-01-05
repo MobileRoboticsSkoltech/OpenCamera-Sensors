@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,7 +75,7 @@ public class SettingsManager {
 	 *  The supplied inputStream will be closed.
 	 * @return Whether the operation was succesful.
 	 */
-	public boolean loadSettings(InputStream inputStream) {
+	private boolean loadSettings(InputStream inputStream) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "loadSettings: " + inputStream);
 		try {
@@ -197,9 +196,8 @@ public class SettingsManager {
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
             Set set = sharedPreferences.getAll().entrySet();
-            Iterator iter = set.iterator();
-            while( iter.hasNext() ) {
-                Map.Entry entry = (Map.Entry)iter.next();
+			for( Object aSet : set) {
+				Map.Entry entry = (Map.Entry) aSet;
                 String key = (String)entry.getKey();
                 Object value = entry.getValue();
                 if( key != null ) {

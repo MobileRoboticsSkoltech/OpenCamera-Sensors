@@ -336,7 +336,7 @@ public class StorageUtils {
 	}
 
 	// only valid if !isUsingSAF()
-	public static File getImageFolder(String folder_name) {
+	private static File getImageFolder(String folder_name) {
 		File file;
 		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
 			// ignore final '/' character
@@ -665,18 +665,20 @@ public class StorageUtils {
 		String mimeType;
 		switch (type) {
 			case MEDIA_TYPE_IMAGE:
-				if( extension.equals("dng") ) {
-					mimeType = "image/dng";
-					//mimeType = "image/x-adobe-dng";
-				}
-				else if( extension.equals("webp") ) {
-					mimeType = "image/webp";
-				}
-				else if( extension.equals("png") ) {
-					mimeType = "image/png";
-				}
-				else {
-					mimeType = "image/jpeg";
+				switch (extension) {
+					case "dng":
+						mimeType = "image/dng";
+						//mimeType = "image/x-adobe-dng";
+						break;
+					case "webp":
+						mimeType = "image/webp";
+						break;
+					case "png":
+						mimeType = "image/png";
+						break;
+					default:
+						mimeType = "image/jpeg";
+						break;
 				}
 				break;
 			case MEDIA_TYPE_VIDEO:

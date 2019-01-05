@@ -83,7 +83,7 @@ public class ImageSaver extends Thread {
 			RAW,
 			DUMMY
 		}
-		Type type;
+		final Type type;
 		enum ProcessType {
 			NORMAL,
 			HDR,
@@ -141,7 +141,7 @@ public class ImageSaver extends Thread {
 		final double geo_direction;
 		final String custom_tag_artist;
 		final String custom_tag_copyright;
-		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
+		final int sample_factor; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
 			ProcessType process_type,

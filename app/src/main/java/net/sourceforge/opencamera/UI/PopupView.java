@@ -532,8 +532,8 @@ public class PopupView extends LinearLayout {
 					burst_mode_values_l.add( all_burst_mode_values[i] );
 					burst_mode_entries_l.add( all_burst_mode_entries[i] );
 				}
-				final String [] burst_mode_values = burst_mode_values_l.toArray(new String[burst_mode_values_l.size()]);
-				final String [] burst_mode_entries = burst_mode_entries_l.toArray(new String[burst_mode_entries_l.size()]);
+				final String [] burst_mode_values = burst_mode_values_l.toArray(new String[0]);
+				final String [] burst_mode_entries = burst_mode_entries_l.toArray(new String[0]);
 
 				String burst_mode_value = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
 				burst_n_images_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);

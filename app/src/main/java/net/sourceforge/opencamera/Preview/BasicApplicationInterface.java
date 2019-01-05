@@ -123,7 +123,7 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	@Override
 	public String getRecordVideoOutputFormatPref() {
 		return "preference_video_output_format_default";
-	};
+	}
 
 	@Override
 	public String getVideoBitratePref() {

@@ -1552,7 +1552,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		}
 	}
 
-	void loadSettings() {
+	private void loadSettings() {
         if( MyDebug.LOG )
             Log.d(TAG, "loadSettings");
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());

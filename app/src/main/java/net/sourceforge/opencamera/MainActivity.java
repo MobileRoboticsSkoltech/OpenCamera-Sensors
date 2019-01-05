@@ -1182,7 +1182,7 @@ public class MainActivity extends Activity {
         applicationInterface.getImageSaver().waitUntilDone();
     }
 
-    public boolean longClickedTakePhoto() {
+    private boolean longClickedTakePhoto() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedTakePhoto");
 		// need to check whether fast burst is supported (including for the current resolution),
@@ -2258,7 +2258,7 @@ public class MainActivity extends Activity {
 		magnetic_accuracy_dialog = null; // if the magnetic accuracy was opened, it must have been closed now
     }
     
-    public void setWindowFlagsForSettings() {
+    private void setWindowFlagsForSettings() {
 		setWindowFlagsForSettings(true);
     }
 

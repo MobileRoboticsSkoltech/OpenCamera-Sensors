@@ -123,7 +123,6 @@ public class DrawPreview {
 	private boolean has_video_max_amp;
 	private int video_max_amp;
 	private long last_video_max_amp_time;
-	private int video_max_amp_prev1;
 	private int video_max_amp_prev2;
 	private int video_max_amp_peak;
 
@@ -1424,7 +1423,7 @@ public class DrawPreview {
             		// audio amplitude
 					if( !this.has_video_max_amp || time_ms > this.last_video_max_amp_time + 50 ) {
 						has_video_max_amp = true;
-						video_max_amp_prev1 = video_max_amp_prev2;
+						int video_max_amp_prev1 = video_max_amp_prev2;
 						video_max_amp_prev2 = video_max_amp;
 						video_max_amp = preview.getMaxAmplitude();
 						last_video_max_amp_time = time_ms;

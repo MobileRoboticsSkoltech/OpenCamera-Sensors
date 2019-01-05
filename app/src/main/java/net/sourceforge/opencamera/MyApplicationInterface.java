@@ -493,7 +493,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	@Override
 	public String getRecordVideoOutputFormatPref() {
     	return sharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default");
-	};
+	}
 
     @Override
     public String getVideoBitratePref() {

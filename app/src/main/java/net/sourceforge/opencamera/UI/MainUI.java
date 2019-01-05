@@ -57,7 +57,7 @@ public class MainUI {
     	UIPLACEMENT_RIGHT,
     	UIPLACEMENT_LEFT,
     	UIPLACEMENT_TOP
-	};
+	}
 	private UIPlacement ui_placement = UIPlacement.UIPLACEMENT_RIGHT;
 	private int top_margin = 0;
 	private boolean view_rotate_animation;
@@ -283,8 +283,7 @@ public class MainUI {
 			buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
             buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
 
-			List<View> buttons_all = new ArrayList<>();
-			buttons_all.addAll(buttons_permanent);
+			List<View> buttons_all = new ArrayList<>(buttons_permanent);
 			// icons which only sometimes show on the icon panel:
             buttons_all.add(main_activity.findViewById(R.id.trash));
             buttons_all.add(main_activity.findViewById(R.id.share));
