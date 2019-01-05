@@ -1303,12 +1303,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(!mPreview.hasFocusArea());
         assertTrue(mPreview.getCameraController().getFocusAreas() == null);
         assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
-        boolean face_detection_started = false;
         // check face detection already started
-        if( !mPreview.getCameraController().startFaceDetection() ) {
-            face_detection_started = true;
-        }
-        assertTrue(face_detection_started);
+        assertFalse( mPreview.getCameraController().startFaceDetection() );
 
         // touch to auto-focus with focus area
         saved_count = mPreview.count_cameraAutoFocus;
@@ -1323,12 +1319,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
             clickView(switchCameraButton);
             waitUntilCameraOpened();
-            face_detection_started = false;
             // check face detection already started
-            if( !mPreview.getCameraController().startFaceDetection() ) {
-                face_detection_started = true;
-            }
-            assertTrue(face_detection_started);
+            assertFalse( mPreview.getCameraController().startFaceDetection() );
 
             clickView(switchCameraButton);
             waitUntilCameraOpened();
@@ -1343,6 +1335,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( faceDetectionButton.getVisibility() == View.VISIBLE );
         assertTrue( faceDetectionButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.face_detection_disable) ) );
 
+        // check face detection already started
+        assertFalse( mPreview.getCameraController().startFaceDetection() );
+
         // restart and check still enabled
         restart();
         faceDetectionButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.face_detection);
@@ -1355,12 +1350,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertFalse( settings.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false) );
         assertTrue( faceDetectionButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.face_detection_enable) ) );
 
-        face_detection_started = false;
         // check face detection not already started
-        if( !mPreview.getCameraController().startFaceDetection() ) {
-            face_detection_started = true;
-        }
-        assertFalse(face_detection_started);
+        assertTrue( mPreview.getCameraController().startFaceDetection() );
     }
 
     private void subTestPopupButtonAvailability(String test_key, String option, boolean expected) {
