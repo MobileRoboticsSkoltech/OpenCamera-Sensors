@@ -1,6 +1,8 @@
 package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -126,6 +128,20 @@ public class SettingsManager {
 				}
 
 				skip(parser);
+			}
+
+			// even though we're restoring from settings, we don't want the first time or what's new dialog showing up again!
+			// important to do this after reading from xml, so that the keys aren't overwritten
+			editor.putBoolean(PreferenceKeys.FirstTimePreferenceKey, true);
+			try {
+				PackageInfo pInfo = main_activity.getPackageManager().getPackageInfo(main_activity.getPackageName(), 0);
+				int version_code = pInfo.versionCode;
+				editor.putInt(PreferenceKeys.LatestVersionPreferenceKey, version_code);
+			}
+			catch(PackageManager.NameNotFoundException e) {
+				if (MyDebug.LOG)
+					Log.d(TAG, "NameNotFoundException exception trying to get version number");
+				e.printStackTrace();
 			}
 
 			editor.apply();
