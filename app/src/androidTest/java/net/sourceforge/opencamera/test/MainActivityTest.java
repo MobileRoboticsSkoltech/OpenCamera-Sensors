@@ -8158,7 +8158,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Tests repeatedly switching camera, waiting for camera to reopen each time.
-     * Guards agains a bug fixed in 1.44 where we would crash due to memory leak in
+     * Guards against a bug fixed in 1.44 where we would crash due to memory leak in
      * OrientationEventListener.enable() (from Preview.cameraOpened()) when called too many times.
      * Note, takes a while (over 1m) to run, test may look like it's hung whilst running!
      */
@@ -8242,15 +8242,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // now load settings
         assertTrue( mActivity.getSettingsManager().loadSettings(mActivity.test_save_settings_file) );
 
-        // wait for restart
+        // wait - n.b., loadSettings() won't restart due to being test code
         Thread.sleep(3000);
+        /*mActivity = getActivity();
         Log.d(TAG, "mActivity is now: " + mActivity);
         mPreview = mActivity.getPreview();
-        Log.d(TAG, "mPreview is now: " + mPreview);
+        Log.d(TAG, "mPreview is now: " + mPreview);*/
 
         // now check setting is as expected
         settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         new_string = settings.getString(PreferenceKeys.TextStampPreferenceKey, "");
+        Log.d(TAG, "new_string: " + new_string);
+        assertEquals(test_string, new_string);
+
+        // check again after a restart
+        restart();
+        settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        new_string = settings.getString(PreferenceKeys.TextStampPreferenceKey, "");
+        Log.d(TAG, "new_string: " + new_string);
         assertEquals(test_string, new_string);
     }
 
@@ -8395,6 +8404,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     /** Tests launching the folder chooser on a new folder.
      */
     public void testFolderChooserNew() throws InterruptedException {
+        Log.d(TAG, "testFolderChooserNew");
         setToDefault();
 
         {
@@ -8436,6 +8446,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * (Shouldn't be possible to get into this state, but just in case.)
      */
     public void testFolderChooserInvalid() throws InterruptedException {
+        Log.d(TAG, "testFolderChooserInvalid");
         setToDefault();
 
         {
@@ -8557,12 +8568,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     public void testSaveFolderHistory() {
+        Log.d(TAG, "testSaveFolderHistory");
         setToDefault();
 
         subTestSaveFolderHistory(false);
     }
 
     public void testSaveFolderHistorySAF() {
+        Log.d(TAG, "testSaveFolderHistorySAF");
         setToDefault();
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
