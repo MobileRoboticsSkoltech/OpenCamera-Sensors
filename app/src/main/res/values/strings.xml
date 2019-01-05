@@ -177,8 +177,8 @@
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved JPEG or WebP photo images (default value is 90%%). Has no effect for PNG image format.\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_location">Store location data (Geotagging) (JPEG and DNG formats only)</string>
-    <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
+    <string name="preference_location">Store location data (Geotagging)</string>
+    <string name="preference_location_summary">Store GPS location data in the photos/videos (for photos, location data can only be stored in JPEG and DNG formats)</string>
     <string name="preference_gps_direction">Store compass direction</string>
     <string name="preference_gps_direction_summary">Store GPS compass direction in the photos (JPEG format only)</string>
     <string name="preference_require_location">Require location data</string>
