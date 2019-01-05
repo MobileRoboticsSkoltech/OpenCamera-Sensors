@@ -121,7 +121,7 @@
     <string name="preference_save_video_prefix_summary">Tiền tố được đặt trong tên tệp khi lưu video</string>
     <string name="preference_save_zulu_time">Định dạng thời gian cho tên tệp</string>
     <string name="preference_show_when_locked">Hiển thị máy ảnh khi khóa</string>
-    <string name="preference_show_when_locked_summary">Nếu kích hoạt, Open Camera vẫn hiển thị trên bất kỳ màn hình khóa nào (bạn vẫn phải mở khóa để truy cập Cài đặt, Thư viện, v.v...)</string>
+    <string name="preference_show_when_locked_summary">Nếu kích hoạt, Open Camera vẫn hiển thị trên bất kỳ màn hình khóa nào (bạn vẫn phải mở khóa để truy cập Cài đặt, Thư viện, v.v…)</string>
     <string name="preference_startup_focus">Tự động lấy nét khi khởi động</string>
     <string name="preference_startup_focus_summary">Tự động lấy nét khi Open Camera được khởi động. Nếu bạn gặp sự cố bật đèn flash khi khởi động, hãy tắt tùy chọn này</string>
     <string name="preference_lock_video">Khóa màn hình khi quay video</string>
@@ -398,7 +398,7 @@
     <string name="pause_video">Tạm dừng quay video</string>
     <string name="resume_video">Tiếp tục quay video</string>
 
-    <string name="capturing">Đang chụp...</string>
+    <string name="capturing">Đang chụp…</string>
 
     <string name="audio_listener_failed">Không thể bắt đầu nghe</string>
     <string name="failed_to_process_hdr">Không thể tạo ảnh HDR</string>
@@ -462,7 +462,7 @@
     <string name="preference_exif_copyright">Bản quyền</string>
     <string name="preference_exif_copyright_summary">Văn bản được lưu trữ trong thẻ "Bản quyền" (chỉ định dạng JPEG). (Để trống là không ghi).</string>
 
-    <string name="processing">Đang xử lý...</string>
+    <string name="processing">Đang xử lý…</string>
 
     <string name="preference_raw_no">Chỉ JPEG</string>
     <string name="preference_raw_yes">JPEG và DNG (RAW)</string>
@@ -497,6 +497,12 @@
     <string name="preference_focus_bracketing_n_images_entries_12">12</string>
     <string name="preference_focus_bracketing_n_images_entries_15">15</string>
     <string name="preference_focus_bracketing_n_images_entries_20">20</string>
+    <string name="preference_focus_bracketing_n_images_entries_25">25</string>
+    <string name="preference_focus_bracketing_n_images_entries_30">30</string>
+    <string name="preference_focus_bracketing_n_images_entries_40">40</string>
+    <string name="preference_focus_bracketing_n_images_entries_50">50</string>
+    <string name="preference_focus_bracketing_n_images_entries_100">100</string>
+    <string name="preference_focus_bracketing_n_images_entries_200">200</string>
 
     <string name="preference_video_capture_rate">Tốc độ</string>
     <string name="preference_video_capture_rate_normal">Bình thường</string>
@@ -618,20 +624,69 @@
     <string name="noise_reduction_mode_fast">Nhanh</string>
     <string name="noise_reduction_mode_high_quality">Chất lượng cao</string>
 
-    <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
-    <string name="whats_new_text">
-        [This dialog is shown when Open Camera is updated. You can disable it under
-        Settings/On screen GUI/Show What\'s New dialog.]
-        \n\n<b>v1.44:</b>\n\n
-        <ul>
-            <li>New photo modes (if Camera2 API is enabled): NR noise reduction (only supported on high end devices), and focus bracketing.\n</li>
-            <li>New "Ghost image" option, to overlap the last photo or a selected image.\n</li>
-            <li>New option to show audio level meter when recording video.\n</li>
-            <li>New option to record video with flat (log) profile. (Camera2 API only.)\n</li>
-            <li>New option to choose metres or feet for photo stamp.\n</li>
-            <li>Improved behaviour of seekbars for manual ISO, shutter speed, white balance.\n</li>
-            <li>If an option that requires compass direction is set, Open Camera will warn you if the device\'s compass is unreliable.\n</li>
-            <li>Other improvements and bug fixes.\n</li>
-        </ul>
-    </string>
+    <string name="preference_burst_mode_off">Tắt</string>
+    <string name="preference_burst_mode_2x">2x</string>
+    <string name="preference_burst_mode_3x">3x</string>
+    <string name="preference_burst_mode_4x">4x</string>
+    <string name="preference_burst_mode_5x">5x</string>
+    <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_20x">20x</string>
+    <string name="preference_burst_mode_30x">30x</string>
+    <string name="preference_burst_mode_40x">40x</string>
+    <string name="preference_burst_mode_50x">50x</string>
+    <string name="preference_burst_mode_unlimited">Không giới hạn</string>
+
+    <string name="preference_burst_interval_no_delay">Không trì hoãn</string>
+    <string name="preference_burst_interval_0.5s">0.5 giây</string>
+    <string name="preference_burst_interval_1s">1 giây</string>
+    <string name="preference_burst_interval_2s">2 giây</string>
+    <string name="preference_burst_interval_3s">3 giây</string>
+    <string name="preference_burst_interval_5s">5 giây</string>
+    <string name="preference_burst_interval_10s">10 giây</string>
+    <string name="preference_burst_interval_15s">15 giây</string>
+    <string name="preference_burst_interval_20s">20 giây</string>
+    <string name="preference_burst_interval_30s">30 giây</string>
+    <string name="preference_burst_interval_1m">1 phút</string>
+    <string name="preference_burst_interval_2m">2 phút</string>
+    <string name="preference_burst_interval_5m">5 phút</string>
+    <string name="preference_burst_interval_10m">10 phút</string>
+    <string name="preference_burst_interval_20m">20 phút</string>
+    <string name="preference_burst_interval_30m">30 phút</string>
+    <string name="preference_burst_interval_1h">1 giờ</string>
+    <string name="preference_burst_interval_2h">2 giờ</string>
+
+    <string name="preference_video_max_filesize_default">Mặc định</string>
+    <string name="preference_video_max_filesize_100mb">100MB</string>
+    <string name="preference_video_max_filesize_200mb">200MB</string>
+    <string name="preference_video_max_filesize_300mb">300MB</string>
+    <string name="preference_video_max_filesize_500mb">500MB</string>
+    <string name="preference_video_max_filesize_1gb">1GB</string>
+    <string name="preference_video_max_filesize_2gb">2GB</string>
+    <string name="preference_video_max_filesize_5gb">5GB</string>
+    <string name="preference_video_max_filesize_9gb">9GB</string>
+
+    <string name="preference_crop_guide_none">Không</string>
+    <string name="preference_crop_guide_1">1 (1:1)</string>
+    <string name="preference_crop_guide_1_25">1.25 (5:4)</string>
+    <string name="preference_crop_guide_1_33">1.33 (4:3)</string>
+    <string name="preference_crop_guide_1_4">1.4 (7:4)</string>
+    <string name="preference_crop_guide_1_5">1.5 (3:2)</string>
+    <string name="preference_crop_guide_1_78">1.78 (16:9)</string>
+    <string name="preference_crop_guide_1_85">1.85 (37:20)</string>
+    <string name="preference_crop_guide_2">2 (2:1)</string>
+    <string name="preference_crop_guide_2_33">2.33 (21:9)</string>
+    <string name="preference_crop_guide_2_35">2.35 (47:20)</string>
+    <string name="preference_crop_guide_2_4">2.4 (12:5)</string>
+
+    <string name="preference_audio_noise_control_sensitivity_3">+3 (độ nhạy cao)</string>
+    <string name="preference_audio_noise_control_sensitivity_2">+2</string>
+    <string name="preference_audio_noise_control_sensitivity_1">+1</string>
+    <string name="preference_audio_noise_control_sensitivity_0">0 (mặc định)</string>
+    <string name="preference_audio_noise_control_sensitivity_m1">-1</string>
+    <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
+    <string name="preference_audio_noise_control_sensitivity_m3">-3 (độ nhạy thấp)</string>
+
+    <string name="preference_ui_placement_left">Thuận tay trái</string>
+    <string name="preference_ui_placement_right">Thuận tay phải</string>
+
 </resources>
