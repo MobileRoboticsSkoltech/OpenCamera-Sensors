@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
 
@@ -112,10 +113,10 @@ public class SettingsManager {
 						editor.putFloat(key, Float.valueOf(parser.getAttributeValue(null, "value")));
 						break;
 					case int_tag:
-						editor.putInt(key, Integer.valueOf(parser.getAttributeValue(null, "value")));
+						editor.putInt(key, Integer.parseInt(parser.getAttributeValue(null, "value")));
 						break;
 					case long_tag:
-						editor.putLong(key, Long.valueOf(parser.getAttributeValue(null, "value")));
+						editor.putLong(key, Long.parseLong(parser.getAttributeValue(null, "value")));
 						break;
 					case string_tag:
 						editor.putString(key, parser.getAttributeValue(null, "value"));
@@ -166,6 +167,7 @@ public class SettingsManager {
 	public void saveSettings(String filename) {
         if( MyDebug.LOG )
             Log.d(TAG, "saveSettings: " + filename);
+        OutputStream outputStream = null;
         try {
             StorageUtils storageUtils = main_activity.getStorageUtils();
             /*OutputStream outputStream;
@@ -185,7 +187,7 @@ public class SettingsManager {
 			storageUtils.createFolderIfRequired(settings_folder);
 			File file = new File(settings_folder.getPath() + File.separator + filename);
 			main_activity.test_save_settings_file = file.getAbsolutePath();
-			OutputStream outputStream = new FileOutputStream(file);
+			outputStream = new FileOutputStream(file);
 
             XmlSerializer xmlSerializer = Xml.newSerializer();
 
@@ -237,8 +239,7 @@ public class SettingsManager {
             String dataWrite = writer.toString();
             /*if( true )
             	throw new IOException(); // test*/
-            outputStream.write(dataWrite.getBytes());
-            outputStream.close();
+            outputStream.write(dataWrite.getBytes(Charset.forName("UTF-8")));
 
 			main_activity.getPreview().showToast(null, R.string.saved_settings);
             /*if( uri != null ) {
@@ -252,5 +253,15 @@ public class SettingsManager {
             e.printStackTrace();
 			main_activity.getPreview().showToast(null, R.string.save_settings_failed);
         }
+        finally {
+        	if( outputStream != null ) {
+				try {
+					outputStream.close();
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
     }
 }

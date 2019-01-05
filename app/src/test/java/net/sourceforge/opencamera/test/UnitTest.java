@@ -498,7 +498,7 @@ public class UnitTest {
 
 	}
 
-	private class float4 {
+	private static class float4 {
 		final float r, g, b, a;
 
 		float4(float r, float g, float b, float a) {

@@ -72,7 +72,7 @@ public class CameraController2 extends CameraController {
 	private boolean supports_face_detect_mode_simple;
 	private boolean supports_face_detect_mode_full;
 	private boolean supports_photo_video_recording;
-	private final int tonemap_max_curve_points_c = 64;
+	private final static int tonemap_max_curve_points_c = 64;
 	private final ErrorCallback preview_error_cb;
 	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
@@ -197,7 +197,7 @@ public class CameraController2 extends CameraController {
 	   We use this class instead of assigning the RequestTagType directly, so we can modify it
 	   (even though CaptureRequest only has a getTag() method).
 	 */
-	private class RequestTagObject {
+	private static class RequestTagObject {
 		private RequestTagType type;
 
 		private RequestTagObject(RequestTagType type) {
@@ -783,7 +783,6 @@ public class CameraController2 extends CameraController {
 				}
 				values[c++] = 1.0f;
 				values[c++] = getLogProfile(1.0f);
-				int n_values = c/2;
 				/*{
 					int n_values = 257;
 					float [] values = new float [2*n_values];
@@ -795,6 +794,7 @@ public class CameraController2 extends CameraController {
 					}
 				}*/
 				if( MyDebug.LOG ) {
+    				int n_values = c/2;
 					for(int i=0;i<n_values;i++) {
 						float in = values[2*i];
 						float out = values[2*i+1];

@@ -71,7 +71,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
-	private final float panorama_pics_per_screen = 2.0f;
+	private final static float panorama_pics_per_screen = 2.0f;
 
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;

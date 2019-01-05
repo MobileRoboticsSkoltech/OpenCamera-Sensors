@@ -19,10 +19,10 @@ public class PermissionHandler {
 
     private final MainActivity main_activity;
 
-    final private int MY_PERMISSIONS_REQUEST_CAMERA = 0;
-    final private int MY_PERMISSIONS_REQUEST_STORAGE = 1;
-    final private int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
-    final private int MY_PERMISSIONS_REQUEST_LOCATION = 3;
+    final private static int MY_PERMISSIONS_REQUEST_CAMERA = 0;
+    final private static int MY_PERMISSIONS_REQUEST_STORAGE = 1;
+    final private static int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
+    final private static int MY_PERMISSIONS_REQUEST_LOCATION = 3;
 
     PermissionHandler(MainActivity main_activity) {
         this.main_activity = main_activity;

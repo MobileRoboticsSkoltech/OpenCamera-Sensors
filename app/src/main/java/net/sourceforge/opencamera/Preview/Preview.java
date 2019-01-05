@@ -131,7 +131,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
 	private boolean video_restart_on_max_filesize;
 	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
-	private class VideoFileInfo {
+	private static class VideoFileInfo {
 		// stores the file (or similar) to record a video
 		private final int video_method;
 		private final Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI

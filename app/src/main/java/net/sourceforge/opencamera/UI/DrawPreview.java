@@ -1992,7 +1992,7 @@ public class DrawPreview {
 			p.setColor(Color.WHITE);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		else if( preview != null && "flash_frontscreen_torch".equals(preview.getCurrentFlashValue()) ) { // getCurrentFlashValue() may return null
+		else if( "flash_frontscreen_torch".equals(preview.getCurrentFlashValue()) ) { // getCurrentFlashValue() may return null
 			p.setColor(Color.WHITE);
 			p.setAlpha(200); // set alpha so user can still see some of the preview
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
@@ -2128,7 +2128,7 @@ public class DrawPreview {
 		if( flip_front ) {
 			boolean is_front_facing = camera_controller != null && camera_controller.isFrontFacing();
 			if( is_front_facing && !sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo") ) {
-				last_image_matrix.preScale(-1.0f, 1.0f, bitmap.getWidth()/2, 0.0f);
+				last_image_matrix.preScale(-1.0f, 1.0f, bitmap.getWidth()/2.0f, 0.0f);
 			}
 		}
 	}
