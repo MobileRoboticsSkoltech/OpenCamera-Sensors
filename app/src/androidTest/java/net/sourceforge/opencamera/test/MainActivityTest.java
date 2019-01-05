@@ -8423,6 +8423,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         FolderChooserDialog fragment = new FolderChooserDialog();
+		fragment.setStartFolder(mActivity.getImageFolder());
         fragment.show(mActivity.getFragmentManager(), "FOLDER_FRAGMENT");
         Thread.sleep(1000); // wait until folderchooser started up
         Log.d(TAG, "started folderchooser");
@@ -8446,6 +8447,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         FolderChooserDialog fragment = new FolderChooserDialog();
+		fragment.setStartFolder(mActivity.getImageFolder());
         fragment.show(mActivity.getFragmentManager(), "FOLDER_FRAGMENT");
         Thread.sleep(1000); // wait until folderchooser started up
         Log.d(TAG, "started folderchooser");
