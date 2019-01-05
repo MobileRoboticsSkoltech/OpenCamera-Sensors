@@ -4701,7 +4701,6 @@ public class CameraController2 extends CameraController {
 		camera_settings.setSceneMode(previewBuilder); // also need to set the scene mode
     	try {
     		setRepeatingRequest();
-			return false;
     	}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -4710,7 +4709,8 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-		} 
+			return false;
+		}
 		return true;
 	}
 	
