@@ -703,7 +703,7 @@
     <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->
     <string-array name="preference_burst_interval_entries">
         <item>@string/preference_burst_interval_no_delay</item>
-        <item>@string/preference_burst_interval_0.5s</item>
+        <item>@string/preference_burst_interval_0_5s</item>
         <item>@string/preference_burst_interval_1s</item>
         <item>@string/preference_burst_interval_2s</item>
         <item>@string/preference_burst_interval_3s</item>

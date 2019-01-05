@@ -650,7 +650,7 @@
     <string name="preference_burst_mode_unlimited">Unlimited</string>
 
     <string name="preference_burst_interval_no_delay">No delay</string>
-    <string name="preference_burst_interval_0.5s">0.5s</string>
+    <string name="preference_burst_interval_0_5s">0.5s</string>
     <string name="preference_burst_interval_1s">1s</string>
     <string name="preference_burst_interval_2s">2s</string>
     <string name="preference_burst_interval_3s">3s</string>
