@@ -129,7 +129,10 @@ public class SettingsManager {
 			}
 
 			editor.apply();
-			main_activity.restartOpenCamera();
+			if( !main_activity.is_test ) {
+				// restarting seems to cause problems for test code (e.g., see testSettingsSaveLoad - even if that test is fine, it risks affecting subsequent tests)
+				main_activity.restartOpenCamera();
+			}
 			return true;
 		}
         catch(Exception e) {
