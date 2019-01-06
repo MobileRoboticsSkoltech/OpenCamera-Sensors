@@ -1221,7 +1221,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mPreview.getView().getLocationOnScreen(gui_location);
         final int step_dist_c = 2;
         final float scale = mActivity.getResources().getDisplayMetrics().density;
-        final int large_step_dist_c = (int) (60 * scale + 0.5f); // convert dps to pixels
+        final int large_step_dist_c = (int) (80 * scale + 0.5f); // convert dps to pixels
         final int step_count_c = 10;
         int width = mPreview.getView().getWidth();
         int height = mPreview.getView().getHeight();
@@ -1570,8 +1570,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "popup is now open");
         subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", false, true);
         subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", true, false);
-        subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
-        subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+        if( mActivity.getApplicationInterface().getSupportedVideoCaptureRates().size() > 1 ) {
+            subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
+            subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+        }
         subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
         subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
         subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
@@ -1639,8 +1641,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "popup is now open");
             subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", false, true);
             subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.video_quality, "VIDEO_RESOLUTIONS", true, false);
-            subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
-            subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+            if( mActivity.getApplicationInterface().getSupportedVideoCaptureRates().size() > 1 ) {
+                subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", false, false);
+                subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_video_capture_rate, "VIDEOCAPTURERATE", true, true);
+            }
             subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", false, false);
             subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_timer, "TIMER", true, true);
             subTestPopupButtonContentDescription(net.sourceforge.opencamera.R.string.preference_burst_mode, "REPEAT_MODE", false, false);
