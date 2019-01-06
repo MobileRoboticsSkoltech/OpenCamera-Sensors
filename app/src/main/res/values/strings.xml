@@ -777,6 +777,8 @@
     <string name="preference_show_exposure_lock_summary">Whether to show an on-screen icon for locking or unlocking exposure</string>
     <string name="exposure_unlock">Unlock exposure</string>
 
+    <string name="preference_nr_mode_low_light_message">Low light mode: please hold the camera steady</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

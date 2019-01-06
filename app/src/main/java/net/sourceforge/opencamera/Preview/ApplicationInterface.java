@@ -110,7 +110,7 @@ public interface ApplicationInterface {
 		NRMODE_NORMAL,
 		NRMODE_LOW_LIGHT
 	}
-	NRModePref getNRModePref();
+	NRModePref getNRModePref(); // only relevant if getBurstForNoiseReduction() returns true
 	boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
 	enum RawPref {
 		RAWPREF_JPEG_ONLY, // JPEG only

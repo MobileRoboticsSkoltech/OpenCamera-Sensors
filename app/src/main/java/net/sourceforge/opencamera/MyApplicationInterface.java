@@ -1002,7 +1002,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			else if( main_activity.getPreview().supportsBurst() && this.isCameraBurstPref() ) {
 				n_raw = 0;
 				if( this.getBurstForNoiseReduction() ) {
-					n_jpegs = 8;
+					if( this.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
+						n_jpegs = CameraController.N_IMAGES_NR_DARK_LOW_LIGHT;
+					}
+					else {
+						n_jpegs = CameraController.N_IMAGES_NR_DARK;
+					}
 				}
 				else {
 					n_jpegs = this.getBurstNImages();

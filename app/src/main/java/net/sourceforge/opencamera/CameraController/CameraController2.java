@@ -5523,7 +5523,7 @@ public class CameraController2 extends CameraController {
 					if( capture_result_iso >= 1100 ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "optimise for dark scene");
-						n_burst = noise_reduction_low_light ? 15 : 8;
+						n_burst = noise_reduction_low_light ? N_IMAGES_NR_DARK_LOW_LIGHT : N_IMAGES_NR_DARK;
 						boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
 						// OnePlus 3T at least has bug where manual ISO can't be set to above 800, so dark images end up too dark -
 						// so no point enabling this code, which is meant to brighten the scene, not make it darker!

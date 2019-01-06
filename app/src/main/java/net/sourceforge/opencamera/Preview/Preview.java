@@ -5627,6 +5627,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "onStarted");
 				applicationInterface.onCaptureStarted();
+				if( applicationInterface.getBurstForNoiseReduction() && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
+					if( camera_controller.getBurstTotal() >= CameraController.N_IMAGES_NR_DARK_LOW_LIGHT ) {
+						showToast(null, R.string.preference_nr_mode_low_light_message);
+					}
+				}
 			}
 
 			public void onCompleted() {
