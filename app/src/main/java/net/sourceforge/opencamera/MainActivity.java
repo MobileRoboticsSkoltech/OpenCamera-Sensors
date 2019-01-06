@@ -3526,8 +3526,12 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting up exposure: " + (System.currentTimeMillis() - debug_time));
 
-		// on-screen icons such as exposure lock, white balance lock, face detection etc are made visible if necessary in
+		// On-screen icons such as exposure lock, white balance lock, face detection etc are made visible if necessary in
 		// MainUI.showGUI()
+		// However still nee to update visibility of icons where visibility depends on camera setup - e.g., exposure button
+		// not supported for high speed video frame rates - see testTakeVideoFPSHighSpeedManual().
+		View exposureButton = findViewById(R.id.exposure);
+	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 		// need to update some icons, e.g., white balance and exposure lock due to them being turned off when pause/resuming
 		mainUI.updateOnScreenIcons();
