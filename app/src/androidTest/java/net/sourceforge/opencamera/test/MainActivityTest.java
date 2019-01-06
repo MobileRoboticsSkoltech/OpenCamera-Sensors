@@ -3188,7 +3188,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             while( !mActivity.hasThumbnailAnimation() ) {
                 Log.d(TAG, "waiting for thumbnail animation");
                 Thread.sleep(10);
-                int allowed_time_ms = 8000;
+                int allowed_time_ms = 10000;
                 if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo ) ) {
                     // some devices need longer time (especially Nexus 6)
                     allowed_time_ms = 12000;
