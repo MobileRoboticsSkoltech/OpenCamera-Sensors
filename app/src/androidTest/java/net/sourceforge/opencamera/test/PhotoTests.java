@@ -65,7 +65,10 @@ public class PhotoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPicture1"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPicture2"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusRepeat"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusRepeatWaitCaptureResult"));
+        if( MainActivityTest.test_camera2 ) {
+            // test_wait_capture_result only relevant for Camera2 API
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusRepeatWaitCaptureResult"));
+        }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStamp"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDRO"));
         if( !MainActivityTest.test_camera2 ) {
