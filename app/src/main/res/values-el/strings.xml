@@ -119,7 +119,7 @@
     <string name="preference_save_video_prefix">Αποθήκευση βίντεο προθέματος</string>
     <string name="preference_save_video_prefix_summary">Πρόθεμα για την αποθήκευση αρχείων βίντεο</string>
     <string name="preference_save_zulu_time">Μορφή ώρας για το όνομα του αρχείου</string>
-    <string name="preference_show_when_locked">Εμφάνιση κάμερας όταν λοκαρίστηκε</string>
+    <string name="preference_show_when_locked">εμφάνιση της κάμερας όταν κλειδώθηκε</string>
     <string name="preference_show_when_locked_summary">Αν είναι αυτή η ρύθμιση ενεργή, το Open Camera θα εμφανίζετε πάνω από κάθε οθόνη κλειδώματος (μπορείτε ακόμα να ξεκλειδώσετε για να αποκτήσετε πρόσβαση στις Ρυθμίσεις κ.λ.π.)</string>
     <string name="preference_startup_focus">Αυτόματη εστίαση κατά την εκκίνηση</string>
     <string name="preference_startup_focus_summary">Με αυτή την ρύθμιση η αυτόματη εστίαση, θα ενεργοποιηθεί όταν ανοίξετε την Κάμερα. Αν έχετε πρόβλημα με το flash κατά την εκκίνηση, απενεργοποιήστε αυτή την επιλογή</string>
