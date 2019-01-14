@@ -587,7 +587,7 @@
     <string name="preference_show_video_max_amp">Hiển thị mức độ âm thanh</string>
     <string name="preference_show_video_max_amp_summary">Hiện mức độ âm thanh trên màn hình khi quay video</string>
 
-    <string name="photo_mode_focus_bracketing">FOCUS</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_focus_bracketing">Focus {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_focus_bracketing_full">Úp sọt điểm lấy nét</string>
 
     <string name="focus_bracketing_source_distance">Khoảng cách úp sọt điểm lấy nét nguồn</string>
