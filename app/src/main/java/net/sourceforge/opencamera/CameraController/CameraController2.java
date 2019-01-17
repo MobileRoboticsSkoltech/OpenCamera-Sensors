@@ -1836,30 +1836,45 @@ public class CameraController2 extends CameraController {
 		}
 
 		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-		boolean capabilities_manual_sensor = false;
+		//boolean capabilities_manual_sensor = false;
 		boolean capabilities_manual_post_processing = false;
 		boolean capabilities_raw = false;
 		boolean capabilities_high_speed_video = false;
 		for(int capability : capabilities) {
-			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ) {
+			/*if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ) {
+				// At least some Huawei devices (at least, the Huawei device model FIG-LX3, device code-name hi6250) don't
+				// have REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR, but I had a user complain that HDR mode and manual ISO
+				// had previously worked for them. Note that we still check below for SENSOR_INFO_SENSITIVITY_RANGE and
+				// SENSOR_INFO_EXPOSURE_TIME_RANGE, so not checking REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR shouldn't
+				// enable manual ISO/exposure on devices that don't support it.
+				// Instead we just block LEGACY devices (probably don't need to, again because we check
+				// SENSOR_INFO_SENSITIVITY_RANGE and SENSOR_INFO_EXPOSURE_TIME_RANGE, but just in case).
 				capabilities_manual_sensor = true;
 			}
-			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ) {
+			else*/ if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ) {
 				capabilities_manual_post_processing = true;
 			}
 			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
 				capabilities_raw = true;
 			}
-			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE ) {
+			/*else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE ) {
+				// see note below
 				camera_features.supports_burst = true;
-			}
+			}*/
 			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 				// we test for at least Android M just to be safe (this is needed for createConstrainedHighSpeedCaptureSession())
 				capabilities_high_speed_video = true;
 			}
 		}
+		// At least some Huawei devices (at least, the Huawei device model FIG-LX3, device code-name hi6250) don't have
+		// REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE, but I had a user complain that NR mode at least had previously
+		// (before 1.45) worked for them. It might be that this can still work, just not at 20fps.
+		// So instead set to true for all LIMITED devices. Still keep block for LEGACY devices (which definitely shouldn't
+		// support fast burst - and which Open Camera never allowed with Camera2 before 1.45).
+		camera_features.supports_burst = CameraControllerManager2.isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
+
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "capabilities_manual_sensor?: " + capabilities_manual_sensor);
+			//Log.d(TAG, "capabilities_manual_sensor?: " + capabilities_manual_sensor);
 			Log.d(TAG, "capabilities_manual_post_processing?: " + capabilities_manual_post_processing);
 			Log.d(TAG, "capabilities_raw?: " + capabilities_raw);
 			Log.d(TAG, "supports_burst?: " + camera_features.supports_burst);
@@ -2089,8 +2104,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "is_video_stabilization_supported: " + camera_features.is_video_stabilization_supported);
 
-		// although we currently require at least LIMITED to offer Camera2, we explicitly check here in case we do ever support
-		// LEGACY devices
 		camera_features.is_photo_video_recording_supported = CameraControllerManager2.isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 		supports_photo_video_recording = camera_features.is_photo_video_recording_supported;
 
@@ -2105,7 +2118,10 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		if( capabilities_manual_sensor ) {
+		// see note above
+		//if( capabilities_manual_sensor )
+		if( CameraControllerManager2.isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED) )
+		{
 			Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 			if( iso_range != null ) {
 				camera_features.supports_iso_range = true;
