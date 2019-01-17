@@ -546,11 +546,6 @@ public class StorageUtils {
         return mediaFilename;
     }
 
-	private File createOutputMediaFile(String mediaFilename) {
-    	File mediaStorageDir = getImageFolder();
-		return new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
-	}
-
     // only valid if !isUsingSAF()
 	File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
         File mediaStorageDir = getImageFolder();
@@ -601,7 +596,7 @@ public class StorageUtils {
 			}
 			else*/ {
 				String mediaFilename = createMediaFilename(type, suffix, count, "." + extension, current_date);
-				mediaFile = createOutputMediaFile(mediaFilename);
+				mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
 			}
             if( !mediaFile.exists() ) {
             	break;
