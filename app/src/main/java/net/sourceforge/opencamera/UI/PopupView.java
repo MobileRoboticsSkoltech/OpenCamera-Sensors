@@ -822,7 +822,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find repeat_mode_value " + repeat_mode_value + " in repeat_mode_values!");
 				repeat_mode_index = 0;
     		}
-    		// set title_in_options_first_only to true, as displaying "Repeat: Unlimited" can be too long in some languages, e.g., Vietnames (vi)
+    		// set title_in_options_first_only to true, as displaying "Repeat: Unlimited" can be too long in some languages, e.g., Vietnamese (vi)
     		addArrayOptionsToPopup(Arrays.asList(repeat_mode_entries), getResources().getString(R.string.preference_burst_mode), true, true, repeat_mode_index, false, "REPEAT_MODE", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( repeat_mode_index == -1 )
