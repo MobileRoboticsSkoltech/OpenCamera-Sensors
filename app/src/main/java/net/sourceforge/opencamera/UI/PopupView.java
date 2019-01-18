@@ -86,12 +86,18 @@ public class PopupView extends LinearLayout {
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 
+		boolean small_screen = false;
 		total_width_dp = 280;
 		int max_width_dp = main_activity.getMainUI().getMaxHeightDp(false);
-		if( total_width_dp > max_width_dp )
+		if( total_width_dp > max_width_dp ) {
 			total_width_dp = max_width_dp;
-		if( MyDebug.LOG )
+			small_screen = true;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "max_width_dp: " + max_width_dp);
 			Log.d(TAG, "total_width_dp: " + total_width_dp);
+			Log.d(TAG, "small_screen: " + small_screen);
+		}
 
 		/*{
 			int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
@@ -781,7 +787,8 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
 				timer_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), true, false, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
+    		// title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
+    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), !small_screen, false, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( timer_index == -1 )
     					return;
@@ -822,8 +829,9 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find repeat_mode_value " + repeat_mode_value + " in repeat_mode_values!");
 				repeat_mode_index = 0;
     		}
+    		// title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
     		// set title_in_options_first_only to true, as displaying "Repeat: Unlimited" can be too long in some languages, e.g., Vietnamese (vi)
-    		addArrayOptionsToPopup(Arrays.asList(repeat_mode_entries), getResources().getString(R.string.preference_burst_mode), true, true, repeat_mode_index, false, "REPEAT_MODE", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(repeat_mode_entries), getResources().getString(R.string.preference_burst_mode), !small_screen, true, repeat_mode_index, false, "REPEAT_MODE", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( repeat_mode_index == -1 )
     					return;
