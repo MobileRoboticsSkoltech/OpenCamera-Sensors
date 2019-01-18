@@ -1847,6 +1847,7 @@ public class CameraController2 extends CameraController {
 				// had previously worked for them. Note that we still check below for SENSOR_INFO_SENSITIVITY_RANGE and
 				// SENSOR_INFO_EXPOSURE_TIME_RANGE, so not checking REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR shouldn't
 				// enable manual ISO/exposure on devices that don't support it.
+				// Also may affect Samsung Galaxy A8(2018).
 				// Instead we just block LEGACY devices (probably don't need to, again because we check
 				// SENSOR_INFO_SENSITIVITY_RANGE and SENSOR_INFO_EXPOSURE_TIME_RANGE, but just in case).
 				capabilities_manual_sensor = true;
@@ -1871,6 +1872,7 @@ public class CameraController2 extends CameraController {
 		// (before 1.45) worked for them. It might be that this can still work, just not at 20fps.
 		// So instead set to true for all LIMITED devices. Still keep block for LEGACY devices (which definitely shouldn't
 		// support fast burst - and which Open Camera never allowed with Camera2 before 1.45).
+		// Also may affect Samsung Galaxy A8(2018).
 		camera_features.supports_burst = CameraControllerManager2.isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 
 		if( MyDebug.LOG ) {
