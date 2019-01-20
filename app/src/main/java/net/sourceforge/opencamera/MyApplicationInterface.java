@@ -295,7 +295,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
-    public int getFocusAssistPref() {
+    int getFocusAssistPref() {
 		String focus_assist_value = sharedPreferences.getString(PreferenceKeys.FocusAssistPreferenceKey, "0");
 		int focus_assist;
 		try {
@@ -307,6 +307,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     		e.printStackTrace();
     		focus_assist = 0;
         }
+        if( focus_assist > 0 && main_activity.getPreview().isVideoRecording() ) {
+			// focus assist not currently supported while recording video - don't want to zoom the resultant video!
+    		focus_assist = 0;
+		}
 		return focus_assist;
     }
 
