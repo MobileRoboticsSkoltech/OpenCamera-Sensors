@@ -6568,6 +6568,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return new CameraController.Size(preview_w, preview_h);
     }
 
+    public double getCurrentPreviewAspectRatio() {
+	    return ((double)preview_w)/(double)preview_h;
+    }
+
     /**
      * @param check_burst If false, and a burst mode is in use (fast burst, expo, HDR), then the
      *                    returned list will be filtered to remove sizes that don't support burst.

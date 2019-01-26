@@ -812,7 +812,10 @@ public class DrawPreview {
 						crop_ratio = 2.4;
 						break;
 				}
-				if( crop_ratio > 0.0 && Math.abs(preview.getTargetRatio() - crop_ratio) > 1.0e-5 ) {
+				// we should compare to getCurrentPreviewAspectRatio() not getCurrentPreviewAspectRatio(), as the actual preview
+				// aspect ratio may differ to the requested photo/video resolution's aspect ratio, in which case it's still useful
+				// to display the crop guide
+				if( crop_ratio > 0.0 && Math.abs(preview.getCurrentPreviewAspectRatio() - crop_ratio) > 1.0e-5 ) {
 		    		/*if( MyDebug.LOG ) {
 		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
 		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
