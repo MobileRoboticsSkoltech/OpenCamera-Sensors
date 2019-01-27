@@ -132,12 +132,12 @@
     <string name="preference_immersive_mode">沉浸模式</string>
     <string name="preference_show_zoom">显示缩放</string>
     <string name="preference_show_zoom_summary">在屏幕上显示当前的相机缩放水平 (当放大时)</string>
-    <string name="preference_show_zoom_controls">显示缩放 -/+ 控件</string>
+    <string name="preference_show_zoom_controls">显示缩放按钮</string>
     <string name="preference_show_zoom_controls_summary">显示缩放控件的 -/+ 按钮</string>
-    <string name="preference_show_zoom_slider_controls">显示缩放滑块控件</string>
+    <string name="preference_show_zoom_slider_controls">显示缩放滑块</string>
     <string name="preference_show_zoom_slider_controls_summary">显示缩放控件的滑块</string>
     <string name="preference_show_iso">显示 ISO</string>
-    <string name="preference_show_iso_summary">显示当前 ISO 级别(需要 Camera2 API)</string>
+    <string name="preference_show_iso_summary">显示当前 ISO 级别(需要Camera2 API)</string>
     <string name="preference_free_memory">显示可用内存</string>
     <string name="preference_free_memory_summary">在屏幕上显示剩余的设备存储空间</string>
     <string name="preference_show_angle">显示角度</string>
@@ -170,8 +170,8 @@
     <string name="preference_screen_video_settings">视频设置…</string>
     <string name="preference_screen_location_settings">位置设置…</string>
     <string name="preference_resolution">相机分辨率</string>
-    <string name="preference_quality">图像质量</string>
-    <string name="preference_quality_summary">设置保存的照片图像的图像质量（建议值是90%%）\n%s</string>
+    <string name="preference_quality">照片质量</string>
+    <string name="preference_quality_summary">设置保存的照片质量（建议值是90%%）\n%s</string>
     <string name="preference_location">存储位置数据 (地理标记)</string>
     <string name="preference_location_summary">在照片/视频中存储 GPS 位置数据</string>
     <string name="preference_gps_direction">存储罗盘方向</string>
@@ -220,7 +220,7 @@
     <string name="preference_category_online">杂项</string>
     <string name="preference_online_help">在线帮助</string>
     <string name="preference_donate">捐赠以支持开发</string>
-    <string name="preference_donate_summary">如果您喜欢这个程序，请考虑捐助。您可以通过购买我的“捐助 app”来进行捐助 - 点击此选项将打开我的捐助 app 页面。谢谢！</string>
+    <string name="preference_donate_summary">如果您喜欢这个程序，可以通过购买我的“捐助 app”向我捐助。点击此选项将打开我的“捐助 app”页面。谢谢！</string>
     <string name="preference_use_camera2">使用 Camera2 API</string>
     <string name="preference_use_camera2_summary">启用 Android 5 的 Camera2 API - 提供附加功能，但当前处于实验阶段 (会引起重启)</string>
     <string name="preference_about">关于</string>
@@ -349,12 +349,8 @@
     <string name="switch_to_photo">切换到拍照模式</string>
     <string name="saf_permission_failed">无法保存到这个目录</string>
     <string name="gb_abbreviation">GB</string>
-    <string name="no_permission">没有权限</string>
-    <string name="permission_rationale_title">需要授权</string>
-    <string name="permission_rationale_camera">操作相机需要相机权限</string>
-    <string name="permission_rationale_storage">保存相片需要读写存储器的权限</string>
-    <string name="permission_rationale_record_audio">录像、录音需要麦克风权限</string>
-    <string name="permission_rationale_location">地理标记需要定位权限</string>
+
+
     <string name="preference_category_photo_debugging">调试选项</string>
     <string name="preference_category_video_debugging">调试选项</string>
     <string name="preference_camera2_fake_flash">使用替代闪光灯的方法</string>
@@ -396,20 +392,9 @@
     <string name="preference_video_capture_rate_normal">普通</string>
     <string name="slow_motion_disabled">关闭慢动作</string>
     <string name="slow_motion_enabled">启用慢动作</string>
-    <string name="preference_antibanding">去除条纹</string>
-    <string name="preference_antibanding_summary">使用算法消除闪烁造成的条纹\n%s</string>
+
     <string name="dont_show_again">不再显示</string>
-    <string name="photo_mode">拍照模式</string>
-    <string name="photo_mode_expo_bracketing_full">包围曝光</string>
-    <string name="photo_mode_fast_burst_full">快速曝光</string>
-    <string name="photo_mode_noise_reduction">NR</string>
-    <string name="photo_mode_noise_reduction_full">降噪</string>
-    <string name="preference_category_stamp">照片水印</string>
-    <string name="preference_hdr_save_expo">保存HDR模式的所有相片</string>
-    <string name="photo_mode_focus_bracketing_full">包围对焦</string>
-    <string name="focus_bracketing_source_distance">包围对焦源距离</string>
-    <string name="focus_bracketing_target_distance">包围对焦目标距离</string>
-    <string name="focus_bracketing_add_infinity">增加无限远</string>
+
     <string name="magnetic_accuracy_title">罗盘方向</string>
     <string name="accuracy_unreliable">不可靠</string>
     <string name="accuracy_low">低</string>
@@ -480,7 +465,6 @@
     <string name="preference_camera2_photo_video_recording">允许在录像时拍照</string>
     <string name="preference_camera2_photo_video_recording_summary">允许在录像时拍照。如果您开启了Camera2 API后发现录制视频有问题，请禁用此功能。</string>
 
-    <string name="preference_hdr_save_expo_summary">启用后使用HDR模式拍照会保存三个基本曝光图像以及最终的HDR照片。注意这会使保存速度变慢，尤其是启用了“照片水印”或自动水平等功能时。</string>
 
     <string name="preference_video_subtitle">视频字幕</string>
     <string name="preference_video_subtitle_summary">创建一个纯粹日期和时间的字幕文件(.SET格式)\n如果启用了定位/方向数据，同时也会记录GPS信息.\n%s</string>
@@ -565,6 +549,7 @@
     <string name="faces_detected">faces</string>
     <string name="preference_record_audio_src_unprocessed">未处理</string>
 
+
     <string name="preference_burst_mode_off">关闭</string>
     <string name="preference_burst_mode_2x">2x</string>
     <string name="preference_burst_mode_3x">3x</string>
@@ -618,7 +603,129 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (低灵敏度)</string>
 
-    <string name="preference_ui_placement_left">左手用户界面</string>
-    <string name="preference_ui_placement_right">右手用户界面</string>
+
+
+    <string name="photo_mode">拍照模式</string>
+    <string name="photo_mode_focus_bracketing_full">包围对焦</string>
+    <string name="focus_bracketing_source_distance">包围对焦源距离</string>
+    <string name="focus_bracketing_target_distance">包围对焦目标距离</string>
+    <string name="focus_bracketing_add_infinity">增加无限远</string>
+
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">标准(Std)</string>
+    <string name="photo_mode_hdr">HDR</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_expo_bracketing_full">包围曝光(Expo)</string>
+    <string name="photo_mode_fast_burst">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
+    <string name="photo_mode_fast_burst_full">快速连拍</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_noise_reduction_full">降噪(NR)</string>
+    <string name="preference_category_stamp">照片水印</string>
+    <string name="preference_hdr_save_expo">保存HDR模式采集的所有原图</string>
+    <string name="preference_hdr_save_expo_summary">启用后使用HDR模式拍照会保存三个基本曝光图像以及最终的HDR照片。注意这会使保存速度变慢，尤其是启用了“照片水印”或自动水平等功能时。</string>
+
+    <string name="no_permission">没有获得授权</string>
+    <string name="permission_rationale_title">需要授权</string>
+    <string name="permission_rationale_camera">操作相机需要相机权限</string>
+    <string name="permission_rationale_storage">保存相片需要读写存储器的权限</string>
+    <string name="permission_rationale_record_audio">录像和语音控制需要麦克风权限</string>
+    <string name="permission_rationale_location">地理标记需要定位权限</string>
+
+    <string name="flash_frontscreen_auto">自动开启屏幕补光</string>
+    <string name="flash_frontscreen_on">打开屏幕补光</string>
+    <string name="flash_frontscreen_torch">屏幕高亮</string>
+
+    <string name="preference_antibanding">去除条纹</string>
+    <string name="preference_antibanding_summary">使用算法消除闪烁造成的摩尔纹\n%s</string>
+
+    <string name="anti_banding_auto">Auto</string>
+    <string name="anti_banding_50hz">50Hz</string>
+    <string name="anti_banding_60hz">60Hz</string>
+    <string name="anti_banding_off">Off</string>
+
+
+    <string name="preference_screen_settings_manager">配置管理</string>
+
+    <string name="preference_save_settings">导出配置</string>
+    <string name="preference_save_settings_summary">导出Open Camera所有选项的设定值一个文件中</string>
+    <string name="preference_save_settings_filename">保存的文件名</string>
+
+    <string name="preference_restore_settings">恢复配置</string>
+    <string name="preference_restore_settings_summary">导入配置文件到Open Camera。注意这会覆盖现在的所有设定值！</string>
+    <string name="preference_restore_settings_question">这个选项允许你选择一个先前导出的配置文件并导入到Open Camera中。需要注意这个文件载入后会覆盖当前所有选项的设定值！</string>
+
+    <string name="preference_video_output_format">视频格式</string>
+    <string name="preference_video_output_format_summary">录像的编码和格式\n%s</string>
+
+    <string name="preference_video_output_format_default">默认</string>
+    <string name="preference_video_output_format_mpeg4_h264">MPEG4 H264</string>
+    <string name="preference_video_output_format_mpeg4_hevc">MPEG4 HEVC</string>
+    <string name="preference_video_output_format_3gpp">3GPP</string>
+    <string name="preference_video_output_format_webm">WebM (不支持音频)</string>
+
+    <string name="saved_settings">导出的配置</string>
+    <string name="save_settings_failed">导出配置失败</string>
+    <string name="restore_settings_failed">导入配置失败</string>
+    <string name="open_files_saf_exception_generic">这个设备没有可用的文件选择器，不支持这个选项</string>
+
+    <string name="preference_image_format">照片格式</string>
+    <string name="preference_image_format_jpeg">JPEG</string>
+    <string name="preference_image_format_webp">WebP</string>
+    <string name="preference_image_format_png">PNG</string>
+
+    <string name="preference_hdr_contrast_enhancement">HDR增强对比度</string>
+    <string name="preference_hdr_contrast_enhancement_summary">HDR如何使用增强对比度的算法。在动态范围非常大的场景中能够提高成像品质。当然这也可以让照片多出一种HDR的味道。\n%s</string>
+    <string name="preference_hdr_contrast_enhancement_off">关闭</string>
+    <string name="preference_hdr_contrast_enhancement_smart">自动</string>
+    <string name="preference_hdr_contrast_enhancement_always">打开</string>
+
+    <string name="preference_ui_placement_left">功能按钮在左侧</string>
+    <string name="preference_ui_placement_right">功能按钮在右侧</string>
+    <string name="preference_ui_placement_top">功能按钮在顶部（竖屏状态时）</string>
+
+    <string name="preference_show_face_detection">显示人脸识别的按钮</string>
+    <string name="preference_show_face_detection_summary">是否在屏幕上显示人脸识别的开关</string>
+    <string name="face_detection_enable">打开人脸识别</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_disable">关闭人脸识别</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_enabled">人脸识别已经打开</string>
+    <string name="face_detection_disabled">人脸识别已经关闭</string>
+
+    <string name="preference_show_auto_level">显示自动水平的按钮</string>
+    <string name="preference_show_auto_level_summary">是否在屏幕上显示自动水平的开关。开启自动水平后，照片会根据水平面自动旋转裁切。</string>
+    <string name="auto_level_enable">打开自动水平</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="auto_level_disable">关闭自动水平</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+
+    <string name="preference_show_stamp">显示水印的按钮</string>
+    <string name="preference_show_stamp_summary">是否在屏幕上显示照片水印的开关</string>
+    <string name="stamp_enable">使用水印</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_disable">禁用水印</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_enabled">水印已经启用</string>
+    <string name="stamp_disabled">水印已经禁用</string>
+
+
+    <string name="preference_show_textstamp">显示文本水印的按钮</string>
+    <string name="preference_show_textstamp_summary">是否在屏幕上显示自定义文本水印的开关</string>
+
+    <string name="preference_show_white_balance_lock">显示白平衡锁</string>
+    <string name="preference_show_white_balance_lock_summary">是否在屏幕上显示白平衡锁定的开关</string>
+    <string name="white_balance_lock">锁定白平衡</string>
+    <string name="white_balance_unlock">解锁白平衡</string>
+    <string name="white_balance_locked">白平衡已经锁定</string>
+    <string name="white_balance_unlocked">白平衡已经解锁</string>
+
+    <string name="preference_show_exposure_lock">显示曝光锁</string>
+    <string name="preference_show_exposure_lock_summary">是否在屏幕上显示曝光锁定的开关</string>
+    <string name="exposure_unlock">解锁曝光</string>
+
+    <string name="preference_nr_mode_low_light_message">暗光模式：请保持相机稳定</string>
+
+    <string name="preference_focus_assist">辅助对焦</string>
+    <string name="preference_focus_assist_summary">手动对焦时是否放大显示\n%s</string>
+    <string name="preference_focus_assist_off">不放大</string>
+    <string name="preference_focus_assist_2x">2倍</string>
+    <string name="preference_focus_assist_4x">4倍</string>
+
+    <string name="exposure_compensation_zoom">增减曝光补偿</string>
+
 
 </resources>
