@@ -720,7 +720,10 @@ compression. Also note this option has no effect if "Image format" is set to PNG
 	<li>WebP - This is an alternative (lossy) file format to JPEG. It offers smaller file sizes,
 	but saving takes longer, and some applications may not support WebP images.</li>
 	<li>PNG - This is a lossless format, but note that file sizes will be large, and saving will
-	take significantly longer.</li>
+	take significantly longer. Note that this doesn't mean there will be absolute no loss in quality:
+	cameras on Android offer images in JPEG or RAW (DNG) file formats. When using PNG, Open Camera
+	receives the JPEG with the quality set to 100%, and converts to PNG - this means that there is minimal
+	lossy compression. The only way to have truly lossless is via RAW (see option below).</li>
 </ul>
 
 <p><b>RAW</b> - Only available if Camera2 API is used. If set to "Standard and DNG (RAW)", then photos
