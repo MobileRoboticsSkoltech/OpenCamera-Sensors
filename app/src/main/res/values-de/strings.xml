@@ -123,7 +123,7 @@
     <string name="preference_show_when_locked">Kamera trotz Sperre anzeigen</string>
     <string name="preference_show_when_locked_summary">Wenn aktiviert, wird Open Camera über dem Sperrbildschirm stehen (das Entsperren ist jedoch für den Zugriff auf Einstellungen, Galerie usw. nötig)</string>
     <string name="preference_startup_focus">Verwende Auto-Fokus bei Start der App</string>
-    <string name="preference_startup_focus_summary">Beim Start von OpenCam automatisch fokussieren. Deaktiviere diese Option bei einem Problem mit dem Blitz.</string>
+    <string name="preference_startup_focus_summary">Beim Start von Open Camera automatisch fokussieren. Deaktiviere diese Option bei einem Problem mit dem Blitz.</string>
     <string name="preference_lock_video">Bildschirm bei Videoaufnahme sperren</string>
     <string name="preference_lock_video_summary">Wenn aktiviert, wird bei Videoaufnahmen die Oberfläche gesperrt, um versehentliches Stoppen zu verhindern. Zum Entsperren einfach wischen.</string>
     <string name="preference_rotate_preview">Vorschau drehen</string>
@@ -139,7 +139,7 @@
     <string name="preference_show_zoom_slider_controls">Zoom-Schieberegler anzeigen</string>
     <string name="preference_show_zoom_slider_controls_summary">Zeigt einen Schieberegler zur Zoomsteuerung an</string>
     <string name="preference_show_iso">ISO-Wert anzeigen</string>
-    <string name="preference_show_iso_summary">Zeigt den aktuellen ISO-Wert auf dem Bildschirm an (benötigt Camera2 API)</string>
+    <string name="preference_show_iso_summary">Zeigt den aktuellen ISO-Wert auf dem Bildschirm an (benötigt Camera2-API)</string>
     <string name="preference_free_memory">Freien Speicherplatz anzeigen</string>
     <string name="preference_free_memory_summary">Zeigt den verbleibenden Speicherplatz auf dem Bildschirm an</string>
     <string name="preference_show_angle">Lagewinkel anzeigen</string>
@@ -196,11 +196,12 @@
     <string name="preference_stamp_font_color_summary">Einstellung der Stempel-Schriftfarbe</string>
     <string name="preference_stamp_style">Stempelstil</string>
     <string name="preference_stamp_style_summary">Einstellung der Stempelart</string>
-    <string name="preference_background_photo_saving">Benutze Hintergrund Thread</string>
-    <string name="preference_background_photo_saving_summary">Legt fest, ob ein Hintergrund Thread zum Speichern eines Bildes zur schnelleren Ausführung benutzt wird</string>
+    <string name="preference_background_photo_saving">Benutze Hintergrund-Thread</string>
+    <string name="preference_background_photo_saving_summary">Legt fest, ob ein Hintergrund-Thread zum Speichern eines Bildes zur schnelleren Ausführung benutzt wird</string>
     <string name="video_quality">Video-Auflösung</string>
     <string name="preference_force_video_4k">Erzwinge UHD/4K (experimentell)</string>
-    <string name="preference_force_video_4k_summary">Aktiviert die Auflösung von 3840x2160 für die Videoaufnahme der Hauptkamera. Funktioniert jedoch nur, wenn es vom Gerät unterstützt wird</string>
+    <string name="preference_force_video_4k_summary">Aktiviert die Auflösung von 3840x2160 für die Videoaufnahme der Hauptkam
+        era. Funktioniert jedoch nur, wenn es vom Gerät unterstützt wird</string>
     <string name="preference_video_stabilization">Video-Stabilisierung</string>
     <string name="preference_video_stabilization_summary">Die Video-Stabilisierung reduziert das Bildwackeln in der Vorschau und der Aufnahme</string>
     <string name="preference_video_bitrate">Video-Bitrate (durchschnittlich)</string>
@@ -267,8 +268,8 @@
     <string name="saf_permission_failed">Kann nicht in diesem Verzeichnis speichern</string>
 
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
-    <string name="permission_record_audio_not_available">Mikrofon Berechtigung nicht verfügbar</string>
-    <string name="permission_location_not_available">Location Berechtigung nicht verfügbar</string>
+    <string name="permission_record_audio_not_available">Mikrofon-Berechtigung ist nicht gegeben</string>
+    <string name="permission_location_not_available">Location-Berechtigung ist nicht gegeben</string>
 
     <string name="start_video">Starte Videoaufnahme</string>
     <string name="stop_video">Stoppe Videoaufnahme</string>
@@ -277,14 +278,14 @@
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
     <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
 
-    <string name="audio_control_start">Starte Sprach/Geräusch Steuerung</string>
-    <string name="audio_control_stop">Stoppe Sprach/Geräusch Steuerung</string>
+    <string name="audio_control_start">Starte Sprach/Geräusch-Steuerung</string>
+    <string name="audio_control_stop">Stoppe Sprach/Geräusch-Steuerung</string>
     <string name="speech_recognizer_started">Sag \"cheese\"</string>
     <string name="audio_listener_started">Mache ein lautes Geräusch</string>
 
     <string name="auto_stabilise_info">Autostabilisierung rotiert die Fotos so, dass sie waagerecht erscheinen.\n\nDies bedeutet aber auch eine geringere Auflösung aufgrund von Rotation und Beschneidung.</string>
-    <string name="raw_info">DNG Dateien enthalten das unkomprimierte und unbearbeitete Bild der Kamera.\n\nDie meisten Galery Apps werden mit DNG Bildern nicht umgehen können. stattdessen werden spezielle Programme wie Snapseed oder Lightroom benötigt.\n\nBeachte, dass "Stamp photos" und "Autostabilisierung" nur auf JPEG Bilder angewendet, aber nicht auf DNG Bilder.\n\nDNG Dateien benötigen viel Platz. Ein Fileexplorer mag nützlich sein um bei Bedarf Bilder zu löschen.\n\nDNG Dateien werden nur in Standard oder DRO Foto Modis geschrieben.</string>
-    <string name="hdr_info">Der HDR Mode ist nützlich für Aufnahmen mit starken Helligkeitsunterschieden. Dabei werden mehrere Aufnahmen unterschiedlicher Belichtungszeiten zu einem Bild kombiniert\n\nBeachte das HDR nicht für schnell bewegte Szenen geeignet ist und die Farbwiedergabe verfälscht.\n\nAufnahmen im HDR Modus sind langsamer.</string>
+    <string name="raw_info">DNG-Dateien enthalten das unkomprimierte und unbearbeitete Bild der Kamera.\n\nDie meisten Galerie-Apps werden mit DNG-Bildern nicht umgehen können. Stattdessen werden spezielle Programme wie Snapseed oder Lightroom benötigt.\n\nBeachte, dass "Fotostempel" und "Autostabilisierung" nur auf JPEG-Bilder angewendet wird, nicht aber auf DNG-Bilder.\n\nDNG-Dateien benötigen viel Platz. Ein Fileexplorer mag nützlich sein, um bei Bedarf Bilder zu löschen.\n\nDNG-Dateien werden nur im Standard- oder DRO-Foto-Modus geschrieben.</string>
+    <string name="hdr_info">Der HDR-Modus ist nützlich für Aufnahmen mit starken Helligkeitsunterschieden. Dabei werden mehrere Aufnahmen unterschiedlicher Belichtungszeiten zu einem Bild kombiniert.\n\nBeachte das HDR nicht für schnell bewegte Szenen geeignet ist und die Farbwiedergabe verfälscht.\n\nAufnahmen im HDR-Modus sind langsamer.</string>
 
     <string name="dont_show_again">Nicht wieder zeigen</string>
 
@@ -300,19 +301,19 @@
     <string name="photo_mode_noise_reduction_full">Rauschunterdrückung</string>
     <string name="preference_category_stamp">Fotostempel</string>
     <string name="preference_hdr_save_expo">Alle Bilder der HDR Aufnahme speichern</string>
-    <string name="preference_hdr_save_expo_summary">Wenn aktiviert, dann werden im HDR Modus die drei Basis Belichtungsbilder zusammen mit dem HDR Foto gespeichert. Beachte, dass die Aufnahmen verlangsamt, besonders wenn Optionen wie \"Stamp photos\" oder Autostabilisieung verwendet werden.</string>
+    <string name="preference_hdr_save_expo_summary">Wenn aktiviert, dann werden im HDR-Modus die drei Basis-Belichtungsbilder zusammen mit dem HDR-Foto gespeichert. Beachte, dass das die Aufnahmen verlangsamt, besonders wenn Optionen wie \"Fotostempel\" oder \"Autostabilisieung\" verwendet werden.</string>
 
     <string name="no_permission">BERECHTIGUNGEN NICHT VERFÜGBAR</string>
     <string name="permission_rationale_title">Berechtigung benötigt</string>
     <string name="permission_rationale_camera">Kamera Berechtigung wird benötigt um die Kamera zu aktivieren</string>
-    <string name="permission_rationale_storage">Speicher Lese/Schreib Berechtiung benötigt zum Speichern von Fotos</string>
-    <string name="permission_rationale_record_audio">Mikrofon Berechtigung benötigt um Audio mit den Videos aufzuzeichnen</string>
-    <string name="permission_rationale_location">Location Berechtigung für das Geotagging benötigt</string>
+    <string name="permission_rationale_storage">Speicher-Berechtiung benötigt zum Speichern von Fotos</string>
+    <string name="permission_rationale_record_audio">Mikrofon-Berechtigung benötigt um Audio mit dem Video aufzuzeichnen</string>
+    <string name="permission_rationale_location">Location-Berechtigung für das Geotagging benötigt</string>
 
-    <string name="preference_category_photo_debugging">Debug Optionen</string>
-    <string name="preference_category_video_debugging">Debug Optionen</string>
+    <string name="preference_category_photo_debugging">Debug-Optionen</string>
+    <string name="preference_category_video_debugging">Debug-Optionen</string>
     <string name="preference_camera2_fake_flash">Benutze alternative Blitz Methode</string>
-    <string name="preference_camera2_fake_flash_summary">Aktiviere dies, wenn dein Geräte Probleme mit der Camera2 API hat</string>
+    <string name="preference_camera2_fake_flash_summary">Aktiviere dies, wenn dein Gerät Probleme mit der Camera2-API hat</string>
 
     <string name="preference_expo_bracketing_n_images">Belichtungsreihe</string>
     <string name="preference_expo_bracketing_n_images_summary">Anzahl der Bilder für die Belichtungsreihe\n%s</string>
@@ -324,7 +325,7 @@
 
     <string name="preference_nr_save_no">Keine Rauschminderung im Originalbild</string>
     <string name="preference_nr_save_single">Speichere einzelnes Originalbild</string>
-    <string name="preference_nr_save_summary">Sollen Originalbilder mit Rauschminderung gespeichert werde? (Benötigt mehr Zeit)\n%s</string>
+    <string name="preference_nr_save_summary">Sollen Originalbilder mit Rauschminderung gespeichert werden? (Benötigt mehr Zeit)\n%s</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
@@ -339,8 +340,8 @@
 
     <string name="camera_error">Ernsthafter Kamera Fehler</string>
 
-    <string name="preference_camera2_fast_burst">Aktiviere schnellen HDR/expo Burst</string>
-    <string name="preference_camera2_fast_burst_summary">Erlaubt schnellere Aufnahmen im HDR/expo Modus. Deaktiviere diesen Modus, falls dein Gerät damit Probleme hat.</string>
+    <string name="preference_camera2_fast_burst">Aktiviere schnellen HDR-/Expo-Burst</string>
+    <string name="preference_camera2_fast_burst_summary">Erlaubt schnellere Aufnahmen im HDR-/Expo-Modus. Deaktiviere diesen Modus, falls dein Gerät damit Probleme hat.</string>
 
     <string name="camera">Kamera</string>
     <string name="record_video">Zeichne Video auf</string>
@@ -351,11 +352,11 @@
 
     <string name="preference_calibrate_level">Kalibriere den Gyro</string>
     <string name="preference_calibrate_level_summary">Diese Option kalibriert den Lagesensor, sodaß die Bilderausrichtung korrekt bestimmt wird.</string>
-    <string name="preference_calibrate_level_dialog">Lege dein Gerät auf eine ebene Fläche, sodaß ebenfalls eben liegt (entweder Portrait oder Landscape Orientierung), and wähle \'Kalibriere\'.\n\nDrücke Reset um die Kalibrierung für dieses Gerät zu entfernen.\n\nDrücke Zurück zum Abbruch.</string>
+    <string name="preference_calibrate_level_dialog">Lege dein Gerät auf eine ebene Fläche, sodass es ebenfalls eben liegt (entweder Portrait- oder Landscape-Orientierung), and wähle \'Kalibriere\'.\n\nDrücke \'Reset\' um die Kalibrierung für dieses Gerät zu entfernen.\n\nDrücke \'Zurück\' zum Abbruch.</string>
     <string name="preference_calibrate_level_calibrate">Kalibriere</string>
     <string name="preference_calibrate_level_reset">Reset</string>
     <string name="preference_calibrate_level_calibrated">Waagerechte Ebene kalibriert.</string>
-    <string name="preference_calibrate_level_calibration_reset">Ebenen Kalibrierung zurückgesetzt</string>
+    <string name="preference_calibrate_level_calibration_reset">Ebenen-Kalibrierung zurückgesetzt</string>
 
     <string name="photo_mode_dro">DRO</string>
 
@@ -364,7 +365,7 @@
     <string name="preference_show_geo_direction_lines">Zeige Kompass-Richtungslinien</string>
     <string name="preference_show_geo_direction_lines_summary">Zeige Kompass Richtungslinien</string>
     <string name="preference_video_subtitle">Video Untertitel</string>
-    <string name="preference_video_subtitle_summary">Erzeuge ein Untertitel .SRT File um das Datum und Zeit zu speichern, sowie die GPS Daten sofern Orts- und Richtungsdaten aktiviert sind\n%s</string>
+    <string name="preference_video_subtitle_summary">Erzeuge eine Untertiteldatei (.SRT) mit Datum und Uhrzeit sowie mit GPS-Daten, sofern GPS aktiviert ist\n%s</string>
 
     <string name="duration_unlimited">Unbegrenzt</string>
     <string name="duration_3s">3 Sekunden</string>
@@ -396,8 +397,8 @@
 
     <string name="video_pause">Videoaufnahme pausiert</string>
     <string name="video_resume">Videoaufnahme fortgesetzt</string>
-    <string name="pause_video">Pausiere Video Aufnahme</string>
-    <string name="resume_video">Video Aufnahme fortsetzen</string>
+    <string name="pause_video">Pausiere Videoaufnahme</string>
+    <string name="resume_video">Videoaufnahme fortsetzen</string>
 
     <string name="capturing">Aufnahme läuft…</string>
 
@@ -508,7 +509,7 @@
     <string name="open_files_saf_exception_ghost">Kein Datei-Dialog möglich, die Geisterbilder-Option wird nicht unterstützt</string>
     <string name="saf_permission_failed_open_image">Bild kann nicht geöffnet werden</string>
 
-    <string name="preference_camera2_photo_video_recording">Ermögliche Fotos während der Videoaudnahme</string>
+    <string name="preference_camera2_photo_video_recording">Ermögliche Fotos während der Videoaufnahme</string>
     <string name="preference_camera2_photo_video_recording_summary">Ermögliche Fotos während der Videoaudnahme. Diese Option ausschalten, falls Probleme mit dem Camera-2-API auftreten.</string>
 
     <string name="preference_video_log">Flaches (Log-) Video-Profil</string>
@@ -581,8 +582,21 @@
     <string name="preference_units_distance_m">Meter</string>
     <string name="preference_units_distance_summary">Verwendet für GPS-Höhe, Fotostempel und Video-Untertitel\n%s</string>
 
-    <string name="preference_show_whats_new">Zeigt den What\'s-New-Dialog</string>
+    <string name="preference_show_whats_new">Zeige den What\'s-New-Dialog</string>
     <string name="preference_show_whats_new_summary">Zeigt Info zu neuen Features und Verbesserungen wenn die App upgedatet wurde</string>
+
+    <string name="preference_video_log_fine">Fein</string>
+
+    <string name="preference_focus_assist">Fokus-Assistenz</string>
+    <string name="preference_focus_assist_summary">Zoomt näher bei manueller Fokussierung\n%s</string>
+    <string name="preference_focus_assist_off">Aus</string>
+    <string name="preference_focus_assist_2x">2x</string>
+    <string name="preference_focus_assist_4x">4x</string>
+
+    <string name="exposure_compensation_zoom">Erhöhe oder vermindere die Belichtungskorrektur</string>
+
+    <string name="previous">Vorheriges</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) for "<" button on popup menu -->
+    <string name="next">Nächstes</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) for ">" button on popup menu -->
 
     <string name="preference_burst_mode_off">Aus</string>
     <string name="preference_burst_mode_2x">2x</string>
@@ -593,6 +607,7 @@
     <string name="preference_burst_mode_unlimited">Unbegrenzt</string>
 
     <string name="preference_burst_interval_no_delay">Keine Verzögerung</string>
+    <string name="preference_burst_interval_0_5s">0,5 s</string>
     <string name="preference_burst_interval_1s">1 s</string>
     <string name="preference_burst_interval_2s">2 s</string>
     <string name="preference_burst_interval_3s">3 s</string>
@@ -616,6 +631,11 @@
     <string name="preference_video_max_filesize_300mb">300 MB</string>
     <string name="preference_video_max_filesize_500mb">500 MB</string>
     <string name="preference_video_max_filesize_1gb">1 GB</string>
+    <string name="preference_video_max_filesize_2gb">2 GB</string>
+    <string name="preference_video_max_filesize_5gb">5 GB</string>
+    <string name="preference_video_max_filesize_9gb">9 GB</string>
+
+    <string name="cancelled_focus_bracketing">Fokus-Bracketing beendet</string>
 
     <string name="preference_crop_guide_none">Keine Hilfslinien</string>
     <string name="preference_crop_guide_1">1,0 (1:1)</string>
@@ -625,6 +645,7 @@
     <string name="preference_crop_guide_1_5">1,5 (3:2)</string>
     <string name="preference_crop_guide_1_78">1,78 (16:9)</string>
     <string name="preference_crop_guide_1_85">1,85 (37:20)</string>
+    <string name="preference_crop_guide_2">2,0 (2:1)</string>
     <string name="preference_crop_guide_2_33">2,33 (21:9)</string>
     <string name="preference_crop_guide_2_35">2,35 (47:20)</string>
     <string name="preference_crop_guide_2_4">2,4 (12:5)</string>
@@ -637,7 +658,82 @@
     <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (Niedrige Empfindlichkeit)</string>
 
+    <string name="preference_hdr_contrast_enhancement">HDR-Kontrastverstärkung</string>
+    <string name="preference_hdr_contrast_enhancement_summary">Verwendet einen Algorithmus zur Verstärkung des HDR-Kontrasts. Das kann die Aufnahme verbessern, wenn eine Szene einen sehr hohen Dynamikumfang hat aber einen "HDR-Look" bekommen soll.\n%s</string>
+    <string name="preference_hdr_contrast_enhancement_off">Aus</string>
+    <string name="preference_hdr_contrast_enhancement_smart">Smart</string>
+    <string name="preference_hdr_contrast_enhancement_always">Immer</string>
+
+    <string name="preference_video_output_format">Video-Format</string>
+    <string name="preference_video_output_format_summary">Video- und Audio-Dateiformat and -Codecs\n%s</string>
+
+    <string name="preference_video_output_format_default">Standard</string>
+    <string name="preference_video_output_format_mpeg4_h264">MPEG4 H264</string>
+    <string name="preference_video_output_format_mpeg4_hevc">MPEG4 HEVC</string>
+    <string name="preference_video_output_format_3gpp">3GPP</string>
+    <string name="preference_video_output_format_webm">WebM (Audio nicht unterstützt)</string>
+
+    <string name="preference_screen_settings_manager">Einstellungsmanager</string>
+
+    <string name="preference_save_settings">Sichere Einstellungen</string>
+    <string name="preference_save_settings_summary">Sichere alle Einstellungen von Open Camera in eine Datei</string>
+    <string name="preference_save_settings_filename">Name der Einstellungsdatei</string>
+
+    <string name="preference_restore_settings">Einstellungen wiederherstellen</string>
+    <string name="preference_restore_settings_summary">Stelle zuvor gesicherte Einstellungen wieder her. Alle aktuellen Einstellungen werden durch die gesicherten ersetzt!</string>
+    <string name="preference_restore_settings_question">Diese Option erlaubt die Auswahl einer zuvor gespeicherten Einstellungsdatei. Vorsicht! Alle aktuellen Einstellungen werden überschrieben, wenn eine Einstellungsdatei geladen wird!</string>
+
+    <string name="saved_settings">Gesicherte Einstellungen</string>
+    <string name="save_settings_failed">Fehler beim Speichern der Einstellungen</string>
+    <string name="restore_settings_failed">Fehler beim Laden der Einstellungen</string>
+    <string name="open_files_saf_exception_generic">Kein Datei-Dialog verfügbar, das Gerät unterstützt diese Funktion nicht.</string>
+
+    <string name="preference_image_format">Bild-Format</string>
+    <string name="preference_image_format_jpeg">JPEG</string>
+    <string name="preference_image_format_webp">WebP</string>
+    <string name="preference_image_format_png">PNG</string>
+
+    <string name="preference_nr_mode">NR-Modus</string>
+    <string name="preference_nr_mode_normal">Normal</string>
+    <string name="preference_nr_mode_low_light">Dunkelheit</string>
+
     <string name="preference_ui_placement_left">Oberfläche für Linkshänder</string>
     <string name="preference_ui_placement_right">Oberfläche für Rechtshänder</string>
+    <string name="preference_ui_placement_top">Icons oben (Portrait)</string>
 
+    <string name="preference_show_face_detection">Zeige Icon für Gesichtserkennung</string>
+    <string name="preference_show_face_detection_summary">Zeigt ein Icon an zum Ein- und Ausschalten der Gesichtserkennung</string>
+    <string name="face_detection_enable">Aktiviere die Gesichtserkennung</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_disable">Deaktiviere die Gesichtserkennung</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_enabled">Gesichtserkennung aktiv</string>
+    <string name="face_detection_disabled">Gesichtserkennung inaktiv</string>
+
+    <string name="preference_show_auto_level">Zeige Icon für Horizontalausrichtung</string>
+    <string name="preference_show_auto_level_summary">Zeigt ein Icon an zum Ein- und Ausschalten der Horizontalausrichtung. Wenn die Horizontalausrichtung aktiviert ist, werden Fotos so rotiert, dass der Horizont waagerecht ist.</string>
+    <string name="auto_level_enable">Aktiviere die Horizontalausrichtung</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="auto_level_disable">Deaktiviere die Horizontalausrichtung</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+
+    <string name="preference_show_stamp">Zeige Icon für Fotostempel</string>
+    <string name="preference_show_stamp_summary">Zeigt ein Icon zum Ein- und Ausschalten des Fotostempels</string>
+    <string name="stamp_enable">Aktiviere Fotostempel</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_disable">Deaktiviere Fotostempel</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_enabled">Fotostempel ein</string>
+    <string name="stamp_disabled">Fotostempel aus</string>
+
+    <string name="preference_show_textstamp">Zeige Icon für eigenen Foto-Textstempel</string>
+    <string name="preference_show_textstamp_summary">Zeigt ein Icon für den Fotostempel mit selbst erstelltem Text</string>
+
+    <string name="preference_show_white_balance_lock">Zeige Icon für die Sperre des automatischen Weißabgleichs</string>
+    <string name="preference_show_white_balance_lock_summary">Zeigt ein Icon für Sperrung oder Freigabe des automatischen Weißabgleichs</string>
+    <string name="white_balance_lock">Sperre für autom. Weißabgleich</string>
+    <string name="white_balance_unlock">Freigabe für autom. Weißabgleich</string>
+    <string name="white_balance_locked">Weißabgleich gesperrt</string>
+    <string name="white_balance_unlocked">Weißabgleich aktiv</string>
+
+    <string name="preference_show_exposure_lock">Zeige Icon zur Deaktivierung der automatischen Belichtung</string>
+    <string name="preference_show_exposure_lock_summary">Zeigt ein Icon für Sperrung oder Freigabe der automatischen Belichtung</string>
+    <string name="exposure_unlock">Autom. Belichtung aktiv</string>
+
+    <string name="preference_nr_mode_low_light_message">Dunkel-Modus: Bitte Kamera still halten</string>
+	
 </resources>
