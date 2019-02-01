@@ -5566,7 +5566,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 // simulate remaining memory now being reduced, so we don't keep trying to restart
                 mActivity.getApplicationInterface().test_available_memory = 10000000;
                 while( mPreview.isVideoRecording() ) {
-                    assertTrue( System.currentTimeMillis() - time_s <= 30000 );
+                    assertTrue( System.currentTimeMillis() - time_s <= 35000 );
                     long video_time = mPreview.getVideoTime();
                     assertTrue( video_time >= video_time_s );
                 }
