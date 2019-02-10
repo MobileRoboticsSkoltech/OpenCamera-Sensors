@@ -14172,13 +14172,39 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Rect dst_rect = new Rect();
         Paint p = new Paint();
         p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        int align_x = 0, align_y = 0;
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "process bitmap: " + i);
 
             float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
 
+            //final int blend_hwidth = 0;
             final int blend_hwidth = bitmap_width/20;
+            final int align_hwidth = bitmap_width/20;
+            Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
+            Log.d(TAG, "    align_hwidth: " + align_hwidth);
+
+            if( i > 0 ) {
+                // autoalignment
+                List<Bitmap> alignment_bitmaps = new ArrayList<>();
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+
+                int [] offsets_x = new int[alignment_bitmaps.size()];
+                int [] offsets_y = new int[alignment_bitmaps.size()];
+                mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, 2*align_hwidth, bitmap_height, alignment_bitmaps, 0, false, 8);
+                for(Bitmap alignment_bitmap : alignment_bitmaps) {
+                    alignment_bitmap.recycle();
+                }
+                alignment_bitmaps.clear();
+                Log.d(TAG, "    offset_x: " + offsets_x[1]);
+                Log.d(TAG, "    offset_y: " + offsets_y[1]);
+                align_x += offsets_x[1];
+                align_y += offsets_y[1];
+                Log.d(TAG, "    align_x is now: " + align_x);
+                Log.d(TAG, "    align_y is now: " + align_y);
+            }
 
             Bitmap bitmap = bitmaps.get(i);
             int start_x = -blend_hwidth;
@@ -14201,6 +14227,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
 
                 src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
+                src_rect.offset(align_x, align_y);
                 dst_rect.set(offset_x + i*slice_width + x, dst_y0, offset_x + i*slice_width + x+1, dst_y1);
 
                 int blend_alpha = 255;
@@ -14270,11 +14297,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             canvas.drawBitmap(bitmap_slice, matrix, null);
             bitmap_slice.recycle();
             */
-
+        }
+        for(Bitmap bitmap : bitmaps) {
             bitmap.recycle();
-            bitmaps.set(i, null);
         }
         bitmaps.clear();
+        Log.d(TAG, "panorama complete!");
 
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
         OutputStream outputStream = new FileOutputStream(file);
