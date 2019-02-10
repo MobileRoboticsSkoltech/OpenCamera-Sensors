@@ -27,6 +27,12 @@ android {
     lintOptions {
         checkReleaseBuilds false
     }
+
+    // needed to use android.test package (ActivityInstrumentationTestCase2 etc) when targetting sdk 28 (Android 9) -
+    // see https://developer.android.com/training/testing/set-up-project
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    //useLibrary 'android.test.mock'
 }
 
 dependencies {
