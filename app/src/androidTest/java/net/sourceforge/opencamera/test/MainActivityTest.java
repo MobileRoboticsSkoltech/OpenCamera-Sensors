@@ -33,10 +33,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.TonemapCurve;
@@ -14126,20 +14131,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
     }
 
-    /** Tests panorama algorithm on test samples "testPanorama1".
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public void testPanorama1() throws IOException {
-        Log.d(TAG, "testPanorama1");
+    public void subTestPanorama(List<String> inputs, String output_name, float panorama_pics_per_screen) throws IOException, InterruptedException {
+        Log.d(TAG, "subTestPanorama");
 
-        setToDefault();
-
-        // list assets
-        List<String> inputs = new ArrayList<>();
-        inputs.add(panorama_images_path + "testPanorama1/input0.jpg");
-        inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
-        inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
+        // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
+        // in case the latter value is changed
 
         List<Bitmap> bitmaps = new ArrayList<>();
         for(String input : inputs) {
@@ -14147,8 +14143,198 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             bitmaps.add(bitmap);
         }
 
-        float angle = 0.0f;
-        for(Bitmap bitmap : bitmaps) {
+        int bitmap_width = bitmaps.get(0).getWidth();
+        int bitmap_height = bitmaps.get(0).getHeight();
+        int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
+        Log.d(TAG, "bitmap_width: " + bitmap_width);
+        Log.d(TAG, "bitmap_height: " + bitmap_height);
+        Log.d(TAG, "slice_width: " + slice_width);
+
+        for(int i=1;i<bitmaps.size();i++) {
+            Bitmap bitmap = bitmaps.get(i);
+            if( bitmap.getWidth() != bitmap_width || bitmap.getHeight() != bitmap_height ) {
+                Log.e(TAG, "bitmaps not of equal sizes");
+                throw new RuntimeException();
+            }
         }
+
+        float camera_angle_deg = mActivity.getPreview().getViewAngleY();
+        double camera_angle = Math.toRadians(camera_angle_deg);
+        Log.d(TAG, "camera_angle_deg: " + camera_angle_deg);
+        Log.d(TAG, "camera_angle: " + camera_angle);
+        double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
+
+        int offset_x = (bitmap_width - slice_width)/2;
+        Bitmap panorama = Bitmap.createBitmap((bitmaps.size()*slice_width+2*offset_x), bitmap_height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(panorama);
+
+        Rect src_rect = new Rect();
+        Rect dst_rect = new Rect();
+        Paint p = new Paint();
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        for(int i=0;i<bitmaps.size();i++) {
+            Log.d(TAG, "process bitmap: " + i);
+
+            float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
+            Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
+
+            final int blend_hwidth = bitmap_width/20;
+
+            Bitmap bitmap = bitmaps.get(i);
+            int start_x = -blend_hwidth;
+            int stop_x = slice_width+blend_hwidth;
+            if( i == 0 )
+                start_x = -offset_x;
+            if( i == bitmaps.size()-1 )
+                stop_x = slice_width+offset_x;
+
+            for(int x=start_x;x<stop_x;x++) {
+                float dx = (float)(x - (slice_width/2));
+
+                // rectangular projection:
+                //float new_height = bitmap_height * (float)(h / (h * Math.cos(alpha) - dx * Math.sin(alpha)));
+                // cylindrical projection:
+                float theta = (float)(dx*camera_angle)/(float)bitmap_width;
+                float new_height = bitmap_height * (float)Math.cos(theta);
+
+                int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
+                int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+
+                src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
+                dst_rect.set(offset_x + i*slice_width + x, dst_y0, offset_x + i*slice_width + x+1, dst_y1);
+
+                int blend_alpha = 255;
+                if( i > 0 && x < blend_hwidth ) {
+                    // left hand blend
+                    //blend_alpha = 127;
+                    // if x=-blend_hwidth: frac=0
+                    // if x=blend_hwidth-1: frac=1
+                    float frac = ((float)x+blend_hwidth)/(float)(2*blend_hwidth-1.0f);
+                    blend_alpha = (int)(255.0f*frac+0.1f);
+                }
+                else if( i < bitmaps.size()-1 && x > slice_width-1-blend_hwidth ) {
+                    // right hand blend
+                    //blend_alpha = 127;
+                    // if x=slice_width-blend_width: ix=0
+                    // if x=slice_width+blend_width-1
+                    //int ix = slice_width-blend_width-x;
+                    // if x=slice_width-blend_hwidth: frac=1
+                    // if x=slice_width+blend_hwidth-1: frac=0
+                    float frac = ((float)slice_width+blend_hwidth-1-x)/(float)(2*blend_hwidth-1.0f);
+                    blend_alpha = (int)(255.0f*frac+0.1f);
+                }
+                p.setAlpha(blend_alpha);
+
+                canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+            }
+
+            /*float x0 = -slice_width/2;
+            float new_height0 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x0 * Math.sin(alpha)));
+            Log.d(TAG, "    new_height0: " + new_height0);
+
+            float x1 = slice_width/2;
+            float new_height1 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x1 * Math.sin(alpha)));
+            Log.d(TAG, "    new_height1: " + new_height1);
+
+            float src_x0 = 0, src_y0 = 0.0f;
+            float src_x1 = 0, src_y1 = bitmap_height;
+            float src_x2 = slice_width, src_y2 = 0.0f;
+            float src_x3 = slice_width, src_y3 = bitmap_height;
+
+            float dst_x0 = src_x0, dst_y0 = (bitmap_height - new_height0)/2.0f;
+            float dst_x1 = src_x1, dst_y1 = (bitmap_height + new_height0)/2.0f;
+            float dst_x2 = src_x2, dst_y2 = (bitmap_height - new_height1)/2.0f;
+            float dst_x3 = src_x3, dst_y3 = (bitmap_height + new_height1)/2.0f;
+
+            float [] src_points = new float[]{src_x0, src_y0, src_x1, src_y1, src_x2, src_y2, src_x3, src_y3};
+            float [] dst_points = new float[]{dst_x0, dst_y0, dst_x1, dst_y1, dst_x2, dst_y2, dst_x3, dst_y3};
+            Log.d(TAG, "    src top-left: " + src_x0 + " , " + src_y0);
+            Log.d(TAG, "    src bottom-left: " + src_x1 + " , " + src_y1);
+            Log.d(TAG, "    src top-right: " + src_x2 + " , " + src_y2);
+            Log.d(TAG, "    src bottom-right: " + src_x3 + " , " + src_y3);
+            Log.d(TAG, "    dst top-left: " + dst_x0 + " , " + dst_y0);
+            Log.d(TAG, "    dst bottom-left: " + dst_x1 + " , " + dst_y1);
+            Log.d(TAG, "    dst top-right: " + dst_x2 + " , " + dst_y2);
+            Log.d(TAG, "    dst bottom-right: " + dst_x3 + " , " + dst_y3);
+
+            Matrix matrix = new Matrix();
+            if( !matrix.setPolyToPoly(src_points, 0, dst_points, 0, 4) ) {
+                Log.e(TAG, "failed to create matrix");
+                throw new RuntimeException();
+            }
+            Log.d(TAG, "matrix: " + matrix);
+
+            matrix.postTranslate(i*slice_width, 0.0f);
+
+            Bitmap bitmap_slice = Bitmap.createBitmap(bitmap, (bitmap_width - slice_width)/2, 0, slice_width, bitmap_height);
+            canvas.drawBitmap(bitmap_slice, matrix, null);
+            bitmap_slice.recycle();
+            */
+
+            bitmap.recycle();
+            bitmaps.set(i, null);
+        }
+        bitmaps.clear();
+
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
+        OutputStream outputStream = new FileOutputStream(file);
+        panorama.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.close();
+        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+        Thread.sleep(500);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama1".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama1() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama1");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        inputs.add(panorama_images_path + "testPanorama1/input0.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input3.jpg");
+        String output_name = "testPanorama1_output.jpg";
+
+        subTestPanorama(inputs, output_name, 2.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama2".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama2() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama2");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        /*final float panorama_pics_per_screen = 1.0f;
+        //inputs.add(panorama_images_path + "testPanorama2xxx/input0.jpg");
+        inputs.add(panorama_images_path + "testPanorama2xxx/input1.jpg");
+        inputs.add(panorama_images_path + "testPanorama2xxx/input2.jpg");*/
+        /*final float panorama_pics_per_screen = 2.0f;
+        //inputs.add(panorama_images_path + "testPanorama1/input0.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
+        inputs.add(panorama_images_path + "testPanorama1/input3.jpg");
+        String output_name = "testPanorama1_output.jpg";*/
+        inputs.add(panorama_images_path + "testPanorama2/input0.jpg");
+        inputs.add(panorama_images_path + "testPanorama2/input1.jpg");
+        inputs.add(panorama_images_path + "testPanorama2/input2.jpg");
+        inputs.add(panorama_images_path + "testPanorama2/input3.jpg");
+        inputs.add(panorama_images_path + "testPanorama2/input4.jpg");
+        inputs.add(panorama_images_path + "testPanorama2/input5.jpg");
+        String output_name = "testPanorama2_output.jpg";
+
+        subTestPanorama(inputs, output_name, 4.0f);
     }
 }
