@@ -35,6 +35,8 @@ public class GyroSensor implements SensorEventListener {
     private final float [] targetVector = new float[3];
     private float targetAngle; // target angle in radians
     private TargetCallback targetCallback;
+    private boolean has_lastTargetAngle;
+    private float lastTargetAngle;
 
     GyroSensor(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
@@ -107,7 +109,7 @@ public class GyroSensor implements SensorEventListener {
         is_recording = true;
         timestamp = 0;
         setToIdentity();
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     void stopRecording() {
@@ -131,11 +133,15 @@ public class GyroSensor implements SensorEventListener {
         this.targetVector[2] = target_z;
         this.targetAngle = targetAngle;
         this.targetCallback = targetCallback;
+        this.has_lastTargetAngle = false;
+        this.lastTargetAngle = 0.0f;
     }
 
     void clearTarget() {
         this.hasTarget = false;
         this.targetCallback = null;
+        this.has_lastTargetAngle = false;
+        this.lastTargetAngle = 0.0f;
     }
 
     @Override
@@ -193,23 +199,36 @@ public class GyroSensor implements SensorEventListener {
 
             System.arraycopy(tempMatrix, 0, currentRotationMatrix, 0, 9);
 
-            if( MyDebug.LOG ) {
+            /*if( MyDebug.LOG ) {
                 setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
                 transformVector(tempVector, currentRotationMatrix, inVector);
                 //transformTransposeVector(tempVector, currentRotationMatrix, inVector);
                 Log.d(TAG, "### gyro vector: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
-            }
+            }*/
 
             if( hasTarget ) {
                 setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
                 transformVector(tempVector, currentRotationMatrix, inVector);
                 float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
                 float angle = (float)Math.acos(cos_angle);
-                if( MyDebug.LOG )
-                    Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");
+                /*if( MyDebug.LOG )
+                    Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
                 if( angle <= targetAngle ) {
-                    targetCallback.onAchieved();
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
+                    //targetCallback.onAchieved();
+                    if( has_lastTargetAngle ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
+                        if( angle > lastTargetAngle ) {
+                            // started to get worse, so call callback
+                            targetCallback.onAchieved();
+                        }
+                        // else, don't call callback yet, as we may get closer to the target
+                    }
                 }
+                has_lastTargetAngle = true;
+                lastTargetAngle = angle;
             }
         }
 

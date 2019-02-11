@@ -71,7 +71,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
-	private final static float panorama_pics_per_screen = 2.0f;
+	private final static float panorama_pics_per_screen = 4.0f;
 
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;
@@ -1410,7 +1410,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setNextPanoramaPoint : " + x + " , " + y + " , " + z);
 
-		final float target_angle = 2.0f * 0.01745329252f;
+		final float target_angle = 1.0f * 0.01745329252f;
 		gyroSensor.setTarget(x, y, z, target_angle, new GyroSensor.TargetCallback() {
 			@Override
 			public void onAchieved() {
