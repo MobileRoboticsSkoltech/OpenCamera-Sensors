@@ -3148,8 +3148,6 @@ public class MainActivity extends Activity {
 		applicationInterface.trashLastImage();
     }
 
-    private final boolean test_panorama = false;
-
 	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
 	 *  volume buttons, audio trigger).
 	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
@@ -3160,7 +3158,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 
-		if( test_panorama ) {
+		if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
 			if (applicationInterface.getGyroSensor().isRecording()) {
 				if (MyDebug.LOG)
 					Log.d(TAG, "panorama complete");
@@ -3193,12 +3191,6 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "takePicturePressed");
 
 		closePopup();
-
-		if( applicationInterface.getGyroSensor().isRecording() ) {
-			if (MyDebug.LOG)
-				Log.d(TAG, "set next panorama point");
-			applicationInterface.setNextPanoramaPoint();
-		}
 
 		this.last_continuous_fast_burst = continuous_fast_burst;
     	this.preview.takePicturePressed(photo_snapshot, continuous_fast_burst);
@@ -3682,14 +3674,20 @@ public class MainActivity extends Activity {
 		return preview.supportsFocusBracketing();
     }
 
-    public boolean supportsFastBurst() {
+	public boolean supportsPanorama() {
+		// require 512MB just to be safe, due to the large number of images that may be created
+		return( large_heap_memory >= 512 );
+		//return false; // currently blocked for release
+	}
+
+	public boolean supportsFastBurst() {
 		if( applicationInterface.isImageCaptureIntent() )
 			return false; // don't support burst mode if called from image capture intent
 		// require 512MB just to be safe, due to the large number of images that may be created
 		return( preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() );
 	}
 
-    public boolean supportsNoiseReduction() {
+	public boolean supportsNoiseReduction() {
 		// require at least Android 5, for the Renderscript support in HDRProcessor, but we require
 		// Android 7 to limit to more modern devices (for performance reasons)
 		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
@@ -3948,6 +3946,9 @@ public class MainActivity extends Activity {
 				}
 				case NoiseReduction:
 					photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
+					break;
+				case Panorama:
+					photo_mode_string = getResources().getString(R.string.photo_mode_panorama_full);
 					break;
 			}
 			if( photo_mode_string != null ) {

@@ -2093,7 +2093,7 @@ public class DrawPreview {
 			p.setStyle(Paint.Style.FILL); // reset
 		}
 
-		if( enable_gyro_target_spot && !taking_picture ) {
+		if( enable_gyro_target_spot ) {
 			GyroSensor gyroSensor = main_activity.getApplicationInterface().getGyroSensor();
 			if( gyroSensor.isRecording() ) {
 				gyroSensor.getRelativeInverseVector(transformed_gyro_direction, gyro_direction);

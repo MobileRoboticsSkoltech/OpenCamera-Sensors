@@ -61,7 +61,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	ExpoBracketing, // take multiple expo bracketed images, without combining to a single image
 		FocusBracketing, // take multiple focus bracketed images, without combining to a single image
 		FastBurst,
-		NoiseReduction
+		NoiseReduction,
+		Panorama
     }
     
 	private final MainActivity main_activity;
@@ -1029,7 +1030,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	// even if the queue isn't full, we may apply additional limits
 		int n_images_to_save = imageSaver.getNImagesToSave();
 		PhotoMode photo_mode = getPhotoMode();
-		if( photo_mode == PhotoMode.FastBurst ) {
+		if( photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.Panorama ) {
 			// only allow one fast burst at a time, so require queue to be empty
 			if( n_images_to_save > 0 ) {
 				if( MyDebug.LOG )
@@ -1262,6 +1263,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		boolean noise_reduction = photo_mode_pref.equals("preference_photo_mode_noise_reduction");
 		if( noise_reduction && main_activity.supportsNoiseReduction() )
 			return PhotoMode.NoiseReduction;
+		boolean panorama = photo_mode_pref.equals("preference_photo_mode_panorama");
+		if( panorama && main_activity.supportsPanorama() )
+			return PhotoMode.Panorama;
 		return PhotoMode.Standard;
     }
 
@@ -1416,14 +1420,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			public void onAchieved() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "TargetCallback.onAchieved");
-				clearPanoramaPoint();
+				// Clear the target so we avoid risk of multiple callbacks - but note we don't call
+				// clearPanoramaPoint(), as we don't want to call drawPreview.clearGyroDirectionMarker()
+				// at this stage (looks better to keep showing the target market on-screen whilst photo
+				// is being taken, user more likely to keep the device still).
+				gyroSensor.clearTarget();
 				main_activity.takePicturePressed(false, false);
 			}
 		});
 		drawPreview.setGyroDirectionMarker(x, y, z);
 	}
 
-	void clearPanoramaPoint() {
+	private void clearPanoramaPoint() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearPanoramaPoint");
 		gyroSensor.clearTarget();
@@ -1926,6 +1934,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			boolean image_capture_intent = isImageCaptureIntent();
 			boolean do_in_background = saveInBackground(image_capture_intent);
 			imageSaver.finishImageAverage(do_in_background);
+		}
+		else if( photo_mode == MyApplicationInterface.PhotoMode.Panorama && gyroSensor.isRecording() ) {
+			if (MyDebug.LOG)
+				Log.d(TAG, "set next panorama point");
+			this.setNextPanoramaPoint();
 		}
 
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away

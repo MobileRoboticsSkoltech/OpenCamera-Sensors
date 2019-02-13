@@ -193,6 +193,10 @@ public class PopupView extends LinearLayout {
     			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
     		}
+			if( main_activity.supportsPanorama() ) {
+				photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_panorama_full : R.string.photo_mode_panorama));
+				photo_mode_values.add(MyApplicationInterface.PhotoMode.Panorama);
+			}
     		if( main_activity.supportsFastBurst() ) {
 				photo_modes.add(getResources().getString(use_expanded_menu ? R.string.photo_mode_fast_burst_full : R.string.photo_mode_fast_burst));
 				photo_mode_values.add(MyApplicationInterface.PhotoMode.FastBurst);
@@ -1022,6 +1026,9 @@ public class PopupView extends LinearLayout {
 				case NoiseReduction:
 					toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
 					break;
+				case Panorama:
+					toast_message = getResources().getString(R.string.photo_mode_panorama_full);
+					break;
 			}
 			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 			SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -1046,6 +1053,9 @@ public class PopupView extends LinearLayout {
 					break;
 				case NoiseReduction:
 					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
+					break;
+				case Panorama:
+					editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
 					break;
 				default:
 					if (MyDebug.LOG)
