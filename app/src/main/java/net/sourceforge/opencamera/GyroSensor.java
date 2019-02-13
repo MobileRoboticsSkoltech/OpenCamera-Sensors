@@ -37,6 +37,7 @@ public class GyroSensor implements SensorEventListener {
     private TargetCallback targetCallback;
     private boolean has_lastTargetAngle;
     private float lastTargetAngle;
+    private int is_upright; // if hasTarget==true, this stores whether the "upright" orientation of the device is close enough to the orientation when recording was started: 0 for yes, otherwise -1 for too anti-clockwise, +1 for too clockwise
 
     GyroSensor(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
@@ -144,6 +145,10 @@ public class GyroSensor implements SensorEventListener {
         this.lastTargetAngle = 0.0f;
     }
 
+    public int isUpright() {
+        return this.is_upright;
+    }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
@@ -207,28 +212,43 @@ public class GyroSensor implements SensorEventListener {
             }*/
 
             if( hasTarget ) {
-                setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+                // first check if we are still "upright"
+                setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
                 transformVector(tempVector, currentRotationMatrix, inVector);
-                float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
-                float angle = (float)Math.acos(cos_angle);
-                /*if( MyDebug.LOG )
-                    Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
-                if( angle <= targetAngle ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
-                    //targetCallback.onAchieved();
-                    if( has_lastTargetAngle ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
-                        if( angle > lastTargetAngle ) {
-                            // started to get worse, so call callback
-                            targetCallback.onAchieved();
-                        }
-                        // else, don't call callback yet, as we may get closer to the target
-                    }
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "### transformed vector up: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
                 }
-                has_lastTargetAngle = true;
-                lastTargetAngle = angle;
+                float sin_angle_up = tempVector[0];
+                if( Math.abs(sin_angle_up) <= 0.017452406437f ) {  // 1 degree
+                    is_upright = 0;
+                }
+                else
+                    is_upright = (sin_angle_up > 0) ? 1 : -1;
+
+                if( is_upright == 0 ) {
+                    setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+                    transformVector(tempVector, currentRotationMatrix, inVector);
+                    float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
+                    float angle = (float)Math.acos(cos_angle);
+                    /*if( MyDebug.LOG )
+                        Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
+                    if( angle <= targetAngle ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
+                        //targetCallback.onAchieved();
+                        if( has_lastTargetAngle ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
+                            if( angle > lastTargetAngle ) {
+                                // started to get worse, so call callback
+                                targetCallback.onAchieved();
+                            }
+                            // else, don't call callback yet, as we may get closer to the target
+                        }
+                    }
+                    has_lastTargetAngle = true;
+                    lastTargetAngle = angle;
+                }
             }
         }
 
