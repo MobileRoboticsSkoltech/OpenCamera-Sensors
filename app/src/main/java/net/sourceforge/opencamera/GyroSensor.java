@@ -215,9 +215,9 @@ public class GyroSensor implements SensorEventListener {
                 // first check if we are still "upright"
                 setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
                 transformVector(tempVector, currentRotationMatrix, inVector);
-                if( MyDebug.LOG ) {
+                /*if( MyDebug.LOG ) {
                     Log.d(TAG, "### transformed vector up: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
-                }
+                }*/
                 float sin_angle_up = tempVector[0];
                 if( Math.abs(sin_angle_up) <= 0.017452406437f ) {  // 1 degree
                     is_upright = 0;
