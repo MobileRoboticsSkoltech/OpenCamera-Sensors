@@ -2119,7 +2119,8 @@ public class DrawPreview {
 					drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y);
 				}
 
-				if( gyroSensor.isUpright() != 0 ) {
+				// show indicator for not being "upright", but only if tilt angle is within 20 degrees
+				if( gyroSensor.isUpright() != 0 && Math.abs(angle_x) <= 20.0f*0.0174532925199f ) {
 					//applicationInterface.drawTextWithBackground(canvas, p, "not upright", Color.WHITE, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, MyApplicationInterface.Alignment.ALIGNMENT_CENTRE, null, true);
 					canvas.save();
 					canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
