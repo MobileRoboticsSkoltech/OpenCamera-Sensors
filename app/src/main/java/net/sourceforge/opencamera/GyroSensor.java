@@ -218,16 +218,30 @@ public class GyroSensor implements SensorEventListener {
                 /*if( MyDebug.LOG ) {
                     Log.d(TAG, "### transformed vector up: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
                 }*/
-                float sin_angle_up = tempVector[0];
+                /*float sin_angle_up = tempVector[0];
                 if( Math.abs(sin_angle_up) <= 0.017452406437f ) {  // 1 degree
                     is_upright = 0;
                 }
                 else
-                    is_upright = (sin_angle_up > 0) ? 1 : -1;
+                    is_upright = (sin_angle_up > 0) ? 1 : -1;*/
+                // compute tempVector X (0 1 0)
+                float cx = - tempVector[2];
+                float cy = 0.0f;
+                float cz = tempVector[0];
+                float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
+
+                setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+                transformVector(tempVector, currentRotationMatrix, inVector);
+
+                if( Math.abs(sin_angle_up) <= 0.017452406437f ) {  // 1 degree
+                    is_upright = 0;
+                }
+                else {
+                    float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
+                    is_upright = (dot < 0) ? 1 : -1;
+                }
 
                 if( is_upright == 0 ) {
-                    setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
-                    transformVector(tempVector, currentRotationMatrix, inVector);
                     float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
                     float angle = (float)Math.acos(cos_angle);
                     /*if( MyDebug.LOG )
