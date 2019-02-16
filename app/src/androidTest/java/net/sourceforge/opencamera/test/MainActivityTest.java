@@ -14181,15 +14181,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             //final int blend_hwidth = 0;
             final int blend_hwidth = bitmap_width/20;
-            final int align_hwidth = bitmap_width/20;
+            final int align_hwidth = bitmap_width/10;
             Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
             Log.d(TAG, "    align_hwidth: " + align_hwidth);
 
             if( i > 0 ) {
                 // autoalignment
                 List<Bitmap> alignment_bitmaps = new ArrayList<>();
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                // save bitmaps used for alignments
+                for(int j=0;j<alignment_bitmaps.size();j++) {
+                    Bitmap alignment_bitmap = alignment_bitmaps.get(j);
+                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/alignment_bitmap_" + i + "_" + j +"_" + output_name);
+                    OutputStream outputStream = new FileOutputStream(file);
+                    alignment_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+                    outputStream.close();
+                    mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+                }
 
                 int [] offsets_x = new int[alignment_bitmaps.size()];
                 int [] offsets_y = new int[alignment_bitmaps.size()];
@@ -14364,5 +14375,48 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String output_name = "testPanorama2_output.jpg";
 
         subTestPanorama(inputs, output_name, 4.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama3".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama3() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama3");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 4.0f;
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131249.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131252.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131255.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131258.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131301.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131303.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131305.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131307.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131315.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131317.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131320.jpg");
+        String output_name = "testPanorama3_output.jpg";
+
+        /*float panorama_pics_per_screen = 2.0f;
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131249.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131252.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131255.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131258.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131301.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131303.jpg");
+        inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131305.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131307.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131315.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131317.jpg");
+        //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131320.jpg");
+        String output_name = "testPanorama3b_output.jpg";*/
+
+        subTestPanorama(inputs, output_name, panorama_pics_per_screen);
     }
 }
