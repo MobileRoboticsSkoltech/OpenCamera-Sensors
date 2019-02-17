@@ -2026,8 +2026,13 @@ public class HDRProcessor {
 	}
 
 	private LuminanceInfo computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "computeMedianLuminance");
+			Log.d(TAG, "mtb_x: " + mtb_x);
+			Log.d(TAG, "mtb_y: " + mtb_y);
+			Log.d(TAG, "mtb_width: " + mtb_width);
+			Log.d(TAG, "mtb_height: " + mtb_height);
+		}
 		final int n_samples_c = 100;
 		final int n_w_samples = (int)Math.sqrt(n_samples_c);
 		final int n_h_samples = n_samples_c/n_w_samples;
