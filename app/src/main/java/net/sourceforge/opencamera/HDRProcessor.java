@@ -1975,6 +1975,15 @@ public class HDRProcessor {
 				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "    best_id " + best_id + " error: " + best_error);
+				MainActivity mActivity = (MainActivity) context;
+				if( best_error >= 2000000000 ) {
+					Log.e(TAG, "    auto-alignment failed due to overflow");
+					// hitting overflow means behaviour will be unstable under SMP, and auto-alignment won't be reliable anyway
+					best_id = 4; // default to centre
+					/*if( mActivity.is_test ) {
+						throw new RuntimeException();
+					}*/
+				}
 				if( best_id != -1 ) {
 					int this_off_x = best_id % 3;
 					int this_off_y = best_id/3;
