@@ -87,7 +87,8 @@ public class ImageSaver extends Thread {
 		enum ProcessType {
 			NORMAL,
 			HDR,
-			AVERAGE
+			AVERAGE,
+			PANORAMA
 		}
 		final ProcessType process_type; // for type==JPEG
 		final boolean force_suffix; // affects filename suffixes for saving jpeg_images: if true, filenames will always be appended with a suffix like _0, even if there's only 1 image in jpeg_images
@@ -119,6 +120,7 @@ public class ImageSaver extends Thread {
 		final int image_quality;
 		final boolean do_auto_stabilise;
 		final double level_angle;
+		final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
 		final boolean is_front_facing;
 		final boolean mirror;
 		final Date current_date;
@@ -153,7 +155,7 @@ public class ImageSaver extends Thread {
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2,
 			ImageFormat image_format, int image_quality,
-			boolean do_auto_stabilise, double level_angle,
+			boolean do_auto_stabilise, double level_angle, List<float []> gyro_rotation_matrix,
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
@@ -180,6 +182,7 @@ public class ImageSaver extends Thread {
 			this.image_quality = image_quality;
 			this.do_auto_stabilise = do_auto_stabilise;
 			this.level_angle = level_angle;
+			this.gyro_rotation_matrix = gyro_rotation_matrix;
 			this.is_front_facing = is_front_facing;
 			this.mirror = mirror;
 			this.current_date = current_date;
@@ -544,11 +547,12 @@ public class ImageSaver extends Thread {
 	private Request pending_image_average_request = null;
 
 	void startImageAverage(boolean do_in_background,
+			Request.ProcessType processType,
 			Request.SaveBase save_base,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2,
 			Request.ImageFormat image_format, int image_quality,
-			boolean do_auto_stabilise, double level_angle,
+			boolean do_auto_stabilise, double level_angle, boolean want_gyro_matrices,
 			boolean is_front_facing,
 			boolean mirror,
 			Date current_date,
@@ -565,7 +569,7 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "do_in_background? " + do_in_background);
 		}
 		pending_image_average_request = new Request(Request.Type.JPEG,
-				Request.ProcessType.AVERAGE,
+				processType,
 				false,
 				0,
 				save_base,
@@ -574,7 +578,7 @@ public class ImageSaver extends Thread {
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2,
 				image_format, image_quality,
-				do_auto_stabilise, level_angle,
+				do_auto_stabilise, level_angle, want_gyro_matrices ? new ArrayList<float []>() : null,
 				is_front_facing,
 				mirror,
 				current_date,
@@ -589,7 +593,7 @@ public class ImageSaver extends Thread {
 				sample_factor);
 	}
 
-	void addImageAverage(byte [] image) {
+	void addImageAverage(byte [] image, float [] gyro_rotation_matrix) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addImageAverage");
 		if( pending_image_average_request == null ) {
@@ -597,6 +601,11 @@ public class ImageSaver extends Thread {
 			return;
 		}
 		pending_image_average_request.jpeg_images.add(image);
+		if( gyro_rotation_matrix != null ) {
+			float [] copy = new float[gyro_rotation_matrix.length];
+			System.arraycopy(gyro_rotation_matrix, 0, copy, 0, gyro_rotation_matrix.length);
+			pending_image_average_request.gyro_rotation_matrix.add(copy);
+		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
 	}
@@ -667,7 +676,7 @@ public class ImageSaver extends Thread {
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2,
 				image_format, image_quality,
-				do_auto_stabilise, level_angle,
+				do_auto_stabilise, level_angle, null,
 				is_front_facing,
 				mirror,
 				current_date,
@@ -774,7 +783,7 @@ public class ImageSaver extends Thread {
 			false, null,
 			false,
 			Request.ImageFormat.STD, 0,
-			false, 0.0,
+			false, 0.0, null,
 			false,
 			false,
 			null,
@@ -1296,6 +1305,80 @@ public class ImageSaver extends Thread {
     		}
 			hdr_bitmap.recycle();
 	        System.gc();
+		}
+		else if( request.process_type == Request.ProcessType.PANORAMA ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "panorama");
+
+			// save text file with gyro info
+			if( !request.image_capture_intent ) {
+				final StringBuilder gyro_text = new StringBuilder();
+				gyro_text.append("Panorama gyro debug info\n");
+				gyro_text.append("n images: " + request.gyro_rotation_matrix.size() + ":\n");
+
+				float [] inVector = new float[3];
+				float [] outVector = new float[3];
+				for(int i=0;i<request.gyro_rotation_matrix.size();i++) {
+					gyro_text.append("Image " + i + ":\n");
+
+					GyroSensor.setVector(inVector, 1.0f, 0.0f, 0.0f); // vector pointing in "right" direction
+					GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+					gyro_text.append("    X: " + outVector[0] + " , " + outVector[1] + " , " + outVector[2] + "\n");
+
+					GyroSensor.setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
+					GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+					gyro_text.append("    Y: " + outVector[0] + " , " + outVector[1] + " , " + outVector[2] + "\n");
+
+					GyroSensor.setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+					GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+					gyro_text.append("    -Z: " + outVector[0] + " , " + outVector[1] + " , " + outVector[2] + "\n");
+
+				}
+				gyro_text.append("\n");
+				gyro_text.append("\n");
+				gyro_text.append("\n");
+				gyro_text.append("\n");
+
+
+				try {
+					StorageUtils storageUtils = main_activity.getStorageUtils();
+					File txtFile = null;
+					/*Uri saveUri = null;
+					if( storageUtils.isUsingSAF() ) {
+						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_TEXT, "", "txt", request.current_date);
+					}
+					else*/ {
+						txtFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_TEXT, "", "txt", request.current_date);
+						if( MyDebug.LOG )
+							Log.d(TAG, "save to: " + txtFile.getAbsolutePath());
+					}
+
+					OutputStream outputStream = new FileOutputStream(txtFile);
+					try {
+						outputStream.write(gyro_text.toString().getBytes());
+					}
+					finally {
+						outputStream.close();
+					}
+
+					if( txtFile != null ) {
+						storageUtils.broadcastFile(txtFile, false, false, false);
+					}
+				}
+				catch(IOException e) {
+					Log.e(TAG, "failed to write gyro text file");
+					e.printStackTrace();
+				}
+			}
+
+			// for now, just save all the images:
+			String suffix = "_";
+			success = saveImages(request, suffix, false, true, true);
+
+			/*saveBaseImages(request, "_");
+			main_activity.savingImage(true);
+
+			main_activity.savingImage(false);*/
 		}
 		else {
 			// see note above how we used to use "_EXP" for the suffix for multiple images

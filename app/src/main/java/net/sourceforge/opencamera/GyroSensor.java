@@ -61,7 +61,7 @@ public class GyroSensor implements SensorEventListener {
 
     /** Helper method to set a 3D vector.
      */
-    private void setVector(final float [] vector, float x, float y, float z) {
+    static void setVector(final float[] vector, float x, float y, float z) {
         vector[0] = x;
         vector[1] = y;
         vector[2] = z;
@@ -69,19 +69,19 @@ public class GyroSensor implements SensorEventListener {
 
     /** Helper method to access the (i, j)th component of a 3x3 matrix.
      */
-    private float getMatrixComponent(final float [] matrix, int row, int col) {
+    private static float getMatrixComponent(final float [] matrix, int row, int col) {
         return matrix[row*3+col];
     }
 
     /** Helper method to set the (i, j)th component of a 3x3 matrix.
      */
-    private void setMatrixComponent(final float [] matrix, int row, int col, float value) {
+    private static void setMatrixComponent(final float [] matrix, int row, int col, float value) {
         matrix[row*3+col] = value;
     }
 
     /** Helper method to multiply 3x3 matrix with a 3D vector.
      */
-    private void transformVector(final float [] result, final float [] matrix, final float [] vector) {
+    public static void transformVector(final float [] result, final float [] matrix, final float [] vector) {
         // result[i] = matrix[ij] . vector[j]
         for(int i=0;i<3;i++) {
             result[i] = 0.0f;
@@ -291,5 +291,9 @@ public class GyroSensor implements SensorEventListener {
 
     public void getRelativeInverseVector(float [] out, float [] in) {
         transformTransposeVector(out, currentRotationMatrix, in);
+    }
+
+    public void getRotationMatrix(float [] out) {
+        System.arraycopy(currentRotationMatrix, 0, out, 0, 9);
     }
 }

@@ -1385,8 +1385,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		drawPreview.onContinuousFocusMove(start);
 	}
 
-    private int n_panorama_pics = 0;
-
 	void startPanorama() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPanorama");
@@ -1399,6 +1397,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			Log.d(TAG, "stopPanorama");
 		gyroSensor.stopRecording();
 		clearPanoramaPoint();
+
+		boolean image_capture_intent = isImageCaptureIntent();
+		boolean do_in_background = saveInBackground(image_capture_intent);
+		imageSaver.finishImageAverage(do_in_background);
 	}
 
 	void setNextPanoramaPoint() {
@@ -1406,6 +1408,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			Log.d(TAG, "setNextPanoramaPoint");
 		float camera_angle_y = main_activity.getPreview().getViewAngleY();
 		n_panorama_pics++;
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_panorama_pics is now: " + n_panorama_pics);
 		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
 		setNextPanoramaPoint((float) Math.sin(angle / panorama_pics_per_screen), 0.0f, (float) -Math.cos(angle / panorama_pics_per_screen));
 	}
@@ -1909,6 +1913,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
+	private int n_panorama_pics = 0;
 
 	@Override
 	public void onCaptureStarted() {
@@ -2403,8 +2408,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}
-		if( photo_mode == PhotoMode.NoiseReduction ) {
-			if( n_capture_images == 1 ) {
+		if( photo_mode == PhotoMode.NoiseReduction || photo_mode == PhotoMode.Panorama ) {
+			boolean first_image = false;
+			if( photo_mode == PhotoMode.Panorama )
+				first_image = n_panorama_pics == 0;
+			else
+				first_image = n_capture_images == 1;
+			if( first_image ) {
 				ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
 				String save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
 				switch( save_base_preference ) {
@@ -2417,11 +2427,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 				}
 
 				imageSaver.startImageAverage(true,
+					photo_mode == PhotoMode.NoiseReduction ? ImageSaver.Request.ProcessType.AVERAGE : ImageSaver.Request.ProcessType.PANORAMA,
 					save_base,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2,
 					image_format, image_quality,
-					do_auto_stabilise, level_angle,
+					do_auto_stabilise, level_angle, photo_mode == PhotoMode.Panorama,
 					is_front_facing,
 					mirror,
 					current_date,
@@ -2433,7 +2444,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					custom_tag_artist, custom_tag_copyright,
 					sample_factor);
 			}
-			imageSaver.addImageAverage(images.get(0));
+
+			float [] gyro_rotation_matrix = null;
+			if( photo_mode == PhotoMode.Panorama ) {
+				gyro_rotation_matrix = new float[9];
+				this.gyroSensor.getRotationMatrix(gyro_rotation_matrix);
+			}
+
+			imageSaver.addImageAverage(images.get(0), gyro_rotation_matrix);
 			success = true;
 		}
 		else {

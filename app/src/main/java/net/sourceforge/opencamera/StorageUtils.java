@@ -41,7 +41,8 @@ public class StorageUtils {
 
     static final int MEDIA_TYPE_IMAGE = 1;
     static final int MEDIA_TYPE_VIDEO = 2;
-    static final int MEDIA_TYPE_PREFS = 3;
+	static final int MEDIA_TYPE_PREFS = 3;
+	static final int MEDIA_TYPE_TEXT = 4;
 
 	private final Context context;
 	private final MyApplicationInterface applicationInterface;
@@ -537,6 +538,11 @@ public class StorageUtils {
 				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
+			case MEDIA_TYPE_TEXT: {
+				String prefix = "TXT_";
+				mediaFilename = prefix + timeStamp + suffix + index + extension;
+				break;
+			}
 			default:
 				// throw exception as this is a programming error
 				if (MyDebug.LOG)
@@ -691,6 +697,9 @@ public class StorageUtils {
 				break;
 			case MEDIA_TYPE_PREFS:
 				mimeType = "text/xml";
+				break;
+			case MEDIA_TYPE_TEXT:
+				mimeType = "text/plain";
 				break;
 			default:
 				// throw exception as this is a programming error
