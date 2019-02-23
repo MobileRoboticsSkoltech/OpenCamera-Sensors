@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +42,9 @@ import android.os.Build;
 import android.renderscript.Allocation;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlSerializer;
 
 /** Handles the saving (and any required processing) of photos.
  */
@@ -1002,7 +1007,11 @@ public class ImageSaver extends Thread {
 		}
 		return hdr_alpha;
 	}
-	
+
+	public final static String gyro_info_doc_tag = "open_camera_gyro_info";
+	public final static String gyro_info_image_tag = "image";
+	public final static String gyro_info_vector_tag = "vector";
+
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 */
 	private boolean saveImageNow(final Request request) {
@@ -1312,7 +1321,7 @@ public class ImageSaver extends Thread {
 
 			// save text file with gyro info
 			if( !request.image_capture_intent ) {
-				final StringBuilder gyro_text = new StringBuilder();
+				/*final StringBuilder gyro_text = new StringBuilder();
 				gyro_text.append("Panorama gyro debug info\n");
 				gyro_text.append("n images: " + request.gyro_rotation_matrix.size() + ":\n");
 
@@ -1333,36 +1342,79 @@ public class ImageSaver extends Thread {
 					GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
 					gyro_text.append("    -Z: " + outVector[0] + " , " + outVector[1] + " , " + outVector[2] + "\n");
 
-				}
-				gyro_text.append("\n");
-				gyro_text.append("\n");
-				gyro_text.append("\n");
-				gyro_text.append("\n");
-
+				}*/
 
 				try {
-					StorageUtils storageUtils = main_activity.getStorageUtils();
-					File txtFile = null;
-					/*Uri saveUri = null;
-					if( storageUtils.isUsingSAF() ) {
-						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_TEXT, "", "txt", request.current_date);
-					}
-					else*/ {
-						txtFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_TEXT, "", "txt", request.current_date);
-						if( MyDebug.LOG )
-							Log.d(TAG, "save to: " + txtFile.getAbsolutePath());
+					XmlSerializer xmlSerializer = Xml.newSerializer();
+
+					StringWriter writer = new StringWriter();
+					xmlSerializer.setOutput(writer);
+					xmlSerializer.startDocument("UTF-8", true);
+					xmlSerializer.startTag(null, gyro_info_doc_tag);
+
+					float [] inVector = new float[3];
+					float [] outVector = new float[3];
+					for(int i=0;i<request.gyro_rotation_matrix.size();i++) {
+						xmlSerializer.startTag(null, gyro_info_image_tag);
+						xmlSerializer.attribute(null, "index", "" + i);
+
+						GyroSensor.setVector(inVector, 1.0f, 0.0f, 0.0f); // vector pointing in "right" direction
+						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+						xmlSerializer.startTag(null, gyro_info_vector_tag);
+						xmlSerializer.attribute(null, "type", "X");
+						xmlSerializer.attribute(null, "x", "" + outVector[0]);
+						xmlSerializer.attribute(null, "y", "" + outVector[1]);
+						xmlSerializer.attribute(null, "z", "" + outVector[2]);
+						xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+						GyroSensor.setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
+						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+						xmlSerializer.startTag(null, gyro_info_vector_tag);
+						xmlSerializer.attribute(null, "type", "Y");
+						xmlSerializer.attribute(null, "x", "" + outVector[0]);
+						xmlSerializer.attribute(null, "y", "" + outVector[1]);
+						xmlSerializer.attribute(null, "z", "" + outVector[2]);
+						xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+						GyroSensor.setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+						xmlSerializer.startTag(null, gyro_info_vector_tag);
+						xmlSerializer.attribute(null, "type", "Z");
+						xmlSerializer.attribute(null, "x", "" + outVector[0]);
+						xmlSerializer.attribute(null, "y", "" + outVector[1]);
+						xmlSerializer.attribute(null, "z", "" + outVector[2]);
+						xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+						xmlSerializer.endTag(null, gyro_info_image_tag);
 					}
 
-					OutputStream outputStream = new FileOutputStream(txtFile);
+					xmlSerializer.endTag(null, gyro_info_doc_tag);
+					xmlSerializer.endDocument();
+					xmlSerializer.flush();
+
+					StorageUtils storageUtils = main_activity.getStorageUtils();
+					File saveFile = null;
+					/*Uri saveUri = null;
+					if( storageUtils.isUsingSAF() ) {
+						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
+					}
+					else*/ {
+						saveFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
+						if( MyDebug.LOG )
+							Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
+					}
+
+					OutputStream outputStream = new FileOutputStream(saveFile);
 					try {
-						outputStream.write(gyro_text.toString().getBytes());
+						//outputStream.write(gyro_text.toString().getBytes());
+						outputStream.write(writer.toString().getBytes(Charset.forName("UTF-8")));
 					}
 					finally {
 						outputStream.close();
 					}
 
-					if( txtFile != null ) {
-						storageUtils.broadcastFile(txtFile, false, false, false);
+					if( saveFile != null ) {
+						storageUtils.broadcastFile(saveFile, false, false, false);
 					}
 				}
 				catch(IOException e) {

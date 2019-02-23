@@ -42,7 +42,7 @@ public class StorageUtils {
     static final int MEDIA_TYPE_IMAGE = 1;
     static final int MEDIA_TYPE_VIDEO = 2;
 	static final int MEDIA_TYPE_PREFS = 3;
-	static final int MEDIA_TYPE_TEXT = 4;
+	static final int MEDIA_TYPE_GYRO_INFO = 4;
 
 	private final Context context;
 	private final MyApplicationInterface applicationInterface;
@@ -521,6 +521,7 @@ public class StorageUtils {
 		}
 		String mediaFilename;
 		switch (type) {
+			case MEDIA_TYPE_GYRO_INFO: // gyro info files have same name as the photo (but different extension)
 			case MEDIA_TYPE_IMAGE: {
 				String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
 				mediaFilename = prefix + timeStamp + suffix + index + extension;
@@ -535,11 +536,6 @@ public class StorageUtils {
 				// good to use a prefix that sorts before IMG_ and VID_: annoyingly when using SAF, it doesn't seem possible to
 				// only show the xml files, and it always defaults to sorting alphabetically...
 				String prefix = "BACKUP_OC_";
-				mediaFilename = prefix + timeStamp + suffix + index + extension;
-				break;
-			}
-			case MEDIA_TYPE_TEXT: {
-				String prefix = "TXT_";
 				mediaFilename = prefix + timeStamp + suffix + index + extension;
 				break;
 			}
@@ -698,8 +694,8 @@ public class StorageUtils {
 			case MEDIA_TYPE_PREFS:
 				mimeType = "text/xml";
 				break;
-			case MEDIA_TYPE_TEXT:
-				mimeType = "text/plain";
+			case MEDIA_TYPE_GYRO_INFO:
+				mimeType = "text/xml";
 				break;
 			default:
 				// throw exception as this is a programming error
