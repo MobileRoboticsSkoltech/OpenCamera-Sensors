@@ -127,7 +127,7 @@ public class SettingsManager {
 						break;
 				}
 
-				skip(parser);
+				skipXml(parser);
 			}
 
 			// even though we're restoring from settings, we don't want the first time or what's new dialog showing up again!
@@ -166,7 +166,7 @@ public class SettingsManager {
 		}
 	}
 
-	private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+	private static void skipXml(XmlPullParser parser) throws XmlPullParserException, IOException {
 		if( parser.getEventType() != XmlPullParser.START_TAG ) {
 			throw new IllegalStateException();
 		}
