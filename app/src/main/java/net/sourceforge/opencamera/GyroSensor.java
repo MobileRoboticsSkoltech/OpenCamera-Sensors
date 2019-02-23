@@ -259,11 +259,12 @@ public class GyroSensor implements SensorEventListener {
                         Log.d(TAG, "    c: " + cx + " , " + cy + " , " + cz);
                     }*/
                     float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
+                    float angle_up = (float)Math.asin(sin_angle_up);
 
                     setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
                     transformVector(tempVector, currentRotationMatrix, inVector);
 
-                    if( Math.abs(sin_angle_up) > 0.017452406437f ) {  // 1 degree
+                    if( Math.abs(angle_up) > targetAngle ) {
                         float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
                         is_upright = (dot < 0) ? 1 : -1;
                     }
