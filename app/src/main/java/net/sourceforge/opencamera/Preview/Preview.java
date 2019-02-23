@@ -5453,7 +5453,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	/** Take photo. The caller should aready have set the phase to PHASE_TAKING_PHOTO.
+	/** Take photo. The caller should already have set the phase to PHASE_TAKING_PHOTO.
 	 */
 	private void takePhoto(boolean skip_autofocus, final boolean continuous_fast_burst) {
 		if( MyDebug.LOG )
