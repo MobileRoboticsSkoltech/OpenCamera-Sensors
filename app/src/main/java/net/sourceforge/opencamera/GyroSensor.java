@@ -224,21 +224,49 @@ public class GyroSensor implements SensorEventListener {
                 }
                 else
                     is_upright = (sin_angle_up > 0) ? 1 : -1;*/
-                // compute tempVector X (0 1 0)
-                float cx = - tempVector[2];
-                float cy = 0.0f;
-                float cz = tempVector[0];
-                float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
+                // store up vector
+                is_upright = 0;
 
-                setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
-                transformVector(tempVector, currentRotationMatrix, inVector);
+                float ux = tempVector[0];
+                float uy = tempVector[1];
+                float uz = tempVector[2];
 
-                if( Math.abs(sin_angle_up) <= 0.017452406437f ) {  // 1 degree
-                    is_upright = 0;
-                }
-                else {
-                    float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
-                    is_upright = (dot < 0) ? 1 : -1;
+                // project up vector into plane perpendicular to targetVector
+                // v' = v - (v.n)n
+                float u_dot_n = ux * targetVector[0] + uy * targetVector[1] + uz * targetVector[2];
+                float p_ux = ux - u_dot_n * targetVector[0];
+                float p_uy = uy - u_dot_n * targetVector[1];
+                float p_uz = uz - u_dot_n * targetVector[2];
+                /*if( MyDebug.LOG ) {
+                    Log.d(TAG, "    u: " + ux + " , " + uy + " , " + uz);
+                    Log.d(TAG, "    p_u: " + p_ux + " , " + p_uy + " , " + p_uz);
+                }*/
+                double p_u_mag = Math.sqrt(p_ux*p_ux + p_uy*p_uy + p_uz*p_uz);
+                if( p_u_mag > 1.0e-5 ) {
+                    /*if( MyDebug.LOG ) {
+                        Log.d(TAG, "    p_u norm: " + p_ux/p_u_mag + " , " + p_uy/p_u_mag + " , " + p_uz/p_u_mag);
+                    }*/
+                    // normalise p_u
+                    p_ux /= p_u_mag;
+                    //p_uy /= p_u_mag; // commented out as not needed
+                    p_uz /= p_u_mag;
+
+                    // compute p_u X (0 1 0)
+                    float cx = - p_uz;
+                    float cy = 0.0f;
+                    float cz = p_ux;
+                    /*if( MyDebug.LOG ) {
+                        Log.d(TAG, "    c: " + cx + " , " + cy + " , " + cz);
+                    }*/
+                    float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
+
+                    setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+                    transformVector(tempVector, currentRotationMatrix, inVector);
+
+                    if( Math.abs(sin_angle_up) > 0.017452406437f ) {  // 1 degree
+                        float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
+                        is_upright = (dot < 0) ? 1 : -1;
+                    }
                 }
 
                 if( is_upright == 0 ) {
