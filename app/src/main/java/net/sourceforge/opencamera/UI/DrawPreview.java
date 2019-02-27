@@ -2117,6 +2117,19 @@ public class DrawPreview {
 					float dir_x = -transformed_gyro_direction_up[1];
 					float dir_y = -transformed_gyro_direction_up[0];
 					drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y);
+					/*{
+						// for debug only, draw the gyro spot that isn't calibrated with the accelerometer
+						gyroSensor.getRelativeInverseVectorGyroOnly(transformed_gyro_direction, gyro_direction);
+						gyroSensor.getRelativeInverseVectorGyroOnly(transformed_gyro_direction_up, gyro_direction_up);
+						p.setColor(Color.YELLOW);
+						angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
+						angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
+						distance_x = angle_scale_x * (float) Math.tan(angle_x); // angle_scale is already in pixels rather than dps
+						distance_y = angle_scale_y * (float) Math.tan(angle_y); // angle_scale is already in pixels rather than dps
+						dir_x = -transformed_gyro_direction_up[1];
+						dir_y = -transformed_gyro_direction_up[0];
+						drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y);
+					}*/
 				}
 
 				// show indicator for not being "upright", but only if tilt angle is within 20 degrees
