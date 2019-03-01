@@ -6548,14 +6548,82 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	/** Returns the horizontal angle of view in degrees (when unzoomed).
 	 */
-	public float getViewAngleX() {
+	/*public float getViewAngleX() {
 		return this.view_angle_x;
+	}*/
+
+	/** Returns the vertical angle of view in degrees (when unzoomed).
+	 */
+	/*public float getViewAngleY() {
+		return this.view_angle_y;
+	}*/
+
+	/** Returns the horizontal angle of view in degrees (when unzoomed).
+	 */
+	public float getViewAngleX(boolean for_preview) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getViewAngleX: " + for_preview);
+		CameraController.Size size = for_preview ? this.getCurrentPreviewSize() : this.getCurrentPictureSize();
+		if( size == null ) {
+			Log.e(TAG, "can't find view angle x size");
+			return this.view_angle_x;
+		}
+		float view_aspect_ratio = view_angle_x/view_angle_y;
+		float actual_aspect_ratio = ((float)size.width)/(float)size.height;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "view_angle_x: " + view_angle_x);
+			Log.d(TAG, "view_angle_y: " + view_angle_y);
+			Log.d(TAG, "view_aspect_ratio: " + view_aspect_ratio);
+			Log.d(TAG, "actual_aspect_ratio: " + actual_aspect_ratio);
+		}
+		if( Math.abs(actual_aspect_ratio - view_aspect_ratio) < 1.0e-5f ) {
+			return this.view_angle_x;
+		}
+		else if( actual_aspect_ratio > view_aspect_ratio ) {
+			return this.view_angle_x;
+		}
+		else {
+			float aspect_ratio_scale = actual_aspect_ratio/view_aspect_ratio;
+			//float actual_view_angle_x = view_angle_x*aspect_ratio_scale;
+			float actual_view_angle_x = (float)Math.toDegrees(2.0 * Math.atan(aspect_ratio_scale * Math.tan(Math.toRadians(view_angle_x) / 2.0)));
+			if( MyDebug.LOG )
+				Log.d(TAG, "actual_view_angle_x: " + actual_view_angle_x);
+			return actual_view_angle_x;
+		}
 	}
 
 	/** Returns the vertical angle of view in degrees (when unzoomed).
 	 */
-	public float getViewAngleY() {
-		return this.view_angle_y;
+	public float getViewAngleY(boolean for_preview) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getViewAngleY: " + for_preview);
+		CameraController.Size size = for_preview ? this.getCurrentPreviewSize() : this.getCurrentPictureSize();
+		if( size == null ) {
+			Log.e(TAG, "can't find view angle y size");
+			return this.view_angle_y;
+		}
+		float view_aspect_ratio = view_angle_x/view_angle_y;
+		float actual_aspect_ratio = ((float)size.width)/(float)size.height;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "view_angle_x: " + view_angle_x);
+			Log.d(TAG, "view_angle_y: " + view_angle_y);
+			Log.d(TAG, "view_aspect_ratio: " + view_aspect_ratio);
+			Log.d(TAG, "actual_aspect_ratio: " + actual_aspect_ratio);
+		}
+		if( Math.abs(actual_aspect_ratio - view_aspect_ratio) < 1.0e-5f ) {
+			return this.view_angle_y;
+		}
+		else if( actual_aspect_ratio > view_aspect_ratio ) {
+			float aspect_ratio_scale = view_aspect_ratio/actual_aspect_ratio;
+			//float actual_view_angle_y = view_angle_y*aspect_ratio_scale;
+			float actual_view_angle_y = (float)Math.toDegrees(2.0 * Math.atan(aspect_ratio_scale * Math.tan(Math.toRadians(view_angle_y) / 2.0)));
+			if( MyDebug.LOG )
+				Log.d(TAG, "actual_view_angle_y: " + actual_view_angle_y);
+			return actual_view_angle_y;
+		}
+		else {
+			return this.view_angle_y;
+		}
 	}
 
 	public List<CameraController.Size> getSupportedPreviewSizes() {

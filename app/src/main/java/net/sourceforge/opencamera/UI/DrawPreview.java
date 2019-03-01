@@ -1726,8 +1726,8 @@ public class DrawPreview {
 					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				}
 			}
-			float camera_angle_x = preview.getViewAngleX();
-			float camera_angle_y = preview.getViewAngleY();
+			float camera_angle_x = preview.getViewAngleX(true);
+			float camera_angle_y = preview.getViewAngleY(true);
 			float angle_scale_x = (float)( canvas.getWidth() / (2.0 * Math.tan( Math.toRadians((camera_angle_x/2.0)) )) );
 			float angle_scale_y = (float)( canvas.getHeight() / (2.0 * Math.tan( Math.toRadians((camera_angle_y/2.0)) )) );
 			/*if( MyDebug.LOG ) {
@@ -2103,8 +2103,8 @@ public class DrawPreview {
 				float angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
 				float angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
 				if( Math.abs(angle_x) < 0.5f*Math.PI && Math.abs(angle_y) < 0.5f*Math.PI ) {
-					float camera_angle_x = preview.getViewAngleX();
-					float camera_angle_y = preview.getViewAngleY();
+					float camera_angle_x = preview.getViewAngleX(true);
+					float camera_angle_y = preview.getViewAngleY(true);
 					float angle_scale_x = (float) (canvas.getWidth() / (2.0 * Math.tan(Math.toRadians((camera_angle_x / 2.0)))));
 					float angle_scale_y = (float) (canvas.getHeight() / (2.0 * Math.tan(Math.toRadians((camera_angle_y / 2.0)))));
 					angle_scale_x *= preview.getZoomRatio();
