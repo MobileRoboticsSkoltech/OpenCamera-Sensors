@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.util.Xml;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 /** Handles the saving (and any required processing) of photos.
@@ -1008,9 +1010,158 @@ public class ImageSaver extends Thread {
 		return hdr_alpha;
 	}
 
-	public final static String gyro_info_doc_tag = "open_camera_gyro_info";
-	public final static String gyro_info_image_tag = "image";
-	public final static String gyro_info_vector_tag = "vector";
+	private final static String gyro_info_doc_tag = "open_camera_gyro_info";
+	private final static String gyro_info_image_tag = "image";
+	private final static String gyro_info_vector_tag = "vector";
+	private final static String gyro_info_vector_right_type = "X";
+	private final static String gyro_info_vector_up_type = "Y";
+	private final static String gyro_info_vector_screen_type = "Z";
+
+	private void writeGyroDebugXml(Writer writer, Request request) throws IOException {
+		XmlSerializer xmlSerializer = Xml.newSerializer();
+
+		xmlSerializer.setOutput(writer);
+		xmlSerializer.startDocument("UTF-8", true);
+		xmlSerializer.startTag(null, gyro_info_doc_tag);
+
+		float [] inVector = new float[3];
+		float [] outVector = new float[3];
+		for(int i=0;i<request.gyro_rotation_matrix.size();i++) {
+			xmlSerializer.startTag(null, gyro_info_image_tag);
+			xmlSerializer.attribute(null, "index", "" + i);
+
+			GyroSensor.setVector(inVector, 1.0f, 0.0f, 0.0f); // vector pointing in "right" direction
+			GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+			xmlSerializer.startTag(null, gyro_info_vector_tag);
+			xmlSerializer.attribute(null, "type", gyro_info_vector_right_type);
+			xmlSerializer.attribute(null, "x", "" + outVector[0]);
+			xmlSerializer.attribute(null, "y", "" + outVector[1]);
+			xmlSerializer.attribute(null, "z", "" + outVector[2]);
+			xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+			GyroSensor.setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
+			GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+			xmlSerializer.startTag(null, gyro_info_vector_tag);
+			xmlSerializer.attribute(null, "type", gyro_info_vector_up_type);
+			xmlSerializer.attribute(null, "x", "" + outVector[0]);
+			xmlSerializer.attribute(null, "y", "" + outVector[1]);
+			xmlSerializer.attribute(null, "z", "" + outVector[2]);
+			xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+			GyroSensor.setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+			GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
+			xmlSerializer.startTag(null, gyro_info_vector_tag);
+			xmlSerializer.attribute(null, "type", gyro_info_vector_screen_type);
+			xmlSerializer.attribute(null, "x", "" + outVector[0]);
+			xmlSerializer.attribute(null, "y", "" + outVector[1]);
+			xmlSerializer.attribute(null, "z", "" + outVector[2]);
+			xmlSerializer.endTag(null, gyro_info_vector_tag);
+
+			xmlSerializer.endTag(null, gyro_info_image_tag);
+		}
+
+		xmlSerializer.endTag(null, gyro_info_doc_tag);
+		xmlSerializer.endDocument();
+		xmlSerializer.flush();
+	}
+
+	public static class GyroDebugInfo {
+		public static class GyroImageDebugInfo {
+			public float [] vectorRight; // X axis
+			public float [] vectorUp; // Y axis
+			public float [] vectorScreen; // vector into the screen - actually the -Z axis
+		}
+
+		public List<GyroImageDebugInfo> image_info;
+
+		public GyroDebugInfo() {
+			image_info = new ArrayList<>();
+		}
+	}
+
+	public static boolean readGyroDebugXml(InputStream inputStream, GyroDebugInfo info) {
+		try {
+			XmlPullParser parser = Xml.newPullParser();
+			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+			parser.setInput(inputStream, null);
+			parser.nextTag();
+
+			parser.require(XmlPullParser.START_TAG, null, gyro_info_doc_tag);
+			GyroDebugInfo.GyroImageDebugInfo image_info = null;
+
+			while( parser.next() != XmlPullParser.END_DOCUMENT ) {
+				switch( parser.getEventType() ) {
+					case XmlPullParser.START_TAG: {
+						String name = parser.getName();
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "start tag, name: " + name);
+						}
+
+						switch( name ) {
+							case gyro_info_image_tag:
+								info.image_info.add( image_info = new GyroDebugInfo.GyroImageDebugInfo() );
+								break;
+							case gyro_info_vector_tag:
+								if( image_info == null ) {
+									Log.e(TAG, "vector tag outside of image tag");
+									return false;
+								}
+								String type = parser.getAttributeValue(null, "type");
+								String x_s = parser.getAttributeValue(null, "x");
+								String y_s = parser.getAttributeValue(null, "y");
+								String z_s = parser.getAttributeValue(null, "z");
+								float [] vector = new float[3];
+								vector[0] = Float.parseFloat(x_s);
+								vector[1] = Float.parseFloat(y_s);
+								vector[2] = Float.parseFloat(z_s);
+								switch( type ) {
+									case gyro_info_vector_right_type:
+										image_info.vectorRight = vector;
+										break;
+									case gyro_info_vector_up_type:
+										image_info.vectorUp = vector;
+										break;
+									case gyro_info_vector_screen_type:
+										image_info.vectorScreen = vector;
+										break;
+									default:
+										Log.e(TAG, "unknown type in vector tag: " + type);
+										return false;
+								}
+								break;
+						}
+						break;
+					}
+					case XmlPullParser.END_TAG: {
+						String name = parser.getName();
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "end tag, name: " + name);
+						}
+
+						switch( name ) {
+							case gyro_info_image_tag:
+								image_info = null;
+								break;
+						}
+						break;
+					}
+				}
+			}
+		}
+        catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		finally {
+			try {
+				inputStream.close();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
+	}
 
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 */
@@ -1345,52 +1496,9 @@ public class ImageSaver extends Thread {
 				}*/
 
 				try {
-					XmlSerializer xmlSerializer = Xml.newSerializer();
-
 					StringWriter writer = new StringWriter();
-					xmlSerializer.setOutput(writer);
-					xmlSerializer.startDocument("UTF-8", true);
-					xmlSerializer.startTag(null, gyro_info_doc_tag);
 
-					float [] inVector = new float[3];
-					float [] outVector = new float[3];
-					for(int i=0;i<request.gyro_rotation_matrix.size();i++) {
-						xmlSerializer.startTag(null, gyro_info_image_tag);
-						xmlSerializer.attribute(null, "index", "" + i);
-
-						GyroSensor.setVector(inVector, 1.0f, 0.0f, 0.0f); // vector pointing in "right" direction
-						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
-						xmlSerializer.startTag(null, gyro_info_vector_tag);
-						xmlSerializer.attribute(null, "type", "X");
-						xmlSerializer.attribute(null, "x", "" + outVector[0]);
-						xmlSerializer.attribute(null, "y", "" + outVector[1]);
-						xmlSerializer.attribute(null, "z", "" + outVector[2]);
-						xmlSerializer.endTag(null, gyro_info_vector_tag);
-
-						GyroSensor.setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
-						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
-						xmlSerializer.startTag(null, gyro_info_vector_tag);
-						xmlSerializer.attribute(null, "type", "Y");
-						xmlSerializer.attribute(null, "x", "" + outVector[0]);
-						xmlSerializer.attribute(null, "y", "" + outVector[1]);
-						xmlSerializer.attribute(null, "z", "" + outVector[2]);
-						xmlSerializer.endTag(null, gyro_info_vector_tag);
-
-						GyroSensor.setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
-						GyroSensor.transformVector(outVector, request.gyro_rotation_matrix.get(i), inVector);
-						xmlSerializer.startTag(null, gyro_info_vector_tag);
-						xmlSerializer.attribute(null, "type", "Z");
-						xmlSerializer.attribute(null, "x", "" + outVector[0]);
-						xmlSerializer.attribute(null, "y", "" + outVector[1]);
-						xmlSerializer.attribute(null, "z", "" + outVector[2]);
-						xmlSerializer.endTag(null, gyro_info_vector_tag);
-
-						xmlSerializer.endTag(null, gyro_info_image_tag);
-					}
-
-					xmlSerializer.endTag(null, gyro_info_doc_tag);
-					xmlSerializer.endDocument();
-					xmlSerializer.flush();
+					writeGyroDebugXml(writer, request);
 
 					StorageUtils storageUtils = main_activity.getStorageUtils();
 					File saveFile = null;
