@@ -14182,6 +14182,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 throw new RuntimeException();
             }
         }
+        //bitmaps.subList(2,bitmaps.size()).clear(); // test
 
         float camera_angle_deg = mActivity.getPreview().getViewAngleY(false);
         double camera_angle = Math.toRadians(camera_angle_deg);
@@ -14224,73 +14225,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             double angle_x = 0.0;
             double angle_y = 0.0;
             double angle_z = 0.0;
-
-            if( use_auto_align && i > 0 ) {
-                // autoalignment
-                List<Bitmap> alignment_bitmaps = new ArrayList<>();
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                // tall:
-                Log.d(TAG, "    align_x: " + align_x);
-                Log.d(TAG, "    offset_x: " + offset_x);
-                Log.d(TAG, "    slice_width: " + slice_width);
-                Log.d(TAG, "    align_x+offset_x+slice_width-align_hwidth: " + (align_x+offset_x+slice_width-align_hwidth));
-                Log.d(TAG, "    bitmap(i-1) width: " + bitmaps.get(i-1).getWidth());
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                // less tall:
-                int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
-                //int align_bitmap_height = Math.min(bitmap_height, 2*align_hwidth); // ratio 1:1
-                //int align_bitmap_height = Math.min(bitmap_height, 4*align_hwidth); // ratio 1:2
-                //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                // save bitmaps used for alignments
-                /*for(int j=0;j<alignment_bitmaps.size();j++) {
-                    Bitmap alignment_bitmap = alignment_bitmaps.get(j);
-                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/alignment_bitmap_" + i + "_" + j +"_" + output_name);
-                    OutputStream outputStream = new FileOutputStream(file);
-                    alignment_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-                    outputStream.close();
-                    mActivity.getStorageUtils().broadcastFile(file, true, false, true);
-                }*/
-
-                int [] offsets_x = new int[alignment_bitmaps.size()];
-                int [] offsets_y = new int[alignment_bitmaps.size()];
-                final boolean use_mtb = false;
-                //final boolean use_mtb = true;
-                mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
-                for(Bitmap alignment_bitmap : alignment_bitmaps) {
-                    alignment_bitmap.recycle();
-                }
-                alignment_bitmaps.clear();
-                Log.d(TAG, "    offset_x: " + offsets_x[1]);
-                Log.d(TAG, "    offset_y: " + offsets_y[1]);
-                align_x += offsets_x[1];
-                align_y += offsets_y[1];
-                Log.d(TAG, "    align_x is now: " + align_x);
-                Log.d(TAG, "    align_y is now: " + align_y);
-                if( align_x < -max_offset_error_x ) {
-                    align_x = -max_offset_error_x;
-                    Log.d(TAG, "    limit align_x to: " + align_x);
-                    //assertTrue(false); // test
-                }
-                else if( align_x > max_offset_error_x ) {
-                    align_x = max_offset_error_x;
-                    Log.d(TAG, "    limit align_x to: " + align_x);
-                    //assertTrue(false); // test
-                }
-                /*if( align_y < -max_offset_error_y ) {
-                    align_y = -max_offset_error_y;
-                    Log.d(TAG, "    limit align_y to: " + align_y);
-                    //assertTrue(false); // test
-                }
-                else if( align_y > max_offset_error_y ) {
-                    align_y = max_offset_error_y;
-                    Log.d(TAG, "    limit align_y to: " + align_y);
-                    //assertTrue(false); // test
-                }*/
-            }
 
             if( gyro_debug_info != null ) {
                 float [] vectorScreen = gyro_debug_info.image_info.get(i).vectorScreen;
@@ -14361,12 +14295,94 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     Log.d(TAG, "    angle_z: " + angle_z + " ( " + Math.toDegrees(angle_z) + " degrees )");
                 }
             }
+
+            // pre-rotate image based on gyro
+            // important to rotate before doing auto-alignment
+            if( Math.abs(angle_z) > 1.0e-5f ) {
+                Log.d(TAG, "rotate bitmap");
+                Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+                Canvas rotated_canvas = new Canvas(rotated_bitmap);
+                rotated_canvas.save();
+                rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2, bitmap_height/2);
+                rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
+                rotated_canvas.restore();
+                bitmaps.get(i).recycle();
+                bitmaps.set(i, rotated_bitmap);
+            }
+
+            if( use_auto_align && i > 0 ) {
+                // autoalignment
+                List<Bitmap> alignment_bitmaps = new ArrayList<>();
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                // tall:
+                Log.d(TAG, "    align_x: " + align_x);
+                Log.d(TAG, "    offset_x: " + offset_x);
+                Log.d(TAG, "    slice_width: " + slice_width);
+                Log.d(TAG, "    align_x+offset_x+slice_width-align_hwidth: " + (align_x+offset_x+slice_width-align_hwidth));
+                Log.d(TAG, "    bitmap(i-1) width: " + bitmaps.get(i-1).getWidth());
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                // less tall:
+                int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
+                //int align_bitmap_height = Math.min(bitmap_height, 2*align_hwidth); // ratio 1:1
+                //int align_bitmap_height = Math.min(bitmap_height, 4*align_hwidth); // ratio 1:2
+                //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                // save bitmaps used for alignments
+                /*for(int j=0;j<alignment_bitmaps.size();j++) {
+                    Bitmap alignment_bitmap = alignment_bitmaps.get(j);
+                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/alignment_bitmap_" + i + "_" + j +"_" + output_name);
+                    OutputStream outputStream = new FileOutputStream(file);
+                    alignment_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+                    outputStream.close();
+                    mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+                }*/
+
+                int [] offsets_x = new int[alignment_bitmaps.size()];
+                int [] offsets_y = new int[alignment_bitmaps.size()];
+                final boolean use_mtb = false;
+                //final boolean use_mtb = true;
+                mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
+                for(Bitmap alignment_bitmap : alignment_bitmaps) {
+                    alignment_bitmap.recycle();
+                }
+                alignment_bitmaps.clear();
+                Log.d(TAG, "    offset_x: " + offsets_x[1]);
+                Log.d(TAG, "    offset_y: " + offsets_y[1]);
+                align_x += offsets_x[1];
+                align_y += offsets_y[1];
+                Log.d(TAG, "    align_x is now: " + align_x);
+                Log.d(TAG, "    align_y is now: " + align_y);
+                if( align_x < -max_offset_error_x ) {
+                    align_x = -max_offset_error_x;
+                    Log.d(TAG, "    limit align_x to: " + align_x);
+                    //assertTrue(false); // test
+                }
+                else if( align_x > max_offset_error_x ) {
+                    align_x = max_offset_error_x;
+                    Log.d(TAG, "    limit align_x to: " + align_x);
+                    //assertTrue(false); // test
+                }
+                /*if( align_y < -max_offset_error_y ) {
+                    align_y = -max_offset_error_y;
+                    Log.d(TAG, "    limit align_y to: " + align_y);
+                    //assertTrue(false); // test
+                }
+                else if( align_y > max_offset_error_y ) {
+                    align_y = max_offset_error_y;
+                    Log.d(TAG, "    limit align_y to: " + align_y);
+                    //assertTrue(false); // test
+                }*/
+            }
+
             //align_x = 0;
             //align_y = 0;
             //angle_z = 0;
 
             Bitmap bitmap = bitmaps.get(i);
-            Bitmap rotated_bitmap = null;
+            /*Bitmap rotated_bitmap = null;
             if( Math.abs(angle_z) > 1.0e-5f ) {
                 Log.d(TAG, "rotate bitmap");
                 rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
@@ -14376,7 +14392,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 rotated_canvas.drawBitmap(bitmap, 0, 0, p);
                 rotated_canvas.restore();
                 bitmap = rotated_bitmap;
-            }
+            }*/
 
             int start_x = -blend_hwidth;
             int stop_x = slice_width+blend_hwidth;
@@ -14435,9 +14451,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 p.setAlpha(255); // reset!
             }
 
-            if( rotated_bitmap != null ) {
+            /*if( rotated_bitmap != null ) {
                 rotated_bitmap.recycle();
-            }
+            }*/
 
             /*float x0 = -slice_width/2;
             float new_height0 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x0 * Math.sin(alpha)));
