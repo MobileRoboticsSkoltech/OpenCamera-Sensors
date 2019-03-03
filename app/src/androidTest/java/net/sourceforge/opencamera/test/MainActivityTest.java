@@ -14205,7 +14205,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final int align_hwidth = bitmap_width/10;
         final boolean use_auto_align = true;
         //final boolean use_auto_align = false;
-        //gyro_debug_info = null; // test
+        gyro_debug_info = null; // test
         Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
         Log.d(TAG, "    align_hwidth: " + align_hwidth);
         int max_offset_error_x = offset_x - align_hwidth; // prevent cumulative align_x meaning we run out of bitmap!
@@ -14330,6 +14330,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                /*final int align_downsample = 64;
+                if( align_downsample > 1 ) {
+                    Matrix align_scale_matrix = new Matrix();
+                    align_scale_matrix.postScale(1.0f/(float)align_downsample, 1.0f/(float)align_downsample);
+                    for(int j=0;j<alignment_bitmaps.size();j++) {
+                        Bitmap new_bitmap = Bitmap.createBitmap(alignment_bitmaps.get(j), 0, 0, alignment_bitmaps.get(j).getWidth(), alignment_bitmaps.get(j).getHeight(), align_scale_matrix, true);
+                        alignment_bitmaps.get(j).recycle();
+                        alignment_bitmaps.set(j, new_bitmap);
+                    }
+                }*/
                 // save bitmaps used for alignments
                 /*for(int j=0;j<alignment_bitmaps.size();j++) {
                     Bitmap alignment_bitmap = alignment_bitmaps.get(j);
@@ -14345,6 +14355,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 final boolean use_mtb = false;
                 //final boolean use_mtb = true;
                 mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
+                /*for(int j=0;j<offsets_x.length;j++) {
+                    offsets_x[j] *= align_downsample;
+                    offsets_y[j] *= align_downsample;
+                }*/
                 for(Bitmap alignment_bitmap : alignment_bitmaps) {
                     alignment_bitmap.recycle();
                 }
