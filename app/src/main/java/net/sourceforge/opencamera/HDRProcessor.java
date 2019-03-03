@@ -23,6 +23,7 @@ import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicHistogram;
+//import android.renderscript.ScriptIntrinsicResize;
 import android.renderscript.Type;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -1875,6 +1876,7 @@ public class HDRProcessor {
 		while( initial_step_size < max_ideal_size ) {
 			initial_step_size *= 2;
 		}
+		//initial_step_size = 64;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_dim: " + max_dim);
 			Log.d(TAG, "max_ideal_size: " + max_ideal_size);
@@ -1924,31 +1926,70 @@ public class HDRProcessor {
 				int pixel_step_size = step_size * pixel_step;
 				if( pixel_step_size > mtb_width || pixel_step_size > mtb_height )
 					pixel_step_size = step_size;
-				alignMTBScript.set_off_x( offsets_x[i] );
-				alignMTBScript.set_off_y( offsets_y[i] );
-				alignMTBScript.set_step_size( pixel_step_size );
+
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "call alignMTBScript for image: " + i);
 					Log.d(TAG, "    versus base image: " + base_bitmap);
 					Log.d(TAG, "step_size: " + step_size);
 					Log.d(TAG, "pixel_step_size: " + pixel_step_size);
 				}
+
+				final boolean use_pyramid = false;
+				//final boolean use_pyramid = true;
+				/*if( use_pyramid ) {
+					// downscale by step_size
+					Allocation [] scaled_allocations = new Allocation[2];
+					for(int j=0;j<2;j++) {
+						int scaled_width = mtb_width/step_size;
+						int scaled_height = mtb_height/step_size;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "create scaled image: " + j);
+							Log.d(TAG, "    scaled_width: " + scaled_width);
+							Log.d(TAG, "    scaled_height: " + scaled_height);
+						}
+						Allocation allocation_to_scale = mtb_allocations[(j==0) ? base_bitmap : i];
+						Type type = Type.createXY(rs, allocation_to_scale.getElement(), scaled_width, scaled_height);
+						scaled_allocations[j] = Allocation.createTyped(rs, type);
+						ScriptIntrinsicResize theIntrinsic = ScriptIntrinsicResize.create(rs);
+						theIntrinsic.setInput(allocation_to_scale);
+						theIntrinsic.forEach_bicubic(scaled_allocations[j]);
+					}
+					alignMTBScript.set_bitmap0(scaled_allocations[0]);
+					alignMTBScript.set_bitmap1(scaled_allocations[1]);
+					int off_x = offsets_x[i]/step_size;
+					int off_y = offsets_y[i]/step_size;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "off_x: " + off_x);
+						Log.d(TAG, "off_y: " + off_y);
+					}
+					alignMTBScript.set_off_x( off_x );
+					alignMTBScript.set_off_y( off_y );
+					alignMTBScript.set_step_size( 1 );
+				}
+				else*/ {
+					alignMTBScript.set_off_x( offsets_x[i] );
+					alignMTBScript.set_off_y( offsets_y[i] );
+					alignMTBScript.set_step_size( pixel_step_size );
+				}
+
 				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
 				alignMTBScript.bind_errors(errorsAllocation);
 				alignMTBScript.invoke_init_errors();
 
-				// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
 				Script.LaunchOptions launch_options = new Script.LaunchOptions();
-				int stop_x = mtb_width/pixel_step_size;
-				int stop_y = mtb_height/pixel_step_size;
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "stop_x: " + stop_x);
-					Log.d(TAG, "stop_y: " + stop_y);
+				if( !use_pyramid ) {
+					// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
+					int stop_x = mtb_width/pixel_step_size;
+					int stop_y = mtb_height/pixel_step_size;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "stop_x: " + stop_x);
+						Log.d(TAG, "stop_y: " + stop_y);
+					}
+					//launch_options.setX((int)(stop_x*0.25), (int)(stop_x*0.75));
+					//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
+					launch_options.setX(0, stop_x);
+					launch_options.setY(0, stop_y);
 				}
-				//launch_options.setX((int)(stop_x*0.25), (int)(stop_x*0.75));
-				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
-				launch_options.setX(0, stop_x);
-				launch_options.setY(0, stop_y);
 				long this_time_s = System.currentTimeMillis();
 				if( use_mtb )
 					alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap], launch_options);
@@ -1984,6 +2025,29 @@ public class HDRProcessor {
 						throw new RuntimeException();
 					}*/
 				}
+				/*if( best_id != 4 ) {
+					int this_off_x = best_id % 3;
+					int this_off_y = best_id/3;
+					this_off_x--;
+					this_off_y--;
+					for(int j=0;j<9;j++) {
+						int that_off_x = j % 3;
+						int that_off_y = j/3;
+						that_off_x--;
+						that_off_y--;
+						if( this_off_x * that_off_x == -1 || this_off_y * that_off_y == -1 ) {
+							float diff = ((float)(best_error - errors[j]))/(float)errors[j];
+							if( MyDebug.LOG )
+								Log.d(TAG, "    opposite errors[" + j + "] diff: " + diff);
+							if( Math.abs(diff) <= 0.02f ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "    reject auto-alignment");
+								best_id = 4;
+								break;
+							}
+						}
+					}
+				}*/
 				if( best_id != -1 ) {
 					int this_off_x = best_id % 3;
 					int this_off_y = best_id/3;
