@@ -1994,7 +1994,7 @@ public class HDRProcessor {
 			Log.d(TAG, "### found: " + actual_matches.size() + " matches");
 
 		// but now choose only top actual matches
-		int n_matches = (int)(actual_matches.size()*0.1)+1;
+        /*int n_matches = (int)(actual_matches.size()*0.1)+1;
 		actual_matches.subList(n_matches,actual_matches.size()).clear();
         if( MyDebug.LOG )
             Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
@@ -2006,29 +2006,75 @@ public class HDRProcessor {
             has_matched1[match.index1] = true;
             if( MyDebug.LOG )
 				Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
+		}*/
+
+        final boolean use_ransac = true;
+        if( use_ransac ) {
+			// RANSAC
+			List<FeatureMatch> best_inliers = new ArrayList<>();
+			List<FeatureMatch> inliers = new ArrayList<>();
+			//final float max_inlier_dist = 2.01f;
+			final float max_inlier_dist = 5.01f;
+			//final float max_inlier_dist = Math.max(5.0f, Math.max(width, height)/128.0f);
+			if( MyDebug.LOG )
+				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
+			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
+			for(int i=0;i<actual_matches.size();i++) {
+				// compute exact transformation from the i-th match only
+				FeatureMatch match = actual_matches.get(i);
+				int candidate_offset_x = points_arrays[1][match.index1].x - points_arrays[0][match.index0].x;
+				int candidate_offset_y = points_arrays[1][match.index1].y - points_arrays[0][match.index0].y;
+				// find the inliers from this
+				inliers.clear();
+				for(FeatureMatch other_match : actual_matches) {
+					int x0 = points_arrays[0][other_match.index0].x;
+					int y0 = points_arrays[0][other_match.index0].y;
+					int x1 = points_arrays[1][other_match.index1].x;
+					int y1 = points_arrays[1][other_match.index1].y;
+					int transformed_x0 = x0 + candidate_offset_x;
+					int transformed_y0 = y0 + candidate_offset_y;
+					float dx = transformed_x0 - x1;
+					float dy = transformed_y0 - y1;
+					float error2 = dx*dx + dy*dy;
+					if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
+						inliers.add(other_match);
+					}
+				}
+				if( inliers.size() > best_inliers.size() ) {
+					// found an improved model!
+					if( MyDebug.LOG )
+						Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
+					best_inliers.clear();
+					best_inliers.addAll(inliers);
+					if( best_inliers.size() == actual_matches.size() ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "all matches are inliers");
+						// no point trying any further
+						break;
+					}
+				}
+			}
+			actual_matches = best_inliers;
+			if( MyDebug.LOG ) {
+				for(FeatureMatch match : actual_matches) {
+					Log.d(TAG, "    after ransac: actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
+				}
+			}
 		}
 
 		Point [] centres = new Point[2];
 		for(int i=0;i<2;i++) {
 			centres[i] = new Point();
-			int count = 0;
-			for(int j=0;j<points_arrays[i].length;j++) {
-				boolean was_matched;
-				if( i == 0 ) {
-					was_matched = has_matched0[j];
-				}
-				else {
-					was_matched = has_matched1[j];
-				}
-				if( !was_matched ) {
-					continue;
-				}
-				centres[i].x += points_arrays[i][j].x;
-				centres[i].y += points_arrays[i][j].y;
-				count++;
-			}
-			centres[i].x /= count;
-			centres[i].y /= count;
+		}
+		for(FeatureMatch match : actual_matches) {
+			centres[0].x += points_arrays[0][match.index0].x;
+			centres[0].y += points_arrays[0][match.index0].y;
+			centres[1].x += points_arrays[1][match.index1].x;
+			centres[1].y += points_arrays[1][match.index1].y;
+		}
+		for(int i=0;i<2;i++) {
+			centres[i].x /= actual_matches.size();
+			centres[i].y /= actual_matches.size();
 		}
 
 		offsets_x[1] = centres[1].x - centres[0].x;
@@ -2051,11 +2097,13 @@ public class HDRProcessor {
 					int off_x = (i==0) ? 0 : width;
 					boolean was_matched;
 					if( i == 0 ) {
-						//Log.d(TAG, "### has_matched0[" + j + "]: " + has_matched0[j]);
+						/*if( MyDebug.LOG )
+							Log.d(TAG, "### has_matched0[" + j + "]: " + has_matched0[j]);*/
 						was_matched = has_matched0[j];
 					}
 					else {
-						//Log.d(TAG, "### has_matched1[" + j + "]: " + has_matched1[j]);
+						/*if( MyDebug.LOG )
+							Log.d(TAG, "### has_matched1[" + j + "]: " + has_matched1[j]);*/
 						was_matched = has_matched1[j];
 					}
 					/*if( !was_matched ) {
