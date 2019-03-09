@@ -1,10 +1,10 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
-//import java.io.FileOutputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-//import java.io.OutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,8 +12,11 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-//import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
@@ -1618,7 +1621,517 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public void autoAlignmentByFeature(int [] offsets_x, int [] offsets_y, int width, int height, List<Bitmap> bitmaps, int debug_index) throws HDRProcessorException {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "autoAlignmentByFeature");
+			Log.d(TAG, "width: " + width);
+			Log.d(TAG, "height: " + height);
+		}
+		if( bitmaps.size() != 2 ) {
+			Log.e(TAG, "must have 2 bitmaps");
+			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
+		}
+
+		// initialise
+		for(int i=0;i<offsets_x.length;i++) {
+			offsets_x[i] = 0;
+			offsets_y[i] = 0;
+		}
+
+		initRenderscript();
+		Allocation [] allocations = new Allocation[bitmaps.size()];
+		for(int i=0;i<bitmaps.size();i++) {
+			allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
+		}
+
+		// create RenderScript
+		/*if( createMTBScript == null ) {
+			createMTBScript = new ScriptC_create_mtb(rs);
+		}*/
+		ScriptC_feature_detector featureDetectorScript = new ScriptC_feature_detector(rs);
+
+		//final int feature_descriptor_radius = 2; // radius of square used to compare features
+		//final int feature_descriptor_radius = 3; // radius of square used to compare features
+		final int feature_descriptor_radius = 5; // radius of square used to compare features
+		Point [][] points_arrays = new Point[2][];
+
+		for(int i=0;i<bitmaps.size();i++) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "detect features for image: " + i);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "convert to greyscale");
+			Allocation gs_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
+			//createMTBScript.set_out_bitmap(gs_allocation);
+			//createMTBScript.forEach_create_greyscale(allocations[i]);
+			featureDetectorScript.forEach_create_greyscale(allocations[i], gs_allocation);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "compute derivatives");
+			Allocation ix_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
+			Allocation iy_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
+			featureDetectorScript.set_bitmap(gs_allocation);
+			featureDetectorScript.set_bitmap_Ix(ix_allocation);
+			featureDetectorScript.set_bitmap_Iy(iy_allocation);
+			featureDetectorScript.forEach_compute_derivatives(gs_allocation);
+
+			/*if( MyDebug.LOG ) {
+				// debugging
+				byte [] bytes = new byte[width*height];
+				ix_allocation.copyTo(bytes);
+				int [] pixels = new int[width*height];
+				for(int j=0;j<width*height;j++) {
+					int b = bytes[j];
+					if( b < 0 )
+						b += 255;
+					pixels[j] = Color.argb(255, b, b, b);
+				}
+				Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+				//File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/ix_bitmap" + debug_index + "_" + i + ".jpg");
+				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/ix_bitmap" + debug_index + "_" + i + ".png");
+				try {
+					OutputStream outputStream = new FileOutputStream(file);
+					//bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+					bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+					outputStream.close();
+					MainActivity mActivity = (MainActivity) context;
+					mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+				bitmap.recycle();
+			}*/
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "call corner detector script for image: " + i);
+			Allocation strength_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.F32(rs), width, height));
+			featureDetectorScript.set_bitmap(gs_allocation);
+			featureDetectorScript.set_bitmap_Ix(ix_allocation);
+			featureDetectorScript.set_bitmap_Iy(iy_allocation);
+			featureDetectorScript.forEach_corner_detector(gs_allocation, strength_allocation);
+
+			/*if( MyDebug.LOG ) {
+				// debugging
+				float [] bytes = new float[width*height];
+				strength_allocation.copyTo(bytes);
+				int [] pixels = new int[width*height];
+				float max_value = 0.0f;
+				for(int j=0;j<width*height;j++) {
+					if( bytes[j] < 1.0f )
+						bytes[j] = 0.0f;
+					else
+						bytes[j] = (float)Math.log10(bytes[j]);
+					if( bytes[j] > max_value )
+						max_value = bytes[j];
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "strength max_value: " + max_value);
+				for(int j=0;j<width*height;j++) {
+					float value = bytes[j]/max_value;
+					int c = (int)(255.0f*value+0.5f);
+					if( c > 255 )
+						c = 255;
+					else if( c < 0 )
+						c = 0;
+					pixels[j] = Color.argb(255, c, c, c);
+				}
+				Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/corner_strength_bitmap" + debug_index + "_" + i + ".jpg");
+				try {
+					OutputStream outputStream = new FileOutputStream(file);
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+					outputStream.close();
+					MainActivity mActivity = (MainActivity) context;
+					mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+				bitmap.recycle();
+			}*/
+
+			ix_allocation.destroy();
+			ix_allocation = null;
+			iy_allocation.destroy();
+			iy_allocation = null;
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "find local maxima for image: " + i);
+			// reuse gs_allocation (since it's on the same U8 type that we want)
+			Allocation local_max_features_allocation = gs_allocation;
+			gs_allocation = null;
+
+			/*featureDetectorScript.set_corner_threshold(100000000.0f);
+			featureDetectorScript.set_bitmap(strength_allocation);
+			featureDetectorScript.forEach_local_maximum(strength_allocation, local_max_features_allocation);
+			// collect points
+			byte [] bytes = new byte[width*height];
+			local_max_features_allocation.copyTo(bytes);
+			// find points
+			List<Point> points = new ArrayList<>();
+			for(int y=feature_descriptor_radius;y<height-feature_descriptor_radius;y++) {
+				for(int x=feature_descriptor_radius;x<width-feature_descriptor_radius;x++) {
+					int j = y*width + x;
+					// remember, bytes are signed!
+					if( bytes[j] != 0 ) {
+						Point point = new Point(x, y);
+						points.add(point);
+					}
+				}
+			}
+			points_arrays[i] = points.toArray(new Point[0]);
+			*/
+
+			featureDetectorScript.set_bitmap(strength_allocation);
+			//final int max_corners = 500;
+			final int max_corners = 200;
+			final int min_corners = max_corners/2;
+			float threshold = 5000000.0f;
+			float low_threshold = 0.0f;
+			float high_threshold = -1.0f;
+			byte [] bytes = new byte[width*height];
+			for(;;) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "### try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
+				featureDetectorScript.set_corner_threshold(threshold);
+				featureDetectorScript.forEach_local_maximum(strength_allocation, local_max_features_allocation);
+
+				// collect points
+				local_max_features_allocation.copyTo(bytes);
+				// find points
+				List<Point> points = new ArrayList<>();
+				for(int y=feature_descriptor_radius;y<height-feature_descriptor_radius;y++) {
+					for(int x=feature_descriptor_radius;x<width-feature_descriptor_radius;x++) {
+						int j = y*width + x;
+						// remember, bytes are signed!
+						if( bytes[j] != 0 ) {
+							Point point = new Point(x, y);
+							points.add(point);
+						}
+					}
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "    " + points.size() + " points");
+				if( points.size() >= min_corners && points.size() <= max_corners ) {
+					points_arrays[i] = points.toArray(new Point[0]);
+					break;
+				}
+				else if( points.size() < min_corners ) {
+					high_threshold = threshold;
+					threshold = 0.5f * ( low_threshold + threshold );
+					if( MyDebug.LOG )
+						Log.d(TAG, "    reduced threshold to: " + threshold);
+				}
+				else {
+					low_threshold = threshold;
+					if( high_threshold < 0.0f ) {
+						threshold *= 10.0f;
+					}
+					else
+						threshold = 0.5f * ( threshold + high_threshold );
+					if( MyDebug.LOG )
+						Log.d(TAG, "    increased threshold to: " + threshold);
+				}
+			}
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "### image: " + i + " has " + points_arrays[i].length + " points");
+
+			strength_allocation.destroy();
+			strength_allocation = null;
+
+			local_max_features_allocation.destroy();
+			local_max_features_allocation = null;
+		}
+
+		class FeatureMatch implements Comparable<FeatureMatch> {
+			private int index0, index1;
+			private float distance; // from 0 to 1, higher means poorer match
+
+			private FeatureMatch(int index0, int index1) {
+				this.index0 = index0;
+				this.index1 = index1;
+			}
+
+			@Override
+			public int compareTo(FeatureMatch that) {
+				//return (int)(this.distance - that.distance);
+				if( this.distance > that.distance )
+					return 1;
+				else if( this.distance < that.distance )
+					return -1;
+				else
+					return 0;
+			}
+		}
+
+		// generate candidate matches
+		final int max_match_dist_x = width;
+		final int max_match_dist_y = height/16;
+		final int max_match_dist2 = max_match_dist_x*max_match_dist_x + max_match_dist_y*max_match_dist_y;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "max_match_dist_x: " + max_match_dist_x);
+			Log.d(TAG, "max_match_dist_y: " + max_match_dist_y);
+			Log.d(TAG, "max_match_dist2: " + max_match_dist2);
+		}
+		List<FeatureMatch> matches = new ArrayList<>();
+		for(int i=0;i<points_arrays[0].length;i++) {
+			int x0 = points_arrays[0][i].x;
+			int y0 = points_arrays[0][i].y;
+			for(int j=0;j<points_arrays[1].length;j++) {
+				int x1 = points_arrays[1][j].x;
+				int y1 = points_arrays[1][j].y;
+				// only consider a match if close enough in actual distance
+				int dx = x1 - x0;
+				int dy = y1 - y0;
+				int dist2 = dx*dx + dy*dy;
+				if( dist2 < max_match_dist2 )
+				{
+					FeatureMatch match = new FeatureMatch(i, j);
+					matches.add(match);
+				}
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "### possible matches: " + matches.size());
+
+		// compute distances between matches
+		for(FeatureMatch match : matches) {
+			Point point0 = points_arrays[0][match.index0];
+			Point point1 = points_arrays[1][match.index1];
+			final int wid = 2*feature_descriptor_radius+1;
+			final int wid2 = wid*wid;
+
+			/*float distance = 0;
+			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+					int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+					int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+					int dist2 = value0*value0 + value1+value1;
+					distance += ((float)dist2)/65025.0f; // so distance for a given pixel is from 0 to 1
+				}
+			}
+			distance /= (float)wid2; // normalise from 0 to 1
+			match.distance = distance;*/
+
+			float fsum = 0, gsum = 0;
+			float f2sum = 0, g2sum = 0;
+			float fgsum = 0;
+			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+					int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+					int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+					fsum += value0;
+					f2sum += value0*value0;
+					gsum += value1;
+					g2sum += value1*value1;
+					fgsum += value0*value1;
+				}
+			}
+			float fden = wid2*f2sum - fsum*fsum;
+			float f_recip = fden==0 ? 0.0f : 1/(float)fden;
+			float gden = wid2*g2sum - gsum*gsum;
+			float g_recip = gden==0 ? 0.0f : 1/(float)gden;
+			float fg_corr = wid2*fgsum-fsum*gsum;
+			//if( MyDebug.LOG ) {
+			//	Log.d(TAG, "match distance: ");
+			//	Log.d(TAG, "    fg_corr: " + fg_corr);
+			//	Log.d(TAG, "    fden: " + fden);
+			//	Log.d(TAG, "    gden: " + gden);
+			//	Log.d(TAG, "    f_recip: " + f_recip);
+			//	Log.d(TAG, "    g_recip: " + g_recip);
+			//}
+			// negate, as we want it so that lower value means better match, and normalise to 0-1
+			match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
+		}
+
+		// sort
+		Collections.sort(matches);
+		if( MyDebug.LOG ) {
+			FeatureMatch best_match = matches.get(0);
+			FeatureMatch worst_match = matches.get(matches.size()-1);
+			Log.d(TAG, "best match between " + best_match.index0 + " and " + best_match.index1 + " distance: " + best_match.distance);
+			Log.d(TAG, "worst match between " + worst_match.index0 + " and " + worst_match.index1 + " distance: " + worst_match.distance);
+		}
+
+		// choose matches
+		boolean [] has_matched0 = new boolean[points_arrays[0].length];
+		boolean [] has_matched1 = new boolean[points_arrays[1].length];
+		List<FeatureMatch> actual_matches = new ArrayList<>();
+		//final int n_matches = (int)(matches.size()*0.25f)+1;
+		for(FeatureMatch match : matches) {
+			if( has_matched0[match.index0] || has_matched1[match.index1] ) {
+				continue;
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "    match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
+			}
+			/*if( match.distance > 0.3f ) {
+				// test only relevant for some kind of matches
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "match not good enough");
+				}
+				break;
+			}*/
+			actual_matches.add(match);
+			has_matched0[match.index0] = true;
+			has_matched1[match.index1] = true;
+			/*if( actual_matches.size() == n_matches ) {
+				// only use best matches
+				break;
+			}*/
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "### found: " + actual_matches.size() + " matches");
+
+		// but now choose only top actual matches
+		int n_matches = (int)(actual_matches.size()*0.1)+1;
+		actual_matches.subList(n_matches,actual_matches.size()).clear();
+        if( MyDebug.LOG )
+            Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
+		// need to reset has_matched arrays
+        has_matched0 = new boolean[points_arrays[0].length];
+        has_matched1 = new boolean[points_arrays[1].length];
+        for(FeatureMatch match : actual_matches) {
+            has_matched0[match.index0] = true;
+            has_matched1[match.index1] = true;
+            if( MyDebug.LOG )
+				Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
+		}
+
+		Point [] centres = new Point[2];
+		for(int i=0;i<2;i++) {
+			centres[i] = new Point();
+			int count = 0;
+			for(int j=0;j<points_arrays[i].length;j++) {
+				boolean was_matched;
+				if( i == 0 ) {
+					was_matched = has_matched0[j];
+				}
+				else {
+					was_matched = has_matched1[j];
+				}
+				if( !was_matched ) {
+					continue;
+				}
+				centres[i].x += points_arrays[i][j].x;
+				centres[i].y += points_arrays[i][j].y;
+				count++;
+			}
+			centres[i].x /= count;
+			centres[i].y /= count;
+		}
+
+		offsets_x[1] = centres[1].x - centres[0].x;
+		offsets_y[1] = centres[1].y - centres[0].y;
+
+		if( MyDebug.LOG ) {
+			// debug:
+			Bitmap bitmap = Bitmap.createBitmap(2*width, height, Bitmap.Config.ARGB_8888);
+			Paint p = new Paint();
+			p.setStyle(Paint.Style.STROKE);
+			Canvas canvas = new Canvas(bitmap);
+
+			// draw bitmaps
+			canvas.drawBitmap(bitmaps.get(0), 0, 0, p);
+			canvas.drawBitmap(bitmaps.get(1), width, 0, p);
+
+			// draw feature points
+			for(int i=0;i<2;i++) {
+				for(int j=0;j<points_arrays[i].length;j++) {
+					int off_x = (i==0) ? 0 : width;
+					boolean was_matched;
+					if( i == 0 ) {
+						//Log.d(TAG, "### has_matched0[" + j + "]: " + has_matched0[j]);
+						was_matched = has_matched0[j];
+					}
+					else {
+						//Log.d(TAG, "### has_matched1[" + j + "]: " + has_matched1[j]);
+						was_matched = has_matched1[j];
+					}
+					/*if( !was_matched ) {
+						continue;
+					}*/
+					p.setColor(was_matched ? Color.YELLOW : Color.RED);
+					//canvas.drawCircle(points_arrays[i][j].x + off_x, points_arrays[i][j].y, 5.0f, p);
+					canvas.drawRect(points_arrays[i][j].x + off_x - feature_descriptor_radius - 1, points_arrays[i][j].y - feature_descriptor_radius - 1, points_arrays[i][j].x + off_x + feature_descriptor_radius + 1, points_arrays[i][j].y + feature_descriptor_radius + 1, p);
+				}
+			}
+			// draw matches
+			for(FeatureMatch match : actual_matches) {
+				int x0 = points_arrays[0][match.index0].x;
+				int y0 = points_arrays[0][match.index0].y;
+				int x1 = points_arrays[1][match.index1].x;
+				int y1 = points_arrays[1][match.index1].y;
+				p.setColor(Color.MAGENTA);
+				p.setAlpha((int)(255.0f * (1.0f-match.distance)));
+				canvas.drawLine(x0, y0, width + x1, y1, p);
+			}
+			p.setAlpha(255);
+
+			// draw centres
+			p.setStyle(Paint.Style.FILL);
+			p.setColor(Color.CYAN);
+			p.setAlpha(127);
+			for(int i=0;i<2;i++) {
+				int off_x = (i==0) ? 0 : width;
+				canvas.drawCircle(centres[i].x + off_x, centres[i].y, 5.0f, p);
+			}
+			// also draw a grid that shows the affect of the offset translation we've chosen
+			final int n_x = 2;
+			final int n_y = 5;
+			p.setColor(Color.BLUE);
+			p.setAlpha(127);
+			for(int i=0;i<n_x;i++) {
+				int cx = (width*(i+1))/(n_x+1);
+				for(int j=0;j<n_y;j++) {
+					int cy = (height*(j+1))/(n_y+1);
+					for(int k=0;k<2;k++) {
+						int off_x = (k==0) ? 0 : width + offsets_x[1];
+						int off_y = (k==0) ? 0 : offsets_y[1];
+						canvas.drawCircle(cx + off_x, cy + off_y, 5.0f, p);
+					}
+				}
+			}
+			p.setAlpha(255);
+
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/matched_bitmap_" + debug_index + ".png");
+			try {
+				OutputStream outputStream = new FileOutputStream(file);
+				bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+				outputStream.close();
+				MainActivity mActivity = (MainActivity) context;
+				mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+			bitmap.recycle();
+		}
+
+		// free allocations
+		for(int i=0;i<allocations.length;i++) {
+			if( allocations[i] != null ) {
+				allocations[i].destroy();
+				allocations[i] = null;
+			}
+		}
+		freeScripts();
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public void autoAlignment(int [] offsets_x, int [] offsets_y, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean use_mtb, int max_align_scale) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "autoAlignment");
 		initRenderscript();
 		Allocation [] allocations = new Allocation[bitmaps.size()];
 		for(int i=0;i<bitmaps.size();i++) {
@@ -1840,7 +2353,9 @@ public class HDRProcessor {
 				mtb_allocations[i].copyTo(mtb_bytes);
 				int [] pixels = new int[mtb_width*mtb_height];
 				for(int j=0;j<mtb_width*mtb_height;j++) {
-					byte b = mtb_bytes[j];
+					int b = mtb_bytes[j];
+					if( b < 0 )
+						b += 255;
 					pixels[j] = Color.argb(255, b, b, b);
 				}
 				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, mtb_width, mtb_height, Bitmap.Config.ARGB_8888);

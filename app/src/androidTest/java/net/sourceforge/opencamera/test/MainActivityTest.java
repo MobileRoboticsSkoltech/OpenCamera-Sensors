@@ -14206,6 +14206,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final boolean use_auto_align = true;
         //final boolean use_auto_align = false;
         gyro_debug_info = null; // test
+        //final boolean x_offsets_cumulative = true; // whether the x offsets (align_x) should be allowed to be cumulative
+        final boolean x_offsets_cumulative = false; // whether the x offsets (align_x) should be allowed to be cumulative
         Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
         Log.d(TAG, "    align_hwidth: " + align_hwidth);
         int max_offset_error_x = offset_x - align_hwidth; // prevent cumulative align_x meaning we run out of bitmap!
@@ -14219,6 +14221,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Paint p = new Paint();
         p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         int align_x = 0, align_y = 0;
+        int dst_offset_x = 0;
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "process bitmap: " + i);
 
@@ -14330,7 +14333,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
                 //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                /*final int align_downsample = 64;
+                //final boolean use_align_by_feature = false;
+                final boolean use_align_by_feature = true;
+                final int align_downsample = use_align_by_feature ? 4 : 1;
                 if( align_downsample > 1 ) {
                     Matrix align_scale_matrix = new Matrix();
                     align_scale_matrix.postScale(1.0f/(float)align_downsample, 1.0f/(float)align_downsample);
@@ -14339,7 +14344,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                         alignment_bitmaps.get(j).recycle();
                         alignment_bitmaps.set(j, new_bitmap);
                     }
-                }*/
+                }
+
                 // save bitmaps used for alignments
                 /*for(int j=0;j<alignment_bitmaps.size();j++) {
                     Bitmap alignment_bitmap = alignment_bitmaps.get(j);
@@ -14352,20 +14358,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                 int [] offsets_x = new int[alignment_bitmaps.size()];
                 int [] offsets_y = new int[alignment_bitmaps.size()];
-                final boolean use_mtb = false;
-                //final boolean use_mtb = true;
-                mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
-                /*for(int j=0;j<offsets_x.length;j++) {
+                if( use_align_by_feature ) {
+                    try {
+                        mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
+                    }
+                    catch (HDRProcessorException e) {
+                        e.printStackTrace();
+                        fail();
+                    }
+                }
+                else {
+                    final boolean use_mtb = false;
+                    //final boolean use_mtb = true;
+                    mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
+                }
+                for(int j=0;j<offsets_x.length;j++) {
                     offsets_x[j] *= align_downsample;
                     offsets_y[j] *= align_downsample;
-                }*/
+                }
                 for(Bitmap alignment_bitmap : alignment_bitmaps) {
                     alignment_bitmap.recycle();
                 }
                 alignment_bitmaps.clear();
                 Log.d(TAG, "    offset_x: " + offsets_x[1]);
                 Log.d(TAG, "    offset_y: " + offsets_y[1]);
-                align_x += offsets_x[1];
+                if( x_offsets_cumulative )
+                    align_x += offsets_x[1];
+                else
+                    align_x = offsets_x[1];
                 align_y += offsets_y[1];
                 Log.d(TAG, "    align_x is now: " + align_x);
                 Log.d(TAG, "    align_y is now: " + align_y);
@@ -14414,6 +14434,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 start_x = -offset_x;
             if( i == bitmaps.size()-1 )
                 stop_x = slice_width+offset_x;
+            if( !x_offsets_cumulative ) {
+                stop_x -= align_x;
+            }
+            Log.d(TAG, "    start_x: " + start_x);
+            Log.d(TAG, "    stop_x: " + stop_x);
 
             float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
@@ -14435,7 +14460,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                 src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
                 src_rect.offset(align_x, align_y);
-                dst_rect.set(offset_x + i*slice_width + x, dst_y0, offset_x + i*slice_width + x+1, dst_y1);
+                dst_rect.set(offset_x + dst_offset_x + x, dst_y0, offset_x + dst_offset_x + x+1, dst_y1);
 
                 int blend_alpha = 255;
                 if( i > 0 && x < blend_hwidth ) {
@@ -14447,15 +14472,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     blend_alpha = (int)(255.0f*frac);
                     //Log.d(TAG, "    left hand blend_alpha: " + blend_alpha);
                 }
-                else if( i < bitmaps.size()-1 && x > slice_width-1-blend_hwidth ) {
+                else if( i < bitmaps.size()-1 && x > stop_x-2*blend_hwidth-1 ) {
                     // right hand blend
                     //blend_alpha = 127;
-                    // if x=slice_width-blend_width: ix=0
-                    // if x=slice_width+blend_width-1
-                    //int ix = slice_width-blend_width-x;
-                    // if x=slice_width-blend_hwidth: frac=1
-                    // if x=slice_width+blend_hwidth-1: frac=0
-                    float frac = ((float)slice_width+blend_hwidth-1-x)/(2*blend_hwidth-1.0f);
+                    // if x=stop_x-2*blend_hwidth: frac=1
+                    // if x=stop_x-1: frac=0
+                    float frac = ((float)stop_x-1-x)/(2*blend_hwidth-1.0f);
                     blend_alpha = (int)(255.0f*frac);
                     //Log.d(TAG, "    right hand blend_alpha: " + blend_alpha);
                 }
@@ -14464,6 +14486,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
                 p.setAlpha(255); // reset!
             }
+            dst_offset_x += slice_width;
+            if( !x_offsets_cumulative ) {
+                dst_offset_x -= align_x;
+            }
+            Log.d(TAG, "    dst_offset_x is now: " + dst_offset_x);
 
             /*if( rotated_bitmap != null ) {
                 rotated_bitmap.recycle();
