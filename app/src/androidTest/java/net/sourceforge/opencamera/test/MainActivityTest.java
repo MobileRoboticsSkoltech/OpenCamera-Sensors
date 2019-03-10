@@ -14356,11 +14356,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     mActivity.getStorageUtils().broadcastFile(file, true, false, true);
                 }*/
 
-                int [] offsets_x = new int[alignment_bitmaps.size()];
-                int [] offsets_y = new int[alignment_bitmaps.size()];
+                int this_align_x = 0, this_align_y = 0;
                 if( use_align_by_feature ) {
                     try {
-                        mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
+                        HDRProcessor.AutoAlignmentByFeatureResult res = mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
+                        this_align_x = res.offset_x;
+                        this_align_y = res.offset_y;
                     }
                     catch (HDRProcessorException e) {
                         e.printStackTrace();
@@ -14370,23 +14371,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 else {
                     final boolean use_mtb = false;
                     //final boolean use_mtb = true;
+                    int [] offsets_x = new int[alignment_bitmaps.size()];
+                    int [] offsets_y = new int[alignment_bitmaps.size()];
                     mActivity.getApplicationInterface().getHDRProcessor().autoAlignment(offsets_x, offsets_y, alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, 0, use_mtb, 8);
+                    this_align_x = offsets_x[1];
+                    this_align_y = offsets_y[1];
                 }
-                for(int j=0;j<offsets_x.length;j++) {
-                    offsets_x[j] *= align_downsample;
-                    offsets_y[j] *= align_downsample;
-                }
+                this_align_x *= align_downsample;
+                this_align_y *= align_downsample;
                 for(Bitmap alignment_bitmap : alignment_bitmaps) {
                     alignment_bitmap.recycle();
                 }
                 alignment_bitmaps.clear();
-                Log.d(TAG, "    offset_x: " + offsets_x[1]);
-                Log.d(TAG, "    offset_y: " + offsets_y[1]);
+                Log.d(TAG, "    this_align_x: " + this_align_x);
+                Log.d(TAG, "    this_align_y: " + this_align_y);
                 if( x_offsets_cumulative )
-                    align_x += offsets_x[1];
+                    align_x += this_align_x;
                 else
-                    align_x = offsets_x[1];
-                align_y += offsets_y[1];
+                    align_x = this_align_x;
+                align_y += this_align_y;
                 Log.d(TAG, "    align_x is now: " + align_x);
                 Log.d(TAG, "    align_y is now: " + align_y);
                 if( align_x < -max_offset_error_x ) {

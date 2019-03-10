@@ -1620,8 +1620,17 @@ public class HDRProcessor {
 			Log.d(TAG, "### time for processAvgMulti: " + (System.currentTimeMillis() - time_s));
 	}
 
+	public class AutoAlignmentByFeatureResult {
+	    public final int offset_x, offset_y;
+
+        AutoAlignmentByFeatureResult(int offset_x, int offset_y) {
+            this.offset_x = offset_x;
+            this.offset_y = offset_y;
+        }
+    }
+
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void autoAlignmentByFeature(int [] offsets_x, int [] offsets_y, int width, int height, List<Bitmap> bitmaps, int debug_index) throws HDRProcessorException {
+	public AutoAlignmentByFeatureResult autoAlignmentByFeature(int width, int height, List<Bitmap> bitmaps, int debug_index) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoAlignmentByFeature");
 			Log.d(TAG, "width: " + width);
@@ -1630,12 +1639,6 @@ public class HDRProcessor {
 		if( bitmaps.size() != 2 ) {
 			Log.e(TAG, "must have 2 bitmaps");
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
-		}
-
-		// initialise
-		for(int i=0;i<offsets_x.length;i++) {
-			offsets_x[i] = 0;
-			offsets_y[i] = 0;
 		}
 
 		initRenderscript();
@@ -2077,8 +2080,8 @@ public class HDRProcessor {
 			centres[i].y /= actual_matches.size();
 		}
 
-		offsets_x[1] = centres[1].x - centres[0].x;
-		offsets_y[1] = centres[1].y - centres[0].y;
+		int offset_x = centres[1].x - centres[0].x;
+		int offset_y = centres[1].y - centres[0].y;
 
 		if( MyDebug.LOG ) {
 			// debug:
@@ -2144,8 +2147,8 @@ public class HDRProcessor {
 				for(int j=0;j<n_y;j++) {
 					int cy = (height*(j+1))/(n_y+1);
 					for(int k=0;k<2;k++) {
-						int off_x = (k==0) ? 0 : width + offsets_x[1];
-						int off_y = (k==0) ? 0 : offsets_y[1];
+						int off_x = (k==0) ? 0 : width + offset_x;
+						int off_y = (k==0) ? 0 : offset_y;
 						canvas.drawCircle(cx + off_x, cy + off_y, 5.0f, p);
 					}
 				}
@@ -2174,6 +2177,8 @@ public class HDRProcessor {
 			}
 		}
 		freeScripts();
+
+		return new AutoAlignmentByFeatureResult(offset_x, offset_y);
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
