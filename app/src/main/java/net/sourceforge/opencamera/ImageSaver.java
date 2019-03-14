@@ -814,8 +814,8 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "waitUntilDone");
 		synchronized( this ) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "queue is size " + queue.size());
-				Log.d(TAG, "images still to save " + n_images_to_save);
+				Log.d(TAG, "waitUntilDone: queue is size " + queue.size());
+				Log.d(TAG, "waitUntilDone: images still to save " + n_images_to_save);
 			}
 			while( n_images_to_save > 0 ) {
 				if( MyDebug.LOG )
