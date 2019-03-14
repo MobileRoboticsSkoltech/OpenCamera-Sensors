@@ -144,13 +144,15 @@ public class MainActivity extends Activity {
     private static final int CHOOSE_LOAD_SETTINGS_SAF_CODE = 44;
 
 	// for testing; must be volatile for test project reading the state
+	// n.b., avoid using static, as static variables are shared between different instances of an application,
+	// and won't be reset in subsequent tests in a suite!
 	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
 	public volatile boolean test_low_memory;
 	public volatile boolean test_have_angle;
 	public volatile float test_angle;
 	public volatile String test_last_saved_image;
-	public static boolean test_force_supports_camera2;
+	public static boolean test_force_supports_camera2; // okay to be static, as this is set for an entire test suite
 	public volatile String test_save_settings_file;
 	
 	@Override
