@@ -1622,10 +1622,12 @@ public class HDRProcessor {
 
 	public class AutoAlignmentByFeatureResult {
 	    public final int offset_x, offset_y;
+	    public final float rotation;
 
-        AutoAlignmentByFeatureResult(int offset_x, int offset_y) {
+        AutoAlignmentByFeatureResult(int offset_x, int offset_y, float rotation) {
             this.offset_x = offset_x;
             this.offset_y = offset_y;
+            this.rotation = rotation;
         }
     }
 
@@ -2011,7 +2013,10 @@ public class HDRProcessor {
 				Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
 		}*/
 
-        final boolean use_ransac = true;
+		final boolean use_ransac = true;
+		//final boolean use_ransac = false;
+		//final boolean estimate_rotation = false;
+		final boolean estimate_rotation = true;
         if( use_ransac ) {
 			// RANSAC
 			List<FeatureMatch> best_inliers = new ArrayList<>();
@@ -2023,37 +2028,127 @@ public class HDRProcessor {
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
 			for(int i=0;i<actual_matches.size();i++) {
-				// compute exact transformation from the i-th match only
 				FeatureMatch match = actual_matches.get(i);
-				int candidate_offset_x = points_arrays[1][match.index1].x - points_arrays[0][match.index0].x;
-				int candidate_offset_y = points_arrays[1][match.index1].y - points_arrays[0][match.index0].y;
-				// find the inliers from this
-				inliers.clear();
-				for(FeatureMatch other_match : actual_matches) {
-					int x0 = points_arrays[0][other_match.index0].x;
-					int y0 = points_arrays[0][other_match.index0].y;
-					int x1 = points_arrays[1][other_match.index1].x;
-					int y1 = points_arrays[1][other_match.index1].y;
-					int transformed_x0 = x0 + candidate_offset_x;
-					int transformed_y0 = y0 + candidate_offset_y;
-					float dx = transformed_x0 - x1;
-					float dy = transformed_y0 - y1;
-					float error2 = dx*dx + dy*dy;
-					if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
-						inliers.add(other_match);
+
+				if( estimate_rotation ) {
+					// compute exact rotation and translation
+					// we need two points, so compare to every other point
+					if( i == 0 )
+						continue;
+					for(int j=0;j<i;j++) {
+						FeatureMatch match2 = actual_matches.get(j);
+						int c0_x = (points_arrays[0][match.index0].x + points_arrays[0][match2.index0].x)/2;
+						int c0_y = (points_arrays[0][match.index0].y + points_arrays[0][match2.index0].y)/2;
+						int c1_x = (points_arrays[1][match.index1].x + points_arrays[1][match2.index1].x)/2;
+						int c1_y = (points_arrays[1][match.index1].y + points_arrays[1][match2.index1].y)/2;
+						// model is a rotation about c0, followed by translation
+						float dx0 = (points_arrays[0][match.index0].x - points_arrays[0][match2.index0].x);
+						float dy0 = (points_arrays[0][match.index0].y - points_arrays[0][match2.index0].y);
+						float dx1 = (points_arrays[1][match.index1].x - points_arrays[1][match2.index1].x);
+						float dy1 = (points_arrays[1][match.index1].y - points_arrays[1][match2.index1].y);
+						float mag_sq0 = dx0*dx0 + dy0*dy0;
+						float mag_sq1 = dx1*dx1 + dy1*dy1;
+						if( mag_sq0 < 1.0e-5 || mag_sq1 < 1.0e-5 ) {
+							continue;
+						}
+						float angle = (float)(Math.atan2(dy1, dx1) - Math.atan2(dy0, dx0));
+						if( angle < -Math.PI )
+							angle += 2.0f*Math.PI;
+						else if( angle > Math.PI )
+							angle -= 2.0f*Math.PI;
+						/*if( MyDebug.LOG ) {
+							Log.d(TAG, "ransac: " + i + " , " + j + ": ");
+							Log.d(TAG, "    match 0: " + points_arrays[0][match.index0].x + " , " + points_arrays[0][match.index0].y);
+							Log.d(TAG, "    match 1: " + points_arrays[1][match.index1].x + " , " + points_arrays[1][match.index1].y);
+							Log.d(TAG, "    match2 0: " + points_arrays[0][match2.index0].x + " , " + points_arrays[0][match2.index0].y);
+							Log.d(TAG, "    match2 1: " + points_arrays[1][match2.index1].x + " , " + points_arrays[1][match2.index1].y);
+							Log.d(TAG, "    angle: " + angle);
+							Log.d(TAG, "    mag0: " + Math.sqrt(mag_sq0));
+							Log.d(TAG, "    mag1: " + Math.sqrt(mag_sq1));
+						}*/
+
+						// find the inliers from this
+						inliers.clear();
+						for(FeatureMatch other_match : actual_matches) {
+							int x0 = points_arrays[0][other_match.index0].x;
+							int y0 = points_arrays[0][other_match.index0].y;
+							int x1 = points_arrays[1][other_match.index1].x;
+							int y1 = points_arrays[1][other_match.index1].y;
+							x0 -= c0_x;
+							y0 -= c0_y;
+							int transformed_x0 = (int)(x0 * Math.cos(angle) - y0 * Math.sin(angle));
+							int transformed_y0 = (int)(x0 * Math.sin(angle) + y0 * Math.cos(angle));
+							transformed_x0 += c1_x;
+							transformed_y0 += c1_y;
+
+							float dx = transformed_x0 - x1;
+							float dy = transformed_y0 - y1;
+							/*if( MyDebug.LOG ) {
+								if( other_match == match )
+									Log.d(TAG, "    ransac on match: " + i + " , " + j + " : " + dx + " , " + dy);
+								else if( other_match == match2 )
+									Log.d(TAG, "    ransac on match2: " + i + " , " + j + " : " + dx + " , " + dy);
+							}*/
+							float error2 = dx*dx + dy*dy;
+							if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
+								inliers.add(other_match);
+							}
+						}
+
+						if( inliers.size() > best_inliers.size() ) {
+							// found an improved model!
+							if( MyDebug.LOG )
+								Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
+							best_inliers.clear();
+							best_inliers.addAll(inliers);
+							if( best_inliers.size() == actual_matches.size() ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "all matches are inliers");
+								// no point trying any further
+								break;
+							}
+						}
 					}
-				}
-				if( inliers.size() > best_inliers.size() ) {
-					// found an improved model!
-					if( MyDebug.LOG )
-						Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
-					best_inliers.clear();
-					best_inliers.addAll(inliers);
+
 					if( best_inliers.size() == actual_matches.size() ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "all matches are inliers");
 						// no point trying any further
 						break;
+					}
+				}
+				else {
+					// compute exact translation from the i-th match only
+					int candidate_offset_x = points_arrays[1][match.index1].x - points_arrays[0][match.index0].x;
+					int candidate_offset_y = points_arrays[1][match.index1].y - points_arrays[0][match.index0].y;
+					// find the inliers from this
+					inliers.clear();
+					for(FeatureMatch other_match : actual_matches) {
+						int x0 = points_arrays[0][other_match.index0].x;
+						int y0 = points_arrays[0][other_match.index0].y;
+						int x1 = points_arrays[1][other_match.index1].x;
+						int y1 = points_arrays[1][other_match.index1].y;
+						int transformed_x0 = x0 + candidate_offset_x;
+						int transformed_y0 = y0 + candidate_offset_y;
+						float dx = transformed_x0 - x1;
+						float dy = transformed_y0 - y1;
+						float error2 = dx*dx + dy*dy;
+						if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
+							inliers.add(other_match);
+						}
+					}
+					if( inliers.size() > best_inliers.size() ) {
+						// found an improved model!
+						if( MyDebug.LOG )
+							Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
+						best_inliers.clear();
+						best_inliers.addAll(inliers);
+						if( best_inliers.size() == actual_matches.size() ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "all matches are inliers");
+							// no point trying any further
+							break;
+						}
 					}
 				}
 			}
@@ -2079,9 +2174,67 @@ public class HDRProcessor {
 			centres[i].x /= actual_matches.size();
 			centres[i].y /= actual_matches.size();
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "centres[0]: " + centres[0].x + " , " + centres[0].y);
+			Log.d(TAG, "centres[1]: " + centres[1].x + " , " + centres[1].y);
+		}
 
 		int offset_x = centres[1].x - centres[0].x;
 		int offset_y = centres[1].y - centres[0].y;
+		float rotation = 0.0f;
+
+		if( estimate_rotation ) {
+			// first compute an ideal rotation for a transformation where we rotate about centres[0], and then translate
+			float angle_sum = 0.0f;
+			int n_angles = 0;
+			for(FeatureMatch match : actual_matches) {
+				float dx0 = points_arrays[0][match.index0].x - centres[0].x;
+				float dy0 = points_arrays[0][match.index0].y - centres[0].y;
+				float dx1 = points_arrays[1][match.index1].x - centres[1].x;
+				float dy1 = points_arrays[1][match.index1].y - centres[1].y;
+				float mag_sq0 = dx0*dx0 + dy0*dy0;
+				float mag_sq1 = dx1*dx1 + dy1*dy1;
+				if( mag_sq0 < 1.0e-5 || mag_sq1 < 1.0e-5 ) {
+					continue;
+				}
+				float angle = (float)(Math.atan2(dy1, dx1) - Math.atan2(dy0, dx0));
+				if( angle < -Math.PI )
+					angle += 2.0f*Math.PI;
+				else if( angle > Math.PI )
+					angle -= 2.0f*Math.PI;
+				if( MyDebug.LOG )
+					Log.d(TAG, "    match has angle: " + angle);
+				angle_sum += angle;
+				n_angles++;
+			}
+			if( n_angles > 0 ) {
+				rotation = angle_sum / n_angles;
+			}
+			//rotation = 0.0f; // test
+			//rotation = (float)(0.125*Math.PI); // test
+			//centres[1].x = centres[0].x; // test
+			//centres[1].y = centres[0].y; // test
+			//offset_x = 0; // test
+			//offset_y = 0; // test
+
+			// but instead we want to rotate about the origin and then translate:
+			// R[x-c] + c + d = R[x] + (d + c - R[c])
+			float rotated_centre_x = (float)(centres[0].x * Math.cos(rotation) - centres[0].y * Math.sin(rotation));
+			float rotated_centre_y = (float)(centres[0].x * Math.sin(rotation) + centres[0].y * Math.cos(rotation));
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "offset_x before rotation: " + offset_x);
+				Log.d(TAG, "offset_y before rotation: " + offset_y);
+				Log.d(TAG, "rotated_centre: " + rotated_centre_x + " , " + rotated_centre_y);
+			}
+			offset_x += centres[0].x - rotated_centre_x;
+			offset_y += centres[0].y - rotated_centre_y;
+
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "offset_x: " + offset_x);
+			Log.d(TAG, "offset_y: " + offset_y);
+			Log.d(TAG, "rotation: " + rotation);
+		}
 
 		if( MyDebug.LOG ) {
 			// debug:
@@ -2136,10 +2289,26 @@ public class HDRProcessor {
 			for(int i=0;i<2;i++) {
 				int off_x = (i==0) ? 0 : width;
 				canvas.drawCircle(centres[i].x + off_x, centres[i].y, 5.0f, p);
+				// draw the rotation:
+				int dir_r_x = 50, dir_r_y = 0;
+				int dir_u_x = 0, dir_u_y = -200;
+				if( i == 1 ) {
+					// transform
+					int n_dir_r_x = (int)(dir_r_x * Math.cos(rotation) - dir_r_y * Math.sin(rotation));
+					int n_dir_r_y = (int)(dir_r_x * Math.sin(rotation) + dir_r_y * Math.cos(rotation));
+					int n_dir_u_x = (int)(dir_u_x * Math.cos(rotation) - dir_u_y * Math.sin(rotation));
+					int n_dir_u_y = (int)(dir_u_x * Math.sin(rotation) + dir_u_y * Math.cos(rotation));
+					dir_r_x = n_dir_r_x;
+					dir_r_y = n_dir_r_y;
+					dir_u_x = n_dir_u_x;
+					dir_u_y = n_dir_u_y;
+				}
+				canvas.drawLine(centres[i].x + off_x, centres[i].y, centres[i].x + off_x + dir_r_x, centres[i].y + dir_r_y, p);
+				canvas.drawLine(centres[i].x + off_x, centres[i].y, centres[i].x + off_x + dir_u_x, centres[i].y + dir_u_y, p);
 			}
 			// also draw a grid that shows the affect of the offset translation we've chosen
-			final int n_x = 2;
-			final int n_y = 5;
+			final int n_x = 3;
+			final int n_y = 10;
 			p.setColor(Color.BLUE);
 			p.setAlpha(127);
 			for(int i=0;i<n_x;i++) {
@@ -2147,9 +2316,20 @@ public class HDRProcessor {
 				for(int j=0;j<n_y;j++) {
 					int cy = (height*(j+1))/(n_y+1);
 					for(int k=0;k<2;k++) {
-						int off_x = (k==0) ? 0 : width + offset_x;
+						/*int off_x = (k==0) ? 0 : width + offset_x;
 						int off_y = (k==0) ? 0 : offset_y;
-						canvas.drawCircle(cx + off_x, cy + off_y, 5.0f, p);
+						canvas.drawCircle(cx + off_x, cy + off_y, 5.0f, p);*/
+						int t_cx = cx, t_cy = cy;
+						if( k == 1 ) {
+						    // transform
+                            t_cx = (int)(cx * Math.cos(rotation) - cy * Math.sin(rotation));
+                            t_cy = (int)(cx * Math.sin(rotation) + cy * Math.cos(rotation));
+                            t_cx += offset_x;
+                            t_cy += offset_y;
+                            // draw on right hand side
+                            t_cx += width;
+                        }
+                        canvas.drawCircle(t_cx, t_cy, 5.0f, p);
 					}
 				}
 			}
@@ -2178,7 +2358,7 @@ public class HDRProcessor {
 		}
 		freeScripts();
 
-		return new AutoAlignmentByFeatureResult(offset_x, offset_y);
+		return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation);
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

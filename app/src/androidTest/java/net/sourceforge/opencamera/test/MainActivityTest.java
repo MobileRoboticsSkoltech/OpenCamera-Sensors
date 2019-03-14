@@ -14300,9 +14300,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
 
             // pre-rotate image based on gyro
-            // important to rotate before doing auto-alignment
+            // important to rotate before doing auto-alignment (since we already have the angle from gyro)
             if( Math.abs(angle_z) > 1.0e-5f ) {
-                Log.d(TAG, "rotate bitmap");
+                Log.d(TAG, "pre-rotate bitmap by: " + angle_z);
                 Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                 Canvas rotated_canvas = new Canvas(rotated_bitmap);
                 rotated_canvas.save();
@@ -14362,6 +14362,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                         HDRProcessor.AutoAlignmentByFeatureResult res = mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
                         this_align_x = res.offset_x;
                         this_align_y = res.offset_y;
+                        angle_z = res.rotation;
                     }
                     catch (HDRProcessorException e) {
                         e.printStackTrace();
@@ -14385,6 +14386,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 alignment_bitmaps.clear();
                 Log.d(TAG, "    this_align_x: " + this_align_x);
                 Log.d(TAG, "    this_align_y: " + this_align_y);
+
+                // post-rotate image based on auto-alignment
+                if( gyro_debug_info == null && Math.abs(angle_z) > 1.0e-5f ) {
+                    Log.d(TAG, "post-rotate bitmap by: " + angle_z);
+                    // we have rotation about origin followed by translation
+                    // but instead we want to rotate about the bitmap centre and then translate:
+                    // R[x] + d = (R[x-c] + c) + (d - c + R[c])
+                    float rotated_centre_x = (float)(bitmap_width/2 * Math.cos(angle_z) - bitmap_height/2 * Math.sin(angle_z));
+                    float rotated_centre_y = (float)(bitmap_width/2 * Math.sin(angle_z) + bitmap_height/2 * Math.cos(angle_z));
+                    //this_align_x += rotated_centre_x - bitmap_width/2;
+                    //this_align_y += rotated_centre_y - bitmap_height/2;
+                    Log.d(TAG, "    this_align_x is now: " + this_align_x);
+                    Log.d(TAG, "    this_align_y is now: " + this_align_y);
+
+                    Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+                    Canvas rotated_canvas = new Canvas(rotated_bitmap);
+                    rotated_canvas.save();
+                    //rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2, bitmap_height/2);
+                    rotated_canvas.rotate((float)Math.toDegrees(-angle_z), align_x+offset_x-align_hwidth, 0);
+                    rotated_canvas.translate(-this_align_x, -this_align_y);
+                    this_align_x = 0;
+                    this_align_y = 0;
+                    rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
+                    rotated_canvas.restore();
+                    bitmaps.get(i).recycle();
+                    bitmaps.set(i, rotated_bitmap);
+                }
+
                 if( x_offsets_cumulative )
                     align_x += this_align_x;
                 else
