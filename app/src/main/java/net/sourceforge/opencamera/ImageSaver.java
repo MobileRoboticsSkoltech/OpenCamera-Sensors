@@ -383,8 +383,8 @@ public class ImageSaver extends Thread {
 			hdrProcessor.onDestroy();
 		}
 	}
-	@Override
 
+	@Override
 	public void run() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "starting ImageSaver thread...");
