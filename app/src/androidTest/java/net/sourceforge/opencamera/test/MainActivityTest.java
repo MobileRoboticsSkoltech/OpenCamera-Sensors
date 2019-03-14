@@ -87,6 +87,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setActivityInitialTouchMode(false);
         Log.d(TAG, "setUp: 1");
 
+        // initialise test statics (to avoid the persisting between tests in a test suite run!)
+        ImageSaver.test_small_queue_size = false;
+
         // use getTargetContext() as we haven't started the activity yet (and don't want to, as we want to set prefs before starting)
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
         SharedPreferences.Editor editor = settings.edit();
@@ -9272,7 +9275,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         ImageSaver.test_small_queue_size = true;
-        ImageSaver.test_slow_saving = true;
+        mActivity.getApplicationInterface().getImageSaver().test_slow_saving = true;
         // need to restart for test_small_queue_size to take effect
         restart();
 
@@ -9546,7 +9549,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         ImageSaver.test_small_queue_size = true;
-        ImageSaver.test_slow_saving = true;
+        mActivity.getApplicationInterface().getImageSaver().test_slow_saving = true;
         // need to restart for test_small_queue_size to take effect
         restart();
 

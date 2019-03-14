@@ -79,9 +79,11 @@ public class ImageSaver extends Thread {
 	private final static int queue_cost_dng_c = 6;
 	//private final static int queue_cost_dng_c = 1;
 
-	// for testing:
-	public static volatile boolean test_small_queue_size;
-	public static volatile boolean test_slow_saving;
+	// for testing; must be volatile for test project reading the state
+	// n.b., avoid using static, as static variables are shared between different instances of an application,
+	// and won't be reset in subsequent tests in a suite!
+	public static volatile boolean test_small_queue_size; // needs to be static, as it needs to be set before activity is created to take effect
+	public volatile boolean test_slow_saving;
 	public volatile boolean test_queue_blocked;
 
 	static class Request {
@@ -243,6 +245,8 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
 		int max_queue_size;
+		if( MyDebug.LOG )
+			Log.d(TAG, "test_small_queue_size?: " + test_small_queue_size);
 		if( test_small_queue_size ) {
 			large_heap_memory = 0;
 		}
