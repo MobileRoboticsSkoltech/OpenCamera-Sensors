@@ -4231,6 +4231,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "thumbnail:" + thumbnail);
         Log.d(TAG, "mActivity.gallery_bitmap: " + mActivity.gallery_bitmap);
         assertTrue(mActivity.gallery_bitmap == thumbnail);
+
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     public void testTakePhotoPreviewPaused() throws InterruptedException {
@@ -4388,6 +4390,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "thumbnail: " + thumbnail);
             assertTrue(mActivity.gallery_bitmap != thumbnail);
         }
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     public void testTakePhotoPreviewPausedTrash() throws InterruptedException {
@@ -4532,6 +4535,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
         assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
         assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     private void takePhotoRepeatFocus(boolean locked) throws InterruptedException {
@@ -4582,6 +4587,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
         assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
         assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     /* Tests that we do an extra autofocus when taking a photo, if too long since last touch-focused.
@@ -5460,6 +5467,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 return 2;
             }
         }, 5000, false, false);
+
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     /** Test taking photo while recording video.
@@ -7814,6 +7823,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==4);
 
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     /* Tests we can stamp custom text to photo.
@@ -7859,6 +7869,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==2);
 
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     /* Tests zoom.
@@ -9516,6 +9527,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // at one photo per 100ms, should have approximately 30 - note that long press can take longer to kick in on some devices, e.g., OnePlus 3T
             assertTrue(n_new_files >= 12 && n_new_files <= 31);
         }
+
+        mActivity.waitUntilImageQueueEmpty();
     }
 
     /** Tests continuous burst.
