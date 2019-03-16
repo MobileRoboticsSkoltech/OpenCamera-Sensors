@@ -782,6 +782,23 @@
     <string name="photo_mode_panorama">Pano</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_panorama_full">Panorama</string>
 
+    <string name="preference_screen_remote_control">Remote control...</string>
+    <string name="preference_enable_remote">Enable remote control</string>
+    <string name="preference_enable_remote_summary">Enable BLE remote control devices</string>
+    <string name="preference_remote_type">Remote device type</string>
+
+    <string name="ble_not_supported">BLE not supported</string>
+    <string name="scan_ble">BLE Device Scan</string>
+    <string name="bluetooth_not_supported">Bluetooth not supported.</string>
+    <string name="unknown_device">Unknown device</string>
+    <string name="preference_remote_disconnect_screen_dim">Dim screen if remote disconnects</string>
+    <string name="preference_remote_disconnect_screen_dim_summary">Hint: set default brightness to minimum level before starting Open Camera.</string>
+    <string name="preference_water_type">Use Saltwater for depth calculations</string>
+    <string name="preference_water_type_summary">For underwater housings, improves accuracy if correct water type is selected.</string>
+    <string name="remote_connected">Remote connected</string>
+
+    <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

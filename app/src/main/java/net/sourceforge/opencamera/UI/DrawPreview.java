@@ -179,6 +179,10 @@ public class DrawPreview {
 	private final float [] gyro_direction_up = new float[3];
 	private final float [] transformed_gyro_direction_up = new float[3];
 
+	// OSD extra lines
+	private String OSDLine1;
+	private String OSDLine2;
+
 	public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "DrawPreview");
@@ -859,7 +863,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_x, final int top_y, long time_ms) {
+	private void onDrawInfoLines(Canvas canvas, final int top_x, final int top_y, final int bottom_y, long time_ms) {
 		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -954,6 +958,21 @@ public class DrawPreview {
 				}
 			}
 		}
+
+		// Now draw additional info on the lower left corner if needed
+		int y_offset = (int) (27 * scale + 0.5f);
+		p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
+		if (OSDLine1 != null && OSDLine1.length() > 0) {
+			applicationInterface.drawTextWithBackground(canvas, p, OSDLine1,
+						Color.WHITE, Color.BLACK,  location_x, bottom_y - y_offset,
+						MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, true);
+		}
+		if (OSDLine2 != null && OSDLine2.length() > 0) {
+			applicationInterface.drawTextWithBackground(canvas, p, OSDLine2,
+					Color.WHITE, Color.BLACK, location_x, bottom_y,
+					MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, true);
+		}
+		p.setTextSize(16 * scale + 0.5f); // Restore text size
 
 		if( camera_controller != null && show_iso_pref ) {
 			if( iso_exposure_string == null || time_ms > last_iso_exposure_time + 500 ) {
@@ -1274,6 +1293,7 @@ public class DrawPreview {
 		double level_angle = preview.getLevelAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
+		int text_base_y = 0;
 
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
@@ -1283,7 +1303,6 @@ public class DrawPreview {
 					canvas.getHeight() / 2, p);*/
 			int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 			// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
-			int text_base_y = 0;
 			if( ui_placement == MainUI.UIPlacement.UIPLACEMENT_TOP && ( ui_rotation == 0 || ui_rotation == 180 ) ) {
 				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
             }
@@ -1632,7 +1651,7 @@ public class DrawPreview {
 			top_x += (int) (10 * scale + 0.5f); // convert dps to pixels
 		}
 
-		onDrawInfoLines(canvas, top_x, top_y, time_ms);
+		onDrawInfoLines(canvas, top_x, top_y, text_base_y, time_ms);
 
 		canvas.restore();
 	}
@@ -2200,6 +2219,21 @@ public class DrawPreview {
 		p.setStrokeWidth(stroke_width);
 		canvas.drawLine(cx - radius*dir_x, cy - radius*dir_y, cx + radius*dir_x, cy + radius*dir_y, p);
 		canvas.drawLine(cx - radius*dir_y, cy + radius*dir_x, cx + radius*dir_y, cy - radius*dir_x, p);
+	}
+
+	/**
+	 * A generic method to display up to two lines on the preview.
+	 * Currently used by the Kraken underwater housing sensor to display
+	 * temperature and depth.
+	 *
+	 * The two lines are displayed in the lower left corner of the screen.
+	 *
+	 * @param line1 First line to display
+	 * @param line2 Second line to display
+	 */
+	public void onExtraOSDValuesChanged(String line1, String line2) {
+		OSDLine1 = line1;
+		OSDLine2 = line2;
 	}
 
 	// for testing:

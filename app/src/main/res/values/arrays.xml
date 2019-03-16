@@ -851,4 +851,10 @@
         <item>ui_right</item>
         <item>ui_top</item>
     </string-array>
+    <string-array name="preference_remote_type_entries">
+        <item>@string/preference_remote_type_kraken</item>
+    </string-array>
+    <string-array name="preference_remote_type_values">
+        <item>preference_remote_type_kraken</item>
+    </string-array>
 </resources>
