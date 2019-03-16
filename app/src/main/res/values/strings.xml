@@ -782,9 +782,9 @@
     <string name="photo_mode_panorama">Pano</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_panorama_full">Panorama</string>
 
-    <string name="preference_screen_remote_control">Remote control...</string>
-    <string name="preference_enable_remote">Enable remote control</string>
-    <string name="preference_enable_remote_summary">Enable BLE remote control devices</string>
+    <string name="preference_screen_remote_control">Bluetooth LE remote control...</string>
+    <string name="preference_enable_remote">Enable Bluetooth LE remote control</string>
+    <string name="preference_enable_remote_summary">Enable Bluetooth LE (BLE) remote control devices</string>
     <string name="preference_remote_type">Remote device type</string>
 
     <string name="ble_not_supported">BLE not supported</string>
