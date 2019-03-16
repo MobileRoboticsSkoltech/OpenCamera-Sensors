@@ -1099,6 +1099,8 @@ public class MainUI {
      *
      */
     private void highlightExposureUILine(boolean selectNext) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "highlightExposureUILine: " + selectNext);
         if (!isExposureUIOpen()) { // Safety check
             return;
         }
@@ -1180,6 +1182,8 @@ public class MainUI {
      *  -3: exposure seek bar
       */
     public void nextExposureUIItem() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "nextExposureUIItem");
         switch (mExposureLine) {
             case 0:
                 nextIsoItem(false);
@@ -1200,6 +1204,8 @@ public class MainUI {
     }
 
     public void previousExposureUIItem() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "previousExposureUIItem");
         switch (mExposureLine) {
             case 0:
                 nextIsoItem(true);
@@ -1220,6 +1226,8 @@ public class MainUI {
     }
 
     private void nextIsoItem(boolean previous) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "nextIsoItem: " + previous);
         // Find current ISO
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
@@ -1259,6 +1267,8 @@ public class MainUI {
      *         // - exposure seek bar
      */
     public void selectExposureUILine() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "selectExposureUILine");
         if (!isExposureUIOpen()) { // Safety check
             return;
         }
@@ -1345,6 +1355,8 @@ public class MainUI {
 	}
 
     public boolean isSelectingExposureUIElement() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "isSelectingExposureUIElement returns:" + mSelectingExposureUIElement);
         return mSelectingExposureUIElement;
     }
 
@@ -1354,6 +1366,8 @@ public class MainUI {
      * @return true if an action was taken
      */
     public boolean processRemoteUpButton() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "processRemoteUpButton");
         boolean didProcess = false;
         if (popupIsOpen()) {
             didProcess = true;
@@ -1378,6 +1392,8 @@ public class MainUI {
      * @return true if an action was taken
      */
     public boolean processRemoteDownButton() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "processRemoteDownButton");
         boolean didProcess = false;
         if (popupIsOpen()) {
             if (selectingIcons()) {
@@ -1756,6 +1772,11 @@ public class MainUI {
 	 * @param highlight
 	 */
 	private void highlightPopupLine(boolean highlight, boolean goUp) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "highlightPopupLine");
+			Log.d(TAG, "highlight: " + highlight);
+			Log.d(TAG, "goUp: " + goUp);
+		}
 		if (!popupIsOpen()) { // Safety check
 			clearSelectionState();
 			return;
@@ -1800,6 +1821,11 @@ public class MainUI {
      * @param goLeft
      */
 	public void highlightPopupIcon(boolean highlight, boolean goLeft) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "highlightPopupIcon");
+			Log.d(TAG, "highlight: " + highlight);
+			Log.d(TAG, "goLeft: " + goLeft);
+		}
 		if (!popupIsOpen()) { // Safety check
 			clearSelectionState();
 			return;
@@ -1860,6 +1886,8 @@ public class MainUI {
      * Simulates a press on the currently selected icon
      */
 	public void clickSelectedIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickSelectedIcon: " + mHighlightedIcon);
 		if (mHighlightedIcon != null) {
 			mHighlightedIcon.callOnClick();
 		}
@@ -1870,6 +1898,8 @@ public class MainUI {
 	 * exit menu selection (used in remote control mode)
 	 */
 	private void clearSelectionState() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearSelectionState");
 		mPopupLine = 0;
 		mPopupIcon = 0;
 		mSelectingIcons = false;
