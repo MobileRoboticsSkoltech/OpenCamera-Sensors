@@ -45,7 +45,6 @@ public class DeviceScanner extends ListActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
-    Button startScanningButton;
     private SharedPreferences mSharedPreferences;
 
 
@@ -76,7 +75,7 @@ public class DeviceScanner extends ListActivity {
             return;
         }
 
-        startScanningButton = (Button) findViewById(R.id.StartScanButton);
+        Button startScanningButton = findViewById(R.id.StartScanButton);
         startScanningButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startScanning();
@@ -95,7 +94,7 @@ public class DeviceScanner extends ListActivity {
     }
 
 
-    protected void startScanning() {
+    private void startScanning() {
 
         if( MyDebug.LOG )
             Log.d(TAG, "Start scanning");
@@ -204,26 +203,26 @@ public class DeviceScanner extends ListActivity {
     }
 
     private class LeDeviceListAdapter extends BaseAdapter {
-        private ArrayList<BluetoothDevice> mLeDevices;
-        private LayoutInflater mInflator;
+        private final ArrayList<BluetoothDevice> mLeDevices;
+        private final LayoutInflater mInflator;
 
-        public LeDeviceListAdapter() {
+        LeDeviceListAdapter() {
             super();
-            mLeDevices = new ArrayList<BluetoothDevice>();
+            mLeDevices = new ArrayList<>();
             mInflator = DeviceScanner.this.getLayoutInflater();
         }
 
-        public void addDevice(BluetoothDevice device) {
+        void addDevice(BluetoothDevice device) {
             if(!mLeDevices.contains(device)) {
                 mLeDevices.add(device);
             }
         }
 
-        public BluetoothDevice getDevice(int position) {
+        BluetoothDevice getDevice(int position) {
             return mLeDevices.get(position);
         }
 
-        public void clear() {
+        void clear() {
             mLeDevices.clear();
         }
 
@@ -249,8 +248,8 @@ public class DeviceScanner extends ListActivity {
             if (view == null) {
                 view = mInflator.inflate(R.layout.listitem_device, null);
                 viewHolder = new ViewHolder();
-                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+                viewHolder.deviceAddress = view.findViewById(R.id.device_address);
+                viewHolder.deviceName = view.findViewById(R.id.device_name);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
@@ -269,7 +268,7 @@ public class DeviceScanner extends ListActivity {
     }
 
     // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+    private final BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
 
                 @Override

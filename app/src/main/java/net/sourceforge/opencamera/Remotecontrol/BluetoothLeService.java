@@ -22,7 +22,7 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -38,9 +38,8 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private String mRemoteDeviceType;
-    private int mConnectionState = STATE_DISCONNECTED;
-    private HashMap<String, BluetoothGattCharacteristic> subscribedCharacteristics = new HashMap<>();
-    private List<BluetoothGattCharacteristic> charsToSubscribeTo = new ArrayList<>();
+    private final HashMap<String, BluetoothGattCharacteristic> subscribedCharacteristics = new HashMap<>();
+    private final List<BluetoothGattCharacteristic> charsToSubscribeTo = new ArrayList<>();
 
     private double currentTemp = -1;
     private double currentDepth = -1;
@@ -89,7 +88,6 @@ public class BluetoothLeService extends Service {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
-                mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "Connected to GATT server.");
@@ -101,7 +99,6 @@ public class BluetoothLeService extends Service {
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = STATE_DISCONNECTED;
                 if( MyDebug.LOG )
                     Log.d(TAG, "Disconnected from GATT server, reattempting every 5 seconds.");
                 broadcastUpdate(intentAction);
@@ -109,7 +106,7 @@ public class BluetoothLeService extends Service {
             }
         }
 
-        public void attemptReconnect() {
+        void attemptReconnect() {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 public void run() {
@@ -168,7 +165,6 @@ public class BluetoothLeService extends Service {
     private void subscribeToServices() {
         List<BluetoothGattService> gattServices = getSupportedGattServices();
         if (gattServices == null) return;
-        UUID uuid = null;
         List<UUID> mCharacteristicsWanted;
 
         switch (mRemoteDeviceType) {
@@ -176,7 +172,7 @@ public class BluetoothLeService extends Service {
                 mCharacteristicsWanted = KrakenGattAttributes.getDesiredCharacteristics();
                 break;
             default:
-                mCharacteristicsWanted = Arrays.asList(UUID.fromString("0000"));
+                mCharacteristicsWanted = Collections.singletonList(UUID.fromString("0000"));
                 break;
         }
 
@@ -187,7 +183,7 @@ public class BluetoothLeService extends Service {
                     gattService.getCharacteristics();
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                uuid = gattCharacteristic.getUuid();
+                UUID uuid = gattCharacteristic.getUuid();
                 if (mCharacteristicsWanted.contains(uuid)) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "Found characteristic to subscribe to: " + uuid);
@@ -261,8 +257,8 @@ public class BluetoothLeService extends Service {
             // is really designed for saltwater at all), and the value has to be divided by the density
             // of saltwater. A commonly accepted value is 1030 kg/m3 (1.03 density)
 
-            double temperature = characteristic.getIntValue(format_uint16, 2) / 10;
-            double depth = characteristic.getIntValue(format_uint16, 0) / 10;
+            double temperature = characteristic.getIntValue(format_uint16, 2) / 10.0;
+            double depth = characteristic.getIntValue(format_uint16, 0) / 10.0;
 
             if (temperature == currentTemp && depth == currentDepth)
                 return;
@@ -358,11 +354,10 @@ public class BluetoothLeService extends Service {
 
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         mBluetoothDeviceAddress = address;
-        mConnectionState = STATE_CONNECTING;
         return true;
 	}
 
-    public void close() {
+    private void close() {
         if( mBluetoothGatt == null ) {
             return;
         }
@@ -370,7 +365,7 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt = null;
     }
 
-    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
+    private void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
                                               boolean enabled) {
         if( mBluetoothAdapter == null ) {
             if( MyDebug.LOG )
@@ -396,7 +391,7 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.writeDescriptor(descriptor);
     }
 
-    public List<BluetoothGattService> getSupportedGattServices() {
+    private List<BluetoothGattService> getSupportedGattServices() {
         if (mBluetoothGatt == null) return null;
 
         return mBluetoothGatt.getServices();
