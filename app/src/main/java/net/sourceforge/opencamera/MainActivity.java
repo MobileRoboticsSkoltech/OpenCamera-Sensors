@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
 	private BluetoothLeService mBluetoothLeService;
 	private String mRemoteDeviceAddress;
 	private String mRemoteDeviceType;
-	private Boolean mRemoteConnected = false;
+	private boolean mRemoteConnected;
 	private PermissionHandler permissionHandler;
 	private SettingsManager settingsManager;
 	private SoundPoolManager soundPoolManager;
@@ -1256,7 +1256,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    public Boolean remoteConnected() {
+    public boolean remoteConnected() {
 		/*if( true )
 			return true; // test*/
         return mRemoteConnected;
@@ -1879,7 +1879,7 @@ public class MainActivity extends Activity {
                     startRemoteControl();
                     break;
 				case PreferenceKeys.WaterType:
-					Boolean wt = sharedPreferences.getBoolean(PreferenceKeys.WaterType, true);
+					boolean wt = sharedPreferences.getBoolean(PreferenceKeys.WaterType, true);
 					mWaterDensity = wt ? WATER_DENSITY_SALTWATER : WATER_DENSITY_FRESHWATER;
 					break;
 				default:
@@ -4627,7 +4627,7 @@ public class MainActivity extends Activity {
      */
 	public boolean remoteEnabled() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		Boolean remote_enabled = sharedPreferences.getBoolean(PreferenceKeys.EnableRemote, false);
+		boolean remote_enabled = sharedPreferences.getBoolean(PreferenceKeys.EnableRemote, false);
 		mRemoteDeviceType = sharedPreferences.getString(PreferenceKeys.RemoteType, "undefined");
 		mRemoteDeviceAddress = sharedPreferences.getString(PreferenceKeys.RemoteName, "undefined");
 		return remote_enabled && !mRemoteDeviceAddress.equals("undefined");

@@ -77,10 +77,10 @@ public class MainUI {
 	private int mPopupIcon = 0;
 	private LinearLayout mHighlightedLine;
 	private View mHighlightedIcon;
-	private Boolean mSelectingIcons = false;
-	private Boolean mSelectingLines = false;
+	private boolean mSelectingIcons = false;
+	private boolean mSelectingLines = false;
 	private int mExposureLine = 0;
-	private Boolean mSelectingExposureUIElement = false;
+	private boolean mSelectingExposureUIElement = false;
 
 	// for testing:
 	private final Map<String, View> test_ui_buttons = new Hashtable<>();
@@ -1098,7 +1098,7 @@ public class MainUI {
      * the value of mExposureLine
      *
      */
-    private void highlightExposureUILine(Boolean selectNext) {
+    private void highlightExposureUILine(boolean selectNext) {
         if (!isExposureUIOpen()) { // Safety check
             return;
         }
@@ -1219,13 +1219,13 @@ public class MainUI {
         }
     }
 
-    private void nextIsoItem(Boolean previous) {
+    private void nextIsoItem(boolean previous) {
         // Find current ISO
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
         int count = iso_buttons.size();
         int step = previous ? -1 : 1;
-        Boolean found = false;
+        boolean found = false;
         for(int i = 0; i < count; i++) {
             Button button= (Button) iso_buttons.get(i);
             String button_text = "" + button.getText();
@@ -1343,7 +1343,8 @@ public class MainUI {
 		dpHeight -= margin;
 		return dpHeight;
 	}
-    public Boolean isSelectingExposureUIElement() {
+
+    public boolean isSelectingExposureUIElement() {
         return mSelectingExposureUIElement;
     }
 
@@ -1352,8 +1353,8 @@ public class MainUI {
      * Process a press to the "Up" button on a remote. Called from MainActivity.
      * @return true if an action was taken
      */
-    public Boolean processRemoteUpButton() {
-        Boolean didProcess = false;
+    public boolean processRemoteUpButton() {
+        boolean didProcess = false;
         if (popupIsOpen()) {
             didProcess = true;
             if (selectingIcons()) {
@@ -1376,8 +1377,8 @@ public class MainUI {
      * Process a press to the "Down" button on a remote. Called from MainActivity.
      * @return true if an action was taken
      */
-    public Boolean processRemoteDownButton() {
-        Boolean didProcess = false;
+    public boolean processRemoteDownButton() {
+        boolean didProcess = false;
         if (popupIsOpen()) {
             if (selectingIcons()) {
                 nextPopupIcon();
@@ -1754,7 +1755,7 @@ public class MainUI {
 	 * Higlights the next LinearLayout view
 	 * @param highlight
 	 */
-	private void highlightPopupLine(Boolean highlight, Boolean goUp) {
+	private void highlightPopupLine(boolean highlight, boolean goUp) {
 		if (!popupIsOpen()) { // Safety check
 			clearSelectionState();
 			return;
@@ -1766,7 +1767,7 @@ public class MainUI {
 		if (inside == null)
 			return; // Safety check
 		int count = inside.getChildCount();
-		Boolean foundLine = false;
+		boolean foundLine = false;
 		while (!foundLine) {
 			// Ensure we stay within our bounds:
 			mPopupLine = (mPopupLine + count ) % count;
@@ -1798,14 +1799,14 @@ public class MainUI {
      * @param highlight
      * @param goLeft
      */
-	public void highlightPopupIcon(Boolean highlight, Boolean goLeft) {
+	public void highlightPopupIcon(boolean highlight, boolean goLeft) {
 		if (!popupIsOpen()) { // Safety check
 			clearSelectionState();
 			return;
 		}
 		highlightPopupLine(false, false);
 		int count = mHighlightedLine.getChildCount();
-		Boolean foundIcon = false;
+		boolean foundIcon = false;
 		while (!foundIcon) {
 			// Ensure we stay within our bounds:
 			// (careful, modulo in Java will allow negative numbers, hence the line below:
