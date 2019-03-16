@@ -184,6 +184,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+			// BluetoothLeService requires Android 4.3+
+			Preference pref = findPreference("preference_screen_remote_control");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_controls");
+			pg.removePreference(pref);
+		}
+
 		final int preview_width = bundle.getInt("preview_width");
 		final int preview_height = bundle.getInt("preview_height");
 		final int [] preview_widths = bundle.getIntArray("preview_widths");

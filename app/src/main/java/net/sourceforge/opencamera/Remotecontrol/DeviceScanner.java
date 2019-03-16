@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
  * Preference fragment for scanning and displaying available Bluetooth LE devices.
  * The result is saved in app preferences
  */
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class DeviceScanner extends ListActivity {
     private static final String TAG = "OC-BLEScanner";
     private LeDeviceListAdapter mLeDeviceListAdapter;

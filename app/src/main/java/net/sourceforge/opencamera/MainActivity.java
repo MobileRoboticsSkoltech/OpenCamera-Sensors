@@ -1870,7 +1870,7 @@ public class MainActivity extends Activity {
 						Log.d(TAG, "this change doesn't require update");
 					break;
                 case PreferenceKeys.EnableRemote:
-                    startRemoteControl();;
+                    startRemoteControl();
                     break;
                 case PreferenceKeys.RemoteName:
                     // The remote address changed, restart the service
@@ -4626,6 +4626,10 @@ public class MainActivity extends Activity {
      * @return true if this is the case
      */
 	public boolean remoteEnabled() {
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+			// BluetoothLeService requires Android 4.3+
+			return false;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean remote_enabled = sharedPreferences.getBoolean(PreferenceKeys.EnableRemote, false);
 		mRemoteDeviceType = sharedPreferences.getString(PreferenceKeys.RemoteType, "undefined");
