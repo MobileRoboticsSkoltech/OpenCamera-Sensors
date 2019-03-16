@@ -69,6 +69,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
@@ -172,6 +173,10 @@ public class MainActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
+			if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+				// BluetoothLeService requires Android 4.3+
+				return;
+			}
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
             if (!mBluetoothLeService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
@@ -186,8 +191,11 @@ public class MainActivity extends Activity {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    mBluetoothLeService.connect(mRemoteDeviceAddress);
-                }
+					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+						// BluetoothLeService requires Android 4.3+
+						mBluetoothLeService.connect(mRemoteDeviceAddress);
+					}
+				}
             }, 5000);
 
         }
@@ -1135,6 +1143,10 @@ public class MainActivity extends Activity {
     private final BroadcastReceiver remoteControlCommandReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+			if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+				// BluetoothLeService requires Android 4.3+
+				return;
+			}
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
 				if( MyDebug.LOG )
@@ -1263,7 +1275,8 @@ public class MainActivity extends Activity {
     }
 
     // TODO: refactor for a filter than receives generic remote control intents
-    private static IntentFilter makeRemoteCommandIntentFilter() {
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+	private static IntentFilter makeRemoteCommandIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
@@ -1281,6 +1294,10 @@ public class MainActivity extends Activity {
     private void startRemoteControl() {
 		if( MyDebug.LOG )
 	        Log.d(TAG, "BLE Remote control service start check...");
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+			// BluetoothLeService requires Android 4.3+
+			return;
+		}
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         if ( remoteEnabled()) {
 			if( MyDebug.LOG )
