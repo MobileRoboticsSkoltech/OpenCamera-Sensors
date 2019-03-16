@@ -73,6 +73,7 @@ public class MainUI {
 
 	// For remote control: keep track of the currently highlighted
 	// line and icon within the line
+	private boolean remote_control_mode; // whether remote control mode is enabled
 	private int mPopupLine = 0;
 	private int mPopupIcon = 0;
 	private LinearLayout mHighlightedLine;
@@ -1088,12 +1089,48 @@ public class MainUI {
 		else if( main_activity.getPreview().getCameraController() != null ) {
 			setupExposureUI();
             if (main_activity.remoteEnabled()) {
-                highlightExposureUILine(true);
+            	initRemoteControlForExposureUI();
             }
 		}
     }
 
-    /**
+    private void initRemoteControlForExposureUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initRemoteControlForExposureUI");
+		if( isExposureUIOpen() ) { // just in case
+			remote_control_mode = true;
+			mExposureLine = 0;
+			highlightExposureUILine(true);
+		}
+	}
+
+	private void clearRemoteControlForExposureUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearRemoteControlForExposureUI");
+		if( isExposureUIOpen() && remote_control_mode ) {
+			remote_control_mode = false;
+			resetExposureUIHighlights();
+		}
+	}
+
+	private void resetExposureUIHighlights() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "resetExposureUIHighlights");
+		ViewGroup iso_buttons_container = main_activity.findViewById(R.id.iso_buttons); // Shown when Camera API2 enabled
+		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
+		View shutter_seekbar = main_activity.findViewById(R.id.exposure_time_seekbar);
+		View iso_seekbar = main_activity.findViewById(R.id.iso_seekbar);
+		View sliders_container = main_activity.findViewById(R.id.sliders_container);
+		View wb_seekbar = main_activity.findViewById(R.id.white_balance_seekbar);
+		// Set all lines to black
+		iso_buttons_container.setBackgroundColor(Color.TRANSPARENT);
+		exposure_seek_bar.setBackgroundColor(Color.TRANSPARENT);
+		shutter_seekbar.setBackgroundColor(Color.TRANSPARENT);
+		iso_seekbar.setBackgroundColor(Color.TRANSPARENT);
+		wb_seekbar.setBackgroundColor(Color.TRANSPARENT);
+	}
+
+	/**
      * Highlights the relevant line on the Exposure UI based on
      * the value of mExposureLine
      *
@@ -1115,6 +1152,11 @@ public class MainUI {
         // - ISO slider
         // - Shutter speed
         // - exposure seek bar
+		if( MyDebug.LOG )
+			Log.d(TAG, "mExposureLine: " + mExposureLine);
+		mExposureLine = ( mExposureLine  + 5 ) % 5;
+		if( MyDebug.LOG )
+			Log.d(TAG, "mExposureLine modulo: " + mExposureLine);
         if (selectNext) {
             if (mExposureLine == 0 && !iso_buttons_container.isShown())
                 mExposureLine++;
@@ -1128,22 +1170,23 @@ public class MainUI {
             	mExposureLine++;
         } else {
             // Select previous
-			if ((mExposureLine == 4 || mExposureLine == 1) && !wb_seekbar.isShown())
+			if (mExposureLine == 4 && !wb_seekbar.isShown())
 				mExposureLine--;
             if (mExposureLine == 3 && !exposure_seek_bar.isShown())
                 mExposureLine--;
             if (mExposureLine == 2 && !shutter_seekbar.isShown())
                 mExposureLine--;
-            if (mExposureLine == 1 && !iso_seekbar.isShown())
-                mExposureLine--;
+			if (mExposureLine == 1 && !iso_seekbar.isShown())
+				mExposureLine--;
+			if (mExposureLine == 0 && !iso_buttons_container.isShown())
+				mExposureLine--;
         }
+		if( MyDebug.LOG )
+			Log.d(TAG, "after skipping: mExposureLine: " + mExposureLine);
         mExposureLine = ( mExposureLine  + 5 ) % 5;
-        // Set all lines to black
-        iso_buttons_container.setBackgroundColor(Color.TRANSPARENT);
-        exposure_seek_bar.setBackgroundColor(Color.TRANSPARENT);
-        shutter_seekbar.setBackgroundColor(Color.TRANSPARENT);
-        iso_seekbar.setBackgroundColor(Color.TRANSPARENT);
-        wb_seekbar.setBackgroundColor(Color.TRANSPARENT);
+		if( MyDebug.LOG )
+			Log.d(TAG, "after skipping: mExposureLine modulo: " + mExposureLine);
+		resetExposureUIHighlights();
 
         if (mExposureLine == 0) {
             iso_buttons_container.setBackgroundColor(Color.RED);
@@ -1256,7 +1299,6 @@ public class MainUI {
             iso_buttons.get(0).callOnClick();
         }
     }
-
 
     /**
      * Select element on exposure UI. Based on the value of mExposureLine
@@ -1680,6 +1722,7 @@ public class MainUI {
 	}
 
     public void clearSeekBar() {
+		clearRemoteControlForExposureUI(); // must be called before we actually close the exposure panel
 		View view = main_activity.findViewById(R.id.sliders_container);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.iso_container);
@@ -1723,6 +1766,9 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close popup");
 		if( popupIsOpen() ) {
+			clearRemoteControlForPopup(); // must be called before we set popup_view_is_open to false; and before clearSelectionState() so we know which highlighting to disable
+			clearSelectionState();
+
 			popup_view_is_open = false;
 			/* Not destroying the popup doesn't really gain any performance.
 			 * Also there are still outstanding bugs to fix if we wanted to do this:
@@ -1916,9 +1962,6 @@ public class MainUI {
 		final ViewGroup popup_container = main_activity.findViewById(R.id.popup_container);
 		if( popupIsOpen() ) {
 			closePopup();
-			highlightPopupLine(false, false);
-			highlightPopupIcon(false, false);
-			clearSelectionState();
 			return;
 		}
 		if( main_activity.getPreview().getCameraController() == null ) {
@@ -1957,13 +2000,9 @@ public class MainUI {
 		popup_view_is_open = true;
 
 	    if (main_activity.remoteEnabled()) {
-            // For remote control, we want to highlight lines and icons on the popup view
-            // so that we can control those just with the up/down buttons and "OK"
-            clearSelectionState();
-            mSelectingLines = true;
-            highlightPopupLine(true, false);
+			initRemoteControlForPopup();
         }
-		
+
         // need to call layoutUI to make sure the new popup is oriented correctly
 		// but need to do after the layout has been done, so we have a valid width/height to use
 		// n.b., even though we only need the portion of layoutUI for the popup container, there
@@ -2021,6 +2060,57 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "time to create popup: " + (System.currentTimeMillis() - time_s));
     }
+
+	private void initRemoteControlForPopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initRemoteControlForPopup");
+		if( popupIsOpen() ) { // just in case
+			// For remote control, we want to highlight lines and icons on the popup view
+			// so that we can control those just with the up/down buttons and "OK"
+			clearSelectionState();
+			remote_control_mode = true;
+			mSelectingLines = true;
+			highlightPopupLine(true, false);
+		}
+	}
+
+	private void clearRemoteControlForPopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearRemoteControlForPopup");
+		if( popupIsOpen() && remote_control_mode ) {
+			remote_control_mode = false;
+
+			// reset highlighting
+			final ViewGroup popup_container = main_activity.findViewById(R.id.popup_container);
+			Rect scrollBounds = new Rect();
+			popup_container.getDrawingRect(scrollBounds);
+			final LinearLayout inside = (LinearLayout) popup_container.getChildAt(0);
+			if( inside == null )
+				return; // Safety check
+			View v = inside.getChildAt(mPopupLine);
+			if( v.isShown() && v instanceof LinearLayout ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "reset " + mPopupLine + "th view: " + v);
+				v.setBackgroundColor(Color.TRANSPARENT);
+				v.setAlpha(1f);
+			}
+			if( mHighlightedLine != null ) {
+				v = mHighlightedLine.getChildAt(mPopupIcon);
+				if( v instanceof ImageButton || v instanceof Button ) {
+					v.setBackgroundColor(Color.TRANSPARENT);
+				}
+			}
+			/*for(int i=0;i<inside.getChildCount();i++) {
+				View v = inside.getChildAt(i);
+				if( v.isShown() && v instanceof LinearLayout ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "reset " + i + "th view: " + v);
+					v.setBackgroundColor(Color.TRANSPARENT);
+					v.setAlpha(1f);
+				}
+			}*/
+		}
+	}
 
 	@SuppressWarnings("deprecation")
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -2155,15 +2245,76 @@ public class MainUI {
 				return true;
 			}
 			case KeyEvent.KEYCODE_ZOOM_IN:
+			case KeyEvent.KEYCODE_PLUS:
+			case KeyEvent.KEYCODE_NUMPAD_ADD:
 			{
 				main_activity.zoomIn();
 				return true;
 			}
 			case KeyEvent.KEYCODE_ZOOM_OUT:
+			case KeyEvent.KEYCODE_MINUS:
+			case KeyEvent.KEYCODE_NUMPAD_SUBTRACT:
 			{
 				main_activity.zoomOut();
 				return true;
 			}
+			case KeyEvent.KEYCODE_SPACE:
+			case KeyEvent.KEYCODE_NUMPAD_5:
+			{
+				if( isExposureUIOpen() && remote_control_mode ) {
+					commandMenuExposure();
+					return true;
+				}
+				else if( popupIsOpen() && remote_control_mode ) {
+					commandMenuPopup();
+					return true;
+				}
+				else if( event.getRepeatCount() == 0 ) {
+					main_activity.takePicture(false);
+					return true;
+				}
+				break;
+			}
+			case KeyEvent.KEYCODE_DPAD_UP:
+			case KeyEvent.KEYCODE_NUMPAD_8:
+			//case KeyEvent.KEYCODE_VOLUME_UP: // test
+				if( !remote_control_mode ) {
+					if( popupIsOpen() ) {
+						initRemoteControlForPopup();
+						return true;
+					}
+					else if( isExposureUIOpen() ) {
+						initRemoteControlForExposureUI();
+						return true;
+					}
+				}
+				else if( processRemoteUpButton() )
+					return true;
+				break;
+			case KeyEvent.KEYCODE_DPAD_DOWN:
+			case KeyEvent.KEYCODE_NUMPAD_2:
+			//case KeyEvent.KEYCODE_VOLUME_DOWN: // test
+				if( !remote_control_mode ) {
+					if( popupIsOpen() ) {
+						initRemoteControlForPopup();
+						return true;
+					}
+					else if( isExposureUIOpen() ) {
+						initRemoteControlForExposureUI();
+						return true;
+					}
+				}
+				else if( processRemoteDownButton() )
+					return true;
+				break;
+			case KeyEvent.KEYCODE_FUNCTION:
+			case KeyEvent.KEYCODE_NUMPAD_MULTIPLY:
+				togglePopupSettings();
+				break;
+			case KeyEvent.KEYCODE_SLASH:
+			case KeyEvent.KEYCODE_NUMPAD_DIVIDE:
+				toggleExposureUI();
+				break;
 		}
 		return false;
 	}
@@ -2175,6 +2326,39 @@ public class MainUI {
 			keydown_volume_up = false;
 		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
 			keydown_volume_down = false;
+	}
+
+	/** If the exposure menu is open, selects a current line or option. Else does nothing.
+	 */
+	public void commandMenuExposure() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "commandMenuExposure");
+		if( isExposureUIOpen() ) {
+			if( isSelectingExposureUIElement() ) {
+				// Close Exposure UI if new press on MENU
+				// while already selecting
+				toggleExposureUI();
+			}
+			else {
+				// Select current element in Exposure UI
+				selectExposureUILine();
+			}
+		}
+	}
+
+	/** If the popup menu is open, selects a current line or option. Else does nothing.
+	 */
+	public void commandMenuPopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "commandMenuPopup");
+		if( popupIsOpen() ) {
+			if( selectingIcons() ) {
+				clickSelectedIcon();
+			}
+			else {
+				highlightPopupIcon(true, false);
+			}
+		}
 	}
 
 	/** Shows an information dialog, with a button to request not to show again.

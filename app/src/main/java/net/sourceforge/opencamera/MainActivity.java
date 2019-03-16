@@ -1210,21 +1210,10 @@ public class MainActivity extends Activity {
 					        if (! mainUI.isExposureUIOpen()) {
                                 mainUI.toggleExposureUI();
                             } else {
-                                if (mainUI.isSelectingExposureUIElement()) {
-                                    // Close Exposure UI if new press on MENU
-                                    // while already selecting
-                                    mainUI.toggleExposureUI();
-                                } else {
-                                    // Select current element in Exposure UI
-                                    mainUI.selectExposureUILine();
-                                }
+					        	mainUI.commandMenuExposure();
                             }
                         } else {
-					        if (mainUI.selectingIcons()) {
-					           mainUI.clickSelectedIcon();
-                            } else {
-                                mainUI.highlightPopupIcon(true, false);
-                            }
+					    	mainUI.commandMenuPopup();
                         }
                         break;
 					case BluetoothLeService.COMMAND_UP:
