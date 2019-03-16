@@ -221,6 +221,7 @@
         android:background="@color/icons_background"
         android:backgroundTint="@color/icons_background_tint"
         android:backgroundTintMode="src_in"
+        android:visibility="gone"
         />
 
     <ImageButton
