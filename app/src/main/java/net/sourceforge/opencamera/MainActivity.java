@@ -567,9 +567,6 @@ public class MainActivity extends Activity {
             }
         }).start();
 
-        // Last: if BLE remote control is enabled, then start the background BLE service
-        startRemoteControl();
-
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
 	}
@@ -803,8 +800,6 @@ public class MainActivity extends Activity {
 		// otherwise we can have crash if we need Renderscript after calling releaseAllContexts(), or because rs has been set to
 		// null from beneath applicationInterface.onDestroy()
 		waitUntilImageQueueEmpty();
-
-		stopRemoteControl();
 
 		preview.onDestroy();
 		if( applicationInterface != null ) {
@@ -1311,7 +1306,6 @@ public class MainActivity extends Activity {
     private void stopRemoteControl() {
 		if( MyDebug.LOG )
 	        Log.d(TAG, "BLE Remote control service shutdown...");
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         if ( remoteEnabled()) {
             // Stop the service if necessary
             try{
@@ -1345,6 +1339,9 @@ public class MainActivity extends Activity {
         orientationEventListener.enable();
 
         registerReceiver(cameraReceiver, new IntentFilter("com.miband2.action.CAMERA"));
+
+        // if BLE remote control is enabled, then start the background BLE service
+        startRemoteControl();
 
         initSpeechRecognizer();
         initLocation();
@@ -1397,6 +1394,7 @@ public class MainActivity extends Activity {
         	// this can happen if not registered - simplest to just catch the exception
         	e.printStackTrace();
 		}
+        stopRemoteControl();
         freeAudioListener(false);
         stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
