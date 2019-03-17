@@ -1866,6 +1866,10 @@ public class CameraController2 extends CameraController {
 				// we test for at least Android M just to be safe (this is needed for createConstrainedHighSpeedCaptureSession())
 				capabilities_high_speed_video = true;
 			}
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera is a logical multi-camera");
+			}
 		}
 		// At least some Huawei devices (at least, the Huawei device model FIG-LX3, device code-name hi6250) don't have
 		// REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE, but I had a user complain that NR mode at least had previously
