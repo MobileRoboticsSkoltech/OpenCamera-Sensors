@@ -187,7 +187,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
 			// BluetoothLeService requires Android 4.3+
 			Preference pref = findPreference("preference_screen_remote_control");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_controls");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_controls_more");
 			pg.removePreference(pref);
 		}
 

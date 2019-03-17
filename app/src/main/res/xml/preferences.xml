@@ -186,7 +186,52 @@
                 android:defaultValue="0"
                 />
 
-            <ListPreference 
+            <!--  if we move this to another PreferenceScreen, we should update code for the findPreference() call -->
+            <PreferenceScreen
+                android:key="preference_screen_remote_control"
+                android:title="@string/preference_screen_remote_control"
+                android:icon="@drawable/ic_more_horiz_white_48dp"
+                android:persistent="false">
+
+                <SwitchPreference
+                    android:key="preference_enable_remote"
+                    android:title="@string/preference_enable_remote"
+                    android:summary="@string/preference_enable_remote_summary"
+                    android:defaultValue="false"
+                    />
+
+                <ListPreference
+                    android:key="preference_remote_type"
+                    android:title="@string/preference_remote_type"
+                    android:summary="%s"
+                    android:entries="@array/preference_remote_type_entries"
+                    android:entryValues="@array/preference_remote_type_values"
+                    android:defaultValue="preference_remote_type_kraken"
+                    />
+
+                <PreferenceScreen
+                    android:key="preference_remote_device_name"
+                    android:title="Select remote device" >
+                    <intent android:action="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"/>
+                </PreferenceScreen>
+
+                <SwitchPreference
+                    android:key="preference_remote_disconnect_screen_dim"
+                    android:title="@string/preference_remote_disconnect_screen_dim"
+                    android:summary="@string/preference_remote_disconnect_screen_dim_summary"
+                    android:defaultValue="false"
+                    />
+
+                <SwitchPreference
+                    android:key="preference_water_type"
+                    android:title="@string/preference_water_type"
+                    android:summary="@string/preference_water_type_summary"
+                    android:defaultValue="true"
+                    />
+
+            </PreferenceScreen>
+
+            <ListPreference
                 android:key="preference_lock_orientation"
                 android:title="@string/preference_lock_orientation"
                 android:summary="@string/preference_lock_orientation_summary"
@@ -540,51 +585,6 @@
                 android:defaultValue="0"
                 />
         
-        </PreferenceScreen>
-
-        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
-        <PreferenceScreen
-            android:key="preference_screen_remote_control"
-            android:title="@string/preference_screen_remote_control"
-            android:icon="@drawable/ic_more_horiz_white_48dp"
-            android:persistent="false">
-
-            <SwitchPreference
-                android:key="preference_enable_remote"
-                android:title="@string/preference_enable_remote"
-                android:summary="@string/preference_enable_remote_summary"
-                android:defaultValue="false"
-                />
-
-            <ListPreference
-                android:key="preference_remote_type"
-                android:title="@string/preference_remote_type"
-                android:summary="%s"
-                android:entries="@array/preference_remote_type_entries"
-                android:entryValues="@array/preference_remote_type_values"
-                android:defaultValue="preference_remote_type_kraken"
-                />
-
-            <PreferenceScreen
-                android:key="preference_remote_device_name"
-                android:title="Select remote device" >
-                <intent android:action="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"/>
-            </PreferenceScreen>
-
-            <SwitchPreference
-                android:key="preference_remote_disconnect_screen_dim"
-                android:title="@string/preference_remote_disconnect_screen_dim"
-                android:summary="@string/preference_remote_disconnect_screen_dim_summary"
-                android:defaultValue="false"
-                />
-
-            <SwitchPreference
-                android:key="preference_water_type"
-                android:title="@string/preference_water_type"
-                android:summary="@string/preference_water_type_summary"
-                android:defaultValue="true"
-                />
-
         </PreferenceScreen>
 
     </PreferenceCategory>
