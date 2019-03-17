@@ -1317,8 +1317,8 @@ public class MainUI {
 
         if (mExposureLine == 0) { // ISO presets
             ViewGroup iso_buttons_container = main_activity.findViewById(R.id.iso_buttons);
-            iso_buttons_container.setBackgroundColor(Color.TRANSPARENT);
-            iso_buttons_container.setAlpha(1f);
+            iso_buttons_container.setBackgroundColor(Color.CYAN);
+            //iso_buttons_container.setAlpha(1f);
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
             String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
             // if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
@@ -1329,7 +1329,7 @@ public class MainUI {
                 String button_text = "" + button.getText();
                 if( button_text.contains(current_iso) ) {
                     PopupView.setButtonSelected(button, true);
-                    button.setBackgroundColor(Color.RED);
+                    //button.setBackgroundColor(Color.CYAN);
                     //button.setAlpha(0.3f);
                     found = true;
                 }
@@ -1344,7 +1344,7 @@ public class MainUI {
             if (!found && manualButton != null) {
                 // We are in manual ISO, highlight the "M" button
                 PopupView.setButtonSelected(manualButton, true);
-                manualButton.setBackgroundColor(Color.RED);
+                manualButton.setBackgroundColor(Color.CYAN);
                 //manualButton.setAlpha(0.3f);
             }
             mSelectingExposureUIElement = true;
@@ -1352,21 +1352,25 @@ public class MainUI {
             // ISO seek bar - change color
             View seek_bar = main_activity.findViewById(R.id.iso_seekbar);
             //seek_bar.setAlpha(0.1f);
+			seek_bar.setBackgroundColor(Color.CYAN);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 2) {
             // ISO seek bar - change color
             View seek_bar = main_activity.findViewById(R.id.exposure_time_seekbar);
             //seek_bar.setAlpha(0.1f);
+			seek_bar.setBackgroundColor(Color.CYAN);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 3) {
 			// Exposure compensation
             View container = main_activity.findViewById(R.id.exposure_container);
             //container.setAlpha(0.1f);
+			container.setBackgroundColor(Color.CYAN);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 4) {
         	// Manual white balance
 			View container = main_activity.findViewById(R.id.white_balance_seekbar);
 			//container.setAlpha(0.1f);
+			container.setBackgroundColor(Color.CYAN);
 			mSelectingExposureUIElement = true;
 		}
     }
