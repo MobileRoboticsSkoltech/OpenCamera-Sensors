@@ -75,9 +75,11 @@ import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 /** This class was originally named due to encapsulating the camera preview,
@@ -6872,112 +6874,149 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "onSaveInstanceState");
 	}
 
-    public void showToast(final ToastBoxer clear_toast, final int message_id) {
-    	showToast(clear_toast, getResources().getString(message_id));
-    }
+	private class RotatedTextView extends View {
+		private String [] lines;
+		private int offset_y;
+		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		private final Rect bounds = new Rect();
+		private final Rect sub_bounds = new Rect();
+		private final RectF rect = new RectF();
 
-    public void showToast(final ToastBoxer clear_toast, final String message) {
-    	showToast(clear_toast, message, 32);
-    }
+		RotatedTextView(String text, int offset_y, Context context) {
+			super(context);
 
-    private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
+			this.lines = text.split("\n");
+			this.offset_y = offset_y;
+		}
+
+		void setText(String text) {
+			this.lines = text.split("\n");
+		}
+
+		void setOffsetY(int offset_y) {
+			this.offset_y = offset_y;
+		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+			final float scale = Preview.this.getResources().getDisplayMetrics().density;
+			paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+			paint.setShadowLayer(1, 0, 1, Color.BLACK);
+			//paint.getTextBounds(text, 0, text.length(), bounds);
+			boolean first_line = true;
+			for(String line : lines) {
+				paint.getTextBounds(line, 0, line.length(), sub_bounds);
+					/*if( MyDebug.LOG ) {
+						Log.d(TAG, "line: " + line + " sub_bounds: " + sub_bounds);
+					}*/
+				if( first_line ) {
+					bounds.set(sub_bounds);
+					first_line = false;
+				}
+				else {
+					bounds.top = Math.min(sub_bounds.top, bounds.top);
+					bounds.bottom = Math.max(sub_bounds.bottom, bounds.bottom);
+					bounds.left = Math.min(sub_bounds.left, bounds.left);
+					bounds.right = Math.max(sub_bounds.right, bounds.right);
+				}
+			}
+			// above we've worked out the maximum bounds of each line - this is useful for left/right, but for the top/bottom
+			// we would rather use a consistent height no matter what the text is (otherwise we have the problem of varying
+			// gap between lines, depending on what the characters are).
+			final String reference_text = "Ap";
+			paint.getTextBounds(reference_text, 0, reference_text.length(), sub_bounds);
+			bounds.top = sub_bounds.top;
+			bounds.bottom = sub_bounds.bottom;
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "bounds: " + bounds);
+				}*/
+			int height = bounds.bottom - bounds.top; // height of each line
+			bounds.bottom += ((lines.length-1) * height)/2;
+			bounds.top -= ((lines.length-1) * height)/2;
+			final int padding = (int) (14 * scale + 0.5f); // padding for the shaded rectangle; convert dps to pixels
+			canvas.save();
+			canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
+
+			rect.left = canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding;
+			rect.top = canvas.getHeight()/2 + bounds.top - padding + offset_y;
+			rect.right = canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding;
+			rect.bottom = canvas.getHeight()/2 + bounds.bottom + padding + offset_y;
+
+			paint.setStyle(Paint.Style.FILL);
+			paint.setColor(Color.rgb(50, 50, 50));
+			//canvas.drawRect(rect, paint);
+			final float radius = (24 * scale + 0.5f); // convert dps to pixels
+			canvas.drawRoundRect(rect, radius, radius, paint);
+
+			paint.setColor(Color.WHITE);
+			int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
+			for(String line : lines) {
+				canvas.drawText(line, canvas.getWidth()/2 - bounds.width()/2, ypos, paint);
+				ypos += height;
+			}
+			canvas.restore();
+		}
+	}
+
+	private final Handler fake_toast_handler = new Handler();
+	private RotatedTextView active_fake_toast = null;
+
+	public void showToast(final ToastBoxer clear_toast, final int message_id) {
+		showToast(clear_toast, getResources().getString(message_id));
+	}
+
+	public void showToast(final ToastBoxer clear_toast, final String message) {
+		showToast(clear_toast, message, 32);
+	}
+
+	private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
 		if( !applicationInterface.getShowToastsPref() ) {
 			return;
 		}
     	
-		class RotatedTextView extends View {
-			private String [] lines;
-			private int offset_y;
-			private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			private final Rect bounds = new Rect();
-			private final Rect sub_bounds = new Rect();
-			private final RectF rect = new RectF();
-
-			RotatedTextView(String text, int offset_y, Context context) {
-				super(context);
-
-				this.lines = text.split("\n");
-				this.offset_y = offset_y;
-			}
-
-			void setText(String text) {
-				this.lines = text.split("\n");
-			}
-
-			void setOffsetY(int offset_y) {
-				this.offset_y = offset_y;
-			}
-
-			@Override
-			protected void onDraw(Canvas canvas) {
-				final float scale = Preview.this.getResources().getDisplayMetrics().density;
-				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				paint.setShadowLayer(1, 0, 1, Color.BLACK);
-				//paint.getTextBounds(text, 0, text.length(), bounds);
-				boolean first_line = true;
-				for(String line : lines) {
-					paint.getTextBounds(line, 0, line.length(), sub_bounds);
-					/*if( MyDebug.LOG ) {
-						Log.d(TAG, "line: " + line + " sub_bounds: " + sub_bounds);
-					}*/
-					if( first_line ) {
-						bounds.set(sub_bounds);
-						first_line = false;
-					}
-					else {
-						bounds.top = Math.min(sub_bounds.top, bounds.top);
-						bounds.bottom = Math.max(sub_bounds.bottom, bounds.bottom);
-						bounds.left = Math.min(sub_bounds.left, bounds.left);
-						bounds.right = Math.max(sub_bounds.right, bounds.right);
-					}
-				}
-				// above we've worked out the maximum bounds of each line - this is useful for left/right, but for the top/bottom
-				// we would rather use a consistent height no matter what the text is (otherwise we have the problem of varying
-				// gap between lines, depending on what the characters are).
-				final String reference_text = "Ap";
-				paint.getTextBounds(reference_text, 0, reference_text.length(), sub_bounds);
-				bounds.top = sub_bounds.top;
-				bounds.bottom = sub_bounds.bottom;
-				/*if( MyDebug.LOG ) {
-					Log.d(TAG, "bounds: " + bounds);
-				}*/
-				int height = bounds.bottom - bounds.top; // height of each line
-				bounds.bottom += ((lines.length-1) * height)/2;
-				bounds.top -= ((lines.length-1) * height)/2;
-				final int padding = (int) (14 * scale + 0.5f); // padding for the shaded rectangle; convert dps to pixels
-				canvas.save();
-				canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
-
-				rect.left = canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding;
-				rect.top = canvas.getHeight()/2 + bounds.top - padding + offset_y;
-				rect.right = canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding;
-				rect.bottom = canvas.getHeight()/2 + bounds.bottom + padding + offset_y;
-
-				paint.setStyle(Paint.Style.FILL);
-				paint.setColor(Color.rgb(50, 50, 50));
-				//canvas.drawRect(rect, paint);
-				final float radius = (24 * scale + 0.5f); // convert dps to pixels
-				canvas.drawRoundRect(rect, radius, radius, paint);
-
-				paint.setColor(Color.WHITE);
-				int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
-				for(String line : lines) {
-					canvas.drawText(line, canvas.getWidth()/2 - bounds.width()/2, ypos, paint);
-					ypos += height;
-				}
-				canvas.restore();
-			}
-		}
-
 		if( MyDebug.LOG )
 			Log.d(TAG, "showToast: " + message);
 		final Activity activity = (Activity)this.getContext();
 		// We get a crash on emulator at least if Toast constructor isn't run on main thread (e.g., the toast for taking a photo when on timer).
 		// Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
+		// Also for the use_fake_toast code, running the creation code, and the postDelayed code, on the UI thread avoids threading issues
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
 				final float scale = Preview.this.getResources().getDisplayMetrics().density;
 				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
+
+				final boolean use_fake_toast = false;
+				//final boolean use_fake_toast = true;
+				if( use_fake_toast ) {
+					if( active_fake_toast != null ) {
+						// re-use existing fake toast
+						active_fake_toast.setText(message);
+						active_fake_toast.setOffsetY(offset_y);
+						active_fake_toast.invalidate(); // make sure the view is redrawn
+						fake_toast_handler.removeCallbacksAndMessages(null);
+					}
+					else {
+						active_fake_toast = new RotatedTextView(message, offset_y, activity);
+						Activity activity = (Activity) Preview.this.getContext();
+						final FrameLayout rootLayout = activity.findViewById(android.R.id.content);
+						rootLayout.addView(active_fake_toast);
+					}
+
+					fake_toast_handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							if( MyDebug.LOG )
+								Log.d(TAG, "remove fake toast: " + active_fake_toast);
+							ViewParent parent = active_fake_toast.getParent();
+							if( parent != null ) {
+								((ViewGroup)parent).removeView(active_fake_toast);
+							}
+							active_fake_toast = null;
+						}
+					}, 2000); // supposedly matches Toast.LENGTH_SHORT
+
+					return;
+				}
 
 				/*if( clear_toast != null && clear_toast.toast != null )
 					clear_toast.toast.cancel();
