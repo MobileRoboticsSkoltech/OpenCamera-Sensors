@@ -5118,6 +5118,15 @@ public class CameraController2 extends CameraController {
 				take_picture_error_cb = null;
 			}
 		}
+		catch(IllegalStateException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "captureSession already closed!");
+			e.printStackTrace();
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
+			// don't report error, as camera is closed or closing
+		}
 	}
 
 	public static List<Float> setupFocusBracketingDistances(float source, float target, int count) {
@@ -5453,6 +5462,15 @@ public class CameraController2 extends CameraController {
 				take_picture_error_cb.onError();
 				take_picture_error_cb = null;
 			}
+		}
+		catch(IllegalStateException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "captureSession already closed!");
+			e.printStackTrace();
+			jpeg_todo = false;
+			raw_todo = false;
+			picture_cb = null;
+			// don't report error, as camera is closed or closing
 		}
 	}
 
