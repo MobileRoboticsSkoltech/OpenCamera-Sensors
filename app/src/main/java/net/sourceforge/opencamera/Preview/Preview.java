@@ -6887,22 +6887,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	
 		class RotatedTextView extends View {
 			private String [] lines;
+			private int offset_y;
 			private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			private final Rect bounds = new Rect();
 			private final Rect sub_bounds = new Rect();
 			private final RectF rect = new RectF();
 
-			RotatedTextView(String text, Context context) {
+			RotatedTextView(String text, int offset_y, Context context) {
 				super(context);
 
 				this.lines = text.split("\n");
+				this.offset_y = offset_y;
 			}
-			
+
 			void setText(String text) {
 				this.lines = text.split("\n");
 			}
 
-			@Override 
+			void setOffsetY(int offset_y) {
+				this.offset_y = offset_y;
+			}
+
+			@Override
 			protected void onDraw(Canvas canvas) {
 				final float scale = Preview.this.getResources().getDisplayMetrics().density;
 				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -6939,7 +6945,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				bounds.bottom += ((lines.length-1) * height)/2;
 				bounds.top -= ((lines.length-1) * height)/2;
 				final int padding = (int) (14 * scale + 0.5f); // padding for the shaded rectangle; convert dps to pixels
-				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 				canvas.save();
 				canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
@@ -6961,7 +6966,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					ypos += height;
 				}
 				canvas.restore();
-			} 
+			}
 		}
 
 		if( MyDebug.LOG )
@@ -6971,6 +6976,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
+				final float scale = Preview.this.getResources().getDisplayMetrics().density;
+				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
+
 				/*if( clear_toast != null && clear_toast.toast != null )
 					clear_toast.toast.cancel();
 
@@ -6997,6 +7005,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// for performance, important to reuse the same view, instead of creating a new one (otherwise we get jerky preview update e.g. for changing manual focus slider)
 					RotatedTextView view = (RotatedTextView)toast.getView();
 					view.setText(message);
+					view.setOffsetY(offset_y);
 					view.invalidate(); // make sure the toast is redrawn
 					toast.setView(view);
 				}
@@ -7011,7 +7020,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "created new toast: " + toast);
 					if( clear_toast != null )
 						clear_toast.toast = toast;
-					View text = new RotatedTextView(message, activity);
+					View text = new RotatedTextView(message, offset_y, activity);
 					toast.setView(text);
 					last_toast_time_ms = time_now;
 				}
