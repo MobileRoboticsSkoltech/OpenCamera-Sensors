@@ -131,6 +131,8 @@ public class PreferenceKeys {
 
 	public static final String StampGPSFormatPreferenceKey = "preference_stamp_gpsformat";
 
+	public static final String StampGeoAddressPreferenceKey = "preference_stamp_geo_address";
+
 	public static final String UnitsDistancePreferenceKey = "preference_units_distance";
 
 	public static final String TextStampPreferenceKey = "preference_textstamp";

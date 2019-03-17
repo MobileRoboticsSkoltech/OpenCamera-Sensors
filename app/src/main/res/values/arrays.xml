@@ -857,4 +857,14 @@
     <string-array name="preference_remote_type_values">
         <item>preference_remote_type_kraken</item>
     </string-array>
+    <string-array name="preference_stamp_geo_address_entries">
+        <item>@string/preference_stamp_geo_address_both</item>
+        <item>@string/preference_stamp_geo_address_prefer</item>
+        <item>@string/preference_stamp_geo_address_no</item>
+    </string-array>
+    <string-array name="preference_stamp_geo_address_values">
+        <item>preference_stamp_geo_address_both</item>
+        <item>preference_stamp_geo_address_prefer</item>
+        <item>preference_stamp_geo_address_no</item>
+    </string-array>
 </resources>

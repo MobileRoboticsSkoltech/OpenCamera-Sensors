@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +31,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
@@ -928,6 +931,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.StampGPSFormatPreferenceKey, "preference_stamp_gpsformat_default");
     }
 
+    private String getStampGeoAddressPref() {
+		return sharedPreferences.getString(PreferenceKeys.StampGeoAddressPreferenceKey, "preference_stamp_geo_address_no");
+	}
+
     private String getUnitsDistancePref() {
     	return sharedPreferences.getString(PreferenceKeys.UnitsDistancePreferenceKey, "preference_units_distance_m");
 	}
@@ -1489,6 +1496,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			final String preference_stamp_timeformat = this.getStampTimeFormatPref();
 			final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
 			final String preference_units_distance = this.getUnitsDistancePref();
+			final String preference_stamp_geo_address = this.getStampGeoAddressPref();
 			final boolean store_location = getGeotaggingPref();
 			final boolean store_geo_direction = getGeodirectionPref();
 			class SubtitleVideoTimerTask extends TimerTask {
@@ -1544,19 +1552,75 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 						Log.d(TAG, "time_stamp: " + time_stamp);
 						Log.d(TAG, "gps_stamp: " + gps_stamp);
 					}
-					String datetime_stamp = "";
-					if( date_stamp.length() > 0 )
-						datetime_stamp += date_stamp;
-					if( time_stamp.length() > 0 ) {
-						if( datetime_stamp.length() > 0 )
-							datetime_stamp += " ";
-						datetime_stamp += time_stamp;
-					}
+
+                    String datetime_stamp = "";
+                    if( date_stamp.length() > 0 )
+                        datetime_stamp += date_stamp;
+                    if( time_stamp.length() > 0 ) {
+                        if( datetime_stamp.length() > 0 )
+                            datetime_stamp += " ";
+                        datetime_stamp += time_stamp;
+                    }
+
+                    // build subtitles
 					String subtitles = "";
 					if( datetime_stamp.length() > 0 )
 						subtitles += datetime_stamp + "\n";
-					if( gps_stamp.length() > 0 )
-						subtitles += gps_stamp + "\n";
+
+					if( gps_stamp.length() > 0 ) {
+                        Address address = null;
+                        if( store_location && !preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
+                            // try to find an address
+                            if( Geocoder.isPresent() ) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "geocoder is present");
+                                Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());
+                                try {
+                                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                    if( addresses != null && addresses.size() > 0 ) {
+                                        address = addresses.get(0);
+                                        if( MyDebug.LOG ) {
+                                            Log.d(TAG, "address: " + address);
+                                            Log.d(TAG, "max line index: " + address.getMaxAddressLineIndex());
+                                        }
+                                    }
+                                }
+                                catch(Exception e) {
+                                    Log.e(TAG, "failed to read from geocoder");
+                                    e.printStackTrace();
+                                }
+                            }
+                            else {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "geocoder not present");
+                            }
+                        }
+
+                        if( address != null ) {
+                            for(int i=0;i<=address.getMaxAddressLineIndex();i++) {
+                                // write in forward order
+                                String addressLine = address.getAddressLine(i);
+                                subtitles += addressLine + "\n";
+                            }
+                        }
+
+                        if( address == null || preference_stamp_geo_address.equals("preference_stamp_geo_address_both") ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "display gps coords");
+                            subtitles += gps_stamp + "\n";
+                        }
+                        else if( store_geo_direction ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "not displaying gps coords, but need to display geo direction");
+                            gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, preference_units_distance, false, null, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
+                            if( gps_stamp.length() > 0 ) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "gps_stamp is now: " + gps_stamp);
+                                subtitles += gps_stamp + "\n";
+                            }
+                        }
+                    }
+
 					if( subtitles.length() == 0 ) {
 						return;
 					}
@@ -2354,6 +2418,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		String preference_stamp_dateformat = this.getStampDateFormatPref();
 		String preference_stamp_timeformat = this.getStampTimeFormatPref();
 		String preference_stamp_gpsformat = this.getStampGPSFormatPref();
+		String preference_stamp_geo_address = this.getStampGeoAddressPref();
 		String preference_units_distance = this.getUnitsDistancePref();
 		boolean store_location = getGeotaggingPref() && getLocation() != null;
 		Location location = store_location ? getLocation() : null;
@@ -2440,7 +2505,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					iso,
 					exposure_time,
 					zoom_factor,
-					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
 					sample_factor);
@@ -2481,7 +2546,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					iso,
 					exposure_time,
 					zoom_factor,
-					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_units_distance,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
 					store_location, location, store_geo_direction, geo_direction,
 					custom_tag_artist, custom_tag_copyright,
 					sample_factor);

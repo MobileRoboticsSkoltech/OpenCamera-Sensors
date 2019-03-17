@@ -799,6 +799,12 @@
 
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
+    <string name="preference_stamp_geo_address">Use addresses</string>
+    <string name="preference_stamp_geo_address_summary">If possible, use an address when stamping GPS locations. This option requires an Internet connection.\n%s</string>
+    <string name="preference_stamp_geo_address_both">Display address if possible, in addition to GPS coords</string>
+    <string name="preference_stamp_geo_address_prefer">Prefer address to GPS coords</string>
+    <string name="preference_stamp_geo_address_no">Don\'t display address</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under
