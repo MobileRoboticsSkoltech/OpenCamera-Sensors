@@ -894,9 +894,11 @@ will stop after the specified time (unless already stopped earlier).</p>
 the video automatically stop and restart the specified number of times. So this can be used to take a video for a long
 period, broken up into multiple video files. If a max duration has not been set, then this option has no effect.</p>
 
-<p><b>Maximum file size of video</b> - This allows to set a maximum file size for videos. Note that almost all Android devices
+<p><b>Maximum file size of video</b> - This allows to set a maximum file size for videos. Note that many Android devices
 set a maximum file size (typically around 2GB or 4GB), and there is no way Open Camera can work around such a limitation (and
-using exFAT doesn't get round it). But this option allows you to set a smaller value. Note that the value is approximate - typically
+using exFAT doesn't get round it). This option allows you to set a smaller maximum file size - note that it can only
+be used to reduce the device's maximum file size (so if a device has a 2GB limit, you can't increase it by setting this option to
+a larger value). Note that the value is approximate - typically
 the resultant videos may be slightly smaller. Note that if you using this option together
 with "Max duration of video", then - if "Restart on maximum file size" is enabled - hitting the maximum file size will cause a
 restart that doesn't reset the max duration timer, nor does it count as one of the number of restarts. E.g., if you requested a
