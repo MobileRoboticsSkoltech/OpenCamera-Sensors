@@ -1592,6 +1592,7 @@ public class MainActivity extends Activity {
 
 		mainUI.updateFaceDetectionIcon();
 		preview.showToast(stamp_toast, value ? R.string.face_detection_enabled : R.string.face_detection_disabled);
+		block_startup_toast = true; // so the toast from reopening camera is suppressed, otherwise it conflicts with the face detection toast
 		preview.reopenCamera();
 	}
 
