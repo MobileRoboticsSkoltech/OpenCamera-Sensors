@@ -82,6 +82,8 @@ public class MainUI {
 	private boolean mSelectingLines = false;
 	private int mExposureLine = 0;
 	private boolean mSelectingExposureUIElement = false;
+	private final int highlightColor = Color.rgb(183, 28, 28); // Red 900
+	private final int highlightColorExposureUIElement = Color.rgb(244, 67, 54); // Red 500
 
 	// for testing:
 	private final Map<String, View> test_ui_buttons = new Hashtable<>();
@@ -1189,20 +1191,20 @@ public class MainUI {
 		resetExposureUIHighlights();
 
         if (mExposureLine == 0) {
-            iso_buttons_container.setBackgroundColor(Color.RED);
+            iso_buttons_container.setBackgroundColor(highlightColor);
             //iso_buttons_container.setAlpha(0.5f);
             return;
         } else if (mExposureLine == 1) {
-           iso_seekbar.setBackgroundColor(Color.RED);
+           iso_seekbar.setBackgroundColor(highlightColor);
            //iso_seekbar.setAlpha(0.5f);
         } else if (mExposureLine == 2) {
-            shutter_seekbar.setBackgroundColor(Color.RED);
+            shutter_seekbar.setBackgroundColor(highlightColor);
             //shutter_seekbar.setAlpha(0.5f);
         } else if (mExposureLine == 3) { //
-			exposure_seek_bar.setBackgroundColor(Color.RED);
+			exposure_seek_bar.setBackgroundColor(highlightColor);
 			//exposure_seek_bar.setAlpha(0.5f);
         } else if (mExposureLine == 4) {
-        	wb_seekbar.setBackgroundColor(Color.RED);
+        	wb_seekbar.setBackgroundColor(highlightColor);
         	//wb_seekbar.setAlpha(0.5f);
 		}
     }
@@ -1317,7 +1319,7 @@ public class MainUI {
 
         if (mExposureLine == 0) { // ISO presets
             ViewGroup iso_buttons_container = main_activity.findViewById(R.id.iso_buttons);
-            iso_buttons_container.setBackgroundColor(Color.CYAN);
+            iso_buttons_container.setBackgroundColor(highlightColorExposureUIElement);
             //iso_buttons_container.setAlpha(1f);
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
             String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
@@ -1329,7 +1331,7 @@ public class MainUI {
                 String button_text = "" + button.getText();
                 if( button_text.contains(current_iso) ) {
                     PopupView.setButtonSelected(button, true);
-                    //button.setBackgroundColor(Color.CYAN);
+                    //button.setBackgroundColor(highlightColorExposureUIElement);
                     //button.setAlpha(0.3f);
                     found = true;
                 }
@@ -1344,7 +1346,7 @@ public class MainUI {
             if (!found && manualButton != null) {
                 // We are in manual ISO, highlight the "M" button
                 PopupView.setButtonSelected(manualButton, true);
-                manualButton.setBackgroundColor(Color.CYAN);
+                manualButton.setBackgroundColor(highlightColorExposureUIElement);
                 //manualButton.setAlpha(0.3f);
             }
             mSelectingExposureUIElement = true;
@@ -1352,25 +1354,25 @@ public class MainUI {
             // ISO seek bar - change color
             View seek_bar = main_activity.findViewById(R.id.iso_seekbar);
             //seek_bar.setAlpha(0.1f);
-			seek_bar.setBackgroundColor(Color.CYAN);
+			seek_bar.setBackgroundColor(highlightColorExposureUIElement);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 2) {
             // ISO seek bar - change color
             View seek_bar = main_activity.findViewById(R.id.exposure_time_seekbar);
             //seek_bar.setAlpha(0.1f);
-			seek_bar.setBackgroundColor(Color.CYAN);
+			seek_bar.setBackgroundColor(highlightColorExposureUIElement);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 3) {
 			// Exposure compensation
             View container = main_activity.findViewById(R.id.exposure_container);
             //container.setAlpha(0.1f);
-			container.setBackgroundColor(Color.CYAN);
+			container.setBackgroundColor(highlightColorExposureUIElement);
             mSelectingExposureUIElement = true;
         } else if (mExposureLine == 4) {
         	// Manual white balance
 			View container = main_activity.findViewById(R.id.white_balance_seekbar);
 			//container.setAlpha(0.1f);
-			container.setBackgroundColor(Color.CYAN);
+			container.setBackgroundColor(highlightColorExposureUIElement);
 			mSelectingExposureUIElement = true;
 		}
     }
@@ -1845,7 +1847,7 @@ public class MainUI {
 			View v = inside.getChildAt(mPopupLine);
 			if (v.isShown() && v instanceof LinearLayout ) {
 				if (highlight) {
-					v.setBackgroundColor(Color.RED);
+					v.setBackgroundColor(highlightColor);
 					//v.setAlpha(0.3f);
 					if (v.getBottom() > scrollBounds.bottom || v.getTop() < scrollBounds.top)
                         popup_container.scrollTo(0, v.getTop());
@@ -1890,7 +1892,7 @@ public class MainUI {
 			View v = mHighlightedLine.getChildAt(mPopupIcon);
 			if (v instanceof ImageButton || v instanceof Button ) {
 				if (highlight) {
-					v.setBackgroundColor(Color.RED);
+					v.setBackgroundColor(highlightColor);
 					//v.setAlpha(0.5f);
 					mHighlightedIcon = v;
 					mSelectingIcons = true;
