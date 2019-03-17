@@ -255,7 +255,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final ToastBoxer focus_toast = new ToastBoxer();
 	private final ToastBoxer take_photo_toast = new ToastBoxer();
 	private final ToastBoxer pause_video_toast = new ToastBoxer();
-	private final ToastBoxer seekbar_toast = new ToastBoxer();
 
 	private int ui_rotation;
 
@@ -3766,7 +3765,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					int id = R.string.focus_distance;
 					if( this.supports_focus_bracketing && applicationInterface.isFocusBracketingPref() )
 						id = is_target_distance ? R.string.focus_bracketing_target_distance : R.string.focus_bracketing_source_distance;
-		    		showToast(seekbar_toast, getResources().getString(id) + " " + focus_distance_s);
+		    		showToast(getResources().getString(id) + " " + focus_distance_s, true);
 				}
 			}
 		}
@@ -3796,7 +3795,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setExposureCompensation(new_exposure) ) {
 				// now save
 				applicationInterface.setExposureCompensationPref(new_exposure);
-	    		showToast(seekbar_toast, getExposureCompensationString(new_exposure), 96);
+	    		showToast(getExposureCompensationString(new_exposure), 96, true);
 			}
 		}
 	}
@@ -3811,7 +3810,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setWhiteBalanceTemperature(new_temperature) ) {
 				// now save
 				applicationInterface.setWhiteBalanceTemperaturePref(new_temperature);
-				showToast(seekbar_toast, getResources().getString(R.string.white_balance) + " " + new_temperature, 96);
+				showToast(getResources().getString(R.string.white_balance) + " " + new_temperature, 96, true);
 			}
 		}
 	}
@@ -3847,7 +3846,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setISO(new_iso) ) {
 				// now save
 				applicationInterface.setISOPref("" + new_iso);
-	    		showToast(seekbar_toast, getISOString(new_iso), 96);
+	    		showToast(getISOString(new_iso), 96, true);
 			}
 		}
 	}
@@ -3863,7 +3862,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setExposureTime(new_exposure_time) ) {
 				// now save
 				applicationInterface.setExposureTimePref(new_exposure_time);
-	    		showToast(seekbar_toast, getExposureTimeString(new_exposure_time), 96);
+	    		showToast(getExposureTimeString(new_exposure_time), 96, true);
 			}
 		}
 	}
@@ -6962,18 +6961,45 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private RotatedTextView active_fake_toast = null;
 
 	public void showToast(final ToastBoxer clear_toast, final int message_id) {
-		showToast(clear_toast, getResources().getString(message_id));
+		showToast(clear_toast, getResources().getString(message_id), false);
 	}
 
 	public void showToast(final ToastBoxer clear_toast, final String message) {
-		showToast(clear_toast, message, 32);
+		showToast(clear_toast, message, false);
 	}
 
-	private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
+	public void showToast(final String message, final boolean use_fake_toast) {
+		showToast(null, message, use_fake_toast);
+	}
+
+	public void showToast(final ToastBoxer clear_toast, final String message, final boolean use_fake_toast) {
+		showToast(clear_toast, message, 32, use_fake_toast);
+	}
+
+	private void showToast(final String message, final int offset_y_dp, final boolean use_fake_toast) {
+		showToast(null, message, offset_y_dp, use_fake_toast);
+	}
+
+	/** Displays a "toast", but has several advantages over calling Android's Toast API directly.
+	 *  We use a custom view, to rotate the toast to account for the device orientation (since
+	 *  Open Camera always runs in landscape).
+	 * @param clear_toast    Only relevant if use_fake_toast is false. If non-null, calls to this method
+	 *                       with the same clear_toast value will overwrite the previous ones rather than
+	 *                       being queued. Note that toasts no longer seem to be queued anyway on
+	 *                       Android 9+.
+	 * @param message        The message to display.
+	 * @param offset_y_dp    The y-offset from the centre of the screen.
+	 * @param use_fake_toast If true, don't use Android's Toast system at all. This is due to problems on
+	 *                       Android 9+ where rapidly displaying toasts (e.g., to display values from a
+	 *                       seekbar being modified) cause problems where toast sometimes disappear (this
+	 *                       happens whether using clear_toast or not). Note that using use_fake_toast
+	 *                       means that the toasts don't have the fade out effect.
+	 */
+	private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp, final boolean use_fake_toast) {
 		if( !applicationInterface.getShowToastsPref() ) {
 			return;
 		}
-    	
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "showToast: " + message);
 		final Activity activity = (Activity)this.getContext();
@@ -6985,8 +7011,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				final float scale = Preview.this.getResources().getDisplayMetrics().density;
 				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 
-				final boolean use_fake_toast = false;
-				//final boolean use_fake_toast = true;
 				if( use_fake_toast ) {
 					if( active_fake_toast != null ) {
 						// re-use existing fake toast
