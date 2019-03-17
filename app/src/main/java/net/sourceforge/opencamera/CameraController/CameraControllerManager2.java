@@ -73,6 +73,9 @@ public class CameraControllerManager2 extends CameraControllerManager {
 				case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY:
 					Log.d(TAG, "Camera has LEGACY Camera2 support");
 					break;
+				case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL:
+					Log.d(TAG, "Camera has EXTERNAL Camera2 support");
+					break;
 				case CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED:
 					Log.d(TAG, "Camera has LIMITED Camera2 support");
 					break;
@@ -90,7 +93,16 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
 			return requiredLevel == deviceLevel;
 		}
-		// deviceLevel is not LEGACY, can use numerical sort
+
+		// treat EXTERNAL as LIMITED so we can then use a numerical sort
+		if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL ) {
+			deviceLevel = CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED;
+		}
+		if( requiredLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL ) {
+			requiredLevel = CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED;
+		}
+
+		// can now use numerical sort
 		return requiredLevel <= deviceLevel;
 	}
 
