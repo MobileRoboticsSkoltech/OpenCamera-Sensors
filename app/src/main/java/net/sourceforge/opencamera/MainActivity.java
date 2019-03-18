@@ -1481,6 +1481,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void clickedStoreLocation(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedStoreLocation");
+		boolean value = applicationInterface.getGeotaggingPref();
+		value = !value;
+
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(PreferenceKeys.LocationPreferenceKey, value);
+		editor.apply();
+
+		mainUI.updateStoreLocationIcon();
+		applicationInterface.getDrawPreview().updateSettings(); // because we cache the geotagging setting
+		initLocation(); // required to enable or disable GPS, also requests permission if necessary
+		this.closePopup();
+	}
+
 	public void clickedTextStamp(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTextStamp");
@@ -1735,23 +1752,23 @@ public class MainActivity extends Activity {
 	public void clickedWhiteBalanceLock(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedWhiteBalanceLock");
-    	this.preview.toggleWhiteBalanceLock();
-    	mainUI.updateWhiteBalanceLockIcon();
+		this.preview.toggleWhiteBalanceLock();
+		mainUI.updateWhiteBalanceLockIcon();
 		preview.showToast(white_balance_lock_toast, preview.isWhiteBalanceLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
 	}
 
-    public void clickedExposure(View view) {
+	public void clickedExposureLock(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedExposureLock");
+		this.preview.toggleExposureLock();
+		mainUI.updateExposureLockIcon();
+		preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);
+	}
+
+	public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
 		mainUI.toggleExposureUI();
-    }
-    
-    public void clickedExposureLock(View view) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clickedExposureLock");
-    	this.preview.toggleExposureLock();
-    	mainUI.updateExposureLockIcon();
-		preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);
     }
     
     public void clickedSettings(View view) {
@@ -2238,6 +2255,10 @@ public class MainActivity extends Activity {
 		}
 		if( !mainUI.showWhiteBalanceLockIcon() ) {
 			View button = findViewById(R.id.white_balance_lock);
+			button.setVisibility(View.GONE);
+		}
+		if( !mainUI.showStoreLocationIcon() ) {
+			View button = findViewById(R.id.store_location);
 			button.setVisibility(View.GONE);
 		}
 		if( !mainUI.showTextStampIcon() ) {

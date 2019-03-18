@@ -292,7 +292,8 @@ public class MainUI {
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
-            buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
+			buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
+			buttons_permanent.add(main_activity.findViewById(R.id.store_location));
 			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
@@ -814,6 +815,11 @@ public class MainUI {
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, false);
 	}
 
+	public boolean showStoreLocationIcon() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowStoreLocationPreferenceKey, false);
+	}
+
 	public boolean showTextStampIcon() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
@@ -855,7 +861,8 @@ public class MainUI {
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
-			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View storeLocationButton = main_activity.findViewById(R.id.store_location);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
@@ -873,8 +880,10 @@ public class MainUI {
 			    	exposureButton.setVisibility(visibility);
 			    if( showExposureLockIcon() )
 			    	exposureLockButton.setVisibility(visibility);
-			    if( showWhiteBalanceLockIcon() )
-			    	whiteBalanceLockButton.setVisibility(visibility);
+				if( showWhiteBalanceLockIcon() )
+					whiteBalanceLockButton.setVisibility(visibility);
+				if( showStoreLocationIcon() )
+					storeLocationButton.setVisibility(visibility);
 			    if( showTextStampIcon() )
 			    	textStampButton.setVisibility(visibility);
 			    if( showStampIcon() )
@@ -956,7 +965,8 @@ public class MainUI {
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
-			    View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View storeLocationButton = main_activity.findViewById(R.id.store_location);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
@@ -972,6 +982,8 @@ public class MainUI {
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
 			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
+				if( showStoreLocationIcon() )
+					storeLocationButton.setVisibility(visibility);
 			    if( showTextStampIcon() )
 			    	textStampButton.setVisibility(visibility);
 				if( showStampIcon() )
@@ -1005,19 +1017,26 @@ public class MainUI {
 		});
     }
 
-	public void updateWhiteBalanceLockIcon() {
-        ImageButton view = main_activity.findViewById(R.id.white_balance_lock);
-        boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
-        view.setImageResource(enabled ? R.drawable.white_balance_locked : R.drawable.white_balance_unlocked);
-		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.white_balance_unlock : R.string.white_balance_lock) );
-    }
-
 	public void updateExposureLockIcon() {
-        ImageButton view = main_activity.findViewById(R.id.exposure_lock);
-        boolean enabled = main_activity.getPreview().isExposureLocked();
-        view.setImageResource(enabled ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+		ImageButton view = main_activity.findViewById(R.id.exposure_lock);
+		boolean enabled = main_activity.getPreview().isExposureLocked();
+		view.setImageResource(enabled ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
-    }
+	}
+
+	public void updateWhiteBalanceLockIcon() {
+		ImageButton view = main_activity.findViewById(R.id.white_balance_lock);
+		boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
+		view.setImageResource(enabled ? R.drawable.white_balance_locked : R.drawable.white_balance_unlocked);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.white_balance_unlock : R.string.white_balance_lock) );
+	}
+
+	public void updateStoreLocationIcon() {
+		ImageButton view = main_activity.findViewById(R.id.store_location);
+		boolean enabled = main_activity.getApplicationInterface().getGeotaggingPref();
+		view.setImageResource(enabled ? R.drawable.ic_gps_fixed_red_48dp : R.drawable.ic_gps_fixed_white_48dp);
+		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.preference_location_disable : R.string.preference_location_enable) );
+	}
 
 	public void updateTextStampIcon() {
 		ImageButton view = main_activity.findViewById(R.id.text_stamp);
@@ -1049,8 +1068,9 @@ public class MainUI {
 	public void updateOnScreenIcons() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateOnScreenIcons");
-		this.updateWhiteBalanceLockIcon();
 		this.updateExposureLockIcon();
+		this.updateWhiteBalanceLockIcon();
+		this.updateStoreLocationIcon();
 		this.updateTextStampIcon();
 		this.updateStampIcon();
 		this.updateAutoLevelIcon();

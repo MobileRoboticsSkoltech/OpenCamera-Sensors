@@ -805,6 +805,11 @@
     <string name="preference_stamp_geo_address_prefer">Prefer address to GPS coords</string>
     <string name="preference_stamp_geo_address_no">Don\'t display address</string>
 
+    <string name="preference_show_store_location">Show store location data icon</string>
+    <string name="preference_show_store_location_summary">Whether to show an on-screen icon for enabling or disabling location data (geotagging)</string>
+    <string name="preference_location_enable">Store location data</string>
+    <string name="preference_location_disable">Stop storing location data</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

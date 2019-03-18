@@ -390,6 +390,14 @@
                 android:defaultValue="false"
                 />
 
+            <CheckBoxPreference
+                android:key="preference_show_store_location"
+                android:title="@string/preference_show_store_location"
+                android:summary="@string/preference_show_store_location_summary"
+                android:icon="@drawable/ic_gps_fixed_white_48dp"
+                android:defaultValue="false"
+                />
+
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <CheckBoxPreference
                 android:key="preference_show_white_balance_lock"
