@@ -293,12 +293,12 @@ public class MainUI {
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
             buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
-            buttons_permanent.add(main_activity.findViewById(R.id.kraken_icon));
 			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
 			buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
             buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
+			buttons_permanent.add(main_activity.findViewById(R.id.kraken_icon));
 
 			List<View> buttons_all = new ArrayList<>(buttons_permanent);
 			// icons which only sometimes show on the icon panel:
