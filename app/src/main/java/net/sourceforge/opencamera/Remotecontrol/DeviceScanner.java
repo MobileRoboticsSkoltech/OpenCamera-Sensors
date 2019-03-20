@@ -125,18 +125,36 @@ public class DeviceScanner extends ListActivity {
     }
 
     private void askForCoarseLocationPermission() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "askForCoarseLocationPermission");
+        // n.b., we only need ACCESS_COARSE_LOCATION, but it's simpler to request both to be consistent with Open Camera's
+        // location permission requests in PermissionHandler. If we only request ACCESS_COARSE_LOCATION here, and later the
+        // user enables something that needs ACCESS_FINE_LOCATION, Android ends up showing the "rationale" dialog - and once
+        // that's dismissed, the permission seems to be granted without showing the permission request dialog (so it works,
+        // but is confusing for the user)
+        // Also note that if we did want to only request ACCESS_COARSE_LOCATION here, we'd need to declare that permission
+        // explicitly in the AndroidManifest.xml, otherwise the dialog to request permission is never shown (and the permission
+        // is denied automatically).
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                 REQUEST_LOCATION_PERMISSIONS);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "location permission granted");
                     scanLeDevice(true);
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "location permission denied");
                 }
             }
         }
@@ -144,6 +162,8 @@ public class DeviceScanner extends ListActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onActivityResult");
         // User chose not to enable Bluetooth.
         if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
             finish();
@@ -182,6 +202,8 @@ public class DeviceScanner extends ListActivity {
     }
 
     private void scanLeDevice(final boolean enable) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "scanLeDevice: " + enable);
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
