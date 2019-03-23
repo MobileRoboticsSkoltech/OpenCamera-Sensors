@@ -412,7 +412,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
                 android:text="@string/iso"
                 android:textStyle="bold"
                 />
@@ -422,8 +421,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginBottom="20dp"
-                android:layout_below="@+id/iso_text"
                 >
             </RelativeLayout>
 
@@ -478,7 +475,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/exposure_seekbar_text_dark"
+                android:layout_below="@+id/exposure_seekbar"
                 />
         </RelativeLayout>
 
