@@ -3,6 +3,7 @@ package net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.CameraController.RawImage;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;
 import net.sourceforge.opencamera.ToastBoxer;
 import net.sourceforge.opencamera.CameraController.CameraController;
@@ -20,6 +21,7 @@ import net.sourceforge.opencamera.Preview.CameraSurface.MyTextureView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +43,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -62,6 +65,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RSInvalidStateException;
+import android.renderscript.RenderScript;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
@@ -103,7 +110,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean set_textureview_size;
 	private int textureview_w, textureview_h;
 
-    private final Matrix camera_to_preview_matrix = new Matrix();
+	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
+	private boolean want_preview_bitmap; // whether application has requested we generate bitmap for the preview
+	public enum HistogramType {
+		HISTOGRAM_TYPE_RGB,
+		HISTOGRAM_TYPE_LUMINANCE,
+		HISTOGRAM_TYPE_VALUE,
+		HISTOGRAM_TYPE_INTENSITY,
+		HISTOGRAM_TYPE_LIGHTNESS
+	}
+	private HistogramType histogram_type = HistogramType.HISTOGRAM_TYPE_VALUE;
+	private Bitmap preview_bitmap;
+	private long last_preview_bitmap_time_ms; // time the last preview_bitmap was updated
+	private RefreshPreviewBitmapTask refreshPreviewBitmapTask;
+	private int [] histogram;
+
+	private final Matrix camera_to_preview_matrix = new Matrix();
     private final Matrix preview_to_camera_matrix = new Matrix();
     private double preview_targetRatio;
 
@@ -794,10 +816,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.textureview_h = height;
 		mySurfaceChanged();
 		configureTransform();
+		recreatePreviewBitmap();
 	}
 
 	@Override
 	public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
+		refreshPreviewBitmap();
 	}
 
     private void configureTransform() { 
@@ -6789,6 +6813,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public void onResume() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
+		recreatePreviewBitmap();
 		this.app_is_paused = false;
 		cameraSurface.onResume();
 		if( canvasView != null )
@@ -6831,11 +6856,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		cameraSurface.onPause();
 		if( canvasView != null )
 			canvasView.onPause();
+		freePreviewBitmap();
     }
 
     public void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
+
+		if( rs != null ) {
+			try {
+				rs.destroy(); // on Android M onwards this is a NOP - instead we call RenderScript.releaseAllContexts(); in MainActivity.onDestroy()
+			}
+			catch(RSInvalidStateException e) {
+				e.printStackTrace();
+			}
+			rs = null;
+		}
+
 		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_CLOSING ) {
 			// If the camera is currently closing on a background thread, then wait until the camera has closed to be safe
 			if( MyDebug.LOG ) {
@@ -7132,7 +7169,249 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
     	}
     }
-	
+
+	public void enablePreviewBitmap(HistogramType histogram_type) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "enablePreviewBitmap");
+		if( cameraSurface instanceof TextureView ) {
+			want_preview_bitmap = true;
+			this.histogram_type = histogram_type;
+			recreatePreviewBitmap();
+		}
+	}
+
+	public void disablePreviewBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "disablePreviewBitmap");
+		freePreviewBitmap();
+		want_preview_bitmap = false;
+	}
+
+	public boolean isPreviewBitmapEnabled() {
+    	return this.want_preview_bitmap;
+	}
+
+	public void setHistogramType(HistogramType histogram_type) {
+		this.histogram_type = histogram_type;
+	}
+
+	public int [] getHistogram() {
+    	return this.histogram;
+	}
+
+	private void freePreviewBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "freePreviewBitmap");
+		cancelRefreshPreviewBitmap();
+		histogram = null;
+		if( preview_bitmap != null ) {
+			preview_bitmap.recycle();
+			preview_bitmap = null;
+		}
+	}
+
+	private void recreatePreviewBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "recreatePreviewBitmap");
+		freePreviewBitmap();
+
+		if( want_preview_bitmap ) {
+			final int downscale = 4;
+			final int bitmap_width = textureview_w / downscale;
+			final int bitmap_height = textureview_h / downscale;
+			preview_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+		}
+	}
+
+	// use static class, and WeakReferences, to avoid memory leaks: https://stackoverflow.com/questions/44309241/warning-this-asynctask-class-should-be-static-or-leaks-might-occur/46166223
+	private static class RefreshPreviewBitmapTask extends AsyncTask<Void, Void, int []> {
+		private static final String TAG = "RefreshPreviewBmTask";
+		private final WeakReference<Preview> previewReference;
+
+		RefreshPreviewBitmapTask(Preview preview) {
+			this.previewReference = new WeakReference<>(preview);
+		}
+
+		@Override
+		protected int [] doInBackground(Void... voids) {
+			long debug_time = 0;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "doInBackground, async task: " + this);
+				debug_time = System.currentTimeMillis();
+			}
+
+			Preview preview = previewReference.get();
+			if( preview == null ) {
+				return null;
+			}
+			Activity activity = (Activity)preview.getContext();
+			if( activity == null || activity.isFinishing() ) {
+				return null;
+			}
+
+			int [] result = null;
+
+			try {
+				TextureView textureView = (TextureView)preview.cameraSurface;
+				textureView.getBitmap(preview.preview_bitmap);
+
+				if( preview.rs == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "create renderscript object");
+					preview.rs = RenderScript.create(activity);
+				}
+
+				Allocation allocation_in = Allocation.createFromBitmap(preview.rs, preview.preview_bitmap);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - debug_time));
+
+				if( MyDebug.LOG )
+					Log.d(TAG, "create histogramScript");
+				ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(preview.rs);
+
+				if( preview.histogram_type == HistogramType.HISTOGRAM_TYPE_RGB ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "rgb histogram");
+					Allocation histogramAllocationR = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
+					Allocation histogramAllocationG = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
+					Allocation histogramAllocationB = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
+
+					if( MyDebug.LOG )
+						Log.d(TAG, "bind histogram allocations");
+					histogramScript.bind_histogram_r(histogramAllocationR);
+					histogramScript.bind_histogram_g(histogramAllocationG);
+					histogramScript.bind_histogram_b(histogramAllocationB);
+					histogramScript.invoke_init_histogram_rgb();
+					if( MyDebug.LOG )
+						Log.d(TAG, "call histogramScript");
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+					histogramScript.forEach_histogram_compute_rgb(allocation_in);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+					result = new int[256*3];
+					int c=0;
+					int [] temp = new int[256];
+
+					histogramAllocationR.copyTo(temp);
+					for(int i=0;i<256;i++)
+						result[c++] = temp[i];
+
+					histogramAllocationG.copyTo(temp);
+					for(int i=0;i<256;i++)
+						result[c++] = temp[i];
+
+					histogramAllocationB.copyTo(temp);
+					for(int i=0;i<256;i++)
+						result[c++] = temp[i];
+
+					histogramAllocationR.destroy();
+					histogramAllocationG.destroy();
+					histogramAllocationB.destroy();
+				}
+				else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "single channel histogram");
+					Allocation histogramAllocation = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
+
+					if( MyDebug.LOG )
+						Log.d(TAG, "bind histogram allocation");
+					histogramScript.bind_histogram(histogramAllocation);
+					histogramScript.invoke_init_histogram();
+					if( MyDebug.LOG )
+						Log.d(TAG, "call histogramScript");
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+					switch( preview.histogram_type ) {
+						case HISTOGRAM_TYPE_LUMINANCE:
+							histogramScript.forEach_histogram_compute_by_luminance(allocation_in);
+							break;
+						case HISTOGRAM_TYPE_VALUE:
+							histogramScript.forEach_histogram_compute_by_value(allocation_in);
+							break;
+						case HISTOGRAM_TYPE_INTENSITY:
+							histogramScript.forEach_histogram_compute_by_intensity(allocation_in);
+							break;
+						case HISTOGRAM_TYPE_LIGHTNESS:
+							histogramScript.forEach_histogram_compute_by_lightness(allocation_in);
+							break;
+					}
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+					result = new int[256];
+					histogramAllocation.copyTo(result);
+					histogramAllocation.destroy();
+				}
+				allocation_in.destroy();
+			}
+			catch(IllegalStateException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to getBitmap");
+				e.printStackTrace();
+			}
+
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time taken: " + (System.currentTimeMillis() - debug_time));
+			}
+			return result;
+		}
+
+		/** The system calls this to perform work in the UI thread and delivers
+		 * the result from doInBackground() */
+		@Override
+		protected void onPostExecute(int [] result) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onPostExecute, async task: " + this);
+
+			Preview preview = previewReference.get();
+			if( preview == null ) {
+				return;
+			}
+			Activity activity = (Activity)preview.getContext();
+			if( activity == null || activity.isFinishing() ) {
+				return;
+			}
+
+			preview.histogram = result;
+			/*if( MyDebug.LOG && preview.histogram != null ) {
+				for(int i=0;i<preview.histogram.length;i++)
+					Log.d(TAG, "    histogram[" + i + "]: " + preview.histogram[i]);
+			}*/
+			preview.refreshPreviewBitmapTask = null;
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "onPostExecute done, async task: " + this);
+		}
+
+		@Override
+		protected void onCancelled() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onCancelled, async task: " + this);
+		}
+	}
+
+	private void refreshPreviewBitmap() {
+		if( want_preview_bitmap && preview_bitmap != null && refreshPreviewBitmapTask == null &&
+			System.currentTimeMillis() > last_preview_bitmap_time_ms + 200 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "refreshPreviewBitmap");
+			this.last_preview_bitmap_time_ms = System.currentTimeMillis();
+			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this);
+			refreshPreviewBitmapTask.execute();
+		}
+	}
+
+	private void cancelRefreshPreviewBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelRefreshPreviewBitmap");
+		if( refreshPreviewBitmapTask != null ) {
+			refreshPreviewBitmapTask.cancel(true);
+			refreshPreviewBitmapTask = null;
+		}
+	}
+
 	public boolean isVideo() {
 		return is_video;
 	}

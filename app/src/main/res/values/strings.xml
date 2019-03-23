@@ -810,6 +810,15 @@
     <string name="preference_location_enable">Store location data</string>
     <string name="preference_location_disable">Stop storing location data</string>
 
+    <string name="preference_histogram">Show a histogram</string>
+    <string name="preference_histogram_summary">Whether to display histogram of the colours shown on-screen\n%s</string>
+    <string name="preference_histogram_off">Off</string>
+    <string name="preference_histogram_rgb">RGB Colours</string>
+    <string name="preference_histogram_luminance">Luminance</string>
+    <string name="preference_histogram_value">Value (Maximum)</string>
+    <string name="preference_histogram_intensity">Intensity (Average)</string>
+    <string name="preference_histogram_lightness">Lightness (Average of min-max)</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

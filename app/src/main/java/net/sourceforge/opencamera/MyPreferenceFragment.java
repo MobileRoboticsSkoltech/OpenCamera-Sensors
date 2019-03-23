@@ -96,7 +96,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "nCameras: " + nCameras);
 
 		final String camera_api = bundle.getString("camera_api");
-		
+
 		final boolean using_android_l = bundle.getBoolean("using_android_l");
 		if( MyDebug.LOG )
 			Log.d(TAG, "using_android_l: " + using_android_l);
@@ -572,11 +572,21 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		setSummary("preference_save_video_prefix");
 		setSummary("preference_textstamp");
 
-        if( !using_android_l ) {
-        	Preference pref = findPreference("preference_show_iso");
-        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
-        	pg.removePreference(pref);
-        }
+		if( !using_android_l ) {
+			Preference pref = findPreference("preference_show_iso");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			pg.removePreference(pref);
+		}
+
+		final boolean supports_preview_bitmaps = bundle.getBoolean("supports_preview_bitmaps");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_preview_bitmaps: " + supports_preview_bitmaps);
+
+		if( !supports_preview_bitmaps ) {
+			Preference pref = findPreference("preference_histogram");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			pg.removePreference(pref);
+		}
 
 		final boolean supports_photo_video_recording = bundle.getBoolean("supports_photo_video_recording");
 		if( MyDebug.LOG )

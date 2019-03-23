@@ -668,6 +668,17 @@ API is used). The text will be shown in red when the auto-exposure routine is sc
 also indicate when flash will fire. Note that this is not an absolute guarantee - when you take a photo, the camera will make an
 updated decision on whether to fire the flash, which in some cases may disagree with whether the flash symbol was displayed.</p>
 
+<p><b>Show a histogram</b> - Allows displaying an on-screen histogram (only available if Camera2 API is used). Note that the
+histogram reflects the currently display on-screen preview, and will not necessarily be accurate for the final resultant photogram,
+especially if modes such as NR, DRO, HDR are used. The follow options are available:</p>
+<ul>
+	<li>RGB Colours - Displays a histogram for each colour channel.</li>
+	<li>Luminance - The brightness is computed as a weighted average of the RGB components: 0.299*R + 0.587G + 0.114*B.</li>
+	<li>Value - The brightness is computed as the maximum of the RGB components.</li>
+	<li>Intensity - The brightness is computed as an unweighted average of the RGB components.</li>
+	<li>Lightness - The brightness is computed as an average of the minimum and maximum of the RGB components.</li>
+</ul>
+
 <p><b>Show audio level meter</b> - If selected, when recording video an on-screen meter will display the current audio level.</p>
 
 <p><b>Show a grid</b> - Whether to display one of a choice of grids on the camera preview. Grids are useful in photography to help

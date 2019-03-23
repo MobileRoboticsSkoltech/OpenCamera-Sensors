@@ -867,4 +867,20 @@
         <item>preference_stamp_geo_address_prefer</item>
         <item>preference_stamp_geo_address_no</item>
     </string-array>
+    <string-array name="preference_histogram_entries">
+        <item>@string/preference_histogram_off</item>
+        <item>@string/preference_histogram_rgb</item>
+        <item>@string/preference_histogram_luminance</item>
+        <item>@string/preference_histogram_value</item>
+        <item>@string/preference_histogram_intensity</item>
+        <item>@string/preference_histogram_lightness</item>
+    </string-array>
+    <string-array name="preference_histogram_values">
+        <item>preference_histogram_off</item>
+        <item>preference_histogram_rgb</item>
+        <item>preference_histogram_luminance</item>
+        <item>preference_histogram_value</item>
+        <item>preference_histogram_intensity</item>
+        <item>preference_histogram_lightness</item>
+    </string-array>
 </resources>

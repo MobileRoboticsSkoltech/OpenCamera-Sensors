@@ -79,6 +79,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -1945,6 +1946,7 @@ public class MainActivity extends Activity {
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
 		bundle.putBoolean("supports_nr", this.supportsNoiseReduction());
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
+		bundle.putBoolean("supports_preview_bitmaps", this.supportsPreviewBitmaps());
 		bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());
 		bundle.putBoolean("supports_exposure_compensation", this.preview.supportsExposures());
 		bundle.putInt("exposure_compensation_min", this.preview.getMinimumExposure());
@@ -4006,6 +4008,10 @@ public class MainActivity extends Activity {
 		// Android 7 to limit to more modern devices (for performance reasons)
 		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
 		//return false; // currently blocked for release
+	}
+
+	public boolean supportsPreviewBitmaps() {
+		return preview.getView() instanceof TextureView && large_heap_memory >= 128;
 	}
     
     private int maxExpoBracketingNImages() {

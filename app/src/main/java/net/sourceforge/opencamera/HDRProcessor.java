@@ -3052,7 +3052,9 @@ public class HDRProcessor {
 						/*if( MyDebug.LOG )
 							Log.d(TAG, "call histogramScript");*/
 					histogramScript.invoke_init_histogram();
-					histogramScript.forEach_histogram_compute(allocation_in, launch_options);
+					// We compute a histogram based on the max RGB value, so this matches with the scaling we do in histogram_adjust.rs.
+					// This improves the look of the grass in testHDR24, testHDR27.
+					histogramScript.forEach_histogram_compute_by_value(allocation_in, launch_options);
 
 					int [] histogram = new int[256];
 					histogramAllocation.copyTo(histogram);
@@ -3271,15 +3273,15 @@ public class HDRProcessor {
 				Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - time_s));
 			if( avg ) {
 				if( floating_point )
-					histogramScript.forEach_histogram_compute_avg_f(allocation_in);
+					histogramScript.forEach_histogram_compute_by_intensity_f(allocation_in);
 				else
-					histogramScript.forEach_histogram_compute_avg(allocation_in);
+					histogramScript.forEach_histogram_compute_by_intensity(allocation_in);
 			}
 			else {
 				if( floating_point )
-					histogramScript.forEach_histogram_compute_f(allocation_in);
+					histogramScript.forEach_histogram_compute_by_value_f(allocation_in);
 				else
-					histogramScript.forEach_histogram_compute(allocation_in);
+					histogramScript.forEach_histogram_compute_by_value(allocation_in);
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - time_s));

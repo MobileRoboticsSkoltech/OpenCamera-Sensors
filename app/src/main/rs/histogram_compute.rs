@@ -3,24 +3,40 @@
 #pragma rs_fp_relaxed
 
 int32_t *histogram;
+int32_t *histogram_r;
+int32_t *histogram_g;
+int32_t *histogram_b;
 
 void init_histogram() {
     for(int i=0;i<256;i++)
         histogram[i] = 0;
 }
 
-void __attribute__((kernel)) histogram_compute(uchar4 in, uint32_t x, uint32_t y) {
-    // We compute a histogram based on the max RGB value, so this matches with the scaling we do in histogram_adjust.rs.
-    // This improves the look of the grass in testHDR24, testHDR27.
+void init_histogram_rgb() {
+    for(int i=0;i<256;i++) {
+        histogram_r[i] = 0;
+        histogram_g[i] = 0;
+        histogram_b[i] = 0;
+    }
+}
+
+void __attribute__((kernel)) histogram_compute_by_luminance(uchar4 in, uint32_t x, uint32_t y) {
+    float3 in_f = convert_float3(in.rgb);
+    float avg = (0.299f*in_f.r + 0.587f*in_f.g + 0.114f*in_f.b);
+    uchar value = (int)(avg+0.5); // round to nearest
+    value = clamp(value, (uchar)0, (uchar)255); // just in case
+
+    rsAtomicInc(&histogram[value]);
+}
+
+void __attribute__((kernel)) histogram_compute_by_value(uchar4 in, uint32_t x, uint32_t y) {
     uchar value = max(in.r, in.g);
     value = max(value, in.b);
 
     rsAtomicInc(&histogram[value]);
 }
 
-void __attribute__((kernel)) histogram_compute_f(float3 in_f, uint32_t x, uint32_t y) {
-    // We compute a histogram based on the max RGB value, so this matches with the scaling we do in histogram_adjust.rs.
-    // This improves the look of the grass in testHDR24, testHDR27.
+void __attribute__((kernel)) histogram_compute_by_value_f(float3 in_f, uint32_t x, uint32_t y) {
     uchar3 in;
     in.r = (uchar)clamp(in_f.r+0.5f, 0.0f, 255.0f);
     in.g = (uchar)clamp(in_f.g+0.5f, 0.0f, 255.0f);
@@ -32,7 +48,7 @@ void __attribute__((kernel)) histogram_compute_f(float3 in_f, uint32_t x, uint32
     rsAtomicInc(&histogram[value]);
 }
 
-void __attribute__((kernel)) histogram_compute_avg(uchar4 in, uint32_t x, uint32_t y) {
+void __attribute__((kernel)) histogram_compute_by_intensity(uchar4 in, uint32_t x, uint32_t y) {
     float3 in_f = convert_float3(in.rgb);
     float avg = (in_f.r + in_f.g + in_f.b)/3.0;
     uchar value = (int)(avg+0.5); // round to nearest
@@ -41,10 +57,29 @@ void __attribute__((kernel)) histogram_compute_avg(uchar4 in, uint32_t x, uint32
     rsAtomicInc(&histogram[value]);
 }
 
-void __attribute__((kernel)) histogram_compute_avg_f(float3 in_f, uint32_t x, uint32_t y) {
+void __attribute__((kernel)) histogram_compute_by_intensity_f(float3 in_f, uint32_t x, uint32_t y) {
     float avg = (in_f.r + in_f.g + in_f.b)/3.0;
     uchar value = (int)(avg+0.5); // round to nearest
     value = min(value, (uchar)255); // just in case
 
     rsAtomicInc(&histogram[value]);
+}
+
+void __attribute__((kernel)) histogram_compute_by_lightness(uchar4 in, uint32_t x, uint32_t y) {
+    uchar max_value = max(in.r, in.g);
+    max_value = max(max_value, in.b);
+    uchar min_value = min(in.r, in.g);
+    min_value = min(min_value, in.b);
+
+    float avg = (min_value + max_value)/2.0;
+    uchar value = (int)(avg+0.5); // round to nearest
+    value = min(value, (uchar)255); // just in case
+
+    rsAtomicInc(&histogram[value]);
+}
+
+void __attribute__((kernel)) histogram_compute_rgb(uchar4 in, uint32_t x, uint32_t y) {
+    rsAtomicInc(&histogram_r[in.r]);
+    rsAtomicInc(&histogram_g[in.g]);
+    rsAtomicInc(&histogram_b[in.b]);
 }

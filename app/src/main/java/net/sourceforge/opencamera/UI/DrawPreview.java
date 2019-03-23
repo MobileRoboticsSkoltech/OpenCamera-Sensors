@@ -29,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -83,6 +84,8 @@ public class DrawPreview {
 	private String ghost_image_pref;
 	private String ghost_selected_image_pref = "";
 	private Bitmap ghost_selected_image_bitmap;
+	private boolean want_preview_bitmap;
+	private Preview.HistogramType histogram_type;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -148,6 +151,7 @@ public class DrawPreview {
 
 	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
+	private final Path path = new Path();
 
 	private Bitmap last_thumbnail; // thumbnail of last picture taken
 	private volatile boolean thumbnail_anim; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
@@ -517,6 +521,29 @@ public class DrawPreview {
 			ghost_selected_image_pref = "";
 		}
 
+		String histogram_pref = sharedPreferences.getString(PreferenceKeys.HistogramPreferenceKey, "preference_histogram_off");
+		want_preview_bitmap = !histogram_pref.equals("preference_histogram_off") && main_activity.supportsPreviewBitmaps();
+		histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_VALUE;
+		if( want_preview_bitmap ) {
+			switch( histogram_pref ) {
+				case "preference_histogram_rgb":
+					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_RGB;
+					break;
+				case "preference_histogram_luminance":
+					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_LUMINANCE;
+					break;
+				case "preference_histogram_value":
+					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_VALUE;
+					break;
+				case "preference_histogram_intensity":
+					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_INTENSITY;
+					break;
+				case "preference_histogram_lightness":
+					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_LIGHTNESS;
+					break;
+			}
+		}
+
 		has_settings = true;
 	}
 
@@ -874,6 +901,7 @@ public class DrawPreview {
 		int location_x = top_x;
 		int location_y = top_y;
 		final int gap_y = (int) (0 * scale + 0.5f); // convert dps to pixels
+		final int icon_gap_y = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( ui_rotation == 90 || ui_rotation == 270 ) {
 			int diff = canvas.getWidth() - canvas.getHeight();
 			location_x += diff/2;
@@ -1037,9 +1065,12 @@ public class DrawPreview {
 			}
 		}
 
+		// padding to align with earlier text
+		final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
+
 		if( camera_controller != null ) {
-			// padding to align with earlier text
-			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
+			// draw info icons
+
 			int location_x2 = location_x - flash_padding;
 			final int icon_size = (int) (16 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 180 ) {
@@ -1264,7 +1295,94 @@ public class DrawPreview {
 			else {
 				needs_flash_time = -1;
 			}
+
+			if( ui_rotation == 90 ) {
+				location_y -= icon_gap_y;
+			}
+			else {
+				location_y += (icon_size+icon_gap_y);
+			}
 		}
+
+		if( camera_controller != null ) {
+			// draw histogram
+			if( want_preview_bitmap != preview.isPreviewBitmapEnabled() ) {
+				if( want_preview_bitmap ) {
+					preview.enablePreviewBitmap(histogram_type);
+				}
+				else
+					preview.disablePreviewBitmap();
+			}
+			else if( want_preview_bitmap ) {
+				// ensure correct histogram type
+				preview.setHistogramType(histogram_type);
+			}
+
+			if( want_preview_bitmap ) {
+				int [] histogram = preview.getHistogram();
+				if( histogram != null ) {
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "histogram length: " + histogram.length);*/
+					final int histogram_width = (int) (100 * scale + 0.5f); // convert dps to pixels
+					final int histogram_height = (int) (60 * scale + 0.5f); // convert dps to pixels
+					int location_x2 = location_x - flash_padding;
+					if( ui_rotation == 180 ) {
+						location_x2 = location_x - histogram_width + flash_padding;
+					}
+					icon_dest.set(location_x2 - flash_padding, location_y, location_x2 - flash_padding + histogram_width, location_y + histogram_height);
+					if( ui_rotation == 90 ) {
+						icon_dest.top -= histogram_height;
+						icon_dest.bottom -= histogram_height;
+					}
+
+					p.setStyle(Paint.Style.FILL);
+					p.setColor(Color.argb(64, 0, 0, 0));
+					canvas.drawRect(icon_dest, p);
+
+					if( histogram.length == 256*3 ) {
+						int [] temp = new int[256];
+						int c=0;
+
+						for(int i=0;i<256;i++)
+							temp[i] = histogram[c++];
+						p.setColor(Color.argb(128, 255, 0, 0));
+						drawHistogramChannel(canvas, temp);
+
+						for(int i=0;i<256;i++)
+							temp[i] = histogram[c++];
+						p.setColor(Color.argb(128, 0, 255, 0));
+						drawHistogramChannel(canvas, temp);
+
+						for(int i=0;i<256;i++)
+							temp[i] = histogram[c++];
+						p.setColor(Color.argb(128, 0, 0, 255));
+						drawHistogramChannel(canvas, temp);
+					}
+					else {
+						p.setColor(Color.argb(192, 255, 255, 255));
+						drawHistogramChannel(canvas, histogram);
+					}
+				}
+			}
+		}
+	}
+
+	private void drawHistogramChannel(Canvas canvas, int [] histogram_channel) {
+		int max = 0;
+		for(int value : histogram_channel) {
+			max = Math.max(max, value);
+		}
+		path.reset();
+		path.moveTo(icon_dest.left, icon_dest.bottom);
+		for(int c=0;c<histogram_channel.length;c++) {
+			double c_alpha = c / (double)histogram_channel.length;
+			int x = (int)(c_alpha * icon_dest.width());
+			int h = (histogram_channel[c] * icon_dest.height()) / max;
+			path.lineTo(icon_dest.left + x, icon_dest.bottom - h);
+		}
+		path.lineTo(icon_dest.right, icon_dest.bottom);
+		path.close();
+		canvas.drawPath(path, p);
 	}
 
     /** Formats the level_angle double into a string.
