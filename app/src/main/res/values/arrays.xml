@@ -485,6 +485,7 @@
         <item>@string/preference_focus_bracketing_n_images_entries_40</item>
         <item>@string/preference_focus_bracketing_n_images_entries_50</item>
         <item>@string/preference_focus_bracketing_n_images_entries_100</item>
+        <item>@string/preference_focus_bracketing_n_images_entries_150</item>
         <item>@string/preference_focus_bracketing_n_images_entries_200</item>
     </string-array>
     <string-array name="preference_focus_bracketing_n_images_values">
@@ -503,6 +504,7 @@
         <item>40</item>
         <item>50</item>
         <item>100</item>
+        <item>150</item>
         <item>200</item>
     </string-array>
     <string-array name="flash_icons">
