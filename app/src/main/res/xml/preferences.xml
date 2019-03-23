@@ -527,6 +527,16 @@
                 android:defaultValue="preference_histogram_off"
                 />
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
+                android:key="preference_zebra_stripes"
+                android:title="@string/preference_zebra_stripes"
+                android:summary="@string/preference_zebra_stripes_summary"
+                android:entries="@array/preference_zebra_stripes_entries"
+                android:entryValues="@array/preference_zebra_stripes_values"
+                android:defaultValue="0"
+                />
+
             <CheckBoxPreference
                 android:key="preference_show_video_max_amp"
                 android:title="@string/preference_show_video_max_amp"

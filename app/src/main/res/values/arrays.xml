@@ -885,4 +885,18 @@
         <item>preference_histogram_intensity</item>
         <item>preference_histogram_lightness</item>
     </string-array>
+    <string-array name="preference_zebra_stripes_entries">
+        <item>@string/preference_zebra_stripes_off</item>
+        <item>@string/preference_zebra_stripes_70pc</item>
+        <item>@string/preference_zebra_stripes_80pc</item>
+        <item>@string/preference_zebra_stripes_90pc</item>
+        <item>@string/preference_zebra_stripes_100pc</item>
+    </string-array>
+    <string-array name="preference_zebra_stripes_values">
+        <item>0</item>
+        <item>179</item>
+        <item>204</item>
+        <item>230</item>
+        <item>255</item>
+    </string-array>
 </resources>

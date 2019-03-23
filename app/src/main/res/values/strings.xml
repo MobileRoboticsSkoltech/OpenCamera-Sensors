@@ -820,6 +820,14 @@
     <string name="preference_histogram_intensity">Intensity (Average)</string>
     <string name="preference_histogram_lightness">Lightness (Average of min-max)</string>
 
+    <string name="preference_zebra_stripes">Show zebra stripes</string>
+    <string name="preference_zebra_stripes_summary">If this option is enabled, zebra stripes will be drawn on-screen showing where the camera preview is over exposed.\n%s</string>
+    <string name="preference_zebra_stripes_off">Off</string>
+    <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_90pc">90%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_100pc">100%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+
     <string name="remaining">Remaining</string> <!-- images remaining for "processing" -->
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->

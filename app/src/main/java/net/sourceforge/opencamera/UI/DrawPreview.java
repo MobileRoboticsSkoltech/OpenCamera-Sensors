@@ -84,8 +84,10 @@ public class DrawPreview {
 	private String ghost_image_pref;
 	private String ghost_selected_image_pref = "";
 	private Bitmap ghost_selected_image_bitmap;
-	private boolean want_preview_bitmap;
+	private boolean want_histogram;
 	private Preview.HistogramType histogram_type;
+	private boolean want_zebra_stripes;
+	private int zebra_stripes_threshold;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -522,9 +524,9 @@ public class DrawPreview {
 		}
 
 		String histogram_pref = sharedPreferences.getString(PreferenceKeys.HistogramPreferenceKey, "preference_histogram_off");
-		want_preview_bitmap = !histogram_pref.equals("preference_histogram_off") && main_activity.supportsPreviewBitmaps();
+		want_histogram = !histogram_pref.equals("preference_histogram_off") && main_activity.supportsPreviewBitmaps();
 		histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_VALUE;
-		if( want_preview_bitmap ) {
+		if( want_histogram ) {
 			switch( histogram_pref ) {
 				case "preference_histogram_rgb":
 					histogram_type = Preview.HistogramType.HISTOGRAM_TYPE_RGB;
@@ -543,6 +545,18 @@ public class DrawPreview {
 					break;
 			}
 		}
+
+		String zebra_stripes_value = sharedPreferences.getString(PreferenceKeys.ZebraStripesPreferenceKey, "0");
+		try {
+			zebra_stripes_threshold = Integer.parseInt(zebra_stripes_value);
+		}
+		catch(NumberFormatException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "failed to parse zebra_stripes_value: " + zebra_stripes_value);
+			e.printStackTrace();
+			zebra_stripes_threshold = 0;
+		}
+		want_zebra_stripes = zebra_stripes_threshold != 0 & main_activity.supportsPreviewBitmaps();
 
 		has_settings = true;
 	}
@@ -1287,6 +1301,7 @@ public class DrawPreview {
 					canvas.drawRect(icon_dest, p);
 					p.setAlpha((int)(255*alpha));
 					canvas.drawBitmap(flash_bitmap, null, icon_dest, p);
+					p.setAlpha(255);
 				}
 				else {
 					needs_flash_time = time_ms;
@@ -1306,19 +1321,7 @@ public class DrawPreview {
 
 		if( camera_controller != null ) {
 			// draw histogram
-			if( want_preview_bitmap != preview.isPreviewBitmapEnabled() ) {
-				if( want_preview_bitmap ) {
-					preview.enablePreviewBitmap(histogram_type);
-				}
-				else
-					preview.disablePreviewBitmap();
-			}
-			else if( want_preview_bitmap ) {
-				// ensure correct histogram type
-				preview.setHistogramType(histogram_type);
-			}
-
-			if( want_preview_bitmap ) {
+			if( preview.isPreviewBitmapEnabled() ) {
 				int [] histogram = preview.getHistogram();
 				if( histogram != null ) {
 					/*if( MyDebug.LOG )
@@ -2145,6 +2148,27 @@ public class DrawPreview {
 
 		final long time_ms = System.currentTimeMillis();
 
+		// set up preview bitmaps (histogram etc)
+		boolean want_preview_bitmap = want_histogram || want_zebra_stripes;
+		if( want_preview_bitmap != preview.isPreviewBitmapEnabled() ) {
+			if( want_preview_bitmap ) {
+				preview.enablePreviewBitmap();
+			}
+			else
+				preview.disablePreviewBitmap();
+		}
+		if( want_preview_bitmap ) {
+			if( want_histogram )
+				preview.enableHistogram(histogram_type);
+			else
+				preview.disableHistogram();
+
+			if( want_zebra_stripes )
+				preview.enableZebraStripes(zebra_stripes_threshold);
+			else
+				preview.disableZebraStripes();
+		}
+
 		// see documentation for CameraController.shouldCoverPreview()
 		if( preview.usingCamera2API() && ( camera_controller == null || camera_controller.shouldCoverPreview() ) ) {
 			p.setColor(Color.BLACK);
@@ -2212,6 +2236,18 @@ public class DrawPreview {
 			p.setAlpha(127);
 			canvas.drawBitmap(ghost_selected_image_bitmap, last_image_matrix, p);
 			p.setAlpha(255);
+		}
+
+		if( preview.isPreviewBitmapEnabled() ) {
+			// draw additional real-time effects
+
+			// draw zebra stripes
+			Bitmap zebra_stripes_bitmap = preview.getZebraStripesBitmap();
+			if( zebra_stripes_bitmap != null ) {
+				setLastImageMatrix(canvas, zebra_stripes_bitmap, 0, false);
+				p.setAlpha(255);
+				canvas.drawBitmap(zebra_stripes_bitmap, last_image_matrix, p);
+			}
 		}
 
 		doThumbnailAnimation(canvas, time_ms);

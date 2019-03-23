@@ -583,8 +583,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "supports_preview_bitmaps: " + supports_preview_bitmaps);
 
 		if( !supports_preview_bitmaps ) {
-			Preference pref = findPreference("preference_histogram");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+
+			Preference pref = findPreference("preference_histogram");
+			pg.removePreference(pref);
+
+			pref = findPreference("preference_zebra_stripes");
 			pg.removePreference(pref);
 		}
 

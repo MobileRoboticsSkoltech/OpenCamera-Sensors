@@ -243,6 +243,8 @@ public class PreferenceKeys {
 
 	public static final String HistogramPreferenceKey = "preference_histogram";
 
+	public static final String ZebraStripesPreferenceKey = "preference_zebra_stripes";
+
 	public static final String ShowVideoMaxAmpPreferenceKey = "preference_show_video_max_amp";
 
 	public static final String ShowAnglePreferenceKey = "preference_show_angle";
