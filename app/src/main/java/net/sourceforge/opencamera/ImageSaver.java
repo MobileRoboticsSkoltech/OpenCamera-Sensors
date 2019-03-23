@@ -380,7 +380,7 @@ public class ImageSaver extends Thread {
 		return max_dng;
 	}
 
-	synchronized int getNImagesToSave() {
+	public synchronized int getNImagesToSave() {
 		return n_images_to_save;
 	}
 

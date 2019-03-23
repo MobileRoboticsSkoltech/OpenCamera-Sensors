@@ -820,6 +820,8 @@
     <string name="preference_histogram_intensity">Intensity (Average)</string>
     <string name="preference_histogram_lightness">Lightness (Average of min-max)</string>
 
+    <string name="remaining">Remaining</string> <!-- images remaining for "processing" -->
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under
