@@ -7545,7 +7545,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
 
 					// median filter
-					//Allocation filtered_allocation = Allocation.createFromBitmap(preview.rs, preview.focus_peaking_bitmap_buffer);
                     Allocation filtered_allocation = Allocation.createTyped(preview.rs, Type.createXY(preview.rs, Element.RGBA_8888(preview.rs), preview.focus_peaking_bitmap_buffer.getWidth(), preview.focus_peaking_bitmap_buffer.getHeight()));
 					histogramScript.set_bitmap(output_allocation);
                     histogramScript.forEach_generate_focus_peaking_filtered(output_allocation, filtered_allocation);
