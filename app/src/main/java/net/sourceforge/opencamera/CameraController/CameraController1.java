@@ -1001,19 +1001,17 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public List<int []> getSupportedPreviewFpsRange() {
-		Camera.Parameters parameters = this.getParameters();
 		try {
+			Camera.Parameters parameters = this.getParameters();
 			return parameters.getSupportedPreviewFpsRange();
 		}
-		catch(StringIndexOutOfBoundsException e) {
-			/* Have had reports of StringIndexOutOfBoundsException on Google Play on Sony Xperia M devices
+		catch(RuntimeException e) {
+			/* N.B, have had reports of StringIndexOutOfBoundsException on Google Play on Sony Xperia M devices
 				at android.hardware.Camera$Parameters.splitRange(Camera.java:4098)
 				at android.hardware.Camera$Parameters.getSupportedPreviewFpsRange(Camera.java:2799)
-				*/
+			  But that's a subclass of RuntimeException which we now catch anyway.
+			  */
 			e.printStackTrace();
-	    	if( MyDebug.LOG ) {
-	    		Log.e(TAG, "getSupportedPreviewFpsRange() gave StringIndexOutOfBoundsException");
-	    	}
 		}
 		return null;
 	}
@@ -1348,47 +1346,57 @@ public class CameraController1 extends CameraController {
 		for(CameraController.Area area : areas) {
 			camera_areas.add(new Camera.Area(area.rect, area.weight));
 		}
-        Camera.Parameters parameters = this.getParameters();
-		String focus_mode = parameters.getFocusMode();
-		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
-        if( parameters.getMaxNumFocusAreas() != 0 && focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
-		    parameters.setFocusAreas(camera_areas);
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			String focus_mode = parameters.getFocusMode();
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+			if( parameters.getMaxNumFocusAreas() != 0 && focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
+				parameters.setFocusAreas(camera_areas);
 
-		    // also set metering areas
-		    if( parameters.getMaxNumMeteringAreas() == 0 ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "metering areas not supported");
-		    }
-		    else {
-		    	parameters.setMeteringAreas(camera_areas);
-		    }
+				// also set metering areas
+				if( parameters.getMaxNumMeteringAreas() == 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "metering areas not supported");
+				}
+				else {
+					parameters.setMeteringAreas(camera_areas);
+				}
 
-		    setCameraParameters(parameters);
+				setCameraParameters(parameters);
 
-		    return true;
-        }
-        else if( parameters.getMaxNumMeteringAreas() != 0 ) {
-	    	parameters.setMeteringAreas(camera_areas);
+				return true;
+			}
+			else if( parameters.getMaxNumMeteringAreas() != 0 ) {
+				parameters.setMeteringAreas(camera_areas);
 
-		    setCameraParameters(parameters);
-        }
+				setCameraParameters(parameters);
+			}
+		}
+		catch(RuntimeException e) {
+			e.printStackTrace();
+		}
         return false;
 	}
 	
 	public void clearFocusAndMetering() {
-        Camera.Parameters parameters = this.getParameters();
-        boolean update_parameters = false;
-        if( parameters.getMaxNumFocusAreas() > 0 ) {
-        	parameters.setFocusAreas(null);
-        	update_parameters = true;
-        }
-        if( parameters.getMaxNumMeteringAreas() > 0 ) {
-        	parameters.setMeteringAreas(null);
-        	update_parameters = true;
-        }
-        if( update_parameters ) {
-		    setCameraParameters(parameters);
-        }
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			boolean update_parameters = false;
+			if( parameters.getMaxNumFocusAreas() > 0 ) {
+				parameters.setFocusAreas(null);
+				update_parameters = true;
+			}
+			if( parameters.getMaxNumMeteringAreas() > 0 ) {
+				parameters.setMeteringAreas(null);
+				update_parameters = true;
+			}
+			if( update_parameters ) {
+				setCameraParameters(parameters);
+			}
+		}
+		catch(RuntimeException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public List<CameraController.Area> getFocusAreas() {
@@ -1417,25 +1425,35 @@ public class CameraController1 extends CameraController {
 
 	@Override
 	public boolean supportsAutoFocus() {
-        Camera.Parameters parameters = this.getParameters();
-		String focus_mode = parameters.getFocusMode();
-		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
-		// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
-        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
-        	return true;
-        }
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			String focus_mode = parameters.getFocusMode();
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
+			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
+			if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
+				return true;
+			}
+		}
+		catch(RuntimeException e) {
+			e.printStackTrace();
+		}
         return false;
 	}
 	
 	@Override
 	public boolean focusIsContinuous() {
-        Camera.Parameters parameters = this.getParameters();
-		String focus_mode = parameters.getFocusMode();
-		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
-		// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
-        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
-        	return true;
-        }
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			String focus_mode = parameters.getFocusMode();
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
+			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
+			if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
+				return true;
+			}
+		}
+		catch(RuntimeException e) {
+			e.printStackTrace();
+		}
         return false;
 	}
 	
