@@ -94,6 +94,9 @@ import android.widget.ZoomControls;
  */
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
+
+	private static int activity_count = 0;
+
 	private SensorManager mSensorManager;
 	private Sensor mSensorAccelerometer;
 	private Sensor mSensorMagnetic;
@@ -211,6 +214,9 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onCreate: " + this);
 			debug_time = System.currentTimeMillis();
 		}
+		activity_count++;
+		if( MyDebug.LOG )
+			Log.d(TAG, "activity_count: " + activity_count);
 		super.onCreate(savedInstanceState);
 
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
@@ -801,6 +807,9 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onDestroy");
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
 		}
+		activity_count--;
+		if( MyDebug.LOG )
+			Log.d(TAG, "activity_count: " + activity_count);
 
 		// reduce risk of losing any images
 		// we don't do this in onPause or onStop, due to risk of ANRs
@@ -813,6 +822,16 @@ public class MainActivity extends Activity {
 		preview.onDestroy();
 		if( applicationInterface != null ) {
 			applicationInterface.onDestroy();
+		}
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity_count == 0 ) {
+			// See note in HDRProcessor.onDestroy() - but from Android M, renderscript contexts are released with releaseAllContexts()
+			// doc for releaseAllContexts() says "If no contexts have been created this function does nothing"
+			// Important to only do so if no other activities are running (see activity_count). Otherwise risk
+			// of crashes if one activity is destroyed when another instance is still using Renderscript. I've
+			// been unable to reproduce this, though such RSInvalidStateException crashes from Google Play.
+			if( MyDebug.LOG )
+				Log.d(TAG, "release renderscript contexts");
+			RenderScript.releaseAllContexts();
 		}
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
 			// see note in HDRProcessor.onDestroy() - but from Android M, renderscript contexts are released with releaseAllContexts()
