@@ -187,6 +187,7 @@ public class CameraController2 extends CameraController {
 	/*private boolean capture_result_has_focus_distance;
 	private float capture_result_focus_distance_min;
 	private float capture_result_focus_distance_max;*/
+	private long max_preview_exposure_time_c = 1000000000L/12;
 	
 	private enum RequestTagType {
 		CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture
@@ -565,7 +566,7 @@ public class CameraController2 extends CameraController {
 				long actual_exposure_time = exposure_time;
 				if( !is_still ) {
 					// if this isn't for still capture, have a max exposure time of 1/12s
-					actual_exposure_time = Math.min(exposure_time, 1000000000L/12);
+					actual_exposure_time = Math.min(exposure_time, max_preview_exposure_time_c);
 					if( MyDebug.LOG )
 						Log.d(TAG, "actually using exposure_time of: " + actual_exposure_time);
 				}
@@ -6747,6 +6748,15 @@ public class CameraController2 extends CameraController {
 			else if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
 				capture_result_has_exposure_time = true;
 				capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+
+				// If using manual exposure time longer than max_preview_exposure_time_c, the preview will be fixed to
+				// max_preview_exposure_time_c, so we should just use the requested manual exposure time.
+				// (This affects the exposure time shown on on-screen preview - whilst showing the preview exposure time
+				// isn't necessarily wrong, it tended to confuse people, thinking that manual exposure time wasn't working
+				// when set above max_preview_exposure_time_c.)
+				if( camera_settings.has_iso && camera_settings.exposure_time > max_preview_exposure_time_c )
+					capture_result_exposure_time = camera_settings.exposure_time;
+
 				if( capture_result_exposure_time <= 0 ) {
 					// wierd bug seen on Nokia 8
 					capture_result_has_exposure_time = false;
