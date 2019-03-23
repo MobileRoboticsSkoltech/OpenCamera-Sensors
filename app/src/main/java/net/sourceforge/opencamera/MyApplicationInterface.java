@@ -35,6 +35,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -45,6 +46,7 @@ import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -2009,6 +2011,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			if (MyDebug.LOG)
 				Log.d(TAG, "set next panorama point");
 			this.setNextPanoramaPoint();
+		}
+		else if( photo_mode == PhotoMode.FocusBracketing ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "focus bracketing completed");
+			if( getShutterSoundPref() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "play completion sound");
+				MediaPlayer player = MediaPlayer.create(getContext(), Settings.System.DEFAULT_NOTIFICATION_URI);
+				if( player != null ) {
+					player.start();
+				}
+			}
 		}
 
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
