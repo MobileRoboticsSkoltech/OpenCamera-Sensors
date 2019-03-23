@@ -126,9 +126,6 @@ uchar4 __attribute__((kernel)) generate_focus_peaking(uchar4 in, uint32_t x, uin
     int width = rsAllocationGetDimX(bitmap);
     int height = rsAllocationGetDimY(bitmap);
 
-    uchar Ix = 0;
-    uchar Iy = 0;
-
     int strength = 0;
     if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
         uchar4 pixel0c = rsGetElementAt_uchar4(bitmap, x-1, y-1);
@@ -189,5 +186,48 @@ uchar4 __attribute__((kernel)) generate_focus_peaking(uchar4 in, uint32_t x, uin
         out.a = 0;
         //out = in;
     }
+    return out;
+}
+
+uchar4 __attribute__((kernel)) generate_focus_peaking_filtered(uchar4 in, uint32_t x, uint32_t y) {
+    int width = rsAllocationGetDimX(bitmap);
+    int height = rsAllocationGetDimY(bitmap);
+
+    uchar4 out = in;
+
+    if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
+        // only need to read one component, as input image is now greyscale
+        int pixel1 = rsGetElementAt_uchar4(bitmap, x, y-1).r;
+        int pixel3 = rsGetElementAt_uchar4(bitmap, x-1, y).r;
+        int pixel4 = in.r;
+        int pixel5 = rsGetElementAt_uchar4(bitmap, x+1, y).r;
+        int pixel7 = rsGetElementAt_uchar4(bitmap, x, y+1).r;
+
+        int count = 0;
+        if( pixel1 == 255 )
+            count++;
+        if( pixel3 == 255 )
+            count++;
+        if( pixel4 == 255 )
+            count++;
+        if( pixel5 == 255 )
+            count++;
+        if( pixel7 == 255 )
+            count++;
+
+        if( count >= 3 ) {
+            out.r = 255;
+            out.g = 255;
+            out.b = 255;
+            out.a = 255;
+        }
+        else {
+            out.r = 0;
+            out.g = 0;
+            out.b = 0;
+            out.a = 0;
+        }
+    }
+
     return out;
 }

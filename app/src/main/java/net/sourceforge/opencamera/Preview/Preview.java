@@ -73,6 +73,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
+import android.renderscript.Type;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
@@ -7542,6 +7543,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					histogramScript.forEach_generate_focus_peaking(allocation_in, output_allocation);
 					if( MyDebug.LOG )
 						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+					// median filter
+					//Allocation filtered_allocation = Allocation.createFromBitmap(preview.rs, preview.focus_peaking_bitmap_buffer);
+                    Allocation filtered_allocation = Allocation.createTyped(preview.rs, Type.createXY(preview.rs, Element.RGBA_8888(preview.rs), preview.focus_peaking_bitmap_buffer.getWidth(), preview.focus_peaking_bitmap_buffer.getHeight()));
+					histogramScript.set_bitmap(output_allocation);
+                    histogramScript.forEach_generate_focus_peaking_filtered(output_allocation, filtered_allocation);
+                    output_allocation.destroy();
+                    output_allocation = filtered_allocation;
 
 					output_allocation.copyTo(preview.focus_peaking_bitmap_buffer);
 					output_allocation.destroy();
