@@ -899,4 +899,12 @@
         <item>230</item>
         <item>255</item>
     </string-array>
+    <string-array name="preference_focus_peaking_entries">
+        <item>@string/preference_focus_peaking_off</item>
+        <item>@string/preference_focus_peaking_on</item>
+    </string-array>
+    <string-array name="preference_focus_peaking_values">
+        <item>preference_focus_peaking_off</item>
+        <item>preference_focus_peaking_on</item>
+    </string-array>
 </resources>

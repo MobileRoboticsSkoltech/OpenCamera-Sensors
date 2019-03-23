@@ -590,6 +590,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 			pref = findPreference("preference_zebra_stripes");
 			pg.removePreference(pref);
+
+			pref = findPreference("preference_focus_peaking");
+			pg.removePreference(pref);
 		}
 
 		final boolean supports_photo_video_recording = bundle.getBoolean("supports_photo_video_recording");

@@ -136,6 +136,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private Bitmap zebra_stripes_bitmap_buffer;
 	private Bitmap zebra_stripes_bitmap;
 
+	private boolean want_focus_peaking; // whether to generate focus peaking bitmap, requires want_preview_bitmap==true
+	private Bitmap focus_peaking_bitmap_buffer;
+	private Bitmap focus_peaking_bitmap;
+
 	private final Matrix camera_to_preview_matrix = new Matrix();
     private final Matrix preview_to_camera_matrix = new Matrix();
     private double preview_targetRatio;
@@ -7223,6 +7227,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			preview_bitmap = null;
 		}
 		freeZebraStripesBitmap();
+		freeFocusPeakingBitmap();
 	}
 
 	private void recreatePreviewBitmap() {
@@ -7247,6 +7252,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			preview_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
 			createZebraStripesBitmap();
+			createFocusPeakingBitmap();
 		}
 	}
 
@@ -7269,6 +7275,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( want_zebra_stripes ) {
 			zebra_stripes_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
 			// zebra_stripes_bitmap itself is created dynamically when generating the zebra stripes
+		}
+	}
+
+	private void freeFocusPeakingBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "freeFocusPeakingBitmap");
+		if( focus_peaking_bitmap_buffer != null ) {
+			focus_peaking_bitmap_buffer.recycle();
+			focus_peaking_bitmap_buffer = null;
+		}
+		if( focus_peaking_bitmap != null ) {
+			focus_peaking_bitmap.recycle();
+			focus_peaking_bitmap = null;
+		}
+	}
+
+	private void createFocusPeakingBitmap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createFocusPeakingBitmap");
+		if( want_focus_peaking ) {
+			focus_peaking_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+			// focus_peaking_bitmap itself is created dynamically when generating
 		}
 	}
 
@@ -7304,9 +7332,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.zebra_stripes_bitmap;
 	}
 
+	public void enableFocusPeaking() {
+		this.want_focus_peaking = true;
+		if( this.focus_peaking_bitmap_buffer == null ) {
+			createFocusPeakingBitmap();;
+		}
+	}
+
+	public void disableFocusPeaking() {
+		if( this.want_focus_peaking ) {
+			this.want_focus_peaking = false;
+			freeFocusPeakingBitmap();
+		}
+	}
+
+	public Bitmap getFocusPeakingBitmap() {
+		return this.focus_peaking_bitmap;
+	}
+
 	private static class RefreshPreviewBitmapTaskResult {
 		int [] new_histogram;
 		Bitmap new_zebra_stripes_bitmap;
+		Bitmap new_focus_peaking_bitmap;
 	}
 
 	// use static class, and WeakReferences, to avoid memory leaks: https://stackoverflow.com/questions/44309241/warning-this-asynctask-class-should-be-static-or-leaks-might-occur/46166223
@@ -7483,6 +7530,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					*/
 				}
 
+				if( preview.want_focus_peaking ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "generate focus peaking bitmap");
+					Allocation output_allocation = Allocation.createFromBitmap(preview.rs, preview.focus_peaking_bitmap_buffer);
+
+					histogramScript.set_bitmap(allocation_in);
+
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+					histogramScript.forEach_generate_focus_peaking(allocation_in, output_allocation);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+					output_allocation.copyTo(preview.focus_peaking_bitmap_buffer);
+					output_allocation.destroy();
+
+					// See comments above for zebra stripes
+					int rotation_degrees = preview.getDisplayRotationDegrees();
+					Matrix matrix = new Matrix();
+					matrix.postRotate(-rotation_degrees);
+					result.new_focus_peaking_bitmap = Bitmap.createBitmap(preview.focus_peaking_bitmap_buffer, 0, 0,
+							preview.focus_peaking_bitmap_buffer.getWidth(), preview.focus_peaking_bitmap_buffer.getHeight(), matrix, false);
+				}
+
 				allocation_in.destroy();
 			}
 			catch(IllegalStateException e) {
@@ -7518,10 +7589,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				for(int i=0;i<preview.histogram.length;i++)
 					Log.d(TAG, "    histogram[" + i + "]: " + preview.histogram[i]);
 			}*/
+
 			if( preview.zebra_stripes_bitmap != null ) {
 				preview.zebra_stripes_bitmap.recycle();
 			}
 			preview.zebra_stripes_bitmap = result.new_zebra_stripes_bitmap;
+
+			if( preview.focus_peaking_bitmap != null ) {
+				preview.focus_peaking_bitmap.recycle();
+			}
+			preview.focus_peaking_bitmap = result.new_focus_peaking_bitmap;
+
 			preview.refreshPreviewBitmapTask = null;
 
 			if( MyDebug.LOG )
@@ -7536,7 +7614,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void refreshPreviewBitmap() {
-		final long refresh_time = want_zebra_stripes ? 100 : 200;
+		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 100 : 200;
 		if( want_preview_bitmap && preview_bitmap != null && refreshPreviewBitmapTask == null &&
 			System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
 			if( MyDebug.LOG )

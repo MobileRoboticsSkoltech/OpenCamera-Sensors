@@ -88,6 +88,7 @@ public class DrawPreview {
 	private Preview.HistogramType histogram_type;
 	private boolean want_zebra_stripes;
 	private int zebra_stripes_threshold;
+	private boolean want_focus_peaking;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -557,6 +558,9 @@ public class DrawPreview {
 			zebra_stripes_threshold = 0;
 		}
 		want_zebra_stripes = zebra_stripes_threshold != 0 & main_activity.supportsPreviewBitmaps();
+
+		String focus_peaking_pref = sharedPreferences.getString(PreferenceKeys.FocusPeakingPreferenceKey, "preference_focus_peaking_off");
+		want_focus_peaking = !focus_peaking_pref.equals("preference_focus_peaking_off") && main_activity.supportsPreviewBitmaps();
 
 		has_settings = true;
 	}
@@ -2149,7 +2153,7 @@ public class DrawPreview {
 		final long time_ms = System.currentTimeMillis();
 
 		// set up preview bitmaps (histogram etc)
-		boolean want_preview_bitmap = want_histogram || want_zebra_stripes;
+		boolean want_preview_bitmap = want_histogram || want_zebra_stripes || want_focus_peaking;
 		if( want_preview_bitmap != preview.isPreviewBitmapEnabled() ) {
 			if( want_preview_bitmap ) {
 				preview.enablePreviewBitmap();
@@ -2167,6 +2171,11 @@ public class DrawPreview {
 				preview.enableZebraStripes(zebra_stripes_threshold);
 			else
 				preview.disableZebraStripes();
+
+			if( want_focus_peaking )
+				preview.enableFocusPeaking();
+			else
+				preview.disableFocusPeaking();
 		}
 
 		// see documentation for CameraController.shouldCoverPreview()
@@ -2247,6 +2256,14 @@ public class DrawPreview {
 				setLastImageMatrix(canvas, zebra_stripes_bitmap, 0, false);
 				p.setAlpha(255);
 				canvas.drawBitmap(zebra_stripes_bitmap, last_image_matrix, p);
+			}
+
+			// draw focus peaking
+			Bitmap focus_peaking_bitmap = preview.getFocusPeakingBitmap();
+			if( focus_peaking_bitmap != null ) {
+				setLastImageMatrix(canvas, focus_peaking_bitmap, 0, false);
+				p.setAlpha(255);
+				canvas.drawBitmap(focus_peaking_bitmap, last_image_matrix, p);
 			}
 		}
 

@@ -119,3 +119,75 @@ uchar4 __attribute__((kernel)) generate_zebra_stripes(uchar4 in, uint32_t x, uin
 
     return out;
 }
+
+rs_allocation bitmap; // input bitmap
+
+uchar4 __attribute__((kernel)) generate_focus_peaking(uchar4 in, uint32_t x, uint32_t y) {
+    int width = rsAllocationGetDimX(bitmap);
+    int height = rsAllocationGetDimY(bitmap);
+
+    uchar Ix = 0;
+    uchar Iy = 0;
+
+    int strength = 0;
+    if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
+        uchar4 pixel0c = rsGetElementAt_uchar4(bitmap, x-1, y-1);
+        int pixel0 = max(pixel0c.r, pixel0c.g);
+        pixel0 = max(pixel0, (int)pixel0c.b);
+        uchar4 pixel1c = rsGetElementAt_uchar4(bitmap, x, y-1);
+        int pixel1 = max(pixel1c.r, pixel1c.g);
+        pixel1 = max(pixel1, (int)pixel1c.b);
+        uchar4 pixel2c = rsGetElementAt_uchar4(bitmap, x+1, y-1);
+        int pixel2 = max(pixel2c.r, pixel2c.g);
+        pixel2 = max(pixel2, (int)pixel2c.b);
+        uchar4 pixel3c = rsGetElementAt_uchar4(bitmap, x-1, y);
+        int pixel3 = max(pixel3c.r, pixel3c.g);
+        pixel3 = max(pixel3, (int)pixel3c.b);
+        uchar4 pixel4c = in;
+        int pixel4 = max(pixel4c.r, pixel4c.g);
+        pixel4 = max(pixel4, (int)pixel4c.b);
+        uchar4 pixel5c = rsGetElementAt_uchar4(bitmap, x+1, y);
+        int pixel5 = max(pixel5c.r, pixel5c.g);
+        pixel5 = max(pixel5, (int)pixel5c.b);
+        uchar4 pixel6c = rsGetElementAt_uchar4(bitmap, x-1, y+1);
+        int pixel6 = max(pixel6c.r, pixel6c.g);
+        pixel6 = max(pixel6, (int)pixel6c.b);
+        uchar4 pixel7c = rsGetElementAt_uchar4(bitmap, x, y+1);
+        int pixel7 = max(pixel7c.r, pixel7c.g);
+        pixel7 = max(pixel7, (int)pixel7c.b);
+        uchar4 pixel8c = rsGetElementAt_uchar4(bitmap, x+1, y+1);
+        int pixel8 = max(pixel8c.r, pixel8c.g);
+        pixel8 = max(pixel8, (int)pixel8c.b);
+
+        /*int iIx = (pixel2 + 2*pixel5 + pixel8) - (pixel0 + 2*pixel3 + pixel6);
+        int iIy = (pixel6 + 2*pixel7 + pixel8) - (pixel0 + 2*pixel1 + pixel2);
+        iIx /= 8;
+        iIy /= 8;
+        //int iIx = (pixel5 - pixel3)/2;
+        //int iIy = (pixel7 - pixel1)/2;
+
+        strength = iIx*iIx + iIy*iIy;
+        //strength = iIx*iIx;
+        */
+        int value = ( 8*pixel4 - pixel0 - pixel1 - pixel2 - pixel3 - pixel5 - pixel6 - pixel7 - pixel8 );
+        value /= 4;
+        strength = value*value;
+    }
+
+    uchar4 out;
+    //if( strength > 128*128 ) {
+    if( strength > 64*64 ) {
+        out.r = 255;
+        out.g = 255;
+        out.b = 255;
+        out.a = 255;
+    }
+    else {
+        out.r = 0;
+        out.g = 0;
+        out.b = 0;
+        out.a = 0;
+        //out = in;
+    }
+    return out;
+}
