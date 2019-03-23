@@ -1638,6 +1638,10 @@ public class DrawPreview {
 					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
 					int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
+					if( ui_rotation == 0 && applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+						// avoid clashing with the target focus bracketing seekbar in landscape orientation
+						pixels_offset_y = 5*text_y;
+					}
 					String text = getContext().getResources().getString(R.string.capturing) + " " + n_burst_taken;
 					if( n_burst_total > 0 ) {
 						text += " / " + n_burst_total;
