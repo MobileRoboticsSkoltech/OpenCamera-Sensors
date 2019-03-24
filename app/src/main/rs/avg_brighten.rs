@@ -14,12 +14,40 @@ void setBlackLevel(float value) {
     white_level = 255.0f / (255.0f - black_level);
 }
 
-float gain;
-float gain_A, gain_B; // see comments below
-float gamma;
-float low_x;
-float mid_x;
-float max_x;
+static float gain;
+static float gain_A, gain_B; // see comments below
+static float gamma;
+static float low_x;
+static float mid_x;
+static float max_x;
+
+void setBrightenParameters(float _gain, float _gamma, float _low_x, float _mid_x, float _max_x) {
+    /* We want A and B s.t.:
+        float alpha = (value-low_x)/(mid_x-low_x);
+        float new_value = (1.0-alpha)*low_x + alpha*gain*mid_x;
+        We should be able to write this as new_value = A * value + B
+        alpha = value/(mid_x-low_x) - low_x/(mid_x-low_x)
+        new_value = low_x - value*low_x/(mid_x-low_x) + low_x^2/(mid_x-low_x) +
+            value*gain*mid_x/(mid_x-low_x) - gain*mid_x*low_x/(mid_x-low_x)
+        So A = (gain*mid_x - low_x)/(mid_x-low_x)
+        B = low_x + low_x^2/(mid_x-low_x) - gain*mid_x*low_x/(mid_x-low_x)
+        = (low_x*mid_x - low_x^2 + low_x^2 - gain*mid_x*low_x)/(mid_x-low_x)
+        = (low_x*mid_x - gain*mid_x*low_x)/(mid_x-low_x)
+        = low_x*mid_x*(1-gain)/(mid_x-low_x)
+     */
+    gain = _gain;
+    gamma = _gamma;
+    low_x = _low_x;
+    mid_x = _mid_x;
+    max_x = _max_x;
+
+	gain_A = 1.0f;
+	gain_B = 0.0f;
+    if( mid_x > low_x ) {
+        gain_A = (gain * mid_x - low_x) / (mid_x - low_x);
+        gain_B = low_x*mid_x*(1.0f-gain)/ (mid_x - low_x);
+    }
+}
 
 //float tonemap_scale;
 //float linear_scale;
