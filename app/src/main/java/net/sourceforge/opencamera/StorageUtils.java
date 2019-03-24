@@ -496,6 +496,10 @@ public class StorageUtils {
 		catch(IllegalArgumentException e) {
 			e.printStackTrace();
 		}
+		catch(SecurityException e) {
+			// have received crashes from Google Play for this
+			e.printStackTrace();
+		}
 		finally {
 			if (cursor != null)
 				cursor.close();
