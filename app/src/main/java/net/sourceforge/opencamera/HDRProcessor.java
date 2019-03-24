@@ -66,7 +66,11 @@ public class HDRProcessor {
 		TONEMAPALGORITHM_FILMIC,
 		TONEMAPALGORITHM_ACES
 	}
-	
+	public enum DROTonemappingAlgorithm {
+		DROALGORITHM_NONE,
+		DROALGORITHM_GAINGAMMA
+	}
+
 	public HDRProcessor(Context context) {
 		this.context = context;
 	}
@@ -335,9 +339,11 @@ public class HDRProcessor {
 	 *                      resultant image.
 	 * @param tonemapping_algorithm
 	 *                      Algorithm to use for tonemapping (if multiple images are received).
+	 * @param dro_tonemapping_algorithm
+	 *                      Algorithm to use for tonemapping (if single image is received).
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, TonemappingAlgorithm tonemapping_algorithm, DROTonemappingAlgorithm dro_tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		if( !assume_sorted && !release_bitmaps ) {
@@ -376,7 +382,7 @@ public class HDRProcessor {
 				sort_order.add(0);
 				sort_cb.sortOrder(sort_order);
 			}
-			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha, n_tiles, ce_preserve_blacks);
+			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha, n_tiles, ce_preserve_blacks, dro_tonemapping_algorithm);
 			break;
 		case HDRALGORITHM_STANDARD:
 			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, n_tiles, ce_preserve_blacks, tonemapping_algorithm);
@@ -934,7 +940,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks) {
+	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, DROTonemappingAlgorithm dro_tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processSingleImage");
 
@@ -960,41 +966,61 @@ public class HDRProcessor {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
 
-		/*{
+		if( dro_tonemapping_algorithm == DROTonemappingAlgorithm.DROALGORITHM_GAINGAMMA ) {
 			// brighten?
 			int [] histo = computeHistogram(allocation, false, false);
 			HistogramInfo histogramInfo = getHistogramInfo(histo);
-			int median_brightness = histogramInfo.median_brightness;
+			int brightness = histogramInfo.median_brightness;
 			int max_brightness = histogramInfo.max_brightness;
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-			int median_target = getBrightnessTarget(median_brightness, 2, 119);
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "median brightness: " + median_brightness);
-				Log.d(TAG, "median target: " + median_target);
+				Log.d(TAG, "median brightness: " + brightness);
 				Log.d(TAG, "max brightness: " + max_brightness);
 			}
+			BrightenFactors brighten_factors = computeBrightenFactors(false, 0, 0, brightness, max_brightness);
+			float gain = brighten_factors.gain;
+			float gamma = brighten_factors.gamma;
+			float low_x = brighten_factors.low_x;
+			float mid_x = brighten_factors.mid_x;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "gain: " + gain);
+				Log.d(TAG, "gamma: " + gamma);
+				Log.d(TAG, "low_x: " + low_x);
+				Log.d(TAG, "mid_x: " + mid_x);
+			}
 
-			if( median_target > median_brightness && max_brightness < 255 ) {
-				float gain = median_target / (float)median_brightness;
+			if( Math.abs(gain - 1.0) > 1.0e-5 || max_brightness != 255 || Math.abs(gamma - 1.0) > 1.0e-5 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "gain " + gain);
-				float max_possible_value = gain*max_brightness;
-				if( MyDebug.LOG )
-					Log.d(TAG, "max_possible_value: " + max_possible_value);
-				if( max_possible_value > 255.0f ) {
-					gain = 255.0f / max_brightness;
-					if( MyDebug.LOG )
-						Log.d(TAG, "limit gain to: " + gain);
-				}
+					Log.d(TAG, "apply gain/gamma");
+				//if( true )
+				//	throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES); // test
+
 				ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+				script.set_gamma(gamma);
 				script.set_gain(gain);
-				script.forEach_avg_brighten_gain(allocation, output_allocation);
+				script.set_low_x(low_x);
+				script.set_mid_x(mid_x);
+				script.set_max_x(max_brightness);
+
+				float gain_A = 1.0f, gain_B = 0.0f;
+				if( mid_x > low_x ) {
+					gain_A = (gain * mid_x - low_x) / (mid_x - low_x);
+					gain_B = low_x*mid_x*(1.0f-gain)/ (mid_x - low_x);
+				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "gain_A: " + gain_A);
+					Log.d(TAG, "gain_B: " + gain_B);
+				}
+				script.set_gain_A(gain_A);
+				script.set_gain_B(gain_B);
+
+				script.forEach_dro_brighten(allocation, output_allocation);
 				allocation = output_allocation; // output is now the input for subsequent operations
 				if( MyDebug.LOG )
-					Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
+					Log.d(TAG, "### time after dro_brighten: " + (System.currentTimeMillis() - time_s));
 			}
-		}*/
+		}
 
 		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, n_tiles, ce_preserve_blacks, time_s);
 
@@ -3395,7 +3421,7 @@ public class HDRProcessor {
 
 	/** Computes various factors used in the avg_brighten.rs script.
 	 */
-	public static BrightenFactors computeBrightenFactors(int iso, long exposure_time, int brightness, int max_brightness) {
+	public static BrightenFactors computeBrightenFactors(boolean has_iso_exposure, int iso, long exposure_time, int brightness, int max_brightness) {
 		// for outdoor/bright images, don't want max_gain_factor 4, otherwise we lose variation in grass colour in testAvg42
 		// and having max_gain_factor at 1.5 prevents testAvg43, testAvg44 being too bright and oversaturated
 		// for other images, we also don't want max_gain_factor 4, as makes cases too bright and overblown if it would
@@ -3403,8 +3429,7 @@ public class HDRProcessor {
 		// testAvg39
 		float max_gain_factor = 1.5f;
 		int ideal_brightness = 119;
-		//if( iso <= 150 ) {
-		if( iso < 1100 && exposure_time < 1000000000L/59 ) {
+		if( has_iso_exposure && iso < 1100 && exposure_time < 1000000000L/59 ) {
 			// this helps: testAvg12, testAvg21, testAvg35
 			// but note we don't want to treat the following as "bright": testAvg17, testAvg23, testAvg36, testAvg37, testAvg50
 			ideal_brightness = 199;
@@ -3454,7 +3479,7 @@ public class HDRProcessor {
 				Log.d(TAG, "clamped gamma to : " + gamma);
 			}
 		}
-		else if( iso > 150 && gamma < min_gamma_non_bright_c ) {
+		else if( has_iso_exposure && iso > 150 && gamma < min_gamma_non_bright_c ) {
 			// too small gamma on non-bright reduces contrast too much (e.g., see testAvg9)
 			// however we can't clamp too much, see testAvg28, testAvg32
 			gamma = min_gamma_non_bright_c;
@@ -3469,8 +3494,8 @@ public class HDRProcessor {
 				Log.d(TAG, "use piecewise gain/gamma");
 			// use piecewise function with gain and gamma
 			// changed from 0.5 to 0.6 to help grass colour variation in testAvg42; also helps testAvg6; using 0.8 helps testAvg46 and testAvg50 further
-			//float mid_y = iso <= 150 ? 0.6f*255.0f : 0.8f*255.0f;
-			float mid_y = ( iso < 1100 && exposure_time < 1000000000L/59 ) ? 0.6f*255.0f : 0.8f*255.0f;
+			//float mid_y = ( has_iso_exposure && iso <= 150 ) ? 0.6f*255.0f : 0.8f*255.0f;
+			float mid_y = ( has_iso_exposure && iso < 1100 && exposure_time < 1000000000L/59 ) ? 0.6f*255.0f : 0.8f*255.0f;
 			mid_x = mid_y / gain;
 			gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
 		}
@@ -3488,7 +3513,7 @@ public class HDRProcessor {
 			}
 		}
 		float low_x = 0.0f;
-		if( iso >= 400 ) {
+		if( has_iso_exposure && iso >= 400 ) {
 			// this helps: testAvg10, testAvg28, testAvg31, testAvg33
 			//low_x = Math.min(8.0f, 0.125f*mid_x);
 			// don't use mid_x directly, otherwise we get unstable behaviour depending on whether we
@@ -3540,7 +3565,7 @@ public class HDRProcessor {
 			Log.d(TAG, "max brightness: " + max_brightness);
 		}
 
-		BrightenFactors brighten_factors = computeBrightenFactors(iso, exposure_time, brightness, max_brightness);
+		BrightenFactors brighten_factors = computeBrightenFactors(true, iso, exposure_time, brightness, max_brightness);
 		float gain = brighten_factors.gain;
 		float low_x = brighten_factors.low_x;
 		float mid_x = brighten_factors.mid_x;

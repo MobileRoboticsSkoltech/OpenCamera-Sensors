@@ -9794,7 +9794,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     		float hdr_alpha = ImageSaver.getHDRAlpha(preference_hdr_contrast_enhancement, exposure_time, inputs.size());
             long time_s = System.currentTimeMillis();
             try {
-                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, hdr_alpha, 4, true, tonemapping_algorithm);
+                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, hdr_alpha, 4, true, tonemapping_algorithm, HDRProcessor.DROTonemappingAlgorithm.DROALGORITHM_GAINGAMMA);
             }
             catch(HDRProcessorException e) {
                 e.printStackTrace();
@@ -9816,7 +9816,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             inputs.add(dro_bitmap_in);
             long time_s = System.currentTimeMillis();
             try {
-                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+                mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD, HDRProcessor.DROTonemappingAlgorithm.DROALGORITHM_GAINGAMMA);
             }
             catch(HDRProcessorException e) {
                 e.printStackTrace();
@@ -10317,7 +10317,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         //checkHistogramDetails(hdrHistogramDetails, 1, 113, 254);
         //checkHistogramDetails(hdrHistogramDetails, 1, 119, 255);
-        checkHistogramDetails(hdrHistogramDetails, 5, 120, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 5, 120, 255);
+        checkHistogramDetails(hdrHistogramDetails, 2, 120, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR19".
@@ -11477,7 +11478,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add( getBitmapFromFile(hdr_images_path + "testHDR51/IMG_20180323_104702_1.jpg") );
         inputs.add( getBitmapFromFile(hdr_images_path + "testHDR51/IMG_20180323_104702_2.jpg") );
 
-        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR51_output.jpg", false, 1600, 1000000000L/11);
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR51_output.jpg", true, 1600, 1000000000L/11);
 
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
     }
@@ -11652,7 +11653,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestHDR(inputs, "testDRODark1_output.jpg", true, -1, -1);
     }
 
-    /** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
+    /** Tests calling the DRO routine with 0.0 factor, and DROALGORITHM_NONE - and that the resultant image is identical.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void testDROZero() throws IOException, InterruptedException {
@@ -11673,7 +11674,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         List<Bitmap> inputs = new ArrayList<>();
         inputs.add(bitmap);
         try {
-            mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+            mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, 4, true, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD, HDRProcessor.DROTonemappingAlgorithm.DROALGORITHM_NONE);
         }
         catch(HDRProcessorException e) {
             e.printStackTrace();
