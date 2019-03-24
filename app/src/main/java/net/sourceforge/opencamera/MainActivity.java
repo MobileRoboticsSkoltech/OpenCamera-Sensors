@@ -4030,7 +4030,9 @@ public class MainActivity extends Activity {
 	}
 
 	public boolean supportsPreviewBitmaps() {
-		return preview.getView() instanceof TextureView && large_heap_memory >= 128;
+		// In practice we only use TextureView on Android 5+ (with Camera2 API enabled) anyway, but have put an explicit check here -
+		// even if in future we allow TextureView pre-Android 5, we still need Android 5+ for Renderscript.
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.getView() instanceof TextureView && large_heap_memory >= 128;
 	}
     
     private int maxExpoBracketingNImages() {

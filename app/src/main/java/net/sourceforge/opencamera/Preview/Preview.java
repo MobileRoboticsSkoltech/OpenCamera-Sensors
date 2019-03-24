@@ -74,6 +74,7 @@ import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
 import android.renderscript.Type;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
@@ -7366,6 +7367,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.previewReference = new WeakReference<>(preview);
 		}
 
+		@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 		@Override
 		protected RefreshPreviewBitmapTaskResult doInBackground(Void... voids) {
 			long debug_time = 0;
@@ -7623,8 +7625,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private void refreshPreviewBitmap() {
 		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 100 : 200;
-		if( want_preview_bitmap && preview_bitmap != null && refreshPreviewBitmapTask == null &&
-			System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
+		if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+			refreshPreviewBitmapTask == null && System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "refreshPreviewBitmap");
 			this.last_preview_bitmap_time_ms = System.currentTimeMillis();
