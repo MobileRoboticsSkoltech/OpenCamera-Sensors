@@ -2262,8 +2262,9 @@ public class DrawPreview {
 			Bitmap focus_peaking_bitmap = preview.getFocusPeakingBitmap();
 			if( focus_peaking_bitmap != null ) {
 				setLastImageMatrix(canvas, focus_peaking_bitmap, 0, false);
-				p.setAlpha(255);
+				p.setAlpha(127);
 				canvas.drawBitmap(focus_peaking_bitmap, last_image_matrix, p);
+                p.setAlpha(255);
 			}
 		}
 
