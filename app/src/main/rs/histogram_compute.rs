@@ -127,7 +127,7 @@ uchar4 __attribute__((kernel)) generate_focus_peaking(uchar4 in, uint32_t x, uin
     int height = rsAllocationGetDimY(bitmap);
 
     int strength = 0;
-    if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
+    /*if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
         uchar4 pixel0c = rsGetElementAt_uchar4(bitmap, x-1, y-1);
         int pixel0 = max(pixel0c.r, pixel0c.g);
         pixel0 = max(pixel0, (int)pixel0c.b);
@@ -156,24 +156,26 @@ uchar4 __attribute__((kernel)) generate_focus_peaking(uchar4 in, uint32_t x, uin
         int pixel8 = max(pixel8c.r, pixel8c.g);
         pixel8 = max(pixel8, (int)pixel8c.b);
 
-        /*int iIx = (pixel2 + 2*pixel5 + pixel8) - (pixel0 + 2*pixel3 + pixel6);
-        int iIy = (pixel6 + 2*pixel7 + pixel8) - (pixel0 + 2*pixel1 + pixel2);
-        iIx /= 8;
-        iIy /= 8;
-        //int iIx = (pixel5 - pixel3)/2;
-        //int iIy = (pixel7 - pixel1)/2;
-
-        strength = iIx*iIx + iIy*iIy;
-        //strength = iIx*iIx;
-        */
         int value = ( 8*pixel4 - pixel0 - pixel1 - pixel2 - pixel3 - pixel5 - pixel6 - pixel7 - pixel8 );
-        value /= 4;
         strength = value*value;
+    }*/
+    if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
+        float3 pixel0c = convert_float3(rsGetElementAt_uchar4(bitmap, x-1, y-1).rgb);
+        float3 pixel1c = convert_float3(rsGetElementAt_uchar4(bitmap, x, y-1).rgb);
+        float3 pixel2c = convert_float3(rsGetElementAt_uchar4(bitmap, x+1, y-1).rgb);
+        float3 pixel3c = convert_float3(rsGetElementAt_uchar4(bitmap, x-1, y).rgb);
+        float3 pixel4c = convert_float3(in.rgb);
+        float3 pixel5c = convert_float3(rsGetElementAt_uchar4(bitmap, x+1, y).rgb);
+        float3 pixel6c = convert_float3(rsGetElementAt_uchar4(bitmap, x-1, y+1).rgb);
+        float3 pixel7c = convert_float3(rsGetElementAt_uchar4(bitmap, x, y+1).rgb);
+        float3 pixel8c = convert_float3(rsGetElementAt_uchar4(bitmap, x+1, y+1).rgb);
+
+        float3 value = ( 8*pixel4c - pixel0c - pixel1c - pixel2c - pixel3c - pixel5c - pixel6c - pixel7c - pixel8c );
+        strength = dot(value, value);
     }
 
     uchar4 out;
-    //if( strength > 128*128 ) {
-    if( strength > 64*64 ) {
+    if( strength > 256*256 ) {
         out.r = 255;
         out.g = 255;
         out.b = 255;
