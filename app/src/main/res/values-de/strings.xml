@@ -735,5 +735,31 @@
     <string name="exposure_unlock">Autom. Belichtung aktiv</string>
 
     <string name="preference_nr_mode_low_light_message">Dunkel-Modus: Bitte Kamera still halten</string>
+
+    <string name="photo_mode_panorama">Pano</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_panorama_full">Panorama</string>
+
+    <string name="preference_screen_remote_control">Bluetooth-LE-Fernsteuerung...</string>
+    <string name="preference_enable_remote">Aktiviere die Bluetooth-LE-Fernsteuerung</string>
+    <string name="preference_enable_remote_summary">Aktiviere die Gerätesteuerung per Bluetooth-LE (BLE)</string>
+    <string name="preference_remote_type">Typ des zu steuernden Geräts</string>
+
+    <string name="ble_not_supported">BLE wird nicht unterstützt</string>
+    <string name="scan_ble">BLE-Geräte-Scan</string>
+    <string name="bluetooth_not_supported">Bluetooth wird nicht unterstützt.</string>
+    <string name="unknown_device">Unbekanntes Gerät</string>
+    <string name="preference_remote_disconnect_screen_dim">Blende Bildschirms ab, wenn Fernsteuerverbindung abbricht</string>
+    <string name="preference_remote_disconnect_screen_dim_summary">Tipp: Setze die Standard-Helligkeit auf minimal bevor du Open Camera startest.</string>
+    <string name="preference_water_type">Setze Salzwasser zur Tiefenberechnung</string>
+    <string name="preference_water_type_summary">Für Unterwassergehäuse, verbessert die Genauigkeit bei korrekter Auswahl der Wasserart.</string>
+    <string name="remote_connected">Fernsteurung verbunden</string>
+
+    <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
+
+    <string name="preference_stamp_geo_address">Verwende Adressen</string>
+    <string name="preference_stamp_geo_address_summary">Wenn möglich, verwende Adressdaten wenn die GPS-Position ins Bild gestempelt wird. Diese Option benötigt eine Internat-Verbindung.\n%s</string>
+    <string name="preference_stamp_geo_address_both">Zeige zusätzlich zur GPS-Position die zugehörige Adresse an</string>
+    <string name="preference_stamp_geo_address_prefer">Bevorzuge Adressdaten vor GPS-Koordinaten</string>
+    <string name="preference_stamp_geo_address_no">Zeige keine Adressdaten an</string>
 	
 </resources>
