@@ -739,7 +739,7 @@
     <string name="photo_mode_panorama">Pano</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_panorama_full">Panorama</string>
 
-    <string name="preference_screen_remote_control">Bluetooth-LE-Fernsteuerung...</string>
+    <string name="preference_screen_remote_control">Bluetooth-LE-Fernsteuerung…</string>
     <string name="preference_enable_remote">Aktiviere die Bluetooth-LE-Fernsteuerung</string>
     <string name="preference_enable_remote_summary">Aktiviere die Gerätesteuerung per Bluetooth-LE (BLE)</string>
     <string name="preference_remote_type">Typ des zu steuernden Geräts</string>
