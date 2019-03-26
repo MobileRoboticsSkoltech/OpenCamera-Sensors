@@ -1688,6 +1688,7 @@ public class HDRProcessor {
 			featureDetectorScript.set_bitmap(gs_allocation);
 			featureDetectorScript.set_bitmap_Ix(ix_allocation);
 			featureDetectorScript.set_bitmap_Iy(iy_allocation);
+
 			featureDetectorScript.forEach_compute_derivatives(gs_allocation);
 
 			/*if( MyDebug.LOG ) {
@@ -2026,7 +2027,7 @@ public class HDRProcessor {
 		final boolean use_ransac = true;
 		//final boolean use_ransac = false;
 		//final boolean estimate_rotation = false;
-		final boolean estimate_rotation = true;
+		final boolean estimate_rotation = false;
         if( use_ransac ) {
 			// RANSAC
 			List<FeatureMatch> best_inliers = new ArrayList<>();
