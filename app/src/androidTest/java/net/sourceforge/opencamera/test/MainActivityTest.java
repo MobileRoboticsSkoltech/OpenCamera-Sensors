@@ -14220,6 +14220,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //final int blend_hwidth = 0;
         final int blend_hwidth = bitmap_width/20;
         final int align_hwidth = bitmap_width/10;
+        //final int align_hwidth = bitmap_width/5;
         final boolean use_auto_align = true;
         //final boolean use_auto_align = false;
         gyro_debug_info = null; // test
@@ -14341,8 +14342,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Log.d(TAG, "    slice_width: " + slice_width);
                 Log.d(TAG, "    align_x+offset_x+slice_width-align_hwidth: " + (align_x+offset_x+slice_width-align_hwidth));
                 Log.d(TAG, "    bitmap(i-1) width: " + bitmaps.get(i-1).getWidth());
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                // n.b., we add in reverse order, so we find the transformation to map the next image (i) onto the previous image (i-1)
                 alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
                 // less tall:
                 int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
                 //int align_bitmap_height = Math.min(bitmap_height, 2*align_hwidth); // ratio 1:1
@@ -14420,16 +14422,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                     Canvas rotated_canvas = new Canvas(rotated_bitmap);
                     rotated_canvas.save();
-                    //rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2, bitmap_height/2);
-                    rotated_canvas.rotate((float)Math.toDegrees(-angle_z), align_x+offset_x-align_hwidth, 0);
+
+                    /*
+                    // handle the transformation entirely by transforming the bitmap
+                    // need to invert the transformation
                     rotated_canvas.translate(-this_align_x, -this_align_y);
+                    rotated_canvas.rotate((float)Math.toDegrees(-angle_z), align_x+offset_x-align_hwidth, 0);
                     this_align_x = 0;
                     this_align_y = 0;
+                    */
+
+                    rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
+
                     rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
                     rotated_canvas.restore();
                     bitmaps.get(i).recycle();
                     bitmaps.set(i, rotated_bitmap);
                 }
+
+                // alignments map next image to previous, so this means we need to move the "source" window in the opposite direction
+                this_align_x = - this_align_x;
+                this_align_y = - this_align_y;
 
                 if( x_offsets_cumulative )
                     align_x += this_align_x;

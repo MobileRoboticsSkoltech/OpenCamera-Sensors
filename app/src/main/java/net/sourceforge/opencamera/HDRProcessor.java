@@ -1800,56 +1800,75 @@ public class HDRProcessor {
 			*/
 
 			featureDetectorScript.set_bitmap(strength_allocation);
-			//final int max_corners = 500;
-			final int max_corners = 200;
+			//final int n_y_chunks = 1;
+			final int n_y_chunks = 2;
+			//final int total_max_corners = 500;
+			final int total_max_corners = 200;
+			final int max_corners = total_max_corners/n_y_chunks;
 			final int min_corners = max_corners/2;
-			float threshold = 5000000.0f;
-			float low_threshold = 0.0f;
-			float high_threshold = -1.0f;
 			byte [] bytes = new byte[width*height];
-			for(;;) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "### try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
-				featureDetectorScript.set_corner_threshold(threshold);
-				featureDetectorScript.forEach_local_maximum(strength_allocation, local_max_features_allocation);
 
-				// collect points
-				local_max_features_allocation.copyTo(bytes);
-				// find points
-				List<Point> points = new ArrayList<>();
-				for(int y=feature_descriptor_radius;y<height-feature_descriptor_radius;y++) {
-					for(int x=feature_descriptor_radius;x<width-feature_descriptor_radius;x++) {
-						int j = y*width + x;
-						// remember, bytes are signed!
-						if( bytes[j] != 0 ) {
-							Point point = new Point(x, y);
-							points.add(point);
+			List<Point> all_points = new ArrayList<>();
+			for(int cy=0;cy<n_y_chunks;cy++) {
+				if( MyDebug.LOG )
+					Log.d(TAG, ">>> find corners, chunk " + cy + " / " + n_y_chunks);
+				float threshold = 5000000.0f;
+				float low_threshold = 0.0f;
+				float high_threshold = -1.0f;
+				int start_y = (cy*height)/n_y_chunks;
+				int stop_y = ((cy+1)*height)/n_y_chunks;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "    start_y: " + start_y);
+					Log.d(TAG, "    stop_y: " + stop_y);
+				}
+				for(;;) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "### try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
+					featureDetectorScript.set_corner_threshold(threshold);
+					Script.LaunchOptions launch_options = new Script.LaunchOptions();
+					launch_options.setX(0, width);
+					launch_options.setY(start_y, stop_y);
+					featureDetectorScript.forEach_local_maximum(strength_allocation, local_max_features_allocation, launch_options);
+
+					// collect points
+					local_max_features_allocation.copyTo(bytes);
+					// find points
+					List<Point> points = new ArrayList<>();
+					for(int y=Math.max(start_y, feature_descriptor_radius);y<Math.min(stop_y, height-feature_descriptor_radius);y++) {
+						for(int x=feature_descriptor_radius;x<width-feature_descriptor_radius;x++) {
+							int j = y*width + x;
+							// remember, bytes are signed!
+							if( bytes[j] != 0 ) {
+								Point point = new Point(x, y);
+								points.add(point);
+							}
 						}
 					}
-				}
-				if( MyDebug.LOG )
-					Log.d(TAG, "    " + points.size() + " points");
-				if( points.size() >= min_corners && points.size() <= max_corners ) {
-					points_arrays[i] = points.toArray(new Point[0]);
-					break;
-				}
-				else if( points.size() < min_corners ) {
-					high_threshold = threshold;
-					threshold = 0.5f * ( low_threshold + threshold );
 					if( MyDebug.LOG )
-						Log.d(TAG, "    reduced threshold to: " + threshold);
-				}
-				else {
-					low_threshold = threshold;
-					if( high_threshold < 0.0f ) {
-						threshold *= 10.0f;
+						Log.d(TAG, "    " + points.size() + " points");
+					if( points.size() >= min_corners && points.size() <= max_corners ) {
+						all_points.addAll(points);
+						break;
 					}
-					else
-						threshold = 0.5f * ( threshold + high_threshold );
-					if( MyDebug.LOG )
-						Log.d(TAG, "    increased threshold to: " + threshold);
+					else if( points.size() < min_corners ) {
+						high_threshold = threshold;
+						threshold = 0.5f * ( low_threshold + threshold );
+						if( MyDebug.LOG )
+							Log.d(TAG, "    reduced threshold to: " + threshold);
+					}
+					else {
+						low_threshold = threshold;
+						if( high_threshold < 0.0f ) {
+							threshold *= 10.0f;
+						}
+						else
+							threshold = 0.5f * ( threshold + high_threshold );
+						if( MyDebug.LOG )
+							Log.d(TAG, "    increased threshold to: " + threshold);
+					}
 				}
 			}
+			points_arrays[i] = all_points.toArray(new Point[0]);
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "### image: " + i + " has " + points_arrays[i].length + " points");
@@ -2027,7 +2046,9 @@ public class HDRProcessor {
 		final boolean use_ransac = true;
 		//final boolean use_ransac = false;
 		//final boolean estimate_rotation = false;
-		final boolean estimate_rotation = false;
+		final boolean estimate_rotation = true;
+		//final boolean estimate_rotation = debug_index < 3;
+		boolean use_rotation = false;
         if( use_ransac ) {
 			// RANSAC
 			List<FeatureMatch> best_inliers = new ArrayList<>();
@@ -2038,14 +2059,53 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
+			final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
+			if( MyDebug.LOG )
+				Log.d(TAG, "min_rotation_dist: " + min_rotation_dist);
+			//final float min_rotation_dist2 = 1.0e-5f;
+			final float min_rotation_dist2 = min_rotation_dist*min_rotation_dist;
 			for(int i=0;i<actual_matches.size();i++) {
 				FeatureMatch match = actual_matches.get(i);
+
+				{
+					// compute exact translation from the i-th match only
+					int candidate_offset_x = points_arrays[1][match.index1].x - points_arrays[0][match.index0].x;
+					int candidate_offset_y = points_arrays[1][match.index1].y - points_arrays[0][match.index0].y;
+					// find the inliers from this
+					inliers.clear();
+					for(FeatureMatch other_match : actual_matches) {
+						int x0 = points_arrays[0][other_match.index0].x;
+						int y0 = points_arrays[0][other_match.index0].y;
+						int x1 = points_arrays[1][other_match.index1].x;
+						int y1 = points_arrays[1][other_match.index1].y;
+						int transformed_x0 = x0 + candidate_offset_x;
+						int transformed_y0 = y0 + candidate_offset_y;
+						float dx = transformed_x0 - x1;
+						float dy = transformed_y0 - y1;
+						float error2 = dx*dx + dy*dy;
+						if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
+							inliers.add(other_match);
+						}
+					}
+					if( inliers.size() > best_inliers.size() ) {
+						// found an improved model!
+						if( MyDebug.LOG )
+							Log.d(TAG, "match " + i + " gives better translation model: " + inliers.size() + " inliers vs " + best_inliers.size());
+						best_inliers.clear();
+						best_inliers.addAll(inliers);
+						use_rotation = false;
+						if( best_inliers.size() == actual_matches.size() ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "all matches are inliers");
+							// no point trying any further
+							break;
+						}
+					}
+				}
 
 				if( estimate_rotation ) {
 					// compute exact rotation and translation
 					// we need two points, so compare to every other point
-					if( i == 0 )
-						continue;
 					for(int j=0;j<i;j++) {
 						FeatureMatch match2 = actual_matches.get(j);
 						int c0_x = (points_arrays[0][match.index0].x + points_arrays[0][match2.index0].x)/2;
@@ -2059,7 +2119,7 @@ public class HDRProcessor {
 						float dy1 = (points_arrays[1][match.index1].y - points_arrays[1][match2.index1].y);
 						float mag_sq0 = dx0*dx0 + dy0*dy0;
 						float mag_sq1 = dx1*dx1 + dy1*dy1;
-						if( mag_sq0 < 1.0e-5 || mag_sq1 < 1.0e-5 ) {
+						if( mag_sq0 < min_rotation_dist2 || mag_sq1 < min_rotation_dist2 ) {
 							continue;
 						}
 						float angle = (float)(Math.atan2(dy1, dx1) - Math.atan2(dy0, dx0));
@@ -2067,6 +2127,10 @@ public class HDRProcessor {
 							angle += 2.0f*Math.PI;
 						else if( angle > Math.PI )
 							angle -= 2.0f*Math.PI;
+						/*if( Math.abs(angle) > Math.PI/18.0f ) {
+							// reject too large angles
+							continue;
+						}*/
 						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "ransac: " + i + " , " + j + ": ");
 							Log.d(TAG, "    match 0: " + points_arrays[0][match.index0].x + " , " + points_arrays[0][match.index0].y);
@@ -2106,12 +2170,17 @@ public class HDRProcessor {
 							}
 						}
 
-						if( inliers.size() > best_inliers.size() ) {
+						if( inliers.size() > best_inliers.size() && inliers.size() >= 5 ) {
 							// found an improved model!
-							if( MyDebug.LOG )
-								Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "match " + i + " gives better rotation model: " + inliers.size() + " inliers vs " + best_inliers.size());
+								Log.d(TAG, "    dx0: " + dx0 + " , dy0: " + dy0);
+								Log.d(TAG, "    rotate by " + angle + " about: " + c0_x + " , " + c0_y);
+								Log.d(TAG, "    translate by: " + (c1_x-c0_x) + " , " + (c1_y-c0_y));
+							}
 							best_inliers.clear();
 							best_inliers.addAll(inliers);
+							use_rotation = true;
 							if( best_inliers.size() == actual_matches.size() ) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "all matches are inliers");
@@ -2126,40 +2195,6 @@ public class HDRProcessor {
 							Log.d(TAG, "all matches are inliers");
 						// no point trying any further
 						break;
-					}
-				}
-				else {
-					// compute exact translation from the i-th match only
-					int candidate_offset_x = points_arrays[1][match.index1].x - points_arrays[0][match.index0].x;
-					int candidate_offset_y = points_arrays[1][match.index1].y - points_arrays[0][match.index0].y;
-					// find the inliers from this
-					inliers.clear();
-					for(FeatureMatch other_match : actual_matches) {
-						int x0 = points_arrays[0][other_match.index0].x;
-						int y0 = points_arrays[0][other_match.index0].y;
-						int x1 = points_arrays[1][other_match.index1].x;
-						int y1 = points_arrays[1][other_match.index1].y;
-						int transformed_x0 = x0 + candidate_offset_x;
-						int transformed_y0 = y0 + candidate_offset_y;
-						float dx = transformed_x0 - x1;
-						float dy = transformed_y0 - y1;
-						float error2 = dx*dx + dy*dy;
-						if( error2 + 1.0e-5 <= max_inlier_dist2 ) {
-							inliers.add(other_match);
-						}
-					}
-					if( inliers.size() > best_inliers.size() ) {
-						// found an improved model!
-						if( MyDebug.LOG )
-							Log.d(TAG, "match " + i + " gives better model: " + inliers.size() + " inliers vs " + best_inliers.size());
-						best_inliers.clear();
-						best_inliers.addAll(inliers);
-						if( best_inliers.size() == actual_matches.size() ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "all matches are inliers");
-							// no point trying any further
-							break;
-						}
 					}
 				}
 			}
@@ -2194,7 +2229,7 @@ public class HDRProcessor {
 		int offset_y = centres[1].y - centres[0].y;
 		float rotation = 0.0f;
 
-		if( estimate_rotation ) {
+		if( estimate_rotation && use_rotation ) {
 			// first compute an ideal rotation for a transformation where we rotate about centres[0], and then translate
 			float angle_sum = 0.0f;
 			int n_angles = 0;
@@ -2290,6 +2325,16 @@ public class HDRProcessor {
 				p.setColor(Color.MAGENTA);
 				p.setAlpha((int)(255.0f * (1.0f-match.distance)));
 				canvas.drawLine(x0, y0, width + x1, y1, p);
+
+				// also draw where the match is actually translated to
+				int t_cx = (int)(x0 * Math.cos(rotation) - y0 * Math.sin(rotation));
+				int t_cy = (int)(x0 * Math.sin(rotation) + y0 * Math.cos(rotation));
+				t_cx += offset_x;
+				t_cy += offset_y;
+				// draw on right hand side
+				t_cx += width;
+				p.setColor(Color.GREEN);
+				canvas.drawPoint(t_cx, t_cy, p);
 			}
 			p.setAlpha(255);
 
@@ -2302,7 +2347,7 @@ public class HDRProcessor {
 				canvas.drawCircle(centres[i].x + off_x, centres[i].y, 5.0f, p);
 				// draw the rotation:
 				int dir_r_x = 50, dir_r_y = 0;
-				int dir_u_x = 0, dir_u_y = -200;
+				int dir_u_x = 0, dir_u_y = -50;
 				if( i == 1 ) {
 					// transform
 					int n_dir_r_x = (int)(dir_r_x * Math.cos(rotation) - dir_r_y * Math.sin(rotation));
