@@ -14376,12 +14376,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }*/
 
                 int this_align_x = 0, this_align_y = 0;
+                float y_scale = 1.0f;
                 if( use_align_by_feature ) {
                     try {
                         HDRProcessor.AutoAlignmentByFeatureResult res = mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
                         this_align_x = res.offset_x;
                         this_align_y = res.offset_y;
                         angle_z = res.rotation;
+                        y_scale = res.y_scale;
                     }
                     catch (HDRProcessorException e) {
                         e.printStackTrace();
@@ -14412,12 +14414,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     // we have rotation about origin followed by translation
                     // but instead we want to rotate about the bitmap centre and then translate:
                     // R[x] + d = (R[x-c] + c) + (d - c + R[c])
-                    float rotated_centre_x = (float)(bitmap_width/2 * Math.cos(angle_z) - bitmap_height/2 * Math.sin(angle_z));
-                    float rotated_centre_y = (float)(bitmap_width/2 * Math.sin(angle_z) + bitmap_height/2 * Math.cos(angle_z));
+                    //float rotated_centre_x = (float)(bitmap_width/2 * Math.cos(angle_z) - bitmap_height/2 * Math.sin(angle_z));
+                    //float rotated_centre_y = (float)(bitmap_width/2 * Math.sin(angle_z) + bitmap_height/2 * Math.cos(angle_z));
                     //this_align_x += rotated_centre_x - bitmap_width/2;
                     //this_align_y += rotated_centre_y - bitmap_height/2;
-                    Log.d(TAG, "    this_align_x is now: " + this_align_x);
-                    Log.d(TAG, "    this_align_y is now: " + this_align_y);
+                    //Log.d(TAG, "    this_align_x is now: " + this_align_x);
+                    //Log.d(TAG, "    this_align_y is now: " + this_align_y);
 
                     Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                     Canvas rotated_canvas = new Canvas(rotated_bitmap);
@@ -14429,10 +14431,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     rotated_canvas.translate(-this_align_x, -this_align_y);
                     rotated_canvas.rotate((float)Math.toDegrees(-angle_z), align_x+offset_x-align_hwidth, 0);
                     this_align_x = 0;
-                    this_align_y = 0;
++                    this_align_y = 0;
                     */
 
                     rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
+                    rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
 
                     rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
                     rotated_canvas.restore();
