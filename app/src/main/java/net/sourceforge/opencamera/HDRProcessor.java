@@ -2016,7 +2016,7 @@ public class HDRProcessor {
 			}
 
 			// Lowe's test
-			/*boolean found = false;
+			boolean found = false;
 			boolean reject = false;
             for(int j=i+1;j<matches.size() && !found;j++) {
                 FeatureMatch match2 = matches.get(j);
@@ -2037,7 +2037,7 @@ public class HDRProcessor {
             if( reject ) {
 				has_matched0[match.index0] = true;
 				continue;
-			}*/
+			}
 
 			actual_matches.add(match);
 			has_matched0[match.index0] = true;
