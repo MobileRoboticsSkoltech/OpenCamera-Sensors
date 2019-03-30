@@ -1802,6 +1802,7 @@ public class HDRProcessor {
 			featureDetectorScript.set_bitmap(strength_allocation);
 			//final int n_y_chunks = 1;
 			final int n_y_chunks = 2;
+			//final int n_y_chunks = 4;
 			//final int total_max_corners = 500;
 			final int total_max_corners = 200;
 			final int max_corners = total_max_corners/n_y_chunks;
@@ -2028,7 +2029,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### found: " + actual_matches.size() + " matches");
 
-		// but now choose only top actual matches
+		// but now choose only best actual matches
         /*int n_matches = (int)(actual_matches.size()*0.1)+1;
 		actual_matches.subList(n_matches,actual_matches.size()).clear();
         if( MyDebug.LOG )
