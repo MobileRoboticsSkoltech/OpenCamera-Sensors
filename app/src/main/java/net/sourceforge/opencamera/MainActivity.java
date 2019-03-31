@@ -1459,7 +1459,15 @@ public class MainActivity extends Activity {
 			CameraController.Size current_size = preview.getCurrentPictureSize();
 			if( current_size != null && current_size.supports_burst ) {
 				MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
-				if( photo_mode == MyApplicationInterface.PhotoMode.Standard ||
+				if( photo_mode == MyApplicationInterface.PhotoMode.Standard &&
+						applicationInterface.isRawOnly(photo_mode) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fast burst not supported in RAW-only mode");
+					// in JPEG+RAW mode, a continuous fast burst will only produce JPEGs which is fine; but in RAW only mode,
+					// no images at all would be saved! (Or we could switch to produce JPEGs anyway, but this seems misleading
+					// in RAW only mode.)
+				}
+				else if( photo_mode == MyApplicationInterface.PhotoMode.Standard ||
 						photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
 					this.takePicturePressed(false, true);
 					return true;
