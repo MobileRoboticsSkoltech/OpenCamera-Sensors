@@ -837,6 +837,8 @@
 
     <string name="remaining">Remaining</string> <!-- images remaining for "processing" -->
 
+    <string name="preference_preview">Camera preview…</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

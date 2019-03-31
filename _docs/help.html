@@ -239,7 +239,7 @@ Settings/Timer.</li>
 <li><b>Repeat</b> - Take a repeated set of photos when the take photo button is pressed. The time
 interval between each repeated photo can be set under Settings/"Repeat mode interval".</li>
 <li><b>Grid</b> - Whether to display one of a choice of grids on the camera preview. Also available
-under Settings/On screen GUI/"Show a grid".</li>
+under Settings/Camera preview/"Show a grid".</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
@@ -463,18 +463,6 @@ delay" still means there will be some time between each photo. If you want to ta
 Fast Burst photo mode, or long press the "take photo" button in Standard or Fast Burst photo modes.
 (Burst mode only supported on some devices; requires Camera2 API to be enabled).</p>
 
-<p><b>Ghost image</b> - You can overlay a previous photo. This is useful for aligning photos (e.g., for stop
-	motion animation).</p>
-<ul>
-	<li><b>Last photo taken</b> - When you take a photo, a ghost of that photo will be displayed. The ghost is
-		reset either by leaving and returning to Open Camera, switching between photo/video modes, or turning
-		this option off.</li>
-	<li><b>Selected image</b> - Select a specific image on your device to be displayed as a ghost (requires
-	Android 5). Note that for this option, the ghost image will not be displayed if Open Camera is running
-	when your device is locked. If the image doesn't show at all, it may be that Open Camera was unable to
-	load the selected image.</li>
-</ul>
-
 <p><b>More camera controls...</b> - Select to access the following controls:</p>
 
 <p><b>Touch to capture</b> - This option allows you to take a photo either just by touching or double-tapping on the
@@ -573,23 +561,119 @@ rely on your device's ability to detect which orientation it's being held (the a
 be calibated correctly. If so, you can use this option to calibrate the acceleromer (or reset the calibration back to the
 default behaviour).</p>
 
-<p><b>On screen GUI...</b> - Select to access the following controls:</p>
+<p><b>Camera preview...</b> - Select to access the following controls:</p>
 
 <p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is
-displayed on the phone/tablet's display) with that of the photo resolution ("Match photo size (WYSIWYG)" mode). The
-advantage is that what you see in the preview will match what will be in the resultant photo
-("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in order to do
-this. If instead you select "Maximise preview size", then the camera preview will be as large as possible, trying to
-fill the available space. However if the resolution of the photo is a different aspect ratio to that of your device,
-this will result in the preview being cropped. In video mode, the preview is always in WYSIWYG mode.</p>
+	displayed on the phone/tablet's display) with that of the photo resolution ("Match photo size (WYSIWYG)" mode). The
+	advantage is that what you see in the preview will match what will be in the resultant photo
+	("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in order to do
+	this. If instead you select "Maximise preview size", then the camera preview will be as large as possible, trying to
+	fill the available space. However if the resolution of the photo is a different aspect ratio to that of your device,
+	this will result in the preview being cropped. In video mode, the preview is always in WYSIWYG mode.</p>
 <ul>
-<li>Note that Android 4.4.3 <a href="https://code.google.com/p/android/issues/detail?id=70830">introduced a bug</a>
-which means that the aspect ratio will be wrong if you select "Maximise preview size" (i.e., the preview will look
-squished). To avoid this problem, stick with "Match photo size".</li>
-<li>Also note that even in "Match photo size" mode, on some devices and resolutions, it may not be possible to match
-the preview to the resultant photo/video exactly; in such cases, Open Camera will try to match as closely as
-possible.</li>
+	<li>Note that Android 4.4.3 <a href="https://code.google.com/p/android/issues/detail?id=70830">introduced a bug</a>
+		which means that the aspect ratio will be wrong if you select "Maximise preview size" (i.e., the preview will look
+		squished). To avoid this problem, stick with "Match photo size".</li>
+	<li>Also note that even in "Match photo size" mode, on some devices and resolutions, it may not be possible to match
+		the preview to the resultant photo/video exactly; in such cases, Open Camera will try to match as closely as
+		possible.</li>
 </ul>
+
+<p><b>Ghost image</b> - You can overlay a previous photo. This is useful for aligning photos (e.g., for stop
+	motion animation).</p>
+<ul>
+	<li><b>Last photo taken</b> - When you take a photo, a ghost of that photo will be displayed. The ghost is
+		reset either by leaving and returning to Open Camera, switching between photo/video modes, or turning
+		this option off.</li>
+	<li><b>Selected image</b> - Select a specific image on your device to be displayed as a ghost (requires
+		Android 5). Note that for this option, the ghost image will not be displayed if Open Camera is running
+		when your device is locked. If the image doesn't show at all, it may be that Open Camera was unable to
+		load the selected image.</li>
+</ul>
+
+<p><b>Focus assist</b> - If enabled, this will show a zoomed in view on the camera preview when in manual focus mode, and you
+	are changing the manual focus distance. Similarly in focus bracketing mode, the preview will zoom in when changing the focus
+	distances to bracket between. Note not supported when recording video.</p>
+
+<p><b>Show zoom</b> - Whether to display the current zoom level of the camera (when zoomed in).</p>
+
+<p><b>Show angle</b> - Whether to display the orientation angle of the device's camera.</p>
+
+<p><b>Show angle line</b> - Whether to display a horizontal "level" line that visually indicates the orientation of the device.</p>
+
+<p><b>Show pitch lines</b> - Whether to display horizontal pitch lines that visually indicate the pitch of the device.</p>
+
+<p><b>Angle highlight color</b> - This controls the color to be used for the angle display and "level" line when the camera is nearly
+	level; and also for the 0 degree pitch line when the camera is held at nearly zero pitch.</p>
+
+<p><b>Show compass direction</b> - Whether to display the compass direction of the device's camera.</p>
+
+<p><b>Show compass direction lines</b> - Whether to display vertical lines that visually indicate the compass direction of the device.</p>
+
+<p><b>Show battery</b> - Whether to display the current battery level.</p>
+
+<p><b>Show time</b> - Whether to display the current time.</p>
+
+<p><b>Show free memory</b> - Whether to display the remaining storage space of the device.</p>
+
+<p><b>Show ISO</b> - If selected, the current ISO, exposure time and frame rate (FPS) will be displayed (only available if Camera2
+	API is used). The text will be shown in red when the auto-exposure routine is scanning. In flash auto mode, a flash symbol will
+	also indicate when flash will fire. Note that this is not an absolute guarantee - when you take a photo, the camera will make an
+	updated decision on whether to fire the flash, which in some cases may disagree with whether the flash symbol was displayed.</p>
+
+<p><b>Show a histogram</b> - Allows displaying an on-screen histogram (only available if Camera2 API is used). Note that the
+	histogram reflects the currently display on-screen preview, and will not necessarily be accurate for the final resultant photograph,
+	especially if modes such as NR, DRO, HDR are used. The follow options are available:</p>
+<ul>
+	<li>RGB Colors - Displays a histogram for each color channel.</li>
+	<li>Luminance - The brightness is computed as a weighted average of the RGB components: 0.299*R + 0.587G + 0.114*B.</li>
+	<li>Value - The brightness is computed as the maximum of the RGB components.</li>
+	<li>Intensity - The brightness is computed as an unweighted average of the RGB components.</li>
+	<li>Lightness - The brightness is computed as an average of the minimum and maximum of the RGB components.</li>
+</ul>
+
+<p><b>Show zebra stripes</b> - Allows displaying on-screen zebra stripes (also known as
+	<a href="https://en.wikipedia.org/wiki/Zebra_patterning">zebra patterning</a>) to show whether the
+	image is over-exposed (only available if Camera2 API is used). Note when using photo modes NR and HDR,
+	a region that is shown as over-exposed on-screen may not necessarily be over-exposed in the resultant image,
+	since these modes are able to better handle a high dynamic range.</p>
+
+<p><b>Focus peaking</b> - Allows displaying on-screen highlights to indicate edges (contours) that are in-focus
+	(only available if Camera2 API is used). This is particularly useful in conjunction with manual focus mode, to help show
+	which regions of the image are in focus.</p>
+
+<p><b>Focus peaking color</b> - This controls the color to be used for the highlights when Focus Peaking is enabled.</p>
+
+<p><b>Show audio level meter</b> - If selected, when recording video an on-screen meter will display the current audio level.</p>
+
+<p><b>Show a grid</b> - Whether to display one of a choice of grids on the camera preview. Grids are useful in photography to help
+	compose your image. Options are:</p>
+<ul>
+	<li>3x3 - helps with applying the <a href="http://en.wikipedia.org/wiki/Rule_of_thirds">rule of thirds</a>.</li>
+	<li>Phi 3x3 - 3x3 grid with ratios 1:0.618:1.</li>
+	<li>4x2</li>
+	<li>Crosshair</li>
+	<li>Golden - displays a <a href="http://en.wikipedia.org/wiki/Golden_spiral">Golden spiral</a> (or technically,
+		a Fibonacci spiral). You can <a href="https://www.apogeephoto.com/how-to-use-the-golden-ratio-to-improve-your-photography/">use
+			this to improve your photography</a>.</li>
+	<li>Golden Triangles</li>
+	<li>Diagonals</li>
+</ul>
+
+<p><b>Show a crop guide</b> - A crop guide is a rectangle displayed on-screen, which has the specified aspect ratio
+	(if different to the photo/video aspect ratio). This is useful if you plan to crop the resultant photos or videos
+	to a particular aspect ratio. For photos, the crop-guide requires "Preview size" to be set to WYSIWYG mode.</p>
+
+<p><b>Show thumbnail animation</b> - Whether to display the moving thumbnail animation when taking a photo.</p>
+
+<p><b>Show border when taking photo</b> - Whether to display a border effect when taking a photo.</p>
+
+<p><b>Rotate preview</b> - this option rotates the on-screen preview by 180 degrees (i.e., upside down). Most users
+	won't ever need this, but this option can be useful if you are using Open Camera with equipment such as zoom lenses
+	which invert the image. Note that this doesn't rotate the resultant photos/videos - you'll still have to rotate those
+	yourself afterwards - but this will correct the preview so that you can still see what you are shooting properly.</p>
+
+<p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
 <p><b>UI placement</b> - Allows you to choose between various layouts for the on-screen user interface icons.</p>
 
@@ -606,10 +690,6 @@ left/right sides if held in portrait).</li>
 mode probably isn't useful for most people (since you need to exit immersive mode even to take a photo), but is available if you wish
 to only have the preview showing.</li>
 </ul>
-
-<p><b>Focus assist</b> - If enabled, this will show a zoomed in view on the camera preview when in manual focus mode, and you
-are changing the manual focus distance. Similarly in focus bracketing mode, the preview will zoom in when changing the focus
-distances to bracket between. Note not supported when recording video.</p>
 
 <p><b>Show face detection icon</b> - Whether to display an on-screen icon for enabling or disabling face detection. See
 	<a href="#auto_stabilise">Auto-level feature</a> above for more details.</p>
@@ -633,8 +713,6 @@ distances to bracket between. Note not supported when recording video.</p>
 
 <p><b>Show auto exposure lock icon</b> - Whether to display an on-screen icon for locking or unlocking auto exposure.</p>
 
-<p><b>Show zoom</b> - Whether to display the current zoom level of the camera (when zoomed in).</p>
-
 <p><b>Show zoom -/+ controls</b> - Whether to display -/+ buttons to control zoom.</p>
 
 <p><b>Show zoom slider controls</b> - Whether to display to a slider to control zoom.</p>
@@ -644,78 +722,7 @@ distances to bracket between. Note not supported when recording video.</p>
 icon for taking a photo (or recording video). Uncheck if you'd
 rather take photos by other methods (e.g., if your device has a hardware shutter button, or using the volume keys).</p>
 
-<p><b>Show angle</b> - Whether to display the orientation angle of the device's camera.</p>
-
-<p><b>Show angle line</b> - Whether to display a horizontal "level" line that visually indicates the orientation of the device.</p>
-
-<p><b>Show pitch lines</b> - Whether to display horizontal pitch lines that visually indicate the pitch of the device.</p>
-
-<p><b>Angle highlight color</b> - This controls the color to be used for the angle display and "level" line when the camera is nearly
-level; and also for the 0 degree pitch line when the camera is held at nearly zero pitch.</p>
-
-<p><b>Show compass direction</b> - Whether to display the compass direction of the device's camera.</p>
-
-<p><b>Show compass direction lines</b> - Whether to display vertical lines that visually indicate the compass direction of the device.</p>
-
-<p><b>Show battery</b> - Whether to display the current battery level.</p>
-
-<p><b>Show time</b> - Whether to display the current time.</p>
-
-<p><b>Show free memory</b> - Whether to display the remaining storage space of the device.</p>
-
-<p><b>Show ISO</b> - If selected, the current ISO, exposure time and frame rate (FPS) will be displayed (only available if Camera2
-API is used). The text will be shown in red when the auto-exposure routine is scanning. In flash auto mode, a flash symbol will
-also indicate when flash will fire. Note that this is not an absolute guarantee - when you take a photo, the camera will make an
-updated decision on whether to fire the flash, which in some cases may disagree with whether the flash symbol was displayed.</p>
-
-<p><b>Show a histogram</b> - Allows displaying an on-screen histogram (only available if Camera2 API is used). Note that the
-histogram reflects the currently display on-screen preview, and will not necessarily be accurate for the final resultant photograph,
-especially if modes such as NR, DRO, HDR are used. The follow options are available:</p>
-<ul>
-	<li>RGB Colors - Displays a histogram for each color channel.</li>
-	<li>Luminance - The brightness is computed as a weighted average of the RGB components: 0.299*R + 0.587G + 0.114*B.</li>
-	<li>Value - The brightness is computed as the maximum of the RGB components.</li>
-	<li>Intensity - The brightness is computed as an unweighted average of the RGB components.</li>
-	<li>Lightness - The brightness is computed as an average of the minimum and maximum of the RGB components.</li>
-</ul>
-
-<p><b>Show zebra stripes</b> - Allows displaying on-screen zebra stripes (also known as
-<a href="https://en.wikipedia.org/wiki/Zebra_patterning">zebra patterning</a>) to show whether the
-image is over-exposed (only available if Camera2 API is used). Note when using photo modes NR and HDR,
-a region that is shown as over-exposed on-screen may not necessarily be over-exposed in the resultant image,
-since these modes are able to better handle a high dynamic range.</p>
-
-<p><b>Focus peaking</b> - Allows displaying on-screen highlights to indicate edges (contours) that are in-focus
-(only available if Camera2 API is used). This is particularly useful in conjunction with manual focus mode, to help show
-which regions of the image are in focus.</p>
-
-<p><b>Focus peaking color</b> - This controls the color to be used for the highlights when Focus Peaking is enabled.</p>
-
-<p><b>Show audio level meter</b> - If selected, when recording video an on-screen meter will display the current audio level.</p>
-
-<p><b>Show a grid</b> - Whether to display one of a choice of grids on the camera preview. Grids are useful in photography to help
-compose your image. Options are:</p>
-<ul>
-<li>3x3 - helps with applying the <a href="http://en.wikipedia.org/wiki/Rule_of_thirds">rule of thirds</a>.</li>
-<li>Phi 3x3 - 3x3 grid with ratios 1:0.618:1.</li>
-<li>4x2</li>
-<li>Crosshair</li>
-<li>Golden - displays a <a href="http://en.wikipedia.org/wiki/Golden_spiral">Golden spiral</a> (or technically,
-a Fibonacci spiral). You can <a href="https://www.apogeephoto.com/how-to-use-the-golden-ratio-to-improve-your-photography/">use
-this to improve your photography</a>.</li>
-<li>Golden Triangles</li>
-<li>Diagonals</li>
-</ul>
-
-<p><b>Show a crop guide</b> - A crop guide is a rectangle displayed on-screen, which has the specified aspect ratio
-(if different to the photo/video aspect ratio). This is useful if you plan to crop the resultant photos or videos
-to a particular aspect ratio. For photos, the crop-guide requires "Preview size" to be set to WYSIWYG mode.</p>
-
 <p><b>Show "toast" messages</b> - Whether to display "toasts" (these are the popup messages that appear with information).</p>
-
-<p><b>Show thumbnail animation</b> - Whether to display the moving thumbnail animation when taking a photo.</p>
-
-<p><b>Show border when taking photo</b> - Whether to display a border effect when taking a photo.</p>
 
 <p><b>Show What's New dialog</b> - When updating to a major new version, Open Camera displays a dialog explaining the new
 features and other options. You can disable this dialog from being displayed if you prefer.</p>
@@ -723,11 +730,6 @@ features and other options. You can disable this dialog from being displayed if 
 <p><b>Keep display on</b> - Whether to force keeping the screen display on, while the main Open Camera UI is active.</p>
 
 <p><b>Force maximum brightness</b> - Whether to force the screen display to maximum brightness.</p>
-
-<p><b>Rotate preview</b> - this option rotates the on-screen preview by 180 degrees (i.e., upside down). Most users
-won't ever need this, but this option can be useful if you are using Open Camera with equipment such as zoom lenses
-which invert the image. Note that this doesn't rotate the resultant photos/videos - you'll still have to rotate those
-yourself afterwards - but this will correct the preview so that you can still see what you are shooting properly.</p>
 
 <p><b>Photo and Video Settings:</b></p>
 
@@ -1231,7 +1233,7 @@ See <a href="https://feedback.photoshop.com/photoshop_family/topics/open-dng-fil
 for some suggestions.</p>
 
 <p><b>Why doesn't the preview display match the resultant photo/video? One of them is cropped.</b> - Firstly, make
-sure that Settings/On screen GUI/Preview size is set to "Match photo size (WYSIWYG)". However if that doesn't fix
+sure that Settings/Camera preview/Preview size is set to "Match photo size (WYSIWYG)". However if that doesn't fix
 the problem, this is a limitation on some devices and photo/video resolutions (it happens if the device doesn't offer
 a "preview" with the same aspect ratio as the chosen photo/video resolution). A workaround may be to try a different
 resolution for photos and/or videos.</p>
@@ -1348,7 +1350,7 @@ some devices may have a bug that I'm not aware of. Also bear in mind that some p
 and it's not possible to get an app that satisfies everyone (e.g., some camera apps hide everything behind popup menus
 that you swipe to enable; others have as much on screen as possible - I try to achieve a balance in Open Camera).</p>
 
-<p><b>Why is the UI cluttered?</b> - Under Settings/On screen GUI, there are options to disable various controls and
+<p><b>Why is the UI cluttered?</b> - Under Settings/"On screen GUI", there are options to disable various controls and
 so on from the main view.</p>
 
 <p><b>Can I use the Open Camera source code in my app?</b> - Open Camera is available under the GPL (see

@@ -535,7 +535,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_focus_assist");
-        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_preview");
         	pg.removePreference(pref);
         }
 
@@ -574,7 +574,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		if( !using_android_l ) {
 			Preference pref = findPreference("preference_show_iso");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_preview");
 			pg.removePreference(pref);
 		}
 
@@ -583,7 +583,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "supports_preview_bitmaps: " + supports_preview_bitmaps);
 
 		if( !supports_preview_bitmaps ) {
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_preview");
 
 			Preference pref = findPreference("preference_histogram");
 			pg.removePreference(pref);
