@@ -1535,6 +1535,8 @@ public class CameraController1 extends CameraController {
 
 	// returns false if RuntimeException thrown (may include if face-detection already started)
 	public boolean startFaceDetection() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startFaceDetection");
 	    try {
 			camera.startFaceDetection();
 	    }
