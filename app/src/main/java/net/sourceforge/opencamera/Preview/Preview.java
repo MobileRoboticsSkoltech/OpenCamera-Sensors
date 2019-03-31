@@ -5353,6 +5353,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "video recorder started");
 		video_recorder_is_paused = false;
+
+		if( this.using_face_detection && !this.using_android_l ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "restart face detection");
+			// doing MediaRecorder.start() seems to stop face detection on old Camera API
+			camera_controller.startFaceDetection();
+			faces_detected = null;
+		}
+
 		if( test_video_failure ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "test_video_failure is true");
