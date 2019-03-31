@@ -127,7 +127,7 @@
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
     </string-array>
-    <string-array name="preference_angle_highlight_color_entries">
+    <string-array name="preference_angle_highlight_color_entries"> <!-- n.b., also used for focus peaking colors -->
         <item>Red</item>
         <item>Green</item>
         <item>Blue</item>

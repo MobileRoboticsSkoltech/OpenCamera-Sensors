@@ -30,6 +30,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -89,6 +91,7 @@ public class DrawPreview {
 	private boolean want_zebra_stripes;
 	private int zebra_stripes_threshold;
 	private boolean want_focus_peaking;
+	private int focus_peaking_color_pref;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -561,6 +564,8 @@ public class DrawPreview {
 
 		String focus_peaking_pref = sharedPreferences.getString(PreferenceKeys.FocusPeakingPreferenceKey, "preference_focus_peaking_off");
 		want_focus_peaking = !focus_peaking_pref.equals("preference_focus_peaking_off") && main_activity.supportsPreviewBitmaps();
+		String focus_peaking_color = sharedPreferences.getString(PreferenceKeys.FocusPeakingColorPreferenceKey, "#ffffff");
+		focus_peaking_color_pref = Color.parseColor(focus_peaking_color);
 
 		has_settings = true;
 	}
@@ -2263,7 +2268,13 @@ public class DrawPreview {
 			if( focus_peaking_bitmap != null ) {
 				setLastImageMatrix(canvas, focus_peaking_bitmap, 0, false);
 				p.setAlpha(127);
+				if( focus_peaking_color_pref != Color.WHITE ) {
+					p.setColorFilter(new PorterDuffColorFilter(focus_peaking_color_pref, PorterDuff.Mode.SRC_IN));
+				}
 				canvas.drawBitmap(focus_peaking_bitmap, last_image_matrix, p);
+				if( focus_peaking_color_pref != Color.WHITE ) {
+					p.setColorFilter(null);
+				}
                 p.setAlpha(255);
 			}
 		}

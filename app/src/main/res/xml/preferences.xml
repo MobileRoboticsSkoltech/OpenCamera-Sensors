@@ -547,6 +547,17 @@
                 android:defaultValue="preference_focus_peaking_off"
                 />
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <!-- n.b., uses same entries/values as preference_angle_highlight_color -->
+            <ListPreference
+                android:key="preference_focus_peaking_color"
+                android:title="@string/preference_focus_peaking_color"
+                android:summary="@string/preference_focus_peaking_color_summary"
+                android:entries="@array/preference_angle_highlight_color_entries"
+                android:entryValues="@array/preference_angle_highlight_color_values"
+                android:defaultValue="#ffffff"
+                />
+
             <CheckBoxPreference
                 android:key="preference_show_video_max_amp"
                 android:title="@string/preference_show_video_max_amp"
