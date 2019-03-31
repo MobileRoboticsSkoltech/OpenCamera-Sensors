@@ -126,10 +126,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	private final ToastBoxer photo_delete_toast = new ToastBoxer();
 
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
-	private int cameraId = 0;
+	private final static int cameraId_default = 0;
+	private int cameraId = cameraId_default;
+	private final static String nr_mode_default = "preference_nr_mode_normal";
+	private String nr_mode = nr_mode_default;
 	// camera properties that aren't saved even in the bundle; these should be initialised/reset in reset()
 	private int zoom_factor; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
-	private String nr_mode;
 
 	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
 		long debug_time = 0;
@@ -156,9 +158,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			// load the things we saved in onSaveInstanceState().
             if( MyDebug.LOG )
                 Log.d(TAG, "read from savedInstanceState");
-    		cameraId = savedInstanceState.getInt("cameraId", 0);
+    		cameraId = savedInstanceState.getInt("cameraId", cameraId_default);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found cameraId: " + cameraId);
+			nr_mode = savedInstanceState.getString("nr_mode", nr_mode_default);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found nr_mode: " + nr_mode);
         }
 
 		if( MyDebug.LOG )
@@ -175,6 +180,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save cameraId: " + cameraId);
     	state.putInt("cameraId", cameraId);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save nr_mode: " + nr_mode);
+		state.putString("nr_mode", nr_mode);
 	}
 	
 	void onDestroy() {
@@ -2271,7 +2279,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reset");
 		this.zoom_factor = 0;
-		this.nr_mode = "preference_nr_mode_normal";
 	}
 
     @Override

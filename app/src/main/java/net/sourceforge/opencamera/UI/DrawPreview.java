@@ -1207,7 +1207,11 @@ public class DrawPreview {
 						photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
 								null;
 				if( bitmap != null ) {
+					if( photoMode == MyApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
+						p.setColorFilter(new PorterDuffColorFilter(Color.rgb(255, 235, 59), PorterDuff.Mode.SRC_IN)); // Yellow 500
+					}
 					canvas.drawBitmap(bitmap, null, icon_dest, p);
+					p.setColorFilter(null);
 
 					if( ui_rotation == 180 ) {
 						location_x2 -= icon_size + flash_padding;
