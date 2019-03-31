@@ -4387,16 +4387,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return features;
 	}
 
-	public void updateFlash(String focus_value) {
+	public void updateFlash(String flash_value) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "updateFlash(): " + focus_value);
+			Log.d(TAG, "updateFlash(): " + flash_value);
 		if( this.phase == PHASE_TAKING_PHOTO && !is_video ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
 			return;
 		}
-		updateFlash(focus_value, true);
+		updateFlash(flash_value, true);
 	}
 
 	private boolean updateFlash(String flash_value, boolean save) {
