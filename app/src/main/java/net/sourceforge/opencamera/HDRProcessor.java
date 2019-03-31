@@ -2016,7 +2016,7 @@ public class HDRProcessor {
 			}
 
 			// Lowe's test
-			boolean found = false;
+			/*boolean found = false;
 			boolean reject = false;
             for(int j=i+1;j<matches.size() && !found;j++) {
                 FeatureMatch match2 = matches.get(j);
@@ -2026,7 +2026,7 @@ public class HDRProcessor {
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "        next best match is with " + match2.index0 + " distance: " + match.distance + " , ratio: " + ratio);
                     }
-                    if( ratio+1.0e-5 > 0.8f ) {
+					if( ratio+1.0e-5 > 0.8f ) {
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "        reject due to Lowe's test, ratio: " + ratio);
                         }
@@ -2037,7 +2037,7 @@ public class HDRProcessor {
             if( reject ) {
 				has_matched0[match.index0] = true;
 				continue;
-			}
+			}*/
 
 			actual_matches.add(match);
 			has_matched0[match.index0] = true;
@@ -2080,8 +2080,10 @@ public class HDRProcessor {
 			List<FeatureMatch> best_inliers = new ArrayList<>();
 			List<FeatureMatch> inliers = new ArrayList<>();
 			//final float max_inlier_dist = 2.01f;
-			final float max_inlier_dist = 5.01f;
-			//final float max_inlier_dist = Math.max(5.0f, Math.max(width, height)/128.0f);
+			//final float max_inlier_dist = 5.01f;
+			//final float max_inlier_dist = 10.01f;
+			//final float max_inlier_dist = 20.01f;
+			final float max_inlier_dist = Math.max(10.01f, Math.max(width, height)/100.0f);
 			if( MyDebug.LOG )
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
