@@ -314,6 +314,21 @@
         />
 
     <ImageButton
+        android:id="@+id/cycle_flash"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/cycle_flash"
+        android:src="@drawable/flash_off"
+        android:background="@color/icons_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedCycleFlash"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/face_detection"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"

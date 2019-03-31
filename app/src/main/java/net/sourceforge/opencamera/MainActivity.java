@@ -1622,6 +1622,14 @@ public class MainActivity extends Activity {
 		this.closePopup();
 	}
 
+	public void clickedCycleFlash(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedCycleFlash");
+
+		preview.cycleFlash(true, true);
+		mainUI.updateCycleFlashIcon();
+	}
+
 	public void clickedFaceDetection(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedFaceDetection");
@@ -2300,6 +2308,10 @@ public class MainActivity extends Activity {
 		}
 		if( !mainUI.showAutoLevelIcon() ) {
 			View button = findViewById(R.id.auto_level);
+			button.setVisibility(View.GONE);
+		}
+		if( !mainUI.showCycleFlashIcon() ) {
+			View button = findViewById(R.id.cycle_flash);
 			button.setVisibility(View.GONE);
 		}
 		if( !mainUI.showFaceDetectionIcon() ) {

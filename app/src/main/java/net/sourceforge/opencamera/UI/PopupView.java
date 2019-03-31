@@ -112,6 +112,7 @@ public class PopupView extends LinearLayout {
 		final Preview preview = main_activity.getPreview();
 		if( MyDebug.LOG )
 			Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
+		if( !main_activity.getMainUI().showCycleFlashIcon() )
 		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
 			if( preview.isVideo() && supported_flash_values != null ) {

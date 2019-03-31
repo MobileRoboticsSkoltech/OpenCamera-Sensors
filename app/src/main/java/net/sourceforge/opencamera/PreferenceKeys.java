@@ -225,6 +225,8 @@ public class PreferenceKeys {
 
 	public static final String ShowFaceDetectionPreferenceKey = "preference_show_face_detection";
 
+	public static final String ShowCycleFlashPreferenceKey = "preference_show_cycle_flash";
+
 	public static final String ShowAutoLevelPreferenceKey = "preference_show_auto_level";
 
 	public static final String ShowStampPreferenceKey = "preference_show_stamp";

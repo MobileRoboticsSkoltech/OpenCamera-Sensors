@@ -4413,6 +4413,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
     	return false;
 	}
+
+	public void cycleFlash(boolean skip_torch, boolean save) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cycleFlash()");
+		if( supported_flash_values != null ) {
+			int new_flash_index = (current_flash_index+1) % supported_flash_values.size();
+			if( supported_flash_values.get(new_flash_index).equals("flash_torch") ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "cycle past torch");
+				new_flash_index = (new_flash_index+1) % supported_flash_values.size();
+			}
+			updateFlash(new_flash_index, save);
+		}
+	}
 	
 	private void updateFlash(int new_flash_index, boolean save) {
 		if( MyDebug.LOG )

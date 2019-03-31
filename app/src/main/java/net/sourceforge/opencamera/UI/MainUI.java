@@ -297,6 +297,7 @@ public class MainUI {
 			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.auto_level));
+			buttons_permanent.add(main_activity.findViewById(R.id.cycle_flash));
 			buttons_permanent.add(main_activity.findViewById(R.id.face_detection));
             buttons_permanent.add(main_activity.findViewById(R.id.audio_control));
 			buttons_permanent.add(main_activity.findViewById(R.id.kraken_icon));
@@ -837,6 +838,13 @@ public class MainUI {
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowAutoLevelPreferenceKey, false);
 	}
 
+	public boolean showCycleFlashIcon() {
+		if( !main_activity.getPreview().supportsFlash() )
+			return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowCycleFlashPreferenceKey, false);
+	}
+
 	public boolean showFaceDetectionIcon() {
 		if( !main_activity.getPreview().supportsFaceDetection() )
 			return false;
@@ -866,6 +874,7 @@ public class MainUI {
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
+				View cycleFlashButton = main_activity.findViewById(R.id.cycle_flash);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
@@ -890,6 +899,8 @@ public class MainUI {
 			    	stampButton.setVisibility(visibility);
 			    if( showAutoLevelIcon() )
 			    	autoLevelButton.setVisibility(visibility);
+			    if( showCycleFlashIcon() )
+			    	cycleFlashButton.setVisibility(visibility);
 			    if( showFaceDetectionIcon() )
 			    	faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
@@ -970,6 +981,7 @@ public class MainUI {
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
 				View autoLevelButton = main_activity.findViewById(R.id.auto_level);
+				View cycleFlashButton = main_activity.findViewById(R.id.cycle_flash);
 				View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
 			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
 			    View popupButton = main_activity.findViewById(R.id.popup);
@@ -990,6 +1002,8 @@ public class MainUI {
 					stampButton.setVisibility(visibility);
 			    if( showAutoLevelIcon() )
 			    	autoLevelButton.setVisibility(visibility);
+			    if( showCycleFlashIcon() )
+			    	cycleFlashButton.setVisibility(visibility);
 				if( showFaceDetectionIcon() )
 					faceDetectionButton.setVisibility(visibility);
 			    if( main_activity.hasAudioControl() )
@@ -1058,6 +1072,33 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.auto_level_disable : R.string.auto_level_enable) );
 	}
 
+	public void updateCycleFlashIcon() {
+		String flash_value = main_activity.getApplicationInterface().getFlashPref();
+		if( flash_value != null ) {
+			ImageButton view = main_activity.findViewById(R.id.cycle_flash);
+			switch( flash_value ) {
+				case "flash_off":
+					view.setImageResource(R.drawable.flash_off);
+					break;
+				case "flash_auto":
+				case "flash_frontscreen_auto":
+					view.setImageResource(R.drawable.flash_auto);
+					break;
+				case "flash_on":
+				case "flash_frontscreen_on":
+					view.setImageResource(R.drawable.flash_on);
+					break;
+				case "flash_torch":
+				case "flash_frontscreen_torch":
+					view.setImageResource(R.drawable.flash_torch);
+					break;
+				case "flash_red_eye":
+					view.setImageResource(R.drawable.flash_red_eye);
+					break;
+			}
+		}
+	}
+
 	public void updateFaceDetectionIcon() {
 		ImageButton view = main_activity.findViewById(R.id.face_detection);
 		boolean enabled = main_activity.getApplicationInterface().getFaceDetectionPref();
@@ -1074,6 +1115,7 @@ public class MainUI {
 		this.updateTextStampIcon();
 		this.updateStampIcon();
 		this.updateAutoLevelIcon();
+		this.updateCycleFlashIcon();
 		this.updateFaceDetectionIcon();
 	}
 
@@ -1768,7 +1810,10 @@ public class MainUI {
 		String flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
-    	if( flash_value != null && flash_value.equals("flash_off") ) {
+		if( main_activity.getMainUI().showCycleFlashIcon() ) {
+			popup.setImageResource(R.drawable.popup);
+		}
+    	else if( flash_value != null && flash_value.equals("flash_off") ) {
 			popup.setImageResource(R.drawable.popup_flash_off);
     	}
     	else if( flash_value != null && ( flash_value.equals("flash_torch") || flash_value.equals("flash_frontscreen_torch") ) ) {
