@@ -1161,15 +1161,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
     public String getNRMode() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "nr_mode: " + nr_mode);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "nr_mode: " + nr_mode);*/
 		return nr_mode;
 	}
 
     @Override
     public NRModePref getNRModePref() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "nr_mode: " + nr_mode);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "nr_mode: " + nr_mode);*/
 		switch( nr_mode ) {
 			case "preference_nr_mode_low_light":
 				return NRModePref.NRMODE_LOW_LIGHT;
