@@ -7401,10 +7401,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 			Preview preview = previewReference.get();
 			if( preview == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "preview is null");
 				return null;
 			}
 			Activity activity = (Activity)preview.getContext();
 			if( activity == null || activity.isFinishing() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "activity is null or finishing");
 				return null;
 			}
 
