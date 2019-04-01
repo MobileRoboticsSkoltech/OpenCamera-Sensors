@@ -7427,6 +7427,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "create histogramScript");
 				ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(preview.rs);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after creating histogramScript: " + (System.currentTimeMillis() - debug_time));
 
 				if( preview.want_histogram ) {
 					if( MyDebug.LOG )
