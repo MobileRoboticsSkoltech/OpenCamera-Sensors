@@ -7468,10 +7468,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						histogramAllocationB.copyTo(temp);
 						for(int i=0;i<256;i++)
 							result.new_histogram[c++] = temp[i];
+						if( MyDebug.LOG )
+							Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
 
 						histogramAllocationR.destroy();
 						histogramAllocationG.destroy();
 						histogramAllocationB.destroy();
+						if( MyDebug.LOG )
+							Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
 					}
 					else {
 						if( MyDebug.LOG )
@@ -7505,7 +7509,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 						result.new_histogram = new int[256];
 						histogramAllocation.copyTo(result.new_histogram);
+						if( MyDebug.LOG )
+							Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
+
 						histogramAllocation.destroy();
+						if( MyDebug.LOG )
+							Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
 					}
 				}
 
