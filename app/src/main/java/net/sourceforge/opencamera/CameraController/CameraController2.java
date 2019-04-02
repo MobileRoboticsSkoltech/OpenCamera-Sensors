@@ -6294,60 +6294,9 @@ public class CameraController2 extends CameraController {
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
-		/** Processes either a partial or total result.
+		/** Updates cached information regarding the capture result status related to auto-exposure.
 		 */
-		private void process(CaptureRequest request, CaptureResult result) {
-			/*if( MyDebug.LOG )
-			Log.d(TAG, "process, state: " + state);*/
-			if( result.getFrameNumber() < last_process_frame_number ) {
-				/*if( MyDebug.LOG )
-					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
-				return;
-			}
-			long debug_time = 0;
-			if( MyDebug.LOG ) {
-				debug_time = System.currentTimeMillis();
-			}
-			last_process_frame_number = result.getFrameNumber();
-
-			/*Integer flash_mode = result.get(CaptureResult.FLASH_MODE);
-			if( MyDebug.LOG ) {
-				if( flash_mode == null )
-					Log.d(TAG, "FLASH_MODE is null");
-				else if( flash_mode == CaptureResult.FLASH_MODE_OFF )
-					Log.d(TAG, "FLASH_MODE = FLASH_MODE_OFF");
-				else if( flash_mode == CaptureResult.FLASH_MODE_SINGLE )
-					Log.d(TAG, "FLASH_MODE = FLASH_MODE_SINGLE");
-				else if( flash_mode == CaptureResult.FLASH_MODE_TORCH )
-					Log.d(TAG, "FLASH_MODE = FLASH_MODE_TORCH");
-				else
-					Log.d(TAG, "FLASH_MODE = " + flash_mode);
-			}*/
-
-			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
-			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-			/*if( MyDebug.LOG ) {
-				if( af_state == null )
-					Log.d(TAG, "CONTROL_AF_STATE is null");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_INACTIVE )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_INACTIVE");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_SCAN");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_FOCUSED");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_ACTIVE_SCAN");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_FOCUSED_LOCKED");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_NOT_FOCUSED_LOCKED");
-				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED )
-					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_UNFOCUSED");
-				else
-					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
-			}*/
-
-			// CONTROL_AE_STATE can be null on some devices, so as with af_state, use Integer
+		private void updateCachedAECaptureStatus(CaptureResult result) {
 			Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
 			/*if( MyDebug.LOG ) {
 				if( ae_state == null )
@@ -6368,6 +6317,19 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
 			}*/
 			Integer flash_mode = result.get(CaptureResult.FLASH_MODE);
+			/*if( MyDebug.LOG ) {
+				if( flash_mode == null )
+					Log.d(TAG, "FLASH_MODE is null");
+				else if( flash_mode == CaptureResult.FLASH_MODE_OFF )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_OFF");
+				else if( flash_mode == CaptureResult.FLASH_MODE_SINGLE )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_SINGLE");
+				else if( flash_mode == CaptureResult.FLASH_MODE_TORCH )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_TORCH");
+				else
+					Log.d(TAG, "FLASH_MODE = " + flash_mode);
+			}*/
+
 			if( use_fake_precapture_mode && ( fake_precapture_torch_focus_performed || fake_precapture_torch_performed ) && flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
 				// don't change ae state while torch is on for fake flash
 			}
@@ -6392,6 +6354,59 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "flash no longer required");
 				}
 			}
+
+			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING ) {
+				/*if( MyDebug.LOG && !capture_result_is_ae_scanning )
+					Log.d(TAG, "ae_state now searching");*/
+				capture_result_is_ae_scanning = true;
+			}
+			else {
+				/*if( MyDebug.LOG && capture_result_is_ae_scanning )
+					Log.d(TAG, "ae_state stopped searching");*/
+				capture_result_is_ae_scanning = false;
+			}
+		}
+
+		private void handleStateChange(CaptureRequest request, CaptureResult result) {
+			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
+			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			/*if( MyDebug.LOG ) {
+				if( af_state == null )
+					Log.d(TAG, "CONTROL_AF_STATE is null");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_INACTIVE )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_INACTIVE");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_SCAN");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_FOCUSED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_ACTIVE_SCAN");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_FOCUSED_LOCKED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_NOT_FOCUSED_LOCKED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_UNFOCUSED");
+				else
+					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
+			}*/
+			// CONTROL_AE_STATE can be null on some devices, so as with af_state, use Integer
+			Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+			/*Integer awb_state = result.get(CaptureResult.CONTROL_AWB_STATE);
+			if( MyDebug.LOG ) {
+				if( awb_state == null )
+					Log.d(TAG, "CONTROL_AWB_STATE is null");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_INACTIVE )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_INACTIVE");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_SEARCHING )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_SEARCHING");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_CONVERGED )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_CONVERGED");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_LOCKED )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_LOCKED");
+				else
+					Log.d(TAG, "CONTROL_AWB_STATE = " + awb_state);
+			}*/
 
 			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
 				/*if( MyDebug.LOG )
@@ -6438,33 +6453,6 @@ public class CameraController2 extends CameraController {
 				}
 			}*/
 
-			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING ) {
-				/*if( MyDebug.LOG && !capture_result_is_ae_scanning )
-					Log.d(TAG, "ae_state now searching");*/
-				capture_result_is_ae_scanning = true;
-			}
-			else {
-				/*if( MyDebug.LOG && capture_result_is_ae_scanning )
-					Log.d(TAG, "ae_state stopped searching");*/
-				capture_result_is_ae_scanning = false;
-			}
-
-			/*Integer awb_state = result.get(CaptureResult.CONTROL_AWB_STATE);
-			if( MyDebug.LOG ) {
-				if( awb_state == null )
-					Log.d(TAG, "CONTROL_AWB_STATE is null");
-				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_INACTIVE )
-					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_INACTIVE");
-				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_SEARCHING )
-					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_SEARCHING");
-				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_CONVERGED )
-					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_CONVERGED");
-				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_LOCKED )
-					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_LOCKED");
-				else
-					Log.d(TAG, "CONTROL_AWB_STATE = " + awb_state);
-			}*/
-
 			if( fake_precapture_turn_on_torch_id != null && fake_precapture_turn_on_torch_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "torch turned on for fake precapture");
@@ -6481,7 +6469,7 @@ public class CameraController2 extends CameraController {
 						Log.e(TAG, "waiting for autofocus but af_state is null");
 					test_af_state_null_focus++;
 					state = STATE_NORMAL;
-			    	precapture_state_change_time_ms = -1;
+					precapture_state_change_time_ms = -1;
 					if( autofocus_cb != null ) {
 						autofocus_cb.onAutoFocus(false);
 						autofocus_cb = null;
@@ -6492,7 +6480,7 @@ public class CameraController2 extends CameraController {
 					// check for autofocus completing
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED /*||
 							af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED*/
-							) {
+					) {
 						boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
 						if( MyDebug.LOG ) {
 							if( focus_success )
@@ -6502,7 +6490,7 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "af_state: " + af_state);
 						}
 						state = STATE_NORMAL;
-				    	precapture_state_change_time_ms = -1;
+						precapture_state_change_time_ms = -1;
 						if( use_fake_precapture_mode && fake_precapture_torch_focus_performed ) {
 							fake_precapture_torch_focus_performed = false;
 							if( !capture_follows_autofocus_hint ) {
@@ -6673,7 +6661,10 @@ public class CameraController2 extends CameraController {
 					takePictureAfterPrecapture();
 				}
 			}
+		}
 
+		private void handleContinuousFocusMove(CaptureResult result) {
+			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "continuous focusing started");
@@ -6688,7 +6679,31 @@ public class CameraController2 extends CameraController {
 					continuous_focus_move_callback.onContinuousFocusMove(false);
 				}
 			}
+		}
 
+		/** Processes either a partial or total result.
+		 */
+		private void process(CaptureRequest request, CaptureResult result) {
+			/*if( MyDebug.LOG )
+			Log.d(TAG, "process, state: " + state);*/
+			if( result.getFrameNumber() < last_process_frame_number ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
+				return;
+			}
+			long debug_time = 0;
+			if( MyDebug.LOG ) {
+				debug_time = System.currentTimeMillis();
+			}
+			last_process_frame_number = result.getFrameNumber();
+
+			updateCachedAECaptureStatus(result);
+
+			handleStateChange(request, result);
+
+			handleContinuousFocusMove(result);
+
+			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != null && af_state != last_af_state ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);
@@ -6699,19 +6714,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "process() took: " + (System.currentTimeMillis() - debug_time));
 			}*/
 		}
-		
-		/** Processes a total result.
+
+		/** Updates cached information regarding the capture result.
 		 */
-		private void processCompleted(CaptureRequest request, CaptureResult result) {
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "processCompleted");*/
-
-			if( !has_received_frame ) {
-				has_received_frame = true;
-				if( MyDebug.LOG )
-					Log.d(TAG, "has_received_frame now set to true");
-			}
-
+		private void updateCachedCaptureResult(CaptureResult result) {
 			if( modified_from_camera_settings ) {
 				// don't update capture results!
 				// otherwise have problem taking HDR photos twice in a row, the second one will pick up the exposure time as
@@ -6749,7 +6755,7 @@ public class CameraController2 extends CameraController {
 							Log.e(TAG, "message: " + e.getMessage());
 						}
 						e.printStackTrace();
-					} 
+					}
 				}*/
 			}
 			else {
@@ -6829,7 +6835,9 @@ public class CameraController2 extends CameraController {
 					convertRggbToTemperature(vector); // logging will occur in this function
 				}
 			}*/
+		}
 
+		private void handleFaceDetection(CaptureResult result) {
 			if( face_detection_listener != null && previewBuilder != null ) {
 				Integer face_detect_mode = previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE);
 				if( face_detect_mode != null && face_detect_mode != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
@@ -6850,6 +6858,142 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
+		}
+
+		/** This should be called when a capture result corresponds to a capture that has completed.
+		 */
+		private void handleCaptureCompleted(CaptureResult result) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture request completed");
+			test_capture_results++;
+			modified_from_camera_settings = false;
+
+			//test_wait_capture_result = true;
+			if( test_wait_capture_result ) {
+				// For RAW capture, we require the capture result before creating DngCreator
+				// but for testing purposes, we need to test the possibility where onImageAvailable() for
+				// the RAW image is called before we receive the capture result here.
+				// Also with JPEG only capture, there are problems with repeat mode and continuous focus if
+				// onImageAvailable() is called before this code is called, because it means here we cancel the
+				// focus and lose the focus callback that was going to trigger the next repeat photo! This shows
+				// up on testContinuousPictureFocusRepeat() on Nexus 7, but can be autotested on other devices
+				// with the flag, see testContinuousPictureFocusRepeatWaitCaptureResult().
+				try {
+					if( MyDebug.LOG )
+						Log.d(TAG, "test_wait_capture_result: waiting...");
+					// 200ms is enough to test the problem with testTakePhotoRawWaitCaptureResult() on Nexus 6, but use 500ms to be sure
+					// 200ms is enough to test the problem with testContinuousPictureFocusRepeatWaitCaptureResult() on Nokia 8, but use 500ms to be sure
+					Thread.sleep(500);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if( onRawImageAvailableListener != null ) {
+				onRawImageAvailableListener.setCaptureResult(result);
+			}
+			// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
+			// need to cancel the autofocus, and restart the preview after taking the photo
+			// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
+			if( previewBuilder != null ) {
+				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+				if( MyDebug.LOG )
+					Log.d(TAG, "### reset ae mode");
+				String saved_flash_value = camera_settings.flash_value;
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+					// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
+					// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
+					camera_settings.flash_value = "flash_off";
+				}
+				// if not using fake precapture, not sure if we need to set the ae mode, but the AE mode is set again in Camera2Basic
+				camera_settings.setAEMode(previewBuilder, false);
+				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
+				try {
+					capture();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to cancel autofocus after taking photo");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				}
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+					// now set up the request to switch to the correct flash value
+					camera_settings.flash_value = saved_flash_value;
+					camera_settings.setAEMode(previewBuilder, false);
+				}
+				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to start preview after taking photo");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					preview_error_cb.onError();
+				}
+			}
+			fake_precapture_torch_performed = false;
+
+			if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus bracketing complete, reset manual focus");
+				camera_settings.setFocusDistance(previewBuilder);
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set focus distance");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				}
+			}
+
+
+			// Important that we only call the picture onCompleted callback after we've received the capture request, so
+			// we need to check if we already received all the images.
+			// Also needs to be run on UI thread.
+			// Needed for testContinuousPictureFocusRepeat on Nexus 7; also testable on other devices via
+			// testContinuousPictureFocusRepeatWaitCaptureResult.
+			final Activity activity = (Activity)context;
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "processCompleted UI thread call checkImagesCompleted()");
+					synchronized( image_reader_lock ) {
+						done_all_captures = true;
+						if( MyDebug.LOG )
+							Log.d(TAG, "done all captures");
+						checkImagesCompleted();
+					}
+				}
+			});
+		}
+
+		/** Processes a total result.
+		 */
+		private void processCompleted(CaptureRequest request, CaptureResult result) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "processCompleted");*/
+
+			if( !has_received_frame ) {
+				has_received_frame = true;
+				if( MyDebug.LOG )
+					Log.d(TAG, "has_received_frame now set to true");
+			}
+
+			updateCachedCaptureResult(result);
+			handleFaceDetection(result);
 
 			if( push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request && previewBuilder != null ) {
 				if( MyDebug.LOG )
@@ -6899,121 +7043,7 @@ public class CameraController2 extends CameraController {
 			}*/
 
 			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "capture request completed");
-				test_capture_results++;
-				modified_from_camera_settings = false;
-
-				//test_wait_capture_result = true;
-				if( test_wait_capture_result ) {
-					// For RAW capture, we require the capture result before creating DngCreator
-					// but for testing purposes, we need to test the possibility where onImageAvailable() for
-					// the RAW image is called before we receive the capture result here.
-					// Also with JPEG only capture, there are problems with repeat mode and continuous focus if
-					// onImageAvailable() is called before this code is called, because it means here we cancel the
-					// focus and lose the focus callback that was going to trigger the next repeat photo! This shows
-					// up on testContinuousPictureFocusRepeat() on Nexus 7, but can be autotested on other devices
-					// with the flag, see testContinuousPictureFocusRepeatWaitCaptureResult().
-					try {
-						if( MyDebug.LOG )
-							Log.d(TAG, "test_wait_capture_result: waiting...");
-						// 200ms is enough to test the problem with testTakePhotoRawWaitCaptureResult() on Nexus 6, but use 500ms to be sure
-						// 200ms is enough to test the problem with testContinuousPictureFocusRepeatWaitCaptureResult() on Nokia 8, but use 500ms to be sure
-						Thread.sleep(500);
-					}
-					catch(InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-
-				if( onRawImageAvailableListener != null ) {
-					onRawImageAvailableListener.setCaptureResult(result);
-				}
-				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
-				// need to cancel the autofocus, and restart the preview after taking the photo
-				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
-				if( previewBuilder != null ) {
-					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-					if( MyDebug.LOG )
-						Log.d(TAG, "### reset ae mode");
-					String saved_flash_value = camera_settings.flash_value;
-					if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-						// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
-						// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
-						camera_settings.flash_value = "flash_off";
-					}
-					// if not using fake precapture, not sure if we need to set the ae mode, but the AE mode is set again in Camera2Basic
-					camera_settings.setAEMode(previewBuilder, false);
-					// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
-					try {
-						capture();
-					}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to cancel autofocus after taking photo");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
-						}
-						e.printStackTrace();
-					}
-					if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-						// now set up the request to switch to the correct flash value
-						camera_settings.flash_value = saved_flash_value;
-						camera_settings.setAEMode(previewBuilder, false);
-					}
-					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
-					try {
-						setRepeatingRequest();
-					}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to start preview after taking photo");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
-						}
-						e.printStackTrace();
-						preview_error_cb.onError();
-					}
-				}
-				fake_precapture_torch_performed = false;
-
-				if( burst_type == BurstType.BURSTTYPE_FOCUS && previewBuilder != null ) { // make sure camera wasn't released in the meantime
-					if( MyDebug.LOG )
-						Log.d(TAG, "focus bracketing complete, reset manual focus");
-					camera_settings.setFocusDistance(previewBuilder);
-					try {
-						setRepeatingRequest();
-					}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to set focus distance");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
-						}
-						e.printStackTrace();
-					}
-				}
-
-
-				// Important that we only call the picture onCompleted callback after we've received the capture request, so
-				// we need to check if we already received all the images.
-				// Also needs to be run on UI thread.
-				// Needed for testContinuousPictureFocusRepeat on Nexus 7; also testable on other devices via
-				// testContinuousPictureFocusRepeatWaitCaptureResult.
-				final Activity activity = (Activity)context;
-				activity.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if( MyDebug.LOG )
-							Log.d(TAG, "processCompleted UI thread call checkImagesCompleted()");
-						synchronized( image_reader_lock ) {
-							done_all_captures = true;
-							if( MyDebug.LOG )
-								Log.d(TAG, "done all captures");
-							checkImagesCompleted();
-						}
-					}
-				});
+				handleCaptureCompleted(result);
 			}
 		}
 	};
