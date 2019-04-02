@@ -4787,11 +4787,15 @@ public class CameraController2 extends CameraController {
 		if( focus_mode == null ) {
 			// we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
 			// (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
+			if( MyDebug.LOG )
+				Log.d(TAG, "no focus mode");
 			cb.onAutoFocus(true);
 			return;
 		}
 		else if( (!do_af_trigger_for_continuous || use_fake_precapture_mode) && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
 			// See note above for do_af_trigger_for_continuous
+			if( MyDebug.LOG )
+				Log.d(TAG, "skip af trigger due to continuous mode");
 			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 			this.autofocus_cb = cb;
 			return;
@@ -4824,6 +4828,8 @@ public class CameraController2 extends CameraController {
 				}
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "state is now STATE_WAITING_AUTOFOCUS");
 		state = STATE_WAITING_AUTOFOCUS;
 		precapture_state_change_time_ms = -1;
 		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
@@ -6298,6 +6304,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
 				return;
 			}
+			long debug_time = 0;
+			if( MyDebug.LOG ) {
+				debug_time = System.currentTimeMillis();
+			}
 			last_process_frame_number = result.getFrameNumber();
 
 			/*Integer flash_mode = result.get(CaptureResult.FLASH_MODE);
@@ -6684,6 +6694,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);
 				last_af_state = af_state;
 			}
+
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "process() took: " + (System.currentTimeMillis() - debug_time));
+			}*/
 		}
 		
 		/** Processes a total result.
