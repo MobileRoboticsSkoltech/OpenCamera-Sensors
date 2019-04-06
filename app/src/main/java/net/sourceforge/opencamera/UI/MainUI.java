@@ -157,7 +157,7 @@ public class MainUI {
 
 	private UIPlacement computeUIPlacement() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-		String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
+		String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_top");
 		switch( ui_placement_string ) {
 			case "ui_left":
 				return UIPlacement.UIPLACEMENT_LEFT;
