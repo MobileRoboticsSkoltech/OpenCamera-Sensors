@@ -7106,6 +7106,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(0, settingsButton.getTop());
         assertEquals(display_size.x, galleryButton.getRight());
         assertEquals(0, galleryButton.getTop());
+
+        assertTrue(!mActivity.popupIsOpen());
+        clickView(popupButton);
+        while( !mActivity.popupIsOpen() ) {
+        }
     }
 
     /* Tests layout bug with popup menu.
