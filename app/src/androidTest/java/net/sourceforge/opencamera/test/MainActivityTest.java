@@ -7050,6 +7050,64 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(popup_height, test_popup_height);
     }
 
+    /* Tests with ui_right vs ui_top layout.
+     */
+    public void testRightLayout() {
+        Log.d(TAG, "testRightLayout");
+
+        setToDefault();
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
+            editor.apply();
+            updateForSettings();
+        }
+
+        View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+        assertTrue(!mActivity.popupIsOpen());
+        clickView(popupButton);
+        while( !mActivity.popupIsOpen() ) {
+        }
+
+        Point display_size = new Point();
+        {
+            Display display = mActivity.getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+            Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
+        }
+        View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+        View galleryButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.gallery);
+
+        Log.d(TAG, "settings right: " + settingsButton.getRight());
+        Log.d(TAG, "settings top: " + settingsButton.getTop());
+        Log.d(TAG, "gallery right: " + galleryButton.getRight());
+        Log.d(TAG, "gallery top: " + galleryButton.getTop());
+
+        assertTrue(settingsButton.getRight() > (int)(0.8*display_size.x));
+        assertEquals(0, settingsButton.getTop());
+        assertEquals(display_size.x, galleryButton.getRight());
+        assertEquals(0, galleryButton.getTop());
+
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.UIPlacementPreferenceKey, "ui_top");
+            editor.apply();
+            updateForSettings();
+        }
+
+        Log.d(TAG, "settings right: " + settingsButton.getRight());
+        Log.d(TAG, "settings top: " + settingsButton.getTop());
+        Log.d(TAG, "gallery right: " + galleryButton.getRight());
+        Log.d(TAG, "gallery top: " + galleryButton.getTop());
+
+        assertTrue(settingsButton.getRight() < (int)(0.2*display_size.x));
+        assertEquals(0, settingsButton.getTop());
+        assertEquals(display_size.x, galleryButton.getRight());
+        assertEquals(0, galleryButton.getTop());
+    }
+
     /* Tests layout bug with popup menu.
      * Note, in practice this doesn't seem to reproduce the problem, but keep the test anyway.
      * Currently not autotested as the problem isn't fixed, and this would just be a test that
