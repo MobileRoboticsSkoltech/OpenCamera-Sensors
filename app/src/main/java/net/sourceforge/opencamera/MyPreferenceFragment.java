@@ -113,6 +113,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}*/
 
+		final boolean supports_flash = bundle.getBoolean("supports_flash");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_flash: " + supports_flash);
+
 		//readFromBundle(bundle, "color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
 		//readFromBundle(bundle, "scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
 		//readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
@@ -539,7 +543,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
         }
 
-        if( !supports_exposure_lock ) {
+		if( !supports_flash ) {
+			Preference pref = findPreference("preference_show_cycle_flash");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			pg.removePreference(pref);
+		}
+
+		if( !supports_exposure_lock ) {
         	Preference pref = findPreference("preference_show_exposure_lock");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);

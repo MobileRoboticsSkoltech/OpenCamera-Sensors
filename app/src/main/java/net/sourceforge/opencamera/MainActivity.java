@@ -1974,6 +1974,7 @@ public class MainActivity extends Activity {
 		bundle.putString("camera_api", this.preview.getCameraAPI());
 		bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
+		bundle.putBoolean("supports_flash", this.preview.supportsFlash());
 		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
 		bundle.putBoolean("supports_camera2", this.supports_camera2);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
