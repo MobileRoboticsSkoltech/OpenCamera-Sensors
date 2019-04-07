@@ -1000,7 +1000,13 @@ public class HDRProcessor {
 				script.invoke_setBrightenParameters(gain, gamma, low_x, mid_x, max_brightness);
 
 				script.forEach_dro_brighten(allocation, output_allocation);
-				allocation = output_allocation; // output is now the input for subsequent operations
+
+				// output is now the input for subsequent operations
+				if( free_output_allocation ) {
+					allocation.destroy();
+					free_output_allocation = false;
+				}
+				allocation = output_allocation;
 				if( MyDebug.LOG )
 					Log.d(TAG, "### time after dro_brighten: " + (System.currentTimeMillis() - time_s));
 			}
