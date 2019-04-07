@@ -122,7 +122,11 @@ public class DrawPreview {
 	private long last_current_time_time;
 
 	private String iso_exposure_string;
+	private boolean is_scanning;
 	private long last_iso_exposure_time;
+
+	private boolean need_flash_indicator = false;
+	private long last_need_flash_indicator_time;
 
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac;
@@ -1047,11 +1051,7 @@ public class DrawPreview {
 					iso_exposure_string += preview.getFrameDurationString(frame_duration);
 				}
 
-				last_iso_exposure_time = time_ms;
-			}
-
-			if( iso_exposure_string.length() > 0 ) {
-				boolean is_scanning = false;
+				is_scanning = false;
 				if( camera_controller.captureResultIsAEScanning() ) {
 					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
 					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
@@ -1061,6 +1061,10 @@ public class DrawPreview {
 					}
 				}
 
+				last_iso_exposure_time = time_ms;
+			}
+
+			if( iso_exposure_string.length() > 0 ) {
 				int text_color = Color.rgb(255, 235, 59); // Yellow 500
 				if( is_scanning ) {
 					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
@@ -1292,13 +1296,21 @@ public class DrawPreview {
 				}
 			}
 
-			String flash_value = preview.getCurrentFlashValue();
-			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
-			if( flash_value != null &&
-					( flash_value.equals("flash_on")
-							|| ( (flash_value.equals("flash_auto") || flash_value.equals("flash_red_eye")) && camera_controller.needsFlash() )
-							|| camera_controller.needsFrontScreenFlash() ) &&
-					!applicationInterface.isVideoPref() ) { // flash-indicator not supported for photos taken in video mode
+			if( time_ms > last_need_flash_indicator_time + 100 ) {
+				need_flash_indicator = false;
+				String flash_value = preview.getCurrentFlashValue();
+				// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
+				if( flash_value != null &&
+						( flash_value.equals("flash_on")
+								|| ( (flash_value.equals("flash_auto") || flash_value.equals("flash_red_eye")) && camera_controller.needsFlash() )
+								|| camera_controller.needsFrontScreenFlash() ) &&
+						!applicationInterface.isVideoPref() ) { // flash-indicator not supported for photos taken in video mode
+					need_flash_indicator = true;
+				}
+
+				last_need_flash_indicator_time = time_ms;
+			}
+			if( need_flash_indicator ) {
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
 					float alpha = (time_ms - needs_flash_time)/(float)fade_ms;
