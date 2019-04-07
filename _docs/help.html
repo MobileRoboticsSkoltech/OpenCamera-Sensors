@@ -623,7 +623,8 @@ default behaviour).</p>
 
 <p><b>Show a histogram</b> - Allows displaying an on-screen histogram (only available if Camera2 API is used). Note that the
 	histogram reflects the currently display on-screen preview, and will not necessarily be accurate for the final resultant photograph,
-	especially if modes such as NR, DRO, HDR are used. The follow options are available:</p>
+	especially if modes such as NR, DRO, HDR are used. Also note that displaying a histogram may use more battery.
+	The follow options are available:</p>
 <ul>
 	<li>RGB Colors - Displays a histogram for each color channel.</li>
 	<li>Luminance - The brightness is computed as a weighted average of the RGB components: 0.299*R + 0.587G + 0.114*B.</li>
@@ -636,11 +637,12 @@ default behaviour).</p>
 	<a href="https://en.wikipedia.org/wiki/Zebra_patterning">zebra patterning</a>) to show whether the
 	image is over-exposed (only available if Camera2 API is used). Note when using photo modes NR and HDR,
 	a region that is shown as over-exposed on-screen may not necessarily be over-exposed in the resultant image,
-	since these modes are able to better handle a high dynamic range.</p>
+	since these modes are able to better handle a high dynamic range. Also note that enabling zebra stripes
+	may use more battery.</p>
 
 <p><b>Focus peaking</b> - Allows displaying on-screen highlights to indicate edges (contours) that are in-focus
 	(only available if Camera2 API is used). This is particularly useful in conjunction with manual focus mode, to help show
-	which regions of the image are in focus.</p>
+	which regions of the image are in focus. Note that enabling focus peaking may use more battery.</p>
 
 <p><b>Focus peaking color</b> - This controls the color to be used for the highlights when Focus Peaking is enabled.</p>
 
