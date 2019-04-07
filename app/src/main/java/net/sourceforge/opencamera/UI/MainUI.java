@@ -370,6 +370,12 @@ public class MainUI {
 					}
 					for(View this_view : buttons_permanent) {
 						if( this_view.getVisibility() == View.VISIBLE ) {
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "set view layout for: " + this_view.getContentDescription());
+								if( this_view==first_visible_view) {
+									Log.d(TAG,"    first visible view");
+								}
+							}
 							//this_view.setPadding(0, margin/2, 0, margin/2);
 							layoutParams = (RelativeLayout.LayoutParams)this_view.getLayoutParams();
 							// be careful if we change how the margins are laid out: it looks nicer when only the settings icon
