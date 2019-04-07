@@ -1359,19 +1359,46 @@ public class DrawPreview {
 						int [] temp = new int[256];
 						int c=0;
 
+						/* For overlapping rgb, we'll have:
+							(1, (1-a2).(1-a1).a0.r, (1-a2).a1.g, a2.b)
+						   If we wanted to have the alpha scaling the same (i.e., same r, g, b values
+						   if r=g=b, then this gives:
+						       a2 = 1/[2+1/a0]
+                               a1 = 1 - a2/[a0.(1-a2)]
+                           However this then means that for non-overlapping colours, red is too
+                           strong whilst blue is too weak, so we instead adjust to:
+                               a0' = (a0+a1)/2
+                               a1' = a1
+                               a2' = (a1+a2)/2
+						 */
+						/*final int a0 = 255;
+						final int a1 = 128;
+						final int a2 = 85;*/
+						//final int a0 = 191;
+						final int a0 = 151;
+						final int a1 = 110;
+						//final int a2 = 77;
+						final int a2 = 94;
+						/*final int a0 = 128;
+						final int a1 = 85;
+						final int a2 = 64;*/
+						final int r = 255;
+						final int g = 255;
+						final int b = 255;
+
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
-						p.setColor(Color.argb(128, 255, 0, 0));
+						p.setColor(Color.argb(a0, r, 0, 0));
 						drawHistogramChannel(canvas, temp);
 
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
-						p.setColor(Color.argb(128, 0, 255, 0));
+						p.setColor(Color.argb(a1, 0, g, 0));
 						drawHistogramChannel(canvas, temp);
 
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
-						p.setColor(Color.argb(128, 0, 0, 255));
+						p.setColor(Color.argb(a2, 0, 0, b));
 						drawHistogramChannel(canvas, temp);
 					}
 					else {
