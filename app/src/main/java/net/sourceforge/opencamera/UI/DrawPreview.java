@@ -1353,6 +1353,8 @@ public class DrawPreview {
 						Log.d(TAG, "histogram length: " + histogram.length);*/
 					final int histogram_width = (int) (100 * scale + 0.5f); // convert dps to pixels
 					final int histogram_height = (int) (60 * scale + 0.5f); // convert dps to pixels
+					// n.b., if changing the histogram_height, remember to update focus_seekbar and
+					// focus_bracketing_target_seekbar margins in activity_main.xml
 					int location_x2 = location_x - flash_padding;
 					if( ui_rotation == 180 ) {
 						location_x2 = location_x - histogram_width + flash_padding;
