@@ -82,9 +82,9 @@ public class CameraController2 extends CameraController {
 	private boolean capture_follows_autofocus_hint;
 	private FaceDetectionListener face_detection_listener;
 	private int last_faces_detected = -1;
-	private final Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
-	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
+	private final Object background_camera_lock = new Object(); // lock to synchronize between UI thread and the background "CameraBackground" thread/handler
+
 	private ImageReader imageReader;
 
 	private BurstType burst_type = BurstType.BURSTTYPE_NONE;
@@ -963,19 +963,22 @@ public class CameraController2 extends CameraController {
 				image.close();
 				return;
 			}
-			synchronized( image_reader_lock ) {
-				/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
-				 * also, we may process the RAW image when the capture result is available, which may be in a separate thread.
-				 */
-				Image image = reader.acquireNextImage();
-				if( MyDebug.LOG )
-					Log.d(TAG, "image timestamp: " + image.getTimestamp());
-				ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-				byte [] bytes = new byte[buffer.remaining()];
-				if( MyDebug.LOG )
-					Log.d(TAG, "read " + bytes.length + " bytes");
-				buffer.get(bytes);
-				image.close();
+
+			List<byte []> single_burst_complete_images = null;
+			boolean call_takePhotoPartial = false;
+			boolean call_takePhotoCompleted = false;
+
+			Image image = reader.acquireNextImage();
+			if( MyDebug.LOG )
+				Log.d(TAG, "image timestamp: " + image.getTimestamp());
+			ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+			byte [] bytes = new byte[buffer.remaining()];
+			if( MyDebug.LOG )
+				Log.d(TAG, "read " + bytes.length + " bytes");
+			buffer.get(bytes);
+			image.close();
+
+			synchronized( background_camera_lock ) {
 				n_burst_taken++;
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "n_burst_taken is now: " + n_burst_taken);
@@ -994,20 +997,33 @@ public class CameraController2 extends CameraController {
 							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
 						}
 						// take a copy, so that we can clear pending_burst_images
-						List<byte []> images = new ArrayList<>(pending_burst_images);
-						picture_cb.onBurstPictureTaken(images);
-						pending_burst_images.clear();
-
-						takePhotoCompleted();
+						single_burst_complete_images = new ArrayList<>(pending_burst_images);
+						// continued below after lock...
 					}
 					else {
 						if( MyDebug.LOG )
 							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
-						takePhotoPartial();
+						call_takePhotoPartial = true;
 					}
 				}
-				else {
-					picture_cb.onPictureTaken(bytes);
+				// case for burst_single_request==false handled below
+			}
+
+			// need to call without a lock
+			if( single_burst_complete_images != null ) {
+				picture_cb.onBurstPictureTaken(single_burst_complete_images);
+			}
+			else if( !burst_single_request ) {
+				picture_cb.onPictureTaken(bytes);
+			}
+
+			synchronized( background_camera_lock ) {
+				if( single_burst_complete_images != null ) {
+					pending_burst_images.clear();
+
+					call_takePhotoCompleted = true;
+				}
+				else if( !burst_single_request ) {
 					n_burst--;
 					if( MyDebug.LOG )
 						Log.d(TAG, "n_burst is now " + n_burst);
@@ -1017,16 +1033,25 @@ public class CameraController2 extends CameraController {
 						// n_burst==0 below (as there may have been more than one image still to be received)
 						if( MyDebug.LOG )
 							Log.d(TAG, "continuous burst mode still in progress");
-						takePhotoPartial();
+						call_takePhotoPartial = true;
 					}
 					else if( n_burst == 0 ) {
-						takePhotoCompleted();
+						call_takePhotoCompleted = true;
 					}
 					else {
-						takePhotoPartial();
+						call_takePhotoPartial = true;
 					}
 				}
 			}
+
+			// need to call outside of lock (because they can lead to calls to external callbacks)
+			if( call_takePhotoPartial ) {
+				takePhotoPartial();
+			}
+			else if( call_takePhotoCompleted ) {
+				takePhotoCompleted();
+			}
+
 			if( MyDebug.LOG )
 				Log.d(TAG, "done onImageAvailable");
 		}
@@ -1037,132 +1062,135 @@ public class CameraController2 extends CameraController {
 		private void takePhotoPartial() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "takePhotoPartial");
-			if( slow_burst_capture_requests != null ) {
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "need to execute the next capture");
-					Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
-				}
-				if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
-					try {
-						if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-							captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
-						}
-					}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to take next burst");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
-						}
-						e.printStackTrace();
-						jpeg_todo = false;
-						raw_todo = false;
-						picture_cb = null;
-						if( take_picture_error_cb != null ) {
-							take_picture_error_cb.onError();
-							take_picture_error_cb = null;
-						}
-					}
-				}
-				else if( previewBuilder != null ) { // make sure camera wasn't released in the meantime
-					if( MyDebug.LOG )
-						Log.d(TAG, "focus bracketing");
 
-					if( !focus_bracketing_in_progress ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "focus bracketing was cancelled");
-						// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
-						// RequestTagType.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "slow_burst_capture_requests size was: " + slow_burst_capture_requests.size());
-							Log.d(TAG, "n_burst size was: " + n_burst);
-							Log.d(TAG, "n_burst_taken: " + n_burst_taken);
-						}
-						slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
-						// if burst_single_request==true, n_burst is constant and we stop when pending_burst_images.size() >= n_burst
-						// if burst_single_request==false, n_burst counts down and we stop when n_burst==0
-						if( burst_single_request )
-							n_burst = slow_burst_capture_requests.size();
-						else
-							n_burst = 1;
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
-							Log.d(TAG, "n_burst is now: " + n_burst);
-						}
-						RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
-						requestTag.setType(RequestTagType.CAPTURE);
-					}
+			ErrorCallback push_take_picture_error_cb = null;
 
-					// code for focus bracketing
-					try {
-						float focus_distance = slow_burst_capture_requests.get(n_burst_taken).get(CaptureRequest.LENS_FOCUS_DISTANCE);
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
-						}
-						previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-						previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
-
-						setRepeatingRequest(previewBuilder.build());
-						//captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
+			synchronized( background_camera_lock ) {
+				if( slow_burst_capture_requests != null ) {
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "need to execute the next capture");
+						Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
 					}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to take set focus distance for next focus bracketing burst");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
-						}
-						e.printStackTrace();
-						jpeg_todo = false;
-						raw_todo = false;
-						picture_cb = null;
-						if( take_picture_error_cb != null ) {
-							take_picture_error_cb.onError();
-							take_picture_error_cb = null;
-						}
-					}
-					handler.postDelayed(new Runnable(){
-						@Override
-						public void run(){
-							if( MyDebug.LOG )
-								Log.d(TAG, "take picture after delay for next focus bracket");
+					if( burst_type != BurstType.BURSTTYPE_FOCUS ) {
+						try {
 							if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-								if( picture_cb.imageQueueWouldBlock(1) ) {
-									if( MyDebug.LOG ) {
-										Log.d(TAG, "...but wait for next focus bracket, as image queue would block");
-									}
-									handler.postDelayed(this, 100);
-									//throw new RuntimeException(); // test
-								}
-								else {
-									// For focus bracketing mode, we play the shutter sound per shot (so the user can tell when the sequence is complete).
-									// From a user mode, the gap between shots in focus bracketing mode makes this more analogous to the auto-repeat mode
-									// (at the Preview level), which makes the shutter sound per shot.
+								captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
+							}
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to take next burst");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							jpeg_todo = false;
+							raw_todo = false;
+							picture_cb = null;
+							push_take_picture_error_cb = take_picture_error_cb;
+						}
+					}
+					else if( previewBuilder != null ) { // make sure camera wasn't released in the meantime
+						if( MyDebug.LOG )
+							Log.d(TAG, "focus bracketing");
 
-									if( sounds_enabled )
-										media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
-									try {
-										captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
-									}
-									catch(CameraAccessException e) {
+						if( !focus_bracketing_in_progress ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "focus bracketing was cancelled");
+							// ideally we'd stop altogether, but instead we take one last shot, so that we can mark it with the
+							// RequestTagType.CAPTURE tag, so onCaptureCompleted() is called knowing it's for the last image
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "slow_burst_capture_requests size was: " + slow_burst_capture_requests.size());
+								Log.d(TAG, "n_burst size was: " + n_burst);
+								Log.d(TAG, "n_burst_taken: " + n_burst_taken);
+							}
+							slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
+							// if burst_single_request==true, n_burst is constant and we stop when pending_burst_images.size() >= n_burst
+							// if burst_single_request==false, n_burst counts down and we stop when n_burst==0
+							if( burst_single_request )
+								n_burst = slow_burst_capture_requests.size();
+							else
+								n_burst = 1;
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
+								Log.d(TAG, "n_burst is now: " + n_burst);
+							}
+							RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
+							requestTag.setType(RequestTagType.CAPTURE);
+						}
+
+						// code for focus bracketing
+						try {
+							float focus_distance = slow_burst_capture_requests.get(n_burst_taken).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
+							}
+							previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+							previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+
+							setRepeatingRequest(previewBuilder.build());
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to take set focus distance for next focus bracketing burst");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							jpeg_todo = false;
+							raw_todo = false;
+							picture_cb = null;
+							push_take_picture_error_cb = take_picture_error_cb;
+						}
+						handler.postDelayed(new Runnable(){
+							@Override
+							public void run(){
+								if( MyDebug.LOG )
+									Log.d(TAG, "take picture after delay for next focus bracket");
+								if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
+									if( picture_cb.imageQueueWouldBlock(1) ) {
 										if( MyDebug.LOG ) {
-											Log.e(TAG, "failed to take next focus bracket");
-											Log.e(TAG, "reason: " + e.getReason());
-											Log.e(TAG, "message: " + e.getMessage());
+											Log.d(TAG, "...but wait for next focus bracket, as image queue would block");
 										}
-										e.printStackTrace();
-										jpeg_todo = false;
-										raw_todo = false;
-										picture_cb = null;
-										if( take_picture_error_cb != null ) {
-											take_picture_error_cb.onError();
-											take_picture_error_cb = null;
+										handler.postDelayed(this, 100);
+										//throw new RuntimeException(); // test
+									}
+									else {
+										// For focus bracketing mode, we play the shutter sound per shot (so the user can tell when the sequence is complete).
+										// From a user mode, the gap between shots in focus bracketing mode makes this more analogous to the auto-repeat mode
+										// (at the Preview level), which makes the shutter sound per shot.
+
+										if( sounds_enabled )
+											media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+										try {
+											captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
+										}
+										catch(CameraAccessException e) {
+											if( MyDebug.LOG ) {
+												Log.e(TAG, "failed to take next focus bracket");
+												Log.e(TAG, "reason: " + e.getReason());
+												Log.e(TAG, "message: " + e.getMessage());
+											}
+											e.printStackTrace();
+											jpeg_todo = false;
+											raw_todo = false;
+											picture_cb = null;
+											if( take_picture_error_cb != null ) {
+												take_picture_error_cb.onError();
+												take_picture_error_cb = null;
+											}
 										}
 									}
 								}
 							}
-						}
-					}, 500);
+						}, 500);
+					}
 				}
+			}
+
+			// need to call callbacks without a lock
+			if( push_take_picture_error_cb != null ) {
+				push_take_picture_error_cb.onError();
 			}
 		}
 
@@ -1173,11 +1201,15 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "takePhotoCompleted");
 			// need to set jpeg_todo to false before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
-			jpeg_todo = false;
+			synchronized( background_camera_lock ) {
+				jpeg_todo = false;
+			}
 			checkImagesCompleted();
 
-			if( burst_type == BurstType.BURSTTYPE_FOCUS )
-				focus_bracketing_in_progress = false;
+			synchronized( background_camera_lock ) {
+				if( burst_type == BurstType.BURSTTYPE_FOCUS )
+					focus_bracketing_in_progress = false;
+			}
 		}
 	}
 
@@ -1188,7 +1220,7 @@ public class CameraController2 extends CameraController {
 		void setCaptureResult(CaptureResult capture_result) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "setCaptureResult()");
-			synchronized( image_reader_lock ) {
+			synchronized( background_camera_lock ) {
 				/* synchronize, as we don't want to set the capture_result, at the same time that onImageAvailable() is called, as
 				 * we'll end up calling processImage() both in onImageAvailable() and here.
 				 */
@@ -1204,10 +1236,8 @@ public class CameraController2 extends CameraController {
 						public void run() {
 							if( MyDebug.LOG )
 								Log.d(TAG, "setCaptureResult UI thread call processImage()");
-							// need to synchronize again
-							synchronized( image_reader_lock ) {
-								processImage();
-							}
+							// n.b., intentionally don't set the lock again
+							processImage();
 						}
 					});
 				}
@@ -1217,40 +1247,40 @@ public class CameraController2 extends CameraController {
 		void clear() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "clear()");
-			synchronized( image_reader_lock ) {
+			synchronized( background_camera_lock ) {
 				// synchronize just to be safe?
 				capture_result = null;
 				image = null;
 			}
 		}
 
-		/** Calls to this method should synchronize on image_reader_lock.
-		 */
 		private void processImage() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "processImage()");
-			if( capture_result == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "don't yet have still_capture_result");
-				return;
-			}
-			if( image == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "don't have image?!");
-				return;
-			}
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "now have all info to process raw image");
-				Log.d(TAG, "image timestamp: " + image.getTimestamp());
-			}
-            DngCreator dngCreator = new DngCreator(characteristics, capture_result);
-            // set fields
-            dngCreator.setOrientation(camera_settings.getExifOrientation());
-			if( camera_settings.location != null ) {
-                dngCreator.setLocation(camera_settings.location);
-			}
+			synchronized( background_camera_lock ) {
+				if( capture_result == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "don't yet have still_capture_result");
+					return;
+				}
+				if( image == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "don't have image?!");
+					return;
+				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "now have all info to process raw image");
+					Log.d(TAG, "image timestamp: " + image.getTimestamp());
+				}
+				DngCreator dngCreator = new DngCreator(characteristics, capture_result);
+				// set fields
+				dngCreator.setOrientation(camera_settings.getExifOrientation());
+				if( camera_settings.location != null ) {
+					dngCreator.setLocation(camera_settings.location);
+				}
 
-			pending_raw_image = new RawImage(dngCreator, image);
+				pending_raw_image = new RawImage(dngCreator, image);
+			}
 
 			checkImagesCompleted();
 			if( MyDebug.LOG )
@@ -1269,13 +1299,13 @@ public class CameraController2 extends CameraController {
 				this_image.close();
 				return;
 			}
-			synchronized( image_reader_lock ) {
+			synchronized( background_camera_lock ) {
 				// see comment above in setCaptureResult() for why we synchronize
 				image = reader.acquireNextImage();
-				processImage();
 			}
+			processImage();
 			if( MyDebug.LOG )
-				Log.d(TAG, "done onImageAvailable");
+				Log.d(TAG, "done (RAW) onImageAvailable");
 		}
 	}
 	
@@ -1596,10 +1626,12 @@ public class CameraController2 extends CameraController {
 	public void release() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "release: " + this);
-		if( captureSession != null ) {
-			captureSession.close();
-			captureSession = null;
-			//pending_request_when_ready = null;
+		synchronized( background_camera_lock ) {
+			if( captureSession != null ) {
+				captureSession.close();
+				captureSession = null;
+				//pending_request_when_ready = null;
+			}
 		}
 		previewBuilder = null;
 		previewIsVideoMode = false;
@@ -3364,6 +3396,9 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "created new imageReader: " + imageReader.toString());
 			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 		}
+		// It's intentional that we pass a handler on null, so the OnImageAvailableListener runs on the UI thread.
+		// If ever we want to change this on future, we should ensure that all image available listeners (JPEG+RAW) are
+		// using the same handler/thread.
 		imageReader.setOnImageAvailableListener(new OnImageAvailableListener(), null);
 		if( want_raw && raw_size != null&& !previewIsVideoMode  ) {
 			// unlike the JPEG imageReader, we can't read the data and close the image straight away, so we need to allow a larger
@@ -3373,6 +3408,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
 				Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
 			}
+			// see note above for imageReader.setOnImageAvailableListener for why we use a null handler
 			imageReaderRaw.setOnImageAvailableListener(onRawImageAvailableListener = new OnRawImageAvailableListener(), null);
 		}
 	}
@@ -3396,10 +3432,15 @@ public class CameraController2 extends CameraController {
 	private void takePendingRaw() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePendingRaw");
+		// takePendingRaw() always called on UI thread, and pending_raw_image only used on UI thread, so shouldn't need to
+		// synchronize for that
 		if( pending_raw_image != null ) {
-            raw_todo = false;
-            picture_cb.onRawPictureTaken(pending_raw_image);
-            // pending_raw_image should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
+			synchronized( background_camera_lock ) {
+				raw_todo = false;
+			}
+			// don't call callback with lock
+			picture_cb.onRawPictureTaken(pending_raw_image);
+			// pending_raw_image should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
 			pending_raw_image = null;
 			if( onRawImageAvailableListener != null ) {
 				onRawImageAvailableListener.clear();
@@ -3410,7 +3451,9 @@ public class CameraController2 extends CameraController {
 	private void checkImagesCompleted() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "checkImagesCompleted");
-		synchronized( image_reader_lock ) {
+		boolean completed = false;
+		boolean take_pending_raw = false;
+		synchronized( background_camera_lock ) {
 			if( !done_all_captures  ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "still waiting for captures");
@@ -3423,26 +3466,31 @@ public class CameraController2 extends CameraController {
 			else if( !jpeg_todo && !raw_todo ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "all image callbacks now completed");
-				// need to set picture_cb to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
-				PictureCallback cb = picture_cb;
-				picture_cb = null;
-				cb.onCompleted();
+				completed = true;
 			}
 			else if( !jpeg_todo && pending_raw_image != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "jpeg callback already done, can now call pending raw callback");
-				takePendingRaw();
-				if( MyDebug.LOG )
-					Log.d(TAG, "all image callbacks now completed");
-				// need to set picture_cb to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
-				PictureCallback cb = picture_cb;
-				picture_cb = null;
-				cb.onCompleted();
+				take_pending_raw = true;
+				completed = true;
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to wait for jpeg and/or raw callback");
 			}
+		}
+
+		// need to call callbacks without a lock
+		if( take_pending_raw ) {
+			takePendingRaw();
+			if( MyDebug.LOG )
+				Log.d(TAG, "all image callbacks now completed");
+		}
+		if( completed ) {
+			// need to set picture_cb to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoRepeat()
+			PictureCallback cb = picture_cb;
+			picture_cb = null;
+			cb.onCompleted();
 		}
 	}
 
@@ -4286,28 +4334,30 @@ public class CameraController2 extends CameraController {
 	private void setRepeatingRequest(CaptureRequest request) throws CameraAccessException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest");
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-		try {
-			if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
-				CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession) captureSession;
-				List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
-				captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no camera or capture session");
+				return;
 			}
-			else {
-				captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+			try {
+				if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+					CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession) captureSession;
+					List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
+					captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
+				}
+				else {
+					captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "setRepeatingRequest done");
 			}
-			if( MyDebug.LOG )
-				Log.d(TAG, "setRepeatingRequest done");
-		}
-		catch(IllegalStateException e) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "captureSession already closed!");
-			e.printStackTrace();
-			// got this as a Google Play exception (from onCaptureCompleted->processCompleted) - this means the capture session is already closed
+			catch(IllegalStateException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "captureSession already closed!");
+				e.printStackTrace();
+				// got this as a Google Play exception (from onCaptureCompleted->processCompleted) - this means the capture session is already closed
+			}
 		}
 	}
 
@@ -4318,14 +4368,16 @@ public class CameraController2 extends CameraController {
 	private void capture(CaptureRequest request) throws CameraAccessException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "capture");
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no camera or capture session");
+				return;
+			}
+			captureSession.capture(request, previewCaptureCallback, handler);
 		}
-		captureSession.capture(request, previewCaptureCallback, handler);
 	}
-	
+
 	private void createPreviewRequest() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createPreviewRequest");
@@ -4374,12 +4426,14 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 
-		if( captureSession != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "close old capture session");
-			captureSession.close();
-			captureSession = null;
-			//pending_request_when_ready = null;
+		synchronized( background_camera_lock ) {
+			if( captureSession != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "close old capture session");
+				captureSession.close();
+				captureSession = null;
+				//pending_request_when_ready = null;
+			}
 		}
 
 		try {
@@ -4447,34 +4501,36 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG ) {
 							Log.d(TAG, "camera is closed");
 						}
-					    synchronized( create_capture_session_lock ) {
+					    synchronized( background_camera_lock ) {
 					    	callback_done = true;
-							create_capture_session_lock.notifyAll();
+							background_camera_lock.notifyAll();
 					    }
 						return;
 					}
-					captureSession = session;
-		        	Surface surface = getPreviewSurface();
-	        		previewBuilder.addTarget(surface);
-	        		if( video_recorder != null )
-	        			previewBuilder.addTarget(video_recorder_surface);
-	        		try {
-	        			setRepeatingRequest();
-	        		}
-					catch(CameraAccessException e) {
-						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to start preview");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
+					synchronized( background_camera_lock ) {
+						captureSession = session;
+						Surface surface = getPreviewSurface();
+						previewBuilder.addTarget(surface);
+						if( video_recorder != null )
+							previewBuilder.addTarget(video_recorder_surface);
+						try {
+							setRepeatingRequest();
 						}
-						e.printStackTrace();
-						// we indicate that we failed to start the preview by setting captureSession back to null
-						// this will cause a CameraControllerException to be thrown below
-						captureSession = null;
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to start preview");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							// we indicate that we failed to start the preview by setting captureSession back to null
+							// this will cause a CameraControllerException to be thrown below
+							captureSession = null;
+						}
 					}
-				    synchronized( create_capture_session_lock ) {
+				    synchronized( background_camera_lock ) {
 				    	callback_done = true;
-						create_capture_session_lock.notifyAll();
+						background_camera_lock.notifyAll();
 				    }
 				}
 
@@ -4484,9 +4540,9 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "onConfigureFailed: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
 					}
-				    synchronized( create_capture_session_lock ) {
+				    synchronized( background_camera_lock ) {
 				    	callback_done = true;
-						create_capture_session_lock.notifyAll();
+						background_camera_lock.notifyAll();
 				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
@@ -4585,11 +4641,15 @@ public class CameraController2 extends CameraController {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
-			synchronized( create_capture_session_lock ) {
+			// n.b., we use the background_camera_lock lock instead of a separate lock, so that it's safe to call this
+			// method under the background_camera_lock (if we did so but used a separate lock, we'd hang here, because
+			// MyStateCallback.onConfigured() needs to lock on background_camera_lock, before it completes and sets
+			// myStateCallback.callback_done to true.
+			synchronized( background_camera_lock ) {
 				while( !myStateCallback.callback_done ) {
 					try {
 						// release the lock, and wait until myStateCallback calls notifyAll()
-						create_capture_session_lock.wait();
+						background_camera_lock.wait();
 					}
 					catch(InterruptedException e) {
 						e.printStackTrace();
@@ -4599,10 +4659,12 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "created captureSession: " + captureSession);
 			}
-			if( captureSession == null ) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "failed to create capture session");
-				throw new CameraControllerException();
+			synchronized( background_camera_lock ) {
+				if( captureSession == null ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to create capture session");
+					throw new CameraControllerException();
+				}
 			}
 		}
 		catch(CameraAccessException e) {
@@ -4630,21 +4692,23 @@ public class CameraController2 extends CameraController {
 	public void startPreview() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
-		if( captureSession != null ) {
-			try {
-				setRepeatingRequest();
-			}
-			catch(CameraAccessException e) {
-				if( MyDebug.LOG ) {
-					Log.e(TAG, "failed to start preview");
-					Log.e(TAG, "reason: " + e.getReason());
-					Log.e(TAG, "message: " + e.getMessage());
+		synchronized( background_camera_lock ) {
+			if( captureSession != null ) {
+				try {
+					setRepeatingRequest();
 				}
-				e.printStackTrace();
-				// do via CameraControllerException instead of preview_error_cb, so caller immediately knows preview has failed
-				throw new CameraControllerException();
-			} 
-			return;
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to start preview");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					// do via CameraControllerException instead of preview_error_cb, so caller immediately knows preview has failed
+					throw new CameraControllerException();
+				}
+				return;
+			}
 		}
 		createCaptureSession(null, false);
 	}
@@ -4653,45 +4717,47 @@ public class CameraController2 extends CameraController {
 	public void stopPreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopPreview: " + this);
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-		try {
-			//pending_request_when_ready = null;
-
-			try {
-				captureSession.stopRepeating();
-			}
-			catch(IllegalStateException e) {
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "captureSession already closed!");
+					Log.d(TAG, "no camera or capture session");
+				return;
+			}
+			try {
+				//pending_request_when_ready = null;
+
+				try {
+					captureSession.stopRepeating();
+				}
+				catch(IllegalStateException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "captureSession already closed!");
+					e.printStackTrace();
+					// got this as a Google Play exception
+					// we still call close() below, as it has no effect if captureSession is already closed
+				}
+				// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
+				if( MyDebug.LOG )
+					Log.d(TAG, "close capture session");
+				captureSession.close();
+				captureSession = null;
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to stop repeating");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
 				e.printStackTrace();
-				// got this as a Google Play exception
-				// we still call close() below, as it has no effect if captureSession is already closed
 			}
-			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
-			if( MyDebug.LOG )
-				Log.d(TAG, "close capture session");
-			captureSession.close();
-			captureSession = null;
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to stop repeating");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+			// simulate CameraController1 behaviour where face detection is stopped when we stop preview
+			if( camera_settings.has_face_detect_mode ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "cancel face detection");
+				camera_settings.has_face_detect_mode = false;
+				camera_settings.setFaceDetectMode(previewBuilder);
+				// no need to call setRepeatingRequest(), we're just setting the camera_settings for when we restart the preview
 			}
-			e.printStackTrace();
-		}
-		// simulate CameraController1 behaviour where face detection is stopped when we stop preview
-		if( camera_settings.has_face_detect_mode ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "cancel face detection");
-			camera_settings.has_face_detect_mode = false;
-	    	camera_settings.setFaceDetectMode(previewBuilder);
-			// no need to call setRepeatingRequest(), we're just setting the camera_settings for when we restart the preview
 		}
 	}
 
@@ -4775,123 +4841,131 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "autoFocus");
 			Log.d(TAG, "capture_follows_autofocus_hint? " + capture_follows_autofocus_hint);
 		}
-		fake_precapture_torch_focus_performed = false;
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
-			cb.onAutoFocus(false);
-			return;
-		}
-		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
-		if( focus_mode == null ) {
-			// we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
-			// (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
-			if( MyDebug.LOG )
-				Log.d(TAG, "no focus mode");
-			cb.onAutoFocus(true);
-			return;
-		}
-		else if( (!do_af_trigger_for_continuous || use_fake_precapture_mode) && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
-			// See note above for do_af_trigger_for_continuous
-			if( MyDebug.LOG )
-				Log.d(TAG, "skip af trigger due to continuous mode");
-			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
-			this.autofocus_cb = cb;
-			return;
-		}
-		else if( is_video_high_speed ) {
-			// CONTROL_AF_TRIGGER_IDLE/CONTROL_AF_TRIGGER_START not supported for high speed video
-			cb.onAutoFocus(true);
-			return;
-		}
-		/*if( state == STATE_WAITING_AUTOFOCUS ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "already waiting for an autofocus");
-			// need to update the callback!
-			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
-			this.autofocus_cb = cb;
-			return;
-		}*/
-		CaptureRequest.Builder afBuilder = previewBuilder;
-		if( MyDebug.LOG ) {
-			{
-				MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
-				for(int i=0;areas != null && i<areas.length;i++) {
-					Log.d(TAG, i + " focus area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
-				}
+		AutoFocusCallback push_autofocus_cb = null;
+		synchronized( background_camera_lock ) {
+			fake_precapture_torch_focus_performed = false;
+			if( camera == null || captureSession == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no camera or capture session");
+				// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
+				cb.onAutoFocus(false);
+				return;
 			}
-			{
-				MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
-				for(int i=0;areas != null && i<areas.length;i++) {
-					Log.d(TAG, i + " metering area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
-				}
+			Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+			if( focus_mode == null ) {
+				// we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
+				// (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
+				if( MyDebug.LOG )
+					Log.d(TAG, "no focus mode");
+				cb.onAutoFocus(true);
+				return;
 			}
-		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "state is now STATE_WAITING_AUTOFOCUS");
-		state = STATE_WAITING_AUTOFOCUS;
-		precapture_state_change_time_ms = -1;
-		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
-		this.autofocus_cb = cb;
-		try {
-			if( use_fake_precapture_mode && !camera_settings.has_iso ) {
-				boolean want_flash = false;
-				if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
-					// calling fireAutoFlash() also caches the decision on whether to flash - otherwise if the flash fires now, we'll then think the scene is bright enough to not need the flash!
-					if( fireAutoFlash() )
-						want_flash = true;
-				}
-				else if( camera_settings.flash_value.equals("flash_on") ) {
-					want_flash = true;
-				}
-				if( want_flash ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "turn on torch for fake flash");
-					afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-					afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-					test_fake_flash_focus++;
-					fake_precapture_torch_focus_performed = true;
-					setRepeatingRequest(afBuilder.build());
-					// We sleep for a short time as on some devices (e.g., OnePlus 3T), the torch will turn off when autofocus
-					// completes even if we don't want that (because we'll be taking a photo).
-					// Note that on other devices such as Nexus 6, this problem doesn't occur even if we don't have a separate
-					// setRepeatingRequest.
-					// Update for 1.37: now we do need this for Nexus 6 too, after switching to setting CONTROL_AE_MODE_ON_AUTO_FLASH
-					// or CONTROL_AE_MODE_ON_ALWAYS_FLASH even for fake flash (see note in CameraSettings.setAEMode()) - and we
-					// needed to increase to 200ms! Otherwise photos come out too dark for flash on if doing touch to focus then
-					// quickly taking a photo. (It also work to previously switch to CONTROL_AE_MODE_ON/FLASH_MODE_OFF first,
-					// but then the same problem shows up on OnePlus 3T again!)
-					try {
-						Thread.sleep(200);
-					}
-					catch(InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+			else if( (!do_af_trigger_for_continuous || use_fake_precapture_mode) && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+				// See note above for do_af_trigger_for_continuous
+				if( MyDebug.LOG )
+					Log.d(TAG, "skip af trigger due to continuous mode");
+				this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
+				this.autofocus_cb = cb;
+				return;
 			}
-
-			// Camera2Basic sets a trigger with capture
-			// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
-			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-			setRepeatingRequest(afBuilder.build());
-			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-			capture(afBuilder.build());
-		}
-		catch(CameraAccessException e) {
+			else if( is_video_high_speed ) {
+				// CONTROL_AF_TRIGGER_IDLE/CONTROL_AF_TRIGGER_START not supported for high speed video
+				cb.onAutoFocus(true);
+				return;
+			}
+			/*if( state == STATE_WAITING_AUTOFOCUS ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "already waiting for an autofocus");
+				// need to update the callback!
+				this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
+				this.autofocus_cb = cb;
+				return;
+			}*/
+			CaptureRequest.Builder afBuilder = previewBuilder;
 			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to autofocus");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+				{
+					MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
+					for(int i=0;areas != null && i<areas.length;i++) {
+						Log.d(TAG, i + " focus area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
+					}
+				}
+				{
+					MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
+					for(int i=0;areas != null && i<areas.length;i++) {
+						Log.d(TAG, i + " metering area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
+					}
+				}
 			}
-			e.printStackTrace();
-			state = STATE_NORMAL;
+			if( MyDebug.LOG )
+				Log.d(TAG, "state is now STATE_WAITING_AUTOFOCUS");
+			state = STATE_WAITING_AUTOFOCUS;
 			precapture_state_change_time_ms = -1;
-			autofocus_cb.onAutoFocus(false);
-			autofocus_cb = null;
-			this.capture_follows_autofocus_hint = false;
+			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
+			this.autofocus_cb = cb;
+			try {
+				if( use_fake_precapture_mode && !camera_settings.has_iso ) {
+					boolean want_flash = false;
+					if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
+						// calling fireAutoFlash() also caches the decision on whether to flash - otherwise if the flash fires now, we'll then think the scene is bright enough to not need the flash!
+						if( fireAutoFlash() )
+							want_flash = true;
+					}
+					else if( camera_settings.flash_value.equals("flash_on") ) {
+						want_flash = true;
+					}
+					if( want_flash ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "turn on torch for fake flash");
+						afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+						test_fake_flash_focus++;
+						fake_precapture_torch_focus_performed = true;
+						setRepeatingRequest(afBuilder.build());
+						// We sleep for a short time as on some devices (e.g., OnePlus 3T), the torch will turn off when autofocus
+						// completes even if we don't want that (because we'll be taking a photo).
+						// Note that on other devices such as Nexus 6, this problem doesn't occur even if we don't have a separate
+						// setRepeatingRequest.
+						// Update for 1.37: now we do need this for Nexus 6 too, after switching to setting CONTROL_AE_MODE_ON_AUTO_FLASH
+						// or CONTROL_AE_MODE_ON_ALWAYS_FLASH even for fake flash (see note in CameraSettings.setAEMode()) - and we
+						// needed to increase to 200ms! Otherwise photos come out too dark for flash on if doing touch to focus then
+						// quickly taking a photo. (It also work to previously switch to CONTROL_AE_MODE_ON/FLASH_MODE_OFF first,
+						// but then the same problem shows up on OnePlus 3T again!)
+						try {
+							Thread.sleep(200);
+						}
+						catch(InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+
+				// Camera2Basic sets a trigger with capture
+				// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
+				afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+				setRepeatingRequest(afBuilder.build());
+				afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+				capture(afBuilder.build());
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to autofocus");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				state = STATE_NORMAL;
+				precapture_state_change_time_ms = -1;
+				push_autofocus_cb = autofocus_cb;
+				autofocus_cb = null;
+				this.capture_follows_autofocus_hint = false;
+			}
+			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
 		}
-		afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
+
+		if( push_autofocus_cb != null ) {
+			// should call callbacks without a lock
+			push_autofocus_cb.onAutoFocus(false);
+		}
 	}
 
 	@Override
@@ -4900,56 +4974,60 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "setCaptureFollowAutofocusHint");
 			Log.d(TAG, "capture_follows_autofocus_hint? " + capture_follows_autofocus_hint);
 		}
-		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
+		synchronized( background_camera_lock ) {
+			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
+		}
 	}
 
 	@Override
 	public void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-
-		if( is_video_high_speed ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "video is high speed");
-			return;
-		}
-
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-		// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
-    	try {
-    		capture();
-    	}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to cancel autofocus [capture]");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no camera or capture session");
+				return;
 			}
-			e.printStackTrace();
-		}
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-		this.autofocus_cb = null;
-		this.capture_follows_autofocus_hint = false;
-		state = STATE_NORMAL;
-		precapture_state_change_time_ms = -1;
-		try {
-			setRepeatingRequest();
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to set repeating request after cancelling autofocus");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+
+			if( is_video_high_speed ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "video is high speed");
+				return;
 			}
-			e.printStackTrace();
-		} 
+
+			previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+			// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
+			try {
+				capture();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to cancel autofocus [capture]");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			}
+			previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+			this.autofocus_cb = null;
+			this.capture_follows_autofocus_hint = false;
+			state = STATE_NORMAL;
+			precapture_state_change_time_ms = -1;
+			try {
+				setRepeatingRequest();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to set repeating request after cancelling autofocus");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	@Override
 	public void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb) {
 		if( MyDebug.LOG )
@@ -5014,125 +5092,188 @@ public class CameraController2 extends CameraController {
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			debug_time = System.currentTimeMillis();
+		}
+
 		if( !previewIsVideoMode ) {
 			// special burst modes not supported for photo snapshots when recording video
 			if( burst_type == BurstType.BURSTTYPE_EXPO || burst_type == BurstType.BURSTTYPE_FOCUS ) {
 				takePictureBurstBracketing();
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "takePictureAfterPrecapture() took: " + (System.currentTimeMillis() - debug_time));
+				}
 				return;
 			}
 			else if( burst_type == BurstType.BURSTTYPE_NORMAL || burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
 				takePictureBurst(false);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "takePictureAfterPrecapture() took: " + (System.currentTimeMillis() - debug_time));
+				}
 				return;
 			}
 		}
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-		try {
-			if( MyDebug.LOG ) {
-				if( imageReaderRaw != null ) {
-					Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.toString());
-					Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
-				}
-				else {
-					Log.d(TAG, "imageReader: " + imageReader.toString());
-					Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
-				}
-			}
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
-			camera_settings.setupBuilder(stillBuilder, true);
-			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "setting torch for capture");
-				if( !camera_settings.has_iso )
-					stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-				test_fake_flash_photo++;
-			}
-			if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
-				final double full_exposure_time_scale = Math.pow(2.0, -0.5);
-				final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
-				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
-				long exposure_time = capture_result_exposure_time;
-				if( exposure_time <= fixed_exposure_time ) {
-					double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
-					exposure_time *= exposure_time_scale;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
-						Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
-					}
-					modified_from_camera_settings = true;
-					setManualExposureTime(stillBuilder, exposure_time);
-				}
-			}
-			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-			if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ) {
-				// unclear why we wouldn't want to request ZSL
-				// this is also required to enable HDR+ on Google Pixel devices when using Camera2: https://opensource.google.com/projects/pixelvisualcorecamera
-				stillBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
-				if( MyDebug.LOG ) {
-					Boolean zsl = stillBuilder.get(CaptureRequest.CONTROL_ENABLE_ZSL);
-					Log.d(TAG, "CONTROL_ENABLE_ZSL: " + (zsl==null ? "null" : zsl));
-				}
-			}
-			clearPending();
-			// shouldn't add preview surface as a target - no known benefit to doing so
-    		stillBuilder.addTarget(imageReader.getSurface());
-        	if( imageReaderRaw != null )
-    			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
-			n_burst = 1;
-			n_burst_taken = 0;
-            n_burst_total = n_burst;
-			burst_single_request = false;
-			if( !previewIsVideoMode ) {
-				// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
-				// but don't do this in video mode - if we're taking photo snapshots while video recording, we don't want to pause video!
-				// update: bug with flash may have been device specific (things are fine with Nokia 8)
-				captureSession.stopRepeating();
-			}
-			if( picture_cb != null ) {
+		CaptureRequest.Builder stillBuilder = null;
+		boolean ok = true;
+		ErrorCallback push_take_picture_error_cb = null;
+
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "call onStarted() in callback");
-				picture_cb.onStarted();
+					Log.d(TAG, "no camera or capture session");
+				return;
 			}
-			if( MyDebug.LOG )
-				Log.d(TAG, "capture with stillBuilder");
-			//pending_request_when_ready = stillBuilder.build();
-			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
-			//captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
-			//}, handler);
-			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to take picture");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+			try {
+				if( MyDebug.LOG ) {
+					if( imageReaderRaw != null ) {
+						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.toString());
+						Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
+					}
+					else {
+						Log.d(TAG, "imageReader: " + imageReader.toString());
+						Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+					}
+				}
+				stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
+				stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+				stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
+				camera_settings.setupBuilder(stillBuilder, true);
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting torch for capture");
+					if( !camera_settings.has_iso )
+						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_photo++;
+				}
+				if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
+					final double full_exposure_time_scale = Math.pow(2.0, -0.5);
+					final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+					final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+					long exposure_time = capture_result_exposure_time;
+					if( exposure_time <= fixed_exposure_time ) {
+						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+						exposure_time *= exposure_time_scale;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+							Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+						}
+						modified_from_camera_settings = true;
+						setManualExposureTime(stillBuilder, exposure_time);
+					}
+				}
+				//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+				//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+				if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ) {
+					// unclear why we wouldn't want to request ZSL
+					// this is also required to enable HDR+ on Google Pixel devices when using Camera2: https://opensource.google.com/projects/pixelvisualcorecamera
+					stillBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
+					if( MyDebug.LOG ) {
+						Boolean zsl = stillBuilder.get(CaptureRequest.CONTROL_ENABLE_ZSL);
+						Log.d(TAG, "CONTROL_ENABLE_ZSL: " + (zsl==null ? "null" : zsl));
+					}
+				}
+				clearPending();
+				// shouldn't add preview surface as a target - no known benefit to doing so
+				stillBuilder.addTarget(imageReader.getSurface());
+				if( imageReaderRaw != null )
+					stillBuilder.addTarget(imageReaderRaw.getSurface());
+
+				n_burst = 1;
+				n_burst_taken = 0;
+				n_burst_total = n_burst;
+				burst_single_request = false;
+				if( !previewIsVideoMode ) {
+					// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+					// but don't do this in video mode - if we're taking photo snapshots while video recording, we don't want to pause video!
+					// update: bug with flash may have been device specific (things are fine with Nokia 8)
+					captureSession.stopRepeating();
+				}
 			}
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			if( take_picture_error_cb != null ) {
-				take_picture_error_cb.onError();
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to take picture");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				ok = false;
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				push_take_picture_error_cb = take_picture_error_cb;
 				take_picture_error_cb = null;
 			}
+			catch(IllegalStateException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "captureSession already closed!");
+				e.printStackTrace();
+				ok = false;
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				// don't report error, as camera is closed or closing
+			}
 		}
-		catch(IllegalStateException e) {
+
+		// need to call callbacks without a lock
+		if( ok && picture_cb != null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "captureSession already closed!");
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			// don't report error, as camera is closed or closing
+				Log.d(TAG, "call onStarted() in callback");
+			picture_cb.onStarted();
+		}
+
+		if( ok ) {
+			synchronized( background_camera_lock ) {
+				if( camera == null || captureSession == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "no camera or capture session");
+					return;
+				}
+				try {
+					if( MyDebug.LOG )
+						Log.d(TAG, "capture with stillBuilder");
+					//pending_request_when_ready = stillBuilder.build();
+					captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
+					//captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
+					//}, handler);
+					if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+						media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to take picture");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					ok = false;
+					jpeg_todo = false;
+					raw_todo = false;
+					picture_cb = null;
+					push_take_picture_error_cb = take_picture_error_cb;
+				}
+				catch(IllegalStateException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "captureSession already closed!");
+					e.printStackTrace();
+					ok = false;
+					jpeg_todo = false;
+					raw_todo = false;
+					picture_cb = null;
+					// don't report error, as camera is closed or closing
+				}
+			}
+		}
+
+		// need to call callbacks without a lock
+		if( push_take_picture_error_cb != null ) {
+			push_take_picture_error_cb.onError();
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "takePictureAfterPrecapture() took: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 
@@ -5201,283 +5342,327 @@ public class CameraController2 extends CameraController {
 		if( burst_type != BurstType.BURSTTYPE_EXPO && burst_type != BurstType.BURSTTYPE_FOCUS ) {
 			Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
         }
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-		try {
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "imageReader: " + imageReader.toString());
-				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
-			}
 
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
-			camera_settings.setupBuilder(stillBuilder, true);
-			clearPending();
-			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
-			// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
-			stillBuilder.addTarget(imageReader.getSurface());
-			// don't add target imageReaderRaw, as Raw not supported for burst
-			raw_todo = false; // raw not supported for burst
+		List<CaptureRequest> requests = new ArrayList<>();
+		boolean ok = true;
+		ErrorCallback push_take_picture_error_cb = null;
 
-			List<CaptureRequest> requests = new ArrayList<>();
-
-			if( burst_type == BurstType.BURSTTYPE_EXPO ) {
-
-            if( MyDebug.LOG )
-                Log.d(TAG, "expo bracketing");
-
-			/*stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-
-			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, -6);
-			requests.add( stillBuilder.build() );
-			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 0);
-			requests.add( stillBuilder.build() );
-			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 6);
-			requests.add( stillBuilder.build() );*/
-
-			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
-			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "setting torch for capture");
-				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-				test_fake_flash_photo++;
+					Log.d(TAG, "no camera or capture session");
+				return;
 			}
-			// else don't turn torch off, as user may be in torch on mode
-
-			Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
-			if( iso_range == null ) {
-				Log.e(TAG, "takePictureBurstBracketing called but null iso_range");
-			}
-			else {
-				// set ISO
-				int iso = 800;
-				// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
-				// might as well use the settings the user has actually requested (also useful for workaround for
-				// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
-				if( camera_settings.has_iso )
-					iso = camera_settings.iso;
-				else if( capture_result_has_iso )
-					iso = capture_result_iso;
-				// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
-				// outside of the allowed manual iso range!
-				iso = Math.max(iso, iso_range.getLower());
-				iso = Math.min(iso, iso_range.getUpper());
-				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
-			}
-			if( capture_result_has_frame_duration  )
-				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
-			else
-				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
-
-			long base_exposure_time = 1000000000L/30;
-			if( camera_settings.has_iso )
-				base_exposure_time = camera_settings.exposure_time;
-			else if( capture_result_has_exposure_time )
-				base_exposure_time = capture_result_exposure_time;
-
-			int n_half_images = expo_bracketing_n_images/2;
-			long min_exposure_time = base_exposure_time;
-			long max_exposure_time = base_exposure_time;
-			final double scale = Math.pow(2.0, expo_bracketing_stops/(double)n_half_images);
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
-			if( exposure_time_range != null ) {
-				min_exposure_time = exposure_time_range.getLower();
-				max_exposure_time = exposure_time_range.getUpper();
-			}
-
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "taking expo bracketing with n_images: " + expo_bracketing_n_images);
-				Log.d(TAG, "ISO: " + stillBuilder.get(CaptureRequest.SENSOR_SENSITIVITY));
-				Log.d(TAG, "Frame duration: " + stillBuilder.get(CaptureRequest.SENSOR_FRAME_DURATION));
-				Log.d(TAG, "Base exposure time: " + base_exposure_time);
-				Log.d(TAG, "Min exposure time: " + min_exposure_time);
-				Log.d(TAG, "Max exposure time: " + max_exposure_time);
-			}
-
-			// darker images
-			for(int i=0;i<n_half_images;i++) {
-				long exposure_time = base_exposure_time;
-				if( exposure_time_range != null ) {
-					double this_scale = scale;
-					for(int j=i;j<n_half_images-1;j++)
-						this_scale *= scale;
-					exposure_time /= this_scale;
-					if( exposure_time < min_exposure_time )
-						exposure_time = min_exposure_time;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "add burst request for " + i + "th dark image:");
-						Log.d(TAG, "    this_scale: " + this_scale);
-						Log.d(TAG, "    exposure_time: " + exposure_time);
-					}
-					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
-					requests.add( stillBuilder.build() );
+			try {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "imageReader: " + imageReader.toString());
+					Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 				}
-			}
 
-			// base image
-			if( MyDebug.LOG )
-				Log.d(TAG, "add burst request for base image");
-			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
-			requests.add( stillBuilder.build() );
+				CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
+				stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+				// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
+				camera_settings.setupBuilder(stillBuilder, true);
+				clearPending();
+				// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
+				// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
+				stillBuilder.addTarget(imageReader.getSurface());
+				// don't add target imageReaderRaw, as Raw not supported for burst
+				raw_todo = false; // raw not supported for burst
 
-			// lighter images
-			for(int i=0;i<n_half_images;i++) {
-				long exposure_time = base_exposure_time;
-				if( exposure_time_range != null ) {
-					double this_scale = scale;
-					for(int j=0;j<i;j++)
-						this_scale *= scale;
-					exposure_time *= this_scale;
-					if( exposure_time > max_exposure_time )
-						exposure_time = max_exposure_time;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "add burst request for " + i + "th light image:");
-						Log.d(TAG, "    this_scale: " + this_scale);
-						Log.d(TAG, "    exposure_time: " + exposure_time);
-					}
-					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
-					if( i == n_half_images - 1 ) {
-						// RequestTagType.CAPTURE should only be set for the last request, otherwise we'll may do things like turning
-						// off torch (for fake flash) before all images are received
-						// More generally, doesn't seem a good idea to be doing the post-capture commands (resetting ae state etc)
-						// multiple times, and before all captures are complete!
-						if( MyDebug.LOG )
-							Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
-						stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
-					}
-					requests.add( stillBuilder.build() );
-				}
-			}
+				if( burst_type == BurstType.BURSTTYPE_EXPO ) {
 
-			burst_single_request = true;
-			}
-			else {
-				// BURSTTYPE_FOCUS
-                if( MyDebug.LOG )
-                    Log.d(TAG, "focus bracketing");
+				if( MyDebug.LOG )
+					Log.d(TAG, "expo bracketing");
 
+				/*stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+
+				stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, -6);
+				requests.add( stillBuilder.build() );
+				stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 0);
+				requests.add( stillBuilder.build() );
+				stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 6);
+				requests.add( stillBuilder.build() );*/
+
+				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "setting torch for capture");
-					if( !camera_settings.has_iso )
-						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 					test_fake_flash_photo++;
 				}
+				// else don't turn torch off, as user may be in torch on mode
 
-				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF); // just in case
-
-				if( Math.abs(camera_settings.focus_distance - focus_bracketing_source_distance) < 1.0e-5 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "current focus matches source");
-				}
-				else if( Math.abs(camera_settings.focus_distance - focus_bracketing_target_distance) < 1.0e-5 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "current focus matches target");
+				Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
+				if( iso_range == null ) {
+					Log.e(TAG, "takePictureBurstBracketing called but null iso_range");
 				}
 				else {
-					Log.d(TAG, "current focus matches neither source nor target");
+					// set ISO
+					int iso = 800;
+					// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
+					// might as well use the settings the user has actually requested (also useful for workaround for
+					// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
+					if( camera_settings.has_iso )
+						iso = camera_settings.iso;
+					else if( capture_result_has_iso )
+						iso = capture_result_iso;
+					// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
+					// outside of the allowed manual iso range!
+					iso = Math.max(iso, iso_range.getLower());
+					iso = Math.min(iso, iso_range.getUpper());
+					stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
+				}
+				if( capture_result_has_frame_duration  )
+					stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
+				else
+					stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+
+				long base_exposure_time = 1000000000L/30;
+				if( camera_settings.has_iso )
+					base_exposure_time = camera_settings.exposure_time;
+				else if( capture_result_has_exposure_time )
+					base_exposure_time = capture_result_exposure_time;
+
+				int n_half_images = expo_bracketing_n_images/2;
+				long min_exposure_time = base_exposure_time;
+				long max_exposure_time = base_exposure_time;
+				final double scale = Math.pow(2.0, expo_bracketing_stops/(double)n_half_images);
+				Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
+				if( exposure_time_range != null ) {
+					min_exposure_time = exposure_time_range.getLower();
+					max_exposure_time = exposure_time_range.getUpper();
 				}
 
-				List<Float> focus_distances = setupFocusBracketingDistances(focus_bracketing_source_distance, focus_bracketing_target_distance, focus_bracketing_n_images);
-				if( focus_bracketing_add_infinity ) {
-					focus_distances.add(0.0f);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "taking expo bracketing with n_images: " + expo_bracketing_n_images);
+					Log.d(TAG, "ISO: " + stillBuilder.get(CaptureRequest.SENSOR_SENSITIVITY));
+					Log.d(TAG, "Frame duration: " + stillBuilder.get(CaptureRequest.SENSOR_FRAME_DURATION));
+					Log.d(TAG, "Base exposure time: " + base_exposure_time);
+					Log.d(TAG, "Min exposure time: " + min_exposure_time);
+					Log.d(TAG, "Max exposure time: " + max_exposure_time);
 				}
-				for(int i=0;i<focus_distances.size();i++) {
-					stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distances.get(i));
-					if( i == focus_distances.size()-1 ) {
-						stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE)); // set capture tag for last only
+
+				// darker images
+				for(int i=0;i<n_half_images;i++) {
+					long exposure_time = base_exposure_time;
+					if( exposure_time_range != null ) {
+						double this_scale = scale;
+						for(int j=i;j<n_half_images-1;j++)
+							this_scale *= scale;
+						exposure_time /= this_scale;
+						if( exposure_time < min_exposure_time )
+							exposure_time = min_exposure_time;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "add burst request for " + i + "th dark image:");
+							Log.d(TAG, "    this_scale: " + this_scale);
+							Log.d(TAG, "    exposure_time: " + exposure_time);
+						}
+						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+						requests.add( stillBuilder.build() );
+					}
+				}
+
+				// base image
+				if( MyDebug.LOG )
+					Log.d(TAG, "add burst request for base image");
+				stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
+				requests.add( stillBuilder.build() );
+
+				// lighter images
+				for(int i=0;i<n_half_images;i++) {
+					long exposure_time = base_exposure_time;
+					if( exposure_time_range != null ) {
+						double this_scale = scale;
+						for(int j=0;j<i;j++)
+							this_scale *= scale;
+						exposure_time *= this_scale;
+						if( exposure_time > max_exposure_time )
+							exposure_time = max_exposure_time;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "add burst request for " + i + "th light image:");
+							Log.d(TAG, "    this_scale: " + this_scale);
+							Log.d(TAG, "    exposure_time: " + exposure_time);
+						}
+						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+						if( i == n_half_images - 1 ) {
+							// RequestTagType.CAPTURE should only be set for the last request, otherwise we'll may do things like turning
+							// off torch (for fake flash) before all images are received
+							// More generally, doesn't seem a good idea to be doing the post-capture commands (resetting ae state etc)
+							// multiple times, and before all captures are complete!
+							if( MyDebug.LOG )
+								Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
+							stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
+						}
+						requests.add( stillBuilder.build() );
+					}
+				}
+
+				burst_single_request = true;
+				}
+				else {
+					// BURSTTYPE_FOCUS
+					if( MyDebug.LOG )
+						Log.d(TAG, "focus bracketing");
+
+					if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "setting torch for capture");
+						if( !camera_settings.has_iso )
+							stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+						test_fake_flash_photo++;
+					}
+
+					stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF); // just in case
+
+					if( Math.abs(camera_settings.focus_distance - focus_bracketing_source_distance) < 1.0e-5 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "current focus matches source");
+					}
+					else if( Math.abs(camera_settings.focus_distance - focus_bracketing_target_distance) < 1.0e-5 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "current focus matches target");
 					}
 					else {
-						// but to cancel focus bracketing, we need to set a NONE tag on every other capture
-						stillBuilder.setTag(new RequestTagObject(RequestTagType.NONE));
+						Log.d(TAG, "current focus matches neither source nor target");
 					}
-					requests.add( stillBuilder.build() );
 
-					focus_bracketing_in_progress = true;
+					List<Float> focus_distances = setupFocusBracketingDistances(focus_bracketing_source_distance, focus_bracketing_target_distance, focus_bracketing_n_images);
+					if( focus_bracketing_add_infinity ) {
+						focus_distances.add(0.0f);
+					}
+					for(int i=0;i<focus_distances.size();i++) {
+						stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distances.get(i));
+						if( i == focus_distances.size()-1 ) {
+							stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE)); // set capture tag for last only
+						}
+						else {
+							// but to cancel focus bracketing, we need to set a NONE tag on every other capture
+							stillBuilder.setTag(new RequestTagObject(RequestTagType.NONE));
+						}
+						requests.add( stillBuilder.build() );
+
+						focus_bracketing_in_progress = true;
+					}
+
+					burst_single_request = false; // we set to false for focus bracketing, as we support bracketing with large numbers of images in this mode
+					//burst_single_request = true; // test
 				}
 
-				burst_single_request = false; // we set to false for focus bracketing, as we support bracketing with large numbers of images in this mode
-				//burst_single_request = true; // test
-			}
-
-			/*
-			// testing:
-			requests.add( stillBuilder.build() );
-			requests.add( stillBuilder.build() );
-			requests.add( stillBuilder.build() );
-			requests.add( stillBuilder.build() );
-			if( MyDebug.LOG )
-				Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
-			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
-			requests.add( stillBuilder.build() );
-			*/
-
-			n_burst = requests.size();
-            n_burst_total = n_burst;
-			n_burst_taken = 0;
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "n_burst: " + n_burst);
-				Log.d(TAG, "burst_single_request: " + burst_single_request);
-			}
-
-			if( !previewIsVideoMode ) {
-				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
-			}
-
-			if( picture_cb != null ) {
+				/*
+				// testing:
+				requests.add( stillBuilder.build() );
+				requests.add( stillBuilder.build() );
+				requests.add( stillBuilder.build() );
+				requests.add( stillBuilder.build() );
 				if( MyDebug.LOG )
-					Log.d(TAG, "call onStarted() in callback");
-				picture_cb.onStarted();
-			}
+					Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
+				stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
+				requests.add( stillBuilder.build() );
+				*/
 
-			modified_from_camera_settings = true;
-			if( use_expo_fast_burst && burst_type == BurstType.BURSTTYPE_EXPO ) { // alway use slow burst for focus bracketing
-				if( MyDebug.LOG )
-					Log.d(TAG, "using fast burst");
-				int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
-				if( MyDebug.LOG )
-					Log.d(TAG, "sequenceId: " + sequenceId);
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "using slow burst");
-				slow_burst_capture_requests = requests;
-				slow_burst_start_ms = System.currentTimeMillis();
-				captureSession.capture(requests.get(0), previewCaptureCallback, handler);
-			}
+				n_burst = requests.size();
+				n_burst_total = n_burst;
+				n_burst_taken = 0;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "n_burst: " + n_burst);
+					Log.d(TAG, "burst_single_request: " + burst_single_request);
+				}
 
-			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to take picture expo burst");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+				if( !previewIsVideoMode ) {
+					captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+				}
 			}
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			if( take_picture_error_cb != null ) {
-				take_picture_error_cb.onError();
-				take_picture_error_cb = null;
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to take picture expo burst");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				ok = false;
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				push_take_picture_error_cb = take_picture_error_cb;
+			}
+			catch(IllegalStateException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "captureSession already closed!");
+				e.printStackTrace();
+				ok = false;
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				// don't report error, as camera is closed or closing
 			}
 		}
-		catch(IllegalStateException e) {
+
+		// need to call callbacks without a lock
+		if( ok && picture_cb != null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "captureSession already closed!");
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			// don't report error, as camera is closed or closing
+				Log.d(TAG, "call onStarted() in callback");
+			picture_cb.onStarted();
+		}
+
+		if( ok ) {
+			synchronized( background_camera_lock ) {
+				if( camera == null || captureSession == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "no camera or capture session");
+					return;
+				}
+				try {
+					modified_from_camera_settings = true;
+					if( use_expo_fast_burst && burst_type == BurstType.BURSTTYPE_EXPO ) { // alway use slow burst for focus bracketing
+						if( MyDebug.LOG )
+							Log.d(TAG, "using fast burst");
+						int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
+						if( MyDebug.LOG )
+							Log.d(TAG, "sequenceId: " + sequenceId);
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "using slow burst");
+						slow_burst_capture_requests = requests;
+						slow_burst_start_ms = System.currentTimeMillis();
+						captureSession.capture(requests.get(0), previewCaptureCallback, handler);
+					}
+
+					if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+						media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to take picture expo burst");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					ok = false;
+					jpeg_todo = false;
+					raw_todo = false;
+					picture_cb = null;
+					push_take_picture_error_cb = take_picture_error_cb;
+				}
+				catch(IllegalStateException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "captureSession already closed!");
+					e.printStackTrace();
+					ok = false;
+					jpeg_todo = false;
+					raw_todo = false;
+					picture_cb = null;
+					// don't report error, as camera is closed or closing
+				}
+			}
+		}
+
+		// need to call callbacks without a lock
+		if( push_take_picture_error_cb != null ) {
+			push_take_picture_error_cb.onError();
 		}
 	}
 
@@ -5487,385 +5672,471 @@ public class CameraController2 extends CameraController {
 		if( burst_type != BurstType.BURSTTYPE_NORMAL && burst_type != BurstType.BURSTTYPE_CONTINUOUS ) {
 			Log.e(TAG, "takePictureBurstBracketing called but unexpected burst_type: " + burst_type);
         }
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			return;
-		}
-		try {
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "imageReader: " + imageReader.toString());
-				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
-			}
 
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
-			camera_settings.setupBuilder(stillBuilder, true);
-			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+		boolean is_new_burst = true;
+		CaptureRequest request = null;
+		CaptureRequest last_request = null;
+		boolean ok = true;
+		ErrorCallback push_take_picture_error_cb = null;
+
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "setting torch for capture");
-				if( !camera_settings.has_iso )
-					stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-				test_fake_flash_photo++;
+					Log.d(TAG, "no camera or capture session");
+				return;
 			}
+			try {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "imageReader: " + imageReader.toString());
+					Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+				}
 
-			if( burst_type == BurstType.BURSTTYPE_NORMAL && burst_for_noise_reduction ) {
-				// must be done after calling setupBuilder(), so we override the default EDGE_MODE and NOISE_REDUCTION_MODE
-				if( MyDebug.LOG )
-					Log.d(TAG, "optimise settings for burst_for_noise_reduction");
-				stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
-				stillBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
-				stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
-			}
-
-			if( !continuing_fast_burst ) {
-				clearPending();
-			}
-			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
-			stillBuilder.addTarget(imageReader.getSurface());
-			// don't add target imageReaderRaw, as Raw not supported for burst
-			raw_todo = false; // raw not supported for burst
-
-			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-				test_fake_flash_photo++;
-			}
-			// else don't turn torch off, as user may be in torch on mode
-
-            boolean is_new_burst = true;
-
-            if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "continuous burst mode");
-				if( continuing_fast_burst ) {
+				CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
+				stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+				// n.b., don't set RequestTagType.CAPTURE here - we only do it for the last of the burst captures (see below)
+				camera_settings.setupBuilder(stillBuilder, true);
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "continuing fast burst");
-					n_burst++;
-					is_new_burst = false;
-                    /*if( !continuous_burst_in_progress ) // test bug where we call callback onCompleted() before all burst images are received
-                    	n_burst = 1;*/
+						Log.d(TAG, "setting torch for capture");
+					if( !camera_settings.has_iso )
+						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_photo++;
+				}
+
+				if( burst_type == BurstType.BURSTTYPE_NORMAL && burst_for_noise_reduction ) {
+					// must be done after calling setupBuilder(), so we override the default EDGE_MODE and NOISE_REDUCTION_MODE
+					if( MyDebug.LOG )
+						Log.d(TAG, "optimise settings for burst_for_noise_reduction");
+					stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
+					stillBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
+					stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
+				}
+
+				if( !continuing_fast_burst ) {
+					clearPending();
+				}
+				// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
+				stillBuilder.addTarget(imageReader.getSurface());
+				// don't add target imageReaderRaw, as Raw not supported for burst
+				raw_todo = false; // raw not supported for burst
+
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_photo++;
+				}
+				// else don't turn torch off, as user may be in torch on mode
+
+				if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "continuous burst mode");
+					if( continuing_fast_burst ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "continuing fast burst");
+						n_burst++;
+						is_new_burst = false;
+						/*if( !continuous_burst_in_progress ) // test bug where we call callback onCompleted() before all burst images are received
+							n_burst = 1;*/
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "start continuous burst");
+						continuous_burst_in_progress = true;
+						n_burst = 1;
+						n_burst_taken = 0;
+					}
+					if( MyDebug.LOG )
+						Log.d(TAG, "n_burst is now " + n_burst);
+				}
+				else if( burst_for_noise_reduction ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "choose n_burst for burst_for_noise_reduction");
+					n_burst = 4;
+					n_burst_taken = 0;
+
+					if( capture_result_has_iso ) {
+						// For Nexus 6, max reported ISO is 1196, so the limit for dark scenes shouldn't be more than this
+						// Nokia 8's max reported ISO is 1551
+						// Note that OnePlus 3T has max reported ISO of 800, but this is a device bug
+						if( capture_result_iso >= 1100 ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "optimise for dark scene");
+							n_burst = noise_reduction_low_light ? N_IMAGES_NR_DARK_LOW_LIGHT : N_IMAGES_NR_DARK;
+							boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+							// OnePlus 3T at least has bug where manual ISO can't be set to above 800, so dark images end up too dark -
+							// so no point enabling this code, which is meant to brighten the scene, not make it darker!
+							if( !camera_settings.has_iso && !is_oneplus ) {
+								long exposure_time = noise_reduction_low_light ? 1000000000L/3 : 1000000000L/10;
+								if( !capture_result_has_exposure_time || capture_result_exposure_time < exposure_time ) {
+									if( MyDebug.LOG )
+										Log.d(TAG, "also set long exposure time");
+									modified_from_camera_settings = true;
+									setManualExposureTime(stillBuilder, exposure_time);
+								}
+								else {
+									if( MyDebug.LOG )
+										Log.d(TAG, "no need to extend exposure time for dark scene, already long enough: " + exposure_time);
+								}
+							}
+						}
+						else if( capture_result_has_exposure_time ) {
+							//final double full_exposure_time_scale = 0.5;
+							final double full_exposure_time_scale = Math.pow(2.0, -0.5);
+							final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+							final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+							long exposure_time = capture_result_exposure_time;
+							if( exposure_time <= fixed_exposure_time ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "optimise for bright scene");
+								//n_burst = 2;
+								n_burst = 3;
+								if( !camera_settings.has_iso ) {
+									double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+									exposure_time *= exposure_time_scale;
+									if( MyDebug.LOG ) {
+										Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+										Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+									}
+									modified_from_camera_settings = true;
+									setManualExposureTime(stillBuilder, exposure_time);
+								}
+							}
+						}
+					}
 				}
 				else {
 					if( MyDebug.LOG )
-						Log.d(TAG, "start continuous burst");
-					continuous_burst_in_progress = true;
-					n_burst = 1;
+						Log.d(TAG, "user requested n_burst");
+					n_burst = burst_requested_n_images;
 					n_burst_taken = 0;
 				}
-				if( MyDebug.LOG )
-					Log.d(TAG, "n_burst is now " + n_burst);
-            }
-			else if( burst_for_noise_reduction ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "choose n_burst for burst_for_noise_reduction");
-				n_burst = 4;
-				n_burst_taken = 0;
+				n_burst_total = n_burst;
+				burst_single_request = false;
 
-				if( capture_result_has_iso ) {
-					// For Nexus 6, max reported ISO is 1196, so the limit for dark scenes shouldn't be more than this
-					// Nokia 8's max reported ISO is 1551
-					// Note that OnePlus 3T has max reported ISO of 800, but this is a device bug
-					if( capture_result_iso >= 1100 ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "optimise for dark scene");
-						n_burst = noise_reduction_low_light ? N_IMAGES_NR_DARK_LOW_LIGHT : N_IMAGES_NR_DARK;
-						boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
-						// OnePlus 3T at least has bug where manual ISO can't be set to above 800, so dark images end up too dark -
-						// so no point enabling this code, which is meant to brighten the scene, not make it darker!
-						if( !camera_settings.has_iso && !is_oneplus ) {
-							long exposure_time = noise_reduction_low_light ? 1000000000L/3 : 1000000000L/10;
-							if( !capture_result_has_exposure_time || capture_result_exposure_time < exposure_time ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "also set long exposure time");
-								modified_from_camera_settings = true;
-								setManualExposureTime(stillBuilder, exposure_time);
-							}
-							else {
-								if( MyDebug.LOG )
-									Log.d(TAG, "no need to extend exposure time for dark scene, already long enough: " + exposure_time);
-							}
-						}
-					}
-					else if( capture_result_has_exposure_time ) {
-						//final double full_exposure_time_scale = 0.5;
-						final double full_exposure_time_scale = Math.pow(2.0, -0.5);
-						final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
-						final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
-						long exposure_time = capture_result_exposure_time;
-						if( exposure_time <= fixed_exposure_time ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "optimise for bright scene");
-							//n_burst = 2;
-							n_burst = 3;
-							if( !camera_settings.has_iso ) {
-								double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
-								exposure_time *= exposure_time_scale;
-								if( MyDebug.LOG ) {
-									Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
-									Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
-								}
-								modified_from_camera_settings = true;
-								setManualExposureTime(stillBuilder, exposure_time);
-							}
-						}
-					}
-				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "n_burst: " + n_burst);
+
+				request = stillBuilder.build();
+				stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
+				last_request = stillBuilder.build();
+
+				// n.b., don't stop the preview with stop.Repeating when capturing a burst
 			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "user requested n_burst");
-				n_burst = burst_requested_n_images;
-				n_burst_taken = 0;
-			}
-			n_burst_total = n_burst;
-			burst_single_request = false;
-
-			if( MyDebug.LOG )
-				Log.d(TAG, "n_burst: " + n_burst);
-
-			final CaptureRequest request = stillBuilder.build();
-			stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
-			final CaptureRequest last_request = stillBuilder.build();
-
-			// n.b., don't stop the preview with stop.Repeating when capturing a burst
-
-			if( picture_cb != null && is_new_burst ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "call onStarted() in callback");
-				picture_cb.onStarted();
-			}
-
-			final boolean use_burst = true;
-			//final boolean use_burst = false;
-
-            if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
+			catch(CameraAccessException e) {
 				if( MyDebug.LOG ) {
-                    Log.d(TAG, "continuous capture");
-                    if( !continuous_burst_in_progress )
-                        Log.d(TAG, "    last continuous capture");
-                }
-                continuous_burst_requested_last_capture = !continuous_burst_in_progress;
-				captureSession.capture(continuous_burst_in_progress ? request : last_request, previewCaptureCallback, handler);
-
-				if( continuous_burst_in_progress ) {
-				    final int continuous_burst_rate_ms = 100;
-					// also take the next burst after a delay
-					handler.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							// note, even if continuous_burst_in_progress has become false by this point, still take one last
-							// photo, as need to ensure that we have a request with RequestTagType.CAPTURE, as well as ensuring
-							// we call the onCompleted() method of the callback
-							if( MyDebug.LOG ) {
-								Log.d(TAG, "take next continuous burst");
-								Log.d(TAG, "continuous_burst_in_progress: " + continuous_burst_in_progress);
-								Log.d(TAG, "n_burst: " + n_burst);
-							}
-							if( n_burst >= 10 ) {
-								// Nokia 8 in std mode without post-processing options doesn't hit this limit (we only hit this
-								// if it's set to "n_burst >= 5")
-                                if( MyDebug.LOG ) {
-                                    Log.d(TAG, "...but wait for continuous burst, as waiting for too many photos");
-                                }
-                                //throw new RuntimeException(); // test
-								handler.postDelayed(this, continuous_burst_rate_ms);
-                            }
-                            else if( picture_cb.imageQueueWouldBlock(n_burst+1) ) {
-                                if( MyDebug.LOG ) {
-                                    Log.d(TAG, "...but wait for continuous burst, as image queue would block");
-                                }
-                                //throw new RuntimeException(); // test
-								handler.postDelayed(this, continuous_burst_rate_ms);
-							}
-                            else {
-    							takePictureBurst(true);
-                            }
-					   }
-					}, continuous_burst_rate_ms);
+					Log.e(TAG, "failed to take picture burst");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
 				}
-            }
-			else if( use_burst ) {
-				List<CaptureRequest> requests = new ArrayList<>();
-				for(int i=0;i<n_burst-1;i++)
-					requests.add(request);
-				requests.add(last_request);
-				if( MyDebug.LOG )
-					Log.d(TAG, "captureBurst");
-				int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
-				if( MyDebug.LOG )
-					Log.d(TAG, "sequenceId: " + sequenceId);
+				e.printStackTrace();
+				ok = false;
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				push_take_picture_error_cb = take_picture_error_cb;
 			}
-			else {
-				final int burst_delay = 100;
-				new Runnable() {
-					int n_remaining = n_burst;
+		}
 
-					@Override
-					public void run() {
+		// need to call callbacks without a lock
+		if( ok && picture_cb != null && is_new_burst ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "call onStarted() in callback");
+			picture_cb.onStarted();
+		}
+
+		if( ok ) {
+			synchronized( background_camera_lock ) {
+				if( camera == null || captureSession == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "no camera or capture session");
+					return;
+				}
+				try {
+					final boolean use_burst = true;
+					//final boolean use_burst = false;
+
+					if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
 						if( MyDebug.LOG ) {
-							Log.d(TAG, "takePictureBurst runnable");
-							if( n_remaining == 1 ) {
-								Log.d(TAG, "    is last request");
-							}
+							Log.d(TAG, "continuous capture");
+							if( !continuous_burst_in_progress )
+								Log.d(TAG, "    last continuous capture");
 						}
-						try {
-							captureSession.capture(n_remaining == 1 ? last_request : request, previewCaptureCallback, handler);
-							n_remaining--;
-							if( MyDebug.LOG )
-								Log.d(TAG, "takePictureBurst n_remaining: " + n_remaining);
-							if( n_remaining > 0 ) {
-								handler.postDelayed(this, burst_delay);
-							}
-						}
-						catch(CameraAccessException e) {
-							if( MyDebug.LOG ) {
-								Log.e(TAG, "failed to take picture burst");
-								Log.e(TAG, "reason: " + e.getReason());
-								Log.e(TAG, "message: " + e.getMessage());
-							}
-							e.printStackTrace();
-							jpeg_todo = false;
-							raw_todo = false;
-							picture_cb = null;
-							if( take_picture_error_cb != null ) {
-								take_picture_error_cb.onError();
-								take_picture_error_cb = null;
-							}
+						continuous_burst_requested_last_capture = !continuous_burst_in_progress;
+						captureSession.capture(continuous_burst_in_progress ? request : last_request, previewCaptureCallback, handler);
+
+						if( continuous_burst_in_progress ) {
+							final int continuous_burst_rate_ms = 100;
+							// also take the next burst after a delay
+							handler.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									// note, even if continuous_burst_in_progress has become false by this point, still take one last
+									// photo, as need to ensure that we have a request with RequestTagType.CAPTURE, as well as ensuring
+									// we call the onCompleted() method of the callback
+									if( MyDebug.LOG ) {
+										Log.d(TAG, "take next continuous burst");
+										Log.d(TAG, "continuous_burst_in_progress: " + continuous_burst_in_progress);
+										Log.d(TAG, "n_burst: " + n_burst);
+									}
+									if( n_burst >= 10 ) {
+										// Nokia 8 in std mode without post-processing options doesn't hit this limit (we only hit this
+										// if it's set to "n_burst >= 5")
+										if( MyDebug.LOG ) {
+											Log.d(TAG, "...but wait for continuous burst, as waiting for too many photos");
+										}
+										//throw new RuntimeException(); // test
+										handler.postDelayed(this, continuous_burst_rate_ms);
+									}
+									else if( picture_cb.imageQueueWouldBlock(n_burst+1) ) {
+										if( MyDebug.LOG ) {
+											Log.d(TAG, "...but wait for continuous burst, as image queue would block");
+										}
+										//throw new RuntimeException(); // test
+										handler.postDelayed(this, continuous_burst_rate_ms);
+									}
+									else {
+										takePictureBurst(true);
+									}
+								}
+							}, continuous_burst_rate_ms);
 						}
 					}
-				}.run();
-			}
+					else if( use_burst ) {
+						List<CaptureRequest> requests = new ArrayList<>();
+						for(int i=0;i<n_burst-1;i++)
+							requests.add(request);
+						requests.add(last_request);
+						if( MyDebug.LOG )
+							Log.d(TAG, "captureBurst");
+						int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
+						if( MyDebug.LOG )
+							Log.d(TAG, "sequenceId: " + sequenceId);
+					}
+					else {
+						final int burst_delay = 100;
+						final CaptureRequest request_f = request;
+						final CaptureRequest last_request_f = last_request;
 
-			if( sounds_enabled && !continuing_fast_burst ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+						new Runnable() {
+							int n_remaining = n_burst;
+
+							@Override
+							public void run() {
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "takePictureBurst runnable");
+									if( n_remaining == 1 ) {
+										Log.d(TAG, "    is last request");
+									}
+								}
+								ErrorCallback push_take_picture_error_cb = null;
+
+								synchronized( background_camera_lock ) {
+									if( camera == null || captureSession == null ) {
+										if( MyDebug.LOG )
+											Log.d(TAG, "no camera or capture session");
+										return;
+									}
+									try {
+										captureSession.capture(n_remaining == 1 ? last_request_f : request_f, previewCaptureCallback, handler);
+										n_remaining--;
+										if( MyDebug.LOG )
+											Log.d(TAG, "takePictureBurst n_remaining: " + n_remaining);
+										if( n_remaining > 0 ) {
+											handler.postDelayed(this, burst_delay);
+										}
+									}
+									catch(CameraAccessException e) {
+										if( MyDebug.LOG ) {
+											Log.e(TAG, "failed to take picture burst");
+											Log.e(TAG, "reason: " + e.getReason());
+											Log.e(TAG, "message: " + e.getMessage());
+										}
+										e.printStackTrace();
+										jpeg_todo = false;
+										raw_todo = false;
+										picture_cb = null;
+										push_take_picture_error_cb = take_picture_error_cb;
+									}
+
+									// need to call callbacks without a lock
+									if( push_take_picture_error_cb != null ) {
+										push_take_picture_error_cb.onError();
+									}
+								}
+							}
+						}.run();
+					}
+
+					if( sounds_enabled && !continuing_fast_burst ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+						media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to take picture burst");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					ok = false;
+					jpeg_todo = false;
+					raw_todo = false;
+					picture_cb = null;
+					push_take_picture_error_cb = take_picture_error_cb;
+				}
+			}
 		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to take picture burst");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
-			}
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			if( take_picture_error_cb != null ) {
-				take_picture_error_cb.onError();
-				take_picture_error_cb = null;
-			}
+
+		// need to call callbacks without a lock
+		if( push_take_picture_error_cb != null ) {
+			push_take_picture_error_cb.onError();
 		}
 	}
 
 	private void runPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runPrecapture");
-		// first run precapture sequence
+		long debug_time = 0;
 		if( MyDebug.LOG ) {
-			if( use_fake_precapture_mode )
-				Log.e(TAG, "shouldn't be doing standard precapture when use_fake_precapture_mode is true!");
-			else if( burst_type != BurstType.BURSTTYPE_NONE )
-				Log.e(TAG, "shouldn't be doing precapture for burst - should be using fake precapture!");
+			debug_time = System.currentTimeMillis();
 		}
-		try {
-			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
-			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
-			precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+		// first run precapture sequence
 
-			camera_settings.setupBuilder(precaptureBuilder, false);
-			precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+		ErrorCallback push_take_picture_error_cb = null;
 
-			precaptureBuilder.addTarget(getPreviewSurface());
-
-	    	state = STATE_WAITING_PRECAPTURE_START;
-	    	precapture_state_change_time_ms = System.currentTimeMillis();
-
-	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
-			if( MyDebug.LOG )
-				Log.d(TAG, "capture with precaptureBuilder");
-			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
-			captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
-
-			// now set precapture
-			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
-		}
-		catch(CameraAccessException e) {
+		synchronized( background_camera_lock ) {
 			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to precapture");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
+				if( use_fake_precapture_mode )
+					Log.e(TAG, "shouldn't be doing standard precapture when use_fake_precapture_mode is true!");
+				else if( burst_type != BurstType.BURSTTYPE_NONE )
+					Log.e(TAG, "shouldn't be doing precapture for burst - should be using fake precapture!");
 			}
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			if( take_picture_error_cb != null ) {
-				take_picture_error_cb.onError();
-				take_picture_error_cb = null;
+			try {
+				// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
+				final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
+				precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+
+				camera_settings.setupBuilder(precaptureBuilder, false);
+				precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+				precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
+				precaptureBuilder.addTarget(getPreviewSurface());
+
+				state = STATE_WAITING_PRECAPTURE_START;
+				precapture_state_change_time_ms = System.currentTimeMillis();
+
+				// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
+				if( MyDebug.LOG )
+					Log.d(TAG, "capture with precaptureBuilder");
+				captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
+				captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
+
+				// now set precapture
+				precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+				captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
 			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to precapture");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				push_take_picture_error_cb = take_picture_error_cb;
+			}
+		}
+
+		// need to call callbacks without a lock
+		if( push_take_picture_error_cb != null ) {
+			push_take_picture_error_cb.onError();
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "runPrecapture() took: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 	
 	private void runFakePrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runFakePrecapture");
-		switch(camera_settings.flash_value) {
-			case "flash_auto":
-			case "flash_on":
-				if(MyDebug.LOG)
-					Log.d(TAG, "turn on torch");
-				previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-				previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-				test_fake_flash_precapture++;
-				fake_precapture_torch_performed = true;
-				break;
-			case "flash_frontscreen_auto":
-			case "flash_frontscreen_on":
-				if(picture_cb != null) {
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			debug_time = System.currentTimeMillis();
+		}
+
+		boolean turn_frontscreen_on = false;
+		ErrorCallback push_take_picture_error_cb = null;
+
+		synchronized( background_camera_lock ) {
+			switch(camera_settings.flash_value) {
+				case "flash_auto":
+				case "flash_on":
 					if(MyDebug.LOG)
-						Log.d(TAG, "request screen turn on for frontscreen flash");
-					picture_cb.onFrontScreenTurnOn();
-				}
-				else {
-					if (MyDebug.LOG)
-						Log.e(TAG, "can't request screen turn on for frontscreen flash, as no picture_cb");
-				}
-				break;
-			default:
+						Log.d(TAG, "turn on torch");
+					previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+					previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_precapture++;
+					fake_precapture_torch_performed = true;
+					break;
+				case "flash_frontscreen_auto":
+				case "flash_frontscreen_on":
+					turn_frontscreen_on = true;
+					break;
+				default:
+					if(MyDebug.LOG)
+						Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
+					break;
+			}
+		}
+
+		// need to call callbacks without a lock
+		if( turn_frontscreen_on ) {
+			if(picture_cb != null) {
 				if(MyDebug.LOG)
-					Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
-				break;
+					Log.d(TAG, "request screen turn on for frontscreen flash");
+				picture_cb.onFrontScreenTurnOn();
+			}
+			else {
+				if (MyDebug.LOG)
+					Log.e(TAG, "can't request screen turn on for frontscreen flash, as no picture_cb");
+			}
 		}
-    	state = STATE_WAITING_FAKE_PRECAPTURE_START;
-    	precapture_state_change_time_ms = System.currentTimeMillis();
-		fake_precapture_turn_on_torch_id = null;
-		try {
-			CaptureRequest request = previewBuilder.build();
-			if( fake_precapture_torch_performed ) {
-				fake_precapture_turn_on_torch_id = request;
-				if( MyDebug.LOG )
-					Log.d(TAG, "fake_precapture_turn_on_torch_id: " + request);
+
+		synchronized( background_camera_lock ) {
+			state = STATE_WAITING_FAKE_PRECAPTURE_START;
+			precapture_state_change_time_ms = System.currentTimeMillis();
+			fake_precapture_turn_on_torch_id = null;
+			try {
+				CaptureRequest request = previewBuilder.build();
+				if( fake_precapture_torch_performed ) {
+					fake_precapture_turn_on_torch_id = request;
+					if( MyDebug.LOG )
+						Log.d(TAG, "fake_precapture_turn_on_torch_id: " + request);
+				}
+				setRepeatingRequest(request);
 			}
-			setRepeatingRequest(request);
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to start fake precapture");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				jpeg_todo = false;
+				raw_todo = false;
+				picture_cb = null;
+				push_take_picture_error_cb = take_picture_error_cb;
+			}
 		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to start fake precapture");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
-			}
-			e.printStackTrace();
-			jpeg_todo = false;
-			raw_todo = false;
-			picture_cb = null;
-			if( take_picture_error_cb != null ) {
-				take_picture_error_cb.onError();
-				take_picture_error_cb = null;
-			}
-		} 
+
+		// need to call callbacks without a lock
+		if( push_take_picture_error_cb != null ) {
+			push_take_picture_error_cb.onError();
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "runFakePrecapture() took: " + (System.currentTimeMillis() - debug_time));
+		}
 	}
 
 	private boolean fireAutoFlashFrontScreen() {
@@ -5928,94 +6199,119 @@ public class CameraController2 extends CameraController {
 	public void takePicture(final PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-		if( camera == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "no camera or capture session");
-			error.onError();
-			return;
-		}
-		this.picture_cb = picture;
-		this.jpeg_todo = true;
-		this.raw_todo = imageReaderRaw != null;
-		this.done_all_captures = false;
-		this.take_picture_error_cb = error;
-		this.fake_precapture_torch_performed = false; // just in case still on?
-		if( !ready_for_capture ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "takePicture: not ready for capture!");
-			//throw new RuntimeException(); // debugging
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			debug_time = System.currentTimeMillis();
 		}
 
-		{
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "current flash value: " + camera_settings.flash_value);
-				Log.d(TAG, "use_fake_precapture_mode: " + use_fake_precapture_mode);
-			}
-			// Don't need precapture if flash off or torch
-			// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
-			if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
-				takePictureAfterPrecapture();
-			}
-			else if( use_fake_precapture_mode ) {
-				// fake flash auto/on mode
-				// fake precapture works by turning on torch (or using a "front screen flash"), so we can't use the camera's own decision for flash auto
-				// instead we check the current ISO value
-				boolean auto_flash = camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto");
-				Integer flash_mode = previewBuilder.get(CaptureRequest.FLASH_MODE);
+		boolean call_takePictureAfterPrecapture = false;
+		boolean call_runFakePrecapture = false;
+		boolean call_runPrecapture = false;
+
+		synchronized( background_camera_lock ) {
+			if( camera == null || captureSession == null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "flash_mode: " + flash_mode);
-				if( auto_flash && !fireAutoFlash() ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "fake precapture flash auto: seems bright enough to not need flash");
-					takePictureAfterPrecapture();
+					Log.d(TAG, "no camera or capture session");
+				error.onError();
+				return;
+			}
+			this.picture_cb = picture;
+			this.jpeg_todo = true;
+			this.raw_todo = imageReaderRaw != null;
+			this.done_all_captures = false;
+			this.take_picture_error_cb = error;
+			this.fake_precapture_torch_performed = false; // just in case still on?
+			if( !ready_for_capture ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "takePicture: not ready for capture!");
+				//throw new RuntimeException(); // debugging
+			}
+
+			{
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "current flash value: " + camera_settings.flash_value);
+					Log.d(TAG, "use_fake_precapture_mode: " + use_fake_precapture_mode);
 				}
-				else if( flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
+				// Don't need precapture if flash off or torch
+				// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
+				if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
+					call_takePictureAfterPrecapture = true;
+				}
+				else if( use_fake_precapture_mode ) {
+					// fake flash auto/on mode
+					// fake precapture works by turning on torch (or using a "front screen flash"), so we can't use the camera's own decision for flash auto
+					// instead we check the current ISO value
+					boolean auto_flash = camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto");
+					Integer flash_mode = previewBuilder.get(CaptureRequest.FLASH_MODE);
 					if( MyDebug.LOG )
-						Log.d(TAG, "fake precapture flash: torch already on (presumably from autofocus)");
-					// On some devices (e.g., OnePlus 3T), if we've already turned on torch for an autofocus immediately before
-					// taking the photo, ae convergence may have already occurred - so if we called runFakePrecapture(), we'd just get
-					// stuck waiting for CONTROL_AE_STATE_SEARCHING which will never happen, until we hit the timeout - it works,
-					// but it means taking photos is slower as we have to wait until the timeout
-					// Instead we assume that ae scanning has already started, so go straight to STATE_WAITING_FAKE_PRECAPTURE_DONE,
-					// which means wait until we're no longer CONTROL_AE_STATE_SEARCHING.
-					// (Note, we don't want to go straight to takePictureAfterPrecapture(), as it might be that ae scanning is still
-					// taking place.)
-					// An alternative solution would be to switch torch off and back on again to cause ae scanning to start - but
-					// at worst this is tricky to get working, and at best, taking photos would be slower.
-					fake_precapture_torch_performed = true; // so we know to fire the torch when capturing
-					test_fake_flash_precapture++; // for testing, should treat this same as if we did do the precapture
-					state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
-					precapture_state_change_time_ms = System.currentTimeMillis();
+						Log.d(TAG, "flash_mode: " + flash_mode);
+					if( auto_flash && !fireAutoFlash() ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "fake precapture flash auto: seems bright enough to not need flash");
+						call_takePictureAfterPrecapture = true;
+					}
+					else if( flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "fake precapture flash: torch already on (presumably from autofocus)");
+						// On some devices (e.g., OnePlus 3T), if we've already turned on torch for an autofocus immediately before
+						// taking the photo, ae convergence may have already occurred - so if we called runFakePrecapture(), we'd just get
+						// stuck waiting for CONTROL_AE_STATE_SEARCHING which will never happen, until we hit the timeout - it works,
+						// but it means taking photos is slower as we have to wait until the timeout
+						// Instead we assume that ae scanning has already started, so go straight to STATE_WAITING_FAKE_PRECAPTURE_DONE,
+						// which means wait until we're no longer CONTROL_AE_STATE_SEARCHING.
+						// (Note, we don't want to go straight to takePictureAfterPrecapture(), as it might be that ae scanning is still
+						// taking place.)
+						// An alternative solution would be to switch torch off and back on again to cause ae scanning to start - but
+						// at worst this is tricky to get working, and at best, taking photos would be slower.
+						fake_precapture_torch_performed = true; // so we know to fire the torch when capturing
+						test_fake_flash_precapture++; // for testing, should treat this same as if we did do the precapture
+						state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
+						precapture_state_change_time_ms = System.currentTimeMillis();
+					}
+					else {
+						call_runFakePrecapture = true;
+					}
 				}
 				else {
-					runFakePrecapture();
+					// standard flash, flash auto or on
+					// note that we don't call needsFlash() (or use is_flash_required) - as if ae state is neither CONVERGED nor FLASH_REQUIRED, we err on the side
+					// of caution and don't skip the precapture
+					//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
+					boolean needs_flash = capture_result_ae != null && capture_result_ae != CaptureResult.CONTROL_AE_STATE_CONVERGED;
+					if( camera_settings.flash_value.equals("flash_auto") && !needs_flash ) {
+						// if we call precapture anyway, flash wouldn't fire - but we tend to have a pause
+						// so skipping the precapture if flash isn't going to fire makes this faster
+						if( MyDebug.LOG )
+							Log.d(TAG, "flash auto, but we don't need flash");
+						call_takePictureAfterPrecapture = true;
+					}
+					else {
+						call_runPrecapture = true;
+					}
 				}
 			}
-			else {
-				// standard flash, flash auto or on
-				// note that we don't call needsFlash() (or use is_flash_required) - as if ae state is neither CONVERGED nor FLASH_REQUIRED, we err on the side
-				// of caution and don't skip the precapture
-				//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
-				boolean needs_flash = capture_result_ae != null && capture_result_ae != CaptureResult.CONTROL_AE_STATE_CONVERGED;
-				if( camera_settings.flash_value.equals("flash_auto") && !needs_flash ) {
-					// if we call precapture anyway, flash wouldn't fire - but we tend to have a pause
-					// so skipping the precapture if flash isn't going to fire makes this faster
-					if( MyDebug.LOG )
-						Log.d(TAG, "flash auto, but we don't need flash");
-					takePictureAfterPrecapture();
-				}
-				else {
-					runPrecapture();
-				}
-			}
+
+			/*camera_settings.setupBuilder(previewBuilder, false);
+			previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+			state = STATE_WAITING_AUTOFOCUS;
+			precapture_started = -1;
+			//capture();
+			setRepeatingRequest();*/
 		}
 
-		/*camera_settings.setupBuilder(previewBuilder, false);
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-		state = STATE_WAITING_AUTOFOCUS;
-		precapture_started = -1;
-    	//capture();
-    	setRepeatingRequest();*/
+		// important to call functions outside of locks, so that they can in turn call callbacks without a lock
+		if( call_takePictureAfterPrecapture ) {
+			takePictureAfterPrecapture();
+		}
+		else if( call_runFakePrecapture ) {
+			runFakePrecapture();
+		}
+		else if( call_runPrecapture ) {
+			runPrecapture();
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "takePicture() took: " + (System.currentTimeMillis() - debug_time));
+		}
 	}
 
 	@Override
@@ -6970,12 +7266,12 @@ public class CameraController2 extends CameraController {
 				public void run() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "processCompleted UI thread call checkImagesCompleted()");
-					synchronized( image_reader_lock ) {
+					synchronized( background_camera_lock ) {
 						done_all_captures = true;
 						if( MyDebug.LOG )
 							Log.d(TAG, "done all captures");
-						checkImagesCompleted();
 					}
+					checkImagesCompleted();
 				}
 			});
 		}

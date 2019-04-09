@@ -5535,20 +5535,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( autofocus_in_continuous_mode ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "continuous mode where user touched to focus");
+
+			boolean wait_for_focus;
+
 			synchronized(this) {
 				// as below, if an autofocus is in progress, then take photo when it's completed
 				if( focus_success == FOCUS_WAITING ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus_in_continuous_mode: take photo after current focus");
+					wait_for_focus = true;
 					take_photo_after_autofocus = true;
-					camera_controller.setCaptureFollowAutofocusHint(true);
 				}
 				else {
 					// when autofocus_in_continuous_mode==true, it means the user recently touched to focus in continuous focus mode, so don't do another focus
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus_in_continuous_mode: no need to refocus");
-					takePhotoWhenFocused(continuous_fast_burst);
+					wait_for_focus = false;
 				}
+			}
+
+			// call CameraController outside the lock
+			if( wait_for_focus ) {
+				camera_controller.setCaptureFollowAutofocusHint(true);
+			}
+			else {
+				takePhotoWhenFocused(continuous_fast_burst);
 			}
 		}
 		else if( camera_controller.focusIsContinuous() ) {
@@ -5579,6 +5590,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			takePhotoWhenFocused(continuous_fast_burst);
 		}
 		else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
+			boolean wait_for_focus;
 			// n.b., we check focus_value rather than camera_controller.supportsAutoFocus(), as we want to discount focus_mode_locked
 			synchronized(this) {
 				if( focus_success == FOCUS_WAITING ) {
@@ -5586,26 +5598,34 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// In general, probably a good idea to not redo a focus - just use the one that's already in progress
 					if( MyDebug.LOG )
 						Log.d(TAG, "take photo after current focus");
+					wait_for_focus = true;
 					take_photo_after_autofocus = true;
-					camera_controller.setCaptureFollowAutofocusHint(true);
 				}
 				else {
+					wait_for_focus = false;
 					focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
-			        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
-						@Override
-						public void onAutoFocus(boolean success) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "autofocus complete: " + success);
-							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
-							prepareAutoFocusPhoto();
-							takePhotoWhenFocused(continuous_fast_burst);
-						}
-			        };
-					if( MyDebug.LOG )
-						Log.d(TAG, "start autofocus to take picture");
-					camera_controller.autoFocus(autoFocusCallback, true);
-					count_cameraAutoFocus++;
 				}
+			}
+
+			// call CameraController outside the lock
+			if( wait_for_focus ) {
+				camera_controller.setCaptureFollowAutofocusHint(true);
+			}
+			else {
+				CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
+					@Override
+					public void onAutoFocus(boolean success) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "autofocus complete: " + success);
+						ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
+						prepareAutoFocusPhoto();
+						takePhotoWhenFocused(continuous_fast_burst);
+					}
+				};
+				if( MyDebug.LOG )
+					Log.d(TAG, "start autofocus to take picture");
+				camera_controller.autoFocus(autoFocusCallback, true);
+				count_cameraAutoFocus++;
 			}
 		}
 		else {
@@ -6108,14 +6128,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				camera_controller.cancelAutoFocus();
 			}
 		}
+
+		boolean local_take_photo_after_autofocus = false;
 		synchronized(this) {
-			if( take_photo_after_autofocus ) {
-				if( MyDebug.LOG ) 
-					Log.d(TAG, "take_photo_after_autofocus is set");
-				take_photo_after_autofocus = false;
-				prepareAutoFocusPhoto();
-				takePhotoWhenFocused(false);
-			}
+			local_take_photo_after_autofocus = take_photo_after_autofocus;
+			take_photo_after_autofocus = false;
+		}
+		// call CameraController outside the lock
+		if( local_take_photo_after_autofocus ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "take_photo_after_autofocus is set");
+			prepareAutoFocusPhoto();
+			takePhotoWhenFocused(false);
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocusCompleted exit");

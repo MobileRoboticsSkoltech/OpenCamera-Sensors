@@ -222,7 +222,9 @@ public abstract class CameraController {
 	public interface FaceDetectionListener {
 		void onFaceDetection(Face[] faces);
 	}
-	
+
+	/** Interface to define callbacks related to taking photos. These callbacks are all called on the UI thread.
+	 */
 	public interface PictureCallback {
 		void onStarted(); // called immediately before we start capturing the picture
 		void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
@@ -244,11 +246,17 @@ public abstract class CameraController {
 		boolean imageQueueWouldBlock(int n_jpegs);
 		void onFrontScreenTurnOn();
 	}
-	
+
+	/** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)
+	 *  or a background thread (CameraController2).
+	 */
 	public interface AutoFocusCallback {
 		void onAutoFocus(boolean success);
 	}
-	
+
+	/** Interface to define callback for continuous focus starting/stopping. This callback may be called on the
+	 *  UI thread (CameraController1) or a background thread (CameraController2).
+	 */
 	public interface ContinuousFocusMoveCallback {
 		void onContinuousFocusMove(boolean start);
 	}
