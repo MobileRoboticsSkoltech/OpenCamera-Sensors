@@ -7,6 +7,7 @@ public class PhotoCamera2Tests {
     // Tests related to taking photos that require Camera2 - only need to run this suite with Camera2
     public static Test suite() {
         TestSuite suite = new TestSuite(MainTests.class.getName());
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoFocusReleaseDuringPhoto"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualFocus"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualISOExposure"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualWB"));

@@ -3781,6 +3781,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
     }
 
+    /** Take a photo for Camera2 API when camera is released on UI thread whilst photo is taken on background thread (via
+     *  autofocus callback).
+     */
+    public void testTakePhotoAutoFocusReleaseDuringPhoto() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoAutoFocusReleaseDuringPhoto");
+
+        if( !mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test requires camera2 api");
+            return;
+        }
+
+        setToDefault();
+        switchToFocusValue("focus_mode_auto");
+
+        mPreview.getCameraController().test_release_during_photo = true;
+
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        assertFalse( mActivity.hasThumbnailAnimation() );
+        Log.d(TAG, "about to click take photo");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take photo");
+
+        Thread.sleep(5000);
+    }
+
     public void testTakePhotoLockedFocus() throws InterruptedException {
         Log.d(TAG, "testTakePhotoLockedFocus");
         setToDefault();

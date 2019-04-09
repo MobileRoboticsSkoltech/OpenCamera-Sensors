@@ -5232,6 +5232,23 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "no camera or capture session");
 					return;
 				}
+				if( test_release_during_photo ) {
+					final Activity activity = (Activity)context;
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if( MyDebug.LOG )
+								Log.d(TAG, "test UI thread call release()");
+							release();
+						}
+					});
+					try {
+						Thread.sleep(1000);
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				try {
 					if( MyDebug.LOG )
 						Log.d(TAG, "capture with stillBuilder");
