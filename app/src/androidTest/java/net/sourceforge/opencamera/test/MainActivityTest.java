@@ -2338,6 +2338,68 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /* Tests enabling and disabling the preview bitmap.
+     */
+    public void testPreviewBitmap() throws InterruptedException {
+        Log.d(TAG, "testPreviewBitmap");
+
+        if( !mActivity.supportsPreviewBitmaps() ) {
+            Log.d(TAG, "preview bitmaps not supported");
+            return;
+        }
+
+        setToDefault();
+        Thread.sleep(1000);
+
+        long [] delays = {20, 50, 100, 1000};
+        int [] n_iters = {50, 30, 30, 3};
+        assertEquals(delays.length, n_iters.length);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+
+        assertFalse(mPreview.isPreviewBitmapEnabled());
+        assertFalse(mPreview.refreshPreviewBitmapTaskIsRunning());
+
+        for(int i=0;i<delays.length;i++) {
+            Log.d(TAG, ">>> i = " + i + " delay: " + delays[i]);
+            for(int j=0;j<n_iters[i];j++) {
+                Log.d(TAG, "    >>> j = " + j + " / " + n_iters[i]);
+                SharedPreferences.Editor editor = settings.edit();
+
+                editor.putString(PreferenceKeys.HistogramPreferenceKey, "preference_histogram_rgb");
+                editor.apply();
+                mActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mActivity.getApplicationInterface().getDrawPreview().updateSettings();
+                    }
+                });
+                this.getInstrumentation().waitForIdleSync();
+                Thread.sleep(delays[i]);
+                if (delays[i] >= 1000) {
+                    assertTrue(mPreview.isPreviewBitmapEnabled());
+                }
+
+                editor.putString(PreferenceKeys.HistogramPreferenceKey, "preference_histogram_off");
+                editor.apply();
+                mActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mActivity.getApplicationInterface().getDrawPreview().updateSettings();
+                    }
+                });
+                this.getInstrumentation().waitForIdleSync();
+                Thread.sleep(delays[i]);
+                if (delays[i] >= 1000) {
+                    assertFalse(mPreview.isPreviewBitmapEnabled());
+                    assertFalse(mPreview.refreshPreviewBitmapTaskIsRunning());
+                }
+            }
+        }
+
+        Thread.sleep(500);
+        assertFalse(mPreview.isPreviewBitmapEnabled());
+        assertFalse(mPreview.refreshPreviewBitmapTaskIsRunning());
+    }
+
     public void testTakePhotoExposureCompensation() throws InterruptedException {
         Log.d(TAG, "testTakePhotoExposureCompensation");
         setToDefault();

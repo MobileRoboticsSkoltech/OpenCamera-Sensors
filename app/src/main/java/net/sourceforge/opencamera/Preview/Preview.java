@@ -6927,7 +6927,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 
-		if( refreshPreviewBitmapTask != null ) {
+		if( refreshPreviewBitmapTaskIsRunning() ) {
 			// if we're being destroyed, better to wait until completion rather than just cancelling
 			try {
 				refreshPreviewBitmapTask.get(); // forces thread to complete
@@ -7266,14 +7266,50 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.want_preview_bitmap;
 	}
 
+
+	public boolean refreshPreviewBitmapTaskIsRunning() {
+		return refreshPreviewBitmapTask != null;
+	}
+
 	private void freePreviewBitmap() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "freePreviewBitmap");
 		cancelRefreshPreviewBitmap();
 		histogram = null;
 		if( preview_bitmap != null ) {
-			preview_bitmap.recycle();
-			preview_bitmap = null;
+			if( !refreshPreviewBitmapTaskIsRunning() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "refreshPreviewBitmapTask not running, can recycle bitmap");
+                preview_bitmap.recycle();
+            }
+            else {
+                // Don't want to recycle bitmap whilst thread is running!
+                // See test testPreviewBitmap().
+                if( MyDebug.LOG )
+                    Log.d(TAG, "refreshPreviewBitmapTask still running, wait before recycle bitmap");
+                final Bitmap saved_preview_bitmap = preview_bitmap;
+                final Handler handler = new Handler();
+                final long recycle_delay = 500;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if( !refreshPreviewBitmapTaskIsRunning() ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "refreshPreviewBitmapTask not running now, can recycle bitmap");
+                            saved_preview_bitmap.recycle();
+                        }
+                        else {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "refreshPreviewBitmapTask still running, wait again before recycle bitmap");
+                            handler.postDelayed(this, recycle_delay);
+                        }
+                    }
+                }, recycle_delay);
+            }
+
+            // It's okay to set preview_bitmap to null even if refreshPreviewBitmapTask is currently running in the background
+            // as it takes it's own reference. But we shouldn't recycle until the background thread is complete.
+            preview_bitmap = null;
 		}
 		freeZebraStripesBitmap();
 		freeFocusPeakingBitmap();
@@ -7408,10 +7444,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	// use static class, and WeakReferences, to avoid memory leaks: https://stackoverflow.com/questions/44309241/warning-this-asynctask-class-should-be-static-or-leaks-might-occur/46166223
 	private static class RefreshPreviewBitmapTask extends AsyncTask<Void, Void, RefreshPreviewBitmapTaskResult> {
 		private static final String TAG = "RefreshPreviewBmTask";
-		private final WeakReference<Preview> previewReference;
+        private final WeakReference<Preview> previewReference;
+        private final WeakReference<Bitmap> preview_bitmapReference; // we take a reference to the bitmap, so the Preview class can set this to null even whilst the background thread is running
 
-		RefreshPreviewBitmapTask(Preview preview) {
-			this.previewReference = new WeakReference<>(preview);
+		RefreshPreviewBitmapTask(Preview preview, Bitmap preview_bitmap) {
+            this.previewReference = new WeakReference<>(preview);
+            this.preview_bitmapReference = new WeakReference<>(preview_bitmap);
 		}
 
 		@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -7423,12 +7461,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				debug_time = System.currentTimeMillis();
 			}
 
-			Preview preview = previewReference.get();
-			if( preview == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "preview is null");
-				return null;
-			}
+            Preview preview = previewReference.get();
+            if( preview == null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview is null");
+                return null;
+            }
+            Bitmap preview_bitmap = preview_bitmapReference.get();
+            if( preview_bitmap == null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview_bitmap is null");
+                return null;
+            }
 			Activity activity = (Activity)preview.getContext();
 			if( activity == null || activity.isFinishing() ) {
 				if( MyDebug.LOG )
@@ -7682,17 +7726,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		protected void onCancelled() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCancelled, async task: " + this);
+			Preview preview = previewReference.get();
+			if( preview == null ) {
+				return;
+			}
+			preview.refreshPreviewBitmapTask = null;
 		}
 	}
 
 	private void refreshPreviewBitmap() {
 		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 100 : 200;
 		if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-			refreshPreviewBitmapTask == null && System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
+			!refreshPreviewBitmapTaskIsRunning() && System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "refreshPreviewBitmap");
 			this.last_preview_bitmap_time_ms = System.currentTimeMillis();
-			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this);
+			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this, preview_bitmap);
 			refreshPreviewBitmapTask.execute();
 		}
 	}
@@ -7700,9 +7749,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void cancelRefreshPreviewBitmap() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelRefreshPreviewBitmap");
-		if( refreshPreviewBitmapTask != null ) {
+		if( refreshPreviewBitmapTaskIsRunning() ) {
 			refreshPreviewBitmapTask.cancel(true);
-			refreshPreviewBitmapTask = null;
+			// we don't set refreshPreviewBitmapTask to null - this will be done by the task itself when it completes;
+            // and we want to know when the task is no longer running (e.g., for freePreviewBitmap()).
 		}
 	}
 
