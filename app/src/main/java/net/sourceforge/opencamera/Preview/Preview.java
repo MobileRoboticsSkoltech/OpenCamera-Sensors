@@ -117,6 +117,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int textureview_w, textureview_h;
 
 	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
+	private ScriptC_histogram_compute histogramScript; // lazily create for performance
 	private boolean want_preview_bitmap; // whether application has requested we generate bitmap for the preview
 	private Bitmap preview_bitmap;
 	private long last_preview_bitmap_time_ms; // time the last preview_bitmap was updated
@@ -7260,6 +7261,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "disablePreviewBitmap");
 		freePreviewBitmap();
 		want_preview_bitmap = false;
+		histogramScript = null; // to help garbage collection
 	}
 
 	public boolean isPreviewBitmapEnabled() {
@@ -7452,16 +7454,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static class RefreshPreviewBitmapTask extends AsyncTask<Void, Void, RefreshPreviewBitmapTaskResult> {
 		private static final String TAG = "RefreshPreviewBmTask";
         private final WeakReference<Preview> previewReference;
+		private final WeakReference<ScriptC_histogram_compute> histogramScriptReference;
 		// we take references to the bitmaps, so the Preview class can set this to null even whilst the background thread is running
         private final WeakReference<Bitmap> preview_bitmapReference;
 		private final WeakReference<Bitmap> zebra_stripes_bitmap_bufferReference;
 		private final WeakReference<Bitmap> focus_peaking_bitmap_bufferReference;
 
-		RefreshPreviewBitmapTask(Preview preview, Bitmap preview_bitmap, Bitmap zebra_stripes_bitmap_buffer, Bitmap focus_peaking_bitmap_buffer) {
+		RefreshPreviewBitmapTask(Preview preview) {
             this.previewReference = new WeakReference<>(preview);
-			this.preview_bitmapReference = new WeakReference<>(preview_bitmap);
-			this.zebra_stripes_bitmap_bufferReference = new WeakReference<>(zebra_stripes_bitmap_buffer);
-			this.focus_peaking_bitmap_bufferReference = new WeakReference<>(focus_peaking_bitmap_buffer);
+			this.preview_bitmapReference = new WeakReference<>(preview.preview_bitmap);
+			this.zebra_stripes_bitmap_bufferReference = new WeakReference<>(preview.zebra_stripes_bitmap_buffer);
+			this.focus_peaking_bitmap_bufferReference = new WeakReference<>(preview.focus_peaking_bitmap_buffer);
 
 			if( preview.rs == null ) {
 				// create on the UI thread rather than doInBackground(), to avoid threading issues
@@ -7469,6 +7472,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "create renderscript object");
 				preview.rs = RenderScript.create(preview.getContext());
 			}
+			if( preview.histogramScript == null ) {
+				// create on the UI thread rather than doInBackground(), to avoid threading issues
+				if( MyDebug.LOG )
+					Log.d(TAG, "create histogramScript");
+				preview.histogramScript = new ScriptC_histogram_compute(preview.rs);
+			}
+			// take a local copy, so preview.histogramScript can be set to null whilst background thread is running
+			this.histogramScriptReference = new WeakReference<>(preview.histogramScript);
 		}
 
 		@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -7480,12 +7491,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				debug_time = System.currentTimeMillis();
 			}
 
-            Preview preview = previewReference.get();
-            if( preview == null ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "preview is null");
-                return null;
-            }
+			Preview preview = previewReference.get();
+			if( preview == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "preview is null");
+				return null;
+			}
+			ScriptC_histogram_compute histogramScript = histogramScriptReference.get();
+			if( histogramScript == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "histogramScript is null");
+				return null;
+			}
 			Bitmap preview_bitmap = preview_bitmapReference.get();
 			if( preview_bitmap == null ) {
 				if( MyDebug.LOG )
@@ -7510,12 +7527,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Allocation allocation_in = Allocation.createFromBitmap(preview.rs, preview_bitmap);
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - debug_time));
-
-				if( MyDebug.LOG )
-					Log.d(TAG, "create histogramScript");
-				ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(preview.rs);
-				if( MyDebug.LOG )
-					Log.d(TAG, "time after creating histogramScript: " + (System.currentTimeMillis() - debug_time));
 
 				if( preview.want_histogram ) {
 					if( MyDebug.LOG )
@@ -7759,7 +7770,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "refreshPreviewBitmap");
 			this.last_preview_bitmap_time_ms = System.currentTimeMillis();
-			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this, preview_bitmap, zebra_stripes_bitmap_buffer, focus_peaking_bitmap_buffer);
+			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this);
 			refreshPreviewBitmapTask.execute();
 		}
 	}
