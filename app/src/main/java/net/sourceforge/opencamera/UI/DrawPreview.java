@@ -1425,10 +1425,17 @@ public class DrawPreview {
 	}
 
 	private void drawHistogramChannel(Canvas canvas, int [] histogram_channel) {
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			debug_time = System.currentTimeMillis();
+		}
 		int max = 0;
 		for(int value : histogram_channel) {
 			max = Math.max(max, value);
 		}
+
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "drawHistogramChannel, time before creating path: " + (System.currentTimeMillis() - debug_time));*/
 		path.reset();
 		path.moveTo(icon_dest.left, icon_dest.bottom);
 		for(int c=0;c<histogram_channel.length;c++) {
@@ -1439,7 +1446,11 @@ public class DrawPreview {
 		}
 		path.lineTo(icon_dest.right, icon_dest.bottom);
 		path.close();
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "drawHistogramChannel, time after creating path: " + (System.currentTimeMillis() - debug_time));*/
 		canvas.drawPath(path, p);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "drawHistogramChannel, time before drawing path: " + (System.currentTimeMillis() - debug_time));*/
 	}
 
     /** Formats the level_angle double into a string.
