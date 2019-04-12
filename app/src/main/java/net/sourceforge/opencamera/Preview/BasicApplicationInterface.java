@@ -374,6 +374,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
+	public boolean isPreviewInBackground() {
+		return false;
+	}
+
+	@Override
 	public boolean isTestAlwaysFocus() {
 		return false;
 	}

@@ -1378,6 +1378,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
+	public boolean isPreviewInBackground() {
+		return main_activity.isCameraInBackground();
+	}
+
+	@Override
     public boolean isTestAlwaysFocus() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
@@ -2283,7 +2288,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onDrawPreview(Canvas canvas) {
-    	drawPreview.onDrawPreview(canvas);
+		if( !main_activity.isCameraInBackground() ) {
+			// no point drawing when in background (e.g., settings open)
+			drawPreview.onDrawPreview(canvas);
+		}
     }
 
 	public enum Alignment {

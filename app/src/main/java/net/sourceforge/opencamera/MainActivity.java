@@ -4125,6 +4125,10 @@ public class MainActivity extends Activity {
     	return this.preview;
     }
 
+	boolean isCameraInBackground() {
+    	return this.camera_in_background;
+	}
+
 	public PermissionHandler getPermissionHandler() {
 		return permissionHandler;
 	}
