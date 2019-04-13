@@ -1695,7 +1695,6 @@ public class HDRProcessor {
 			featureDetectorScript.set_bitmap(gs_allocation);
 			featureDetectorScript.set_bitmap_Ix(ix_allocation);
 			featureDetectorScript.set_bitmap_Iy(iy_allocation);
-
 			featureDetectorScript.forEach_compute_derivatives(gs_allocation);
 
 			/*if( MyDebug.LOG ) {
