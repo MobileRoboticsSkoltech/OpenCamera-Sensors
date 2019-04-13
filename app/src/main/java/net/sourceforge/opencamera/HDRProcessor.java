@@ -1910,7 +1910,7 @@ public class HDRProcessor {
 
 			@Override
 			public boolean equals(Object that) {
-				return compareTo((FeatureMatch)that) == 0;
+				return (that instanceof FeatureMatch) && compareTo((FeatureMatch)that) == 0;
 			}
 		}
 

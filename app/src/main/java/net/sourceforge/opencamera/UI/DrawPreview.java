@@ -103,6 +103,7 @@ public class DrawPreview {
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 	private final String ybounds_text;
+	private final int [] temp_histogram_channel = new int[256];
 	// cached Rects for drawTextWithBackground() calls
 	private Rect text_bounds_time;
 	private Rect text_bounds_free_memory;
@@ -1375,7 +1376,6 @@ public class DrawPreview {
 					}
 
 					if( histogram.length == 256*3 ) {
-						int [] temp = new int[256];
 						int c=0;
 
 						/* For overlapping rgb, we'll have:
@@ -1406,19 +1406,19 @@ public class DrawPreview {
 						final int b = 255;
 
 						for(int i=0;i<256;i++)
-							temp[i] = histogram[c++];
+							temp_histogram_channel[i] = histogram[c++];
 						p.setColor(Color.argb(a0, r, 0, 0));
-						drawHistogramChannel(canvas, temp, max);
+						drawHistogramChannel(canvas, temp_histogram_channel, max);
 
 						for(int i=0;i<256;i++)
-							temp[i] = histogram[c++];
+							temp_histogram_channel[i] = histogram[c++];
 						p.setColor(Color.argb(a1, 0, g, 0));
-						drawHistogramChannel(canvas, temp, max);
+						drawHistogramChannel(canvas, temp_histogram_channel, max);
 
 						for(int i=0;i<256;i++)
-							temp[i] = histogram[c++];
+							temp_histogram_channel[i] = histogram[c++];
 						p.setColor(Color.argb(a2, 0, 0, b));
-						drawHistogramChannel(canvas, temp, max);
+						drawHistogramChannel(canvas, temp_histogram_channel, max);
 					}
 					else {
 						p.setColor(Color.argb(192, 255, 255, 255));
