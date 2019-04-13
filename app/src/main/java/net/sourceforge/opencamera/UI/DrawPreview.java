@@ -1369,6 +1369,11 @@ public class DrawPreview {
 					p.setColor(Color.argb(64, 0, 0, 0));
 					canvas.drawRect(icon_dest, p);
 
+					int max = 0;
+					for(int value : histogram) {
+						max = Math.max(max, value);
+					}
+
 					if( histogram.length == 256*3 ) {
 						int [] temp = new int[256];
 						int c=0;
@@ -1403,35 +1408,37 @@ public class DrawPreview {
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
 						p.setColor(Color.argb(a0, r, 0, 0));
-						drawHistogramChannel(canvas, temp);
+						drawHistogramChannel(canvas, temp, max);
 
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
 						p.setColor(Color.argb(a1, 0, g, 0));
-						drawHistogramChannel(canvas, temp);
+						drawHistogramChannel(canvas, temp, max);
 
 						for(int i=0;i<256;i++)
 							temp[i] = histogram[c++];
 						p.setColor(Color.argb(a2, 0, 0, b));
-						drawHistogramChannel(canvas, temp);
+						drawHistogramChannel(canvas, temp, max);
 					}
 					else {
 						p.setColor(Color.argb(192, 255, 255, 255));
-						drawHistogramChannel(canvas, histogram);
+						drawHistogramChannel(canvas, histogram, max);
 					}
 				}
 			}
 		}
 	}
 
-	private void drawHistogramChannel(Canvas canvas, int [] histogram_channel) {
+	/** Draws histogram for a single color channel.
+	 * @param canvas Canvas to draw onto.
+	 * @param histogram_channel The histogram for this color.
+	 * @param max The maximum value of histogram_channel, or if drawing multiple channels, this
+	 *            should be the maximum value of all histogram channels.
+	 */
+	private void drawHistogramChannel(Canvas canvas, int [] histogram_channel, int max) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			debug_time = System.currentTimeMillis();
-		}
-		int max = 0;
-		for(int value : histogram_channel) {
-			max = Math.max(max, value);
 		}
 
 		/*if( MyDebug.LOG )
