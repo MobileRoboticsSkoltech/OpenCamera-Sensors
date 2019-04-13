@@ -7482,6 +7482,102 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.histogramScriptReference = new WeakReference<>(preview.histogramScript);
 		}
 
+		private static int [] computeHistogram(Allocation allocation_in, RenderScript rs, ScriptC_histogram_compute histogramScript, HistogramType histogram_type) {
+			long debug_time = 0;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "computeHistogram");
+				debug_time = System.currentTimeMillis();
+			}
+
+			int [] new_histogram;
+
+			if( histogram_type == HistogramType.HISTOGRAM_TYPE_RGB ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "rgb histogram");
+				Allocation histogramAllocationR = Allocation.createSized(rs, Element.I32(rs), 256);
+				Allocation histogramAllocationG = Allocation.createSized(rs, Element.I32(rs), 256);
+				Allocation histogramAllocationB = Allocation.createSized(rs, Element.I32(rs), 256);
+
+				if( MyDebug.LOG )
+					Log.d(TAG, "bind histogram allocations");
+				histogramScript.bind_histogram_r(histogramAllocationR);
+				histogramScript.bind_histogram_g(histogramAllocationG);
+				histogramScript.bind_histogram_b(histogramAllocationB);
+				histogramScript.invoke_init_histogram_rgb();
+				if( MyDebug.LOG )
+					Log.d(TAG, "call histogramScript");
+				if( MyDebug.LOG )
+					Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+				histogramScript.forEach_histogram_compute_rgb(allocation_in);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+				new_histogram = new int[256*3];
+				int c=0;
+				int [] temp = new int[256];
+
+				histogramAllocationR.copyTo(temp);
+				for(int i=0;i<256;i++)
+					new_histogram[c++] = temp[i];
+
+				histogramAllocationG.copyTo(temp);
+				for(int i=0;i<256;i++)
+					new_histogram[c++] = temp[i];
+
+				histogramAllocationB.copyTo(temp);
+				for(int i=0;i<256;i++)
+					new_histogram[c++] = temp[i];
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
+
+				histogramAllocationR.destroy();
+				histogramAllocationG.destroy();
+				histogramAllocationB.destroy();
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "single channel histogram");
+				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
+
+				if( MyDebug.LOG )
+					Log.d(TAG, "bind histogram allocation");
+				histogramScript.bind_histogram(histogramAllocation);
+				histogramScript.invoke_init_histogram();
+				if( MyDebug.LOG )
+					Log.d(TAG, "call histogramScript");
+				if( MyDebug.LOG )
+					Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+				switch( histogram_type ) {
+					case HISTOGRAM_TYPE_LUMINANCE:
+						histogramScript.forEach_histogram_compute_by_luminance(allocation_in);
+						break;
+					case HISTOGRAM_TYPE_VALUE:
+						histogramScript.forEach_histogram_compute_by_value(allocation_in);
+						break;
+					case HISTOGRAM_TYPE_INTENSITY:
+						histogramScript.forEach_histogram_compute_by_intensity(allocation_in);
+						break;
+					case HISTOGRAM_TYPE_LIGHTNESS:
+						histogramScript.forEach_histogram_compute_by_lightness(allocation_in);
+						break;
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+
+				new_histogram = new int[256];
+				histogramAllocation.copyTo(new_histogram);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
+
+				histogramAllocation.destroy();
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
+			}
+			return new_histogram;
+		}
+
 		@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 		@Override
 		protected RefreshPreviewBitmapTaskResult doInBackground(Void... voids) {
@@ -7532,90 +7628,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "generate histogram");
 
-					if( preview.histogram_type == HistogramType.HISTOGRAM_TYPE_RGB ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "rgb histogram");
-						Allocation histogramAllocationR = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
-						Allocation histogramAllocationG = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
-						Allocation histogramAllocationB = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
-
-						if( MyDebug.LOG )
-							Log.d(TAG, "bind histogram allocations");
-						histogramScript.bind_histogram_r(histogramAllocationR);
-						histogramScript.bind_histogram_g(histogramAllocationG);
-						histogramScript.bind_histogram_b(histogramAllocationB);
-						histogramScript.invoke_init_histogram_rgb();
-						if( MyDebug.LOG )
-							Log.d(TAG, "call histogramScript");
-						if( MyDebug.LOG )
-							Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
-						histogramScript.forEach_histogram_compute_rgb(allocation_in);
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
-
-						result.new_histogram = new int[256*3];
-						int c=0;
-						int [] temp = new int[256];
-
-						histogramAllocationR.copyTo(temp);
-						for(int i=0;i<256;i++)
-							result.new_histogram[c++] = temp[i];
-
-						histogramAllocationG.copyTo(temp);
-						for(int i=0;i<256;i++)
-							result.new_histogram[c++] = temp[i];
-
-						histogramAllocationB.copyTo(temp);
-						for(int i=0;i<256;i++)
-							result.new_histogram[c++] = temp[i];
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
-
-						histogramAllocationR.destroy();
-						histogramAllocationG.destroy();
-						histogramAllocationB.destroy();
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
-					}
-					else {
-						if( MyDebug.LOG )
-							Log.d(TAG, "single channel histogram");
-						Allocation histogramAllocation = Allocation.createSized(preview.rs, Element.I32(preview.rs), 256);
-
-						if( MyDebug.LOG )
-							Log.d(TAG, "bind histogram allocation");
-						histogramScript.bind_histogram(histogramAllocation);
-						histogramScript.invoke_init_histogram();
-						if( MyDebug.LOG )
-							Log.d(TAG, "call histogramScript");
-						if( MyDebug.LOG )
-							Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
-						switch( preview.histogram_type ) {
-							case HISTOGRAM_TYPE_LUMINANCE:
-								histogramScript.forEach_histogram_compute_by_luminance(allocation_in);
-								break;
-							case HISTOGRAM_TYPE_VALUE:
-								histogramScript.forEach_histogram_compute_by_value(allocation_in);
-								break;
-							case HISTOGRAM_TYPE_INTENSITY:
-								histogramScript.forEach_histogram_compute_by_intensity(allocation_in);
-								break;
-							case HISTOGRAM_TYPE_LIGHTNESS:
-								histogramScript.forEach_histogram_compute_by_lightness(allocation_in);
-								break;
-						}
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
-
-						result.new_histogram = new int[256];
-						histogramAllocation.copyTo(result.new_histogram);
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after copying histogram data: " + (System.currentTimeMillis() - debug_time));
-
-						histogramAllocation.destroy();
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after destroying allocations: " + (System.currentTimeMillis() - debug_time));
-					}
+					result.new_histogram = computeHistogram(allocation_in, preview.rs, histogramScript, preview.histogram_type);
 				}
 
 				if( preview.want_zebra_stripes && zebra_stripes_bitmap_buffer != null ) {
