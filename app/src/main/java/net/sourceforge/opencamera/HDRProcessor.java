@@ -1636,9 +1636,9 @@ public class HDRProcessor {
 			Log.d(TAG, "### time for processAvgMulti: " + (System.currentTimeMillis() - time_s));
 	}
 
-	public class AutoAlignmentByFeatureResult {
-	    public final int offset_x, offset_y;
-	    public final float rotation, y_scale;
+	static class AutoAlignmentByFeatureResult {
+	    final int offset_x, offset_y;
+	    final float rotation, y_scale;
 
         AutoAlignmentByFeatureResult(int offset_x, int offset_y, float rotation, float y_scale) {
             this.offset_x = offset_x;
@@ -1900,12 +1900,18 @@ public class HDRProcessor {
 			@Override
 			public int compareTo(FeatureMatch that) {
 				//return (int)(this.distance - that.distance);
-				if( this.distance > that.distance )
+				/*if( this.distance > that.distance )
 					return 1;
 				else if( this.distance < that.distance )
 					return -1;
 				else
-					return 0;
+					return 0;*/
+				return Float.compare(this.distance, that.distance);
+			}
+
+			@Override
+			public boolean equals(Object that) {
+				return compareTo((FeatureMatch)that) == 0;
 			}
 		}
 
