@@ -357,9 +357,13 @@ public class MainUI {
 					int total_button_size = count*button_size;
 					int margin = 0;
 					if( total_button_size > display_height ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "need to reduce button size");
 						button_size = display_height / count;
 					}
 					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "need to increase margin");
 						if( count > 1 )
 							margin = (display_height - total_button_size) / (count-1);
 					}
