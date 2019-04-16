@@ -1636,9 +1636,11 @@ public class HDRProcessor {
 			Log.d(TAG, "### time for processAvgMulti: " + (System.currentTimeMillis() - time_s));
 	}
 
-	static class AutoAlignmentByFeatureResult {
-	    final int offset_x, offset_y;
-	    final float rotation, y_scale;
+	public static class AutoAlignmentByFeatureResult {
+	    public final int offset_x;
+		public final int offset_y;
+	    public final float rotation;
+		public final float y_scale;
 
         AutoAlignmentByFeatureResult(int offset_x, int offset_y, float rotation, float y_scale) {
             this.offset_x = offset_x;
