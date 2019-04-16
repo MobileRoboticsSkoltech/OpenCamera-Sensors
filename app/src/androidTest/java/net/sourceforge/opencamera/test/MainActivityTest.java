@@ -545,11 +545,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     private void subTestSaveFlashTorchQuit() throws InterruptedException {
         Log.d(TAG, "subTestSaveFlashTorchQuit");
 
+        setToDefault();
+
         if( !mPreview.supportsFlash() ) {
+            Log.d(TAG, "doesn't support flash");
             return;
         }
-
-        setToDefault();
 
         switchToFlashValue("flash_torch");
 
