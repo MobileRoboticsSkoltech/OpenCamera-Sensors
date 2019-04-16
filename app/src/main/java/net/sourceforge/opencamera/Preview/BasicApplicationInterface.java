@@ -484,11 +484,6 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
-	public void layoutUI() {
-
-	}
-
-	@Override
 	public void multitouchZoom(int new_zoom) {
 
 	}

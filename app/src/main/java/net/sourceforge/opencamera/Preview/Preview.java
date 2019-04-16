@@ -768,9 +768,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
             return;
         }
-        
-		// need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed)
-        applicationInterface.layoutUI();
     }
     
 	@Override

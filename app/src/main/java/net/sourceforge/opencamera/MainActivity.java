@@ -2584,6 +2584,24 @@ public class MainActivity extends Activity {
 		// force to landscape mode
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE); // testing for devices with unusual sensor orientation (e.g., Nexus 5X)
+		if( preview != null ) {
+			// also need to call setCameraDisplayOrientation, as this handles if the user switched from portrait to reverse landscape whilst in settings/etc
+			// as switching from reverse landscape back to landscape isn't detected in onConfigurationChanged
+			preview.setCameraDisplayOrientation();
+		}
+		if( preview != null && mainUI != null ) {
+			// layoutUI() is needed because even though we call layoutUI from MainUI.onOrientationChanged(), certain things
+			// (ui_rotation) depend on the system orientation too.
+			// Without this, going to Settings, then changing orientation, then exiting settings, would show the icons with the
+			// wrong orientation.
+			// We put this here instead of onConfigurationChanged() as onConfigurationChanged() isn't called when switching from
+			// reverse landscape to landscape orientation: so it's needed to fix if the user starts in portrait, goes to settings
+			// or a dialog, then switches to reverse landscape, then exits settings/dialog - the system orientation will switch
+			// to landscape (which Open Camera is forced to).
+			mainUI.layoutUI();
+		}
+
+
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
 		if( sharedPreferences.getBoolean(PreferenceKeys.getKeepDisplayOnPreferenceKey(), true) ) {
 			if( MyDebug.LOG )

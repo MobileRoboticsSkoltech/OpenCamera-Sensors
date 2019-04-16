@@ -2084,11 +2084,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
-	public void layoutUI() {
-		main_activity.getMainUI().layoutUI();
-	}
-	
-	@Override
 	public void multitouchZoom(int new_zoom) {
 		main_activity.getMainUI().setSeekbarZoom(new_zoom);
 	}
