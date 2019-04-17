@@ -4143,7 +4143,7 @@ public class MainActivity extends Activity {
     	return this.preview;
     }
 
-	boolean isCameraInBackground() {
+	public boolean isCameraInBackground() {
     	return this.camera_in_background;
 	}
 

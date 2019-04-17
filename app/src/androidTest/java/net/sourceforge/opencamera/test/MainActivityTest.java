@@ -8369,9 +8369,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testSettings");
         setToDefault();
 
+        assertFalse(mActivity.isCameraInBackground());
         View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
         clickView(settingsButton);
-
+        this.getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.isCameraInBackground());
     }
 
     /* Tests save and load settings.
