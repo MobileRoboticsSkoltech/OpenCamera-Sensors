@@ -69,6 +69,7 @@ public class PhotoTests {
             // test_wait_capture_result only relevant for Camera2 API
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusRepeatWaitCaptureResult"));
         }
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testKeyboardControls"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStamp"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDRO"));
         if( !MainActivityTest.test_camera2 ) {

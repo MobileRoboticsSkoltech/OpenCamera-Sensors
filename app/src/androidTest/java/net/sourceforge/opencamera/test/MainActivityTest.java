@@ -7409,6 +7409,222 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /* Tests for USB/bluetooth keyboard controls.
+     */
+    public void testKeyboardControls() throws InterruptedException {
+        Log.d(TAG, "testKeyboardControls");
+
+        setToDefault();
+
+        if( !mPreview.supportsFlash() ) {
+            Log.d(TAG, "doesn't support flash");
+            return;
+        }
+        else if( !mPreview.supportsFocus() ) {
+            Log.d(TAG, "doesn't support focus");
+            return;
+        }
+
+        switchToFlashValue("flash_auto");
+
+        // open popup
+        assertFalse( mActivity.popupIsOpen() );
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_FUNCTION);
+        getInstrumentation().waitForIdleSync();
+        assertTrue( mActivity.popupIsOpen() );
+
+        // arrow down
+        assertFalse(mActivity.getMainUI().testGetRemoteControlMode());
+        assertFalse(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow down again
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_2);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertEquals(1, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow down again
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_2);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertEquals(3, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow up
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertEquals(1, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow up again
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_8);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // select
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_5);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertTrue(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow down
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertTrue(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(1, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow down again
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_2);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertTrue(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(2, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow up
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertTrue(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(1, mActivity.getMainUI().testGetPopupIcon());
+
+        // arrow up again
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_8);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertTrue(mActivity.getMainUI().selectingLines());
+        assertTrue(mActivity.getMainUI().selectingIcons());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+
+        // select
+        assertEquals("flash_auto", mPreview.getCurrentFlashValue());
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_5);
+        getInstrumentation().waitForIdleSync();
+        Thread.sleep(500);
+        assertFalse( mActivity.popupIsOpen() );
+        assertEquals("flash_off", mPreview.getCurrentFlashValue());
+        assertFalse(mActivity.getMainUI().testGetRemoteControlMode());
+        assertFalse(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+
+        Thread.sleep(500);
+
+        // open exposure panel
+        assertFalse( mActivity.getMainUI().isExposureUIOpen() );
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_SLASH);
+        getInstrumentation().waitForIdleSync();
+        assertTrue( mActivity.getMainUI().isExposureUIOpen() );
+
+        assertFalse(mActivity.getMainUI().testGetRemoteControlMode());
+        if( mPreview.usingCamera2API() ) {
+            // need to skip past the ISO line
+            assertFalse(mActivity.getMainUI().selectingLines());
+            assertFalse(mActivity.getMainUI().selectingIcons());
+            getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_2);
+            getInstrumentation().waitForIdleSync();
+            assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+            assertFalse(mActivity.getMainUI().selectingLines());
+            assertFalse(mActivity.getMainUI().selectingIcons());
+            assertFalse(mActivity.getMainUI().isSelectingExposureUIElement());
+            assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+            assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+            assertEquals(0, mActivity.getMainUI().testGetExposureLine());
+        }
+
+        // arrow down
+        assertFalse(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertFalse(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertFalse(mActivity.getMainUI().isSelectingExposureUIElement());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+        assertEquals(3, mActivity.getMainUI().testGetExposureLine());
+
+        // select
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_5);
+        getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
+        assertFalse(mActivity.getMainUI().selectingLines());
+        assertFalse(mActivity.getMainUI().selectingIcons());
+        assertTrue(mActivity.getMainUI().isSelectingExposureUIElement());
+        assertEquals(0, mActivity.getMainUI().testGetPopupLine());
+        assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+        assertEquals(3, mActivity.getMainUI().testGetExposureLine());
+
+        // arrow down
+        for(int i=0;i<6;i++) {
+            assertEquals(-i, mPreview.getCurrentExposure());
+            getInstrumentation().sendKeyDownUpSync((i%2==0) ? KeyEvent.KEYCODE_NUMPAD_2 : KeyEvent.KEYCODE_DPAD_DOWN);
+            getInstrumentation().waitForIdleSync();
+            assertEquals(-(i+1), mPreview.getCurrentExposure());
+        }
+
+        // arrow up
+        for(int i=0;i<6;i++) {
+            assertEquals(-6+i, mPreview.getCurrentExposure());
+            getInstrumentation().sendKeyDownUpSync((i%2==0) ? KeyEvent.KEYCODE_NUMPAD_8 : KeyEvent.KEYCODE_DPAD_UP);
+            getInstrumentation().waitForIdleSync();
+            assertEquals(-6+(i+1), mPreview.getCurrentExposure());
+        }
+
+        // close exposure panel
+        assertTrue( mActivity.getMainUI().isExposureUIOpen() );
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_SLASH);
+        getInstrumentation().waitForIdleSync();
+        assertFalse( mActivity.getMainUI().isExposureUIOpen() );
+
+        // take photo
+        assertTrue(mPreview.count_cameraTakePicture==0);
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_5);
+        getInstrumentation().waitForIdleSync();
+        waitForTakePhoto();
+        assertTrue(mPreview.count_cameraTakePicture==1);
+        mActivity.waitUntilImageQueueEmpty();
+
+        // open settings
+        assertFalse(mActivity.isCameraInBackground());
+        getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
+        this.getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.isCameraInBackground());
+
+        //Thread.sleep(3000);
+        Thread.sleep(500);
+    }
+
     /* Tests taking photos repeatedly with auto-repeat method.
      */
     public void testTakePhotoRepeat() {

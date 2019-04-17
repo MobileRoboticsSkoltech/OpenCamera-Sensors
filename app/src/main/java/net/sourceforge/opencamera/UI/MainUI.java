@@ -2736,4 +2736,20 @@ public class MainUI {
     public PopupView getPopupView() {
 		return popup_view;
 	}
+
+	public boolean testGetRemoteControlMode() {
+		return remote_control_mode;
+	}
+
+	public int testGetPopupLine() {
+		return mPopupLine;
+	}
+
+	public int testGetPopupIcon() {
+		return mPopupIcon;
+	}
+
+	public int testGetExposureLine() {
+		return mExposureLine;
+	}
 }
