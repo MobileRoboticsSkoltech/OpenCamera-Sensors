@@ -181,7 +181,7 @@ public class PermissionHandler {
         else {
             // Can go ahead and request the permission
             if( MyDebug.LOG )
-                Log.d(TAG, "requesting loacation permissions...");
+                Log.d(TAG, "requesting location permissions...");
             ActivityCompat.requestPermissions(main_activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
         }
     }
