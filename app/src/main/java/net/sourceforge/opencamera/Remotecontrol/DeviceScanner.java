@@ -2,11 +2,13 @@ package net.sourceforge.opencamera.Remotecontrol;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -112,6 +114,7 @@ public class DeviceScanner extends ListActivity {
 
         // In real life most of bluetooth LE devices associated with location, so without this
         // permission the sample shows nothing in most cases
+        // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
         int permissionCoarse = Build.VERSION.SDK_INT >= 23 ?
                 ContextCompat
                         .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) :
@@ -120,13 +123,13 @@ public class DeviceScanner extends ListActivity {
         if (permissionCoarse == PackageManager.PERMISSION_GRANTED) {
             scanLeDevice(true);
         } else {
-            askForCoarseLocationPermission();
+            askForLocationPermission();
         }
     }
 
-    private void askForCoarseLocationPermission() {
+    private void askForLocationPermission() {
         if( MyDebug.LOG )
-            Log.d(TAG, "askForCoarseLocationPermission");
+            Log.d(TAG, "askForLocationPermission");
         // n.b., we only need ACCESS_COARSE_LOCATION, but it's simpler to request both to be consistent with Open Camera's
         // location permission requests in PermissionHandler. If we only request ACCESS_COARSE_LOCATION here, and later the
         // user enables something that needs ACCESS_FINE_LOCATION, Android ends up showing the "rationale" dialog - and once
@@ -135,9 +138,48 @@ public class DeviceScanner extends ListActivity {
         // Also note that if we did want to only request ACCESS_COARSE_LOCATION here, we'd need to declare that permission
         // explicitly in the AndroidManifest.xml, otherwise the dialog to request permission is never shown (and the permission
         // is denied automatically).
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                REQUEST_LOCATION_PERMISSIONS);
+        if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
+                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+            showRequestLocationPermissionRationale();
+        }
+        else {
+            // Can go ahead and request the permission
+            if( MyDebug.LOG )
+                Log.d(TAG, "requesting location permissions...");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    REQUEST_LOCATION_PERMISSIONS);
+        }
+    }
+
+    private void showRequestLocationPermissionRationale() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "showRequestLocationPermissionRationale");
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
+            return;
+        }
+
+        String [] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+        int message_id = R.string.permission_rationale_location;
+
+        final String [] permissions_f = permissions;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.permission_rationale_title)
+                .setMessage(message_id)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.ok, null)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "requesting permission...");
+                        ActivityCompat.requestPermissions(DeviceScanner.this, permissions_f, REQUEST_LOCATION_PERMISSIONS);
+                    }
+                }).show();
     }
 
     @Override
