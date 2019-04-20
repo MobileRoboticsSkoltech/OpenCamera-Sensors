@@ -7614,8 +7614,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			RefreshPreviewBitmapTaskResult result = new RefreshPreviewBitmapTaskResult();
 
 			try {
+				if( MyDebug.LOG )
+					Log.d(TAG, "time before getBitmap: " + (System.currentTimeMillis() - debug_time));
 				TextureView textureView = (TextureView)preview.cameraSurface;
 				textureView.getBitmap(preview_bitmap);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after getBitmap: " + (System.currentTimeMillis() - debug_time));
 
 				Allocation allocation_in = Allocation.createFromBitmap(preview.rs, preview_bitmap);
 				if( MyDebug.LOG )
@@ -7637,10 +7641,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					histogramScript.set_zebra_stripes_width(zebra_stripes_bitmap_buffer.getWidth()/20);
 
 					if( MyDebug.LOG )
-						Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+						Log.d(TAG, "time before histogramScript generate_zebra_stripes: " + (System.currentTimeMillis() - debug_time));
 					histogramScript.forEach_generate_zebra_stripes(allocation_in, output_allocation);
 					if( MyDebug.LOG )
-						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+						Log.d(TAG, "time after histogramScript generate_zebra_stripes: " + (System.currentTimeMillis() - debug_time));
 
 					output_allocation.copyTo(zebra_stripes_bitmap_buffer);
 					output_allocation.destroy();
@@ -7683,15 +7687,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					histogramScript.set_bitmap(allocation_in);
 
 					if( MyDebug.LOG )
-						Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - debug_time));
+						Log.d(TAG, "time before histogramScript generate_focus_peaking: " + (System.currentTimeMillis() - debug_time));
 					histogramScript.forEach_generate_focus_peaking(allocation_in, output_allocation);
 					if( MyDebug.LOG )
-						Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - debug_time));
+						Log.d(TAG, "time after histogramScript generate_focus_peaking: " + (System.currentTimeMillis() - debug_time));
 
 					// median filter
                     Allocation filtered_allocation = Allocation.createTyped(preview.rs, Type.createXY(preview.rs, Element.RGBA_8888(preview.rs), focus_peaking_bitmap_buffer.getWidth(), focus_peaking_bitmap_buffer.getHeight()));
 					histogramScript.set_bitmap(output_allocation);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before histogramScript generate_focus_peaking_filtered: " + (System.currentTimeMillis() - debug_time));
                     histogramScript.forEach_generate_focus_peaking_filtered(output_allocation, filtered_allocation);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after histogramScript generate_focus_peaking_filtered: " + (System.currentTimeMillis() - debug_time));
                     output_allocation.destroy();
                     output_allocation = filtered_allocation;
 
