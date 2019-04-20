@@ -7629,7 +7629,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "generate histogram");
 
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before computeHistogram: " + (System.currentTimeMillis() - debug_time));
 					result.new_histogram = computeHistogram(allocation_in, preview.rs, histogramScript, preview.histogram_type);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after computeHistogram: " + (System.currentTimeMillis() - debug_time));
 				}
 
 				if( preview.want_zebra_stripes && zebra_stripes_bitmap_buffer != null ) {
@@ -7656,11 +7660,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					/*if( MyDebug.LOG ) {
 						Log.d(TAG, "orientation of display relative to natural orientaton: " + rotation_degrees);
 					}*/
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before creating new_zebra_stripes_bitmap: " + (System.currentTimeMillis() - debug_time));
 					Matrix matrix = new Matrix();
 					matrix.postRotate(-rotation_degrees);
 					result.new_zebra_stripes_bitmap = Bitmap.createBitmap(zebra_stripes_bitmap_buffer, 0, 0,
 							zebra_stripes_bitmap_buffer.getWidth(), zebra_stripes_bitmap_buffer.getHeight(), matrix, false);
 
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after creating new_zebra_stripes_bitmap: " + (System.currentTimeMillis() - debug_time));
 					/*
 					// test:
 					//File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/zebra_stripes_bitmap_buffer.jpg");
@@ -7708,10 +7716,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 					// See comments above for zebra stripes
 					int rotation_degrees = preview.getDisplayRotationDegrees();
+					if( MyDebug.LOG )
+						Log.d(TAG, "time before creating new_focus_peaking_bitmap: " + (System.currentTimeMillis() - debug_time));
 					Matrix matrix = new Matrix();
 					matrix.postRotate(-rotation_degrees);
 					result.new_focus_peaking_bitmap = Bitmap.createBitmap(focus_peaking_bitmap_buffer, 0, 0,
 							focus_peaking_bitmap_buffer.getWidth(), focus_peaking_bitmap_buffer.getHeight(), matrix, false);
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after creating new_focus_peaking_bitmap: " + (System.currentTimeMillis() - debug_time));
 				}
 
 				allocation_in.destroy();
