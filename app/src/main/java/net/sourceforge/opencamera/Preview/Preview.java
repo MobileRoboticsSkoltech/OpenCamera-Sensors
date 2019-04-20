@@ -133,6 +133,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	private HistogramType histogram_type = HistogramType.HISTOGRAM_TYPE_VALUE;
 	private int [] histogram;
+	private long last_histogram_time_ms; // time the last histogram was updated
 
 	private boolean want_zebra_stripes; // whether to generate zebra stripes bitmap, requires want_preview_bitmap==true
 	private int zebra_stripes_threshold; // pixels with max rgb value equal to or greater than this threshold are marked with zebra stripes
@@ -7456,12 +7457,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         private final WeakReference<Bitmap> preview_bitmapReference;
 		private final WeakReference<Bitmap> zebra_stripes_bitmap_bufferReference;
 		private final WeakReference<Bitmap> focus_peaking_bitmap_bufferReference;
+		private final boolean update_histogram;
 
-		RefreshPreviewBitmapTask(Preview preview) {
+		RefreshPreviewBitmapTask(Preview preview, boolean update_histogram) {
             this.previewReference = new WeakReference<>(preview);
 			this.preview_bitmapReference = new WeakReference<>(preview.preview_bitmap);
 			this.zebra_stripes_bitmap_bufferReference = new WeakReference<>(preview.zebra_stripes_bitmap_buffer);
 			this.focus_peaking_bitmap_bufferReference = new WeakReference<>(preview.focus_peaking_bitmap_buffer);
+			this.update_histogram = update_histogram;
 
 			if( preview.rs == null ) {
 				// create on the UI thread rather than doInBackground(), to avoid threading issues
@@ -7625,7 +7628,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - debug_time));
 
-				if( preview.want_histogram ) {
+				if( update_histogram ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "generate histogram");
 
@@ -7759,7 +7762,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				return;
 			}
 
-			preview.histogram = result.new_histogram;
+			if( result.new_histogram != null )
+				preview.histogram = result.new_histogram;
 			/*if( MyDebug.LOG && preview.histogram != null ) {
 				for(int i=0;i<preview.histogram.length;i++)
 					Log.d(TAG, "    histogram[" + i + "]: " + preview.histogram[i]);
@@ -7794,14 +7798,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void refreshPreviewBitmap() {
-		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 100 : 200;
+		final int refresh_histogram_rate_ms = 200;
+		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 67 : refresh_histogram_rate_ms;
+		long time_now = System.currentTimeMillis();
 		if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
 			!app_is_paused && !applicationInterface.isPreviewInBackground() &&
-			!refreshPreviewBitmapTaskIsRunning() && System.currentTimeMillis() > last_preview_bitmap_time_ms + refresh_time ) {
+			!refreshPreviewBitmapTaskIsRunning() && time_now > last_preview_bitmap_time_ms + refresh_time ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "refreshPreviewBitmap");
-			this.last_preview_bitmap_time_ms = System.currentTimeMillis();
-			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this);
+			// even if we're running the background task at a faster rate (due to zebra stripes etc), we still update the histogram
+			// at the standard rate
+			boolean update_histogram = want_histogram && time_now > last_histogram_time_ms + refresh_histogram_rate_ms;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "update_histogram: " + update_histogram);
+				Log.d(TAG, "want_histogram: " + want_histogram);
+				Log.d(TAG, "time_now: " + time_now);
+				Log.d(TAG, "last_preview_bitmap_time_ms: " + last_preview_bitmap_time_ms);
+				Log.d(TAG, "last_histogram_time_ms: " + last_histogram_time_ms);
+			}
+
+			this.last_preview_bitmap_time_ms = time_now;
+			if( update_histogram ) {
+				this.last_histogram_time_ms = time_now;
+			}
+			refreshPreviewBitmapTask = new RefreshPreviewBitmapTask(this, update_histogram);
 			refreshPreviewBitmapTask.execute();
 		}
 	}
