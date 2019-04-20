@@ -7799,7 +7799,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private void refreshPreviewBitmap() {
 		final int refresh_histogram_rate_ms = 200;
-		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 67 : refresh_histogram_rate_ms;
+		final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 40 : refresh_histogram_rate_ms;
 		long time_now = System.currentTimeMillis();
 		if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
 			!app_is_paused && !applicationInterface.isPreviewInBackground() &&
