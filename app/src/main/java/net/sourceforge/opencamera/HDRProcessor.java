@@ -2088,6 +2088,13 @@ public class HDRProcessor {
 		//final boolean estimate_y_scale = true;
 		//final boolean estimate_rotation = debug_index < 3;
 		boolean use_rotation = false;
+
+		final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
+		if( MyDebug.LOG )
+			Log.d(TAG, "min_rotation_dist: " + min_rotation_dist);
+		//final float min_rotation_dist2 = 1.0e-5f;
+		final float min_rotation_dist2 = min_rotation_dist*min_rotation_dist;
+
         if( use_ransac ) {
 			// RANSAC
 			List<FeatureMatch> best_inliers = new ArrayList<>();
@@ -2100,11 +2107,6 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
-			final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
-			if( MyDebug.LOG )
-				Log.d(TAG, "min_rotation_dist: " + min_rotation_dist);
-			//final float min_rotation_dist2 = 1.0e-5f;
-			final float min_rotation_dist2 = min_rotation_dist*min_rotation_dist;
 			for(int i=0;i<actual_matches.size();i++) {
 				FeatureMatch match = actual_matches.get(i);
 
@@ -2164,11 +2166,11 @@ public class HDRProcessor {
 							continue;
 						}
 
-						float y_scale = 1.0f;
-						if( estimate_y_scale && Math.abs(dy0) > min_rotation_dist2 && Math.abs(dy1) > min_rotation_dist2 ) {
+						/*float y_scale = 1.0f;
+						if( estimate_y_scale && Math.abs(dy0) > min_rotation_dist && Math.abs(dy1) > min_rotation_dist ) {
 							y_scale = dy1 / dy0;
 							dy0 *= y_scale;
-						}
+						}*/
 
 						float angle = (float)(Math.atan2(dy1, dx1) - Math.atan2(dy0, dx0));
 						if( angle < -Math.PI )
@@ -2191,6 +2193,15 @@ public class HDRProcessor {
 							Log.d(TAG, "    mag1: " + Math.sqrt(mag_sq1));
 						}*/
 
+						float y_scale = 1.0f;
+						if( estimate_y_scale ) {
+							//int transformed_dx0 = (int)(dx0 * Math.cos(angle) - dy0 * Math.sin(angle));
+							int transformed_dy0 = (int)(dx0 * Math.sin(angle) + dy0 * Math.cos(angle));
+							if( Math.abs(transformed_dy0) > min_rotation_dist && Math.abs(dy1) > min_rotation_dist ) {
+								y_scale = dy1 / transformed_dy0;
+							}
+						}
+
 						// find the inliers from this
 						inliers.clear();
 						for(FeatureMatch other_match : actual_matches) {
@@ -2200,9 +2211,10 @@ public class HDRProcessor {
 							int y1 = points_arrays[1][other_match.index1].y;
 							x0 -= c0_x;
 							y0 -= c0_y;
-							y0 *= y_scale;
+							//y0 *= y_scale;
 							int transformed_x0 = (int)(x0 * Math.cos(angle) - y0 * Math.sin(angle));
 							int transformed_y0 = (int)(x0 * Math.sin(angle) + y0 * Math.cos(angle));
+							transformed_y0 *= y_scale;
 							transformed_x0 += c1_x;
 							transformed_y0 += c1_y;
 
@@ -2225,6 +2237,7 @@ public class HDRProcessor {
 							if( MyDebug.LOG ) {
 								Log.d(TAG, "match " + i + " gives better rotation model: " + inliers.size() + " inliers vs " + best_inliers.size());
 								Log.d(TAG, "    dx0: " + dx0 + " , dy0: " + dy0);
+								Log.d(TAG, "    dx1: " + dx1 + " , dy1: " + dy1);
 								Log.d(TAG, "    rotate by " + angle + " about: " + c0_x + " , " + c0_y);
 								Log.d(TAG, "    y scale by " + y_scale);
 								Log.d(TAG, "    translate by: " + (c1_x-c0_x) + " , " + (c1_y-c0_y));
@@ -2284,22 +2297,24 @@ public class HDRProcessor {
 		if( estimate_rotation && use_rotation ) {
 
 			// first compute an ideal y_scale
-			if( estimate_y_scale ) {
+			/*if( estimate_y_scale ) {
 				float y_scale_sum = 0.0f;
 				int n_y_scale = 0;
 				for(FeatureMatch match : actual_matches) {
 					float d0_y = points_arrays[0][match.index0].y - centres[0].y;
 					float d1_y = points_arrays[1][match.index1].y - centres[1].y;
-					if( Math.abs(d0_y) > 1.5f && Math.abs(d1_y) > 1.5f ) {
+					if( Math.abs(d0_y) > min_rotation_dist && Math.abs(d1_y) > min_rotation_dist ) {
 						float this_y_scale = d1_y / d0_y;
 						y_scale_sum += this_y_scale;
 						n_y_scale++;
+						if( MyDebug.LOG )
+							Log.d(TAG, "    match has scale: " + this_y_scale);
 					}
 				}
 				if( n_y_scale > 0 ) {
 					y_scale = y_scale_sum / n_y_scale;
 				}
-			}
+			}*/
 
 			// compute an ideal rotation for a transformation where we rotate about centres[0], and then translate
 			float angle_sum = 0.0f;
@@ -2315,7 +2330,7 @@ public class HDRProcessor {
 					continue;
 				}
 
-				dy0 *= y_scale;
+				//dy0 *= y_scale;
 
 				float angle = (float)(Math.atan2(dy1, dx1) - Math.atan2(dy0, dx0));
 				if( angle < -Math.PI )
@@ -2337,12 +2352,38 @@ public class HDRProcessor {
 			//offset_x = 0; // test
 			//offset_y = 0; // test
 
+			if( estimate_y_scale ) {
+				float y_scale_sum = 0.0f;
+				int n_y_scale = 0;
+				for(FeatureMatch match : actual_matches) {
+					float dx0 = (points_arrays[0][match.index0].x - centres[0].x);
+					float dy0 = (points_arrays[0][match.index0].y - centres[0].y);
+					//float dx1 = (points_arrays[1][match.index1].x - centres[1].x);
+					float dy1 = (points_arrays[1][match.index1].y - centres[1].y);
+					int transformed_dy0 = (int)(dx0 * Math.sin(rotation) + dy0 * Math.cos(rotation));
+					if( Math.abs(transformed_dy0) > min_rotation_dist && Math.abs(dy1) > min_rotation_dist ) {
+						float this_y_scale = dy1 / transformed_dy0;
+						y_scale_sum += this_y_scale;
+						n_y_scale++;
+						if( MyDebug.LOG )
+							Log.d(TAG, "    match has scale: " + this_y_scale);
+					}
+				}
+				if( n_y_scale > 0 ) {
+					y_scale = y_scale_sum / n_y_scale;
+				}
+			}
+
 			// but instead we want to (scale and) rotate about the origin and then translate:
 			// R[x-c] + c + d = R[x] + (d + c - R[c])
 			// Or with scale:
-			// RS[x-c] + c + d = RS[x] + (d + c - RS[c])
-			float rotated_centre_x = (float)(centres[0].x * Math.cos(rotation) - y_scale * centres[0].y * Math.sin(rotation));
-			float rotated_centre_y = (float)(centres[0].x * Math.sin(rotation) + y_scale * centres[0].y * Math.cos(rotation));
+			// // RS[x-c] + c + d = RS[x] + (d + c - RS[c])
+			//float rotated_centre_x = (float)(centres[0].x * Math.cos(rotation) - y_scale * centres[0].y * Math.sin(rotation));
+			//float rotated_centre_y = (float)(centres[0].x * Math.sin(rotation) + y_scale * centres[0].y * Math.cos(rotation));
+			// SR[x-c] + c + d = SR[x] + (d + c - SR[c])
+			float rotated_centre_x = (float)(centres[0].x * Math.cos(rotation) - centres[0].y * Math.sin(rotation));
+			float rotated_centre_y = (float)(centres[0].x * Math.sin(rotation) + centres[0].y * Math.cos(rotation));
+			rotated_centre_y *= y_scale;
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "offset_x before rotation: " + offset_x);
 				Log.d(TAG, "offset_y before rotation: " + offset_y);
@@ -2404,8 +2445,11 @@ public class HDRProcessor {
 				canvas.drawLine(x0, y0, width + x1, y1, p);
 
 				// also draw where the match is actually translated to
-				int t_cx = (int)(x0 * Math.cos(rotation) - y_scale * y0 * Math.sin(rotation));
-				int t_cy = (int)(x0 * Math.sin(rotation) + y_scale * y0 * Math.cos(rotation));
+				//int t_cx = (int)(x0 * Math.cos(rotation) - y_scale * y0 * Math.sin(rotation));
+				//int t_cy = (int)(x0 * Math.sin(rotation) + y_scale * y0 * Math.cos(rotation));
+				int t_cx = (int)(x0 * Math.cos(rotation) - y0 * Math.sin(rotation));
+				int t_cy = (int)(x0 * Math.sin(rotation) + y0 * Math.cos(rotation));
+				t_cy *= y_scale;
 				t_cx += offset_x;
 				t_cy += offset_y;
 				// draw on right hand side
@@ -2457,8 +2501,11 @@ public class HDRProcessor {
 						int t_cx = cx, t_cy = cy;
 						if( k == 1 ) {
 						    // transform
-                            t_cx = (int)(cx * Math.cos(rotation) - y_scale * cy * Math.sin(rotation));
-                            t_cy = (int)(cx * Math.sin(rotation) + y_scale * cy * Math.cos(rotation));
+							//t_cx = (int)(cx * Math.cos(rotation) - y_scale * cy * Math.sin(rotation));
+							//t_cy = (int)(cx * Math.sin(rotation) + y_scale * cy * Math.cos(rotation));
+							t_cx = (int)(cx * Math.cos(rotation) - cy * Math.sin(rotation));
+							t_cy = (int)(cx * Math.sin(rotation) + cy * Math.cos(rotation));
+							t_cy *= y_scale;
                             t_cx += offset_x;
                             t_cy += offset_y;
                             // draw on right hand side
