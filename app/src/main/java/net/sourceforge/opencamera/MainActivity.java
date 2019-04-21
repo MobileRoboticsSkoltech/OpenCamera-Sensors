@@ -1909,7 +1909,7 @@ public class MainActivity extends Activity {
 				case "preference_take_photo_border":
 				case "preference_keep_display_on":
 				case "preference_max_brightness":
-				case "preference_hdr_save_expo":
+				//case "preference_hdr_save_expo": // we need to update if this is changed, as it affects whether we request RAW or not in HDR mode when RAW is enabled
 				case "preference_front_camera_mirror":
 				case "preference_stamp":
 				case "preference_stamp_dateformat":
@@ -1979,6 +1979,7 @@ public class MainActivity extends Activity {
 		bundle.putBoolean("supports_camera2", this.supports_camera2);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 		bundle.putBoolean("supports_raw", this.preview.supportsRaw());
+		bundle.putBoolean("supports_burst_raw", this.supportsBurstRaw());
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
 		bundle.putBoolean("supports_nr", this.supportsNoiseReduction());
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
@@ -4066,6 +4067,13 @@ public class MainActivity extends Activity {
 		// Android 7 to limit to more modern devices (for performance reasons)
 		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
 		//return false; // currently blocked for release
+	}
+
+	/** Whether RAW mode would be supported for various burst modes (expo bracketing etc).
+	 *  Note that caller should still separately check preview.supportsRaw() if required.
+	 */
+	public boolean supportsBurstRaw() {
+		return( large_heap_memory >= 512 );
 	}
 
 	public boolean supportsPreviewBitmaps() {

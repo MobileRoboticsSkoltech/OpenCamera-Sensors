@@ -998,31 +998,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			n_jpegs = 1;
 		}
 		else {
-			if( main_activity.getPreview().supportsRaw() && this.getRawPref() == RawPref.RAWPREF_JPEG_DNG ) {
-				// note, even in RAW only mode, the CameraController will still take JPEG+RAW (we still need to JPEG to
-				// generate a bitmap from for thumbnail and pause preview option), so this still generates a request in
-				// the ImageSaver
-				n_raw = 1;
-				n_jpegs = 1;
-			}
-			else {
-				n_raw = 0;
-				n_jpegs = 1;
-			}
+			n_jpegs = 1; // default
 
 			if( main_activity.getPreview().supportsExpoBracketing() && this.isExpoBracketingPref() ) {
-				n_raw = 0;
 				n_jpegs = this.getExpoBracketingNImagesPref();
 			}
 			else if( main_activity.getPreview().supportsFocusBracketing() && this.isFocusBracketingPref() ) {
 				// focus bracketing mode always avoids blocking the image queue, no matter how many images are being taken
 				// so all that matters is that we can take at least 1 photo (for the first shot)
-				n_raw = 0;
 				//n_jpegs = this.getFocusBracketingNImagesPref();
 				n_jpegs = 1;
 			}
 			else if( main_activity.getPreview().supportsBurst() && this.isCameraBurstPref() ) {
-				n_raw = 0;
 				if( this.getBurstForNoiseReduction() ) {
 					if( this.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
 						n_jpegs = CameraController.N_IMAGES_NR_DARK_LOW_LIGHT;
@@ -1035,9 +1022,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 					n_jpegs = this.getBurstNImages();
 				}
 			}
+
+			if( main_activity.getPreview().supportsRaw() && this.getRawPref() == RawPref.RAWPREF_JPEG_DNG ) {
+				// note, even in RAW only mode, the CameraController will still take JPEG+RAW (we still need to JPEG to
+				// generate a bitmap from for thumbnail and pause preview option), so this still generates a request in
+				// the ImageSaver
+				n_raw = n_jpegs;
+			}
+			else {
+				n_raw = 0;
+			}
 		}
 
-		int photo_cost = imageSaver.computePhotoCost(n_raw > 0, n_jpegs);
+		int photo_cost = imageSaver.computePhotoCost(n_raw, n_jpegs);
     	if( imageSaver.queueWouldBlock(photo_cost) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "canTakeNewPhoto: no, as queue would block");
@@ -1096,10 +1093,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	}
 
 	@Override
-	public boolean imageQueueWouldBlock(boolean has_raw, int n_jpegs) {
+	public boolean imageQueueWouldBlock(int n_raw, int n_jpegs) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "imageQueueWouldBlock");
-		return imageSaver.queueWouldBlock(has_raw, n_jpegs);
+		return imageSaver.queueWouldBlock(n_raw, n_jpegs);
 	}
 
 	@Override
@@ -1303,9 +1300,26 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		}
     }
 
-	private static boolean photoModeSupportsRaw(PhotoMode photo_mode) {
-    	// RAW only supported for Std or DRO modes
-	    return photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO;
+	private boolean photoModeSupportsRaw(PhotoMode photo_mode) {
+		//return photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO;
+		if( photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO ) {
+			return true;
+		}
+		else if( photo_mode == PhotoMode.ExpoBracketing ) {
+			return sharedPreferences.getBoolean(PreferenceKeys.AllowRawForExpoBracketingPreferenceKey, true) &&
+					main_activity.supportsBurstRaw();
+		}
+		else if( photo_mode == PhotoMode.HDR ) {
+			// for HDR, RAW is only relevant if we're going to be saving the base expo images (otherwise there's nothing to save)
+			return sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false) &&
+					sharedPreferences.getBoolean(PreferenceKeys.AllowRawForExpoBracketingPreferenceKey, true) &&
+					main_activity.supportsBurstRaw();
+		}
+		else if( photo_mode == PhotoMode.FocusBracketing ) {
+			return sharedPreferences.getBoolean(PreferenceKeys.AllowRawForFocusBracketingPreferenceKey, true) &&
+					main_activity.supportsBurstRaw();
+		}
+		return false;
     }
 
 	/** Return whether to capture JPEG, or RAW+JPEG.
@@ -1992,7 +2006,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	drawPreview.turnFrontScreenFlashOn();
     }
 
-    private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
+	private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
+	private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
 	private int n_panorama_pics = 0;
 
 	@Override
@@ -2000,6 +2015,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCaptureStarted");
 		n_capture_images = 0;
+		n_capture_images_raw = 0;
 		drawPreview.onCaptureStarted();
 	}
 
@@ -2393,6 +2409,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		return image_capture_intent;
 	}
 
+	/** Whether the photos will be part of a burst, even if we're receiving via the non-burst callbacks.
+	 */
+	private boolean forceSuffix(PhotoMode photo_mode) {
+		// focus bracketing and fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
+		boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst ||
+				(
+						main_activity.getPreview().getCameraController() != null &&
+								main_activity.getPreview().getCameraController().isCapturingBurst()
+				);
+		return force_suffix;
+	}
+
     /** Saves the supplied image(s)
      * @param save_expo If the photo mode is one where multiple images are saved to a single
 	 *                  resultant image, this indicates if all the base images should also be saved
@@ -2546,12 +2574,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		}
 		else {
 		    boolean is_hdr = photo_mode == PhotoMode.DRO || photo_mode == PhotoMode.HDR;
-            // focus bracketing and fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
-		    boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst ||
-					(
-						main_activity.getPreview().getCameraController() != null &&
-						main_activity.getPreview().getCameraController().isCapturingBurst()
-					);
+		    boolean force_suffix = forceSuffix(photo_mode);
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
 					force_suffix,
 					// N.B., n_capture_images will be 1 for first image, not 0, so subtract 1 so we start off from _0.
@@ -2642,16 +2665,52 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			Log.d(TAG, "onRawPictureTaken");
         System.gc();
 
+		n_capture_images_raw++;
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_capture_images_raw is now " + n_capture_images_raw);
+
 		boolean do_in_background = saveInBackground(false);
 
-		boolean success = imageSaver.saveImageRaw(do_in_background, raw_image, current_date);
+		PhotoMode photo_mode = getPhotoMode();
+		if( main_activity.getPreview().isVideo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "snapshot mode");
+			// must be in photo snapshot while recording video mode, only support standard photo mode
+			// (RAW not supported anyway for video snapshot mode, but have this code just to be safe)
+			photo_mode = PhotoMode.Standard;
+		}
+		boolean force_suffix = forceSuffix(photo_mode);
+		// N.B., n_capture_images_raw will be 1 for first image, not 0, so subtract 1 so we start off from _0.
+		// (It wouldn't be a huge problem if we did start from _1, but it would be inconsistent with the naming
+		// of images where images.size() > 1 (e.g., expo bracketing mode) where we also start from _0.)
+		int suffix_offset = force_suffix ? (n_capture_images_raw-1) : 0;
+		boolean success = imageSaver.saveImageRaw(do_in_background, force_suffix, suffix_offset, raw_image, current_date);
 		
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken complete");
 		return success;
 	}
-    
-    void addLastImage(File file, boolean share) {
+
+	@Override
+	public boolean onRawBurstPictureTaken(List<RawImage> raw_images, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawBurstPictureTaken");
+		System.gc();
+
+		boolean do_in_background = saveInBackground(false);
+
+		// currently we don't ever do post processing with RAW burst images, so just save them all
+		boolean success = true;
+		for(int i=0;i<raw_images.size() && success;i++) {
+			success = imageSaver.saveImageRaw(do_in_background, true, i, raw_images.get(i), current_date);
+		}
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawBurstPictureTaken complete");
+		return success;
+	}
+
+	void addLastImage(File file, boolean share) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "addLastImage: " + file);
 			Log.d(TAG, "share?: " + share);

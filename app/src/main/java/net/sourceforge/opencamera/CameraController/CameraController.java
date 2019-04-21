@@ -237,14 +237,17 @@ public abstract class CameraController {
 		/** Only called if burst is requested.
 		 */
 		void onBurstPictureTaken(List<byte[]> images);
+		/** Only called if burst is requested.
+		 */
+		void onRawBurstPictureTaken(List<RawImage> raw_images);
 		/* This is called for flash_frontscreen_auto or flash_frontscreen_on mode to indicate the caller should light up the screen
 		 * (for flash_frontscreen_auto it will only be called if the scene is considered dark enough to require the screen flash).
 		 * The screen flash can be removed when or after onCompleted() is called.
 		 */
 		/* This is called for when burst mode is BURSTTYPE_FOCUS or BURSTTYPE_CONTINUOUS, to ask whether it's safe to take
-		 * n_jpegs extra images, or whether to wait.
+		 * n_raw extra RAW images and n_jpegs extra JPEG images, or whether to wait.
 		 */
-		boolean imageQueueWouldBlock(int n_jpegs);
+		boolean imageQueueWouldBlock(int n_raw, int n_jpegs);
 		void onFrontScreenTurnOn();
 	}
 

@@ -6,8 +6,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -119,14 +121,16 @@ public class CameraController2 extends CameraController {
 	private boolean raw_todo; // whether we are still waiting for RAW images
 	private boolean done_all_captures; // whether we've received the capture for the image (or all images if a burst)
 	//private CaptureRequest pending_request_when_ready;
-	private int n_burst; // number of expected (remaining) burst images in this capture
-	private int n_burst_taken; // number of burst images taken so far in this capture
-    private int n_burst_total; // total number of expected burst images in this capture (if known)
+	private int n_burst; // number of expected (remaining) burst JPEG images in this capture
+	private int n_burst_taken; // number of burst JPEG images taken so far in this capture
+    private int n_burst_total; // total number of expected burst images in this capture (if known) (same for JPEG and RAW)
+	private int n_burst_raw; // number of expected (remaining) burst RAW images in this capture
 	private boolean burst_single_request; // if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
+	private final List<RawImage> pending_burst_images_raw = new ArrayList<>();
 	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (e.g., when use_expo_fast_burst==false, or for focus bracketing)
 	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using captureBurst())
-	private RawImage pending_raw_image;
+	private RawImage pending_raw_image; // used to ensure that when taking JPEG+RAW, the JPEG picture callback is called first (only used for non-burst cases)
 	private ErrorCallback take_picture_error_cb;
 	private boolean want_video_high_speed;
 	private boolean is_video_high_speed; // whether we're actually recording in high speed
@@ -187,11 +191,12 @@ public class CameraController2 extends CameraController {
 	/*private boolean capture_result_has_focus_distance;
 	private float capture_result_focus_distance_min;
 	private float capture_result_focus_distance_max;*/
-	private long max_preview_exposure_time_c = 1000000000L/12;
+	private final static long max_preview_exposure_time_c = 1000000000L/12;
 	
 	private enum RequestTagType {
-		CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture
-		NONE // should be treated the same as if no tag had been set on the request
+		CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
+        CAPTURE_BURST_IN_PROGRESS, // request is for a burst capture, but isn't the last of the burst capture sequence
+		NONE // should be treated the same as if no tag had been set on the request - but allows the request tag type to be changed later
 	}
 
 	/* The class that we use for setTag() and getTag() for capture requests.
@@ -1107,13 +1112,22 @@ public class CameraController2 extends CameraController {
 							slow_burst_capture_requests.subList(n_burst_taken+1, slow_burst_capture_requests.size()).clear(); // https://stackoverflow.com/questions/1184636/shrinking-an-arraylist-to-a-new-size
 							// if burst_single_request==true, n_burst is constant and we stop when pending_burst_images.size() >= n_burst
 							// if burst_single_request==false, n_burst counts down and we stop when n_burst==0
-							if( burst_single_request )
-								n_burst = slow_burst_capture_requests.size();
-							else
-								n_burst = 1;
+							if( burst_single_request ) {
+                                n_burst = slow_burst_capture_requests.size();
+                                if( n_burst_raw > 0 ) {
+                                    n_burst_raw = slow_burst_capture_requests.size();
+                                }
+                            }
+							else {
+                                n_burst = 1;
+                                if( n_burst_raw > 0 ) {
+                                    n_burst_raw = 1;
+                                }
+                            }
 							if( MyDebug.LOG ) {
 								Log.d(TAG, "size is now: " + slow_burst_capture_requests.size());
-								Log.d(TAG, "n_burst is now: " + n_burst);
+                                Log.d(TAG, "n_burst is now: " + n_burst);
+                                Log.d(TAG, "n_burst_raw is now: " + n_burst_raw);
 							}
 							RequestTagObject requestTag = (RequestTagObject)slow_burst_capture_requests.get(slow_burst_capture_requests.size()-1).getTag();
 							requestTag.setType(RequestTagType.CAPTURE);
@@ -1148,7 +1162,7 @@ public class CameraController2 extends CameraController {
 								if( MyDebug.LOG )
 									Log.d(TAG, "take picture after delay for next focus bracket");
 								if( camera != null && captureSession != null ) { // make sure camera wasn't released in the meantime
-									if( picture_cb.imageQueueWouldBlock(1) ) {
+									if( picture_cb.imageQueueWouldBlock(imageReaderRaw != null ? 1 : 0, 1) ) {
 										if( MyDebug.LOG ) {
 											Log.d(TAG, "...but wait for next focus bracket, as image queue would block");
 										}
@@ -1205,17 +1219,12 @@ public class CameraController2 extends CameraController {
 				jpeg_todo = false;
 			}
 			checkImagesCompleted();
-
-			synchronized( background_camera_lock ) {
-				if( burst_type == BurstType.BURSTTYPE_FOCUS )
-					focus_bracketing_in_progress = false;
-			}
 		}
 	}
 
 	private class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
-		private CaptureResult capture_result;
-		private Image image;
+		private final Queue<CaptureResult> capture_results = new LinkedList<>();
+		private final Queue<Image> images = new LinkedList<>();
 
 		void setCaptureResult(CaptureResult capture_result) {
 			if( MyDebug.LOG )
@@ -1224,8 +1233,8 @@ public class CameraController2 extends CameraController {
 				/* synchronize, as we don't want to set the capture_result, at the same time that onImageAvailable() is called, as
 				 * we'll end up calling processImage() both in onImageAvailable() and here.
 				 */
-				this.capture_result = capture_result;
-				if( image != null ) {
+				this.capture_results.add(capture_result);
+				if( images.size() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "can now process the image");
 					// should call processImage() on UI thread, to be consistent with onImageAvailable()->processImage()
@@ -1249,40 +1258,123 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "clear()");
 			synchronized( background_camera_lock ) {
 				// synchronize just to be safe?
-				capture_result = null;
-				image = null;
+				capture_results.clear();
+				images.clear();
 			}
 		}
 
 		private void processImage() {
 			if( MyDebug.LOG )
 				Log.d(TAG, "processImage()");
+
+			List<RawImage> single_burst_complete_images = null;
+			boolean call_takePhotoCompleted = false;
+			DngCreator dngCreator;
+            CaptureResult capture_result;
+            Image image;
+
 			synchronized( background_camera_lock ) {
-				if( capture_result == null ) {
+				if( capture_results.size() == 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "don't yet have still_capture_result");
 					return;
 				}
-				if( image == null ) {
+				if( images.size() == 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "don't have image?!");
 					return;
 				}
+				capture_result = capture_results.remove();
+				image = images.remove();
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "now have all info to process raw image");
 					Log.d(TAG, "image timestamp: " + image.getTimestamp());
 				}
-				DngCreator dngCreator = new DngCreator(characteristics, capture_result);
+				dngCreator = new DngCreator(characteristics, capture_result);
 				// set fields
 				dngCreator.setOrientation(camera_settings.getExifOrientation());
 				if( camera_settings.location != null ) {
 					dngCreator.setLocation(camera_settings.location);
 				}
 
-				pending_raw_image = new RawImage(dngCreator, image);
+				if( n_burst_total == 1 && burst_type != BurstType.BURSTTYPE_CONTINUOUS ) {
+					// Rather than call onRawPictureTaken straight away, we set pending_raw_image so that
+					// it's called in checkImagesCompleted, to ensure the RAW callback is taken after the JPEG callback.
+					// This isn't required, but can give an appearance of better performance to the user, as the thumbnail
+					// animation for a photo having been taken comes from the JPEG.
+					// We don't do this for burst mode, as it would get too complicated trying to enforce an ordering...
+					pending_raw_image = new RawImage(dngCreator, image);
+				}
+				else if( burst_single_request ) {
+					pending_burst_images_raw.add(new RawImage(dngCreator, image));
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "pending_burst_images_raw size is now: " + pending_burst_images_raw.size());
+					}
+					if( pending_burst_images_raw.size() >= n_burst_raw ) { // shouldn't ever be greater, but just in case
+						if( MyDebug.LOG )
+							Log.d(TAG, "all raw burst images available");
+						if( pending_burst_images_raw.size() > n_burst_raw ) {
+							Log.e(TAG, "pending_burst_images_raw size " + pending_burst_images_raw.size() + " is greater than n_burst_raw " + n_burst_raw);
+						}
+						// take a copy, so that we can clear pending_burst_images_raw
+						single_burst_complete_images = new ArrayList<>(pending_burst_images_raw);
+						// continued below after lock...
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "number of raw burst images is now: " + pending_burst_images_raw.size());
+					}
+				}
+				// case for burst_single_request==false handled below
 			}
 
-			checkImagesCompleted();
+			if( pending_raw_image != null ) {
+				//takePendingRaw(); // test not waiting for JPEG callback
+
+				checkImagesCompleted();
+			}
+			else {
+				// burst-only code
+				// need to call without a lock
+				if( single_burst_complete_images != null ) {
+					picture_cb.onRawBurstPictureTaken(single_burst_complete_images);
+				}
+				else if( !burst_single_request ) {
+					picture_cb.onRawPictureTaken(new RawImage(dngCreator, image));
+				}
+
+				synchronized( background_camera_lock ) {
+					if( single_burst_complete_images != null ) {
+						pending_burst_images_raw.clear();
+
+						call_takePhotoCompleted = true;
+					}
+					else if( !burst_single_request ) {
+						n_burst_raw--;
+						if( MyDebug.LOG )
+							Log.d(TAG, "n_burst_raw is now " + n_burst_raw);
+						if( burst_type == BurstType.BURSTTYPE_CONTINUOUS && !continuous_burst_requested_last_capture ) {
+							// even if n_burst_raw is 0, we don't want to give up if we're still in continuous burst mode
+							// also note if we do have continuous_burst_requested_last_capture==true, we still check for
+							// n_burst_raw==0 below (as there may have been more than one image still to be received)
+							if( MyDebug.LOG )
+								Log.d(TAG, "continuous burst mode still in progress");
+						}
+						else if( n_burst_raw == 0 ) {
+							call_takePhotoCompleted = true;
+						}
+					}
+				}
+
+				// need to call outside of lock (because they can lead to calls to external callbacks)
+				if( call_takePhotoCompleted ) {
+					synchronized( background_camera_lock ) {
+						raw_todo = false;
+					}
+					checkImagesCompleted();
+				}
+			}
+
 			if( MyDebug.LOG )
 				Log.d(TAG, "done processImage");
 		}
@@ -1301,7 +1393,8 @@ public class CameraController2 extends CameraController {
 			}
 			synchronized( background_camera_lock ) {
 				// see comment above in setCaptureResult() for why we synchronize
-				image = reader.acquireNextImage();
+				Image image = reader.acquireNextImage();
+				images.add(image);
 			}
 			processImage();
 			if( MyDebug.LOG )
@@ -3279,7 +3372,7 @@ public class CameraController2 extends CameraController {
 		if( !isBurstOrExpo() )
 			return false;
 		if( burst_type == BurstType.BURSTTYPE_CONTINUOUS )
-			return continuous_burst_in_progress || n_burst > 0;
+			return continuous_burst_in_progress || n_burst > 0 || n_burst_raw > 0;
 		return getBurstTotal() > 1 && getNBurstTaken() < getBurstTotal();
 	}
 
@@ -3417,6 +3510,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearPending");
 		pending_burst_images.clear();
+		pending_burst_images_raw.clear();
 		pending_raw_image = null;
 		if( onRawImageAvailableListener != null ) {
 			onRawImageAvailableListener.clear();
@@ -3425,6 +3519,7 @@ public class CameraController2 extends CameraController {
 		n_burst = 0;
 		n_burst_taken = 0;
         n_burst_total = 0;
+        n_burst_raw = 0;
 		burst_single_request = false;
 		slow_burst_start_ms = 0;
 	}
@@ -3491,6 +3586,10 @@ public class CameraController2 extends CameraController {
 			PictureCallback cb = picture_cb;
 			picture_cb = null;
 			cb.onCompleted();
+            synchronized( background_camera_lock ) {
+                if( burst_type == BurstType.BURSTTYPE_FOCUS )
+                    focus_bracketing_in_progress = false;
+            }
 		}
 	}
 
@@ -5184,6 +5283,7 @@ public class CameraController2 extends CameraController {
 				n_burst = 1;
 				n_burst_taken = 0;
 				n_burst_total = n_burst;
+				n_burst_raw = raw_todo ? n_burst : 0;
 				burst_single_request = false;
 				if( !previewIsVideoMode ) {
 					// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
@@ -5384,8 +5484,8 @@ public class CameraController2 extends CameraController {
 				// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 				// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
 				stillBuilder.addTarget(imageReader.getSurface());
-				// don't add target imageReaderRaw, as Raw not supported for burst
-				raw_todo = false; // raw not supported for burst
+                if( raw_todo )
+					stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 				if( burst_type == BurstType.BURSTTYPE_EXPO ) {
 
@@ -5477,6 +5577,7 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "    exposure_time: " + exposure_time);
 						}
 						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+                        stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 						requests.add( stillBuilder.build() );
 					}
 				}
@@ -5485,6 +5586,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "add burst request for base image");
 				stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				requests.add( stillBuilder.build() );
 
 				// lighter images
@@ -5512,6 +5614,9 @@ public class CameraController2 extends CameraController {
 								Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
 							stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 						}
+						else {
+                            stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
+                        }
 						requests.add( stillBuilder.build() );
 					}
 				}
@@ -5556,8 +5661,11 @@ public class CameraController2 extends CameraController {
 							stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE)); // set capture tag for last only
 						}
 						else {
-							// but to cancel focus bracketing, we need to set a NONE tag on every other capture
-							stillBuilder.setTag(new RequestTagObject(RequestTagType.NONE));
+						    // note, even if we didn't need to set CAPTURE_BURST_IN_PROGRESS, we'd still want
+                            // to set a RequestTagObject (e.g., type NONE) so that it can be changed later,
+                            // so that cancelling focus bracketing works
+							//stillBuilder.setTag(new RequestTagObject(RequestTagType.NONE));
+                            stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 						}
 						requests.add( stillBuilder.build() );
 
@@ -5570,9 +5678,13 @@ public class CameraController2 extends CameraController {
 
 				/*
 				// testing:
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				requests.add( stillBuilder.build() );
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				requests.add( stillBuilder.build() );
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				requests.add( stillBuilder.build() );
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				requests.add( stillBuilder.build() );
 				if( MyDebug.LOG )
 					Log.d(TAG, "set RequestTagType.CAPTURE for last burst request");
@@ -5583,6 +5695,7 @@ public class CameraController2 extends CameraController {
 				n_burst = requests.size();
 				n_burst_total = n_burst;
 				n_burst_taken = 0;
+				n_burst_raw = raw_todo ? n_burst : 0;
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "n_burst: " + n_burst);
 					Log.d(TAG, "burst_single_request: " + burst_single_request);
@@ -5735,8 +5848,7 @@ public class CameraController2 extends CameraController {
 				}
 				// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 				stillBuilder.addTarget(imageReader.getSurface());
-				// don't add target imageReaderRaw, as Raw not supported for burst
-				raw_todo = false; // raw not supported for burst
+				// RAW target added below
 
 				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
@@ -5747,6 +5859,7 @@ public class CameraController2 extends CameraController {
 				if( burst_type == BurstType.BURSTTYPE_CONTINUOUS ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "continuous burst mode");
+                    raw_todo = false; // RAW works in continuous burst mode, but makes things very slow...
 					if( continuing_fast_burst ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "continuing fast burst");
@@ -5827,12 +5940,16 @@ public class CameraController2 extends CameraController {
 					n_burst = burst_requested_n_images;
 					n_burst_taken = 0;
 				}
+                if( raw_todo )
+                    stillBuilder.addTarget(imageReaderRaw.getSurface());
 				n_burst_total = n_burst;
+				n_burst_raw = raw_todo ? n_burst : 0;
 				burst_single_request = false;
 
 				if( MyDebug.LOG )
 					Log.d(TAG, "n_burst: " + n_burst);
 
+                stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE_BURST_IN_PROGRESS));
 				request = stillBuilder.build();
 				stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));
 				last_request = stillBuilder.build();
@@ -5895,7 +6012,7 @@ public class CameraController2 extends CameraController {
 										Log.d(TAG, "continuous_burst_in_progress: " + continuous_burst_in_progress);
 										Log.d(TAG, "n_burst: " + n_burst);
 									}
-									if( n_burst >= 10 ) {
+									if( n_burst >= 10 || n_burst_raw >= 10 ) {
 										// Nokia 8 in std mode without post-processing options doesn't hit this limit (we only hit this
 										// if it's set to "n_burst >= 5")
 										if( MyDebug.LOG ) {
@@ -5904,7 +6021,7 @@ public class CameraController2 extends CameraController {
 										//throw new RuntimeException(); // test
 										handler.postDelayed(this, continuous_burst_rate_ms);
 									}
-									else if( picture_cb.imageQueueWouldBlock(n_burst+1) ) {
+									else if( picture_cb.imageQueueWouldBlock(n_burst_raw, n_burst+1) ) {
 										if( MyDebug.LOG ) {
 											Log.d(TAG, "...but wait for continuous burst, as image queue would block");
 										}
@@ -6548,22 +6665,15 @@ public class CameraController2 extends CameraController {
 
 		@Override
 		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
-				if( MyDebug.LOG ) {
+            if( MyDebug.LOG ) {
+    			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
 					Log.d(TAG, "onCaptureStarted: capture");
 					Log.d(TAG, "frameNumber: " + frameNumber);
 					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
 				}
-				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
-				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTagType.CAPTURE for the last image)
 			}
-			/*else {
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "onCaptureStarted:");
-					Log.d(TAG, "frameNumber: " + frameNumber);
-					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
-				}
-			}*/
+            // n.b., we don't play the shutter sound here for RequestTagType.CAPTURE, as it typically sounds "too late"
+            // (if ever we changed this, would also need to fix for burst, where we only set the RequestTagType.CAPTURE for the last image)
 			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
 
@@ -6583,25 +6693,15 @@ public class CameraController2 extends CameraController {
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
-			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
-				if( MyDebug.LOG ) {
+            if( MyDebug.LOG ) {
+    			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
 					Log.d(TAG, "onCaptureCompleted: capture");
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
 					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
 					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
 					Log.d(TAG, "frame duration: " + request.get(CaptureRequest.SENSOR_FRAME_DURATION));
 				}
-				//return;
 			}
-			/*else {
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "onCaptureCompleted:");
-					Log.d(TAG, "sequenceId: " + result.getSequenceId());
-					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
-					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
-					Log.d(TAG, "frame duration: " + request.get(CaptureRequest.SENSOR_FRAME_DURATION));
-				}
-			}*/
 			process(request, result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
@@ -7173,6 +7273,47 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
+        /** Passes the capture result to the RAW onImageAvailableListener, if it exists.
+         */
+		private void handleRawCaptureResult(CaptureResult result) {
+            //test_wait_capture_result = true;
+            if( test_wait_capture_result ) {
+                // For RAW capture, we require the capture result before creating DngCreator
+                // but for testing purposes, we need to test the possibility where onImageAvailable() for
+                // the RAW image is called before we receive the capture result here.
+                // Also with JPEG only capture, there are problems with repeat mode and continuous focus if
+                // onImageAvailable() is called before this code is called, because it means here we cancel the
+                // focus and lose the focus callback that was going to trigger the next repeat photo! This shows
+                // up on testContinuousPictureFocusRepeat() on Nexus 7, but can be autotested on other devices
+                // with the flag, see testContinuousPictureFocusRepeatWaitCaptureResult().
+                try {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "test_wait_capture_result: waiting...");
+                    // 200ms is enough to test the problem with testTakePhotoRawWaitCaptureResult() on Nexus 6, but use 500ms to be sure
+                    // 200ms is enough to test the problem with testContinuousPictureFocusRepeatWaitCaptureResult() on Nokia 8, but use 500ms to be sure
+                    Thread.sleep(500);
+                }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if( onRawImageAvailableListener != null ) {
+                onRawImageAvailableListener.setCaptureResult(result);
+            }
+        }
+
+        /** This should be called when a capture result corresponds to a capture that is for a burst
+         *  sequence, that isn't the last capture (for the last capture, handleCaptureCompleted() is
+         *  instead called).
+         */
+        private void handleCaptureBurstInProgress(CaptureResult result) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "handleCaptureBurstInProgress");
+
+            handleRawCaptureResult(result);
+        }
+
 		/** This should be called when a capture result corresponds to a capture that has completed.
 		 */
 		private void handleCaptureCompleted(CaptureResult result) {
@@ -7181,31 +7322,8 @@ public class CameraController2 extends CameraController {
 			test_capture_results++;
 			modified_from_camera_settings = false;
 
-			//test_wait_capture_result = true;
-			if( test_wait_capture_result ) {
-				// For RAW capture, we require the capture result before creating DngCreator
-				// but for testing purposes, we need to test the possibility where onImageAvailable() for
-				// the RAW image is called before we receive the capture result here.
-				// Also with JPEG only capture, there are problems with repeat mode and continuous focus if
-				// onImageAvailable() is called before this code is called, because it means here we cancel the
-				// focus and lose the focus callback that was going to trigger the next repeat photo! This shows
-				// up on testContinuousPictureFocusRepeat() on Nexus 7, but can be autotested on other devices
-				// with the flag, see testContinuousPictureFocusRepeatWaitCaptureResult().
-				try {
-					if( MyDebug.LOG )
-						Log.d(TAG, "test_wait_capture_result: waiting...");
-					// 200ms is enough to test the problem with testTakePhotoRawWaitCaptureResult() on Nexus 6, but use 500ms to be sure
-					// 200ms is enough to test the problem with testContinuousPictureFocusRepeatWaitCaptureResult() on Nokia 8, but use 500ms to be sure
-					Thread.sleep(500);
-				}
-				catch(InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			handleRawCaptureResult(result);
 
-			if( onRawImageAvailableListener != null ) {
-				onRawImageAvailableListener.setCaptureResult(result);
-			}
 			// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 			// need to cancel the autofocus, and restart the preview after taking the photo
 			// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
@@ -7355,9 +7473,13 @@ public class CameraController2 extends CameraController {
 				} 
 			}*/
 
-			if( getRequestTagType(request) == RequestTagType.CAPTURE ) {
+            RequestTagType tag_type = getRequestTagType(request);
+			if( tag_type == RequestTagType.CAPTURE ) {
 				handleCaptureCompleted(result);
 			}
+            else if( tag_type == RequestTagType.CAPTURE_BURST_IN_PROGRESS ) {
+                handleCaptureBurstInProgress(result);
+            }
 		}
 	};
 }

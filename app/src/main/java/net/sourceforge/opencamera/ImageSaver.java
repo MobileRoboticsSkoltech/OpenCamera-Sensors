@@ -291,52 +291,50 @@ public class ImageSaver extends Thread {
 	 *  Note that for RAW+DNG mode, computeRequestCost() is called twice for a given photo (one for each
 	 *  of the two requests: one RAW, one JPEG).
 	 * @param is_raw Whether RAW/DNG or JPEG.
-	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
+	 * @param n_images This is the number of JPEG or RAW images that are in the request.
 	 */
-	public static int computeRequestCost(boolean is_raw, int n_jpegs) {
+	public static int computeRequestCost(boolean is_raw, int n_images) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "computeRequestCost");
 			Log.d(TAG, "is_raw: " + is_raw);
-			Log.d(TAG, "n_jpegs: " + n_jpegs);
+			Log.d(TAG, "n_images: " + n_images);
 		}
 		int cost;
 		if( is_raw )
-			cost = queue_cost_dng_c;
+			cost = n_images * queue_cost_dng_c;
 		else {
-			cost = n_jpegs * queue_cost_jpeg_c;
-			//cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
+			cost = n_images * queue_cost_jpeg_c;
+			//cost = (n_images > 1 ? 2 : 1) * queue_cost_jpeg_c;
 		}
 		return cost;
 	}
 
 	/** Computes the cost (in terms of number of slots on the image queue) of a new photo.
-	 * @param has_raw Whether this is RAW+JPEG or RAW only.
-	 * @param n_jpegs If has_raw is false, the number of JPEGs that will be taken.
+	 * @param n_raw The number of JPEGs that will be taken.
+	 * @param n_jpegs The number of JPEGs that will be taken.
 	 */
-	int computePhotoCost(boolean has_raw, int n_jpegs) {
+	int computePhotoCost(int n_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "computePhotoCost");
-			Log.d(TAG, "has_raw: " + has_raw);
+			Log.d(TAG, "n_raw: " + n_raw);
 			Log.d(TAG, "n_jpegs: " + n_jpegs);
 		}
-		int cost;
-		if( has_raw ) {
-			// even in RAW only mode, we still include the cost of a JPEG, as we still take a JPEG photo
-			cost = computeRequestCost(true, 0) + computeRequestCost(false, 1);
-		}
-		else
-			cost = computeRequestCost(false, n_jpegs);
+		int cost = 0;
+		if( n_raw > 0 )
+			cost += computeRequestCost(true, n_raw);
+		if( n_jpegs > 0 )
+			cost += computeRequestCost(false, n_jpegs);
 		if( MyDebug.LOG )
 			Log.d(TAG, "cost: " + cost);
 		return cost;
 	}
 
 	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
-	 * @param has_raw Whether this is RAW+JPEG or RAW only.
-	 * @param n_jpegs If has_raw is false, the number of JPEGs that will be taken.
+	 * @param n_raw The number of JPEGs that will be taken.
+	 * @param n_jpegs The number of JPEGs that will be taken.
 	 */
-	boolean queueWouldBlock(boolean has_raw, int n_jpegs) {
-		int photo_cost = this.computePhotoCost(has_raw, n_jpegs);
+	boolean queueWouldBlock(int n_raw, int n_jpegs) {
+		int photo_cost = this.computePhotoCost(n_raw, n_jpegs);
     	return this.queueWouldBlock(photo_cost);
 	}
 
@@ -528,6 +526,8 @@ public class ImageSaver extends Thread {
 	 *  successfully.
 	 */
 	boolean saveImageRaw(boolean do_in_background,
+			boolean force_suffix,
+			int suffix_offset,
 			RawImage raw_image,
 			Date current_date) {
 		if( MyDebug.LOG ) {
@@ -537,8 +537,8 @@ public class ImageSaver extends Thread {
 		return saveImage(do_in_background,
 				true,
 				false,
-				false,
-				0,
+				force_suffix,
+				suffix_offset,
 				false,
 				null,
 				raw_image,
@@ -708,7 +708,7 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			int cost = computeRequestCost(is_raw, is_raw ? 0 : request.jpeg_images.size());
+			int cost = computeRequestCost(is_raw, is_raw ? 1 : request.jpeg_images.size());
 			addRequest(request, cost);
 			success = true; // always return true when done in background
 		}
@@ -1370,7 +1370,7 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "save NR image");
 			String suffix = "_NR";
-			success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true);
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true, true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for nr image");
 			nr_bitmap.recycle();
@@ -1465,7 +1465,7 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "base_image_id: " + base_image_id);
 			String suffix = request.jpeg_images.size() == 1 ? "_DRO" : "_HDR";
-			success = saveSingleImageNow(request, request.jpeg_images.get(base_image_id), hdr_bitmap, suffix, true, true);
+			success = saveSingleImageNow(request, request.jpeg_images.get(base_image_id), hdr_bitmap, suffix, true, true, true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
     		if( MyDebug.LOG ) {
@@ -1577,7 +1577,7 @@ public class ImageSaver extends Thread {
 			boolean multiple_jpegs = request.jpeg_images.size() > 1 && !first_only;
 			String filename_suffix = (multiple_jpegs || request.force_suffix) ? suffix + (i + request.suffix_offset) : "";
 			boolean share_image = share && (i == mid_image);
-			if( !saveSingleImageNow(request, image, null, filename_suffix, update_thumbnail, share_image) ) {
+			if( !saveSingleImageNow(request, image, null, filename_suffix, update_thumbnail, share_image, false) ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "saveSingleImageNow failed for image: " + i);
 				success = false;
@@ -2054,10 +2054,13 @@ public class ImageSaver extends Thread {
 	 *  @param update_thumbnail - Whether to update the thumbnail (and show the animation).
 	 *  @param share_image - Whether this image should be marked as the one to share (if multiple images can
 	 *  be saved from a single shot (e.g., saving exposure images with HDR).
+	 *  @param ignore_raw_only - If true, then save even if RAW Only is set (needed for HDR mode
+	 *                         where we always save the HDR image even though it's a JPEG - the
+	 *                         RAW preference only affects the base images.
 	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image) {
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image, boolean ignore_raw_only) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
 
@@ -2077,7 +2080,7 @@ public class ImageSaver extends Thread {
 		
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
-		boolean raw_only = applicationInterface.isRawOnly();
+		boolean raw_only = !ignore_raw_only && applicationInterface.isRawOnly();
 		if( MyDebug.LOG )
 			Log.d(TAG, "raw_only: " + raw_only);
 		StorageUtils storageUtils = main_activity.getStorageUtils();
@@ -2811,15 +2814,17 @@ public class ImageSaver extends Thread {
     		File picFile = null;
     		Uri saveUri = null;
 
+			String suffix = "_";
+			String filename_suffix = (request.force_suffix) ? suffix + (request.suffix_offset) : "";
 			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
 	    		// need a real file; secondly copying to a temp file is much slower for RAW.
 			}
 			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}

@@ -281,10 +281,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 		}
-		
+
 		final boolean supports_raw = bundle.getBoolean("supports_raw");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_raw: " + supports_raw);
+		final boolean supports_burst_raw = bundle.getBoolean("supports_burst_raw");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_burst_raw: " + supports_burst_raw);
 
 		if( !supports_raw ) {
 			Preference pref = findPreference("preference_raw");
@@ -340,6 +343,14 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	return true;
                 }
             });        	
+		}
+
+		if( !( supports_raw && supports_burst_raw ) ) {
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+			Preference pref = findPreference("preference_raw_expo_bracketing");
+			pg.removePreference(pref);
+			pref = findPreference("preference_raw_focus_bracketing");
+			pg.removePreference(pref);
 		}
 
 		final boolean supports_hdr = bundle.getBoolean("supports_hdr");

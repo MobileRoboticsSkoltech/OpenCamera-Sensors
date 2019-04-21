@@ -5799,7 +5799,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			public void onPictureTaken(byte[] data) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onPictureTaken");
-    	    	// n.b., this is automatically run in a different thread
 				initDate();
 				if( !applicationInterface.onPictureTaken(data, current_date) ) {
 					if( MyDebug.LOG )
@@ -5824,7 +5823,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			public void onBurstPictureTaken(List<byte[]> images) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onBurstPictureTaken");
-    	    	// n.b., this is automatically run in a different thread
 				initDate();
 
 				success = true;
@@ -5835,10 +5833,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
     	    }
 
-			public boolean imageQueueWouldBlock(int n_jpegs) {
+			public void onRawBurstPictureTaken(List<RawImage> raw_images) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onRawBurstPictureTaken");
+				initDate();
+
+				if( !applicationInterface.onRawBurstPictureTaken(raw_images, current_date) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "applicationInterface.onRawBurstPictureTaken failed");
+				}
+			}
+
+			public boolean imageQueueWouldBlock(int n_raw, int n_jpegs) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "imageQueueWouldBlock");
-				return applicationInterface.imageQueueWouldBlock(false, n_jpegs);
+				return applicationInterface.imageQueueWouldBlock(n_raw, n_jpegs);
 			}
 
 			public void onFrontScreenTurnOn() {

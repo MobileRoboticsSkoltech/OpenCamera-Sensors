@@ -81,6 +81,10 @@ public class PreferenceKeys {
 
 	public static final String RawPreferenceKey = "preference_raw";
 
+	public static final String AllowRawForExpoBracketingPreferenceKey = "preference_raw_expo_bracketing";
+
+	public static final String AllowRawForFocusBracketingPreferenceKey = "preference_raw_focus_bracketing";
+
 	public static final String ExpoBracketingNImagesPreferenceKey = "preference_expo_bracketing_n_images";
 
 	public static final String ExpoBracketingStopsPreferenceKey = "preference_expo_bracketing_stops";

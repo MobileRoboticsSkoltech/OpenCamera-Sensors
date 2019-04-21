@@ -2947,22 +2947,32 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
         int exp_n_new_files;
-        if( is_raw ) {
-            if( mActivity.getApplicationInterface().isRawOnly() )
-                exp_n_new_files = 1;
-            else
-                exp_n_new_files = 2;
-        }
-        else if( is_hdr && hdr_save_expo )
+        if( is_hdr && hdr_save_expo ) {
             exp_n_new_files = 4;
-        else if( is_expo )
+            if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
+                exp_n_new_files += 3;
+            }
+        }
+        else if( is_expo ) {
             exp_n_new_files = n_expo_images;
-        else if( is_focus_bracketing )
+            if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
+                exp_n_new_files *= 2;
+            }
+        }
+        else if( is_focus_bracketing ) {
             exp_n_new_files = n_focus_bracketing_images;
+            if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
+                exp_n_new_files *= 2;
+            }
+        }
         else if( is_fast_burst )
             exp_n_new_files = n_fast_burst_images;
-        else
+        else {
             exp_n_new_files = 1;
+            if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
+                exp_n_new_files *= 2;
+            }
+        }
         Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
         return exp_n_new_files;
     }
@@ -3020,7 +3030,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }
                 else if( filename.endsWith(".dng") ) {
                     assertTrue(is_raw);
-                    assertTrue(filename_dng == null);
+                    assertTrue(hdr_save_expo || is_expo || is_focus_bracketing || filename_dng == null);
                     filename_dng = filename;
                 }
                 else {
@@ -3028,13 +3038,22 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }
             }
         }
-        assertTrue( (filename_jpeg == null) == (is_raw && mActivity.getApplicationInterface().isRawOnly()) );
+        assertTrue( (filename_jpeg == null) == (is_raw && mActivity.getApplicationInterface().isRawOnly() && !is_hdr) );
         assertTrue( (filename_dng != null) == is_raw );
         if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
             // check we have same filenames (ignoring extensions)
-            String filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-4);
+            // if HDR, then we should exclude the "_HDR" vs "_x" of the base filenames
+            String filename_base_jpeg;
+            String filename_base_dng;
+            if( is_hdr ) {
+                filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-7);
+                filename_base_dng = filename_dng.substring(0, filename_dng.length()-5);
+            }
+            else {
+                filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-4);
+                filename_base_dng = filename_dng.substring(0, filename_dng.length()-4);
+            }
             Log.d(TAG, "filename_base_jpeg: " + filename_base_jpeg);
-            String filename_base_dng = filename_dng.substring(0, filename_dng.length()-4);
             Log.d(TAG, "filename_base_dng: " + filename_base_dng);
             assertTrue( filename_base_jpeg.equals(filename_base_dng) );
         }
@@ -3475,6 +3494,77 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else {
             subTestTakeVideoSnapshot();
         }
+    }
+
+    /** Test taking photo with JPEG + DNG (RAW) in Expo photo mode.
+     */
+    public void testTakePhotoRawExpo() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoRawExpo");
+        setToDefault();
+
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+        editor.apply();
+        updateForSettings();
+
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
+        if( mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        }
+    }
+
+    /** Test taking photo with JPEG + DNG (RAW) in Expo photo mode, with test_wait_capture_result.
+     */
+    public void testTakePhotoRawExpoWaitCaptureResult() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoRawExpoWaitCaptureResult");
+        setToDefault();
+
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+        editor.apply();
+        updateForSettings();
+
+        mPreview.getCameraController().test_wait_capture_result = true;
+        subTestTakePhoto(false, false, true, true, false, false, true, true);
+        if( mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        }
+    }
+
+    /** Test taking photo with DNG (RAW) only in Expo photo mode.
+     */
+    public void testTakePhotoRawOnlyExpo() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoRawOnlyExpo");
+        setToDefault();
+
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_only");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+        editor.apply();
+        updateForSettings();
+
+        // test modes not supported in RAW only mode
+        assertFalse(mActivity.supportsAutoStabilise());
+        assertFalse(mActivity.supportsDRO());
+
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
     }
 
     public void testTakePhotoAutoStabilise() throws InterruptedException {
@@ -9384,6 +9474,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /** Tests taking photo in HDR photo mode with saving base expo images.
+     */
     public void testTakePhotoHDRSaveExpo() throws InterruptedException {
         Log.d(TAG, "testTakePhotoHDRSaveExpo");
 
@@ -9402,6 +9494,66 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
         subTestTakePhoto(false, false, true, true, false, false, false, false);
+        if( mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        }
+    }
+
+    /** Tests taking photo in HDR photo mode with saving base expo images, with RAW.
+     */
+    public void testTakePhotoHDRSaveExpoRaw() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoHDRSaveExpoRaw");
+
+        setToDefault();
+
+        if( !mActivity.supportsHDR() ) {
+            return;
+        }
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+        editor.putBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
+        if( mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+            assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        }
+    }
+
+    /** Tests taking photo in HDR photo mode with saving base expo images, with RAW only.
+     */
+    public void testTakePhotoHDRSaveExpoRawOnly() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoHDRSaveExpoRawOnly");
+
+        setToDefault();
+
+        if( !mActivity.supportsHDR() ) {
+            return;
+        }
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_only");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+        editor.putBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
         if( mPreview.usingCamera2API() ) {
             Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
             assertTrue(mPreview.getCameraController().test_capture_results == 1);
@@ -9765,6 +9917,106 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
             assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
         }
+    }
+
+    /** Tests taking a photo with RAW and focus bracketing mode.
+     */
+    public void testTakePhotoRawFocusBracketing() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoRawFocusBracketing");
+
+        setToDefault();
+
+        if( !mActivity.supportsFocusBracketing() ) {
+            return;
+        }
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+
+        SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        assertTrue(focusSeekBar.getVisibility() == View.GONE);
+        SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+        assertTrue(focusTargetSeekBar.getVisibility() == View.GONE);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+        editor.apply();
+        updateForSettings();
+
+        setUpFocusBracketing();
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
+
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == 1);
+
+        float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+        assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+        float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+        assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
+    }
+
+    /** Tests taking a photo with RAW only and focus bracketing mode.
+     */
+    public void testTakePhotoRawOnlyFocusBracketing() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoRawOnlyFocusBracketing");
+
+        setToDefault();
+
+        if( !mActivity.supportsFocusBracketing() ) {
+            return;
+        }
+        if( !mPreview.supportsRaw() ) {
+            return;
+        }
+
+        SeekBar focusSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        assertTrue(focusSeekBar.getVisibility() == View.GONE);
+        SeekBar focusTargetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+        assertTrue(focusTargetSeekBar.getVisibility() == View.GONE);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_only");
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+        editor.apply();
+        updateForSettings();
+
+        setUpFocusBracketing();
+
+        float initial_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "initial_focus_distance: " + initial_focus_distance);
+        CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+        CaptureRequest.Builder previewBuilder = camera_controller2.testGetPreviewBuilder();
+        // need to use LENS_FOCUS_DISTANCE rather than mPreview.getCameraController().getFocusDistance(), as the latter
+        // will always return the source focus distance, even if the preview was set to something else
+        float actual_initial_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        assertEquals(initial_focus_distance, actual_initial_focus_distance, 1.0e-5f);
+
+        subTestTakePhoto(false, false, true, true, false, false, true, false);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == 1);
+
+        float new_focus_distance = mPreview.getCameraController().getFocusDistance();
+        Log.d(TAG, "new_focus_distance: " + new_focus_distance);
+        assertEquals(initial_focus_distance, new_focus_distance, 1.0e-5f);
+
+        float new_actual_focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+        Log.d(TAG, "new_actual_focus_distance: " + new_actual_focus_distance);
+        assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
     }
 
     /** Tests NR photo mode.

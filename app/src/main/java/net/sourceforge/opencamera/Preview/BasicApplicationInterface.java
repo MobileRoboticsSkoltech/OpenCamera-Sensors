@@ -279,7 +279,7 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 	}
 
 	@Override
-	public boolean imageQueueWouldBlock(boolean has_raw, int n_jpegs) {
+	public boolean imageQueueWouldBlock(int n_raw, int n_jpegs) {
 		return false;
 	}
 
@@ -605,6 +605,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
 
 	@Override
 	public boolean onRawPictureTaken(RawImage raw_image, Date current_date) {
+		return false;
+	}
+
+	@Override
+	public boolean onRawBurstPictureTaken(List<RawImage> raw_images, Date current_date) {
 		return false;
 	}
 

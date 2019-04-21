@@ -93,7 +93,7 @@ public interface ApplicationInterface {
 	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
 	double getCalibratedLevelAngle(); // set to non-zero to calibrate the accelerometer used for the level angles
 	boolean canTakeNewPhoto(); // whether taking new photos is allowed (e.g., can return false if queue for processing images would become full)
-	boolean imageQueueWouldBlock(boolean has_raw, int n_jpegs); // called during some burst operations, whether we can allow taking the supplied number of extra photos
+	boolean imageQueueWouldBlock(int n_raw, int n_jpegs); // called during some burst operations, whether we can allow taking the supplied number of extra photos
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref(boolean is_target_distance);
@@ -184,6 +184,7 @@ public interface ApplicationInterface {
 	boolean onPictureTaken(byte [] data, Date current_date);
 	boolean onBurstPictureTaken(List<byte []> images, Date current_date);
 	boolean onRawPictureTaken(RawImage raw_image, Date current_date);
+	boolean onRawBurstPictureTaken(List<RawImage> raw_images, Date current_date);
 	void onCaptureStarted(); // called immediately before we start capturing the picture
 	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
