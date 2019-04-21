@@ -1742,7 +1742,7 @@ public class DrawPreview {
 					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
 					int pixels_offset_y = 3 * text_y; // avoid overwriting the zoom, and also allow a bit extra space
-					int n_images_to_save = applicationInterface.getImageSaver().getNImagesToSave();
+					int n_images_to_save = applicationInterface.getImageSaver().getNRealImagesToSave();
 					String string = getContext().getResources().getString(R.string.processing) + " (" + n_images_to_save + " " + getContext().getResources().getString(R.string.remaining) + ")";
 					applicationInterface.drawTextWithBackground(canvas, p, string, Color.LTGRAY, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 				}

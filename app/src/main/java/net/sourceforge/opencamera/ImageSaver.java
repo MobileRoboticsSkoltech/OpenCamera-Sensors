@@ -72,9 +72,12 @@ public class ImageSaver extends Thread {
 	 * Therefore we should always have n_images_to_save >= queue.size().
 	 * Also note, main_activity.imageQueueChanged() should be called on UI thread after n_images_to_save increases or
 	 * decreases.
-	 * Access to n_images_to_save should always be synchronized to this (i.e., the ImageSaver class)
+	 * Access to n_images_to_save should always be synchronized to this (i.e., the ImageSaver class).
+	 * n_real_images_to_save excludes "Dummy" requests, and should also be synchronized, and modified
+	 * at the same time as n_images_to_save.
 	 */
 	private int n_images_to_save = 0;
+	private int n_real_images_to_save = 0;
 	private final int queue_capacity;
 	private final BlockingQueue<Request> queue;
 	private final static int queue_cost_jpeg_c = 1; // also covers WEBP
@@ -378,8 +381,19 @@ public class ImageSaver extends Thread {
 		return max_dng;
 	}
 
+	/** Returns the number of images to save, weighted by their cost (e.g., so a single RAW image
+	 *  will be counted as multiple images).
+	 */
 	public synchronized int getNImagesToSave() {
 		return n_images_to_save;
+	}
+
+	/** Returns the number of images to save (e.g., so a single RAW image will only be counted as
+	 *  one image, unlike getNImagesToSave()).
+
+	 */
+	public synchronized int getNRealImagesToSave() {
+		return n_real_images_to_save;
 	}
 
 	void onDestroy() {
@@ -437,10 +451,16 @@ public class ImageSaver extends Thread {
 				}
 				synchronized( this ) {
 					n_images_to_save--;
+					if( request.type != Request.Type.DUMMY )
+						n_real_images_to_save--;
 					if( MyDebug.LOG )
 						Log.d(TAG, "ImageSaver thread processed new request from queue, images to save is now: " + n_images_to_save);
 					if( MyDebug.LOG && n_images_to_save < 0 ) {
 						Log.e(TAG, "images to save has become negative");
+						throw new RuntimeException();
+					}
+					else if( MyDebug.LOG && n_real_images_to_save < 0 ) {
+						Log.e(TAG, "real images to save has become negative");
 						throw new RuntimeException();
 					}
 					notifyAll();
@@ -752,6 +772,8 @@ public class ImageSaver extends Thread {
 					// but we synchronize modification to avoid risk of problems related to compiler optimisation (local caching or reordering)
 					// also see FindBugs warning due to inconsistent synchronisation
 					n_images_to_save++; // increment before adding to the queue, just to make sure the main thread doesn't think we're all done
+					if( request.type != Request.Type.DUMMY )
+						n_real_images_to_save++;
 
 					main_activity.runOnUiThread(new Runnable() {
 						public void run() {
@@ -769,6 +791,7 @@ public class ImageSaver extends Thread {
 					synchronized( this ) { // keep FindBugs happy
 						Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
 						Log.d(TAG, "images still to save is now: " + n_images_to_save);
+						Log.d(TAG, "real images still to save is now: " + n_real_images_to_save);
 					}
 				}
 				done = true;
