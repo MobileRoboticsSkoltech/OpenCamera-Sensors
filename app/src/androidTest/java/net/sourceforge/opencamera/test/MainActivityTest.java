@@ -14837,7 +14837,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "max_offset_error_x: " + max_offset_error_x);
         Log.d(TAG, "max_offset_error_y: " + max_offset_error_y);*/
 
-        int offset_x = (bitmap_width - slice_width)/2;
+        final int offset_x = (bitmap_width - slice_width)/2;
         //final int blend_hwidth = 0;
         final int blend_hwidth = bitmap_width/20;
         final int align_hwidth = bitmap_width/10;
@@ -15130,8 +15130,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
 
+            Bitmap projected_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+            {
+                // project
+                Canvas projected_canvas = new Canvas(projected_bitmap);
+                for(int x=0;x<bitmap_width;x++) {
+                    float dx = (float)(x - (bitmap_width/2));
+                    // cylindrical projection:
+                    float theta = (float)(dx*camera_angle)/(float)bitmap_width;
+                    float new_height = bitmap_height * (float)Math.cos(theta);
+
+                    int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
+                    int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+
+                    src_rect.set(x, 0, x+1, bitmap_height);
+                    dst_rect.set(x, dst_y0, x+1, dst_y1);
+
+                    projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                }
+            }
+
             for(int x=start_x;x<stop_x;x++) {
-                float dx = (float)(x - (slice_width/2));
+                /*float dx = (float)(x - (slice_width/2));
                 dx += align_x;
 
                 // rectangular projection:
@@ -15148,6 +15168,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
                 src_rect.offset(align_x, align_y);
                 dst_rect.set(offset_x + dst_offset_x + x, dst_y0, offset_x + dst_offset_x + x+1, dst_y1);
+                */
+
+                src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
+                src_rect.offset(align_x, align_y);
+                dst_rect.set(offset_x + dst_offset_x + x, 0, offset_x + dst_offset_x + x+1, bitmap_height);
 
                 int blend_alpha = 255;
                 if( i > 0 && x < blend_hwidth ) {
@@ -15170,7 +15195,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }
                 p.setAlpha(blend_alpha);
 
-                canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                //canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
                 p.setAlpha(255); // reset!
             }
             dst_offset_x += slice_width;
@@ -15179,6 +15205,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
             Log.d(TAG, "    dst_offset_x is now: " + dst_offset_x);
 
+            projected_bitmap.recycle();
             /*if( rotated_bitmap != null ) {
                 rotated_bitmap.recycle();
             }*/
