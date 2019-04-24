@@ -2064,9 +2064,8 @@ public class HDRProcessor {
 			Log.d(TAG, "### found: " + actual_matches.size() + " matches");
 
 		// but now choose only best actual matches
-        /*
 		//int n_matches = (int)(actual_matches.size()*0.1)+1;
-		int n_matches = (int)(actual_matches.size()*0.9)+1;
+		int n_matches = (int)(actual_matches.size()*0.7)+1;
 		actual_matches.subList(n_matches,actual_matches.size()).clear();
         if( MyDebug.LOG )
             Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
@@ -2078,7 +2077,7 @@ public class HDRProcessor {
             has_matched1[match.index1] = true;
             if( MyDebug.LOG )
 				Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
-		}*/
+		}
 
 		final boolean use_ransac = true;
 		//final boolean use_ransac = false;
