@@ -14771,7 +14771,43 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
     }
 
-    public void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float gyro_tol_degrees) throws IOException, InterruptedException {
+    private Bitmap blend_panorama(Bitmap lhs, Bitmap rhs) {
+        int width = lhs.getWidth();
+        int height = lhs.getHeight();
+        if( width != rhs.getWidth() ) {
+            Log.e(TAG, "bitmaps have different widths");
+            throw new RuntimeException();
+        }
+        else if( height != rhs.getHeight() ) {
+            Log.e(TAG, "bitmaps have different heights");
+            throw new RuntimeException();
+        }
+        Paint p = new Paint();
+        Rect rect = new Rect();
+        Bitmap blended_bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas blended_canvas = new Canvas(blended_bitmap);
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        for(int x=0;x<width;x++) {
+            rect.set(x, 0, x+1, height);
+
+            // right hand blend
+            // if x=0: frac=1
+            // if x=width-1: frac=0
+            float frac = (width-1.0f-x)/(width-1.0f);
+            p.setAlpha((int)(255.0f*frac));
+            blended_canvas.drawBitmap(rhs, rect, rect, p);
+
+            // left hand blend
+            // if x=0: frac=0
+            // if x=width-1: frac=1
+            frac = ((float)x)/(width-1.0f);
+            p.setAlpha((int)(255.0f*frac));
+            blended_canvas.drawBitmap(lhs, rect, rect, p);
+        }
+        return blended_bitmap;
+    }
+
+    private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float gyro_tol_degrees) throws IOException, InterruptedException {
         Log.d(TAG, "subTestPanorama");
 
         // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
@@ -14858,7 +14894,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Rect src_rect = new Rect();
         Rect dst_rect = new Rect();
         Paint p = new Paint();
-        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         int align_x = 0, align_y = 0;
         int dst_offset_x = 0;
         for(int i=0;i<bitmaps.size();i++) {
@@ -15115,18 +15150,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 bitmap = rotated_bitmap;
             }*/
 
-            int start_x = -blend_hwidth;
-            int stop_x = slice_width+blend_hwidth;
-            if( i == 0 )
-                start_x = -offset_x;
-            if( i == bitmaps.size()-1 )
-                stop_x = slice_width+offset_x;
-            if( !x_offsets_cumulative ) {
-                stop_x -= align_x;
-            }
-            Log.d(TAG, "    start_x: " + start_x);
-            Log.d(TAG, "    stop_x: " + stop_x);
-
             float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
 
@@ -15136,6 +15159,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Canvas projected_canvas = new Canvas(projected_bitmap);
                 for(int x=0;x<bitmap_width;x++) {
                     float dx = (float)(x - (bitmap_width/2));
+                    // rectangular projection:
+                    //float new_height = bitmap_height * (float)(h / (h * Math.cos(alpha) - dx * Math.sin(alpha)));
                     // cylindrical projection:
                     float theta = (float)(dx*camera_angle)/(float)bitmap_width;
                     float new_height = bitmap_height * (float)Math.cos(theta);
@@ -15150,26 +15175,84 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }
             }
 
-            for(int x=start_x;x<stop_x;x++) {
-                /*float dx = (float)(x - (slice_width/2));
-                dx += align_x;
+            if( i > 0 && blend_hwidth > 0 ) {
+                // first blend right hand side of previous image with left hand side of new image
+                Bitmap rhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+                //Bitmap lhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+                Bitmap lhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+                {
+                    Canvas lhs_canvas = new Canvas(lhs);
+                    src_rect.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
+                    src_rect.offset(align_x, align_y);
+                    dst_rect.set(0, 0, 2*blend_hwidth, bitmap_height);
+                    lhs_canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
+                }
+                Bitmap blended_bitmap = blend_panorama(lhs, rhs);
+                /*Bitmap blended_bitmap = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+                Canvas blended_canvas = new Canvas(blended_bitmap);
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+                for(int x=0;x<2*blend_hwidth;x++) {
+                    src_rect.set(x, 0, x+1, bitmap_height);
 
-                // rectangular projection:
-                //float new_height = bitmap_height * (float)(h / (h * Math.cos(alpha) - dx * Math.sin(alpha)));
-                // cylindrical projection:
-                float theta = (float)(dx*camera_angle)/(float)bitmap_width;
-                float new_height = bitmap_height * (float)Math.cos(theta);
-                // no projection:
-                //float new_height = bitmap_height;
+                    // right hand blend
+                    // if x=0: frac=1
+                    // if x=2*blend_width-1: frac=0
+                    float frac = (2.0f*blend_hwidth-1.0f-x)/(2.0f*blend_hwidth-1.0f);
+                    p.setAlpha((int)(255.0f*frac));
+                    blended_canvas.drawBitmap(rhs, src_rect, src_rect, p);
 
-                int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
-                int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
-
-                src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
-                src_rect.offset(align_x, align_y);
-                dst_rect.set(offset_x + dst_offset_x + x, dst_y0, offset_x + dst_offset_x + x+1, dst_y1);
+                    // left hand blend
+                    // if x=0: frac=0
+                    // if x=2*blend_width-1: frac=1
+                    frac = ((float)x)/(2.0f*blend_hwidth-1.0f);
+                    p.setAlpha((int)(255.0f*frac));
+                    blended_canvas.drawBitmap(lhs, src_rect, src_rect, p);
+                }
+                p.setAlpha(255); // reset
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
                 */
 
+                // now draw the blended region
+                canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth, 0, p);
+
+                rhs.recycle();
+                lhs.recycle();
+                blended_bitmap.recycle();
+            }
+
+            int start_x = blend_hwidth;
+            int stop_x = slice_width+blend_hwidth;
+            if( i == 0 )
+                start_x = -offset_x;
+            if( i == bitmaps.size()-1 )
+                stop_x = slice_width+offset_x;
+            if( !x_offsets_cumulative ) {
+                stop_x -= align_x;
+            }
+            Log.d(TAG, "    start_x: " + start_x);
+            Log.d(TAG, "    stop_x: " + stop_x);
+
+            // draw rest of this image
+            src_rect.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
+            src_rect.offset(align_x, align_y);
+            dst_rect.set(offset_x + dst_offset_x + start_x, 0, offset_x + dst_offset_x + stop_x, bitmap_height);
+            canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
+
+            /*
+            int start_x = -blend_hwidth;
+            int stop_x = slice_width+blend_hwidth;
+            if( i == 0 )
+                start_x = -offset_x;
+            if( i == bitmaps.size()-1 )
+                stop_x = slice_width+offset_x;
+            if( !x_offsets_cumulative ) {
+                stop_x -= align_x;
+            }
+            Log.d(TAG, "    start_x: " + start_x);
+            Log.d(TAG, "    stop_x: " + stop_x);
+
+            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            for(int x=start_x;x<stop_x;x++) {
                 src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
                 src_rect.offset(align_x, align_y);
                 dst_rect.set(offset_x + dst_offset_x + x, 0, offset_x + dst_offset_x + x+1, bitmap_height);
@@ -15197,8 +15280,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                 //canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
                 canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
-                p.setAlpha(255); // reset!
             }
+            p.setAlpha(255); // reset
+            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
+            */
+
             dst_offset_x += slice_width;
             if( !x_offsets_cumulative ) {
                 dst_offset_x -= align_x;
