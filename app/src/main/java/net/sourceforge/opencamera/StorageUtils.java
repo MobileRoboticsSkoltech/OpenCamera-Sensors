@@ -23,6 +23,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -911,4 +912,44 @@ public class StorageUtils {
 			Log.d(TAG, "return latest media: " + media);
 		return media;
     }
+
+	/** Return free memory in MB.
+	 */
+	public long freeMemory() { // return free memory in MB
+		if( MyDebug.LOG )
+			Log.d(TAG, "freeMemory");
+		try {
+			File folder = getImageFolder();
+			if( folder == null ) {
+				throw new IllegalArgumentException(); // so that we fall onto the backup
+			}
+			StatFs statFs = new StatFs(folder.getAbsolutePath());
+			// cast to long to avoid overflow!
+			long blocks = statFs.getAvailableBlocks();
+			long size = statFs.getBlockSize();
+			return (blocks*size) / 1048576;
+		}
+		catch(IllegalArgumentException e) {
+			// this can happen if folder doesn't exist, or don't have read access
+			// if the save folder is a subfolder of DCIM, we can just use that instead
+			try {
+				if( !isUsingSAF() ) {
+					// getSaveLocation() only valid if !isUsingSAF()
+					String folder_name = getSaveLocation();
+					if( !folder_name.startsWith("/") ) {
+						File folder = getBaseFolder();
+						StatFs statFs = new StatFs(folder.getAbsolutePath());
+						// cast to long to avoid overflow!
+						long blocks = statFs.getAvailableBlocks();
+						long size = statFs.getBlockSize();
+						return (blocks*size) / 1048576;
+					}
+				}
+			}
+			catch(IllegalArgumentException e2) {
+				// just in case
+			}
+		}
+		return -1;
+	}
 }

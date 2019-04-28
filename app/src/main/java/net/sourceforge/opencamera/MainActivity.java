@@ -43,7 +43,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.animation.ArgbEvaluator;
@@ -4098,47 +4097,6 @@ public class MainActivity extends Activity {
     	this.supports_force_video_4k = false;
     }
 
-    /** Return free memory in MB.
-     */
-    @SuppressWarnings("deprecation")
-	public long freeMemory() { // return free memory in MB
-		if( MyDebug.LOG )
-			Log.d(TAG, "freeMemory");
-    	try {
-    		File folder = applicationInterface.getStorageUtils().getImageFolder();
-    		if( folder == null ) {
-    			throw new IllegalArgumentException(); // so that we fall onto the backup
-    		}
-	        StatFs statFs = new StatFs(folder.getAbsolutePath());
-	        // cast to long to avoid overflow!
-	        long blocks = statFs.getAvailableBlocks();
-	        long size = statFs.getBlockSize();
-	        return (blocks*size) / 1048576;
-    	}
-    	catch(IllegalArgumentException e) {
-    		// this can happen if folder doesn't exist, or don't have read access
-    		// if the save folder is a subfolder of DCIM, we can just use that instead
-        	try {
-        		if( !applicationInterface.getStorageUtils().isUsingSAF() ) {
-        			// StorageUtils.getSaveLocation() only valid if !isUsingSAF()
-            		String folder_name = applicationInterface.getStorageUtils().getSaveLocation();
-            		if( !folder_name.startsWith("/") ) {
-            			File folder = StorageUtils.getBaseFolder();
-            	        StatFs statFs = new StatFs(folder.getAbsolutePath());
-            	        // cast to long to avoid overflow!
-            	        long blocks = statFs.getAvailableBlocks();
-            	        long size = statFs.getBlockSize();
-            	        return (blocks*size) / 1048576;
-            		}
-        		}
-        	}
-        	catch(IllegalArgumentException e2) {
-        		// just in case
-        	}
-    	}
-		return -1;
-    }
-    
     public static String getDonateLink() {
     	return "https://play.google.com/store/apps/details?id=harman.mark.donation";
     }

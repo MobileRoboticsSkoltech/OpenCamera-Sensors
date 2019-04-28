@@ -745,7 +745,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     		if( is_internal ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "using internal storage");
-        		long free_memory = main_activity.freeMemory() * 1024 * 1024;
+        		long free_memory = storageUtils.freeMemory() * 1024 * 1024;
         		final long min_free_memory = 50000000; // how much free space to leave after video
         		// min_free_filesize is the minimum value to set for max file size:
         		//   - no point trying to create a really short video

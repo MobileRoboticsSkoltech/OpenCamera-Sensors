@@ -982,7 +982,7 @@ public class DrawPreview {
 		if( camera_controller != null && show_free_memory_pref ) {
 			if( last_free_memory_time == 0 || time_ms > last_free_memory_time + 10000 ) {
 				// don't call this too often, for UI performance
-				long free_mb = main_activity.freeMemory();
+				long free_mb = main_activity.getStorageUtils().freeMemory();
 				if( free_mb >= 0 ) {
 					float new_free_memory_gb = free_mb/1024.0f;
 					if( MyDebug.LOG ) {
