@@ -142,7 +142,8 @@ public class DrawPreview {
 
 	private Bitmap location_bitmap;
 	private Bitmap location_off_bitmap;
-	private Bitmap raw_bitmap;
+	private Bitmap raw_jpeg_bitmap;
+	private Bitmap raw_only_bitmap;
 	private Bitmap auto_stabilise_bitmap;
 	private Bitmap dro_bitmap;
 	private Bitmap hdr_bitmap;
@@ -216,7 +217,8 @@ public class DrawPreview {
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_fixed_white_48dp);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_off_white_48dp);
-		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
+		raw_jpeg_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
+		raw_only_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_only_icon);
 		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
 		dro_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.dro_icon);
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
@@ -249,9 +251,13 @@ public class DrawPreview {
 			location_off_bitmap.recycle();
 			location_off_bitmap = null;
 		}
-		if( raw_bitmap != null ) {
-			raw_bitmap.recycle();
-			raw_bitmap = null;
+		if( raw_jpeg_bitmap != null ) {
+			raw_jpeg_bitmap.recycle();
+			raw_jpeg_bitmap = null;
+		}
+		if( raw_only_bitmap != null ) {
+			raw_only_bitmap.recycle();
+			raw_only_bitmap = null;
 		}
 		if( auto_stabilise_bitmap != null ) {
 			auto_stabilise_bitmap.recycle();
@@ -1145,7 +1151,7 @@ public class DrawPreview {
 				p.setAlpha(64);
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
-				canvas.drawBitmap(raw_bitmap, null, icon_dest, p);
+				canvas.drawBitmap(is_raw_only_pref ? raw_only_bitmap : raw_jpeg_bitmap, null, icon_dest, p);
 
 				if( ui_rotation == 180 ) {
 					location_x2 -= icon_size + flash_padding;
