@@ -176,9 +176,6 @@ public class MainUI {
 			debug_time = System.currentTimeMillis();
 		}
 
-		// reset:
-		top_margin = 0;
-
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     	// we cache the preference_ui_placement to save having to check it in the draw() method
 		this.ui_placement = computeUIPlacement();
@@ -253,6 +250,9 @@ public class MainUI {
 
 		if( !popup_container_only )
 		{
+			// reset:
+			top_margin = 0;
+
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
