@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +24,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
@@ -32,6 +34,9 @@ import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video.VideoColumns;
 import android.support.v4.content.ContextCompat;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStatVfs;
 import android.util.Log;
 
 /** Provides access to the filesystem. Supports both standard and Storage
@@ -918,6 +923,39 @@ public class StorageUtils {
 	public long freeMemory() { // return free memory in MB
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeMemory");
+		if( applicationInterface.getStorageUtils().isUsingSAF() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
+			if( MyDebug.LOG )
+				Log.d(TAG, "treeUri: " + treeUri);
+			Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+			if( MyDebug.LOG )
+				Log.d(TAG, "docUri: " + docUri);
+			try {
+				ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
+				if( pfd == null ) { // just in case
+					Log.e(TAG, "pfd is null!");
+					throw new FileNotFoundException();
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "read direct from SAF uri");
+				StructStatVfs statFs = Os.fstatvfs(pfd.getFileDescriptor());
+				long blocks = statFs.f_bavail;
+				long size = statFs.f_bsize;
+				return (blocks*size) / 1048576;
+			}
+			catch(IllegalArgumentException e) {
+				// IllegalArgumentException can be thrown by DocumentsContract.getTreeDocumentId or getContentResolver().openFileDescriptor
+				e.printStackTrace();
+			}
+			catch(FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			catch(ErrnoException e) {
+				e.printStackTrace();
+			}
+			// if we fail for SAF, don't fall back to the methods below, as this may be incorrect (especially for external SD card)
+			return -1;
+		}
 		try {
 			File folder = getImageFolder();
 			if( folder == null ) {

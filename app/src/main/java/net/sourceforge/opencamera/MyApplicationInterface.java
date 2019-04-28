@@ -719,14 +719,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		video_max_filesize.max_filesize = getVideoMaxFileSizeUserPref();
 		video_max_filesize.auto_restart = getVideoRestartMaxFileSizeUserPref();
 		
-		/* Also if using internal memory without storage access framework, try to set the max filesize so we don't run out of space.
-		   This is the only way to avoid the problem where videos become corrupt when run out of space - MediaRecorder doesn't stop on
-		   its own, and no error is given!
-		   If using SD card, it's not reliable to get the free storage (see https://sourceforge.net/p/opencamera/tickets/153/ ).
-		   If using storage access framework, in theory we could check if this was on internal storage, but risk of getting it wrong...
-		   so seems safest to leave (the main reason for using SAF is for SD cards, anyway).
+		/* Try to set the max filesize so we don't run out of space.
+		   If using SD card without storage access framework, it's not reliable to get the free storage
+		   (see https://sourceforge.net/p/opencamera/tickets/153/ ).
+		   If using Storage Access Framework, getting the available space seems to be reliable for
+		   internal storage or external SD card.
 		   */
-		if( !storageUtils.isUsingSAF() ) {
+		boolean set_max_filesize;
+		if( storageUtils.isUsingSAF() ) {
+			set_max_filesize = true;
+		}
+		else {
     		String folder_name = storageUtils.getSaveLocation();
     		if( MyDebug.LOG )
     			Log.d(TAG, "saving to: " + folder_name);
@@ -742,40 +745,51 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     			if( folder_name.startsWith( storage.getAbsolutePath() ) )
     				is_internal = true;
     		}
-    		if( is_internal ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "using internal storage");
-        		long free_memory = storageUtils.freeMemory() * 1024 * 1024;
-        		final long min_free_memory = 50000000; // how much free space to leave after video
-        		// min_free_filesize is the minimum value to set for max file size:
-        		//   - no point trying to create a really short video
-        		//   - too short videos can end up being corrupted
-        		//   - also with auto-restart, if this is too small we'll end up repeatedly restarting and creating shorter and shorter videos
-        		final long min_free_filesize = 20000000;
-        		long available_memory = free_memory - min_free_memory;
-        		if( test_set_available_memory ) {
-        			available_memory = test_available_memory;
-        		}
-        		if( MyDebug.LOG ) {
-        			Log.d(TAG, "free_memory: " + free_memory);
-        			Log.d(TAG, "available_memory: " + available_memory);
-        		}
-        		if( available_memory > min_free_filesize ) {
-        			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available_memory ) {
-        				video_max_filesize.max_filesize = available_memory;
-        				// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit beforehand, if there's a device max limit set (typically ~2GB)
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
-        			}
-        		}
-        		else {
-    				if( MyDebug.LOG )
-    					Log.e(TAG, "not enough free storage to record video");
-        			throw new NoFreeStorageException();
-        		}
-    		}
+			if( MyDebug.LOG )
+				Log.d(TAG, "using internal storage?" + is_internal);
+    		set_max_filesize = is_internal;
 		}
-		
+		if( set_max_filesize ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "try setting max filesize");
+			long free_memory = storageUtils.freeMemory();
+			if( free_memory >= 0 ) {
+				free_memory = free_memory * 1024 * 1024;
+
+				final long min_free_memory = 50000000; // how much free space to leave after video
+				// min_free_filesize is the minimum value to set for max file size:
+				//   - no point trying to create a really short video
+				//   - too short videos can end up being corrupted
+				//   - also with auto-restart, if this is too small we'll end up repeatedly restarting and creating shorter and shorter videos
+				final long min_free_filesize = 20000000;
+				long available_memory = free_memory - min_free_memory;
+				if( test_set_available_memory ) {
+					available_memory = test_available_memory;
+				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "free_memory: " + free_memory);
+					Log.d(TAG, "available_memory: " + available_memory);
+				}
+				if( available_memory > min_free_filesize ) {
+					if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available_memory ) {
+						video_max_filesize.max_filesize = available_memory;
+						// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit beforehand, if there's a device max limit set (typically ~2GB)
+						if( MyDebug.LOG )
+							Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
+					}
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.e(TAG, "not enough free storage to record video");
+					throw new NoFreeStorageException();
+				}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't determine remaining free space");
+			}
+		}
+
 		return video_max_filesize;
 	}
 
