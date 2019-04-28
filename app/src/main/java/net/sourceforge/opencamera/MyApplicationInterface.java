@@ -1314,7 +1314,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		}
     }
 
-	private boolean photoModeSupportsRaw(PhotoMode photo_mode) {
+	/** Returns whether RAW is currently allowed, even if RAW is enabled in the preference (RAW
+	 *  isn't allowed for some photo modes, or in video mode, or when called from an intent).
+	 *  Note that this doesn't check whether RAW is supported by the camera.
+	 */
+	public boolean isRawAllowed(PhotoMode photo_mode) {
+		if( isImageCaptureIntent() )
+			return false;
+		if( main_activity.getPreview().isVideo() )
+			return false; // video snapshot mode
 		//return photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO;
 		if( photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO ) {
 			return true;
@@ -1343,12 +1351,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	 */
 	@Override
 	public RawPref getRawPref() {
-    	if( isImageCaptureIntent() )
-    		return RawPref.RAWPREF_JPEG_ONLY;
-		if( main_activity.getPreview().isVideo() )
-    		return RawPref.RAWPREF_JPEG_ONLY; // video snapshot mode
     	PhotoMode photo_mode = getPhotoMode();
-    	if( photoModeSupportsRaw(photo_mode) ) {
+    	if( isRawAllowed(photo_mode) ) {
 			switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
 				case "preference_raw_yes":
 				case "preference_raw_only":
@@ -1369,11 +1373,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	 *  without causing an infinite loop!
 	 */
 	boolean isRawOnly(PhotoMode photo_mode) {
-    	if( isImageCaptureIntent() )
-    		return false;
-		if( main_activity.getPreview().isVideo() )
-    		return false; // video snapshot mode
-    	if( photoModeSupportsRaw(photo_mode) ) {
+    	if( isRawAllowed(photo_mode) ) {
 			switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
 				case "preference_raw_only":
 					return true;
