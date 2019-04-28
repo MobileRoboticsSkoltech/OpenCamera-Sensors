@@ -1508,6 +1508,37 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void clickedCycleRaw(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedCycleRaw");
+
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String new_value = null;
+		switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
+			case "preference_raw_no":
+				new_value = "preference_raw_yes";
+				break;
+			case "preference_raw_yes":
+				new_value = "preference_raw_only";
+				break;
+			case "preference_raw_only":
+				new_value = "preference_raw_no";
+				break;
+			default:
+				Log.e(TAG, "unrecognised raw preference");
+				break;
+		}
+		if( new_value != null ) {
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(PreferenceKeys.RawPreferenceKey, new_value);
+			editor.apply();
+
+			mainUI.updateCycleRawIcon();
+			applicationInterface.getDrawPreview().updateSettings();
+			preview.reopenCamera(); // needed for RAW options to take effect
+		}
+	}
+
 	public void clickedStoreLocation(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedStoreLocation");
@@ -1779,6 +1810,14 @@ public class MainActivity extends Activity {
 
 		mainUI.setTakePhotoIcon();
 	    mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
+
+		// ensure icons invisible if they're affected by being in video mode or not
+		// (if enabling them, we'll make the icon visible later on)
+		if( !mainUI.showCycleRawIcon() ) {
+			View button = findViewById(R.id.cycle_raw);
+			button.setVisibility(View.GONE);
+		}
+
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(true);
 		}
@@ -2293,6 +2332,10 @@ public class MainActivity extends Activity {
 		}
 		if( !mainUI.showWhiteBalanceLockIcon() ) {
 			View button = findViewById(R.id.white_balance_lock);
+			button.setVisibility(View.GONE);
+		}
+		if( !mainUI.showCycleRawIcon() ) {
+			View button = findViewById(R.id.cycle_raw);
 			button.setVisibility(View.GONE);
 		}
 		if( !mainUI.showStoreLocationIcon() ) {

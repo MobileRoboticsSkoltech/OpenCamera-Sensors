@@ -230,6 +230,21 @@
         />
 
     <ImageButton
+        android:id="@+id/cycle_raw"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/cycle_raw"
+        android:src="@drawable/raw_off_icon"
+        android:background="@color/icons_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedCycleRaw"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/store_location"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"

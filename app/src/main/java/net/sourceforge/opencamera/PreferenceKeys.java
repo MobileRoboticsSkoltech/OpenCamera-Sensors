@@ -239,6 +239,8 @@ public class PreferenceKeys {
 
 	public static final String ShowStoreLocationPreferenceKey = "preference_show_store_location";
 
+	public static final String ShowCycleRawPreferenceKey = "preference_show_cycle_raw";
+
 	public static final String ShowWhiteBalanceLockPreferenceKey = "preference_show_white_balance_lock";
 
 	public static final String ShowExposureLockPreferenceKey = "preference_show_exposure_lock";

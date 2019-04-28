@@ -4,6 +4,7 @@ import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.R;
 
@@ -293,6 +294,7 @@ public class MainUI {
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
 			buttons_permanent.add(main_activity.findViewById(R.id.white_balance_lock));
+			buttons_permanent.add(main_activity.findViewById(R.id.cycle_raw));
 			buttons_permanent.add(main_activity.findViewById(R.id.store_location));
 			buttons_permanent.add(main_activity.findViewById(R.id.text_stamp));
 			buttons_permanent.add(main_activity.findViewById(R.id.stamp));
@@ -826,6 +828,15 @@ public class MainUI {
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowWhiteBalanceLockPreferenceKey, false);
 	}
 
+	public boolean showCycleRawIcon() {
+		if( !main_activity.getPreview().supportsRaw() )
+			return false;
+		if( !main_activity.getApplicationInterface().isRawAllowed(main_activity.getApplicationInterface().getPhotoMode()) )
+            return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		return sharedPreferences.getBoolean(PreferenceKeys.ShowCycleRawPreferenceKey, false);
+	}
+
 	public boolean showStoreLocationIcon() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		return sharedPreferences.getBoolean(PreferenceKeys.ShowStoreLocationPreferenceKey, false);
@@ -880,6 +891,7 @@ public class MainUI {
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View cycleRawButton = main_activity.findViewById(R.id.cycle_raw);
 				View storeLocationButton = main_activity.findViewById(R.id.store_location);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
@@ -901,6 +913,8 @@ public class MainUI {
 			    	exposureLockButton.setVisibility(visibility);
 				if( showWhiteBalanceLockIcon() )
 					whiteBalanceLockButton.setVisibility(visibility);
+				if( showCycleRawIcon() )
+					cycleRawButton.setVisibility(visibility);
 				if( showStoreLocationIcon() )
 					storeLocationButton.setVisibility(visibility);
 			    if( showTextStampIcon() )
@@ -987,6 +1001,7 @@ public class MainUI {
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
 				View whiteBalanceLockButton = main_activity.findViewById(R.id.white_balance_lock);
+				View cycleRawButton = main_activity.findViewById(R.id.cycle_raw);
 				View storeLocationButton = main_activity.findViewById(R.id.store_location);
 				View textStampButton = main_activity.findViewById(R.id.text_stamp);
 				View stampButton = main_activity.findViewById(R.id.stamp);
@@ -1004,6 +1019,8 @@ public class MainUI {
 			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
 			    if( showWhiteBalanceLockIcon() )
 			    	whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
+				if( showCycleRawIcon() )
+					cycleRawButton.setVisibility(visibility);
 				if( showStoreLocationIcon() )
 					storeLocationButton.setVisibility(visibility);
 			    if( showTextStampIcon() )
@@ -1053,6 +1070,23 @@ public class MainUI {
 		boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
 		view.setImageResource(enabled ? R.drawable.white_balance_locked : R.drawable.white_balance_unlocked);
 		view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.white_balance_unlock : R.string.white_balance_lock) );
+	}
+
+	public void updateCycleRawIcon() {
+		ApplicationInterface.RawPref raw_pref = main_activity.getApplicationInterface().getRawPref();
+		ImageButton view = main_activity.findViewById(R.id.cycle_raw);
+		if( raw_pref == ApplicationInterface.RawPref.RAWPREF_JPEG_DNG ) {
+			if( main_activity.getApplicationInterface().isRawOnly() ) {
+				// actually RAW only
+				view.setImageResource(R.drawable.raw_only_icon);
+			}
+			else {
+				view.setImageResource(R.drawable.raw_icon);
+			}
+		}
+		else {
+			view.setImageResource(R.drawable.raw_off_icon);
+		}
 	}
 
 	public void updateStoreLocationIcon() {
@@ -1121,6 +1155,7 @@ public class MainUI {
 			Log.d(TAG, "updateOnScreenIcons");
 		this.updateExposureLockIcon();
 		this.updateWhiteBalanceLockIcon();
+		this.updateCycleRawIcon();
 		this.updateStoreLocationIcon();
 		this.updateTextStampIcon();
 		this.updateStampIcon();

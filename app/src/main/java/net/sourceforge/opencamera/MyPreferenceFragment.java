@@ -566,6 +566,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		if( !supports_raw ) {
+			Preference pref = findPreference("preference_show_cycle_raw");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+			pg.removePreference(pref);
+		}
+
         if( !supports_white_balance_lock ) {
         	Preference pref = findPreference("preference_show_white_balance_lock");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");

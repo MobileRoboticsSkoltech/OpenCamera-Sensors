@@ -850,6 +850,10 @@
     <string name="preference_raw_focus_bracketing">Allow RAW for focus bracketing</string>
     <string name="preference_raw_focus_bracketing_summary">Whether the RAW option should also apply for focus bracketing photo mode. If this option is disabled, only JPEGs will be saved in focus bracketing photo modes.</string>
 
+    <string name="cycle_raw">Cycle RAW modes</string>
+    <string name="preference_show_cycle_raw">Show RAW icon</string>
+    <string name="preference_show_cycle_raw_summary">Whether to show an on-screen icon for cycling through the RAW modes</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

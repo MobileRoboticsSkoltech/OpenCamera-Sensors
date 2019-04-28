@@ -586,6 +586,15 @@
 
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <CheckBoxPreference
+                android:key="preference_show_cycle_raw"
+                android:title="@string/preference_show_cycle_raw"
+                android:summary="@string/preference_show_cycle_raw_summary"
+                android:icon="@drawable/raw_icon"
+                android:defaultValue="false"
+                />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <CheckBoxPreference
                 android:key="preference_show_white_balance_lock"
                 android:title="@string/preference_show_white_balance_lock"
                 android:summary="@string/preference_show_white_balance_lock_summary"
