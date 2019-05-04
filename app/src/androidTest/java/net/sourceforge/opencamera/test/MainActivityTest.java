@@ -14759,7 +14759,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
     }
 
-    private Bitmap blend_panorama(Bitmap lhs, Bitmap rhs) {
+    private Bitmap blend_panorama_alpha(Bitmap lhs, Bitmap rhs) {
         int width = lhs.getWidth();
         int height = lhs.getHeight();
         if( width != rhs.getWidth() ) {
@@ -14778,19 +14778,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         for(int x=0;x<width;x++) {
             rect.set(x, 0, x+1, height);
 
-            // right hand blend
+            // left hand blend
             // if x=0: frac=1
             // if x=width-1: frac=0
             float frac = (width-1.0f-x)/(width-1.0f);
             p.setAlpha((int)(255.0f*frac));
-            blended_canvas.drawBitmap(rhs, rect, rect, p);
+            blended_canvas.drawBitmap(lhs, rect, rect, p);
 
-            // left hand blend
+            // right hand blend
             // if x=0: frac=0
             // if x=width-1: frac=1
             frac = ((float)x)/(width-1.0f);
             p.setAlpha((int)(255.0f*frac));
-            blended_canvas.drawBitmap(lhs, rect, rect, p);
+            blended_canvas.drawBitmap(rhs, rect, rect, p);
         }
         return blended_bitmap;
     }
@@ -15161,36 +15161,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             if( i > 0 && blend_hwidth > 0 ) {
                 // first blend right hand side of previous image with left hand side of new image
-                Bitmap rhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
-                //Bitmap lhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
-                Bitmap lhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+                Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+                //Bitmap rhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+                Bitmap rhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
                 {
-                    Canvas lhs_canvas = new Canvas(lhs);
+                    Canvas rhs_canvas = new Canvas(rhs);
                     src_rect.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
                     src_rect.offset(align_x, align_y);
                     dst_rect.set(0, 0, 2*blend_hwidth, bitmap_height);
-                    lhs_canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
+                    rhs_canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
                 }
-                Bitmap blended_bitmap = blend_panorama(lhs, rhs);
+                Bitmap blended_bitmap = blend_panorama_alpha(lhs, rhs);
                 /*Bitmap blended_bitmap = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
                 Canvas blended_canvas = new Canvas(blended_bitmap);
                 p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
                 for(int x=0;x<2*blend_hwidth;x++) {
                     src_rect.set(x, 0, x+1, bitmap_height);
 
-                    // right hand blend
+                    // left hand blend
                     // if x=0: frac=1
                     // if x=2*blend_width-1: frac=0
                     float frac = (2.0f*blend_hwidth-1.0f-x)/(2.0f*blend_hwidth-1.0f);
                     p.setAlpha((int)(255.0f*frac));
-                    blended_canvas.drawBitmap(rhs, src_rect, src_rect, p);
+                    blended_canvas.drawBitmap(lhs, src_rect, src_rect, p);
 
-                    // left hand blend
+                    // right hand blend
                     // if x=0: frac=0
                     // if x=2*blend_width-1: frac=1
                     frac = ((float)x)/(2.0f*blend_hwidth-1.0f);
                     p.setAlpha((int)(255.0f*frac));
-                    blended_canvas.drawBitmap(lhs, src_rect, src_rect, p);
+                    blended_canvas.drawBitmap(rhs, src_rect, src_rect, p);
                 }
                 p.setAlpha(255); // reset
                 p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
@@ -15199,8 +15199,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 // now draw the blended region
                 canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth, 0, p);
 
-                rhs.recycle();
                 lhs.recycle();
+                rhs.recycle();
                 blended_bitmap.recycle();
             }
 
