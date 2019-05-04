@@ -2013,8 +2013,8 @@ public class HDRProcessor {
 		ScriptC_feature_detector featureDetectorScript = new ScriptC_feature_detector(rs);
 
 		//final int feature_descriptor_radius = 2; // radius of square used to compare features
-		//final int feature_descriptor_radius = 3; // radius of square used to compare features
-		final int feature_descriptor_radius = 5; // radius of square used to compare features
+		final int feature_descriptor_radius = 3; // radius of square used to compare features
+		//final int feature_descriptor_radius = 5; // radius of square used to compare features
 		Point [][] points_arrays = new Point[2][];
 
 		for(int i=0;i<bitmaps.size();i++) {
@@ -2440,7 +2440,8 @@ public class HDRProcessor {
 			//final float max_inlier_dist = 5.01f;
 			//final float max_inlier_dist = 10.01f;
 			//final float max_inlier_dist = 20.01f;
-			final float max_inlier_dist = Math.max(10.01f, Math.max(width, height)/100.0f);
+			//final float max_inlier_dist = Math.max(10.01f, Math.max(width, height)/100.0f);
+			final float max_inlier_dist = Math.max(5.01f, Math.max(width, height)/100.0f);
 			if( MyDebug.LOG )
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
@@ -2737,7 +2738,7 @@ public class HDRProcessor {
 			Log.d(TAG, "y_scale: " + y_scale);
 		}
 
-		if( MyDebug.LOG ) {
+		if( false && MyDebug.LOG ) {
 			// debug:
 			Bitmap bitmap = Bitmap.createBitmap(2*width, height, Bitmap.Config.ARGB_8888);
 			Paint p = new Paint();

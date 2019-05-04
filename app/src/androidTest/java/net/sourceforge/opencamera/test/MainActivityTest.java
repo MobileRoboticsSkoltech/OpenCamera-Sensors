@@ -14818,6 +14818,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
         // in case the latter value is changed
 
+        long time_s = System.currentTimeMillis();
+
         List<Bitmap> bitmaps = new ArrayList<>();
         for(String input : inputs) {
             Bitmap bitmap = getBitmapFromFile(input);
@@ -14826,10 +14828,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         int bitmap_width = bitmaps.get(0).getWidth();
         int bitmap_height = bitmaps.get(0).getHeight();
-        int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
         Log.d(TAG, "bitmap_width: " + bitmap_width);
         Log.d(TAG, "bitmap_height: " + bitmap_height);
-        Log.d(TAG, "slice_width: " + slice_width);
 
         for(int i=1;i<bitmaps.size();i++) {
             Bitmap bitmap = bitmaps.get(i);
@@ -14862,6 +14862,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
         }
         //bitmaps.subList(2,bitmaps.size()).clear(); // test
+
+        // downscale
+        final int max_height = 2080;
+        if( bitmap_height >= max_height ) {
+            float scale = ((float)max_height) / ((float)bitmap_height);
+            Log.d(TAG, "scale: " + scale);
+            Matrix scale_matrix = new Matrix();
+            scale_matrix.postScale(scale, scale);
+            for(int j=0;j<bitmaps.size();j++) {
+                Bitmap new_bitmap = Bitmap.createBitmap(bitmaps.get(j), 0, 0, bitmap_width, bitmap_height, scale_matrix, true);
+                bitmaps.get(j).recycle();
+                bitmaps.set(j, new_bitmap);
+            }
+            bitmap_width = bitmaps.get(0).getWidth();
+            bitmap_height = bitmaps.get(0).getHeight();
+            Log.d(TAG, "bitmap_width is now: " + bitmap_width);
+            Log.d(TAG, "bitmap_height is now: " + bitmap_height);
+        }
+
+        int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
+        Log.d(TAG, "slice_width: " + slice_width);
 
         float camera_angle_deg = mActivity.getPreview().getViewAngleY(false);
         double camera_angle = Math.toRadians(camera_angle_deg);
@@ -15347,6 +15368,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         bitmaps.clear();
         Log.d(TAG, "panorama complete!");
+
+        Log.d(TAG, "### time taken: " + (System.currentTimeMillis() - time_s));
 
         saveBitmap(panorama, output_name);
         Thread.sleep(500);
