@@ -10423,11 +10423,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
             Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
 
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-            OutputStream outputStream = new FileOutputStream(file);
-            inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-            outputStream.close();
-            mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+            saveBitmap(inputs.get(0), output_name);
             hdrHistogramDetails = checkHistogram(inputs.get(0));
         }
         inputs.get(0).recycle();
@@ -10445,11 +10441,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
             Log.d(TAG, "DRO time: " + (System.currentTimeMillis() - time_s));
 
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
-            OutputStream outputStream = new FileOutputStream(file);
-            inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-            outputStream.close();
-            mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+            saveBitmap(inputs.get(0), "dro" + output_name);
             checkHistogram(inputs.get(0));
             inputs.get(0).recycle();
             inputs.clear();
@@ -12302,11 +12294,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             throw new RuntimeException();
         }
 
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/droZerotestHDR3_output.jpg");
-        OutputStream outputStream = new FileOutputStream(file);
-        inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+        saveBitmap(inputs.get(0), "droZerotestHDR3_output.jpg");
         checkHistogram(bitmap);
 
         // check bitmaps are the same
@@ -12439,11 +12427,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             throw new RuntimeException();
         }
 
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-        OutputStream outputStream = new FileOutputStream(file);
-        nr_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+        saveBitmap(nr_bitmap, output_name);
         HistogramDetails hdrHistogramDetails = checkHistogram(nr_bitmap);
         nr_bitmap.recycle();
         System.gc();
@@ -14631,11 +14615,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             bitmap.setPixels(buffer, 0, bitmap.getWidth(), 0, y, bitmap.getWidth(), 1);
         }
 
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-        OutputStream outputStream = new FileOutputStream(file);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+        saveBitmap(bitmap, output_name);
         HistogramDetails hdrHistogramDetails = checkHistogram(bitmap);
         bitmap.recycle();
         System.gc();
@@ -14769,6 +14749,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile3_extra_strong_output.jpg");
 
         checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
+    }
+
+    private void saveBitmap(Bitmap bitmap, String name) throws IOException {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + name);
+        OutputStream outputStream = new FileOutputStream(file);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.close();
+        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
     }
 
     private Bitmap blend_panorama(Bitmap lhs, Bitmap rhs) {
@@ -15024,11 +15012,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 // save bitmaps used for alignments
                 /*for(int j=0;j<alignment_bitmaps.size();j++) {
                     Bitmap alignment_bitmap = alignment_bitmaps.get(j);
-                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/alignment_bitmap_" + i + "_" + j +"_" + output_name);
-                    OutputStream outputStream = new FileOutputStream(file);
-                    alignment_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-                    outputStream.close();
-                    mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+                    saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +"_" + output_name);
                 }*/
 
                 int this_align_x = 0, this_align_y = 0;
@@ -15345,11 +15329,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         bitmaps.clear();
         Log.d(TAG, "panorama complete!");
 
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-        OutputStream outputStream = new FileOutputStream(file);
-        panorama.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+        saveBitmap(panorama, output_name);
         Thread.sleep(500);
     }
 
