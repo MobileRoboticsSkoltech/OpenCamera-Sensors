@@ -169,17 +169,42 @@ uchar4 __attribute__((kernel)) add(uchar4 in, uint32_t x, uint32_t y) {
     return out;
 }
 
+static int merge_blend_width;
+static int start_blend_x;
+
+void setBlendWidth(int blend_width, full_width) {
+    merge_blend_width = blend_width;
+    start_blend_x = (full_width - merge_blend_width)/2;
+}
+
+static float3 merge_core(float3 in0, float3 in1, uint32_t x, uint32_t y) {
+    //int width = rsAllocationGetDimX(bitmap);
+    //float alpha = ((float)(x-start_blend_x))/(float)merge_blend_width;
+    /*float alpha = 0.0f;
+    if( x > start_blend_x ) {
+        alpha = ((float)(x-start_blend_x))/(float)merge_blend_width;
+    }*/
+    int32_t ix = x;
+    float alpha = ((float)(ix-start_blend_x))/(float)merge_blend_width;
+    alpha = clamp(alpha, 0.0f, 1.0f);
+    float3 out = (1.0f-alpha)*in0 + alpha*in1;
+    return out;
+}
+
 /** Overwrites the right hand side with the right hand side of bitmap.
  */
 uchar4 __attribute__((kernel)) merge(uchar4 in, uint32_t x, uint32_t y) {
+    /*
     int hwidth = rsAllocationGetDimX(bitmap)/2;
     uchar4 out = in;
     if( x >= hwidth )
     {
         out = rsGetElementAt_uchar4(bitmap, x, y);
     }
+    */
 
-    /*int width = rsAllocationGetDimX(bitmap);
+    /*
+    int width = rsAllocationGetDimX(bitmap);
     float alpha = ((float)x)/(float)width;
 
     uchar4 in1 = rsGetElementAt_uchar4(bitmap, x, y);
@@ -190,7 +215,19 @@ uchar4 __attribute__((kernel)) merge(uchar4 in, uint32_t x, uint32_t y) {
 
     uchar4 out;
     out.rgb = convert_uchar3(clamp(result+0.5f, 0.f, 255.f));
-    out.a = 255;*/
+    out.a = 255;
+    */
+
+    uchar4 in1 = rsGetElementAt_uchar4(bitmap, x, y);
+
+    float3 in0_f = convert_float3(in.rgb);
+    float3 in1_f = convert_float3(in1.rgb);
+
+    float3 result = merge_core(in0_f, in1_f, x, y);
+
+    uchar4 out;
+    out.rgb = convert_uchar3(clamp(result+0.5f, 0.f, 255.f));
+    out.a = 255;
 
     return out;
 }
@@ -198,14 +235,24 @@ uchar4 __attribute__((kernel)) merge(uchar4 in, uint32_t x, uint32_t y) {
 /** Overwrites the right hand side with the right hand side of bitmap.
  */
 float3 __attribute__((kernel)) merge_f(float3 in, uint32_t x, uint32_t y) {
+    /*
     int hwidth = rsAllocationGetDimX(bitmap)/2;
     float3 out = in;
     if( x >= hwidth )
     {
         out = rsGetElementAt_float3(bitmap, x, y);
-        /*out.r = 0;
-        out.g = 0;
-        out.b = 0;*/
     }
+    */
+
+    /*int width = rsAllocationGetDimX(bitmap);
+    float alpha = ((float)x)/(float)width;
+
+    float3 in1 = rsGetElementAt_float3(bitmap, x, y);
+
+    float3 out = (1.0f-alpha)*in + alpha*in1;*/
+
+    float3 in1 = rsGetElementAt_float3(bitmap, x, y);
+    float3 out = merge_core(in, in1, x, y);
+
     return out;
 }

@@ -1828,6 +1828,22 @@ public class HDRProcessor {
 			}
 
 			script.set_bitmap(allocation1);
+
+			//int blend_width = (i==pyramid0.size()-1) ? width : 2;
+			int blend_width;
+			if( i==pyramid0.size()-1 ) {
+				blend_width = width;
+			}
+			else {
+				blend_width = 2;
+				for(int j=0;j<i;j++) {
+					blend_width *= 2;
+				}
+				blend_width = Math.min(blend_width, width);
+			}
+
+			script.invoke_setBlendWidth(blend_width, width);
+
 			if( allocation0.getType().getElement().getDataType() == Element.DataType.FLOAT_32 ) {
 				script.forEach_merge_f(allocation0, allocation0);
 			}
@@ -1901,7 +1917,6 @@ public class HDRProcessor {
 		ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
 		//final int n_levels = 5;
 		final int n_levels = 4;
-		//final int n_levels = 3;
 		//final int n_levels = 1;
 
 		// debug
@@ -1946,7 +1961,7 @@ public class HDRProcessor {
 		Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);
 		// debug
         /*{
-            //savePyramid("merged_laplacian", lhs_pyramid);
+            savePyramid("merged_laplacian", lhs_pyramid);
             saveBitmap(merged_bitmap, "merged_bitmap.jpg");
         }*/
 
