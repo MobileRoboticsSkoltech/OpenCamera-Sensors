@@ -14759,6 +14759,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
     }
 
+    private Bitmap blend_panorama_pyramids(Bitmap lhs, Bitmap rhs) throws IOException {
+        Bitmap merged_bitmap = mActivity.getApplicationInterface().getHDRProcessor().blendPyramids(lhs, rhs);
+
+        /*{
+            // debug
+            saveBitmap(merged_bitmap, "merged_bitmap.jpg");
+        }*/
+        return merged_bitmap;
+    }
+
     private Bitmap blend_panorama_alpha(Bitmap lhs, Bitmap rhs) {
         int width = lhs.getWidth();
         int height = lhs.getHeight();
@@ -14793,6 +14803,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             blended_canvas.drawBitmap(rhs, rect, rect, p);
         }
         return blended_bitmap;
+    }
+
+    private int nextPowerOf2(int value) {
+        int power = 1;
+        while( value > power )
+            power *= 2;
+        return power;
     }
 
     private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float gyro_tol_degrees) throws IOException, InterruptedException {
@@ -14863,7 +14880,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         final int offset_x = (bitmap_width - slice_width)/2;
         //final int blend_hwidth = 0;
-        final int blend_hwidth = bitmap_width/20;
+        //final int blend_hwidth = bitmap_width/20;
+        final int blend_hwidth = nextPowerOf2(bitmap_width/20);
         final int align_hwidth = bitmap_width/10;
         //final int align_hwidth = bitmap_width/5;
         final boolean use_auto_align = true;
@@ -15171,7 +15189,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     dst_rect.set(0, 0, 2*blend_hwidth, bitmap_height);
                     rhs_canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
                 }
-                Bitmap blended_bitmap = blend_panorama_alpha(lhs, rhs);
+                //Bitmap blended_bitmap = blend_panorama_alpha(lhs, rhs);
+                Bitmap blended_bitmap = blend_panorama_pyramids(lhs, rhs);
                 /*Bitmap blended_bitmap = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
                 Canvas blended_canvas = new Canvas(blended_bitmap);
                 p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
@@ -15622,6 +15641,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String gyro_name = panorama_images_path + "testPanorama9/IMG_20190301_145213.xml";
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+
+        Thread.sleep(1000); // need to wait for debug images to be saved/broadcast?
     }
 
     /** Tests panorama algorithm on test samples "testPanorama10".

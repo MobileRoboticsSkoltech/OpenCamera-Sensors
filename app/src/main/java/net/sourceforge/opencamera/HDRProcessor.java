@@ -1636,6 +1636,329 @@ public class HDRProcessor {
 			Log.d(TAG, "### time for processAvgMulti: " + (System.currentTimeMillis() - time_s));
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private Allocation reduceBitmap(ScriptC_pyramid_blending script, Allocation allocation) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "reduceBitmap");
+		int width = allocation.getType().getX();
+		int height = allocation.getType().getY();
+
+		Allocation reduced_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width/2, height/2));
+
+		script.set_bitmap(allocation);
+		script.forEach_reduce(reduced_allocation, reduced_allocation);
+
+		return reduced_allocation;
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private Allocation expandBitmap(ScriptC_pyramid_blending script, Allocation allocation) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "expandBitmap");
+		int width = allocation.getType().getX();
+		int height = allocation.getType().getY();
+
+		Allocation expanded_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+
+		script.set_bitmap(allocation);
+		script.forEach_expand(expanded_allocation, expanded_allocation);
+
+		Allocation result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+		script.set_bitmap(expanded_allocation);
+		script.forEach_blur(expanded_allocation, result_allocation);
+		expanded_allocation.destroy();
+		//Allocation result_allocation = expanded_allocation;
+
+		return result_allocation;
+	}
+
+	/** Creates an allocation where each pixel equals the pixel from allocation0 minus the corresponding
+	 *  pixel from allocation1.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private Allocation subtractBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "subtractBitmap");
+		int width = allocation0.getType().getX();
+		int height = allocation0.getType().getY();
+		if( allocation1.getType().getX() != width || allocation1.getType().getY() != height ) {
+			Log.e(TAG, "allocations of different dimensions");
+			throw new RuntimeException();
+		}
+		Allocation result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_3(rs), width, height));
+		script.set_bitmap(allocation1);
+		script.forEach_subtract(allocation0, result_allocation);
+
+		return result_allocation;
+	}
+
+	/** Updates allocation0 such that each pixel equals the pixel from allocation0 plus the
+	 *  corresponding pixel from allocation1.
+	 *  allocation0 should be of type RGBA_8888, allocation1 should be of type F32_3.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private void addBitmap(ScriptC_pyramid_blending script, Allocation allocation0, Allocation allocation1) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addBitmap");
+		int width = allocation0.getType().getX();
+		int height = allocation0.getType().getY();
+		if( allocation1.getType().getX() != width || allocation1.getType().getY() != height ) {
+			Log.e(TAG, "allocations of different dimensions");
+			throw new RuntimeException();
+		}
+		script.set_bitmap(allocation1);
+		script.forEach_add(allocation0, allocation0);
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private List<Allocation> createGaussianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createGaussianPyramid");
+		List<Allocation> pyramid = new ArrayList<>();
+
+		Allocation allocation = Allocation.createFromBitmap(rs, bitmap);
+		pyramid.add(allocation);
+		for(int i=0;i<n_levels;i++ ) {
+			allocation = reduceBitmap(script, allocation);
+			pyramid.add(allocation);
+		}
+
+		return pyramid;
+	}
+
+	/** Creates a laplacian pyramid of the supplied bitmap, ordered from bottom to top. The i-th
+	 *  entry is equal to [G(i) - G'(i+1)], where G(i) is the i-th level of the gaussian pyramid,
+	 *  and G' is created by expanding a level of the gaussian pyramid; except the last entry
+	 *  is simply equal to the last (i.e., top) level of the gaussian pyramid.
+	 *  The allocations are of type floating point (F32_3), except the last which is of type
+	 *  RGBA_8888.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script,Bitmap bitmap, int n_levels, String name) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createLaplacianPyramid");
+
+        List<Allocation> gaussianPyramid = createGaussianPyramid(script, bitmap, n_levels);
+		/*{
+			// debug
+			savePyramid("gaussian", gaussianPyramid);
+		}*/
+		List<Allocation> pyramid = new ArrayList<>();
+
+		for(int i=0;i<gaussianPyramid.size()-1;i++) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "createLaplacianPyramid: i = " + i);
+			Allocation this_gauss = gaussianPyramid.get(i);
+			Allocation next_gauss = gaussianPyramid.get(i+1);
+			Allocation next_gauss_expanded = expandBitmap(script, next_gauss);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "this_gauss: " + this_gauss.getType().getX() + " , " + this_gauss.getType().getY());
+				Log.d(TAG, "next_gauss: " + next_gauss.getType().getX() + " , " + next_gauss.getType().getY());
+				Log.d(TAG, "next_gauss_expanded: " + next_gauss_expanded.getType().getX() + " , " + next_gauss_expanded.getType().getY());
+			}
+			/*{
+				// debug
+				saveAllocation(name + "_this_gauss_" + i + ".jpg", this_gauss);
+				saveAllocation(name + "_next_gauss_expanded_" + i + ".jpg", next_gauss_expanded);
+			}*/
+			Allocation difference = subtractBitmap(script, this_gauss, next_gauss_expanded);
+			/*{
+				// debug
+				saveAllocation(name + "_difference_" + i + ".jpg", difference);
+			}*/
+			pyramid.add(difference);
+			//pyramid.add(this_gauss);
+
+			this_gauss.destroy();
+			gaussianPyramid.set(i, null); // to help garbage collection
+			next_gauss_expanded.destroy();
+		}
+		pyramid.add(gaussianPyramid.get(gaussianPyramid.size()-1));
+
+		return pyramid;
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private Bitmap collapseLaplacianPyramid(ScriptC_pyramid_blending script, List<Allocation> pyramid) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "collapseLaplacianPyramid");
+
+		Allocation allocation = pyramid.get(pyramid.size()-1);
+		boolean first = true;
+		for(int i=pyramid.size()-2;i>=0;i--) {
+			Allocation expanded_allocation = expandBitmap(script, allocation);
+			if( !first ) {
+				allocation.destroy();
+			}
+			addBitmap(script, expanded_allocation, pyramid.get(i));
+			allocation = expanded_allocation;
+			first = false;
+		}
+
+		int width = allocation.getType().getX();
+		int height = allocation.getType().getY();
+		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		allocation.copyTo(bitmap);
+		if( !first ) {
+			allocation.destroy();
+		}
+		return bitmap;
+	}
+
+	/** Updates every allocation in pyramid0 so that the right hand side comes from the
+	 *  right hand side of the corresponding allocation in pyramid1.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private void mergePyramids(ScriptC_pyramid_blending script, List<Allocation> pyramid0, List<Allocation> pyramid1) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "mergePyramids");
+		for(int i=0;i<pyramid0.size();i++) {
+			Allocation allocation0 = pyramid0.get(i);
+			Allocation allocation1 = pyramid1.get(i);
+
+			int width = allocation0.getType().getX();
+			int height = allocation0.getType().getY();
+			if( allocation1.getType().getX() != width || allocation1.getType().getY() != height ) {
+				Log.e(TAG, "allocations of different dimensions");
+				throw new RuntimeException();
+			}
+			else if( allocation0.getType().getElement().getDataType() != allocation1.getType().getElement().getDataType() ) {
+				Log.e(TAG, "allocations of different data types");
+				throw new RuntimeException();
+			}
+
+			script.set_bitmap(allocation1);
+			if( allocation0.getType().getElement().getDataType() == Element.DataType.FLOAT_32 ) {
+				script.forEach_merge_f(allocation0, allocation0);
+			}
+			else {
+				script.forEach_merge(allocation0, allocation0);
+			}
+		}
+	}
+
+	/** For testing.
+	 */
+	private void saveBitmap(Bitmap bitmap, String name) {
+		try {
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + name);
+			OutputStream outputStream = new FileOutputStream(file);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+			outputStream.close();
+			MainActivity mActivity = (MainActivity) context;
+			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private void saveAllocation(String name, Allocation allocation) {
+		Bitmap bitmap;
+		int width = allocation.getType().getX();
+		int height = allocation.getType().getY();
+		Log.d(TAG, "count: " + allocation.getType().getCount());
+		Log.d(TAG, "byte size: " + allocation.getType().getElement().getBytesSize());
+		if( allocation.getType().getElement().getDataType() == Element.DataType.FLOAT_32 ) {
+			float [] bytes = new float[width*height*4];
+			allocation.copyTo(bytes);
+			int [] pixels = new int[width*height];
+			for(int j=0;j<width*height;j++) {
+				float r = bytes[4*j];
+				float g = bytes[4*j+1];
+				float b = bytes[4*j+2];
+				// each value should be from -255 to +255, we compress to be in the range [0, 255]
+				int ir = (int)(255.0f * ((r/510.0f) + 0.5f) + 0.5f);
+				int ig = (int)(255.0f * ((g/510.0f) + 0.5f) + 0.5f);
+				int ib = (int)(255.0f * ((b/510.0f) + 0.5f) + 0.5f);
+				ir = Math.max(Math.min(ir, 255), 0);
+				ig = Math.max(Math.min(ig, 255), 0);
+				ib = Math.max(Math.min(ib, 255), 0);
+				pixels[j] = Color.argb(255, ir, ig, ib);
+			}
+			bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+		}
+		else {
+			bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+			allocation.copyTo(bitmap);
+		}
+		saveBitmap(bitmap, name);
+		bitmap.recycle();
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private void savePyramid(String name, List<Allocation> pyramid) {
+		for(int i=0;i<pyramid.size();i++) {
+			Allocation allocation = pyramid.get(i);
+			saveAllocation(name + "_" + i + ".jpg", allocation);
+		}
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public Bitmap blendPyramids(Bitmap lhs, Bitmap rhs) {
+		ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
+		//final int n_levels = 5;
+		final int n_levels = 4;
+		//final int n_levels = 3;
+		//final int n_levels = 1;
+
+		// debug
+        /*{
+            saveBitmap(lhs, "lhs.jpg");
+            saveBitmap(rhs, "rhs.jpg");
+        }*/
+		// debug
+        /*{
+            List<Allocation> lhs_pyramid = createGaussianPyramid(script, lhs, n_levels);
+            List<Allocation> rhs_pyramid = createGaussianPyramid(script, rhs, n_levels);
+            savePyramid("lhs_gauss", lhs_pyramid);
+            savePyramid("rhs_gauss", rhs_pyramid);
+            for(Allocation allocation : lhs_pyramid) {
+                allocation.destroy();
+            }
+            for(Allocation allocation : rhs_pyramid) {
+                allocation.destroy();
+            }
+        }*/
+
+		List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, n_levels, "lhs");
+		List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, n_levels, "rhs");
+
+		// debug
+		/*{
+			savePyramid("lhs_laplacian", lhs_pyramid);
+			savePyramid("rhs_laplacian", rhs_pyramid);
+		}*/
+
+		// debug
+		/*{
+			Bitmap lhs_collapsed = collapseLaplacianPyramid(script, lhs_pyramid);
+			saveBitmap(lhs_collapsed, "lhs_collapsed.jpg");
+			Bitmap rhs_collapsed = collapseLaplacianPyramid(script, rhs_pyramid);
+			saveBitmap(rhs_collapsed, "rhs_collapsed.jpg");
+			lhs_collapsed.recycle();
+			rhs_collapsed.recycle();
+		}*/
+
+		mergePyramids(script, lhs_pyramid, rhs_pyramid);
+		Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);
+		// debug
+        /*{
+            //savePyramid("merged_laplacian", lhs_pyramid);
+            saveBitmap(merged_bitmap, "merged_bitmap.jpg");
+        }*/
+
+		for(Allocation allocation : lhs_pyramid) {
+			allocation.destroy();
+		}
+		for(Allocation allocation : rhs_pyramid) {
+			allocation.destroy();
+		}
+		return merged_bitmap;
+	}
+
 	public static class AutoAlignmentByFeatureResult {
 	    public final int offset_x;
 		public final int offset_y;
