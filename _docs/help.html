@@ -1147,10 +1147,7 @@ if you use this method, and then uninstall!</li>
 <li><b>Android 5.0 onwards</b> - The restrictions on SD cards introduced in Android 4.4 still apply, however
 instead you can enable Settings/More camera controls/"Use Storage Access Framework", and this should allow you
 to save to external SD cards. If when choosing a folder, you only see "Recent", you may need to click on the
-three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage", and
-hopefully you'll see something similar for the SD card). Note that a known issue is that the on-screen "free memory"
-will still show the free internal storage rather than on the SD card (this is an Android limitation - when using
-Storage Access Framework, there doesn't seem to be a way to get the free space on the drive).</li>
+three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage".</li>
 <li><b>Android 6.0 onwards</b> - From Android 6, some devices support "Adoptable Storage" allowing you to
 <a href="https://www.androidcentral.com/adoptable-storage">select to use
 an SD card as internal storage</a>. Note that not all devices support this, even if running Android 6 or later. If your device
@@ -1277,10 +1274,11 @@ by going to Settings/On screen GUI/Force maximum brightness.</p>
 though different sticks work in different ways, so it's hard to guarantee this. Sticks and bluetooth remote controls
 which work by triggering a volume key press should work (and the behaviour can be configured by
 Settings/More camera controls/"Volume keys"). For example, the
-<a href="https://www.amazon.co.uk/gp/product/B017NA7V1U/">KobraTech TriFlex Mini</a>. And if you have a Mi Band 2 or
+<a href="https://www.amazon.co.uk/gp/product/B017NA7V1U/">KobraTech TriFlex Mini</a>. If you have a Mi Band 2 or
 Amazfit Bip/Arc, you can try using
 <a href="https://play.google.com/store/apps/details?id=com.miband2.mibandselfie">Mi Band 2 &amp; Amazfit Selfie</a> in
-conjunction with Open Camera.</p>
+conjunction with Open Camera. Open Camera also supports connecting to the Kraken Smart Housing via the options in
+"Settings/More camera controls/Bluetooth LE remote control".</p>
 
 <p><b>Why is auto-level slow?</b> - This feature requires doing a decompress of the JPEG data, followed by a
 rotation of a multi-megapixel image, then recompressing, which typically results in a short pause on most devices.
@@ -1324,7 +1322,7 @@ This is turned off by default as some <a href="devices.html">devices</a> have po
 "legacy" Camera2 support, which means it isn't any better than the original Camera API. Open Camera doesn't support
 enabling Camera2 on such devices.</p>
 
-<p><b>Does Open Camera support HDR+, or use the Pixel 2's Visual Core?</b> If you have a Google Pixel (2), then Open Camera
+<p><b>Does Open Camera support HDR+, or use the Pixel 2's Visual Core?</b> If you have a Google Pixel, then Open Camera
 should be using HDR+ when the following settings are set: Photo Mode Standard, flash off (or auto if the flash doesn't fire),
 white balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW. HDR+ should be
 supported in both old and Camera2 API. See
@@ -1353,10 +1351,6 @@ the device is very slow at processing the video file after stopping, and this do
 Camera will stop the video in advance of the device shutting down to help reduce this risk (see "Critical battery check" option),
 but if this still happens, the best hope is to try MP4Fix, see the previous question. Note that if this happens, it isn't an
 Open Camera bug - it's a problem that will happen on any device where the device shuts off before the video can be processed.</p>
-
-<p><b>My save folder is on the SD card, so why does the free storage still show for internal memory?</b> - Open Camera tries
-to obtain the space of the drive being used, but there are no reliable ways to do this (especially Android 4.4 onwards), so
-this is an Android limitation.</p>
 
 <p><b>Does Open Camera support external USB cameras?</b> - Unfortunately Open Camera does not support USB cameras. These don't
 seem to use the standard Android camera APIs, and it would be a lot of work to add support for these.</p>
