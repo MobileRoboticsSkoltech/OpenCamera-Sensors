@@ -2460,6 +2460,8 @@ public class HDRProcessor {
 		//final boolean estimate_y_scale = true;
 		//final boolean estimate_rotation = debug_index < 3;
 		boolean use_rotation = false;
+		boolean use_y_scale = false;
+		final float max_y_scale = 1.05f + 1.0e-5f;
 
 		final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
 		if( MyDebug.LOG )
@@ -2477,6 +2479,7 @@ public class HDRProcessor {
 			//final float max_inlier_dist = 20.01f;
 			//final float max_inlier_dist = Math.max(10.01f, Math.max(width, height)/100.0f);
 			final float max_inlier_dist = Math.max(5.01f, Math.max(width, height)/100.0f);
+			//final float max_inlier_dist = Math.max(2.51f, Math.max(width, height)/200.0f);
 			if( MyDebug.LOG )
 				Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
 			final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
@@ -2510,6 +2513,7 @@ public class HDRProcessor {
 						best_inliers.clear();
 						best_inliers.addAll(inliers);
 						use_rotation = false;
+						use_y_scale = false;
 						if( best_inliers.size() == actual_matches.size() ) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "all matches are inliers");
@@ -2540,8 +2544,15 @@ public class HDRProcessor {
 						}
 
 						/*float y_scale = 1.0f;
+						boolean found_y_scale = false;
 						if( estimate_y_scale && Math.abs(dy0) > min_rotation_dist && Math.abs(dy1) > min_rotation_dist ) {
 							y_scale = dy1 / dy0;
+							if( y_scale <= max_y_scale && y_scale >= 1.0f/max_y_scale ) {
+								found_y_scale = true;
+							}
+							else {
+								y_scale = 1.0f;
+							}
 							dy0 *= y_scale;
 						}*/
 
@@ -2567,11 +2578,18 @@ public class HDRProcessor {
 						}*/
 
 						float y_scale = 1.0f;
+						boolean found_y_scale = false;
 						if( estimate_y_scale ) {
 							//int transformed_dx0 = (int)(dx0 * Math.cos(angle) - dy0 * Math.sin(angle));
 							int transformed_dy0 = (int)(dx0 * Math.sin(angle) + dy0 * Math.cos(angle));
 							if( Math.abs(transformed_dy0) > min_rotation_dist && Math.abs(dy1) > min_rotation_dist ) {
 								y_scale = dy1 / transformed_dy0;
+								if( y_scale <= max_y_scale && y_scale >= 1.0f/max_y_scale ) {
+									found_y_scale = true;
+								}
+								else {
+									y_scale = 1.0f;
+								}
 							}
 						}
 
@@ -2618,6 +2636,7 @@ public class HDRProcessor {
 							best_inliers.clear();
 							best_inliers.addAll(inliers);
 							use_rotation = true;
+							use_y_scale = found_y_scale;
 							if( best_inliers.size() == actual_matches.size() ) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "all matches are inliers");
@@ -2670,7 +2689,7 @@ public class HDRProcessor {
 		if( estimate_rotation && use_rotation ) {
 
 			// first compute an ideal y_scale
-			/*if( estimate_y_scale ) {
+			/*if( estimate_y_scale && use_y_scale ) {
 				float y_scale_sum = 0.0f;
 				int n_y_scale = 0;
 				for(FeatureMatch match : actual_matches) {
@@ -2725,7 +2744,7 @@ public class HDRProcessor {
 			//offset_x = 0; // test
 			//offset_y = 0; // test
 
-			if( estimate_y_scale ) {
+			if( estimate_y_scale && use_y_scale ) {
 				float y_scale_sum = 0.0f;
 				int n_y_scale = 0;
 				for(FeatureMatch match : actual_matches) {
