@@ -2160,6 +2160,11 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, ">>> find corners, chunk " + cy + " / " + n_y_chunks);
 				float threshold = 5000000.0f;
+				// setting a min_thresold fixes testPanorama11, also helps testPanorama1
+				// note that this needs to be at least 1250000.0f - at 625000.0f, testPanorama1
+				// still has problems and in fact ends up being worse than having no min threshold
+				final float min_threshold = 1250000.0f;
+				//final float min_threshold = 625000.0f;
 				float low_threshold = 0.0f;
 				float high_threshold = -1.0f;
 				int start_y = (cy*height)/n_y_chunks;
@@ -2198,10 +2203,21 @@ public class HDRProcessor {
 						break;
 					}
 					else if( points.size() < min_corners ) {
-						high_threshold = threshold;
-						threshold = 0.5f * ( low_threshold + threshold );
-						if( MyDebug.LOG )
-							Log.d(TAG, "    reduced threshold to: " + threshold);
+						if( threshold <= min_threshold ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "    hit minimum threshold: " + threshold);
+							all_points.addAll(points);
+							break;
+						}
+						else {
+							high_threshold = threshold;
+							threshold = 0.5f * ( low_threshold + threshold );
+							if( MyDebug.LOG )
+								Log.d(TAG, "    reduced threshold to: " + threshold);
+						/*if( low_threshold == 0.0f ) {
+							throw new RuntimeException();
+						}*/
+						}
 					}
 					else {
 						low_threshold = threshold;
