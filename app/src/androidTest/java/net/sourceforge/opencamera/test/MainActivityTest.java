@@ -15026,15 +15026,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Log.d(TAG, "    align_x+offset_x+slice_width-align_hwidth: " + (align_x+offset_x+slice_width-align_hwidth));
                 Log.d(TAG, "    bitmap(i-1) width: " + bitmaps.get(i-1).getWidth());
                 // n.b., we add in reverse order, so we find the transformation to map the next image (i) onto the previous image (i-1)
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
                 // less tall:
-                int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
+                //int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
                 //int align_bitmap_height = Math.min(bitmap_height, 2*align_hwidth); // ratio 1:1
                 //int align_bitmap_height = Math.min(bitmap_height, 4*align_hwidth); // ratio 1:2
                 //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                int align_bitmap_height = (3*bitmap_height)/4;
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
                 //final boolean use_align_by_feature = false;
                 final boolean use_align_by_feature = true;
                 final int align_downsample = use_align_by_feature ? 4 : 1;
