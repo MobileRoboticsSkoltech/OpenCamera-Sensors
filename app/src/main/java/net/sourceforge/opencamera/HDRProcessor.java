@@ -2243,6 +2243,25 @@ public class HDRProcessor {
 			local_max_features_allocation = null;
 		}
 
+		// if we have too few good corners, risk of getting a poor match
+		final int min_required_corners = 10;
+		if( points_arrays[0].length < min_required_corners || points_arrays[1].length < min_required_corners ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "too few points!");
+			/*if( true )
+				throw new RuntimeException();*/
+
+			// free allocations
+			for(int i=0;i<allocations.length;i++) {
+				if( allocations[i] != null ) {
+					allocations[i].destroy();
+					allocations[i] = null;
+				}
+			}
+			freeScripts();
+			return new AutoAlignmentByFeatureResult(0, 0, 0.0f, 1.0f);
+		}
+
 		class FeatureMatch implements Comparable<FeatureMatch> {
 			private int index0, index1;
 			private float distance; // from 0 to 1, higher means poorer match
@@ -2893,7 +2912,6 @@ public class HDRProcessor {
 			}
 		}
 		freeScripts();
-
 		return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation, y_scale);
 	}
 
