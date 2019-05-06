@@ -2550,10 +2550,10 @@ public class HDRProcessor {
 							angle += 2.0f*Math.PI;
 						else if( angle > Math.PI )
 							angle -= 2.0f*Math.PI;
-						/*if( Math.abs(angle) > Math.PI/18.0f ) {
+						if( Math.abs(angle) > 30.0f*Math.PI/180.0f ) {
 							// reject too large angles
 							continue;
-						}*/
+						}
 						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "ransac: " + i + " , " + j + ": ");
 							Log.d(TAG, "    match 0: " + points_arrays[0][match.index0].x + " , " + points_arrays[0][match.index0].y);
@@ -2772,6 +2772,10 @@ public class HDRProcessor {
 			Log.d(TAG, "rotation: " + rotation);
 			Log.d(TAG, "y_scale: " + y_scale);
 		}
+		/*if( Math.abs(rotation) > 30.0f*Math.PI/180.0f ) {
+			// test
+			throw new RuntimeException();
+		}*/
 
 		if( false && MyDebug.LOG ) {
 			// debug:
