@@ -19,6 +19,7 @@ import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
+import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
@@ -14818,7 +14819,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
         // in case the latter value is changed
 
-        long time_s = System.currentTimeMillis();
+        long time_s = 0;
+        if( MyDebug.LOG )
+            time_s = System.currentTimeMillis();
 
         List<Bitmap> bitmaps = new ArrayList<>();
         for(String input : inputs) {
@@ -14880,6 +14883,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "bitmap_width is now: " + bitmap_width);
             Log.d(TAG, "bitmap_height is now: " + bitmap_height);
         }
+        Log.d(TAG, "### time after downsscale: " + (System.currentTimeMillis() - time_s));
 
         int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
         Log.d(TAG, "slice_width: " + slice_width);
@@ -15004,6 +15008,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // important to rotate before doing auto-alignment (since we already have the angle from gyro)
             if( Math.abs(angle_z) > 1.0e-5f ) {
                 Log.d(TAG, "pre-rotate bitmap by: " + angle_z);
+                Log.d(TAG, "### time before rotating " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                 Canvas rotated_canvas = new Canvas(rotated_bitmap);
                 rotated_canvas.save();
@@ -15012,6 +15017,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 rotated_canvas.restore();
                 bitmaps.get(i).recycle();
                 bitmaps.set(i, rotated_bitmap);
+                Log.d(TAG, "### time after rotating " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             }
 
             if( use_auto_align && i > 0 ) {
@@ -15034,12 +15040,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 //int align_bitmap_height = Math.min(bitmap_height, 4*align_hwidth); // ratio 1:2
                 //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
                 int align_bitmap_height = (3*bitmap_height)/4;
+                Log.d(TAG, "### time before creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
                 alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                Log.d(TAG, "### time after creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 //final boolean use_align_by_feature = false;
                 final boolean use_align_by_feature = true;
                 final int align_downsample = use_align_by_feature ? 4 : 1;
                 if( align_downsample > 1 ) {
+                    Log.d(TAG, "### time before downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                     Matrix align_scale_matrix = new Matrix();
                     align_scale_matrix.postScale(1.0f/(float)align_downsample, 1.0f/(float)align_downsample);
                     for(int j=0;j<alignment_bitmaps.size();j++) {
@@ -15047,6 +15056,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                         alignment_bitmaps.get(j).recycle();
                         alignment_bitmaps.set(j, new_bitmap);
                     }
+                    Log.d(TAG, "### time after downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 }
 
                 // save bitmaps used for alignments
@@ -15057,6 +15067,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                 int this_align_x = 0, this_align_y = 0;
                 float y_scale = 1.0f;
+                Log.d(TAG, "### time before auto-alignment for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 if( use_align_by_feature ) {
                     try {
                         HDRProcessor.AutoAlignmentByFeatureResult res = mActivity.getApplicationInterface().getHDRProcessor().autoAlignmentByFeature(alignment_bitmaps.get(0).getWidth(), alignment_bitmaps.get(0).getHeight(), alignment_bitmaps, i);
@@ -15079,6 +15090,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     this_align_x = offsets_x[1];
                     this_align_y = offsets_y[1];
                 }
+                Log.d(TAG, "### time after auto-alignment for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 this_align_x *= align_downsample;
                 this_align_y *= align_downsample;
                 for(Bitmap alignment_bitmap : alignment_bitmaps) {
@@ -15091,6 +15103,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 // post-rotate image based on auto-alignment
                 if( gyro_debug_info == null && Math.abs(angle_z) > 1.0e-5f ) {
                     Log.d(TAG, "post-rotate bitmap by: " + angle_z);
+                    Log.d(TAG, "### time before pre-rotate for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                     // we have rotation about origin followed by translation
                     // but instead we want to rotate about the bitmap centre and then translate:
                     // R[x] + d = (R[x-c] + c) + (d - c + R[c])
@@ -15122,6 +15135,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     rotated_canvas.restore();
                     bitmaps.get(i).recycle();
                     bitmaps.set(i, rotated_bitmap);
+                    Log.d(TAG, "### time after pre-rotate for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 }
 
                 // alignments map next image to previous, so this means we need to move the "source" window in the opposite direction
@@ -15177,6 +15191,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
 
+            Log.d(TAG, "### time before projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             Bitmap projected_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
             {
                 // project
@@ -15198,8 +15213,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
                 }
             }
+            Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
             if( i > 0 && blend_hwidth > 0 ) {
+                Log.d(TAG, "### time before blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 // first blend right hand side of previous image with left hand side of new image
                 Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
                 //Bitmap rhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
@@ -15243,6 +15260,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 lhs.recycle();
                 rhs.recycle();
                 blended_bitmap.recycle();
+                Log.d(TAG, "### time after blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             }
 
             int start_x = blend_hwidth;
@@ -15258,10 +15276,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "    stop_x: " + stop_x);
 
             // draw rest of this image
+            Log.d(TAG, "### time before drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             src_rect.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
             src_rect.offset(align_x, align_y);
             dst_rect.set(offset_x + dst_offset_x + start_x, 0, offset_x + dst_offset_x + stop_x, bitmap_height);
             canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
+            Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
             /*
             int start_x = -blend_hwidth;
@@ -15363,6 +15383,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             canvas.drawBitmap(bitmap_slice, matrix, null);
             bitmap_slice.recycle();
             */
+            Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
         for(Bitmap bitmap : bitmaps) {
             bitmap.recycle();
