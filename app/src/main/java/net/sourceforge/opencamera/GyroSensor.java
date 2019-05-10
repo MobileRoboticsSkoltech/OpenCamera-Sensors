@@ -21,6 +21,8 @@ public class GyroSensor implements SensorEventListener {
 
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final float [] deltaRotationVector = new float[4];
+    private boolean has_gyroVector;
+    private final float [] gyroVector = new float[3];
     private final float [] currentRotationMatrix = new float[9];
     private final float [] currentRotationMatrixGyroOnly = new float[9];
     private final float [] deltaRotationMatrix = new float[9];
@@ -33,6 +35,8 @@ public class GyroSensor implements SensorEventListener {
 
     private boolean has_original_rotation_matrix;
     private final float [] originalRotationMatrix = new float[9];
+    private boolean has_rotationVector;
+    private final float [] rotationVector = new float[3];
 
     // temporary vectors:
     private final float [] tempVector = new float[3];
@@ -75,9 +79,13 @@ public class GyroSensor implements SensorEventListener {
         currentRotationMatrix[8] = 1.0f;
         System.arraycopy(currentRotationMatrix, 0, currentRotationMatrixGyroOnly, 0, 9);
 
+        has_gyroVector = false;
+        has_rotationVector = false;
         for(int i=0;i<3;i++) {
             initAccelVector[i] = 0.0f;
             accelVector[i] = 0.0f;
+            gyroVector[i] = 0.0f;
+            rotationVector[i] = 0.0f;
         }
 
         has_original_rotation_matrix = false;
@@ -188,6 +196,8 @@ public class GyroSensor implements SensorEventListener {
         else if( !has_accel ) {
             return;
         }
+        if( true )
+            return; // don't use accelerometer for now
 
         //transformVector(tempVector, currentRotationMatrix, initAccelVector);
         // tempVector is now the initAccelVector transformed by the gyro matrix
@@ -263,7 +273,15 @@ public class GyroSensor implements SensorEventListener {
                 setMatrixComponent(temp2Matrix, i, j, value);
             }
         }
+
+        // replace directly:
         System.arraycopy(temp2Matrix, 0, currentRotationMatrix, 0, 9);
+        // filter:
+        /*final float sensor_alpha = 0.98f; // for filter: higher value means slower transition
+        for(int i=0;i<9;i++) {
+            currentRotationMatrix[i] = sensor_alpha * currentRotationMatrix[i] + (1.0f-sensor_alpha) * temp2Matrix[i];
+        }*/
+
         if( MyDebug.LOG ) {
             // test:
             //transformVector(tempVector, temp2Matrix, initAccelVector);
@@ -300,14 +318,28 @@ public class GyroSensor implements SensorEventListener {
             adjustGyroForAccel();
         }
         else if( event.sensor.getType() == Sensor.TYPE_GYROSCOPE ) {
+            if( has_gyroVector ) {
+                final float sensor_alpha = 0.5f; // for filter
+                for(int i=0;i<3;i++) {
+                    //this.gyroVector[i] = event.values[i];
+                    this.gyroVector[i] = sensor_alpha * this.gyroVector[i] + (1.0f-sensor_alpha) * event.values[i];
+                }
+            }
+            else {
+                for(int i=0;i<3;i++) {
+                    this.gyroVector[i] = event.values[i];
+                }
+                has_gyroVector = true;
+            }
+
             // This timestep's delta rotation to be multiplied by the current rotation
             // after computing it from the gyro sample data.
             if( timestamp != 0 ) {
                 final float dT = (event.timestamp - timestamp) * NS2S;
                 // Axis of the rotation sample, not normalized yet.
-                float axisX = event.values[0];
-                float axisY = event.values[1];
-                float axisZ = event.values[2];
+                float axisX = gyroVector[0];
+                float axisY = gyroVector[1];
+                float axisZ = gyroVector[2];
 
                 // Calculate the angular speed of the sample
                 double omegaMagnitude = Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
@@ -331,6 +363,10 @@ public class GyroSensor implements SensorEventListener {
                 deltaRotationVector[1] = sinThetaOverTwo * axisY;
                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
                 deltaRotationVector[3] = cosThetaOverTwo;
+                /*if( MyDebug.LOG ) {
+                    Log.d(TAG, "### values: " + event.values[0] + " , " + event.values[1] + " , " + event.values[2]);
+                    Log.d(TAG, "smoothed values: " + gyroVector[0] + " , " + gyroVector[1] + " , " + gyroVector[2]);
+                }*/
 
                 SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
                 // User code should concatenate the delta rotation we computed with the current rotation
@@ -375,7 +411,22 @@ public class GyroSensor implements SensorEventListener {
             timestamp = event.timestamp;
         }
         else if( event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR || event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR ) {
-            SensorManager.getRotationMatrixFromVector(tempMatrix, event.values);
+            if( has_rotationVector ) {
+                //final float sensor_alpha = 0.7f; // for filter
+                final float sensor_alpha = 0.8f; // for filter
+                for(int i=0;i<3;i++) {
+                    //this.rotationVector[i] = event.values[i];
+                    this.rotationVector[i] = sensor_alpha * this.rotationVector[i] + (1.0f-sensor_alpha) * event.values[i];
+                }
+            }
+            else {
+                for(int i=0;i<3;i++) {
+                    this.rotationVector[i] = event.values[i];
+                }
+                has_rotationVector = true;
+            }
+
+            SensorManager.getRotationMatrixFromVector(tempMatrix, rotationVector);
 
             if( !has_original_rotation_matrix ) {
                 System.arraycopy(tempMatrix, 0, originalRotationMatrix, 0, 9);
