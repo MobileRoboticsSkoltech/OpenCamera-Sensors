@@ -15196,6 +15196,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             {
                 // project
                 Canvas projected_canvas = new Canvas(projected_bitmap);
+                int prev_x = 0;
+                int prev_y0 = -1, prev_y1 = -1;
                 for(int x=0;x<bitmap_width;x++) {
                     float dx = (float)(x - (bitmap_width/2));
                     // rectangular projection:
@@ -15206,11 +15208,30 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                     int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
                     int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+                    if( x == 0 ) {
+                        prev_y0 = dst_y0;
+                        prev_y1 = dst_y1;
+                    }
+                    else if( dst_y0 != prev_y0 || dst_y1 != prev_y1 ) {
+                        src_rect.set(prev_x, 0, x, bitmap_height);
+                        dst_rect.set(prev_x, dst_y0, x, dst_y1);
+                        projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                        prev_x = x;
+                        prev_y0 = dst_y0;
+                        prev_y1 = dst_y1;
+                    }
 
-                    src_rect.set(x, 0, x+1, bitmap_height);
+                    if( x == bitmap_width-1 ) {
+                        // draw last
+                        src_rect.set(prev_x, 0, x+1, bitmap_height);
+                        dst_rect.set(prev_x, dst_y0, x+1, dst_y1);
+                        projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                    }
+
+                    /*src_rect.set(x, 0, x+1, bitmap_height);
                     dst_rect.set(x, dst_y0, x+1, dst_y1);
 
-                    projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
+                    projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);*/
                 }
             }
             Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
