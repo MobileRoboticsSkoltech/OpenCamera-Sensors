@@ -2371,9 +2371,9 @@ public class HDRProcessor {
 					Log.d(TAG, "    start_y: " + start_y);
 					Log.d(TAG, "    stop_y: " + stop_y);
 				}
-				for(;;) {
+				for(int count=0;;count++) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "### try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
+						Log.d(TAG, "### attempt " + count + " try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
 					featureDetectorScript.set_corner_threshold(threshold);
 					Script.LaunchOptions launch_options = new Script.LaunchOptions();
 					launch_options.setX(0, width);
@@ -2412,9 +2412,12 @@ public class HDRProcessor {
 							threshold = 0.5f * ( low_threshold + threshold );
 							if( MyDebug.LOG )
 								Log.d(TAG, "    reduced threshold to: " + threshold);
-						/*if( low_threshold == 0.0f ) {
-							throw new RuntimeException();
-						}*/
+							/*if( low_threshold == 0.0f ) {
+								throw new RuntimeException();
+							}*/
+							/*if( count == 0 ) {
+								throw new RuntimeException();
+							}*/
 						}
 					}
 					else {
