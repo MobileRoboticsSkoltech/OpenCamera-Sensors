@@ -1655,17 +1655,25 @@ public class HDRProcessor {
 	private Allocation expandBitmap(ScriptC_pyramid_blending script, Allocation allocation) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "expandBitmap");
+		long time_s = 0;
+		if( MyDebug.LOG )
+			time_s = System.currentTimeMillis();
+
 		int width = allocation.getType().getX();
 		int height = allocation.getType().getY();
 
 		Allocation expanded_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+		Log.d(TAG, "### expandBitmap: time after creating expanded_allocation: " + (System.currentTimeMillis() - time_s));
 
 		script.set_bitmap(allocation);
 		script.forEach_expand(expanded_allocation, expanded_allocation);
+		Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
 
 		Allocation result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+		Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
 		script.set_bitmap(expanded_allocation);
 		script.forEach_blur(expanded_allocation, result_allocation);
+		Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
 		expanded_allocation.destroy();
 		//Allocation result_allocation = expanded_allocation;
 
@@ -1737,8 +1745,12 @@ public class HDRProcessor {
 	private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script,Bitmap bitmap, int n_levels, String name) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createLaplacianPyramid");
+		long time_s = 0;
+		if( MyDebug.LOG )
+			time_s = System.currentTimeMillis();
 
         List<Allocation> gaussianPyramid = createGaussianPyramid(script, bitmap, n_levels);
+		Log.d(TAG, "### createLaplacianPyramid: time after createGaussianPyramid: " + (System.currentTimeMillis() - time_s));
 		/*{
 			// debug
 			savePyramid("gaussian", gaussianPyramid);
@@ -1751,6 +1763,7 @@ public class HDRProcessor {
 			Allocation this_gauss = gaussianPyramid.get(i);
 			Allocation next_gauss = gaussianPyramid.get(i+1);
 			Allocation next_gauss_expanded = expandBitmap(script, next_gauss);
+			Log.d(TAG, "### createLaplacianPyramid: time after expandBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "this_gauss: " + this_gauss.getType().getX() + " , " + this_gauss.getType().getY());
 				Log.d(TAG, "next_gauss: " + next_gauss.getType().getX() + " , " + next_gauss.getType().getY());
@@ -1762,6 +1775,7 @@ public class HDRProcessor {
 				saveAllocation(name + "_next_gauss_expanded_" + i + ".jpg", next_gauss_expanded);
 			}*/
 			Allocation difference = subtractBitmap(script, this_gauss, next_gauss_expanded);
+			Log.d(TAG, "### createLaplacianPyramid: time after subtractBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
 			/*{
 				// debug
 				saveAllocation(name + "_difference_" + i + ".jpg", difference);
@@ -1772,6 +1786,7 @@ public class HDRProcessor {
 			this_gauss.destroy();
 			gaussianPyramid.set(i, null); // to help garbage collection
 			next_gauss_expanded.destroy();
+			Log.d(TAG, "### createLaplacianPyramid: time after level " + i + ": " + (System.currentTimeMillis() - time_s));
 		}
 		pyramid.add(gaussianPyramid.get(gaussianPyramid.size()-1));
 
@@ -1914,7 +1929,11 @@ public class HDRProcessor {
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public Bitmap blendPyramids(Bitmap lhs, Bitmap rhs) {
+		long time_s = 0;
+		if( MyDebug.LOG )
+			time_s = System.currentTimeMillis();
 		ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
+		Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
 		//final int n_levels = 5;
 		final int n_levels = 4;
 		//final int n_levels = 1;
@@ -1939,7 +1958,9 @@ public class HDRProcessor {
         }*/
 
 		List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, n_levels, "lhs");
+		Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
 		List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, n_levels, "rhs");
+		Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
 		// debug
 		/*{
@@ -1958,7 +1979,9 @@ public class HDRProcessor {
 		}*/
 
 		mergePyramids(script, lhs_pyramid, rhs_pyramid);
+		Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
 		Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);
+		Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
 		// debug
         /*{
             savePyramid("merged_laplacian", lhs_pyramid);
@@ -1971,6 +1994,7 @@ public class HDRProcessor {
 		for(Allocation allocation : rhs_pyramid) {
 			allocation.destroy();
 		}
+		Log.d(TAG, "### blendPyramids: time taken: " + (System.currentTimeMillis() - time_s));
 		return merged_bitmap;
 	}
 
