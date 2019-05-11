@@ -120,26 +120,21 @@ uchar __attribute__((kernel)) local_maximum(float in, uint32_t x, uint32_t y) {
 
     uchar out = 0;
 
-    //if( in >= 0.00001f ) {
-    //if( in >= 0.001f ) {
-    //if( in >= 0.03f ) {
-    //if( in >= 1600000.0f ) {
-    //if( in >= 50000000.0f ) {
     if( in >= corner_threshold ) {
-    //if( in >= 2000000000.0f ) {
-    //if( in >= 500000000000.0f ) {
         //out = 255;
         // best of 3x3:
         /*if( x >= 1 && x < width-1 && y >= 1 && y < height-1 ) {
-            float pixel0 = rsGetElementAt_float(bitmap, x-1, y-1);
-            float pixel1 = rsGetElementAt_float(bitmap, x, y-1);
-            float pixel2 = rsGetElementAt_float(bitmap, x+1, y-1);
-            float pixel3 = rsGetElementAt_float(bitmap, x-1, y);
-            float pixel5 = rsGetElementAt_float(bitmap, x+1, y);
-            float pixel6 = rsGetElementAt_float(bitmap, x-1, y+1);
-            float pixel7 = rsGetElementAt_float(bitmap, x, y+1);
-            float pixel8 = rsGetElementAt_float(bitmap, x+1, y+1);
-            if( in > pixel0 && in > pixel1 && in > pixel2 & in > pixel3 && in > pixel5 && in > pixel6 && in > pixel7 && in > pixel8 ) {
+            if( in > rsGetElementAt_float(bitmap, x-1, y-1) &&
+                in > rsGetElementAt_float(bitmap, x, y-1) &&
+                in > rsGetElementAt_float(bitmap, x+1, y-1) &&
+
+                in > rsGetElementAt_float(bitmap, x-1, y) &&
+                in > rsGetElementAt_float(bitmap, x+1, y) &&
+
+                in > rsGetElementAt_float(bitmap, x-1, y+1) &&
+                in > rsGetElementAt_float(bitmap, x, y+1) &&
+                in > rsGetElementAt_float(bitmap, x+1, y+1)
+                ) {
                 out = 255;
             }
         }*/
