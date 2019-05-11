@@ -2371,61 +2371,73 @@ public class HDRProcessor {
 		Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
 
 		// compute distances between matches
-		for(FeatureMatch match : matches) {
-			Point point0 = points_arrays[0][match.index0];
-			Point point1 = points_arrays[1][match.index1];
+		{
 			final int wid = 2*feature_descriptor_radius+1;
 			final int wid2 = wid*wid;
+			int [] pixels0 = new int[wid2];
+			int [] pixels1 = new int[wid2];
+			for(FeatureMatch match : matches) {
+				Point point0 = points_arrays[0][match.index0];
+				Point point1 = points_arrays[1][match.index1];
 
-			/*float distance = 0;
-			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
-				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
-					int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
-					int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
-					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
-					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
-					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
-					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
-					int dist2 = value0*value0 + value1+value1;
-					distance += ((float)dist2)/65025.0f; // so distance for a given pixel is from 0 to 1
+				/*float distance = 0;
+				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+					for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+						int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+						int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+						//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+						//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+						int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+						int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+						int dist2 = value0*value0 + value1+value1;
+						distance += ((float)dist2)/65025.0f; // so distance for a given pixel is from 0 to 1
+					}
 				}
-			}
-			distance /= (float)wid2; // normalise from 0 to 1
-			match.distance = distance;*/
+				distance /= (float)wid2; // normalise from 0 to 1
+				match.distance = distance;*/
 
-			float fsum = 0, gsum = 0;
-			float f2sum = 0, g2sum = 0;
-			float fgsum = 0;
-			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
-				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
-					int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
-					int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
-					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
-					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
-					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
-					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
-					fsum += value0;
-					f2sum += value0*value0;
-					gsum += value1;
-					g2sum += value1*value1;
-					fgsum += value0*value1;
+				float fsum = 0, gsum = 0;
+				float f2sum = 0, g2sum = 0;
+				float fgsum = 0;
+				// much faster to read via getPixels() rather than pixel by pixel
+				bitmaps.get(0).getPixels(pixels0, 0, wid, point0.x - feature_descriptor_radius, point0.y - feature_descriptor_radius, wid, wid);
+				bitmaps.get(1).getPixels(pixels1, 0, wid, point1.x - feature_descriptor_radius, point1.y - feature_descriptor_radius, wid, wid);
+				int pixel_idx = 0;
+				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+					for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+						//int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+						//int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+						int pixel0 = pixels0[pixel_idx];
+						int pixel1 = pixels1[pixel_idx];
+						pixel_idx++;
+
+						//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+						//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+						int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+						int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+						fsum += value0;
+						f2sum += value0*value0;
+						gsum += value1;
+						g2sum += value1*value1;
+						fgsum += value0*value1;
+					}
 				}
+				float fden = wid2*f2sum - fsum*fsum;
+				float f_recip = fden==0 ? 0.0f : 1/(float)fden;
+				float gden = wid2*g2sum - gsum*gsum;
+				float g_recip = gden==0 ? 0.0f : 1/(float)gden;
+				float fg_corr = wid2*fgsum-fsum*gsum;
+				//if( MyDebug.LOG ) {
+				//	Log.d(TAG, "match distance: ");
+				//	Log.d(TAG, "    fg_corr: " + fg_corr);
+				//	Log.d(TAG, "    fden: " + fden);
+				//	Log.d(TAG, "    gden: " + gden);
+				//	Log.d(TAG, "    f_recip: " + f_recip);
+				//	Log.d(TAG, "    g_recip: " + g_recip);
+				//}
+				// negate, as we want it so that lower value means better match, and normalise to 0-1
+				match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
 			}
-			float fden = wid2*f2sum - fsum*fsum;
-			float f_recip = fden==0 ? 0.0f : 1/(float)fden;
-			float gden = wid2*g2sum - gsum*gsum;
-			float g_recip = gden==0 ? 0.0f : 1/(float)gden;
-			float fg_corr = wid2*fgsum-fsum*gsum;
-			//if( MyDebug.LOG ) {
-			//	Log.d(TAG, "match distance: ");
-			//	Log.d(TAG, "    fg_corr: " + fg_corr);
-			//	Log.d(TAG, "    fden: " + fden);
-			//	Log.d(TAG, "    gden: " + gden);
-			//	Log.d(TAG, "    f_recip: " + f_recip);
-			//	Log.d(TAG, "    g_recip: " + g_recip);
-			//}
-			// negate, as we want it so that lower value means better match, and normalise to 0-1
-			match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
 		}
 		Log.d(TAG, "### autoAlignmentByFeature: time after computing match distances: " + (System.currentTimeMillis() - time_s));
 
