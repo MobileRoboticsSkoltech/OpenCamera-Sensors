@@ -1294,7 +1294,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		if( noise_reduction && main_activity.supportsNoiseReduction() )
 			return PhotoMode.NoiseReduction;
 		boolean panorama = photo_mode_pref.equals("preference_photo_mode_panorama");
-		if( panorama && main_activity.supportsPanorama() )
+		if( panorama && !main_activity.getPreview().isVideo() && main_activity.supportsPanorama() )
 			return PhotoMode.Panorama;
 		return PhotoMode.Standard;
     }
