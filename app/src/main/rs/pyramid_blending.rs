@@ -137,6 +137,60 @@ uchar4 __attribute__((kernel)) blur(uchar4 in, uint32_t x, uint32_t y) {
     return out;
 }
 
+uchar4 __attribute__((kernel)) blur1dX(uchar4 in, uint32_t x, uint32_t y) {
+    int width = rsAllocationGetDimX(bitmap);
+
+    uchar4 out;
+
+    if( x >= 2 && x < width-2 ) {
+        float3 pixel0 = convert_float3(rsGetElementAt_uchar4(bitmap, x-2, y).rgb) * g0;
+        float3 pixel1 = convert_float3(rsGetElementAt_uchar4(bitmap, x-1, y).rgb) * g1;
+        float3 pixel2 = convert_float3(in.rgb) * g2;
+        float3 pixel3 = convert_float3(rsGetElementAt_uchar4(bitmap, x+1, y).rgb) * g1;
+        float3 pixel4 = convert_float3(rsGetElementAt_uchar4(bitmap, x+2, y).rgb) * g0;
+
+        float3 result = pixel0 + pixel1 + pixel2 + pixel3 + pixel4;
+        result *= 2;
+
+        out.r = (uchar)clamp(result.r+0.5f, 0.0f, 255.0f);
+        out.g = (uchar)clamp(result.g+0.5f, 0.0f, 255.0f);
+        out.b = (uchar)clamp(result.b+0.5f, 0.0f, 255.0f);
+        out.a = 255;
+    }
+    else {
+        out = in;
+    }
+
+    return out;
+}
+
+uchar4 __attribute__((kernel)) blur1dY(uchar4 in, uint32_t x, uint32_t y) {
+    int height = rsAllocationGetDimY(bitmap);
+
+    uchar4 out;
+
+    if( y >= 2 && y < height-2 ) {
+        float3 pixel0 = convert_float3(rsGetElementAt_uchar4(bitmap, x, y-2).rgb) * g0;
+        float3 pixel1 = convert_float3(rsGetElementAt_uchar4(bitmap, x, y-1).rgb) * g1;
+        float3 pixel2 = convert_float3(in.rgb) * g2;
+        float3 pixel3 = convert_float3(rsGetElementAt_uchar4(bitmap, x, y+1).rgb) * g1;
+        float3 pixel4 = convert_float3(rsGetElementAt_uchar4(bitmap, x, y+2).rgb) * g0;
+
+        float3 result = pixel0 + pixel1 + pixel2 + pixel3 + pixel4;
+        result *= 2;
+
+        out.r = (uchar)clamp(result.r+0.5f, 0.0f, 255.0f);
+        out.g = (uchar)clamp(result.g+0.5f, 0.0f, 255.0f);
+        out.b = (uchar)clamp(result.b+0.5f, 0.0f, 255.0f);
+        out.a = 255;
+    }
+    else {
+        out = in;
+    }
+
+    return out;
+}
+
 /* Subtracts bitmap from the input.
  */
 float3 __attribute__((kernel)) subtract(uchar4 in, uint32_t x, uint32_t y) {

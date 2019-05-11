@@ -1661,6 +1661,7 @@ public class HDRProcessor {
 
 		int width = allocation.getType().getX();
 		int height = allocation.getType().getY();
+		Allocation result_allocation;
 
 		Allocation expanded_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
 		Log.d(TAG, "### expandBitmap: time after creating expanded_allocation: " + (System.currentTimeMillis() - time_s));
@@ -1669,13 +1670,31 @@ public class HDRProcessor {
 		script.forEach_expand(expanded_allocation, expanded_allocation);
 		Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
 
-		Allocation result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-		Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
-		script.set_bitmap(expanded_allocation);
-		script.forEach_blur(expanded_allocation, result_allocation);
-		Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
-		expanded_allocation.destroy();
-		//Allocation result_allocation = expanded_allocation;
+		final boolean use_blur_2d = false; // faster to do blue as two 1D passes
+		if( use_blur_2d ) {
+			result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+			Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
+			script.set_bitmap(expanded_allocation);
+			script.forEach_blur(expanded_allocation, result_allocation);
+			Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
+			expanded_allocation.destroy();
+			//result_allocation = expanded_allocation;
+		}
+		else {
+			Allocation temp_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
+			Log.d(TAG, "### expandBitmap: time after creating temp_allocation: " + (System.currentTimeMillis() - time_s));
+			script.set_bitmap(expanded_allocation);
+			script.forEach_blur1dX(expanded_allocation, temp_allocation);
+			Log.d(TAG, "### expandBitmap: time after blur1dX: " + (System.currentTimeMillis() - time_s));
+
+			// now re-use expanded_allocation for the result_allocation
+			result_allocation = expanded_allocation;
+			script.set_bitmap(temp_allocation);
+			script.forEach_blur1dY(temp_allocation, result_allocation);
+			Log.d(TAG, "### expandBitmap: time after blur1dY: " + (System.currentTimeMillis() - time_s));
+
+			temp_allocation.destroy();
+		}
 
 		return result_allocation;
 	}
