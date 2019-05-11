@@ -1664,34 +1664,41 @@ public class HDRProcessor {
 		Allocation result_allocation;
 
 		Allocation expanded_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-		Log.d(TAG, "### expandBitmap: time after creating expanded_allocation: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### expandBitmap: time after creating expanded_allocation: " + (System.currentTimeMillis() - time_s));
 
 		script.set_bitmap(allocation);
 		script.forEach_expand(expanded_allocation, expanded_allocation);
-		Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### expandBitmap: time after expand: " + (System.currentTimeMillis() - time_s));
 
 		final boolean use_blur_2d = false; // faster to do blue as two 1D passes
 		if( use_blur_2d ) {
 			result_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-			Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### expandBitmap: time after creating result_allocation: " + (System.currentTimeMillis() - time_s));
 			script.set_bitmap(expanded_allocation);
 			script.forEach_blur(expanded_allocation, result_allocation);
-			Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### expandBitmap: time after blur: " + (System.currentTimeMillis() - time_s));
 			expanded_allocation.destroy();
 			//result_allocation = expanded_allocation;
 		}
 		else {
 			Allocation temp_allocation = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), 2*width, 2*height));
-			Log.d(TAG, "### expandBitmap: time after creating temp_allocation: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### expandBitmap: time after creating temp_allocation: " + (System.currentTimeMillis() - time_s));
 			script.set_bitmap(expanded_allocation);
 			script.forEach_blur1dX(expanded_allocation, temp_allocation);
-			Log.d(TAG, "### expandBitmap: time after blur1dX: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### expandBitmap: time after blur1dX: " + (System.currentTimeMillis() - time_s));
 
 			// now re-use expanded_allocation for the result_allocation
 			result_allocation = expanded_allocation;
 			script.set_bitmap(temp_allocation);
 			script.forEach_blur1dY(temp_allocation, result_allocation);
-			Log.d(TAG, "### expandBitmap: time after blur1dY: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### expandBitmap: time after blur1dY: " + (System.currentTimeMillis() - time_s));
 
 			temp_allocation.destroy();
 		}
@@ -1769,7 +1776,8 @@ public class HDRProcessor {
 			time_s = System.currentTimeMillis();
 
         List<Allocation> gaussianPyramid = createGaussianPyramid(script, bitmap, n_levels);
-		Log.d(TAG, "### createLaplacianPyramid: time after createGaussianPyramid: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### createLaplacianPyramid: time after createGaussianPyramid: " + (System.currentTimeMillis() - time_s));
 		/*{
 			// debug
 			savePyramid("gaussian", gaussianPyramid);
@@ -1782,7 +1790,8 @@ public class HDRProcessor {
 			Allocation this_gauss = gaussianPyramid.get(i);
 			Allocation next_gauss = gaussianPyramid.get(i+1);
 			Allocation next_gauss_expanded = expandBitmap(script, next_gauss);
-			Log.d(TAG, "### createLaplacianPyramid: time after expandBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### createLaplacianPyramid: time after expandBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "this_gauss: " + this_gauss.getType().getX() + " , " + this_gauss.getType().getY());
 				Log.d(TAG, "next_gauss: " + next_gauss.getType().getX() + " , " + next_gauss.getType().getY());
@@ -1794,7 +1803,8 @@ public class HDRProcessor {
 				saveAllocation(name + "_next_gauss_expanded_" + i + ".jpg", next_gauss_expanded);
 			}*/
 			Allocation difference = subtractBitmap(script, this_gauss, next_gauss_expanded);
-			Log.d(TAG, "### createLaplacianPyramid: time after subtractBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### createLaplacianPyramid: time after subtractBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
 			/*{
 				// debug
 				saveAllocation(name + "_difference_" + i + ".jpg", difference);
@@ -1805,7 +1815,8 @@ public class HDRProcessor {
 			this_gauss.destroy();
 			gaussianPyramid.set(i, null); // to help garbage collection
 			next_gauss_expanded.destroy();
-			Log.d(TAG, "### createLaplacianPyramid: time after level " + i + ": " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### createLaplacianPyramid: time after level " + i + ": " + (System.currentTimeMillis() - time_s));
 		}
 		pyramid.add(gaussianPyramid.get(gaussianPyramid.size()-1));
 
@@ -1952,7 +1963,8 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			time_s = System.currentTimeMillis();
 		ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
-		Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
 		//final int n_levels = 5;
 		final int n_levels = 4;
 		//final int n_levels = 1;
@@ -1977,9 +1989,11 @@ public class HDRProcessor {
         }*/
 
 		List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, n_levels, "lhs");
-		Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
 		List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, n_levels, "rhs");
-		Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
 		// debug
 		/*{
@@ -1998,9 +2012,11 @@ public class HDRProcessor {
 		}*/
 
 		mergePyramids(script, lhs_pyramid, rhs_pyramid);
-		Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
 		Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);
-		Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
 		// debug
         /*{
             savePyramid("merged_laplacian", lhs_pyramid);
@@ -2013,7 +2029,8 @@ public class HDRProcessor {
 		for(Allocation allocation : rhs_pyramid) {
 			allocation.destroy();
 		}
-		Log.d(TAG, "### blendPyramids: time taken: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### blendPyramids: time taken: " + (System.currentTimeMillis() - time_s));
 		return merged_bitmap;
 	}
 
@@ -2047,19 +2064,22 @@ public class HDRProcessor {
 		}
 
 		initRenderscript();
-		Log.d(TAG, "### autoAlignmentByFeature: time after initRenderscript: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after initRenderscript: " + (System.currentTimeMillis() - time_s));
 		Allocation [] allocations = new Allocation[bitmaps.size()];
 		for(int i=0;i<bitmaps.size();i++) {
 			allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after creating allocations: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after creating allocations: " + (System.currentTimeMillis() - time_s));
 
 		// create RenderScript
 		/*if( createMTBScript == null ) {
 			createMTBScript = new ScriptC_create_mtb(rs);
 		}*/
 		ScriptC_feature_detector featureDetectorScript = new ScriptC_feature_detector(rs);
-		Log.d(TAG, "### autoAlignmentByFeature: time after create featureDetectorScript: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after create featureDetectorScript: " + (System.currentTimeMillis() - time_s));
 
 		//final int feature_descriptor_radius = 2; // radius of square used to compare features
 		final int feature_descriptor_radius = 3; // radius of square used to compare features
@@ -2291,7 +2311,8 @@ public class HDRProcessor {
 			local_max_features_allocation.destroy();
 			local_max_features_allocation = null;
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after feature detection: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after feature detection: " + (System.currentTimeMillis() - time_s));
 
 		// if we have too few good corners, risk of getting a poor match
 		final int min_required_corners = 10;
@@ -2368,7 +2389,8 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### possible matches: " + matches.size());
-		Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
 
 		// compute distances between matches
 		{
@@ -2439,11 +2461,13 @@ public class HDRProcessor {
 				match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
 			}
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after computing match distances: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after computing match distances: " + (System.currentTimeMillis() - time_s));
 
 		// sort
 		Collections.sort(matches);
-		Log.d(TAG, "### autoAlignmentByFeature: time after sorting matches: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after sorting matches: " + (System.currentTimeMillis() - time_s));
 		if( MyDebug.LOG ) {
 			FeatureMatch best_match = matches.get(0);
 			FeatureMatch worst_match = matches.get(matches.size()-1);
@@ -2498,7 +2522,8 @@ public class HDRProcessor {
 				break;
 			}*/
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after initial matching: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after initial matching: " + (System.currentTimeMillis() - time_s));
 		if( MyDebug.LOG )
 			Log.d(TAG, "### found: " + actual_matches.size() + " matches");
 		Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
@@ -2518,7 +2543,8 @@ public class HDRProcessor {
             if( MyDebug.LOG )
 				Log.d(TAG, "    actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after choosing best matches: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after choosing best matches: " + (System.currentTimeMillis() - time_s));
 
 		final boolean use_ransac = true;
 		//final boolean use_ransac = false;
@@ -2723,7 +2749,8 @@ public class HDRProcessor {
 				}
 			}
 			actual_matches = best_inliers;
-			Log.d(TAG, "### autoAlignmentByFeature: time after RANSAC: " + (System.currentTimeMillis() - time_s));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### autoAlignmentByFeature: time after RANSAC: " + (System.currentTimeMillis() - time_s));
 			if( MyDebug.LOG ) {
 				for(FeatureMatch match : actual_matches) {
 					Log.d(TAG, "    after ransac: actual match between " + match.index0 + " and " + match.index1 + " distance: " + match.distance);
@@ -2854,7 +2881,8 @@ public class HDRProcessor {
 			offset_y += centres[0].y - rotated_centre_y;
 
 		}
-		Log.d(TAG, "### autoAlignmentByFeature: time after computing transformation: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: time after computing transformation: " + (System.currentTimeMillis() - time_s));
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "offset_x: " + offset_x);
 			Log.d(TAG, "offset_y: " + offset_y);
@@ -3005,7 +3033,8 @@ public class HDRProcessor {
 			}
 		}
 		freeScripts();
-		Log.d(TAG, "### autoAlignmentByFeature: total time: " + (System.currentTimeMillis() - time_s));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### autoAlignmentByFeature: total time: " + (System.currentTimeMillis() - time_s));
 		return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation, y_scale);
 	}
 
