@@ -2061,13 +2061,11 @@ public class HDRProcessor {
 		}
 	}
 
-	private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, Point [][] points_arrays, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
+	private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
 		final int wid = 2*feature_descriptor_radius+1;
 		final int wid2 = wid*wid;
 		for(int indx=st_indx;indx<nd_indx;indx++) {
 			FeatureMatch match = matches.get(indx);
-			Point point0 = points_arrays[0][match.index0];
-			Point point1 = points_arrays[1][match.index1];
 
 				/*float distance = 0;
 				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
@@ -2088,22 +2086,34 @@ public class HDRProcessor {
 			float fsum = 0, gsum = 0;
 			float f2sum = 0, g2sum = 0;
 			float fgsum = 0;
+
 			// much faster to read via getPixels() rather than pixel by pixel
-			bitmaps.get(0).getPixels(pixels0, 0, wid, point0.x - feature_descriptor_radius, point0.y - feature_descriptor_radius, wid, wid);
-			bitmaps.get(1).getPixels(pixels1, 0, wid, point1.x - feature_descriptor_radius, point1.y - feature_descriptor_radius, wid, wid);
-			int pixel_idx = 0;
+			//bitmaps.get(0).getPixels(pixels0, 0, wid, point0.x - feature_descriptor_radius, point0.y - feature_descriptor_radius, wid, wid);
+			//bitmaps.get(1).getPixels(pixels1, 0, wid, point1.x - feature_descriptor_radius, point1.y - feature_descriptor_radius, wid, wid);
+			//int pixel_idx = 0;
+
+			int pixel_idx0 = match.index0*wid2;
+			int pixel_idx1 = match.index1*wid2;
+
 			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
 				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
 					//int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
 					//int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
-					int pixel0 = pixels0[pixel_idx];
-					int pixel1 = pixels1[pixel_idx];
-					pixel_idx++;
+
+					//int pixel0 = pixels0[pixel_idx];
+					//int pixel1 = pixels1[pixel_idx];
+					//pixel_idx++;
 
 					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
 					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
-					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
-					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+					//int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+					//int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+
+					int value0 = pixels0[pixel_idx0];
+					int value1 = pixels1[pixel_idx1];
+					pixel_idx0++;
+					pixel_idx1++;
+
 					fsum += value0;
 					f2sum += value0*value0;
 					gsum += value1;
@@ -2133,25 +2143,23 @@ public class HDRProcessor {
 		private final List<FeatureMatch> matches;
 		private final int st_indx;
 		private final int nd_indx;
-		private final Point [][] points_arrays;
 		private final int feature_descriptor_radius;
 		private final List<Bitmap> bitmaps;
+		private final int [] pixels0;
+		private final int [] pixels1;
 
-		ComputeDistancesBetweenMatchesThread(List<FeatureMatch> matches, int st_indx, int nd_indx, Point [][] points_arrays, int feature_descriptor_radius, List<Bitmap> bitmaps) {
+		ComputeDistancesBetweenMatchesThread(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
 			this.matches = matches;
 			this.st_indx = st_indx;
 			this.nd_indx = nd_indx;
-			this.points_arrays = points_arrays;
 			this.feature_descriptor_radius = feature_descriptor_radius;
 			this.bitmaps = bitmaps;
+			this.pixels0 = pixels0;
+			this.pixels1 = pixels1;
 		}
 
 		public void run() {
-			final int wid = 2*feature_descriptor_radius+1;
-			final int wid2 = wid*wid;
-			int [] pixels0 = new int[wid2];
-			int [] pixels1 = new int[wid2];
-			computeDistancesBetweenMatches(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps, pixels0, pixels1);
+			computeDistancesBetweenMatches(matches, st_indx, nd_indx, feature_descriptor_radius, bitmaps, pixels0, pixels1);
 		}
 	}
 
@@ -2488,8 +2496,33 @@ public class HDRProcessor {
 
 		// compute distances between matches
 		{
-			final boolean use_smp = false; // disabled for now, no evidence this improves performance
+			final int wid = 2*feature_descriptor_radius+1;
+			final int wid2 = wid*wid;
+			int [] pixels0 = new int[points_arrays[0].length*wid2];
+			int [] pixels1 = new int[points_arrays[1].length*wid2];
+			for(int i=0;i<points_arrays[0].length;i++) {
+				int x = points_arrays[0][i].x;
+				int y = points_arrays[0][i].y;
+				bitmaps.get(0).getPixels(pixels0, i*wid2, wid, x - feature_descriptor_radius, y - feature_descriptor_radius, wid, wid);
+			}
+			for(int i=0;i<points_arrays[1].length;i++) {
+				int x = points_arrays[1][i].x;
+				int y = points_arrays[1][i].y;
+				bitmaps.get(1).getPixels(pixels1, i*wid2, wid, x - feature_descriptor_radius, y - feature_descriptor_radius, wid, wid);
+			}
+			// convert to greyscale
+			for(int i=0;i<pixels0.length;i++) {
+				int pixel = pixels0[i];
+				pixels0[i] = (int)(0.3*Color.red(pixel) + 0.59*Color.green(pixel) + 0.11*Color.blue(pixel));
+			}
+			for(int i=0;i<pixels1.length;i++) {
+				int pixel = pixels1[i];
+				pixels1[i] = (int)(0.3*Color.red(pixel) + 0.59*Color.green(pixel) + 0.11*Color.blue(pixel));
+			}
+
+			final boolean use_smp = true;
 			if( use_smp ) {
+				// testing shows 2 threads gives slightly better than using more threads, or not using smp
 				//int n_threads = Math.min(matches.size(), Runtime.getRuntime().availableProcessors());
 				int n_threads = Math.min(matches.size(), 2);
 				if( MyDebug.LOG )
@@ -2500,7 +2533,7 @@ public class HDRProcessor {
 					int nd_indx = (((i+1)*matches.size())/n_threads);
 					if( MyDebug.LOG )
 						Log.d(TAG, "thread " + i + " from " + st_indx + " to " + nd_indx);
-					threads[i] = new ComputeDistancesBetweenMatchesThread(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps);
+					threads[i] = new ComputeDistancesBetweenMatchesThread(matches, st_indx, nd_indx, feature_descriptor_radius, bitmaps, pixels0, pixels1);
 					st_indx = nd_indx;
 				}
 				// start threads
@@ -2527,11 +2560,11 @@ public class HDRProcessor {
 			}
 			else {
 				int st_indx = 0, nd_indx = matches.size();
-				final int wid = 2*feature_descriptor_radius+1;
+				/*final int wid = 2*feature_descriptor_radius+1;
 				final int wid2 = wid*wid;
 				int [] pixels0 = new int[wid2];
-				int [] pixels1 = new int[wid2];
-				computeDistancesBetweenMatches(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps, pixels0, pixels1);
+				int [] pixels1 = new int[wid2];*/
+				computeDistancesBetweenMatches(matches, st_indx, nd_indx, feature_descriptor_radius, bitmaps, pixels0, pixels1);
 			}
 		}
 		if( MyDebug.LOG )
