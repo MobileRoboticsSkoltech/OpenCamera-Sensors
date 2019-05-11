@@ -2034,6 +2034,127 @@ public class HDRProcessor {
 		return merged_bitmap;
 	}
 
+	private static class FeatureMatch implements Comparable<FeatureMatch> {
+		private int index0, index1;
+		private float distance; // from 0 to 1, higher means poorer match
+
+		private FeatureMatch(int index0, int index1) {
+			this.index0 = index0;
+			this.index1 = index1;
+		}
+
+		@Override
+		public int compareTo(FeatureMatch that) {
+			//return (int)(this.distance - that.distance);
+				/*if( this.distance > that.distance )
+					return 1;
+				else if( this.distance < that.distance )
+					return -1;
+				else
+					return 0;*/
+			return Float.compare(this.distance, that.distance);
+		}
+
+		@Override
+		public boolean equals(Object that) {
+			return (that instanceof FeatureMatch) && compareTo((FeatureMatch)that) == 0;
+		}
+	}
+
+	private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, Point [][] points_arrays, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
+		final int wid = 2*feature_descriptor_radius+1;
+		final int wid2 = wid*wid;
+		for(int indx=st_indx;indx<nd_indx;indx++) {
+			FeatureMatch match = matches.get(indx);
+			Point point0 = points_arrays[0][match.index0];
+			Point point1 = points_arrays[1][match.index1];
+
+				/*float distance = 0;
+				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+					for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+						int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+						int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+						//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+						//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+						int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+						int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+						int dist2 = value0*value0 + value1+value1;
+						distance += ((float)dist2)/65025.0f; // so distance for a given pixel is from 0 to 1
+					}
+				}
+				distance /= (float)wid2; // normalise from 0 to 1
+				match.distance = distance;*/
+
+			float fsum = 0, gsum = 0;
+			float f2sum = 0, g2sum = 0;
+			float fgsum = 0;
+			// much faster to read via getPixels() rather than pixel by pixel
+			bitmaps.get(0).getPixels(pixels0, 0, wid, point0.x - feature_descriptor_radius, point0.y - feature_descriptor_radius, wid, wid);
+			bitmaps.get(1).getPixels(pixels1, 0, wid, point1.x - feature_descriptor_radius, point1.y - feature_descriptor_radius, wid, wid);
+			int pixel_idx = 0;
+			for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
+				for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
+					//int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
+					//int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
+					int pixel0 = pixels0[pixel_idx];
+					int pixel1 = pixels1[pixel_idx];
+					pixel_idx++;
+
+					//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
+					//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
+					int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
+					int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
+					fsum += value0;
+					f2sum += value0*value0;
+					gsum += value1;
+					g2sum += value1*value1;
+					fgsum += value0*value1;
+				}
+			}
+			float fden = wid2*f2sum - fsum*fsum;
+			float f_recip = fden==0 ? 0.0f : 1/(float)fden;
+			float gden = wid2*g2sum - gsum*gsum;
+			float g_recip = gden==0 ? 0.0f : 1/(float)gden;
+			float fg_corr = wid2*fgsum-fsum*gsum;
+			//if( MyDebug.LOG ) {
+			//	Log.d(TAG, "match distance: ");
+			//	Log.d(TAG, "    fg_corr: " + fg_corr);
+			//	Log.d(TAG, "    fden: " + fden);
+			//	Log.d(TAG, "    gden: " + gden);
+			//	Log.d(TAG, "    f_recip: " + f_recip);
+			//	Log.d(TAG, "    g_recip: " + g_recip);
+			//}
+			// negate, as we want it so that lower value means better match, and normalise to 0-1
+			match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
+		}
+	}
+
+	private static class ComputeDistancesBetweenMatchesThread extends Thread {
+		private final List<FeatureMatch> matches;
+		private final int st_indx;
+		private final int nd_indx;
+		private final Point [][] points_arrays;
+		private final int feature_descriptor_radius;
+		private final List<Bitmap> bitmaps;
+
+		ComputeDistancesBetweenMatchesThread(List<FeatureMatch> matches, int st_indx, int nd_indx, Point [][] points_arrays, int feature_descriptor_radius, List<Bitmap> bitmaps) {
+			this.matches = matches;
+			this.st_indx = st_indx;
+			this.nd_indx = nd_indx;
+			this.points_arrays = points_arrays;
+			this.feature_descriptor_radius = feature_descriptor_radius;
+			this.bitmaps = bitmaps;
+		}
+
+		public void run() {
+			final int wid = 2*feature_descriptor_radius+1;
+			final int wid2 = wid*wid;
+			int [] pixels0 = new int[wid2];
+			int [] pixels1 = new int[wid2];
+			computeDistancesBetweenMatches(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps, pixels0, pixels1);
+		}
+	}
+
 	public static class AutoAlignmentByFeatureResult {
 	    public final int offset_x;
 		public final int offset_y;
@@ -2333,33 +2454,6 @@ public class HDRProcessor {
 			return new AutoAlignmentByFeatureResult(0, 0, 0.0f, 1.0f);
 		}
 
-		class FeatureMatch implements Comparable<FeatureMatch> {
-			private int index0, index1;
-			private float distance; // from 0 to 1, higher means poorer match
-
-			private FeatureMatch(int index0, int index1) {
-				this.index0 = index0;
-				this.index1 = index1;
-			}
-
-			@Override
-			public int compareTo(FeatureMatch that) {
-				//return (int)(this.distance - that.distance);
-				/*if( this.distance > that.distance )
-					return 1;
-				else if( this.distance < that.distance )
-					return -1;
-				else
-					return 0;*/
-				return Float.compare(this.distance, that.distance);
-			}
-
-			@Override
-			public boolean equals(Object that) {
-				return (that instanceof FeatureMatch) && compareTo((FeatureMatch)that) == 0;
-			}
-		}
-
 		// generate candidate matches
 		final int max_match_dist_x = width;
 		final int max_match_dist_y = height/16;
@@ -2394,71 +2488,50 @@ public class HDRProcessor {
 
 		// compute distances between matches
 		{
-			final int wid = 2*feature_descriptor_radius+1;
-			final int wid2 = wid*wid;
-			int [] pixels0 = new int[wid2];
-			int [] pixels1 = new int[wid2];
-			for(FeatureMatch match : matches) {
-				Point point0 = points_arrays[0][match.index0];
-				Point point1 = points_arrays[1][match.index1];
-
-				/*float distance = 0;
-				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
-					for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
-						int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
-						int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
-						//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
-						//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
-						int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
-						int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
-						int dist2 = value0*value0 + value1+value1;
-						distance += ((float)dist2)/65025.0f; // so distance for a given pixel is from 0 to 1
+			final boolean use_smp = false; // disabled for now, no evidence this improves performance
+			if( use_smp ) {
+				//int n_threads = Math.min(matches.size(), Runtime.getRuntime().availableProcessors());
+				int n_threads = Math.min(matches.size(), 2);
+				if( MyDebug.LOG )
+					Log.d(TAG, "n_threads: " + n_threads);
+				ComputeDistancesBetweenMatchesThread [] threads = new ComputeDistancesBetweenMatchesThread[n_threads];
+				int st_indx = 0;
+				for(int i=0;i<n_threads;i++) {
+					int nd_indx = (((i+1)*matches.size())/n_threads);
+					if( MyDebug.LOG )
+						Log.d(TAG, "thread " + i + " from " + st_indx + " to " + nd_indx);
+					threads[i] = new ComputeDistancesBetweenMatchesThread(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps);
+					st_indx = nd_indx;
+				}
+				// start threads
+				if( MyDebug.LOG )
+					Log.d(TAG, "start threads");
+				for(int i=0;i<n_threads;i++) {
+					threads[i].start();
+				}
+				// wait for threads to complete
+				if( MyDebug.LOG )
+					Log.d(TAG, "wait for threads to complete");
+				try {
+					for(int i=0;i<n_threads;i++) {
+						threads[i].join();
 					}
 				}
-				distance /= (float)wid2; // normalise from 0 to 1
-				match.distance = distance;*/
-
-				float fsum = 0, gsum = 0;
-				float f2sum = 0, g2sum = 0;
-				float fgsum = 0;
-				// much faster to read via getPixels() rather than pixel by pixel
-				bitmaps.get(0).getPixels(pixels0, 0, wid, point0.x - feature_descriptor_radius, point0.y - feature_descriptor_radius, wid, wid);
-				bitmaps.get(1).getPixels(pixels1, 0, wid, point1.x - feature_descriptor_radius, point1.y - feature_descriptor_radius, wid, wid);
-				int pixel_idx = 0;
-				for(int dy=-feature_descriptor_radius;dy<=feature_descriptor_radius;dy++) {
-					for(int dx=-feature_descriptor_radius;dx<=feature_descriptor_radius;dx++) {
-						//int pixel0 = bitmaps.get(0).getPixel(point0.x + dx, point0.y + dy);
-						//int pixel1 = bitmaps.get(1).getPixel(point1.x + dx, point1.y + dy);
-						int pixel0 = pixels0[pixel_idx];
-						int pixel1 = pixels1[pixel_idx];
-						pixel_idx++;
-
-						//int value0 = (Color.red(pixel0) + Color.green(pixel0) + Color.blue(pixel0))/3;
-						//int value1 = (Color.red(pixel1) + Color.green(pixel1) + Color.blue(pixel1))/3;
-						int value0 = (int)(0.3*Color.red(pixel0) + 0.59*Color.green(pixel0) + 0.11*Color.blue(pixel0));
-						int value1 = (int)(0.3*Color.red(pixel1) + 0.59*Color.green(pixel1) + 0.11*Color.blue(pixel1));
-						fsum += value0;
-						f2sum += value0*value0;
-						gsum += value1;
-						g2sum += value1*value1;
-						fgsum += value0*value1;
-					}
+				catch(InterruptedException e) {
+					Log.e(TAG, "ComputeDistancesBetweenMatchesThread threads interrupted");
+					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
-				float fden = wid2*f2sum - fsum*fsum;
-				float f_recip = fden==0 ? 0.0f : 1/(float)fden;
-				float gden = wid2*g2sum - gsum*gsum;
-				float g_recip = gden==0 ? 0.0f : 1/(float)gden;
-				float fg_corr = wid2*fgsum-fsum*gsum;
-				//if( MyDebug.LOG ) {
-				//	Log.d(TAG, "match distance: ");
-				//	Log.d(TAG, "    fg_corr: " + fg_corr);
-				//	Log.d(TAG, "    fden: " + fden);
-				//	Log.d(TAG, "    gden: " + gden);
-				//	Log.d(TAG, "    f_recip: " + f_recip);
-				//	Log.d(TAG, "    g_recip: " + g_recip);
-				//}
-				// negate, as we want it so that lower value means better match, and normalise to 0-1
-				match.distance = 1.0f-Math.abs((fg_corr*fg_corr*f_recip*g_recip));
+				if( MyDebug.LOG )
+					Log.d(TAG, "threads completed");
+			}
+			else {
+				int st_indx = 0, nd_indx = matches.size();
+				final int wid = 2*feature_descriptor_radius+1;
+				final int wid2 = wid*wid;
+				int [] pixels0 = new int[wid2];
+				int [] pixels1 = new int[wid2];
+				computeDistancesBetweenMatches(matches, st_indx, nd_indx, points_arrays, feature_descriptor_radius, bitmaps, pixels0, pixels1);
 			}
 		}
 		if( MyDebug.LOG )
