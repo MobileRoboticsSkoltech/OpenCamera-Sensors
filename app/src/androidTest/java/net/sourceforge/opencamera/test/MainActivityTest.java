@@ -15208,11 +15208,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                     int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
                     int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+                    // y_tol: boost performance at the expense of accuracy (but only by up to 1 pixel)
+                    //final int y_tol = 0;
+                    final int y_tol = 1;
                     if( x == 0 ) {
                         prev_y0 = dst_y0;
                         prev_y1 = dst_y1;
                     }
-                    else if( dst_y0 != prev_y0 || dst_y1 != prev_y1 ) {
+                    //else if( dst_y0 != prev_y0 || dst_y1 != prev_y1 ) {
+                    else if( Math.abs(dst_y0 - prev_y0) > y_tol || Math.abs(dst_y1 - prev_y1) > y_tol ) {
                         src_rect.set(prev_x, 0, x, bitmap_height);
                         dst_rect.set(prev_x, dst_y0, x, dst_y1);
                         projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
