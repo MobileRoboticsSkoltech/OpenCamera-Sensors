@@ -49,6 +49,7 @@ public class GyroSensor implements SensorEventListener {
     private boolean hasTarget;
     private final float [] targetVector = new float[3];
     private float targetAngle; // target angle in radians
+    private boolean targetAchieved;
     private TargetCallback targetCallback;
     private boolean has_lastTargetAngle;
     private float lastTargetAngle;
@@ -178,6 +179,18 @@ public class GyroSensor implements SensorEventListener {
         this.targetCallback = null;
         this.has_lastTargetAngle = false;
         this.lastTargetAngle = 0.0f;
+    }
+
+    void disableTargetCallback() {
+        this.targetCallback = null;
+    }
+
+    boolean hasTarget() {
+        return this.hasTarget;
+    }
+
+    boolean isTargetAchieved() {
+        return this.hasTarget && this.targetAchieved;
     }
 
     public int isUpright() {
@@ -515,6 +528,7 @@ public class GyroSensor implements SensorEventListener {
                 }
             }
 
+            targetAchieved = false;
             if( is_upright == 0 ) {
                 float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
                 float angle = (float)Math.acos(cos_angle);
@@ -523,20 +537,25 @@ public class GyroSensor implements SensorEventListener {
                 if( angle <= targetAngle ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
-                    //targetCallback.onAchieved();
-                    if( has_lastTargetAngle ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
-                        if( angle > lastTargetAngle ) {
-                            // started to get worse, so call callback
-                            targetCallback.onAchieved();
+                    targetAchieved = true;
+                    if( targetCallback != null ) {
+                        //targetCallback.onAchieved();
+                        if( has_lastTargetAngle ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
+                            if( angle > lastTargetAngle ) {
+                                // started to get worse, so call callback
+                                targetCallback.onAchieved();
+                            }
+                            // else, don't call callback yet, as we may get closer to the target
                         }
-                        // else, don't call callback yet, as we may get closer to the target
                     }
                 }
                 has_lastTargetAngle = true;
                 lastTargetAngle = angle;
             }
+            if( MyDebug.LOG )
+                Log.d(TAG, "targetAchieved? " + targetAchieved);
         }
     }
 

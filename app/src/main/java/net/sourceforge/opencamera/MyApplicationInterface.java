@@ -857,6 +857,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     
     @Override
     public boolean getShutterSoundPref() {
+		if( getPhotoMode() == PhotoMode.Panorama )
+			return false;
     	return sharedPreferences.getBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), true);
     }
 
@@ -1440,6 +1442,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			Log.d(TAG, "startPanorama");
 		gyroSensor.startRecording();
 		n_panorama_pics = 0;
+		panorama_pic_accepted = false;
 	}
 
 	void stopPanorama() {
@@ -1453,11 +1456,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		imageSaver.finishImageAverage(do_in_background);
 	}
 
-	void setNextPanoramaPoint() {
+	void setNextPanoramaPoint(boolean repeat) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setNextPanoramaPoint");
 		float camera_angle_y = main_activity.getPreview().getViewAngleY(false);
-		n_panorama_pics++;
+		if( !repeat )
+			n_panorama_pics++;
 		if( MyDebug.LOG )
 			Log.d(TAG, "n_panorama_pics is now: " + n_panorama_pics);
 		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
@@ -1475,11 +1479,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			public void onAchieved() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "TargetCallback.onAchieved");
-				// Clear the target so we avoid risk of multiple callbacks - but note we don't call
+				// Disable the target callback so we avoid risk of multiple callbacks - but note we don't call
 				// clearPanoramaPoint(), as we don't want to call drawPreview.clearGyroDirectionMarker()
 				// at this stage (looks better to keep showing the target market on-screen whilst photo
 				// is being taken, user more likely to keep the device still).
-				gyroSensor.clearTarget();
+				// Also we still keep the target active (and don't call clearTarget() so we can monitor if
+				// the target is still achieved or not (for panorama_pic_accepted).
+				//gyroSensor.clearTarget();
+				gyroSensor.disableTargetCallback();
 				main_activity.takePicturePressed(false, false);
 			}
 		});
@@ -2023,6 +2030,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
 	private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
 	private int n_panorama_pics = 0;
+	private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
 
 	@Override
 	public void onCaptureStarted() {
@@ -2051,9 +2059,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			imageSaver.finishImageAverage(do_in_background);
 		}
 		else if( photo_mode == MyApplicationInterface.PhotoMode.Panorama && gyroSensor.isRecording() ) {
-			if (MyDebug.LOG)
-				Log.d(TAG, "set next panorama point");
-			this.setNextPanoramaPoint();
+			if( panorama_pic_accepted ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set next panorama point");
+				this.setNextPanoramaPoint(false);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "panorama pic wasn't accepted");
+				this.setNextPanoramaPoint(true);
+			}
 		}
 		else if( photo_mode == PhotoMode.FocusBracketing ) {
 			if( MyDebug.LOG )
@@ -2540,10 +2555,20 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}
-		if( photo_mode == PhotoMode.NoiseReduction || photo_mode == PhotoMode.Panorama ) {
+
+		if( photo_mode == PhotoMode.Panorama && gyroSensor.isRecording() && gyroSensor.hasTarget() && !gyroSensor.isTargetAchieved() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore panorama image as target no longer achieved!");
+			// n.b., gyroSensor.hasTarget() will be false if this is the first picture in the panorama series
+			panorama_pic_accepted = false;
+			success = true; // still treat as success
+		}
+		else if( photo_mode == PhotoMode.NoiseReduction || photo_mode == PhotoMode.Panorama ) {
 			boolean first_image = false;
-			if( photo_mode == PhotoMode.Panorama )
+			if( photo_mode == PhotoMode.Panorama ) {
+				panorama_pic_accepted = true;
 				first_image = n_panorama_pics == 0;
+			}
 			else
 				first_image = n_capture_images == 1;
 			if( first_image ) {
