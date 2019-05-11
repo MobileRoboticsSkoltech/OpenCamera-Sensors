@@ -815,6 +815,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     
     @Override
     public String getLockOrientationPref() {
+		if( getPhotoMode() == PhotoMode.Panorama )
+			return "portrait"; // for now panorama only supports portrait
     	return sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
     }
 

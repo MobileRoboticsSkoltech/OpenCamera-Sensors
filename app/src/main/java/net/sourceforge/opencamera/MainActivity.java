@@ -4221,6 +4221,7 @@ public class MainActivity extends Activity {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
 		boolean video_high_speed = preview.isVideoHighSpeed();
+		MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
 		if( preview.isVideo() ) {
 			VideoProfile profile = preview.getVideoProfile();
 
@@ -4296,7 +4297,6 @@ public class MainActivity extends Activity {
 			}
 		}
 		else {
-			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
 			toast_string = getResources().getString(R.string.photo);
 			CameraController.Size current_size = preview.getCurrentPictureSize();
 			toast_string += " " + current_size.width + "x" + current_size.height;
@@ -4396,7 +4396,8 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		String lock_orientation = applicationInterface.getLockOrientationPref();
-		if( !lock_orientation.equals("none") ) {
+		if( !lock_orientation.equals("none") && photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+			// panorama locks to portrait, but don't want to display that in the toast
 			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
 			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
 			int index = Arrays.asList(values_array).indexOf(lock_orientation);
