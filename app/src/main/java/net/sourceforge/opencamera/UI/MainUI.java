@@ -1229,7 +1229,6 @@ public class MainUI {
 		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
 		View shutter_seekbar = main_activity.findViewById(R.id.exposure_time_seekbar);
 		View iso_seekbar = main_activity.findViewById(R.id.iso_seekbar);
-		View sliders_container = main_activity.findViewById(R.id.sliders_container);
 		View wb_seekbar = main_activity.findViewById(R.id.white_balance_seekbar);
 		// Set all lines to black
 		iso_buttons_container.setBackgroundColor(Color.TRANSPARENT);
@@ -1254,7 +1253,6 @@ public class MainUI {
         View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
         View shutter_seekbar = main_activity.findViewById(R.id.exposure_time_seekbar);
         View iso_seekbar = main_activity.findViewById(R.id.iso_seekbar);
-        View sliders_container = main_activity.findViewById(R.id.sliders_container);
         View wb_seekbar = main_activity.findViewById(R.id.white_balance_seekbar);
         // Our order for lines is:
         // - ISO buttons
