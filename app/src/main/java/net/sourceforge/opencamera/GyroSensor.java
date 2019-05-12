@@ -209,8 +209,8 @@ public class GyroSensor implements SensorEventListener {
         else if( !has_accel ) {
             return;
         }
-        if( true )
-            return; // don't use accelerometer for now
+        /*if( true )
+            return;*/ // don't use accelerometer for now
 
         //transformVector(tempVector, currentRotationMatrix, initAccelVector);
         // tempVector is now the initAccelVector transformed by the gyro matrix
@@ -232,6 +232,10 @@ public class GyroSensor implements SensorEventListener {
             // gyroscope already matches accelerometer
             return;
         }
+
+        double angle = Math.acos(cos_angle);
+        angle *= 0.02f; // filter
+        cos_angle = Math.cos(angle);
 
         /*
         // compute matrix to transform tempVector to accelVector
@@ -287,13 +291,7 @@ public class GyroSensor implements SensorEventListener {
             }
         }
 
-        // replace directly:
         System.arraycopy(temp2Matrix, 0, currentRotationMatrix, 0, 9);
-        // filter:
-        /*final float sensor_alpha = 0.98f; // for filter: higher value means slower transition
-        for(int i=0;i<9;i++) {
-            currentRotationMatrix[i] = sensor_alpha * currentRotationMatrix[i] + (1.0f-sensor_alpha) * temp2Matrix[i];
-        }*/
 
         if( MyDebug.LOG ) {
             // test:
