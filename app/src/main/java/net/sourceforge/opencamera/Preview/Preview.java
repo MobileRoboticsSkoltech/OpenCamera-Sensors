@@ -6738,7 +6738,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     /**
-     * @param check_burst If false, and a burst mode is in use (fast burst, expo, HDR), then the
+     * @param check_burst If true, and a burst mode is in use (fast burst, expo, HDR), then the
      *                    returned list will be filtered to remove sizes that don't support burst.
      */
     public List<CameraController.Size> getSupportedPictureSizes(boolean check_burst) {
