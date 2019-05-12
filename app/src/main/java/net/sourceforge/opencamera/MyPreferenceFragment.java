@@ -662,6 +662,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		final float camera_view_angle_x = bundle.getFloat("camera_view_angle_x");
+		final float camera_view_angle_y = bundle.getFloat("camera_view_angle_y");
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "camera_view_angle_x: " + camera_view_angle_x);
+			Log.d(TAG, "camera_view_angle_y: " + camera_view_angle_y);
+		}
+
 		{
 			// remove preference_category_photo_debugging category if empty (which will be the case for old api)
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
@@ -1100,6 +1107,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						about_string.append(tonemap_max_curve_points);
 						about_string.append("\nCan disable shutter sound?: ");
 						about_string.append(getString(can_disable_shutter_sound ? R.string.about_available : R.string.about_not_available));
+
+						about_string.append("\nCamera view angle: " + camera_view_angle_x + " , " + camera_view_angle_y);
+
                         about_string.append("\nFlash modes: ");
                 		String [] flash_values = bundle.getStringArray("flash_values");
                 		if( flash_values != null && flash_values.length > 0 ) {

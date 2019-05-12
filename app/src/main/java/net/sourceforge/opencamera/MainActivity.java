@@ -2042,6 +2042,8 @@ public class MainActivity extends Activity {
 		bundle.putInt("tonemap_max_curve_points", this.preview.getTonemapMaxCurvePoints());
 		bundle.putBoolean("supports_tonemap_curve", this.preview.supportsTonemapCurve());
 		bundle.putBoolean("supports_photo_video_recording", this.preview.supportsPhotoVideoRecording());
+		bundle.putFloat("camera_view_angle_x", preview.getViewAngleX(false));
+		bundle.putFloat("camera_view_angle_y", preview.getViewAngleY(false));
 
 		putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
 		putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());
