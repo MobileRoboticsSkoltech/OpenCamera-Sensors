@@ -77,7 +77,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
-	private final static float panorama_pics_per_screen = 3.0f;
+	private final static float panorama_pics_per_screen = 3.33333f;
+	private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
+	private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
+	private int n_panorama_pics = 0;
+	private final static int max_panorama_pics_c = 10;
+	private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
 
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;
@@ -1507,6 +1512,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 			n_panorama_pics++;
 		if( MyDebug.LOG )
 			Log.d(TAG, "n_panorama_pics is now: " + n_panorama_pics);
+		if( n_panorama_pics == max_panorama_pics_c ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "reached max panorama limit");
+			stopPanorama();
+			return;
+		}
 		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
 		setNextPanoramaPoint((float) Math.sin(angle / panorama_pics_per_screen), 0.0f, (float) -Math.cos(angle / panorama_pics_per_screen));
 	}
@@ -2069,11 +2080,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     	main_activity.setBrightnessForCamera(true); // ensure we have max screen brightness, even if user preference not set for max brightness
     	drawPreview.turnFrontScreenFlashOn();
     }
-
-	private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
-	private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
-	private int n_panorama_pics = 0;
-	private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
 
 	@Override
 	public void onCaptureStarted() {
