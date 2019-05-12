@@ -14813,7 +14813,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         return power;
     }
 
-    private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float gyro_tol_degrees) throws IOException, InterruptedException {
+    /**
+     * @param panorama_pics_per_screen The value of panorama_pics_per_screen used when taking the input photos.
+     * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
+     * @param camera_angle_y The value of preview.getViewAngleY(for_preview=false) (in degrees) when taking the input photos (on the device used).
+     */
+    private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float camera_angle_x, float camera_angle_y, float gyro_tol_degrees) throws IOException, InterruptedException {
         Log.d(TAG, "subTestPanorama");
 
         // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
@@ -14888,13 +14893,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
         Log.d(TAG, "slice_width: " + slice_width);
 
-        float camera_angle_deg = mActivity.getPreview().getViewAngleY(false);
-        double camera_angle = Math.toRadians(camera_angle_deg);
-        Log.d(TAG, "camera_angle_deg: " + camera_angle_deg);
+        double camera_angle = Math.toRadians(camera_angle_y);
+        Log.d(TAG, "camera_angle_y: " + camera_angle_y);
         Log.d(TAG, "camera_angle: " + camera_angle);
         // max offset error of gyro_tol_degrees - convert this to pixels
         //int max_offset_error_x = (int)(gyro_tol_degrees * bitmap_width / mActivity.getPreview().getViewAngleY() + 0.5f);
         //int max_offset_error_y = (int)(gyro_tol_degrees * bitmap_height / mActivity.getPreview().getViewAngleX() + 0.5f);
+        //if we use the above code, remember not to use the camera view angles, but those that the test photos were taken with!
         double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
         /*int max_offset_error_x = (int)(h * Math.tan(Math.toRadians(gyro_tol_degrees)) + 0.5f);
         max_offset_error_x *= 2; // allow a fudge factor
@@ -15438,12 +15443,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
         inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
         inputs.add(panorama_images_path + "testPanorama1/input3.jpg");
+        float camera_angle_x = 62.93796f;
+        float camera_angle_y = 47.44656f;
         float panorama_pics_per_screen = 2.0f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (47.44656/49.56283);
         String output_name = "testPanorama1_output.jpg";
 
-        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, 2.0f);
+        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 2.0f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama2".
@@ -15476,10 +15483,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama2/input4.jpg");
         inputs.add(panorama_images_path + "testPanorama2/input5.jpg");
         String output_name = "testPanorama2_output.jpg";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, 2.0f);
+        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 2.0f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama3".
@@ -15507,10 +15516,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131317.jpg");
         inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131320.jpg");
         String output_name = "testPanorama3_output.jpg";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, 1.0f);
+        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama3", with panorama_pics_per_screen set
@@ -15539,10 +15550,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131317.jpg");
         inputs.add(panorama_images_path + "testPanorama3/IMG_20190214_131320.jpg");
         String output_name = "testPanorama3_picsperscreen2_output.jpg";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, 1.0f);
+        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama4".
@@ -15568,10 +15581,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama4/IMG_20190222_225317_7.jpg");
         String output_name = "testPanorama4_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama4/IMG_20190222_225317.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 1.0f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama5".
@@ -15597,10 +15612,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama5/IMG_20190223_220524_7.jpg");
         String output_name = "testPanorama5_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama5/IMG_20190223_220524.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama6".
@@ -15626,10 +15643,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama6/IMG_20190225_154232_7.jpg");
         String output_name = "testPanorama6_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama6/IMG_20190225_154232.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama7".
@@ -15656,10 +15675,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama7/IMG_20190225_155510_8.jpg");
         String output_name = "testPanorama7_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama7/IMG_20190225_155510.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama8".
@@ -15681,10 +15702,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama8/IMG_20190227_001431_3.jpg");
         String output_name = "testPanorama8_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama8/IMG_20190227_001431.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
-        panorama_pics_per_screen *= (50.44399/52.26029);
+        panorama_pics_per_screen *= (50.282097/52.26029);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama9".
@@ -15709,8 +15732,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama9/IMG_20190301_145213_6.jpg");
         String output_name = "testPanorama9_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama9/IMG_20190301_145213.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+        // these images were taken with incorrect camera view angles, so we compensate in the test:
+        panorama_pics_per_screen *= (50.282097/50.44399);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
 
         Thread.sleep(1000); // need to wait for debug images to be saved/broadcast?
     }
@@ -15743,8 +15770,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama10/IMG_20190301_144948_12.jpg");
         String output_name = "testPanorama10_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama10/IMG_20190301_144948.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+        // these images were taken with incorrect camera view angles, so we compensate in the test:
+        panorama_pics_per_screen *= (50.282097/50.44399);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama11".
@@ -15769,8 +15800,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama11/IMG_20190306_143652_6.jpg");
         String output_name = "testPanorama11_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama11/IMG_20190306_143652.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+        // these images were taken with incorrect camera view angles, so we compensate in the test:
+        panorama_pics_per_screen *= (50.282097/50.44399);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama12".
@@ -15798,7 +15833,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama12/IMG_20190308_152008_9.jpg");
         String output_name = "testPanorama12_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama12/IMG_20190308_152008.xml";
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+        // these images were taken with incorrect camera view angles, so we compensate in the test:
+        panorama_pics_per_screen *= (50.282097/50.44399);
 
-        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, 0.5f);
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
 }
