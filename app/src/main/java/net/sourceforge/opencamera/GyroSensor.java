@@ -57,10 +57,14 @@ public class GyroSensor implements SensorEventListener {
 
     GyroSensor(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
         //mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         //mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-        mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        //mSensorAccel = null;
+
         if( MyDebug.LOG ) {
             Log.d(TAG, "GyroSensor");
             if( mSensor == null )
@@ -80,15 +84,10 @@ public class GyroSensor implements SensorEventListener {
         currentRotationMatrix[8] = 1.0f;
         System.arraycopy(currentRotationMatrix, 0, currentRotationMatrixGyroOnly, 0, 9);
 
-        has_gyroVector = false;
-        has_rotationVector = false;
         for(int i=0;i<3;i++) {
             initAccelVector[i] = 0.0f;
-            accelVector[i] = 0.0f;
-            gyroVector[i] = 0.0f;
-            rotationVector[i] = 0.0f;
+            // don't set accelVector, rotationVector, gyroVector to 0 here, as we continually smooth the values even when not recording
         }
-
         has_original_rotation_matrix = false;
     }
 
@@ -137,15 +136,40 @@ public class GyroSensor implements SensorEventListener {
         }
     }
 
+    /* We should enable sensors before startRecording(), so that we can apply smoothing to the
+     * sensors to reduce noise.
+     * This should be limited to when we might want to use the gyro, to help battery life.
+     */
+    void enableSensors() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "enableSensors");
+        has_accel = false;
+        has_rotationVector = false;
+        has_gyroVector = false;
+        for(int i=0;i<3;i++) {
+            accelVector[i] = 0.0f;
+            rotationVector[i] = 0.0f;
+            gyroVector[i] = 0.0f;
+        }
+
+        if( mSensor != null )
+            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
+        if( mSensorAccel != null )
+            mSensorManager.registerListener(this, mSensorAccel, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    void disableSensors() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "disableSensors");
+        mSensorManager.unregisterListener(this);
+    }
+
     void startRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "startRecording");
         is_recording = true;
         timestamp = 0;
-        has_accel = false;
         setToIdentity();
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
-        mSensorManager.registerListener(this, mSensorAccel, SensorManager.SENSOR_DELAY_UI);
     }
 
     void stopRecording() {
@@ -154,8 +178,6 @@ public class GyroSensor implements SensorEventListener {
                 Log.d(TAG, "stopRecording");
             is_recording = false;
             timestamp = 0;
-            has_accel = false;
-            mSensorManager.unregisterListener(this);
         }
     }
 
@@ -218,7 +240,7 @@ public class GyroSensor implements SensorEventListener {
         transformVector(tempVector, currentRotationMatrix, accelVector);
         // tempVector is now the accelVector transformed by the gyro matrix
         double cos_angle = (tempVector[0] * initAccelVector[0] + tempVector[1] * initAccelVector[1] + tempVector[2] * initAccelVector[2]);
-        if( MyDebug.LOG ) {
+        /*if( MyDebug.LOG ) {
             Log.d(TAG, "adjustGyroForAccel:");
             Log.d(TAG, "### currentRotationMatrix row 0: " + currentRotationMatrix[0] + " , " + currentRotationMatrix[1] + " , " + currentRotationMatrix[2]);
             Log.d(TAG, "### currentRotationMatrix row 1: " + currentRotationMatrix[3] + " , " + currentRotationMatrix[4] + " , " + currentRotationMatrix[5]);
@@ -227,7 +249,7 @@ public class GyroSensor implements SensorEventListener {
             Log.d(TAG, "### accelVector: " + accelVector[0] + " , " + accelVector[1] + " , " + accelVector[2]);
             Log.d(TAG, "### tempVector: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
             Log.d(TAG, "### cos_angle: " + cos_angle);
-        }
+        }*/
         if( cos_angle >= 0.99999999995 ) {
             // gyroscope already matches accelerometer
             return;
@@ -268,7 +290,7 @@ public class GyroSensor implements SensorEventListener {
         setMatrixComponent(tempMatrix, 2, 0, (float)(a_x*a_z*(1.0-cos_angle)-sin_angle*a_y));
         setMatrixComponent(tempMatrix, 2, 1, (float)(a_y*a_z*(1.0-cos_angle)+sin_angle*a_x));
         setMatrixComponent(tempMatrix, 2, 2, (float)(a_z*a_z*(1.0-cos_angle)+cos_angle));
-        if( MyDebug.LOG ) {
+        /*if( MyDebug.LOG ) {
             // test:
             System.arraycopy(tempVector, 0, inVector, 0, 3);
             transformVector(tempVector, tempMatrix, inVector);
@@ -276,7 +298,7 @@ public class GyroSensor implements SensorEventListener {
             Log.d(TAG, "### tempMatrix row 1: " + tempMatrix[3] + " , " + tempMatrix[4] + " , " + tempMatrix[5]);
             Log.d(TAG, "### tempMatrix row 2: " + tempMatrix[6] + " , " + tempMatrix[7] + " , " + tempMatrix[8]);
             Log.d(TAG, "### rotated tempVector: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
-        }
+        }*/
         // replace currentRotationMatrix with tempMatrix.currentRotationMatrix
         // since [tempMatrix.currentRotationMatrix].[initAccelVector] = tempMatrix.tempVector = accelVector
         // since [tempMatrix.currentRotationMatrix].[accelVector] = tempMatrix.tempVector = initAccelVector
@@ -293,7 +315,7 @@ public class GyroSensor implements SensorEventListener {
 
         System.arraycopy(temp2Matrix, 0, currentRotationMatrix, 0, 9);
 
-        if( MyDebug.LOG ) {
+        /*if( MyDebug.LOG ) {
             // test:
             //transformVector(tempVector, temp2Matrix, initAccelVector);
             //transformTransposeVector(tempVector, currentRotationMatrix, initAccelVector);
@@ -302,11 +324,13 @@ public class GyroSensor implements SensorEventListener {
             Log.d(TAG, "### new currentRotationMatrix row 1: " + temp2Matrix[3] + " , " + temp2Matrix[4] + " , " + temp2Matrix[5]);
             Log.d(TAG, "### new currentRotationMatrix row 2: " + temp2Matrix[6] + " , " + temp2Matrix[7] + " , " + temp2Matrix[8]);
             Log.d(TAG, "### new tempVector: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
-        }
+        }*/
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        /*if( MyDebug.LOG )
+            Log.d(TAG, "onSensorChanged: " + event);*/
         if( event.sensor.getType() == Sensor.TYPE_ACCELEROMETER ) {
             final float sensor_alpha = 0.8f; // for filter
             for(int i=0;i<3;i++) {

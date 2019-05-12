@@ -1370,6 +1370,7 @@ public class MainActivity extends Activity {
 
         initSpeechRecognizer();
         initLocation();
+		initGyroSensors();
         soundPoolManager.initSound();
     	soundPoolManager.loadSound(R.raw.beep);
     	soundPoolManager.loadSound(R.raw.beep_hi);
@@ -1424,6 +1425,7 @@ public class MainActivity extends Activity {
         stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		applicationInterface.getGyroSensor().stopRecording();
+		applicationInterface.getGyroSensor().disableSensors();
 		soundPoolManager.releaseSound();
 		applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
 		applicationInterface.getDrawPreview().clearGhostImage();
@@ -2372,6 +2374,7 @@ public class MainActivity extends Activity {
 
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
+		initGyroSensors(); // in case we've entered or left panoram
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: time after init speech and location: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -4783,7 +4786,18 @@ public class MainActivity extends Activity {
     		permissionHandler.requestLocationPermission();
         }
 	}
-	
+
+	void initGyroSensors() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initGyroSensors");
+		if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
+			applicationInterface.getGyroSensor().enableSensors();
+		}
+		else {
+			applicationInterface.getGyroSensor().disableSensors();
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	void speak(String text) {
         if( textToSpeech != null && textToSpeechSuccess ) {
