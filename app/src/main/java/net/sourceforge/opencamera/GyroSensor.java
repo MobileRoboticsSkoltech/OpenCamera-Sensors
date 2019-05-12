@@ -29,7 +29,7 @@ public class GyroSensor implements SensorEventListener {
     private final float [] tempMatrix = new float[9];
     private final float [] temp2Matrix = new float[9];
 
-    private boolean has_accel = false;
+    private boolean has_init_accel = false;
     private final float [] initAccelVector = new float[3];
     private final float [] accelVector = new float[3];
 
@@ -88,6 +88,7 @@ public class GyroSensor implements SensorEventListener {
             initAccelVector[i] = 0.0f;
             // don't set accelVector, rotationVector, gyroVector to 0 here, as we continually smooth the values even when not recording
         }
+        has_init_accel = false;
         has_original_rotation_matrix = false;
     }
 
@@ -143,7 +144,6 @@ public class GyroSensor implements SensorEventListener {
     void enableSensors() {
         if( MyDebug.LOG )
             Log.d(TAG, "enableSensors");
-        has_accel = false;
         has_rotationVector = false;
         has_gyroVector = false;
         for(int i=0;i<3;i++) {
@@ -228,7 +228,7 @@ public class GyroSensor implements SensorEventListener {
             // don't have a gyro matrix yet
             return;
         }
-        else if( !has_accel ) {
+        else if( !has_init_accel ) {
             return;
         }
         /*if( true )
@@ -345,9 +345,9 @@ public class GyroSensor implements SensorEventListener {
                 accelVector[2] /= mag;
             }
 
-            if( !has_accel ) {
+            if( !has_init_accel ) {
                 System.arraycopy(accelVector, 0, initAccelVector, 0, 3);
-                has_accel = true;
+                has_init_accel = true;
             }
 
             adjustGyroForAccel();
@@ -431,6 +431,7 @@ public class GyroSensor implements SensorEventListener {
                     }
                 }
                 System.arraycopy(tempMatrix, 0, currentRotationMatrixGyroOnly, 0, 9);
+
 
                 /*if( MyDebug.LOG ) {
                     setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
@@ -576,8 +577,8 @@ public class GyroSensor implements SensorEventListener {
                 has_lastTargetAngle = true;
                 lastTargetAngle = angle;
             }
-            if( MyDebug.LOG )
-                Log.d(TAG, "targetAchieved? " + targetAchieved);
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "targetAchieved? " + targetAchieved);*/
         }
     }
 
