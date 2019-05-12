@@ -393,6 +393,47 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
 	public Pair<Integer, Integer> getCameraResolutionPref() {
+		if( getPhotoMode() == PhotoMode.Panorama ) {
+			List<CameraController.Size> sizes = main_activity.getPreview().getSupportedPictureSizes(false);
+			final int max_width_c = 2080;
+			boolean found = false;
+			CameraController.Size best_size = null;
+			// find largest width <= max_width_c with aspect ratio 4:3
+			for(CameraController.Size size : sizes) {
+				if( size.width <= max_width_c ) {
+					double aspect_ratio = ((double)size.width) / (double)size.height;
+					if( Math.abs(aspect_ratio - 4.0/3.0) < 1.0e-5 ) {
+						if( !found || size.width > best_size.width ) {
+							found = true;
+							best_size = size;
+						}
+					}
+				}
+			}
+			if( found ) {
+				return new Pair<>(best_size.width, best_size.height);
+			}
+			// else find largest width <= max_width_c
+			for(CameraController.Size size : sizes) {
+				if( size.width <= max_width_c ) {
+					if( !found || size.width > best_size.width ) {
+						found = true;
+						best_size = size;
+					}
+				}
+			}
+			if( found ) {
+				return new Pair<>(best_size.width, best_size.height);
+			}
+			// else find smallest width
+			for(CameraController.Size size : sizes) {
+				if( !found || size.width < best_size.width ) {
+					found = true;
+					best_size = size;
+				}
+			}
+			return new Pair<>(best_size.width, best_size.height);
+		}
 		String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");
 		if( MyDebug.LOG )
 			Log.d(TAG, "resolution_value: " + resolution_value);
@@ -2242,6 +2283,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 	
     @Override
 	public void setCameraResolutionPref(int width, int height) {
+        if( getPhotoMode() == PhotoMode.Panorama ) {
+            // in Panorama mode we'll have set a different resolution to the user setting, so don't want that to then be saved!
+            return;
+        }
 		String resolution_value = width + " " + height;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "save new resolution_value: " + resolution_value);
