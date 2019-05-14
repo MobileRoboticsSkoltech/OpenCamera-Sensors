@@ -927,10 +927,10 @@ public class StorageUtils {
 			Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
 			if( MyDebug.LOG )
 				Log.d(TAG, "treeUri: " + treeUri);
-			Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-			if( MyDebug.LOG )
-				Log.d(TAG, "docUri: " + docUri);
 			try {
+				Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+				if( MyDebug.LOG )
+					Log.d(TAG, "docUri: " + docUri);
 				ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
 				if( pfd == null ) { // just in case
 					Log.e(TAG, "pfd is null!");
