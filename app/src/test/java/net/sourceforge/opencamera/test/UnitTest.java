@@ -617,7 +617,7 @@ public class UnitTest {
 		// If any of these tests fail due to changes to HDRProcessor, consider that we might want to update the values tested in
 		// computeBrightenFactors(), rather than simply updating the expected results, to preserve what the test is meant to test.
 
-		HDRProcessor.BrightenFactors brighten_factors = HDRProcessor.computeBrightenFactors(1600, 1000000000L/12, 20, 170);
+		HDRProcessor.BrightenFactors brighten_factors = HDRProcessor.computeBrightenFactors(true,1600, 1000000000L/12, 20, 170);
 		assertEquals(1.5f, brighten_factors.gain, 1.0e-5f);
 		assertEquals(8.0f, brighten_factors.low_x, 0.1f);
 		assertEquals(255.5f, brighten_factors.mid_x, 1.0e-5f);
@@ -625,7 +625,7 @@ public class UnitTest {
 
 		// this checks for stability - we change the inputs so we enter "use piecewise function with gain and gamma", but
 		// we should not significantly change the values of gain or low_x, and gamma should be close to 1
-		brighten_factors = HDRProcessor.computeBrightenFactors(1600, 1000000000L/12, 20, 171);
+		brighten_factors = HDRProcessor.computeBrightenFactors(true,1600, 1000000000L/12, 20, 171);
 		assertEquals(1.5f, brighten_factors.gain, 1.0e-5f);
 		assertEquals(8.0f, brighten_factors.low_x, 0.1f);
 		assertEquals(136.0f, brighten_factors.mid_x, 0.5f);
