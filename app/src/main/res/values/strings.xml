@@ -858,26 +858,19 @@
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under
         Settings/On screen GUI/Show What\'s New dialog.]
-        \n\n<b>v1.45:</b>\n\n
+        \n\n<b>v1.46:</b>\n\n
         <ul>
-            <li>New optional layout for user-interface (Settings/On screen GUI/UI placement/"Icons along top").\n</li>
-            <li>New options to enable on-screen icons for enabling face detection, auto-level, photo stamp, custom text stamp, white balance lock (Settings/On screen GUI/).\n</li>
-            <li>New "Low light" mode for Noise Reduction photo mode. (Camera2 API only.)\n</li>
-            <li>Improvements for Noise Reduction, DRO and HDR photo modes.\n</li>
-            <li>Hold down shutter button in standard or fast burst photo modes to take a continuous burst. (Camera2 API only.)\n</li>
-            <li>Support for WebP and PNG (Settings/Photo settings/"Image format").\n</li>
-            <li>Support for different video file formats (Settings/Video settings/"Video format").\n</li>
-            <li>New options to save and restore all settings (Settings/"Settings manager").\n</li>
-            <li>"Say cheese" voice control now remains on.\n</li>
-            <li>Timelapse capture rates of 120x and 240x.\n</li>
-            <li>Focus bracketing mode now supports up to 200 images.\n</li>
-            <li>More auto-repeat options.\n</li>
-            <li>Larger options for maximum filesize for video (up to 9GB).\n</li>
-            <li>2:1 crop guide.\n</li>
-            <li>New "fine" setting for video flat (log) profile.\n</li>
-            <li>New lower noise sensitivity for "loud noise" audio trigger.\n</li>
-            <li>Vietnamese translation (thanks to Khánh Trần).\n</li>
-            <li>Allow Camera2 mode to be used on more devices.\n</li>
+            <li>New features when Settings/\"Use Camera2 API\" is enabled: histogram, zebra stripes, focus peaking (see
+                Settings/\"Camera preview\"/).\n</li>
+            <li>RAW now supported for expo and focus bracketing on higher end devices (see Settings/Photo settings/ to
+                disable).\n</li>
+            <li>New Settings/Photo settings/\"Use addresses\" to display GPS coordinates as an address.\n</li>
+            <li>More on-screen icons under Settings/On screen GUI/.\n</li>
+            <li>Support for remote control via bluetooth/USB keyboards and Kraken Smart Housing (thanks to Edouard Lafargue).\n</li>
+            <li>Improved DRO algorithm for some scenes.\n</li>
+            <li>Noise Reduction \"NR Mode\" is now saved.\n</li>
+            <li>Some settings now moved from \"On screen GUI\" to \"Camera preview\".\n</li>
+            <li>Corrected display of free space with using external SD cards with Storage Access Framework.\n</li>
             <li>Other improvements and bug fixes.\n</li>
         </ul>
     </string>
