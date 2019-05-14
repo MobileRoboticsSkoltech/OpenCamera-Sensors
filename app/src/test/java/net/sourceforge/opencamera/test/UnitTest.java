@@ -493,7 +493,7 @@ public class UnitTest {
 	public void testImageSaverRequestCost() {
 		Log.d(TAG, "testImageSaverRequestCost");
 
-		assertTrue( ImageSaver.computeRequestCost(true, 0) > ImageSaver.computeRequestCost(false, 1));
+		assertTrue( ImageSaver.computeRequestCost(true, 1) > ImageSaver.computeRequestCost(false, 1));
 		assertEquals( ImageSaver.computeRequestCost(false, 3), 3*ImageSaver.computeRequestCost(false, 1));
 
 	}
