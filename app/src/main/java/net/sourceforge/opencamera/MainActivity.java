@@ -4098,8 +4098,8 @@ public class MainActivity extends Activity {
 
 	public boolean supportsPanorama() {
 		// require 512MB just to be safe, due to the large number of images that may be created
-		return( large_heap_memory >= 512 );
-		//return false; // currently blocked for release
+		//return( large_heap_memory >= 512 );
+		return false; // currently blocked for release
 	}
 
 	public boolean supportsFastBurst() {
