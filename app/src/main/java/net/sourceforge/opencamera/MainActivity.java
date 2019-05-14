@@ -4,7 +4,7 @@ import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoProfile;
-import net.sourceforge.opencamera.Remotecontrol.BluetoothLeService;
+import net.sourceforge.opencamera.remotecontrol.BluetoothLeService;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.MainUI;
 import net.sourceforge.opencamera.UI.ManualSeekbars;

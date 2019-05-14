@@ -68,7 +68,7 @@
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"
+            android:name="net.sourceforge.opencamera.remotecontrol.DeviceScanner"
             android:label="@string/scan_ble"
         >
             <intent-filter>
@@ -145,6 +145,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-        <service android:name="net.sourceforge.opencamera.Remotecontrol.BluetoothLeService" android:enabled="true"/>
+        <service android:name="net.sourceforge.opencamera.remotecontrol.BluetoothLeService" android:enabled="true"/>
     </application>
 </manifest>

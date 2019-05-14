@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Remotecontrol;
+package net.sourceforge.opencamera.remotecontrol;
 
 import java.util.Arrays;
 import java.util.List;

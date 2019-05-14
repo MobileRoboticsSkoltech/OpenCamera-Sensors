@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Remotecontrol;
+package net.sourceforge.opencamera.remotecontrol;
 
 import net.sourceforge.opencamera.MyDebug;
 
