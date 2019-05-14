@@ -885,7 +885,6 @@ public class ImageSaver extends Thread {
 	 *                for the image post-processing (auto-stabilise etc), in general we need the
 	 *                bitmap to be mutable (for photostamp to work).
 	 */
-	@SuppressWarnings("deprecation")
 	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable, int inSampleSize) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmap");
@@ -925,7 +924,6 @@ public class ImageSaver extends Thread {
 
 	/** Converts the array of jpegs to Bitmaps. The bitmap with index mutable_id will be marked as mutable (or set to -1 to have no mutable bitmaps).
 	 */
-	@SuppressWarnings("deprecation")
 	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images, int mutable_id, int inSampleSize) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmaps");
@@ -1103,7 +1101,7 @@ public class ImageSaver extends Thread {
 			public float [] vectorScreen; // vector into the screen - actually the -Z axis
 		}
 
-		public List<GyroImageDebugInfo> image_info;
+		public final List<GyroImageDebugInfo> image_info;
 
 		public GyroDebugInfo() {
 			image_info = new ArrayList<>();
@@ -2082,7 +2080,6 @@ public class ImageSaver extends Thread {
 	 *                         RAW preference only affects the base images.
 	 */
 	@SuppressLint("SimpleDateFormat")
-	@SuppressWarnings("deprecation")
 	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image, boolean ignore_raw_only) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
@@ -2501,7 +2498,6 @@ public class ImageSaver extends Thread {
 	 *  the same string value (e.g., TAG_APERTURE replaced with TAG_F_NUMBER, but both have value "FNumber"). We use the deprecated versions
 	 *  to avoid complicating the code (we'd still have to read the deprecated values for older devices).
 	 */
-	@SuppressWarnings("deprecation")
 	private void setExifFromFile(final Request request, File from_file, File to_file) throws IOException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setExifFromFile");
@@ -2526,7 +2522,6 @@ public class ImageSaver extends Thread {
 	 *  the same string value (e.g., TAG_APERTURE replaced with TAG_F_NUMBER, but both have value "FNumber"). We use the deprecated versions
 	 *  to avoid complicating the code (we'd still have to read the deprecated values for older devices).
      */
-    @SuppressWarnings("deprecation")
     private void setExif(final Request request, ExifInterface exif, ExifInterface exif_new) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "setExif");

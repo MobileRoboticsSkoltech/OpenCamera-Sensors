@@ -8,7 +8,6 @@ import android.util.Log;
 /** Provides support using Android's original camera API
  *  android.hardware.Camera.
  */
-@SuppressWarnings("deprecation")
 public class CameraControllerManager1 extends CameraControllerManager {
 	private static final String TAG = "CControllerManager1";
 	public int getNumberOfCameras() {

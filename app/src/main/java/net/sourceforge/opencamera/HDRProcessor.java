@@ -2035,7 +2035,7 @@ public class HDRProcessor {
 	}
 
 	private static class FeatureMatch implements Comparable<FeatureMatch> {
-		private int index0, index1;
+		private final int index0, index1;
 		private float distance; // from 0 to 1, higher means poorer match
 
 		private FeatureMatch(int index0, int index1) {
@@ -2122,9 +2122,9 @@ public class HDRProcessor {
 				}
 			}
 			float fden = wid2*f2sum - fsum*fsum;
-			float f_recip = fden==0 ? 0.0f : 1/(float)fden;
+			float f_recip = fden==0 ? 0.0f : 1/ fden;
 			float gden = wid2*g2sum - gsum*gsum;
-			float g_recip = gden==0 ? 0.0f : 1/(float)gden;
+			float g_recip = gden==0 ? 0.0f : 1/ gden;
 			float fg_corr = wid2*fgsum-fsum*gsum;
 			//if( MyDebug.LOG ) {
 			//	Log.d(TAG, "match distance: ");

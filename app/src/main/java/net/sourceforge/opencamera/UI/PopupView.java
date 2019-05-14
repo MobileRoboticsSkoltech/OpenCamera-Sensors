@@ -1476,7 +1476,6 @@ public class PopupView extends LinearLayout {
 						final ScrollView popup_container = main_activity.findViewById(R.id.popup_container);
 						popup_container.getViewTreeObserver().addOnGlobalLayoutListener(
 								new OnGlobalLayoutListener() {
-									@SuppressWarnings("deprecation")
 									@Override
 									public void onGlobalLayout() {
 										if( MyDebug.LOG )

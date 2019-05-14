@@ -2593,7 +2593,7 @@ public class MainActivity extends Activity {
     /**
      * Set the brightness to minimal in case the preference key is set to do it
      */
-    void setBrightnessToMinimumIfWanted() {
+	private void setBrightnessToMinimumIfWanted() {
         if( MyDebug.LOG )
             Log.d(TAG, "setBrightnessToMinimum");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -4787,7 +4787,7 @@ public class MainActivity extends Activity {
         }
 	}
 
-	void initGyroSensors() {
+	private void initGyroSensors() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initGyroSensors");
 		if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
@@ -4798,7 +4798,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	void speak(String text) {
         if( textToSpeech != null && textToSpeechSuccess ) {
         	textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
@@ -4806,7 +4805,7 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
 		permissionHandler.onRequestPermissionsResult(requestCode, grantResults);

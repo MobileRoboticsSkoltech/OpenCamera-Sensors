@@ -1314,12 +1314,12 @@ public class MainUI {
 		}
     }
 
-    public void nextExposureUILine() {
+    private void nextExposureUILine() {
         mExposureLine++;
         highlightExposureUILine(true);
     }
 
-    public void previousExposureUILine() {
+    private void previousExposureUILine() {
         mExposureLine--;
         highlightExposureUILine(false);
     }
@@ -1331,7 +1331,7 @@ public class MainUI {
      *  -2: Shutter speed
      *  -3: exposure seek bar
       */
-    public void nextExposureUIItem() {
+	private void nextExposureUIItem() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "nextExposureUIItem");
         switch (mExposureLine) {
@@ -1353,7 +1353,7 @@ public class MainUI {
         }
     }
 
-    public void previousExposureUIItem() {
+    private void previousExposureUIItem() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "previousExposureUIItem");
         switch (mExposureLine) {
@@ -1415,7 +1415,7 @@ public class MainUI {
      *         // - Shutter speed
      *         // - exposure seek bar
      */
-    public void selectExposureUILine() {
+	private void selectExposureUILine() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "selectExposureUILine");
         if (!isExposureUIOpen()) { // Safety check
@@ -1980,7 +1980,7 @@ public class MainUI {
      * @param highlight
      * @param goLeft
      */
-	public void highlightPopupIcon(boolean highlight, boolean goLeft) {
+	private void highlightPopupIcon(boolean highlight, boolean goLeft) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "highlightPopupIcon");
 			Log.d(TAG, "highlight: " + highlight);
@@ -2018,25 +2018,25 @@ public class MainUI {
      * Select the next line on the settings popup. Called by MainActivity
      * when receiving a remote control command.
      */
-	public void nextPopupLine() {
+	private void nextPopupLine() {
 		highlightPopupLine(false, false);
 		mPopupLine++;
 		highlightPopupLine(true, false);
 	}
 
-	public void previousPopupLine() {
+	private void previousPopupLine() {
 		highlightPopupLine(false, true);
 		mPopupLine--;
 		highlightPopupLine(true, true);
 	}
 
-	public void nextPopupIcon() {
+	private void nextPopupIcon() {
 		highlightPopupIcon(false, false);
 		mPopupIcon++;
 		highlightPopupIcon(true, false);
 	}
 
-	public void previousPopupIcon() {
+	private void previousPopupIcon() {
 		highlightPopupIcon(false, true);
 		mPopupIcon--;
 		highlightPopupIcon(true, true);
@@ -2045,7 +2045,7 @@ public class MainUI {
     /**
      * Simulates a press on the currently selected icon
      */
-	public void clickSelectedIcon() {
+	private void clickSelectedIcon() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickSelectedIcon: " + mHighlightedIcon);
 		if (mHighlightedIcon != null) {
@@ -2123,7 +2123,6 @@ public class MainUI {
 		// doesn't seem to be any performance benefit in only calling that part
 		popup_container.getViewTreeObserver().addOnGlobalLayoutListener(
 			new OnGlobalLayoutListener() {
-				@SuppressWarnings("deprecation")
 				@Override
 			    public void onGlobalLayout() {
 					if( MyDebug.LOG )
@@ -2226,7 +2225,6 @@ public class MainUI {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyDown: " + keyCode);

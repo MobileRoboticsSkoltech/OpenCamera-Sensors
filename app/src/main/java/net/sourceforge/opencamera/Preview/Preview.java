@@ -7057,10 +7057,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			canvas.save();
 			canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
-			rect.left = canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding;
-			rect.top = canvas.getHeight()/2 + bounds.top - padding + offset_y;
-			rect.right = canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding;
-			rect.bottom = canvas.getHeight()/2 + bounds.bottom + padding + offset_y;
+			rect.left = canvas.getWidth()/2.0f - bounds.width()/2.0f + bounds.left - padding;
+			rect.top = canvas.getHeight()/2.0f + bounds.top - padding + offset_y;
+			rect.right = canvas.getWidth()/2.0f - bounds.width()/2.0f + bounds.right + padding;
+			rect.bottom = canvas.getHeight()/2.0f + bounds.bottom + padding + offset_y;
 
 			paint.setStyle(Paint.Style.FILL);
 			paint.setColor(Color.rgb(50, 50, 50));
@@ -7071,7 +7071,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			paint.setColor(Color.WHITE);
 			int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
 			for(String line : lines) {
-				canvas.drawText(line, canvas.getWidth()/2 - bounds.width()/2, ypos, paint);
+				canvas.drawText(line, canvas.getWidth()/2.0f - bounds.width()/2.0f, ypos, paint);
 				ypos += height;
 			}
 			canvas.restore();
@@ -7436,7 +7436,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void enableFocusPeaking() {
 		this.want_focus_peaking = true;
 		if( this.focus_peaking_bitmap_buffer == null ) {
-			createFocusPeakingBitmap();;
+			createFocusPeakingBitmap();
 		}
 	}
 

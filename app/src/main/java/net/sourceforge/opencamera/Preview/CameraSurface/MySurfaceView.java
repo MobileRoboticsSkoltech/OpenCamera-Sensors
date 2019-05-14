@@ -27,7 +27,6 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private final Handler handler = new Handler();
 	private final Runnable tick;
 
-	@SuppressWarnings("deprecation")
 	public
 	MySurfaceView(Context context, final Preview preview) {
 		super(context);

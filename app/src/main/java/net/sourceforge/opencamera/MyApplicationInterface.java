@@ -1504,7 +1504,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 		imageSaver.finishImageAverage(do_in_background);
 	}
 
-	void setNextPanoramaPoint(boolean repeat) {
+	private void setNextPanoramaPoint(boolean repeat) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setNextPanoramaPoint");
 		float camera_angle_y = main_activity.getPreview().getViewAngleY(false);
@@ -1667,9 +1667,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     }
 
                     // build subtitles
-					String subtitles = "";
+					StringBuilder subtitles = new StringBuilder();
 					if( datetime_stamp.length() > 0 )
-						subtitles += datetime_stamp + "\n";
+						subtitles.append(datetime_stamp).append("\n");
 
 					if( gps_stamp.length() > 0 ) {
                         Address address = null;
@@ -1704,14 +1704,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             for(int i=0;i<=address.getMaxAddressLineIndex();i++) {
                                 // write in forward order
                                 String addressLine = address.getAddressLine(i);
-                                subtitles += addressLine + "\n";
+                                subtitles.append(addressLine).append("\n");
                             }
                         }
 
                         if( address == null || preference_stamp_geo_address.equals("preference_stamp_geo_address_both") ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "display gps coords");
-                            subtitles += gps_stamp + "\n";
+                            subtitles.append(gps_stamp).append("\n");
                         }
                         else if( store_geo_direction ) {
                             if( MyDebug.LOG )
@@ -1720,7 +1720,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             if( gps_stamp.length() > 0 ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "gps_stamp is now: " + gps_stamp);
-                                subtitles += gps_stamp + "\n";
+                                subtitles.append(gps_stamp).append("\n");
                             }
                         }
                     }
@@ -1764,7 +1764,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 								writer.append(" --> ");
 								writer.append(subtitle_time_to);
 								writer.append('\n');
-								writer.append(subtitles); // subtitles should include the '\n' at the end
+								writer.append(subtitles.toString()); // subtitles should include the '\n' at the end
 								writer.append('\n'); // additional newline to indicate end of this subtitle
 								writer.flush();
 								// n.b., we flush rather than closing/reopening the writer each time, as appending doesn't seem to work with storage access framework

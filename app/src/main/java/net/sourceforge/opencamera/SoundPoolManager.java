@@ -22,7 +22,6 @@ class SoundPoolManager {
         this.context = context;
     }
 
-    @SuppressWarnings("deprecation")
     void initSound() {
         if( sound_pool == null ) {
             if( MyDebug.LOG )

@@ -91,7 +91,7 @@ public class DeviceScanner extends ListActivity {
             Log.d(TAG, "preference_remote_device_name: " + remote_name);
 
         TextView currentRemote = findViewById(R.id.currentRemote);
-        currentRemote.setText("Current remote: " + remote_name);
+        currentRemote.setText(getResources().getString(R.string.bluetooth_current_remote) + " " + remote_name);
 
     }
 

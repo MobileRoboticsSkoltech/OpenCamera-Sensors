@@ -53,7 +53,7 @@ public class VideoQualityHandler {
         if( MyDebug.LOG )
             Log.d(TAG, "initialiseVideoQualityFromProfiles()");
         video_quality = new ArrayList<>();
-        boolean done_video_size[] = null;
+        boolean[] done_video_size = null;
         if( video_sizes != null ) {
             done_video_size = new boolean[video_sizes.size()];
             for(int i=0;i<video_sizes.size();i++)
@@ -95,7 +95,7 @@ public class VideoQualityHandler {
         }
     }
 
-    private void addVideoResolutions(boolean done_video_size[], int base_profile, int min_resolution_w, int min_resolution_h) {
+    private void addVideoResolutions(boolean[] done_video_size, int base_profile, int min_resolution_w, int min_resolution_h) {
         if( video_sizes == null ) {
             return;
         }

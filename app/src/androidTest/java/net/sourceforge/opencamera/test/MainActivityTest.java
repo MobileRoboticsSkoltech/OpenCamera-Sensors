@@ -75,7 +75,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     public static final boolean test_camera2 = false;
     //public static final boolean test_camera2 = true;
 
-    @SuppressWarnings("deprecation")
     public MainActivityTest() {
         super("net.sourceforge.opencamera", MainActivity.class);
     }
@@ -15017,7 +15016,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                 Canvas rotated_canvas = new Canvas(rotated_bitmap);
                 rotated_canvas.save();
-                rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2, bitmap_height/2);
+                rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2.0f, bitmap_height/2.0f);
                 rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
                 rotated_canvas.restore();
                 bitmaps.get(i).recycle();

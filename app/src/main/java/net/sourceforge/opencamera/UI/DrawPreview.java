@@ -1919,7 +1919,7 @@ public class DrawPreview {
 				draw_rect.set(cx - radius - hthickness, cy - 2 * hthickness, cx + radius + hthickness, cy + 2 * hthickness);
 				canvas.drawRoundRect(draw_rect, 2 * hthickness, 2 * hthickness, p);
 				// draw the vertical crossbar
-				draw_rect.set(cx - 2 * hthickness, cy - radius / 2 - hthickness, cx + 2 * hthickness, cy + radius / 2 + hthickness);
+				draw_rect.set(cx - 2 * hthickness, cy - radius / 2.0f - hthickness, cx + 2 * hthickness, cy + radius / 2.0f + hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				// draw inner portion
 				if( is_level ) {
@@ -1933,7 +1933,7 @@ public class DrawPreview {
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
 				// draw the vertical crossbar
-				draw_rect.set(cx - hthickness, cy - radius / 2, cx + hthickness, cy + radius / 2);
+				draw_rect.set(cx - hthickness, cy - radius / 2.0f, cx + hthickness, cy + radius / 2.0f);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
 				if( is_level ) {
@@ -2100,10 +2100,10 @@ public class DrawPreview {
 				float correction_h = st_h/nd_h - 1.0f;
 				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
 				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
-				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
-				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
-				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
-				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
+				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2.0f;
+				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2.0f;
+				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2.0f;
+				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2.0f;
 				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
 				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
 				//thumbnail_anim_matrix.reset();

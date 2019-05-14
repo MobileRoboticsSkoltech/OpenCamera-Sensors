@@ -361,9 +361,7 @@ public class GyroSensor implements SensorEventListener {
                 }
             }
             else {
-                for(int i=0;i<3;i++) {
-                    this.gyroVector[i] = event.values[i];
-                }
+                System.arraycopy(event.values, 0, this.gyroVector, 0, 3);
                 has_gyroVector = true;
             }
 
@@ -456,9 +454,7 @@ public class GyroSensor implements SensorEventListener {
                 }
             }
             else {
-                for(int i=0;i<3;i++) {
-                    this.rotationVector[i] = event.values[i];
-                }
+                System.arraycopy(event.values, 0, this.rotationVector, 0, 3);
                 has_rotationVector = true;
             }
 
