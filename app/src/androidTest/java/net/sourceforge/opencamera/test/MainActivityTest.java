@@ -1795,6 +1795,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     private int getNFiles(File folder) {
         File [] files = folder.listFiles();
+        Log.d(TAG, "getNFiles: " + folder + " has: " + files);
         return files == null ? 0 : files.length;
     }
 
@@ -5247,10 +5248,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 assertTrue(n_new_files == 0 || n_new_files == 1);
             }
             else if( subtitles ) {
-                assertEquals(n_new_files, 2);
+                assertEquals(2, n_new_files);
             }
             else {
-                assertEquals(n_new_files, 1);
+                assertEquals(1, n_new_files);
             }
         }
         else {
@@ -5807,8 +5808,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 10s.
      *  Then check recording stops again within 10s.
-     *  On Android 8+, we use MediaRecorder.setNextOutputFile() (see Preview.onVideoInfo()), so instead we just wait 5s and
-     *  check video is still recording, then expect at least 2 resultant video files.
+     *  On Android 8+, we use MediaRecorder.setNextOutputFile() (see Preview.onVideoInfo()), so instead we just wait 10s and
+     *  check video is still recording, then expect at least 2 resultant video files. If this fails on Android 8+, ensure
+     *  that the video lengths aren't too short (if less than 3s, we sometimes seem to fall back to the pre-Android 8
+     *  behaviour, presumably because setNextOutputFile() can't take effect in time).
      *  This test is fine-tuned to Nexus 6, OnePlus 3T and Nokia 8, as we measure hitting max filesize based on time.
      */
     public void testTakeVideoMaxFileSize1() throws InterruptedException {
@@ -5825,7 +5828,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         if( is_nokia ) {
             // Nokia 8 has much smaller video sizes, at least when recording with phone face down, so we also set 4K
             editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-            editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "2000000"); // approx 3s on Nokia 8 at 4K
+            //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "2000000"); // approx 3s on Nokia 8 at 4K
+            editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "10000000"); // approx 3s on Nokia 8 at 4K
         }
         else {
             //editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
@@ -5842,7 +5846,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     assertTrue(mPreview.isVideoRecording());
                     Log.d(TAG, "wait");
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(10000);
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();
@@ -5850,7 +5854,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     }
                     Log.d(TAG, "check still recording");
                     assertTrue(mPreview.isVideoRecording());
-                    return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary widly
+                    return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary wildly, so we check the number of files afterwards (below)
                 }
 
                 // pre-Android 8 code:
