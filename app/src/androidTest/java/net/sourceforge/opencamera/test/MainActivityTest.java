@@ -7640,7 +7640,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mActivity.getMainUI().isExposureUIOpen() );
 
         assertFalse(mActivity.getMainUI().testGetRemoteControlMode());
-        if( mPreview.usingCamera2API() ) {
+        if( mPreview.supportsISORange() || mPreview.getSupportedISOs() != null ) {
             // need to skip past the ISO line
             assertFalse(mActivity.getMainUI().selectingLines());
             assertFalse(mActivity.getMainUI().selectingIcons());
