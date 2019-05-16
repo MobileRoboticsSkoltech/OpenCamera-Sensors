@@ -33,6 +33,7 @@ import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video.VideoColumns;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -918,43 +919,49 @@ public class StorageUtils {
 		return media;
     }
 
-	/** Return free memory in MB.
+	// only valid if isUsingSAF()
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private long freeMemorySAF() {
+		Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
+		if( MyDebug.LOG )
+			Log.d(TAG, "treeUri: " + treeUri);
+		try {
+			Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+			if( MyDebug.LOG )
+				Log.d(TAG, "docUri: " + docUri);
+			ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
+			if( pfd == null ) { // just in case
+				Log.e(TAG, "pfd is null!");
+				throw new FileNotFoundException();
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "read direct from SAF uri");
+			StructStatVfs statFs = Os.fstatvfs(pfd.getFileDescriptor());
+			long blocks = statFs.f_bavail;
+			long size = statFs.f_bsize;
+			return (blocks*size) / 1048576;
+		}
+		catch(IllegalArgumentException e) {
+			// IllegalArgumentException can be thrown by DocumentsContract.getTreeDocumentId or getContentResolver().openFileDescriptor
+			e.printStackTrace();
+		}
+		catch(FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch(ErrnoException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	/** Return free memory in MB, or -1 if this was unable to be found.
 	 */
 	public long freeMemory() { // return free memory in MB
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeMemory");
 		if( applicationInterface.getStorageUtils().isUsingSAF() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-			Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
-			if( MyDebug.LOG )
-				Log.d(TAG, "treeUri: " + treeUri);
-			try {
-				Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-				if( MyDebug.LOG )
-					Log.d(TAG, "docUri: " + docUri);
-				ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
-				if( pfd == null ) { // just in case
-					Log.e(TAG, "pfd is null!");
-					throw new FileNotFoundException();
-				}
-				if( MyDebug.LOG )
-					Log.d(TAG, "read direct from SAF uri");
-				StructStatVfs statFs = Os.fstatvfs(pfd.getFileDescriptor());
-				long blocks = statFs.f_bavail;
-				long size = statFs.f_bsize;
-				return (blocks*size) / 1048576;
-			}
-			catch(IllegalArgumentException e) {
-				// IllegalArgumentException can be thrown by DocumentsContract.getTreeDocumentId or getContentResolver().openFileDescriptor
-				e.printStackTrace();
-			}
-			catch(FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			catch(ErrnoException e) {
-				e.printStackTrace();
-			}
 			// if we fail for SAF, don't fall back to the methods below, as this may be incorrect (especially for external SD card)
-			return -1;
+			return freeMemorySAF();
 		}
 		try {
 			File folder = getImageFolder();
