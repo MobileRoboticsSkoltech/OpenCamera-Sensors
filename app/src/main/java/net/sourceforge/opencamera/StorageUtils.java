@@ -948,7 +948,11 @@ public class StorageUtils {
 		catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		catch(ErrnoException e) {
+		catch(Exception e) {
+			// We actually just want to catch ErrnoException here, but that isn't available pre-Android 5, and trying to catch ErrnoException
+			// means we crash on pre-Android 5 with java.lang.VerifyError when trying to create the StorageUtils class!
+			// One solution might be to move this method to a separate class that's only created on Android 5+, but this is a quick fix for
+			// now.
 			e.printStackTrace();
 		}
 		return -1;
