@@ -3261,6 +3261,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             max_time_s = 3; // takes longer to save 20 images!
         }
 
+        if( is_raw ) {
+            max_time_s += 6; // extra time needed for Nexus 6 at least
+        }
+
         boolean pause_preview =  sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
         if( pause_preview ) {
             max_time_s += 3; // need to allow longer for testTakePhotoRawWaitCaptureResult with Nexus 6 at least
@@ -3282,7 +3286,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Log.d(TAG, "waiting for thumbnail animation");
                 Thread.sleep(10);
                 int allowed_time_ms = 10000;
-                if( !mPreview.usingCamera2API() && ( is_hdr || is_nr || is_expo ) ) {
+                if( is_hdr || is_nr || is_expo ) {
                     // some devices need longer time (especially Nexus 6)
                     allowed_time_ms = 12000;
                 }
