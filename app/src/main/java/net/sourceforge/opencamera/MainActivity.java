@@ -3992,7 +3992,7 @@ public class MainActivity extends Activity {
 				has_saved_zoom = false;
 				if( preview.supportsZoom() ) {
 					int focus_assist = applicationInterface.getFocusAssistPref();
-					if( focus_assist > 0 ) {
+					if( focus_assist > 0 && preview.getCameraController() != null ) {
 						has_saved_zoom = true;
 						saved_zoom_factor = preview.getCameraController().getZoom();
 						if( MyDebug.LOG )
@@ -4007,7 +4007,7 @@ public class MainActivity extends Activity {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "manual focus seekbar: onStopTrackingTouch");
-				if( has_saved_zoom ) {
+				if( has_saved_zoom && preview.getCameraController() != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "unzoom for focus assist, zoom factor was: " + saved_zoom_factor);
 					preview.getCameraController().setZoom(saved_zoom_factor);
