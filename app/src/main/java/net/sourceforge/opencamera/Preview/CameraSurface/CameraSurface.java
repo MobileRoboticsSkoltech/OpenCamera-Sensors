@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.Preview.CameraSurface;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 
 import android.graphics.Matrix;
 import android.media.MediaRecorder;

@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.CameraController;
+package net.sourceforge.opencamera.cameracontroller;
 
 /** Provides additional support related to the Android camera APIs. This is to
  *  support functionality that doesn't require a camera to have been opened.

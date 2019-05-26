@@ -1,7 +1,7 @@
 package net.sourceforge.opencamera;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
-import net.sourceforge.opencamera.CameraController.RawImage;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -9,8 +9,8 @@ import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
-import net.sourceforge.opencamera.CameraController.RawImage;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
 
 /** A partial implementation of ApplicationInterface that provides "default" implementations. So
  *  sub-classing this is easier than implementing ApplicationInterface directly - you only have to

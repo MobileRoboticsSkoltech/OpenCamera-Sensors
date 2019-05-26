@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.UI;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;

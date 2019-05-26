@@ -1,8 +1,8 @@
 package net.sourceforge.opencamera.Preview.CameraSurface;
 
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.CameraController.CameraController;
-import net.sourceforge.opencamera.CameraController.CameraControllerException;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
 import net.sourceforge.opencamera.Preview.Preview;
 
 import android.annotation.SuppressLint;

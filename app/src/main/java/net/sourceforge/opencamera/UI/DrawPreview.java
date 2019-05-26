@@ -15,7 +15,7 @@ import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
 
 import android.app.KeyguardManager;

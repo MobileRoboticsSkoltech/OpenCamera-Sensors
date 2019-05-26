@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.CameraController;
+package net.sourceforge.opencamera.cameracontroller;
 
 /** Exception for CameraController classes.
  */

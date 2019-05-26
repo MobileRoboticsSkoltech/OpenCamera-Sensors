@@ -13,8 +13,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
-import net.sourceforge.opencamera.CameraController.RawImage;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;

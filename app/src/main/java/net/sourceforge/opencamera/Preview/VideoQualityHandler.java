@@ -3,7 +3,7 @@ package net.sourceforge.opencamera.Preview;
 import android.media.CamcorderProfile;
 import android.util.Log;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.io.Serializable;

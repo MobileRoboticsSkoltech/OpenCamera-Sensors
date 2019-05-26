@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
 
-import net.sourceforge.opencamera.CameraController.RawImage;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
 
 /** Provides communication between the Preview and the rest of the application
  *  - so in theory one can drop the Preview/ (and CameraController/) classes

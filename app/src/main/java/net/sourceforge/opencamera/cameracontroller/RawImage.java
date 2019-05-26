@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.CameraController;
+package net.sourceforge.opencamera.cameracontroller;
 
 import android.annotation.TargetApi;
 import android.hardware.camera2.DngCreator;
