@@ -7351,7 +7351,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "bitmap_height: " + bitmap_height);
 				Log.d(TAG, "rotation: " + rotation);
 			}
-			preview_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+			try {
+				/*if( true )
+					throw new IllegalArgumentException(); // test*/
+				preview_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+			}
+			catch(IllegalArgumentException e) {
+				Log.e(TAG, "failed to create preview_bitmap");
+				e.printStackTrace();
+				// Note if we failed to create the preview_bitmap, we don't call disablePreviewBitmap() or set want_preview_bitmap to false,
+				// otherwise DrawPreview will keep trying.
+			}
 			createZebraStripesBitmap();
 			createFocusPeakingBitmap();
 		}
@@ -7373,9 +7383,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void createZebraStripesBitmap() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createZebraStripesBitmap");
-		if( want_zebra_stripes ) {
-			zebra_stripes_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-			// zebra_stripes_bitmap itself is created dynamically when generating the zebra stripes
+		// n.b., preview_bitmap might be null if we failed to create the bitmap
+		if( want_zebra_stripes && preview_bitmap != null ) {
+			try {
+				/*if( true )
+					throw new IllegalArgumentException(); // test*/
+				zebra_stripes_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+				// zebra_stripes_bitmap itself is created dynamically when generating the zebra stripes
+			}
+			catch(IllegalArgumentException e) {
+				Log.e(TAG, "failed to create zebra_stripes_bitmap_buffer");
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -7395,9 +7414,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void createFocusPeakingBitmap() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createFocusPeakingBitmap");
-		if( want_focus_peaking ) {
-			focus_peaking_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-			// focus_peaking_bitmap itself is created dynamically when generating
+		// n.b., preview_bitmap might be null if we failed to create the bitmap
+		if( want_focus_peaking & preview_bitmap != null ) {
+			try {
+				/*if( true )
+					throw new IllegalArgumentException(); // test*/
+				focus_peaking_bitmap_buffer = Bitmap.createBitmap(preview_bitmap.getWidth(), preview_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+				// focus_peaking_bitmap itself is created dynamically when generating
+			}
+			catch(IllegalArgumentException e) {
+				Log.e(TAG, "failed to create focus_peaking_bitmap_buffer");
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -7634,6 +7662,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "time after getBitmap: " + (System.currentTimeMillis() - debug_time));
 
 				Allocation allocation_in = Allocation.createFromBitmap(preview.rs, preview_bitmap);
+				/*if( true )
+					throw new RSInvalidStateException("test"); // test*/
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - debug_time));
 
@@ -7743,6 +7773,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			catch(IllegalStateException e) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to getBitmap");
+				e.printStackTrace();
+			}
+			catch(RSInvalidStateException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "renderscript failure");
 				e.printStackTrace();
 			}
 
