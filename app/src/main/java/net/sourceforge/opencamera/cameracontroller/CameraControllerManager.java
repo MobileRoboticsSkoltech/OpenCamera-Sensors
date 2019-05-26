@@ -4,6 +4,6 @@ package net.sourceforge.opencamera.cameracontroller;
  *  support functionality that doesn't require a camera to have been opened.
  */
 public abstract class CameraControllerManager {
-	public abstract int getNumberOfCameras();
-	public abstract boolean isFrontFacing(int cameraId);
+    public abstract int getNumberOfCameras();
+    public abstract boolean isFrontFacing(int cameraId);
 }

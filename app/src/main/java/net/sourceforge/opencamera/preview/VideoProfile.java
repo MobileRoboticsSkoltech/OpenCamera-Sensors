@@ -7,10 +7,10 @@ import android.util.Log;
 import net.sourceforge.opencamera.MyDebug;
 
 /** This is essentially similar to CamcorderProfile in that it encapsulates a set of video settings
-	 *  to be passed to MediaRecorder, but allows us to store additional fields.
-	 */
+     *  to be passed to MediaRecorder, but allows us to store additional fields.
+     */
 public class VideoProfile {
-	private static final String TAG = "VideoProfile";
+    private static final String TAG = "VideoProfile";
 
     public boolean record_audio;
     public boolean no_audio_permission; // set to true if record_audio==false, but where the user had requested audio and we don't have microphone permission
