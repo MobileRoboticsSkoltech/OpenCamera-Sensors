@@ -183,7 +183,7 @@ public class MainActivity extends Activity {
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
             if (!mBluetoothLeService.initialize()) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
-                finish();
+				stopRemoteControl();
             }
             // Automatically connects to the device upon successful start-up initialization.
             mBluetoothLeService.connect(mRemoteDeviceAddress);
