@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Preview.CameraSurface;
+package net.sourceforge.opencamera.preview.CameraSurface;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 

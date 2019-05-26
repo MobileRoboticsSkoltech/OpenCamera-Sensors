@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Preview;
+package net.sourceforge.opencamera.preview;
 
 import net.sourceforge.opencamera.MyDebug;
 import android.content.Context;

@@ -15,10 +15,10 @@ import java.util.TimerTask;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
-import net.sourceforge.opencamera.Preview.ApplicationInterface;
-import net.sourceforge.opencamera.Preview.BasicApplicationInterface;
-import net.sourceforge.opencamera.Preview.Preview;
-import net.sourceforge.opencamera.Preview.VideoProfile;
+import net.sourceforge.opencamera.preview.ApplicationInterface;
+import net.sourceforge.opencamera.preview.BasicApplicationInterface;
+import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.UI.DrawPreview;
 
 import android.annotation.TargetApi;

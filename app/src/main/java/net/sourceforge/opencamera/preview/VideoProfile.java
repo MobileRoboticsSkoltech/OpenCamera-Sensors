@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Preview;
+package net.sourceforge.opencamera.preview;
 
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;

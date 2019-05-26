@@ -7,8 +7,8 @@ import net.sourceforge.opencamera.cameracontroller.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
-import net.sourceforge.opencamera.Preview.Preview;
-import net.sourceforge.opencamera.Preview.VideoQualityHandler;
+import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.preview.VideoQualityHandler;
 import net.sourceforge.opencamera.TextFormatter;
 import net.sourceforge.opencamera.UI.DrawPreview;
 

@@ -6,7 +6,7 @@ import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.Preview.Preview;
+import net.sourceforge.opencamera.preview.Preview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
