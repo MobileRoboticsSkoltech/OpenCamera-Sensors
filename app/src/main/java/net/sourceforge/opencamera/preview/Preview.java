@@ -15,9 +15,9 @@ import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager1;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
 import net.sourceforge.opencamera.preview.ApplicationInterface.NoFreeStorageException;
-import net.sourceforge.opencamera.preview.CameraSurface.CameraSurface;
-import net.sourceforge.opencamera.preview.CameraSurface.MySurfaceView;
-import net.sourceforge.opencamera.preview.CameraSurface.MyTextureView;
+import net.sourceforge.opencamera.preview.camerasurface.CameraSurface;
+import net.sourceforge.opencamera.preview.camerasurface.MySurfaceView;
+import net.sourceforge.opencamera.preview.camerasurface.MyTextureView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
