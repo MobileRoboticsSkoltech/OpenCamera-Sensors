@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.UI;
+package net.sourceforge.opencamera.ui;
 
 import android.util.Log;
 import android.widget.SeekBar;

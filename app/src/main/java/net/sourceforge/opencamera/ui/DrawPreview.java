@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.UI;
+package net.sourceforge.opencamera.ui;
 
 import java.io.File;
 import java.io.IOException;

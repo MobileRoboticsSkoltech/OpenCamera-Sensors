@@ -19,7 +19,7 @@ import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
-import net.sourceforge.opencamera.UI.DrawPreview;
+import net.sourceforge.opencamera.ui.DrawPreview;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

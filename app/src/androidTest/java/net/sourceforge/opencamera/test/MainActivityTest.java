@@ -25,8 +25,8 @@ import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.UI.FolderChooserDialog;
-import net.sourceforge.opencamera.UI.PopupView;
+import net.sourceforge.opencamera.ui.FolderChooserDialog;
+import net.sourceforge.opencamera.ui.PopupView;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;

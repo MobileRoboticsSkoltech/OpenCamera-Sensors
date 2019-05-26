@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.UI;
+package net.sourceforge.opencamera.ui;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;

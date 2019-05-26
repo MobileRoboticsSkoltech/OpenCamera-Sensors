@@ -10,7 +10,7 @@ import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoQualityHandler;
 import net.sourceforge.opencamera.TextFormatter;
-import net.sourceforge.opencamera.UI.DrawPreview;
+import net.sourceforge.opencamera.ui.DrawPreview;
 
 import org.junit.Test;
 

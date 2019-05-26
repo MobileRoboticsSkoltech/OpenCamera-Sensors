@@ -2,7 +2,7 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.UI.FolderChooserDialog;
+import net.sourceforge.opencamera.ui.FolderChooserDialog;
 
 import android.app.Activity;
 import android.app.ActivityManager;
