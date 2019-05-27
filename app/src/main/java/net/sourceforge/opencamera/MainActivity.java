@@ -60,9 +60,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.renderscript.RenderScript;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -94,15 +91,19 @@ public class MainActivity extends Activity {
 
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
-    private MagneticSensor magneticSensor;
-    private MainUI mainUI;
+
+    // components: always non-null (after onCreate())
     private BluetoothRemoteControl bluetoothRemoteControl;
     private PermissionHandler permissionHandler;
     private SettingsManager settingsManager;
-    private SoundPoolManager soundPoolManager;
+    private MainUI mainUI;
     private ManualSeekbars manualSeekbars;
-    private TextFormatter textFormatter;
     private MyApplicationInterface applicationInterface;
+    private TextFormatter textFormatter;
+    private SoundPoolManager soundPoolManager;
+    private MagneticSensor magneticSensor;
+    private SpeechControl speechControl;
+
     private Preview preview;
     private OrientationEventListener orientationEventListener;
     private int large_heap_memory;
@@ -122,9 +123,7 @@ public class MainActivity extends Activity {
     private TextToSpeech textToSpeech;
     private boolean textToSpeechSuccess;
 
-    private AudioListener audio_listener;
-    private SpeechRecognizer speechRecognizer;
-    private boolean speechRecognizerIsStarted;
+    private AudioListener audio_listener; // may be null - created when needed
 
     //private boolean ui_placement_right = true;
 
@@ -241,6 +240,7 @@ public class MainActivity extends Activity {
         textFormatter = new TextFormatter(this);
         soundPoolManager = new SoundPoolManager(this);
         magneticSensor = new MagneticSensor(this);
+        speechControl = new SpeechControl(this);
 
         // determine whether we support Camera2 API
         initCamera2Support();
@@ -960,7 +960,7 @@ public class MainActivity extends Activity {
         // if BLE remote control is enabled, then start the background BLE service
         bluetoothRemoteControl.startRemoteControl();
 
-        initSpeechRecognizer();
+        speechControl.initSpeechRecognizer();
         initLocation();
         initGyroSensors();
         soundPoolManager.initSound();
@@ -1014,7 +1014,7 @@ public class MainActivity extends Activity {
         }
         bluetoothRemoteControl.stopRemoteControl();
         freeAudioListener(false);
-        stopSpeechRecognizer();
+        speechControl.stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
         applicationInterface.getGyroSensor().stopRecording();
         applicationInterface.getGyroSensor().disableSensors();
@@ -1285,10 +1285,9 @@ public class MainActivity extends Activity {
         this.closePopup();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
-        if( audio_control.equals("voice") && speechRecognizer != null ) {
-            if( speechRecognizerIsStarted ) {
-                speechRecognizer.stopListening();
-                speechRecognizerStopped();
+        if( audio_control.equals("voice") && speechControl.hasSpeechRecognition() ) {
+            if( speechControl.isStarted() ) {
+                speechControl.stopListening();
             }
             else {
                 boolean has_audio_permission = true;
@@ -1305,8 +1304,8 @@ public class MainActivity extends Activity {
                 }
                 if( has_audio_permission ) {
                     preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
-                    startSpeechRecognizerIntent();
-                    speechRecognizerStarted();
+                    speechControl.startSpeechRecognizerIntent();
+                    speechControl.speechRecognizerStarted();
                 }
             }
         }
@@ -1318,30 +1317,6 @@ public class MainActivity extends Activity {
                 startAudioListener();
             }
         }
-    }
-
-    private void startSpeechRecognizerIntent() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "startSpeechRecognizerIntent");
-        if( speechRecognizer != null ) {
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
-            speechRecognizer.startListening(intent);
-        }
-    }
-
-    private void speechRecognizerStarted() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "speechRecognizerStarted");
-        mainUI.audioControlStarted();
-        speechRecognizerIsStarted = true;
-    }
-
-    private void speechRecognizerStopped() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "speechRecognizerStopped");
-        mainUI.audioControlStopped();
-        speechRecognizerIsStarted = false;
     }
 
     /* Returns the cameraId that the "Switch camera" button will switch to.
@@ -1964,7 +1939,7 @@ public class MainActivity extends Activity {
             speechRecognizerButton.setVisibility(View.GONE);
         }
 
-        initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
+        speechControl.initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
         initLocation(); // in case we've enabled or disabled GPS
         initGyroSensors(); // in case we've entered or left panoram
         if( MyDebug.LOG ) {
@@ -4110,230 +4085,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void initSpeechRecognizer() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "initSpeechRecognizer");
-        // in theory we could create the speech recognizer always (hopefully it shouldn't use battery when not listening?), though to be safe, we only do this when the option is enabled (e.g., just in case this doesn't work on some devices!)
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean want_speech_recognizer = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("voice");
-        if( speechRecognizer == null && want_speech_recognizer ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "create new speechRecognizer");
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-            if( speechRecognizer != null ) {
-                speechRecognizerIsStarted = false;
-                speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                    private void restart() {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: restart");
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            public void run() {
-                                startSpeechRecognizerIntent();
-                            }
-                        }, 250);
-
-						/*freeSpeechRecognizer();
-						Handler handler = new Handler();
-						handler.postDelayed(new Runnable() {
-							public void run() {
-								initSpeechRecognizer();
-								startSpeechRecognizerIntent();
-					        	speechRecognizerIsStarted = true;
-							}
-						}, 500);*/
-                    }
-
-                    @Override
-                    public void onBeginningOfSpeech() {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onBeginningOfSpeech");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                    }
-
-                    @Override
-                    public void onBufferReceived(byte[] buffer) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onBufferReceived");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                    }
-
-                    @Override
-                    public void onEndOfSpeech() {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onEndOfSpeech");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                        //speechRecognizerStopped();
-                        restart();
-                    }
-
-                    @Override
-                    public void onError(int error) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onError: " + error);
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                        if( error != SpeechRecognizer.ERROR_NO_MATCH ) {
-                            // we sometime receive ERROR_NO_MATCH straight after listening starts
-                            // it seems that the end is signalled either by ERROR_SPEECH_TIMEOUT or onEndOfSpeech()
-                            //speechRecognizerStopped();
-							/*if( error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "RecognitionListener: ERROR_RECOGNIZER_BUSY");
-								freeSpeechRecognizer();
-
-								Handler handler = new Handler();
-								handler.postDelayed(new Runnable() {
-									public void run() {
-										initSpeechRecognizer();
-										startSpeechRecognizerIntent();
-							        	speechRecognizerIsStarted = true;
-									}
-								}, 500);
-							}
-							else*/ {
-                                restart();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onEvent(int eventType, Bundle params) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onEvent");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                    }
-
-                    @Override
-                    public void onPartialResults(Bundle partialResults) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onPartialResults");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                    }
-
-                    @Override
-                    public void onReadyForSpeech(Bundle params) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onReadyForSpeech");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                    }
-
-                    public void onResults(Bundle results) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "RecognitionListener: onResults");
-                        if( !speechRecognizerIsStarted ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "...but speech recognition already stopped");
-                            return;
-                        }
-                        ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                        boolean found = false;
-                        final String trigger = "cheese";
-                        //String debug_toast = "";
-                        for(int i=0;list != null && i<list.size();i++) {
-                            String text = list.get(i);
-                            if( MyDebug.LOG ) {
-                                float [] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
-                                if( scores != null )
-                                    Log.d(TAG, "text: " + text + " score: " + scores[i]);
-                            }
-							/*if( i > 0 )
-								debug_toast += "\n";
-							debug_toast += text + " : " + results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i];*/
-                            if( text.toLowerCase(Locale.US).contains(trigger) ) {
-                                found = true;
-                            }
-                        }
-                        //preview.showToast(null, debug_toast); // debug only!
-                        if( found ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "audio trigger from speech recognition");
-                            audioTrigger();
-                        }
-                        else if( list != null && list.size() > 0 ) {
-                            String toast = list.get(0) + "?";
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "unrecognised: " + toast);
-                            preview.showToast(audio_control_toast, toast);
-                        }
-                    }
-
-                    @Override
-                    public void onRmsChanged(float rmsdB) {
-                    }
-                });
-
-                if( !mainUI.inImmersiveMode() ) {
-                    View speechRecognizerButton = findViewById(R.id.audio_control);
-                    speechRecognizerButton.setVisibility(View.VISIBLE);
-                }
-            }
-        }
-        else if( speechRecognizer != null && !want_speech_recognizer ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "stop existing SpeechRecognizer");
-            stopSpeechRecognizer();
-        }
-    }
-
-    private void freeSpeechRecognizer() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "freeSpeechRecognizer");
-        speechRecognizer.cancel();
-        try {
-            speechRecognizer.destroy();
-        }
-        catch(IllegalArgumentException e) {
-            // reported from Google Play - unclear why this happens, but might as well catch
-            Log.e(TAG, "exception destroying speechRecognizer");
-            e.printStackTrace();
-        }
-        speechRecognizer = null;
-    }
-
-    private void stopSpeechRecognizer() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "stopSpeechRecognizer");
-        if( speechRecognizer != null ) {
-            speechRecognizerStopped();
-            View speechRecognizerButton = findViewById(R.id.audio_control);
-            speechRecognizerButton.setVisibility(View.GONE);
-            freeSpeechRecognizer();
-        }
-    }
-
     public boolean hasAudioControl() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
         if( audio_control.equals("voice") ) {
-            return speechRecognizer != null;
+            return speechControl.hasSpeechRecognition();
         }
         else if( audio_control.equals("noise") ) {
             return true;
@@ -4348,10 +4104,9 @@ public class MainActivity extends Activity {
 
     public void stopAudioListeners() {
         freeAudioListener(true);
-        if( speechRecognizer != null ) {
+        if( speechControl.hasSpeechRecognition() ) {
             // no need to free the speech recognizer, just stop it
-            speechRecognizer.stopListening();
-            speechRecognizerStopped();
+            speechControl.stopListening();
         }
     }
 
@@ -4405,6 +4160,10 @@ public class MainActivity extends Activity {
         if( preview.getCameraController() != null && preview.getCameraController().isContinuousBurstInProgress() ) {
             preview.getCameraController().stopContinuousBurst();
         }
+    }
+
+    ToastBoxer getAudioControlToast() {
+        return this.audio_control_toast;
     }
 
     // for testing:
