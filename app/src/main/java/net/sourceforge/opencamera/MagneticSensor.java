@@ -144,9 +144,6 @@ public class MagneticSensor {
                 Log.d(TAG, "message: " + message);
             magnetic_accuracy_dialog.setMessage(message);
         }
-        else {
-            magnetic_accuracy_dialog = null;
-        }
     }
 
     private boolean shown_magnetic_accuracy_dialog = false; // whether the dialog for poor magnetic accuracy has been shown since application start
