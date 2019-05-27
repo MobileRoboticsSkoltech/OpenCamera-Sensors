@@ -94,7 +94,7 @@ public class MainActivity extends Activity {
 
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
-    private Sensor mSensorMagnetic;
+    private MagneticSensor magneticSensor;
     private MainUI mainUI;
     private BluetoothRemoteControl bluetoothRemoteControl;
     private PermissionHandler permissionHandler;
@@ -240,6 +240,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
         textFormatter = new TextFormatter(this);
         soundPoolManager = new SoundPoolManager(this);
+        magneticSensor = new MagneticSensor(this);
 
         // determine whether we support Camera2 API
         initCamera2Support();
@@ -281,15 +282,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "onCreate: time after creating accelerometer sensor: " + (System.currentTimeMillis() - debug_time));
 
         // magnetic sensor (for compass direction)
-        if( mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "found magnetic sensor");
-            mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        }
-        else {
-            if( MyDebug.LOG )
-                Log.d(TAG, "no support for magnetic sensor");
-        }
+        magneticSensor.initSensor(mSensorManager);
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating magnetic sensor: " + (System.currentTimeMillis() - debug_time));
 
@@ -928,177 +921,6 @@ public class MainActivity extends Activity {
         }
     };
 
-    private int magnetic_accuracy = -1;
-    private AlertDialog magnetic_accuracy_dialog;
-
-    private boolean magneticListenerIsRegistered;
-
-    /** Registers the magnetic sensor, only if it's required (by user preferences), and hasn't already
-     *  been registered.
-     *  If the magnetic sensor was previously registered, but is no longer required by user preferences,
-     *  then it is unregistered.
-     */
-    private void registerMagneticListener() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if( !magneticListenerIsRegistered ) {
-            if( needsMagneticSensor(sharedPreferences) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "register magneticListener");
-                mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
-                magneticListenerIsRegistered = true;
-            }
-            else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "don't register magneticListener as not needed");
-            }
-        }
-        else {
-            if( needsMagneticSensor(sharedPreferences) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "magneticListener already registered");
-            }
-            else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "magneticListener already registered but no longer needed");
-                mSensorManager.unregisterListener(magneticListener);
-                magneticListenerIsRegistered = false;
-            }
-        }
-    }
-
-    /** Unregisters the magnetic sensor, if it was registered.
-     */
-    private void unregisterMagneticListener() {
-        if( magneticListenerIsRegistered ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "unregister magneticListener");
-            mSensorManager.unregisterListener(magneticListener);
-            magneticListenerIsRegistered = false;
-        }
-        else {
-            if( MyDebug.LOG )
-                Log.d(TAG, "magneticListener wasn't registered");
-        }
-    }
-
-    private final SensorEventListener magneticListener = new SensorEventListener() {
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "magneticListener.onAccuracyChanged: " + accuracy);
-            //accuracy = SensorManager.SENSOR_STATUS_ACCURACY_LOW; // test
-            MainActivity.this.magnetic_accuracy = accuracy;
-            setMagneticAccuracyDialogText(); // update if a dialog is already open for this
-            checkMagneticAccuracy();
-
-            // test accuracy changing after dialog opened:
-			/*Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				public void run() {
-					MainActivity.this.magnetic_accuracy = SensorManager.SENSOR_STATUS_ACCURACY_HIGH;
-					setMagneticAccuracyDialogText();
-					checkMagneticAccuracy();
-				}
-			}, 5000);*/
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            preview.onMagneticSensorChanged(event);
-        }
-    };
-
-    private void setMagneticAccuracyDialogText() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "setMagneticAccuracyDialogText()");
-        if( magnetic_accuracy_dialog != null ) {
-            String message = getResources().getString(R.string.magnetic_accuracy_info) + " ";
-            switch( magnetic_accuracy ) {
-                case SensorManager.SENSOR_STATUS_UNRELIABLE:
-                    message += getResources().getString(R.string.accuracy_unreliable);
-                    break;
-                case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
-                    message += getResources().getString(R.string.accuracy_low);
-                    break;
-                case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
-                    message += getResources().getString(R.string.accuracy_medium);
-                    break;
-                case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
-                    message += getResources().getString(R.string.accuracy_high);
-                    break;
-                default:
-                    message += getResources().getString(R.string.accuracy_unknown);
-                    break;
-            }
-            if( MyDebug.LOG )
-                Log.d(TAG, "message: " + message);
-            magnetic_accuracy_dialog.setMessage(message);
-        }
-        else {
-            magnetic_accuracy_dialog = null;
-        }
-    }
-
-    private boolean shown_magnetic_accuracy_dialog = false; // whether the dialog for poor magnetic accuracy has been shown since application start
-
-    /** Checks whether the user should be informed about poor magnetic sensor accuracy, and shows
-     *  the dialog if so.
-     */
-    private void checkMagneticAccuracy() {
-        if( MyDebug.LOG )
-            Log.d(TAG, "checkMagneticAccuracy(): " + magnetic_accuracy);
-        if( magnetic_accuracy != SensorManager.SENSOR_STATUS_UNRELIABLE && magnetic_accuracy != SensorManager.SENSOR_STATUS_ACCURACY_LOW ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "accuracy is good enough (or accuracy not yet known)");
-        }
-        else if( shown_magnetic_accuracy_dialog ) {
-            // if we've shown the dialog since application start, then don't show again even if the user didn't click to not show again
-            if( MyDebug.LOG )
-                Log.d(TAG, "already shown_magnetic_accuracy_dialog");
-        }
-        else if( preview.isTakingPhotoOrOnTimer() || preview.isVideoRecording() ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "don't disturb whilst taking photo, on timer, or recording video");
-        }
-        else if( camera_in_background ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "don't show magnetic accuracy dialog due to camera in background");
-            // don't want to show dialog if another is open, or in settings, etc
-        }
-        else {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            if( !needsMagneticSensor(sharedPreferences) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "don't need magnetic sensor");
-                // note, we shouldn't set shown_magnetic_accuracy_dialog to true here, otherwise we won't pick up if the user enables one of these options
-            }
-            else if( sharedPreferences.contains(PreferenceKeys.MagneticAccuracyPreferenceKey) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "user selected to no longer show the dialog");
-                shown_magnetic_accuracy_dialog = true; // also set this flag, so future calls to checkMagneticAccuracy() will exit without needing to get/read the SharedPreferences
-            }
-            else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "show dialog for magnetic accuracy");
-                shown_magnetic_accuracy_dialog = true;
-                magnetic_accuracy_dialog = mainUI.showInfoDialog(R.string.magnetic_accuracy_title, 0, PreferenceKeys.MagneticAccuracyPreferenceKey);
-                setMagneticAccuracyDialogText();
-            }
-        }
-    }
-
-    /* Whether the user preferences indicate that we need the magnetic sensor to be enabled.
-     */
-    private boolean needsMagneticSensor(SharedPreferences sharedPreferences) {
-        if( applicationInterface.getGeodirectionPref() ||
-                sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false) ||
-                sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false) ) {
-            return true;
-        }
-        return false;
-    }
-
     /* To support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie .
      * Allows using the Mi Band 2 as a Bluetooth remote for Open Camera to take photos or start/stop
      * videos.
@@ -1130,7 +952,7 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().getRootView().setBackgroundColor(Color.BLACK);
 
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        registerMagneticListener();
+        magneticSensor.registerMagneticListener(mSensorManager);
         orientationEventListener.enable();
 
         registerReceiver(cameraReceiver, new IntentFilter("com.miband2.action.CAMERA"));
@@ -1181,7 +1003,7 @@ public class MainActivity extends Activity {
         super.onPause(); // docs say to call this before freeing other things
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
-        unregisterMagneticListener();
+        magneticSensor.unregisterMagneticListener(mSensorManager);
         orientationEventListener.disable();
         try {
             unregisterReceiver(cameraReceiver);
@@ -1821,7 +1643,7 @@ public class MainActivity extends Activity {
         putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());
         putBundleExtra(bundle, "white_balances", this.preview.getSupportedWhiteBalances());
         putBundleExtra(bundle, "isos", this.preview.getSupportedISOs());
-        bundle.putInt("magnetic_accuracy", magnetic_accuracy);
+        bundle.putInt("magnetic_accuracy", magneticSensor.getMagneticAccuracy());
         bundle.putString("iso_key", this.preview.getISOKey());
         if( this.preview.getCameraController() != null ) {
             bundle.putString("parameters_string", preview.getCameraController().getParametersString());
@@ -2181,8 +2003,8 @@ public class MainActivity extends Activity {
     		preview.updateFocus(saved_focus_value, true, false);
     	}*/
 
-        registerMagneticListener(); // check whether we need to register or unregister the magnetic listener
-        checkMagneticAccuracy();
+        magneticSensor.registerMagneticListener(mSensorManager); // check whether we need to register or unregister the magnetic listener
+        magneticSensor.checkMagneticAccuracy();
 
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: done: " + (System.currentTimeMillis() - debug_time));
@@ -2448,7 +2270,7 @@ public class MainActivity extends Activity {
         initImmersiveMode();
         camera_in_background = false;
 
-        magnetic_accuracy_dialog = null; // if the magnetic accuracy was opened, it must have been closed now
+        magneticSensor.clearDialog(); // if the magnetic accuracy was opened, it must have been closed now
     }
 
     private void setWindowFlagsForSettings() {
