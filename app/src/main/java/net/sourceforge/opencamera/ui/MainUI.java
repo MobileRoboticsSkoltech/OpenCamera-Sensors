@@ -775,7 +775,7 @@ public class MainUI {
 
     public void updateRemoteConnectionIcon() {
         View remoteConnectedIcon = main_activity.findViewById(R.id.kraken_icon);
-        if (main_activity.remoteConnected() ) {
+        if (main_activity.getBluetoothRemoteControl().remoteConnected() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "Remote control connected");
             remoteConnectedIcon.setVisibility(View.VISIBLE);
@@ -1040,7 +1040,7 @@ public class MainUI {
                 }
 
                 View remoteConnectedIcon = main_activity.findViewById(R.id.kraken_icon);
-                if (main_activity.remoteConnected() ) {
+                if (main_activity.getBluetoothRemoteControl().remoteConnected() ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "Remote control connected");
                     remoteConnectedIcon.setVisibility(View.VISIBLE);
@@ -1197,7 +1197,7 @@ public class MainUI {
         }
         else if( main_activity.getPreview().getCameraController() != null ) {
             setupExposureUI();
-            if (main_activity.remoteEnabled()) {
+            if (main_activity.getBluetoothRemoteControl().remoteEnabled()) {
                 initRemoteControlForExposureUI();
             }
         }
@@ -2113,7 +2113,7 @@ public class MainUI {
         }
         popup_view_is_open = true;
 
-        if (main_activity.remoteEnabled()) {
+        if (main_activity.getBluetoothRemoteControl().remoteEnabled()) {
             initRemoteControlForPopup();
         }
 
