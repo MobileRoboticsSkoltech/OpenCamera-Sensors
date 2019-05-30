@@ -9,11 +9,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.TextureView;
 
 /** CameraController is an abstract class that wraps up the access/control to
  *  the Android camera, so that the rest of the application doesn't have to
@@ -493,7 +493,7 @@ public abstract class CameraController {
     public abstract boolean focusIsVideo();
     public abstract void reconnect() throws CameraControllerException;
     public abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
-    public abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
+    public abstract void setPreviewTexture(TextureView texture) throws CameraControllerException;
     /** Starts the camera preview.
      *  @throws CameraControllerException if the camera preview fails to start.
      */

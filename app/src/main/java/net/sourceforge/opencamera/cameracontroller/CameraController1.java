@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusMoveCallback;
 import android.location.Location;
@@ -17,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.TextureView;
 
 /** Provides support using Android's original camera API
  *  android.hardware.Camera.
@@ -1497,11 +1497,11 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
-    public void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
+    public void setPreviewTexture(TextureView texture) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "setPreviewTexture");
         try {
-            camera.setPreviewTexture(texture);
+            camera.setPreviewTexture(texture.getSurfaceTexture());
         }
         catch(IOException e) {
             e.printStackTrace();

@@ -50,6 +50,7 @@ import android.util.SizeF;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.TextureView;
 
 /** Provides support using Android 5's Camera 2 API
  *  android.hardware.camera2.*.
@@ -4419,7 +4420,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
+	public void setPreviewTexture(TextureView texture) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		if( this.texture != null ) {
@@ -4427,7 +4428,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "preview texture already set");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		this.texture = texture;
+		this.texture = texture.getSurfaceTexture();
 	}
 
 	private void setRepeatingRequest() throws CameraAccessException {
