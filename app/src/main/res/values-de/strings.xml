@@ -284,8 +284,8 @@
     <string name="audio_listener_started">Mache ein lautes Geräusch</string>
 
     <string name="auto_stabilise_info">Autostabilisierung rotiert die Fotos so, dass sie waagerecht erscheinen.\n\nDies bedeutet aber auch eine geringere Auflösung aufgrund von Rotation und Beschneidung.</string>
-    <string name="raw_info">DNG-Dateien enthalten das unkomprimierte und unbearbeitete Bild der Kamera.\n\nDie meisten Galerie-Apps werden mit DNG-Bildern nicht umgehen können. Stattdessen werden spezielle Programme wie Snapseed oder Lightroom benötigt.\n\nBeachte, dass "Fotostempel" und "Autostabilisierung" nur auf JPEG-Bilder angewendet wird, nicht aber auf DNG-Bilder.\n\nDNG-Dateien benötigen viel Platz. Ein Fileexplorer mag nützlich sein, um bei Bedarf Bilder zu löschen.\n\nDNG-Dateien werden nur im Standard- oder DRO-Foto-Modus geschrieben.</string>
-    <string name="hdr_info">Der HDR-Modus ist nützlich für Aufnahmen mit starken Helligkeitsunterschieden. Dabei werden mehrere Aufnahmen unterschiedlicher Belichtungszeiten zu einem Bild kombiniert.\n\nBeachte das HDR nicht für schnell bewegte Szenen geeignet ist und die Farbwiedergabe verfälscht.\n\nAufnahmen im HDR-Modus sind langsamer.</string>
+    <string name="raw_info">DNG-Dateien enthalten die volle, unkomprimierte Bildinformation der Kamera. Manche Galerie-Apps erkennen das DNG-Format nicht. DNG-Dateien können in  spezialisierten Foto-Editor-Apps wie Snapseed oder Lightroom verwendet werden. Verschiedene Bildbearbeitungsoptionen wie \"Fotostempel\" oder \"Autostabilisierung\" werden nur bei JPEG-Dateien angewandt und nicht bei DNG-Dateien.</string>
+    <string name="hdr_info">Der HDR-Modus ist nützlich für Motive mit starkem Kontrast. Dabei werden mehrere Bilder mit verschiedener Belichtung kombiniert.\n\nHDR ist nicht für bewegte Szenen geeignet, kann Farbänderungen bewirken und benötigt mehr Zeit.</string>
 
     <string name="dont_show_again">Nicht wieder zeigen</string>
 
@@ -761,5 +761,50 @@
     <string name="preference_stamp_geo_address_both">Zeige zusätzlich zur GPS-Position die zugehörige Adresse an</string>
     <string name="preference_stamp_geo_address_prefer">Bevorzuge Adressdaten vor GPS-Koordinaten</string>
     <string name="preference_stamp_geo_address_no">Zeige keine Adressdaten an</string>
-	
+
+    <string name="preference_histogram">Zeige ein Histogramm</string>
+    <string name="preference_histogram_summary">Zeigt ein Farb-Histogramm an\n%s</string>
+    <string name="preference_histogram_off">Aus</string>
+    <string name="preference_histogram_rgb">RGB-Farben</string>
+    <string name="preference_histogram_luminance">Leuchtdichte</string>
+    <string name="preference_histogram_value">Wert (Maximum)</string>
+    <string name="preference_histogram_intensity">Intensität (Durchschnitt)</string>
+    <string name="preference_histogram_lightness">Helligkeit (Durchschnitt des Min.-Max.)</string>
+
+    <string name="preference_zebra_stripes">Zeige Zebrastreifen</string>
+    <string name="preference_zebra_stripes_summary">Zeigt in der Vorschau Zebrastreifen in den überbelichteten Stellen der Aufnahme.\n%s</string>
+    <string name="preference_zebra_stripes_off">Aus</string>
+    <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_90pc">90%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_100pc">100%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+
+    <string name="preference_focus_peaking">Fokus-Peaking</string>
+    <string name="preference_focus_peaking_summary">Fokus-Peaking hebt scharf abgebildete Konturen hervor. Das ist vorrangig bei manuellem Fokus nützlich und hilft die scharf eingestellten Bereiche des Bilds zu erkennen.\n%s</string>
+    <string name="preference_focus_peaking_off">Aus</string>
+    <string name="preference_focus_peaking_on">An</string>
+    <string name="preference_focus_peaking_color">Fokus-Peaking-Farbe</string>
+    <string name="preference_focus_peaking_color_summary">Bestimmt die Farbe zur Hervorhebung der fokussierten Konturen.\n%s</string>
+
+    <string name="remaining">Verbleibende</string> <!-- images remaining for "processing" -->
+
+    <string name="preference_preview">Kamera-Vorschau…</string>
+
+    <string name="cycle_flash">Blitz-Optionen</string>
+    <string name="preference_show_cycle_flash">Zeige Blitz-Icon</string>
+    <string name="preference_show_cycle_flash_summary">Zeigt Icon für die Blitz-Optionen-Auswahl direkt auf dem Bildschirm, anstelle der Auswahl per Popup-Menü.</string>
+
+    <string name="preference_raw_expo_bracketing">RAW für Belichtungsreihe</string>
+    <string name="preference_raw_expo_bracketing_summary">Speichert die Fotos von Belichtungsreihen (Expo {}) auch im RAW-Format (oder für HDR-Modus, wenn \"Speichere alle Fotos für HDR-Modus\" gewählt ist). Ist die Option \"RAW für Belichtungsreihe\" nicht ausgewählt, werden in diesen Modi nur JPEGs gespeichert.</string>
+
+    <string name="preference_raw_focus_bracketing">RAW für Fokus-Reihe</string>
+    <string name="preference_raw_focus_bracketing_summary">Speichert die Fotos von Fokus-Reihen (FOCUS {}) auch im RAW-Format. Ist die Option \"RAW für Fokus-Reihe\" nicht ausgewählt, werden in diesen Modi nur JPEGs gespeichert.</string>
+
+    <string name="cycle_raw">RAW-Mode-Optionen</string>
+    <string name="preference_show_cycle_raw">Zeige RAW-Icon</string>
+    <string name="preference_show_cycle_raw_summary">Zeigt Icon für die RAW-Mode-Auswahl direkt auf dem Bildschirm.</string>
+
+    <string name="bluetooth_current_remote">Momentane Fernsteurung:</string>
+    <string name="bluetooth_scan">Scan</string>
+
 </resources>
