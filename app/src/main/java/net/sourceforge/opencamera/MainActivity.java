@@ -621,7 +621,7 @@ public class MainActivity extends Activity {
             if( MyDebug.LOG )
                 Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: selfie mode");
             done_facing = true;
-            switchToCamera(true);
+            applicationInterface.switchToCamera(true);
         }
         else if( ACTION_SHORTCUT_GALLERY.equals(action) ) {
             if( MyDebug.LOG )
@@ -643,7 +643,7 @@ public class MainActivity extends Activity {
                 if( camera_facing == 0 || camera_facing == 1 ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "found android.intent.extras.CAMERA_FACING: " + camera_facing);
-                    switchToCamera(camera_facing==1);
+                    applicationInterface.switchToCamera(camera_facing==1);
                     done_facing = true;
                 }
             }
@@ -651,7 +651,7 @@ public class MainActivity extends Activity {
                 if( extras.getInt("android.intent.extras.LENS_FACING_FRONT", -1) == 1 ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "found android.intent.extras.LENS_FACING_FRONT");
-                    switchToCamera(true);
+                    applicationInterface.switchToCamera(true);
                     done_facing = true;
                 }
             }
@@ -659,7 +659,7 @@ public class MainActivity extends Activity {
                 if( extras.getInt("android.intent.extras.LENS_FACING_BACK", -1) == 1 ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "found android.intent.extras.LENS_FACING_BACK");
-                    switchToCamera(false);
+                    applicationInterface.switchToCamera(false);
                     done_facing = true;
                 }
             }
@@ -667,27 +667,20 @@ public class MainActivity extends Activity {
                 if( extras.getBoolean("android.intent.extra.USE_FRONT_CAMERA", false) ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "found android.intent.extra.USE_FRONT_CAMERA");
-                    switchToCamera(true);
+                    applicationInterface.switchToCamera(true);
                     done_facing = true;
                 }
             }
         }
-    }
 
-    /** Switch to the first available camera that is front or back facing as desired.
-     * @param front_facing Whether to switch to a front or back facing camera.
-     */
-    private void switchToCamera(boolean front_facing) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "switchToCamera: " + front_facing);
-        int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
-        for(int i=0;i<n_cameras;i++) {
-            if( preview.getCameraControllerManager().isFrontFacing(i) == front_facing ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "found desired camera: " + i);
-                applicationInterface.setCameraIdPref(i);
-                break;
-            }
+        // N.B., in practice the hasSetCameraId() check is pointless as we don't save the camera ID in shared preferences, so it will always
+        // be false when application is started from onCreate(), unless resuming from saved instance (in which case we shouldn't be here anyway)
+        if( !done_facing && !applicationInterface.hasSetCameraId() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "initialise to back camera");
+            // most devices have first camera as back camera anyway so this wouldn't be needed, but some (e.g., LG G6) have first camera
+            // as front camera, so we should explicitly switch to back camera
+            applicationInterface.switchToCamera(false);
         }
     }
 

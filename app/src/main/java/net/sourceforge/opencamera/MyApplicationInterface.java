@@ -132,6 +132,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     // camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
     private final static int cameraId_default = 0;
+    private boolean has_set_cameraId;
     private int cameraId = cameraId_default;
     private final static String nr_mode_default = "preference_nr_mode_normal";
     private String nr_mode = nr_mode_default;
@@ -163,6 +164,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // load the things we saved in onSaveInstanceState().
             if( MyDebug.LOG )
                 Log.d(TAG, "read from savedInstanceState");
+            has_set_cameraId = true;
             cameraId = savedInstanceState.getInt("cameraId", cameraId_default);
             if( MyDebug.LOG )
                 Log.d(TAG, "found cameraId: " + cameraId);
@@ -2182,8 +2184,32 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         main_activity.getMainUI().setSeekbarZoom(new_zoom);
     }
 
+    /** Switch to the first available camera that is front or back facing as desired.
+     * @param front_facing Whether to switch to a front or back facing camera.
+     */
+    void switchToCamera(boolean front_facing) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "switchToCamera: " + front_facing);
+        int n_cameras = main_activity.getPreview().getCameraControllerManager().getNumberOfCameras();
+        for(int i=0;i<n_cameras;i++) {
+            if( main_activity.getPreview().getCameraControllerManager().isFrontFacing(i) == front_facing ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "found desired camera: " + i);
+                this.setCameraIdPref(i);
+                break;
+            }
+        }
+    }
+
+    /* Note that the cameraId is still valid if this returns false, it just means that a cameraId hasn't be explicitly set yet.
+     */
+    boolean hasSetCameraId() {
+        return has_set_cameraId;
+    }
+
     @Override
     public void setCameraIdPref(int cameraId) {
+        this.has_set_cameraId = true;
         this.cameraId = cameraId;
     }
 
