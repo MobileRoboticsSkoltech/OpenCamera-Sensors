@@ -4511,6 +4511,7 @@ public class CameraController2 extends CameraController {
 		} 
 	}
 
+	// should synchronize calls to this method using background_camera_lock
 	private Surface getPreviewSurface() {
 		return surface_texture;
 	}
@@ -4564,14 +4565,16 @@ public class CameraController2 extends CameraController {
 				}
 				texture.setDefaultBufferSize(preview_width, preview_height);
 				// also need to create a new surface for the texture, in case the size has changed - but make sure we remove the old one first!
-				if( surface_texture != null ) {
+				synchronized( background_camera_lock ) {
+					if( surface_texture != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "remove old target: " + surface_texture);
+						previewBuilder.removeTarget(surface_texture);
+					}
+					this.surface_texture = new Surface(texture);
 					if( MyDebug.LOG )
-						Log.d(TAG, "remove old target: " + surface_texture);
-					previewBuilder.removeTarget(surface_texture);
+						Log.d(TAG, "created new target: " + surface_texture);
 				}
-				this.surface_texture = new Surface(texture);
-				if( MyDebug.LOG )
-					Log.d(TAG, "created new target: " + surface_texture);
 			}
 			if( video_recorder != null ) {
 				if( MyDebug.LOG )
@@ -4586,12 +4589,14 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
 
-			if( video_recorder != null )
-				video_recorder_surface = video_recorder.getSurface();
-			else
-				video_recorder_surface = null;
-			if( MyDebug.LOG )
-				Log.d(TAG, "video_recorder_surface: " + video_recorder_surface);
+			synchronized( background_camera_lock ) {
+				if( video_recorder != null )
+					video_recorder_surface = video_recorder.getSurface();
+				else
+					video_recorder_surface = null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "video_recorder_surface: " + video_recorder_surface);
+			}
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				private boolean callback_done; // must sychronize on this and notifyAll when setting to true
@@ -4683,26 +4688,30 @@ public class CameraController2 extends CameraController {
 			}
 			final MyStateCallback myStateCallback = new MyStateCallback();
 
-        	Surface preview_surface = getPreviewSurface();
-        	List<Surface> surfaces;
-        	if( video_recorder != null ) {
-				if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
-					surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface());
+			List<Surface> surfaces;
+        	synchronized( background_camera_lock ) {
+				Surface preview_surface = getPreviewSurface();
+				if( video_recorder != null ) {
+					if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
+						surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface());
+					}
+					else {
+						surfaces = Arrays.asList(preview_surface, video_recorder_surface);
+					}
+					// n.b., raw not supported for photo snapshots while video recording
+				}
+				else if( imageReaderRaw != null ) {
+					surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
 				}
 				else {
-					surfaces = Arrays.asList(preview_surface, video_recorder_surface);
+					surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
 				}
-				// n.b., raw not supported for photo snapshots while video recording
-        	}
-    		else if( imageReaderRaw != null ) {
-        		surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
-    		}
-    		else {
-        		surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
-    		}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "texture: " + texture);
+					Log.d(TAG, "preview_surface: " + preview_surface);
+				}
+			}
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "texture: " + texture);
-				Log.d(TAG, "preview_surface: " + preview_surface);
 				if( video_recorder == null ) {
 					if( imageReaderRaw != null ) {
 						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw);
