@@ -1057,9 +1057,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(video_high_speed);
                         about_string.append("\nVideo capture rate factor: ");
                         about_string.append(video_capture_rate_factor);
-                        about_string.append("\nAuto-stabilise?: ");
+                        about_string.append("\nAuto-level?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
-                        about_string.append("\nAuto-stabilise enabled?: ");
+                        about_string.append("\nAuto-level enabled?: ");
                         about_string.append(sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
