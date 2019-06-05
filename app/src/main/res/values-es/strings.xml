@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Color de fuente</string>
     <string name="preference_stamp_font_color_summary">Color de la fuente a utilizar cuando se estampe texto en las fotos</string>
     <string name="preference_stamp_style">Estilo de texto</string>
-    <string name="preference_stamp_style_summary">Estilo a utilizar cuando se estampe texto en las fotos</string>
+    <string name="preference_stamp_style_summary">Estilo a utilizar cuando se estampe texto en las fotos\n%s</string>
     <string name="preference_background_photo_saving">Utilizar subproceso en segundo plano</string>
     <string name="preference_background_photo_saving_summary">Guarde fotos con un subproceso en segundo plano (para una operación más rápida)</string>
     <string name="video_quality">Resolución de video</string>

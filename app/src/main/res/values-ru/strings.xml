@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Цвет</string>
     <string name="preference_stamp_font_color_summary">Цвет для добавляемого на фотографию текста</string>
     <string name="preference_stamp_style">Стиль</string>
-    <string name="preference_stamp_style_summary">Стиль для добавляемого на фотографию текста</string>
+    <string name="preference_stamp_style_summary">Стиль для добавляемого на фотографию текста\n%s</string>
     <string name="preference_background_photo_saving">Использовать фоновый поток</string>
     <string name="preference_background_photo_saving_summary">Сохранять фото в фоновом потоке (для ускорения работы)</string>
     <string name="video_quality">Разрешение видео</string>

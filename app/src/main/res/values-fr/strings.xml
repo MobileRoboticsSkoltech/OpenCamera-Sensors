@@ -192,7 +192,7 @@
     <string name="preference_stamp_font_color">Couleur de la police</string>
     <string name="preference_stamp_font_color_summary">Couleur de la police utilisée pour l\'incrustation de texte sur les photos</string>
     <string name="preference_stamp_style">Format du texte</string>
-    <string name="preference_stamp_style_summary">Format du texte utilisé pour l\'incrustation de texte sur les photos</string>
+    <string name="preference_stamp_style_summary">Format du texte utilisé pour l\'incrustation de texte sur les photos\n%s</string>
     <string name="video_quality">Résolution vidéo</string>
     <string name="preference_force_video_4k">Forcer le format vidéo 4K UHD (experimental)</string>
     <string name="preference_force_video_4k_summary">Active la résolution 3840x2160 pour l\'enregistrement vidéo sur l\'appareil photo arrière - cela ne fonctionnera que si votre appareil le prend en charge (et peut se bloquer le cas échéant\u00A0!)</string>

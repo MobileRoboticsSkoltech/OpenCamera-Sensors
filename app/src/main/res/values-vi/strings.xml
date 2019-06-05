@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Màu phông</string>
     <string name="preference_stamp_font_color_summary">Màu phông chữ được sử dụng khi gắn văn bản vào ảnh</string>
     <string name="preference_stamp_style">Kiểu văn bản</string>
-    <string name="preference_stamp_style_summary">Kiểu văn bản được sử dụng khi gắn vào ảnh</string>
+    <string name="preference_stamp_style_summary">Kiểu văn bản được sử dụng khi gắn vào ảnh\n%s</string>
     <string name="preference_background_photo_saving">Chạy dưới nền</string>
     <string name="preference_background_photo_saving_summary">Lưu ảnh dưới nền (giúp thao tác nhanh hơn)</string>
     <string name="video_quality">Độ phân giải video</string>

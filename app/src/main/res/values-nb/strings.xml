@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Skrifttypefarge</string>
     <string name="preference_stamp_font_color_summary">Skrifttypefargen som skal brukes når det stemples tekst oppå bilder.</string>
     <string name="preference_stamp_style">Tekststil</string>
-    <string name="preference_stamp_style_summary">Stilen som skal brukes når det stemples tekst oppå bilder.</string>
+    <string name="preference_stamp_style_summary">Stilen som skal brukes når det stemples tekst oppå bilder.\n%s</string>
     <string name="preference_background_photo_saving">Bruk bakgrunnstråd</string>
     <string name="preference_background_photo_saving_summary">Hvorvidt det skal lagres bilder på en bakgrunnstråd (for å kunne kjøre raskere)</string>
     <string name="video_quality">Videooppløsning</string>

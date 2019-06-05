@@ -183,7 +183,7 @@
     <string name="preference_stamp_font_color">字型顏色</string>
     <string name="preference_stamp_font_color_summary">當在照片上標記文字時使用的字型顏色</string>
     <string name="preference_stamp_style">文字風格</string>
-    <string name="preference_stamp_style_summary">當在照片上標記文字時使用的字型風格</string>
+    <string name="preference_stamp_style_summary">當在照片上標記文字時使用的字型風格\n%s</string>
     <string name="video_quality">影片解析度</string>
     <string name="preference_force_video_4k">強制 4K UHD 影片 (實驗中)</string>
     <string name="preference_force_video_4k_summary">為後置相機錄影啟用 3840x2160 解析度 - 僅當您的裝置支援時才能作用，且如果不支援可能當機！</string>

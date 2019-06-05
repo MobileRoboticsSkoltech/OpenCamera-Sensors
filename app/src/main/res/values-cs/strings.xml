@@ -186,7 +186,7 @@
     <string name="preference_stamp_font_color">Barva písma</string>
     <string name="preference_stamp_font_color_summary">Barva písma pro oražení fotografií textem</string>
     <string name="preference_stamp_style">Styl textu</string>
-    <string name="preference_stamp_style_summary">Styl textu pro oražení fotografií textem</string>
+    <string name="preference_stamp_style_summary">Styl textu pro oražení fotografií textem\n%s</string>
     <string name="video_quality">Rozlišení videa</string>
     <string name="preference_force_video_4k">Vynutit 4K UHD video (experimentální)</string>
     <string name="preference_force_video_4k_summary">Zapne rozlišení 3840x2160 pro natáčení vide zadním fotoaparátem - toto bude fungovat pouze pokud ho vaše zařízení podporuje, jinak může dojít k pádu aplikace!</string>

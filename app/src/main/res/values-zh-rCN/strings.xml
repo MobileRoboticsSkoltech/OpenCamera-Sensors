@@ -190,7 +190,7 @@
     <string name="preference_stamp_font_color">字体颜色</string>
     <string name="preference_stamp_font_color_summary">水印文本的字体颜色</string>
     <string name="preference_stamp_style">文本样式</string>
-    <string name="preference_stamp_style_summary">水印文本的样式</string>
+    <string name="preference_stamp_style_summary">水印文本的样式\n%s</string>
     <string name="video_quality">视频分辨率</string>
     <string name="preference_force_video_4k">强制 4K UHD 视频 (实验)</string>
     <string name="preference_force_video_4k_summary">为后置相机录像启用 3840x2160 分辨率 - 仅当你的设备支持时才能工作，并且如果不支持可能崩溃！</string>

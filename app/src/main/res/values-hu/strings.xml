@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Betűszín</string>
     <string name="preference_stamp_font_color_summary">A feliratozás szövegének betűszíne</string>
     <string name="preference_stamp_style">Szövegstílus</string>
-    <string name="preference_stamp_style_summary">A feliratozás szövegének stílusa</string>
+    <string name="preference_stamp_style_summary">A feliratozás szövegének stílusa\n%s</string>
     <string name="preference_background_photo_saving">Háttérszál használata</string>
     <string name="preference_background_photo_saving_summary">A fotók mentése háttérben futó programszálon (gyorsabb műveletek)</string>
     <string name="video_quality">Videó felbontása</string>

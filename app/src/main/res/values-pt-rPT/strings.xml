@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Cor do tipo de letra</string>
     <string name="preference_stamp_font_color_summary">Cor do tipo de letra usado para carimbar texto nas fotografias</string>
     <string name="preference_stamp_style">Estilo do texto</string>
-    <string name="preference_stamp_style_summary">Estilo usado para carimbar texto nas fotografias</string>
+    <string name="preference_stamp_style_summary">Estilo usado para carimbar texto nas fotografias\n%s</string>
     <string name="preference_background_photo_saving">Usar recurso em segundo plano</string>
     <string name="preference_background_photo_saving_summary">Optar por guardar fotografias em segundo plano (para operação mais rápida)</string>
     <string name="video_quality">Resolução do vídeo</string>

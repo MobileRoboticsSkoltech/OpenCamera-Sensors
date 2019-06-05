@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Kolor fontu</string>
     <string name="preference_stamp_font_color_summary">Kolor fontu użytego do stemplowania zdjęcia</string>
     <string name="preference_stamp_style">Styl tekstu</string>
-    <string name="preference_stamp_style_summary">Określa styl tekstu stempla</string>
+    <string name="preference_stamp_style_summary">Określa styl tekstu stempla\n%s</string>
     <string name="preference_background_photo_saving">Użyj wątku w tle</string>
     <string name="preference_background_photo_saving_summary">Używanie wątku aplikacji działającego w tle do zapisu zdjęć (szybsze operacje)</string>
     <string name="video_quality">Rozdzielczość filmów</string>

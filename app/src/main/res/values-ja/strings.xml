@@ -186,7 +186,7 @@
     <string name="preference_stamp_font_color">文字の色</string>
     <string name="preference_stamp_font_color_summary">写真に貼り付ける文字の色を決めます</string>
     <string name="preference_stamp_style">文字の形状</string>
-    <string name="preference_stamp_style_summary">写真に貼り付ける文字の形状を決めます</string>
+    <string name="preference_stamp_style_summary">写真に貼り付ける文字の形状を決めます\n%s</string>
     <string name="video_quality">ビデオの解像度</string>
     <string name="preference_force_video_4k">4K UHDビデオ (実験中)</string>
     <string name="preference_force_video_4k_summary">3840x2160での撮影を有効にします - サポートしていない機械ではクラッシュする事もあります!</string>

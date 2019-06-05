@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Колір</string>
     <string name="preference_stamp_font_color_summary">Колір для тексту, що додаватиметься на фотографію</string>
     <string name="preference_stamp_style">Стиль</string>
-    <string name="preference_stamp_style_summary">Стиль для тексту, що додаватиметься на фотографію</string>
+    <string name="preference_stamp_style_summary">Стиль для тексту, що додаватиметься на фотографію\n%s</string>
     <string name="preference_background_photo_saving">Використовувати фоновий потік</string>
     <string name="preference_background_photo_saving_summary">Зберігати фото у фоновому процесі (для прискорення роботи)</string>
     <string name="video_quality">Розширення відео</string>

@@ -183,7 +183,7 @@
     <string name="preference_stamp_font_color">Колер шрыфту</string>
     <string name="preference_stamp_font_color_summary">Колер шрыфту для друку на фотаздымках</string>
     <string name="preference_stamp_style">Стыль тэксту</string>
-    <string name="preference_stamp_style_summary">Стыль для друку на фотаздымках</string>
+    <string name="preference_stamp_style_summary">Стыль для друку на фотаздымках\n%s</string>
     <string name="video_quality">Раздзяляльная здольнасць відэа</string>
     <string name="preference_force_video_4k"> 4K UHD відэа (эксперыментальны)</string>
     <string name="preference_force_video_4k_summary">Уключыць раздзяляльную здольнасць 3840x2160  для запісу відэа на задняй камеры. Гэта будзе рабіць, калі  падтрымліваецца прыладай. Калі не - можа адбыцца збой!</string>

@@ -194,7 +194,7 @@
     <string name="preference_stamp_font_color">Χρώμα γραμματοσειράς</string>
     <string name="preference_stamp_font_color_summary">Χρώμα γραμματοσειράς για χρήση στις σφραγίδες</string>
     <string name="preference_stamp_style">Στυλ κειμένου</string>
-    <string name="preference_stamp_style_summary">Στυλ κειμένου για χρήση στις σφραγίδες</string>
+    <string name="preference_stamp_style_summary">Στυλ κειμένου για χρήση στις σφραγίδες\n%s</string>
     <string name="preference_background_photo_saving">Χρήση νήματος φόντου</string>
     <string name="preference_background_photo_saving_summary">Εάν θέλετε να αποθηκεύσετε τις φωτογραφίες σε ένα νήμα φόντου (για ταχύτερη λειτουργία)</string>
     <string name="video_quality">Ανάλυση βίντεο</string>

@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Barva pisave</string>
     <string name="preference_stamp_font_color_summary">Barva pisave žiga z besedilom</string>
     <string name="preference_stamp_style">Slog besedila</string>
-    <string name="preference_stamp_style_summary">Slog besedila žiga</string>
+    <string name="preference_stamp_style_summary">Slog besedila žiga\n%s</string>
     <string name="preference_background_photo_saving">Uporabi nit v ozadju</string>
     <string name="preference_background_photo_saving_summary">Ali naj se fotografije shranjujejo z uporabo niti v ozadju (za hitrejše delovanje)</string>
     <string name="video_quality">Ločljivost videoposnetkov</string>

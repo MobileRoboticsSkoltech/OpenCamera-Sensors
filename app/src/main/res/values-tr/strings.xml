@@ -185,7 +185,7 @@
     <string name="preference_stamp_font_color">Yazı rengi</string>
     <string name="preference_stamp_font_color_summary">Fotoğrafların üzerine eklendiğinde kullanılacak yazı rengi</string>
     <string name="preference_stamp_style">Yazı stili</string>
-    <string name="preference_stamp_style_summary">Fotoğrafların üzerine eklendiğinde kullanılacak yazı stili</string>
+    <string name="preference_stamp_style_summary">Fotoğrafların üzerine eklendiğinde kullanılacak yazı stili\n%s</string>
     <string name="video_quality">Vidyo çözünürlüğü</string>
     <string name="preference_force_video_4k">4K UHD vidyo için zorla(deneysel)</string>
     <string name="preference_force_video_4k_summary">3840x2160 çözünürlüğünü arka kameradan vidyo kaydederken etkinleştir- bu ayar sadece cihazınız destekliyorsa çalışacaktır, desteklemiyorsa cihazınız çökebilir!</string>

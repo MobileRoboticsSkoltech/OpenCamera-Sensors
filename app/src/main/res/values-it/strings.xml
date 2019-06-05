@@ -190,7 +190,7 @@
     <string name="preference_stamp_font_color">Colore Carattere</string>
     <string name="preference_stamp_font_color_summary">Colore del carattere da utilizzare per il testo del timbro su una foto</string>
     <string name="preference_stamp_style">Stile Testo</string>
-    <string name="preference_stamp_style_summary">Stile da utilizzare per il testo del timbro su una foto</string>
+    <string name="preference_stamp_style_summary">Stile da utilizzare per il testo del timbro su una foto\n%s</string>
     <string name="preference_background_photo_saving">Usa thread in background</string>
     <string name="preference_background_photo_saving_summary">Stabilisce se salvare foto in un thread in (per operazioni più veloci)</string>
     <string name="video_quality">Risoluzione video</string>

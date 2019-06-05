@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Font color</string>
     <string name="preference_stamp_font_color_summary">Font color to use when stamping text onto photos</string>
     <string name="preference_stamp_style">Text style</string>
-    <string name="preference_stamp_style_summary">Style to use when stamping text onto photos</string>
+    <string name="preference_stamp_style_summary">Style to use when stamping text onto photos\n%s</string>
     <string name="preference_background_photo_saving">Use background thread</string>
     <string name="preference_background_photo_saving_summary">Whether to save photos on a background thread (for faster operation)</string>
     <string name="video_quality">Video resolution</string>

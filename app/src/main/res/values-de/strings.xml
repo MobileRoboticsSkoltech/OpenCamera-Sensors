@@ -195,7 +195,7 @@
     <string name="preference_stamp_font_color">Stempel-Schriftfarbe</string>
     <string name="preference_stamp_font_color_summary">Einstellung der Stempel-Schriftfarbe</string>
     <string name="preference_stamp_style">Stempelstil</string>
-    <string name="preference_stamp_style_summary">Einstellung der Stempelart</string>
+    <string name="preference_stamp_style_summary">Einstellung der Stempelart\n%s</string>
     <string name="preference_background_photo_saving">Benutze Hintergrund-Thread</string>
     <string name="preference_background_photo_saving_summary">Legt fest, ob ein Hintergrund-Thread zum Speichern eines Bildes zur schnelleren Ausführung benutzt wird</string>
     <string name="video_quality">Video-Auflösung</string>
