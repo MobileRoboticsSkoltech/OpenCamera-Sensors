@@ -5,6 +5,7 @@ import net.sourceforge.opencamera.cameracontroller.RawImage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,6 +43,7 @@ import android.location.Location;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.renderscript.Allocation;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -2124,8 +2126,11 @@ public class ImageSaver extends Thread {
 
         File exifTempFile = null;
 
+        // If saveUri is non-null, then:
+        //     Before Android 7, picFile is a temporary file which we use for saving exif tags too, and then we redirect the picFile to saveUri.
+        //     On Android 7+, picFile is null - we can write the exif tags direct to the saveUri.
         File picFile = null;
-        Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
+        Uri saveUri = null;
         try {
             if( !raw_only ) {
                 PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
@@ -2209,16 +2214,20 @@ public class ImageSaver extends Thread {
                     Log.d(TAG, "save to: " + picFile.getAbsolutePath());
             }
 
-            if( saveUri != null && picFile == null ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "saveUri: " + saveUri);
+            if( MyDebug.LOG )
+                Log.d(TAG, "saveUri: " + saveUri);
+            if( saveUri != null && picFile == null && Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
                 picFile = File.createTempFile("picFile", "jpg", main_activity.getCacheDir());
                 if( MyDebug.LOG )
                     Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
             }
 
-            if( picFile != null ) {
-                OutputStream outputStream = new FileOutputStream(picFile);
+            if( picFile != null || saveUri != null ) {
+                OutputStream outputStream;
+                if( picFile != null )
+                    outputStream = new FileOutputStream(picFile);
+                else
+                    outputStream = main_activity.getContentResolver().openOutputStream(saveUri);
                 try {
                     if( bitmap != null ) {
                         if( MyDebug.LOG )
@@ -2254,18 +2263,33 @@ public class ImageSaver extends Thread {
                     success = true;
                 }
 
-                if( picFile != null && request.image_format == Request.ImageFormat.STD ) {
+                if( request.image_format == Request.ImageFormat.STD ) {
                     // handle transferring/setting Exif tags (JPEG format only)
                     if( bitmap != null ) {
                         // need to update EXIF data! (only supported for JPEG image formats)
                         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "set Exif tags from data");
-                            setExifFromData(request, data, picFile);
+                            if( picFile != null ) {
+                                setExifFromData(request, data, picFile);
+                            }
+                            else {
+                                ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
+                                if( parcelFileDescriptor != null ) {
+                                    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                                    setExifFromData(request, data, fileDescriptor);
+                                }
+                                else {
+                                    Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                                }
+                            }
                         }
                         else {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "set Exif tags from file");
+                            if( picFile == null ) {
+                                throw new RuntimeException("should have set picFile on pre-Android 7!");
+                            }
                             if( exifTempFile != null ) {
                                 setExifFromFile(request, exifTempFile, picFile);
                                 if( MyDebug.LOG ) {
@@ -2279,7 +2303,7 @@ public class ImageSaver extends Thread {
                         }
                     }
                     else {
-                        updateExif(request, picFile);
+                        updateExif(request, picFile, saveUri);
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "Save single image performance: time after updateExif: " + (System.currentTimeMillis() - time_s));
                         }
@@ -2304,7 +2328,9 @@ public class ImageSaver extends Thread {
                 }
 
                 if( saveUri != null ) {
-                    copyFileToUri(main_activity, saveUri, picFile);
+                    if( picFile != null ) {
+                        copyFileToUri(main_activity, saveUri, picFile);
+                    }
                     success = true;
 	    		    /* We still need to broadcastFile for SAF for two reasons:
 	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
@@ -2483,6 +2509,28 @@ public class ImageSaver extends Thread {
             inputStream = new ByteArrayInputStream(data);
             ExifInterface exif = new ExifInterface(inputStream);
             ExifInterface exif_new = new ExifInterface(to_file.getAbsolutePath());
+            setExif(request, exif, exif_new);
+        }
+        finally {
+            if( inputStream != null ) {
+                inputStream.close();
+            }
+        }
+    }
+
+    /** As setExifFromFile, but can read the Exif tags directly from the jpeg data, and to a file descriptor, rather than a file.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void setExifFromData(final Request request, byte [] data, FileDescriptor to_file_descriptor) throws IOException {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "setExifFromData");
+            Log.d(TAG, "to_file_descriptor: " + to_file_descriptor);
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = new ByteArrayInputStream(data);
+            ExifInterface exif = new ExifInterface(inputStream);
+            ExifInterface exif_new = new ExifInterface(to_file_descriptor);
             setExif(request, exif, exif_new);
         }
         finally {
@@ -3049,8 +3097,10 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the saved image file, according to the preferences in request.
      *  This method is used when saving directly from the JPEG data rather than a bitmap.
+     *  If picFile==null, then saveUri must be non-null (and the Android version must be Android 7
+     *  or later), and will be used instead to write the exif tags too.
      */
-    private void updateExif(Request request, File picFile) throws IOException {
+    private void updateExif(Request request, File picFile, Uri saveUri) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "updateExif: " + picFile);
         if( request.store_geo_direction || hasCustomExif(request.custom_tag_artist, request.custom_tag_copyright) ) {
@@ -3058,9 +3108,32 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "add additional exif info");
             try {
-                ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-                modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
-                exif.saveAttributes();
+                ExifInterface exif = null;
+                if( picFile != null ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "write to picFile: " + picFile);
+                    exif = new ExifInterface(picFile.getAbsolutePath());
+                }
+                else if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "write direct to saveUri: " + saveUri);
+                    ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
+                    if( parcelFileDescriptor != null ) {
+                        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                        exif = new ExifInterface(fileDescriptor);
+                    }
+                    else {
+                        Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                    }
+                }
+                else {
+                    // throw runtimeexception, as this is a programming error
+                    throw new RuntimeException("picFile==null but Android version is not 7 or later");
+                }
+                if( exif != null ) {
+                    modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
+                    exif.saveAttributes();
+                }
             }
             catch(NoClassDefFoundError exception) {
                 // have had Google Play crashes from new ExifInterface() elsewhere for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn), so also catch here just in case
