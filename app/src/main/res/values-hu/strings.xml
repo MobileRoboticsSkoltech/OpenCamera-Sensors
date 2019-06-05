@@ -496,4 +496,7 @@
     <string name="preference_ui_placement_left">Balkezes felhasználói felület</string>
     <string name="preference_ui_placement_right">Jobbkezes felhasználói felület</string>
 
+    <string name="preference_stamp_style_shadowed">Árnyékos szöveg</string>
+    <string name="preference_stamp_style_plain">Sima szöveg</string>
+
 </resources>

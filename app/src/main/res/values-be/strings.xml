@@ -355,4 +355,7 @@
     <string name="preference_ui_placement_left">Панэль злева</string>
     <string name="preference_ui_placement_right">Панэль справа</string>
 
+    <string name="preference_stamp_style_shadowed">Тэкст з ценем</string>
+    <string name="preference_stamp_style_plain">Звычайны тэкст</string>
+
 </resources>

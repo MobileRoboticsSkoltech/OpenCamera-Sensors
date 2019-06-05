@@ -727,5 +727,7 @@
 
     <string name="exposure_compensation_zoom">增减曝光补偿</string>
 
+    <string name="preference_stamp_style_shadowed">阴影文本</string>
+    <string name="preference_stamp_style_plain">纯文本</string>
 
 </resources>

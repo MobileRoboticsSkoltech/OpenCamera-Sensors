@@ -438,4 +438,7 @@
     <string name="preference_ui_placement_left">Interface utilisateur pour gaucher</string>
     <string name="preference_ui_placement_right">Interface utilisateur pour droitier</string>
 
+    <string name="preference_stamp_style_shadowed">Texte ombré</string>
+    <string name="preference_stamp_style_plain">Texte brut</string>
+
 </resources>

@@ -778,4 +778,8 @@
     <string name="exposure_unlock">Mở khóa phơi sáng</string>
 
     <string name="preference_nr_mode_low_light_message">Chế độ ánh sáng yếu: vui lòng giữ máy ảnh ổn định!</string>
+
+    <string name="preference_stamp_style_shadowed">Đổ bóng</string>
+    <string name="preference_stamp_style_plain">Thuần túy</string>
+
 </resources>

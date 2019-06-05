@@ -494,4 +494,7 @@
     <string name="preference_ui_placement_left">Интерфейс для левши</string>
     <string name="preference_ui_placement_right">Интерфейс для правши</string>
 
+    <string name="preference_stamp_style_shadowed">Текст с тенью</string>
+    <string name="preference_stamp_style_plain">Обычный текст</string>
+
 </resources>

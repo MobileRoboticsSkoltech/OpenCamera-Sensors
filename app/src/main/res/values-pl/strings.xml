@@ -472,4 +472,7 @@
     <string name="preference_ui_placement_left">Interfejs dla leworęcznych</string>
     <string name="preference_ui_placement_right">Interfejs dla praworęcznych</string>
 
+    <string name="preference_stamp_style_shadowed">Cieniowany tekst</string>
+    <string name="preference_stamp_style_plain">Czysty tekst</string>
+
 </resources>

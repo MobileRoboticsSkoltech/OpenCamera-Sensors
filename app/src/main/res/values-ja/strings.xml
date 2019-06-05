@@ -355,4 +355,7 @@
     <string name="preference_ui_placement_left">左利き用</string>
     <string name="preference_ui_placement_right">右利き用</string>
 
+    <string name="preference_stamp_style_shadowed">影付き文字</string>
+    <string name="preference_stamp_style_plain">普通の文字</string>
+
 </resources>

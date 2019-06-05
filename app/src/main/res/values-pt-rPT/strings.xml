@@ -412,4 +412,7 @@
     <string name="preference_ui_placement_left">Interface de mão esquerda</string>
     <string name="preference_ui_placement_right">Interface de mão direita</string>
 
+    <string name="preference_stamp_style_shadowed">Texto sombreado</string>
+    <string name="preference_stamp_style_plain">Texto simples</string>
+
 </resources>

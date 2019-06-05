@@ -551,4 +551,7 @@
     <string name="preference_ui_placement_left">Up. vmesnik za levičarje</string>
     <string name="preference_ui_placement_right">Up. vmesnik za desničarje</string>
 
+    <string name="preference_stamp_style_shadowed">Osenčeno besedilo</string>
+    <string name="preference_stamp_style_plain">Golo besedilo</string>
+
 </resources>

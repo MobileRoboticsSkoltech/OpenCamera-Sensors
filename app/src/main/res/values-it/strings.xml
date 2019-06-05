@@ -524,4 +524,7 @@
     <string name="preference_ui_placement_left">Interfaccia utente mancini</string>
     <string name="preference_ui_placement_right">Interfaccia utente destrorsi</string>
 
+    <string name="preference_stamp_style_shadowed">Testo ombreggiato</string>
+    <string name="preference_stamp_style_plain">Testo piano</string>
+
 </resources>

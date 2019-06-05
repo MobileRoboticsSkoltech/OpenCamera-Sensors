@@ -812,4 +812,7 @@
     <string name="bluetooth_current_remote">Momentane Fernsteurung:</string>
     <string name="bluetooth_scan">Scan</string>
 
+    <string name="preference_stamp_style_shadowed">Schattierter Text</string>
+    <string name="preference_stamp_style_plain">Normaler Text</string>
+
 </resources>

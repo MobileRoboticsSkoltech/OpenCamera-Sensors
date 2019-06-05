@@ -229,14 +229,6 @@
         <item>22</item>
         <item>24</item>
     </string-array>
-    <string-array name="preference_stamp_style_entries">
-        <item>Shadowed text</item>
-        <item>Plain text</item>
-    </string-array>
-    <string-array name="preference_stamp_style_values">
-        <item>preference_stamp_style_shadowed</item>
-        <item>preference_stamp_style_plain</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>不重複</item>
         <item>重複 1 次</item>

@@ -359,4 +359,7 @@
     <string name="preference_ui_placement_left">Rohraní pro leváky</string>
     <string name="preference_ui_placement_right">Rozhraní pro praváky</string>
 
+    <string name="preference_stamp_style_shadowed">Vystínovaný text</string>
+    <string name="preference_stamp_style_plain">Prostý text</string>
+
 </resources>

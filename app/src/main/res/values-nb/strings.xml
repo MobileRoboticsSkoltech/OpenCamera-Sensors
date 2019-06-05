@@ -546,4 +546,7 @@
     <string name="preference_ui_placement_left">Venstrehendt grensesnitt</string>
     <string name="preference_ui_placement_right">Høyrehendt grensesnitt</string>
 
+    <string name="preference_stamp_style_shadowed">Skyggelagt tekst</string>
+    <string name="preference_stamp_style_plain">Ren tekst</string>
+
 </resources>

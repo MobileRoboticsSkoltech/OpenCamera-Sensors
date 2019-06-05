@@ -358,4 +358,7 @@
     <string name="preference_ui_placement_left">Solak kullanıcı arayüzü</string>
     <string name="preference_ui_placement_right">Sağ el kullanıcı arayüzü</string>
 
+    <string name="preference_stamp_style_shadowed">Gölgeli yazı</string>
+    <string name="preference_stamp_style_plain">Düz yazı</string>
+
 </resources>

@@ -229,14 +229,6 @@
         <item>22</item>
         <item>24</item>
     </string-array>
-    <string-array name="preference_stamp_style_entries">
-        <item>Đổ bóng</item>
-        <item>Thuần túy</item>
-    </string-array>
-    <string-array name="preference_stamp_style_values">
-        <item>preference_stamp_style_shadowed</item>
-        <item>preference_stamp_style_plain</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Không</item>
         <item>1 lần</item>
