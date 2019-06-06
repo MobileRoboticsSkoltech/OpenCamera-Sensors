@@ -8185,7 +8185,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     public void testDirectionOn() throws IOException {
         Log.d(TAG, "testDirectionOn");
-        subTestLocationOff(false);
+        subTestLocationOff(true);
     }
 
     /* Tests we can stamp date/time and location to photo.
