@@ -2419,19 +2419,25 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         ALIGNMENT_BOTTOM
     }
 
+    public enum Shadow {
+        SHADOW_NONE,
+        SHADOW_OUTLINE,
+        SHADOW_BACKGROUND
+    }
+
     public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
         return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
     }
 
     public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
-        return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
+        return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, Shadow.SHADOW_OUTLINE);
     }
 
-    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
+    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, Shadow shadow) {
         return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, shadow, null);
     }
 
-    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow, Rect bounds) {
+    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, Shadow shadow, Rect bounds) {
         final float scale = getContext().getResources().getDisplayMetrics().density;
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(background);
@@ -2483,9 +2489,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             text_bounds.top += location_y - padding;
             text_bounds.bottom += location_y + padding;
         }
+        if( shadow == Shadow.SHADOW_BACKGROUND ) {
+            paint.setColor(background);
+            paint.setAlpha(64);
+            canvas.drawRect(text_bounds, paint);
+            paint.setAlpha(255);
+        }
         paint.setColor(foreground);
         canvas.drawText(text, location_x, location_y, paint);
-        if( shadow ) {
+        if( shadow == Shadow.SHADOW_OUTLINE ) {
             paint.setColor(background);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(1);

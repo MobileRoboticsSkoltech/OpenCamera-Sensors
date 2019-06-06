@@ -1879,12 +1879,17 @@ public class ImageSaver extends Thread {
                 int diff_y = (int)((font_size+4) * scale + 0.5f); // convert pt to pixels
                 int ypos = height - offset_y;
                 p.setTextAlign(Align.RIGHT);
-                boolean draw_shadowed = false;
-                if( pref_style.equals("preference_stamp_style_shadowed") ) {
-                    draw_shadowed = true;
-                }
-                else if( pref_style.equals("preference_stamp_style_plain") ) {
-                    draw_shadowed = false;
+                MyApplicationInterface.Shadow draw_shadowed = MyApplicationInterface.Shadow.SHADOW_NONE;
+                switch( pref_style ) {
+                    case "preference_stamp_style_shadowed":
+                        draw_shadowed = MyApplicationInterface.Shadow.SHADOW_OUTLINE;
+                        break;
+                    case "preference_stamp_style_plain":
+                        draw_shadowed = MyApplicationInterface.Shadow.SHADOW_NONE;
+                        break;
+                    case "preference_stamp_style_background":
+                        draw_shadowed = MyApplicationInterface.Shadow.SHADOW_BACKGROUND;
+                        break;
                 }
                 if( MyDebug.LOG )
                     Log.d(TAG, "draw_shadowed: " + draw_shadowed);
