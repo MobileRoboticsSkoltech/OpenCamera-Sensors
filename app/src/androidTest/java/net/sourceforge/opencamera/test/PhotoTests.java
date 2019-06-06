@@ -14,6 +14,7 @@ public class PhotoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOff"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOn"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOnSAF"));
         }
         // then do memory intensive tests:
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevel"));
@@ -71,6 +72,9 @@ public class PhotoTests {
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testKeyboardControls"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStamp"));
+        if( !MainActivityTest.test_camera2 ) {
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStampSAF"));
+        }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDRO"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDROPhotoStamp"));

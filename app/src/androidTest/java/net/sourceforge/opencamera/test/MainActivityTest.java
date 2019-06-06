@@ -8188,14 +8188,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestLocationOff(true);
     }
 
-    /* Tests we can stamp date/time and location to photo.
+    /* As testDirectionOn() but for SAF.
      * May fail on devices without mobile network, especially if we don't even have wifi.
+     * If this test fails, make sure we've manually selected that folder (as permission can't be given through the test
+     * framework).
      */
-    public void testPhotoStamp() {
-        Log.d(TAG, "testPhotoStamp");
+    public void testDirectionOnSAF() throws IOException {
+        Log.d(TAG, "testDirectionOnSAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
 
         setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
+        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
 
+        subTestLocationOff(true);
+    }
+
+    private void subTestPhotoStamp() throws IOException {
         {
             assertFalse(mActivity.getApplicationInterface().getDrawPreview().getStoredHasStampPref());
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -8216,6 +8233,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==1);
+        mActivity.waitUntilImageQueueEmpty();
+        assertTrue(mActivity.test_last_saved_image != null);
+        testExif(mActivity.test_last_saved_image, false);
 
         // now again with location
         {
@@ -8245,6 +8265,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==2);
+        mActivity.waitUntilImageQueueEmpty();
+        assertTrue(mActivity.test_last_saved_image != null);
+        testExif(mActivity.test_last_saved_image, true);
 
         // now again with custom text
         {
@@ -8268,6 +8291,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==3);
+        mActivity.waitUntilImageQueueEmpty();
+        assertTrue(mActivity.test_last_saved_image != null);
+        testExif(mActivity.test_last_saved_image, true);
 
         // now test with auto-stabilise
         {
@@ -8287,8 +8313,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertTrue(mPreview.count_cameraTakePicture==4);
+        mActivity.waitUntilImageQueueEmpty();
+        assertTrue(mActivity.test_last_saved_image != null);
+        testExif(mActivity.test_last_saved_image, true);
 
         mActivity.waitUntilImageQueueEmpty();
+    }
+
+    /* Tests we can stamp date/time and location to photo.
+     * May fail on devices without mobile network, especially if we don't even have wifi.
+     */
+    public void testPhotoStamp() throws IOException {
+        Log.d(TAG, "testPhotoStamp");
+
+        setToDefault();
+
+        subTestPhotoStamp();
+    }
+
+    /** As testPhotoStamp() but with SAF.
+     *  If this test fails, make sure we've manually selected that folder (as permission can't be given through the test
+     *  framework).
+     */
+    public void testPhotoStampSAF() throws IOException {
+        Log.d(TAG, "testPhotoStampSAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
+        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+
+        subTestPhotoStamp();
     }
 
     /* Tests we can stamp custom text to photo.
