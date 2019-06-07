@@ -25,6 +25,9 @@ public class PanoramaTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama10"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama11"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama12"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama13"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama14"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama15"));
         return suite;
     }
 }
