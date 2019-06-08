@@ -14935,9 +14935,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void renderPanoramaImage(final int i, final int n_bitmaps, final Rect src_rect_workspace, final Rect dst_rect_workspace,
                                      final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height,
-                                     final int blend_hwidth, final int slice_width, final boolean x_offsets_cumulative,
+                                     final int blend_hwidth, final int slice_width, final int offset_x, final boolean x_offsets_cumulative,
                                      final Bitmap panorama, final Canvas canvas,
-                                     final int align_x, final int align_y, final int offset_x, final int dst_offset_x,
+                                     final int align_x, final int align_y, final int dst_offset_x,
                                      final double camera_angle, long time_s) throws IOException {
         //float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
         //Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
@@ -15187,10 +15187,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         Log.d(TAG, "### time after downsscale: " + (System.currentTimeMillis() - time_s));
 
-        int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
+        final int slice_width = (int)(bitmap_width / panorama_pics_per_screen);
         Log.d(TAG, "slice_width: " + slice_width);
 
-        double camera_angle = Math.toRadians(camera_angle_y);
+        final double camera_angle = Math.toRadians(camera_angle_y);
         Log.d(TAG, "camera_angle_y: " + camera_angle_y);
         Log.d(TAG, "camera_angle: " + camera_angle);
         // max offset error of gyro_tol_degrees - convert this to pixels
@@ -15497,9 +15497,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
                 bitmap, p, bitmap_width, bitmap_height,
-                blend_hwidth, slice_width, x_offsets_cumulative,
+                blend_hwidth, slice_width, offset_x, x_offsets_cumulative,
                 panorama, canvas,
-                align_x, align_y, offset_x, dst_offset_x,
+                align_x, align_y, dst_offset_x,
                 camera_angle, time_s);
 
             dst_offset_x += slice_width;
