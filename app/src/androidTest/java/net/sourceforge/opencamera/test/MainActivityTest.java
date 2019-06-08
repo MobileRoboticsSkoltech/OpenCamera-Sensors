@@ -14933,6 +14933,183 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         return projected_bitmap;
     }
 
+    private void renderPanoramaImage(final int i, final int n_bitmaps, final Rect src_rect_workspace, final Rect dst_rect_workspace,
+                                     final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height,
+                                     final int blend_hwidth, final int slice_width, final boolean x_offsets_cumulative,
+                                     final Bitmap panorama, final Canvas canvas,
+                                     final int align_x, final int align_y, final int offset_x, final int dst_offset_x,
+                                     final double camera_angle, long time_s) throws IOException {
+        //float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
+        //Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
+
+        Log.d(TAG, "### time before projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        Bitmap projected_bitmap = createProjectedBitmap(src_rect_workspace, dst_rect_workspace, bitmap, p, bitmap_width, bitmap_height, camera_angle);
+        Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+
+        if( i > 0 && blend_hwidth > 0 ) {
+            Log.d(TAG, "### time before blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+            // first blend right hand side of previous image with left hand side of new image
+            Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+            //Bitmap rhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+            Bitmap rhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+            {
+                Canvas rhs_canvas = new Canvas(rhs);
+                src_rect_workspace.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
+                src_rect_workspace.offset(align_x, align_y);
+                dst_rect_workspace.set(0, 0, 2*blend_hwidth, bitmap_height);
+                rhs_canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
+            }
+            //Bitmap blended_bitmap = blend_panorama_alpha(lhs, rhs);
+            Bitmap blended_bitmap = blend_panorama_pyramids(lhs, rhs);
+            /*Bitmap blended_bitmap = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+            Canvas blended_canvas = new Canvas(blended_bitmap);
+            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+            for(int x=0;x<2*blend_hwidth;x++) {
+                src_rect_workspace.set(x, 0, x+1, bitmap_height);
+
+                // left hand blend
+                // if x=0: frac=1
+                // if x=2*blend_width-1: frac=0
+                float frac = (2.0f*blend_hwidth-1.0f-x)/(2.0f*blend_hwidth-1.0f);
+                p.setAlpha((int)(255.0f*frac));
+                blended_canvas.drawBitmap(lhs, src_rect_workspace, src_rect_workspace, p);
+
+                // right hand blend
+                // if x=0: frac=0
+                // if x=2*blend_width-1: frac=1
+                frac = ((float)x)/(2.0f*blend_hwidth-1.0f);
+                p.setAlpha((int)(255.0f*frac));
+                blended_canvas.drawBitmap(rhs, src_rect_workspace, src_rect_workspace, p);
+            }
+            p.setAlpha(255); // reset
+            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
+            */
+
+            // now draw the blended region
+            canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth, 0, p);
+
+            lhs.recycle();
+            rhs.recycle();
+            blended_bitmap.recycle();
+            Log.d(TAG, "### time after blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        }
+
+        int start_x = blend_hwidth;
+        int stop_x = slice_width+blend_hwidth;
+        if( i == 0 )
+            start_x = -offset_x;
+        if( i == n_bitmaps-1 )
+            stop_x = slice_width+offset_x;
+        if( !x_offsets_cumulative ) {
+            stop_x -= align_x;
+        }
+        Log.d(TAG, "    start_x: " + start_x);
+        Log.d(TAG, "    stop_x: " + stop_x);
+
+        // draw rest of this image
+        Log.d(TAG, "### time before drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        src_rect_workspace.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
+        src_rect_workspace.offset(align_x, align_y);
+        dst_rect_workspace.set(offset_x + dst_offset_x + start_x, 0, offset_x + dst_offset_x + stop_x, bitmap_height);
+        canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
+        Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+
+        /*
+        int start_x = -blend_hwidth;
+        int stop_x = slice_width+blend_hwidth;
+        if( i == 0 )
+            start_x = -offset_x;
+        if( i == bitmaps.size()-1 )
+            stop_x = slice_width+offset_x;
+        if( !x_offsets_cumulative ) {
+            stop_x -= align_x;
+        }
+        Log.d(TAG, "    start_x: " + start_x);
+        Log.d(TAG, "    stop_x: " + stop_x);
+
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        for(int x=start_x;x<stop_x;x++) {
+            src_rect_workspace.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
+            src_rect_workspace.offset(align_x, align_y);
+            dst_rect_workspace.set(offset_x + dst_offset_x + x, 0, offset_x + dst_offset_x + x+1, bitmap_height);
+
+            int blend_alpha = 255;
+            if( i > 0 && x < blend_hwidth ) {
+                // left hand blend
+                //blend_alpha = 127;
+                // if x=-blend_hwidth: frac=0
+                // if x=blend_hwidth-1: frac=1
+                float frac = ((float)x+blend_hwidth)/(2*blend_hwidth-1.0f);
+                blend_alpha = (int)(255.0f*frac);
+                //Log.d(TAG, "    left hand blend_alpha: " + blend_alpha);
+            }
+            else if( i < bitmaps.size()-1 && x > stop_x-2*blend_hwidth-1 ) {
+                // right hand blend
+                //blend_alpha = 127;
+                // if x=stop_x-2*blend_hwidth: frac=1
+                // if x=stop_x-1: frac=0
+                float frac = ((float)stop_x-1-x)/(2*blend_hwidth-1.0f);
+                blend_alpha = (int)(255.0f*frac);
+                //Log.d(TAG, "    right hand blend_alpha: " + blend_alpha);
+            }
+            p.setAlpha(blend_alpha);
+
+            //canvas.drawBitmap(bitmap, src_rect_workspace, dst_rect_workspace, p);
+            canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
+        }
+        p.setAlpha(255); // reset
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
+        */
+
+        projected_bitmap.recycle();
+        /*if( rotated_bitmap != null ) {
+            rotated_bitmap.recycle();
+        }*/
+
+        /*float x0 = -slice_width/2;
+        float new_height0 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x0 * Math.sin(alpha)));
+        Log.d(TAG, "    new_height0: " + new_height0);
+
+        float x1 = slice_width/2;
+        float new_height1 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x1 * Math.sin(alpha)));
+        Log.d(TAG, "    new_height1: " + new_height1);
+
+        float src_x0 = 0, src_y0 = 0.0f;
+        float src_x1 = 0, src_y1 = bitmap_height;
+        float src_x2 = slice_width, src_y2 = 0.0f;
+        float src_x3 = slice_width, src_y3 = bitmap_height;
+
+        float dst_x0 = src_x0, dst_y0 = (bitmap_height - new_height0)/2.0f;
+        float dst_x1 = src_x1, dst_y1 = (bitmap_height + new_height0)/2.0f;
+        float dst_x2 = src_x2, dst_y2 = (bitmap_height - new_height1)/2.0f;
+        float dst_x3 = src_x3, dst_y3 = (bitmap_height + new_height1)/2.0f;
+
+        float [] src_points = new float[]{src_x0, src_y0, src_x1, src_y1, src_x2, src_y2, src_x3, src_y3};
+        float [] dst_points = new float[]{dst_x0, dst_y0, dst_x1, dst_y1, dst_x2, dst_y2, dst_x3, dst_y3};
+        Log.d(TAG, "    src top-left: " + src_x0 + " , " + src_y0);
+        Log.d(TAG, "    src bottom-left: " + src_x1 + " , " + src_y1);
+        Log.d(TAG, "    src top-right: " + src_x2 + " , " + src_y2);
+        Log.d(TAG, "    src bottom-right: " + src_x3 + " , " + src_y3);
+        Log.d(TAG, "    dst top-left: " + dst_x0 + " , " + dst_y0);
+        Log.d(TAG, "    dst bottom-left: " + dst_x1 + " , " + dst_y1);
+        Log.d(TAG, "    dst top-right: " + dst_x2 + " , " + dst_y2);
+        Log.d(TAG, "    dst bottom-right: " + dst_x3 + " , " + dst_y3);
+
+        Matrix matrix = new Matrix();
+        if( !matrix.setPolyToPoly(src_points, 0, dst_points, 0, 4) ) {
+            Log.e(TAG, "failed to create matrix");
+            throw new RuntimeException();
+        }
+        Log.d(TAG, "matrix: " + matrix);
+
+        matrix.postTranslate(i*slice_width, 0.0f);
+
+        Bitmap bitmap_slice = Bitmap.createBitmap(bitmap, (bitmap_width - slice_width)/2, 0, slice_width, bitmap_height);
+        canvas.drawBitmap(bitmap_slice, matrix, null);
+        bitmap_slice.recycle();
+        */
+    }
+
     /**
      * @param panorama_pics_per_screen The value of panorama_pics_per_screen used when taking the input photos.
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
@@ -15256,6 +15433,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
                     rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
 
+                    // handle the transformation entirely by transforming the bitmap
+                    /*rotated_canvas.translate(this_align_x, this_align_y);
+                    this_align_x = 0;
+                    this_align_y = 0;*/
+
                     rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
                     rotated_canvas.restore();
                     bitmaps.get(i).recycle();
@@ -15313,127 +15495,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 bitmap = rotated_bitmap;
             }*/
 
-            float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
-            Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
-
-            Log.d(TAG, "### time before projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-            Bitmap projected_bitmap = createProjectedBitmap(src_rect, dst_rect, bitmap, p, bitmap_width, bitmap_height, camera_angle);
-            Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-
-            if( i > 0 && blend_hwidth > 0 ) {
-                Log.d(TAG, "### time before blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                // first blend right hand side of previous image with left hand side of new image
-                Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
-                //Bitmap rhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
-                Bitmap rhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
-                {
-                    Canvas rhs_canvas = new Canvas(rhs);
-                    src_rect.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
-                    src_rect.offset(align_x, align_y);
-                    dst_rect.set(0, 0, 2*blend_hwidth, bitmap_height);
-                    rhs_canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
-                }
-                //Bitmap blended_bitmap = blend_panorama_alpha(lhs, rhs);
-                Bitmap blended_bitmap = blend_panorama_pyramids(lhs, rhs);
-                /*Bitmap blended_bitmap = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
-                Canvas blended_canvas = new Canvas(blended_bitmap);
-                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-                for(int x=0;x<2*blend_hwidth;x++) {
-                    src_rect.set(x, 0, x+1, bitmap_height);
-
-                    // left hand blend
-                    // if x=0: frac=1
-                    // if x=2*blend_width-1: frac=0
-                    float frac = (2.0f*blend_hwidth-1.0f-x)/(2.0f*blend_hwidth-1.0f);
-                    p.setAlpha((int)(255.0f*frac));
-                    blended_canvas.drawBitmap(lhs, src_rect, src_rect, p);
-
-                    // right hand blend
-                    // if x=0: frac=0
-                    // if x=2*blend_width-1: frac=1
-                    frac = ((float)x)/(2.0f*blend_hwidth-1.0f);
-                    p.setAlpha((int)(255.0f*frac));
-                    blended_canvas.drawBitmap(rhs, src_rect, src_rect, p);
-                }
-                p.setAlpha(255); // reset
-                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
-                */
-
-                // now draw the blended region
-                canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth, 0, p);
-
-                lhs.recycle();
-                rhs.recycle();
-                blended_bitmap.recycle();
-                Log.d(TAG, "### time after blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-            }
-
-            int start_x = blend_hwidth;
-            int stop_x = slice_width+blend_hwidth;
-            if( i == 0 )
-                start_x = -offset_x;
-            if( i == bitmaps.size()-1 )
-                stop_x = slice_width+offset_x;
-            if( !x_offsets_cumulative ) {
-                stop_x -= align_x;
-            }
-            Log.d(TAG, "    start_x: " + start_x);
-            Log.d(TAG, "    stop_x: " + stop_x);
-
-            // draw rest of this image
-            Log.d(TAG, "### time before drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-            src_rect.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
-            src_rect.offset(align_x, align_y);
-            dst_rect.set(offset_x + dst_offset_x + start_x, 0, offset_x + dst_offset_x + stop_x, bitmap_height);
-            canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
-            Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-
-            /*
-            int start_x = -blend_hwidth;
-            int stop_x = slice_width+blend_hwidth;
-            if( i == 0 )
-                start_x = -offset_x;
-            if( i == bitmaps.size()-1 )
-                stop_x = slice_width+offset_x;
-            if( !x_offsets_cumulative ) {
-                stop_x -= align_x;
-            }
-            Log.d(TAG, "    start_x: " + start_x);
-            Log.d(TAG, "    stop_x: " + stop_x);
-
-            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-            for(int x=start_x;x<stop_x;x++) {
-                src_rect.set(offset_x + x, 0, offset_x + x+1, bitmap_height);
-                src_rect.offset(align_x, align_y);
-                dst_rect.set(offset_x + dst_offset_x + x, 0, offset_x + dst_offset_x + x+1, bitmap_height);
-
-                int blend_alpha = 255;
-                if( i > 0 && x < blend_hwidth ) {
-                    // left hand blend
-                    //blend_alpha = 127;
-                    // if x=-blend_hwidth: frac=0
-                    // if x=blend_hwidth-1: frac=1
-                    float frac = ((float)x+blend_hwidth)/(2*blend_hwidth-1.0f);
-                    blend_alpha = (int)(255.0f*frac);
-                    //Log.d(TAG, "    left hand blend_alpha: " + blend_alpha);
-                }
-                else if( i < bitmaps.size()-1 && x > stop_x-2*blend_hwidth-1 ) {
-                    // right hand blend
-                    //blend_alpha = 127;
-                    // if x=stop_x-2*blend_hwidth: frac=1
-                    // if x=stop_x-1: frac=0
-                    float frac = ((float)stop_x-1-x)/(2*blend_hwidth-1.0f);
-                    blend_alpha = (int)(255.0f*frac);
-                    //Log.d(TAG, "    right hand blend_alpha: " + blend_alpha);
-                }
-                p.setAlpha(blend_alpha);
-
-                //canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
-                canvas.drawBitmap(projected_bitmap, src_rect, dst_rect, p);
-            }
-            p.setAlpha(255); // reset
-            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // reset
-            */
+            renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
+                bitmap, p, bitmap_width, bitmap_height,
+                blend_hwidth, slice_width, x_offsets_cumulative,
+                panorama, canvas,
+                align_x, align_y, offset_x, dst_offset_x,
+                camera_angle, time_s);
 
             dst_offset_x += slice_width;
             if( !x_offsets_cumulative ) {
@@ -15441,53 +15508,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
             Log.d(TAG, "    dst_offset_x is now: " + dst_offset_x);
 
-            projected_bitmap.recycle();
-            /*if( rotated_bitmap != null ) {
-                rotated_bitmap.recycle();
-            }*/
-
-            /*float x0 = -slice_width/2;
-            float new_height0 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x0 * Math.sin(alpha)));
-            Log.d(TAG, "    new_height0: " + new_height0);
-
-            float x1 = slice_width/2;
-            float new_height1 = bitmap_height * (float)(h / (h * Math.cos(alpha) - x1 * Math.sin(alpha)));
-            Log.d(TAG, "    new_height1: " + new_height1);
-
-            float src_x0 = 0, src_y0 = 0.0f;
-            float src_x1 = 0, src_y1 = bitmap_height;
-            float src_x2 = slice_width, src_y2 = 0.0f;
-            float src_x3 = slice_width, src_y3 = bitmap_height;
-
-            float dst_x0 = src_x0, dst_y0 = (bitmap_height - new_height0)/2.0f;
-            float dst_x1 = src_x1, dst_y1 = (bitmap_height + new_height0)/2.0f;
-            float dst_x2 = src_x2, dst_y2 = (bitmap_height - new_height1)/2.0f;
-            float dst_x3 = src_x3, dst_y3 = (bitmap_height + new_height1)/2.0f;
-
-            float [] src_points = new float[]{src_x0, src_y0, src_x1, src_y1, src_x2, src_y2, src_x3, src_y3};
-            float [] dst_points = new float[]{dst_x0, dst_y0, dst_x1, dst_y1, dst_x2, dst_y2, dst_x3, dst_y3};
-            Log.d(TAG, "    src top-left: " + src_x0 + " , " + src_y0);
-            Log.d(TAG, "    src bottom-left: " + src_x1 + " , " + src_y1);
-            Log.d(TAG, "    src top-right: " + src_x2 + " , " + src_y2);
-            Log.d(TAG, "    src bottom-right: " + src_x3 + " , " + src_y3);
-            Log.d(TAG, "    dst top-left: " + dst_x0 + " , " + dst_y0);
-            Log.d(TAG, "    dst bottom-left: " + dst_x1 + " , " + dst_y1);
-            Log.d(TAG, "    dst top-right: " + dst_x2 + " , " + dst_y2);
-            Log.d(TAG, "    dst bottom-right: " + dst_x3 + " , " + dst_y3);
-
-            Matrix matrix = new Matrix();
-            if( !matrix.setPolyToPoly(src_points, 0, dst_points, 0, 4) ) {
-                Log.e(TAG, "failed to create matrix");
-                throw new RuntimeException();
-            }
-            Log.d(TAG, "matrix: " + matrix);
-
-            matrix.postTranslate(i*slice_width, 0.0f);
-
-            Bitmap bitmap_slice = Bitmap.createBitmap(bitmap, (bitmap_width - slice_width)/2, 0, slice_width, bitmap_height);
-            canvas.drawBitmap(bitmap_slice, matrix, null);
-            bitmap_slice.recycle();
-            */
             Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
         for(Bitmap bitmap : bitmaps) {
