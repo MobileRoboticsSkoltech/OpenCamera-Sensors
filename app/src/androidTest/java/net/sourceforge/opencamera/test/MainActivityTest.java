@@ -14943,7 +14943,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // downscale
         final int max_height = 2080;
-        if( bitmap_height >= max_height ) {
+        if( bitmap_height > max_height ) {
             float scale = ((float)max_height) / ((float)bitmap_height);
             Log.d(TAG, "scale: " + scale);
             Matrix scale_matrix = new Matrix();
