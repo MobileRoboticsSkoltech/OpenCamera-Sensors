@@ -14883,6 +14883,56 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         return power;
     }
 
+    private Bitmap createProjectedBitmap(final Rect src_rect_workspace, final Rect dst_rect_workspace, final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height, final double camera_angle) {
+        Bitmap projected_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+        {
+            // project
+            Canvas projected_canvas = new Canvas(projected_bitmap);
+            int prev_x = 0;
+            int prev_y0 = -1, prev_y1 = -1;
+            for(int x=0;x<bitmap_width;x++) {
+                float dx = (float)(x - (bitmap_width/2));
+                // rectangular projection:
+                //float new_height = bitmap_height * (float)(h / (h * Math.cos(alpha) - dx * Math.sin(alpha)));
+                // cylindrical projection:
+                float theta = (float)(dx*camera_angle)/(float)bitmap_width;
+                float new_height = bitmap_height * (float)Math.cos(theta);
+
+                int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
+                int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+                // y_tol: boost performance at the expense of accuracy (but only by up to 1 pixel)
+                //final int y_tol = 0;
+                final int y_tol = 1;
+                if( x == 0 ) {
+                    prev_y0 = dst_y0;
+                    prev_y1 = dst_y1;
+                }
+                //else if( dst_y0 != prev_y0 || dst_y1 != prev_y1 ) {
+                else if( Math.abs(dst_y0 - prev_y0) > y_tol || Math.abs(dst_y1 - prev_y1) > y_tol ) {
+                    src_rect_workspace.set(prev_x, 0, x, bitmap_height);
+                    dst_rect_workspace.set(prev_x, dst_y0, x, dst_y1);
+                    projected_canvas.drawBitmap(bitmap, src_rect_workspace, dst_rect_workspace, p);
+                    prev_x = x;
+                    prev_y0 = dst_y0;
+                    prev_y1 = dst_y1;
+                }
+
+                if( x == bitmap_width-1 ) {
+                    // draw last
+                    src_rect_workspace.set(prev_x, 0, x+1, bitmap_height);
+                    dst_rect_workspace.set(prev_x, dst_y0, x+1, dst_y1);
+                    projected_canvas.drawBitmap(bitmap, src_rect_workspace, dst_rect_workspace, p);
+                }
+
+                /*src_rect.set(x, 0, x+1, bitmap_height);
+                dst_rect.set(x, dst_y0, x+1, dst_y1);
+
+                projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);*/
+            }
+        }
+        return projected_bitmap;
+    }
+
     /**
      * @param panorama_pics_per_screen The value of panorama_pics_per_screen used when taking the input photos.
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
@@ -15267,52 +15317,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "    alpha: " + alpha + " ( " + Math.toDegrees(alpha) + " degrees )");
 
             Log.d(TAG, "### time before projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-            Bitmap projected_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
-            {
-                // project
-                Canvas projected_canvas = new Canvas(projected_bitmap);
-                int prev_x = 0;
-                int prev_y0 = -1, prev_y1 = -1;
-                for(int x=0;x<bitmap_width;x++) {
-                    float dx = (float)(x - (bitmap_width/2));
-                    // rectangular projection:
-                    //float new_height = bitmap_height * (float)(h / (h * Math.cos(alpha) - dx * Math.sin(alpha)));
-                    // cylindrical projection:
-                    float theta = (float)(dx*camera_angle)/(float)bitmap_width;
-                    float new_height = bitmap_height * (float)Math.cos(theta);
-
-                    int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
-                    int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
-                    // y_tol: boost performance at the expense of accuracy (but only by up to 1 pixel)
-                    //final int y_tol = 0;
-                    final int y_tol = 1;
-                    if( x == 0 ) {
-                        prev_y0 = dst_y0;
-                        prev_y1 = dst_y1;
-                    }
-                    //else if( dst_y0 != prev_y0 || dst_y1 != prev_y1 ) {
-                    else if( Math.abs(dst_y0 - prev_y0) > y_tol || Math.abs(dst_y1 - prev_y1) > y_tol ) {
-                        src_rect.set(prev_x, 0, x, bitmap_height);
-                        dst_rect.set(prev_x, dst_y0, x, dst_y1);
-                        projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
-                        prev_x = x;
-                        prev_y0 = dst_y0;
-                        prev_y1 = dst_y1;
-                    }
-
-                    if( x == bitmap_width-1 ) {
-                        // draw last
-                        src_rect.set(prev_x, 0, x+1, bitmap_height);
-                        dst_rect.set(prev_x, dst_y0, x+1, dst_y1);
-                        projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);
-                    }
-
-                    /*src_rect.set(x, 0, x+1, bitmap_height);
-                    dst_rect.set(x, dst_y0, x+1, dst_y1);
-
-                    projected_canvas.drawBitmap(bitmap, src_rect, dst_rect, p);*/
-                }
-            }
+            Bitmap projected_bitmap = createProjectedBitmap(src_rect, dst_rect, bitmap, p, bitmap_width, bitmap_height, camera_angle);
             Log.d(TAG, "### time after projection for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
 
             if( i > 0 && blend_hwidth > 0 ) {
@@ -15967,6 +15972,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama14/IMG_20190513_151249_9.jpg");
         String output_name = "testPanorama14_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama14/IMG_20190513_151249.xml";
+        //String gyro_name = null;
         float camera_angle_x = 66.708595f;
         float camera_angle_y = 50.282097f;
 
