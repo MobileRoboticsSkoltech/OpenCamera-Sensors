@@ -15229,6 +15229,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Paint p = new Paint();
         int align_x = 0, align_y = 0;
         int dst_offset_x = 0;
+        List<Integer> align_x_values = new ArrayList<>();
+        List<Integer> align_y_values = new ArrayList<>();
+        List<Integer> dst_offset_x_values = new ArrayList<>();
+
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "process bitmap: " + i);
 
@@ -15472,7 +15476,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             //align_y = 0;
             //angle_z = 0;
 
-            Bitmap bitmap = bitmaps.get(i);
+            //Bitmap bitmap = bitmaps.get(i);
             /*Bitmap rotated_bitmap = null;
             if( Math.abs(angle_z) > 1.0e-5f ) {
                 Log.d(TAG, "rotate bitmap");
@@ -15485,12 +15489,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 bitmap = rotated_bitmap;
             }*/
 
-            renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
+            /*renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
                 bitmap, p, bitmap_width, bitmap_height,
                 blend_hwidth, slice_width, offset_x, x_offsets_cumulative,
                 panorama, canvas,
                 align_x, align_y, dst_offset_x,
-                camera_angle, time_s);
+                camera_angle, time_s);*/
+
+            align_x_values.add(align_x);
+            align_y_values.add(align_y);
+            dst_offset_x_values.add(dst_offset_x);
 
             dst_offset_x += slice_width;
             if( !x_offsets_cumulative ) {
@@ -15500,6 +15508,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
+
+        for(int i=0;i<bitmaps.size();i++) {
+            Log.d(TAG, "render bitmap: " + i);
+            Bitmap bitmap = bitmaps.get(i);
+            align_x = align_x_values.get(i);
+            align_y = align_y_values.get(i);
+            dst_offset_x = dst_offset_x_values.get(i);
+
+            renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
+                bitmap, p, bitmap_width, bitmap_height,
+                blend_hwidth, slice_width, offset_x, x_offsets_cumulative,
+                panorama, canvas,
+                align_x, align_y, dst_offset_x,
+                camera_angle, time_s);
+
+            Log.d(TAG, "### time after rendering " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        }
+
         for(Bitmap bitmap : bitmaps) {
             bitmap.recycle();
         }
