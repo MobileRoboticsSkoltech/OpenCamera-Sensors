@@ -15420,14 +15420,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     Canvas rotated_canvas = new Canvas(rotated_bitmap);
                     rotated_canvas.save();
 
-                    //rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
-                    rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
-                    rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
-
                     // handle the transformation entirely by transforming the bitmap
                     /*rotated_canvas.translate(this_align_x, this_align_y);
                     this_align_x = 0;
                     this_align_y = 0;*/
+
+                    //rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
+                    rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
+                    rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
 
                     rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
                     rotated_canvas.restore();
