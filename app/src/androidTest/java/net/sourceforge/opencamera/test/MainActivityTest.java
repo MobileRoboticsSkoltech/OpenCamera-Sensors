@@ -15881,6 +15881,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama10/IMG_20190301_144948_12.jpg");
         String output_name = "testPanorama10_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama10/IMG_20190301_144948.xml";
+        //gyro_name = null;
         float camera_angle_x = 66.708595f;
         float camera_angle_y = 50.282097f;
         // these images were taken with incorrect camera view angles, so we compensate in the test:
@@ -16008,7 +16009,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama14/IMG_20190513_151249_9.jpg");
         String output_name = "testPanorama14_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama14/IMG_20190513_151249.xml";
-        //String gyro_name = null;
+        //gyro_name = null;
         float camera_angle_x = 66.708595f;
         float camera_angle_y = 50.282097f;
 
@@ -16040,6 +16041,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(panorama_images_path + "testPanorama15/IMG_20190513_151624_9.jpg");
         String output_name = "testPanorama15_output.jpg";
         String gyro_name = panorama_images_path + "testPanorama15/IMG_20190513_151624.xml";
+        //gyro_name = null;
         float camera_angle_x = 66.708595f;
         float camera_angle_y = 50.282097f;
 
