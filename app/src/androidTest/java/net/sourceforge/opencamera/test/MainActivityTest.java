@@ -15232,7 +15232,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Matrix cumulative_transform = new Matrix();
         List<Matrix> cumulative_transforms = new ArrayList<>(); // i-th entry is the transform to apply to the i-th bitmap so that it's aligned to the same space as the 1st bitmap
 
-        Bitmap panorama = Bitmap.createBitmap((bitmaps.size()*slice_width+2*offset_x), bitmap_height, Bitmap.Config.ARGB_8888);
+        final int panorama_width = (bitmaps.size()*slice_width+2*offset_x);
+        Bitmap panorama = Bitmap.createBitmap(panorama_width, bitmap_height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(panorama);
 
         Rect src_rect = new Rect();
@@ -15565,6 +15566,37 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
 
+        if( use_cumulative_transforms ) {
+            float [] values = new float[9];
+            float min_rotation = 1000, max_rotation = - 1000;
+            float sum_rotation = 0.0f;
+            for(int i=0;i<bitmaps.size();i++) {
+                cumulative_transforms.get(i).getValues(values);
+                // get rotation anticlockwise in degrees - https://stackoverflow.com/questions/12256854/get-the-rotate-value-from-matrix-in-android
+                float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
+                Log.d(TAG, "bitmap " + i + " has rotation " + rotation + " degrees");
+                min_rotation = Math.min(min_rotation, rotation);
+                max_rotation = Math.max(max_rotation, rotation);
+                sum_rotation += rotation;
+            }
+            float mid_rotation = 0.5f*(min_rotation + max_rotation);
+            //float mid_rotation = sum_rotation/bitmaps.size();
+            Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
+            // we now apply a rotation of -mid_rotation about what will be the centre of the resultant panoramic image, remembering
+            // that each matrix in cumulative_transforms is set up for each input images coordinate space
+            for(int i=0;i<bitmaps.size();i++) {
+                float centre_x = panorama_width/2.0f - i*slice_width;
+                float centre_y = bitmap_height/2.0f;
+                // apply a post rotate of mid_rotation clockwise about (centre_x, centre_y)
+                cumulative_transforms.get(i).postRotate(mid_rotation, centre_x, centre_y);
+                {
+                    cumulative_transforms.get(i).getValues(values);
+                    float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
+                    Log.d(TAG, "bitmap " + i + " now has rotation " + rotation + " degrees");
+                }
+            }
+        }
+
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "render bitmap: " + i);
             Bitmap bitmap = bitmaps.get(i);
@@ -15585,7 +15617,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     shift_stop_x = 0;
                 }
 
-                if( i != 0 ) {
+                {
                     Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                     Canvas rotated_canvas = new Canvas(rotated_bitmap);
                     rotated_canvas.save();
@@ -15597,13 +15629,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                     bitmap = rotated_bitmap;
                     free_bitmap = true;
+                }
 
-                    if( shift_transition ) {
-                        int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
-                        dst_offset_x -= shift_start_x;
-                        align_x = - shift_start_x;
-                        shift_stop_x -= shift_start_x;
-                    }
+                if( i != 0 && shift_transition ) {
+                    int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
+                    dst_offset_x -= shift_start_x;
+                    align_x = - shift_start_x;
+                    shift_stop_x -= shift_start_x;
                 }
             }
 
