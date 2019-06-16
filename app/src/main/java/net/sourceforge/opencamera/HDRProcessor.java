@@ -1854,9 +1854,19 @@ public class HDRProcessor {
      *  right hand side of the corresponding allocation in pyramid1.
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void mergePyramids(ScriptC_pyramid_blending script, List<Allocation> pyramid0, List<Allocation> pyramid1) {
+    private void mergePyramids(ScriptC_pyramid_blending script, List<Allocation> pyramid0, List<Allocation> pyramid1, int [] best_path, int best_path_n_x) {
         if( MyDebug.LOG )
             Log.d(TAG, "mergePyramids");
+
+        if( best_path == null ) {
+            best_path = new int[1];
+            // leave best_path[0] initialised to 0
+            best_path_n_x = 1;
+        }
+        Allocation bestPathAllocation = Allocation.createSized(rs, Element.I32(rs), best_path.length);
+        script.bind_best_path(bestPathAllocation);
+        bestPathAllocation.copyFrom(best_path);
+
         for(int i=0;i<pyramid0.size();i++) {
             Allocation allocation0 = pyramid0.get(i);
             Allocation allocation1 = pyramid1.get(i);
@@ -1893,7 +1903,12 @@ public class HDRProcessor {
             blend_width = Math.max(blend_width, 2);*/
             //blend_width = 1; // test
 
+            float best_path_x_width = width / (best_path_n_x+1.0f); // width of each "bucket" for the best paths
+            // when using best_path, we have a narrower region to blend across
+            blend_width = Math.min(blend_width, (int)(2.0f*best_path_x_width+0.5f));
             script.invoke_setBlendWidth(blend_width, width);
+            script.set_best_path_x_width(best_path_x_width);
+            script.set_best_path_y_scale(best_path.length/(float)height);
 
             if( allocation0.getType().getElement().getDataType() == Element.DataType.FLOAT_32 ) {
                 script.forEach_merge_f(allocation0, allocation0);
@@ -1902,6 +1917,8 @@ public class HDRProcessor {
                 script.forEach_merge(allocation0, allocation0);
             }
         }
+
+        bestPathAllocation.destroy();
     }
 
     /** For testing.
@@ -1968,6 +1985,7 @@ public class HDRProcessor {
         long time_s = 0;
         if( MyDebug.LOG )
             time_s = System.currentTimeMillis();
+
         ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
@@ -1994,6 +2012,72 @@ public class HDRProcessor {
             }
         }*/
 
+        if( lhs.getWidth() != rhs.getWidth() || lhs.getHeight() != rhs.getHeight() ) {
+            Log.e(TAG, "lhs/rhs bitmaps of different dimensions");
+            throw new RuntimeException();
+        }
+
+        final boolean find_best_path = false;
+        //final boolean find_best_path = true;
+        final int best_path_n_x = 3;
+        final int best_path_n_y = 8;
+        int [] best_path = null;
+        if( find_best_path ) {
+            best_path = new int[best_path_n_y];
+
+            Allocation lhs_allocation = Allocation.createFromBitmap(rs, lhs);
+            Allocation rhs_allocation = Allocation.createFromBitmap(rs, rhs);
+
+            int [] errors = new int[1];
+            Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 1);
+            script.bind_errors(errorsAllocation);
+
+            Script.LaunchOptions launch_options = new Script.LaunchOptions();
+            if( MyDebug.LOG )
+                Log.d(TAG, "### blendPyramids: time after creating allocations for best path: " + (System.currentTimeMillis() - time_s));
+
+            script.set_bitmap(rhs_allocation);
+
+            int start_y = 0, stop_y;
+            for(int y=0;y<best_path_n_y;y++) {
+                best_path[y] = -1;
+                int best_error = -1;
+
+                stop_y = ((y+1) * lhs.getHeight()) / best_path_n_y;
+                launch_options.setY(start_y, stop_y);
+                start_y = stop_y; // set for next iteration
+
+                int start_x = 0, stop_x;
+                for(int x=0;x<best_path_n_x;x++) {
+                    stop_x = ((x+1) * lhs.getWidth()) / best_path_n_x;
+                    launch_options.setX(start_x, stop_x);
+                    start_x = stop_x; // set for next iteration
+
+                    script.invoke_init_errors();
+                    script.forEach_compute_error(lhs_allocation, launch_options);
+                    errorsAllocation.copyTo(errors);
+
+                    int this_error = errors[0];
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "    best_path error[" + x + "][" + y + "]: " + this_error);
+                    if( best_path[y] == -1 || this_error < best_error ) {
+                        best_path[y] = x;
+                        best_error = this_error;
+                    }
+                }
+
+                if( MyDebug.LOG )
+                    Log.d(TAG, "best_path [" + y + "]: " + best_path[y]);
+            }
+
+            lhs_allocation.destroy();
+            rhs_allocation.destroy();
+            errorsAllocation.destroy();
+
+            if( MyDebug.LOG )
+                Log.d(TAG, "### blendPyramids: time after finding best path: " + (System.currentTimeMillis() - time_s));
+        }
+
         List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, n_levels, "lhs");
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
@@ -2017,7 +2101,7 @@ public class HDRProcessor {
 			rhs_collapsed.recycle();
 		}*/
 
-        mergePyramids(script, lhs_pyramid, rhs_pyramid);
+        mergePyramids(script, lhs_pyramid, rhs_pyramid, best_path, best_path_n_x);
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
         Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);

@@ -231,6 +231,10 @@ void setBlendWidth(int blend_width, full_width) {
     start_blend_x = (full_width - merge_blend_width)/2;
 }
 
+int32_t *best_path;
+float best_path_x_width;
+float best_path_y_scale;
+
 static float3 merge_core(float3 in0, float3 in1, uint32_t x, uint32_t y) {
     //int width = rsAllocationGetDimX(bitmap);
     //float alpha = ((float)(x-start_blend_x))/(float)merge_blend_width;
@@ -238,9 +242,22 @@ static float3 merge_core(float3 in0, float3 in1, uint32_t x, uint32_t y) {
     if( x > start_blend_x ) {
         alpha = ((float)(x-start_blend_x))/(float)merge_blend_width;
     }*/
+
+    int best_path_y_index = (int)((y+0.5f)*best_path_y_scale);
+    int best_path_value = best_path[best_path_y_index];
+    int mid_x = (int)((best_path_value+1) * best_path_x_width + 0.5f);
+
     int32_t ix = x;
-    float alpha = ((float)(ix-start_blend_x))/(float)merge_blend_width;
+    //float alpha = ((float)(ix-start_blend_x))/(float)merge_blend_width;
+    float alpha = ((float)( ix-(mid_x-merge_blend_width/2) )) / (float)merge_blend_width;
     alpha = clamp(alpha, 0.0f, 1.0f);
+
+    /*float alpha;
+    if( ix < mid_x )
+        alpha = 0.0f;
+    else
+        alpha = 1.0f;*/
+
     float3 out = (1.0f-alpha)*in0 + alpha*in1;
     return out;
 }
@@ -309,4 +326,22 @@ float3 __attribute__((kernel)) merge_f(float3 in, uint32_t x, uint32_t y) {
     float3 out = merge_core(in, in1, x, y);
 
     return out;
+}
+
+int32_t *errors;
+
+void init_errors() {
+    for(int i=0;i<9;i++)
+        errors[i] = 0;
+}
+
+void __attribute__((kernel)) compute_error(uchar4 in, uint32_t x, uint32_t y) {
+    float3 in0_f = convert_float3(in.rgb);
+    float3 in1_f = convert_float3(rsGetElementAt_uchar4(bitmap, x, y).rgb);
+    float3 diff = in0_f - in1_f;
+    float diff2 = dot(diff, diff);
+
+    if( errors[0] < 2000000000 ) { // avoid risk of overflow
+        rsAtomicAdd(&errors[0], diff2);
+    }
 }
