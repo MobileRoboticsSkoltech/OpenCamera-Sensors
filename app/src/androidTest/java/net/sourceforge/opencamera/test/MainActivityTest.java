@@ -14898,8 +14898,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 float theta = (float)(dx*camera_angle)/(float)bitmap_width;
                 float new_height = bitmap_height * (float)Math.cos(theta);
 
+                //float fixed_y_frac = 0.5f;
+                //int dst_y0 = (int)(fixed_y_frac*(bitmap_height - new_height) + 0.5f);
+                //int dst_y1 = (int)(fixed_y_frac*bitmap_height + (1.0f - fixed_y_frac)*new_height + 0.5f);
                 int dst_y0 = (int)((bitmap_height - new_height)/2.0f+0.5f);
                 int dst_y1 = (int)((bitmap_height + new_height)/2.0f+0.5f);
+
                 // y_tol: boost performance at the expense of accuracy (but only by up to 1 pixel)
                 //final int y_tol = 0;
                 final int y_tol = 1;

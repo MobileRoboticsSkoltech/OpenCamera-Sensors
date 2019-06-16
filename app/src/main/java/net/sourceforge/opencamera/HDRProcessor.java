@@ -2346,6 +2346,7 @@ public class HDRProcessor {
             featureDetectorScript.set_bitmap(strength_allocation);
             //final int n_y_chunks = 1;
             final int n_y_chunks = 2;
+            //final int n_y_chunks = 3;
             //final int n_y_chunks = 4;
             //final int total_max_corners = 500;
             final int total_max_corners = 200;
@@ -2683,6 +2684,7 @@ public class HDRProcessor {
             //final float max_inlier_dist = Math.max(10.01f, Math.max(width, height)/100.0f);
             final float max_inlier_dist = Math.max(5.01f, Math.max(width, height)/100.0f);
             //final float max_inlier_dist = Math.max(2.51f, Math.max(width, height)/200.0f);
+            //final float max_inlier_dist = Math.max(1.26f, Math.max(width, height)/400.0f);
             if( MyDebug.LOG )
                 Log.d(TAG, "max_inlier_dist: " + max_inlier_dist);
             final float max_inlier_dist2 = max_inlier_dist*max_inlier_dist;
