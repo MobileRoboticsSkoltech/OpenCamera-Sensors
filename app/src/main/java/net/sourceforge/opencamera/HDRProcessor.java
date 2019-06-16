@@ -1886,6 +1886,12 @@ public class HDRProcessor {
                 }
                 blend_width = Math.min(blend_width, width);
             }
+            /*int blend_width = width;
+            for(int j=i;j<pyramid0.size()-1;j++) {
+                blend_width /= 2;
+            }
+            blend_width = Math.max(blend_width, 2);*/
+            //blend_width = 1; // test
 
             script.invoke_setBlendWidth(blend_width, width);
 
