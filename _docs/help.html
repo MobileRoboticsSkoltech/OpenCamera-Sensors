@@ -331,7 +331,7 @@ This is similar to what Open Camera's <a href="#hdr">HDR</a> mode can achieve. A
 <li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
 being taken. Aside from reducing the risk of ghosting effects, the more steady the camera is, the more effective the noise reduction
 algorithm is in reducing noise and enhancing detail.</li>
-<li>If you have a Google Pixel (2), you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
+<li>If you have a Google Pixel with Pixel Visual Core, you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
 is generally little benefit to using Open Camera's NR mode on these devices. See "Does Open Camera support HDR+" in the
 <a href="#faq">FAQ</a> for more details.</li>
 </ul>
@@ -380,7 +380,7 @@ being taken.</li>
 <li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
 unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
 apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
-<li>If you have a Google Pixel (2), you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
+<li>If you have a Google Pixel with Pixel Visual Core, you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
 is generally little benefit to using Open Camera's HDR mode on these devices. See "Does Open Camera support HDR+" in the
 <a href="#faq">FAQ</a> for more details.</li>
 <li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
@@ -1322,11 +1322,13 @@ This is turned off by default as some <a href="devices.html">devices</a> have po
 "legacy" Camera2 support, which means it isn't any better than the original Camera API. Open Camera doesn't support
 enabling Camera2 on such devices.</p>
 
-<p><b>Does Open Camera support HDR+, or use the Pixel 2's Visual Core?</b> If you have a Google Pixel, then Open Camera
+<p><b>Does Open Camera support HDR+, or use the Pixel's Visual Core?</b> If you have a Google Pixel with Pixel Visual Core, then Open Camera
 should be using HDR+ when the following settings are set: Photo Mode Standard, flash off (or auto if the flash doesn't fire),
 white balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW. HDR+ should be
 supported in both old and Camera2 API. See
-<a href="https://sourceforge.net/p/opencamera/discussion/general/thread/61950751/">this thread</a> for more discussion.</p>
+<a href="https://sourceforge.net/p/opencamera/discussion/general/thread/61950751/">this thread</a> for more discussion.
+Note that some Google Pixels (e.g., 3a) do not have a Pixel Visual Core chip, and may not support HDR+ in third party
+camera applications (see <a href="https://sourceforge.net/p/opencamera/tickets/592/">this thread</a>).</p>
 
 <p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
 of applying a HDR algorithm, some may do better or worse in different circumstances; some may look more or less pleasing
