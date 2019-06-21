@@ -15217,8 +15217,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         final int offset_x = (bitmap_width - slice_width)/2;
         //final int blend_hwidth = 0;
-        //final int blend_hwidth = bitmap_width/20;
         final int blend_hwidth = nextPowerOf2(bitmap_width/20);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/10);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
         final int align_hwidth = bitmap_width/10;
         //final int align_hwidth = bitmap_width/5;
         final boolean use_auto_align = true;
@@ -15621,6 +15622,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     shift_stop_x = 0;
                 }
 
+                if( i != 0 && shift_transition ) {
+                    int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
+                    dst_offset_x -= shift_start_x;
+                    align_x = - shift_start_x;
+                    shift_stop_x -= shift_start_x;
+                }
+
+                if( align_x != 0 ) {
+                    // Bake the alignment into the transform.
+                    // Otherwise we have risk that we can transform the image too far off the bitmap, only to try to undo
+                    // that translation via align_x in renderPanoramaImage(), which means we get black regions due to having
+                    // lost the parts of the image that were translated too far!
+                    // This can show up when the blend_hwidth is sufficiently large, and means we get dark bands on the
+                    // resultant image.
+                    cumulative_transforms.get(i).postTranslate(-align_x, 0.0f);
+                    //Log.d(TAG, "centre_shift_x: " + centre_shift_x);
+                    //Log.d(TAG, "    align_x: " + align_x);
+                    centre_shift_x -= align_x;
+                    //Log.d(TAG, "new centre_shift_x: " + centre_shift_x);
+                    align_x = 0;
+                }
+
                 {
                     Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
                     Canvas rotated_canvas = new Canvas(rotated_bitmap);
@@ -15633,13 +15656,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
                     bitmap = rotated_bitmap;
                     free_bitmap = true;
-                }
-
-                if( i != 0 && shift_transition ) {
-                    int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
-                    dst_offset_x -= shift_start_x;
-                    align_x = - shift_start_x;
-                    shift_stop_x -= shift_start_x;
                 }
             }
 
