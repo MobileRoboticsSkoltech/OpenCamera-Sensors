@@ -1951,6 +1951,7 @@ public class HDRProcessor {
                         Log.d(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y] + " (best_path_value " + best_path_value + ")");
                     }*/
                 }
+                //if( false )
                 {
                     // linear interpolation
                     float best_path_y_index = ((y+0.5f)*best_path_y_scale);
@@ -1964,7 +1965,17 @@ public class HDRProcessor {
                     else {
                         best_path_y_index -= 0.5f;
                         int best_path_y_index_i = (int)best_path_y_index;
-                        float alpha = best_path_y_index - best_path_y_index_i;
+                        float linear_alpha = best_path_y_index - best_path_y_index_i;
+                        //float alpha = linear_alpha;
+                        //final float edge_length = 0.25f;
+                        final float edge_length = 0.1f;
+                        float alpha;
+                        if( linear_alpha < edge_length )
+                            alpha = 0.0f;
+                        else if( linear_alpha > 1.0f-edge_length )
+                            alpha = 1.0f;
+                        else
+                            alpha = (linear_alpha - edge_length) / (1.0f - 2.0f*edge_length);
                         int prev_best_path = best_path[best_path_y_index_i];
                         int next_best_path = best_path[best_path_y_index_i+1];
                         best_path_value = (1.0f-alpha) * prev_best_path + alpha * next_best_path;
@@ -2115,14 +2126,27 @@ public class HDRProcessor {
 
         //final boolean find_best_path = false;
         final boolean find_best_path = true;
-        final int best_path_n_x = 3;
+        //final int best_path_n_x = 3;
+        final int best_path_n_x = 7;
         final int best_path_n_y = 8;
+        //final int best_path_n_y = 16;
         int [] best_path = null;
         if( find_best_path ) {
             best_path = new int[best_path_n_y];
 
-            Allocation lhs_allocation = Allocation.createFromBitmap(rs, lhs);
-            Allocation rhs_allocation = Allocation.createFromBitmap(rs, rhs);
+            //Bitmap best_path_lhs = lhs;
+            //Bitmap best_path_rhs = rhs;
+            final int scale_factor = 4;
+            Bitmap best_path_lhs = Bitmap.createScaledBitmap(lhs, lhs.getWidth()/scale_factor, lhs.getHeight()/scale_factor, true);
+            Bitmap best_path_rhs = Bitmap.createScaledBitmap(rhs, rhs.getWidth()/scale_factor, rhs.getHeight()/scale_factor, true);
+            // debug
+            /*{
+                saveBitmap(best_path_lhs, "best_path_lhs.jpg");
+                saveBitmap(best_path_rhs, "best_path_rhs.jpg");
+            }*/
+
+            Allocation lhs_allocation = Allocation.createFromBitmap(rs, best_path_lhs);
+            Allocation rhs_allocation = Allocation.createFromBitmap(rs, best_path_rhs);
 
             int [] errors = new int[1];
             Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 1);
@@ -2134,13 +2158,13 @@ public class HDRProcessor {
 
             script.set_bitmap(rhs_allocation);
 
-            int window_width = Math.max(2, lhs.getWidth()/8);
+            int window_width = Math.max(2, best_path_lhs.getWidth()/8);
             int start_y = 0, stop_y;
             for(int y=0;y<best_path_n_y;y++) {
                 best_path[y] = -1;
                 int best_error = -1;
 
-                stop_y = ((y+1) * lhs.getHeight()) / best_path_n_y;
+                stop_y = ((y+1) * best_path_lhs.getHeight()) / best_path_n_y;
                 launch_options.setY(start_y, stop_y);
                 start_y = stop_y; // set for next iteration
 
@@ -2149,10 +2173,10 @@ public class HDRProcessor {
                     // windows for computing best path should be centred with the path centres we'll actually take
                     float alpha = ((float)x)/(best_path_n_x-1.0f);
                     float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
-                    int mid_x = (int)(frac * lhs.getWidth() + 0.5f);
+                    int mid_x = (int)(frac * best_path_lhs.getWidth() + 0.5f);
                     int start_x = mid_x - window_width/2;
                     int stop_x = mid_x + window_width/2;
-                    //stop_x = ((x+1) * lhs.getWidth()) / best_path_n_x;
+                    //stop_x = ((x+1) * best_path_lhs.getWidth()) / best_path_n_x;
                     launch_options.setX(start_x, stop_x);
                     //start_x = stop_x; // set for next iteration
 
@@ -2170,6 +2194,7 @@ public class HDRProcessor {
                 }
 
                 //best_path[y] = 1; // test
+                //best_path[y] = y % best_path_n_x; // test
                 if( MyDebug.LOG )
                     Log.d(TAG, "best_path [" + y + "]: " + best_path[y]);
             }
@@ -2177,6 +2202,13 @@ public class HDRProcessor {
             lhs_allocation.destroy();
             rhs_allocation.destroy();
             errorsAllocation.destroy();
+
+            if( best_path_lhs != lhs ) {
+                best_path_lhs.recycle();
+            }
+            if( best_path_rhs != rhs ) {
+                best_path_rhs.recycle();
+            }
 
             if( MyDebug.LOG )
                 Log.d(TAG, "### blendPyramids: time after finding best path: " + (System.currentTimeMillis() - time_s));
