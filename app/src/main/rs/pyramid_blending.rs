@@ -333,7 +333,7 @@ float3 __attribute__((kernel)) merge_f(float3 in, uint32_t x, uint32_t y) {
 int32_t *errors;
 
 void init_errors() {
-    for(int i=0;i<9;i++)
+    for(int i=0;i<1;i++)
         errors[i] = 0;
 }
 
