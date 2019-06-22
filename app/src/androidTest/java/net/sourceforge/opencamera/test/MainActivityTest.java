@@ -15216,9 +15216,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "max_offset_error_y: " + max_offset_error_y);*/
 
         final int offset_x = (bitmap_width - slice_width)/2;
+        // blend_hwidth is the half-width of the region that we blend between.
+        // N.B., when using blendPyramids(), the region we actually have blending over is only half
+        // of the width of the images it receives to blend receive (i.e., the blend region width
+        // is equal to blend_hwidth), because of the code to find a best path.
         //final int blend_hwidth = 0;
-        final int blend_hwidth = nextPowerOf2(bitmap_width/20);
-        //final int blend_hwidth = nextPowerOf2(bitmap_width/10);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/20);
+        final int blend_hwidth = nextPowerOf2(bitmap_width/10);
         //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
         final int align_hwidth = bitmap_width/10;
         //final int align_hwidth = bitmap_width/5;

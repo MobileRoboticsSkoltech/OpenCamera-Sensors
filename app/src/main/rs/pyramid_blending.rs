@@ -226,14 +226,15 @@ uchar4 __attribute__((kernel)) add(uchar4 in, uint32_t x, uint32_t y) {
 static int merge_blend_width;
 static int start_blend_x;
 
-void setBlendWidth(int blend_width, full_width) {
+void setBlendWidth(int blend_width, int full_width) {
     merge_blend_width = blend_width;
     start_blend_x = (full_width - merge_blend_width)/2;
 }
 
-int32_t *best_path;
-float best_path_x_width;
-float best_path_y_scale;
+//int32_t *best_path;
+int32_t *interpolated_best_path; // the centre of the blend window, for each y coordinate
+//float best_path_x_width;
+//float best_path_y_scale;
 
 static float3 merge_core(float3 in0, float3 in1, uint32_t x, uint32_t y) {
     //int width = rsAllocationGetDimX(bitmap);
@@ -243,9 +244,10 @@ static float3 merge_core(float3 in0, float3 in1, uint32_t x, uint32_t y) {
         alpha = ((float)(x-start_blend_x))/(float)merge_blend_width;
     }*/
 
-    int best_path_y_index = (int)((y+0.5f)*best_path_y_scale);
+    /*int best_path_y_index = (int)((y+0.5f)*best_path_y_scale);
     int best_path_value = best_path[best_path_y_index];
-    int mid_x = (int)((best_path_value+1) * best_path_x_width + 0.5f);
+    int mid_x = (int)((best_path_value+1) * best_path_x_width + 0.5f);*/
+    int mid_x = interpolated_best_path[y];
 
     int32_t ix = x;
     //float alpha = ((float)(ix-start_blend_x))/(float)merge_blend_width;

@@ -1850,8 +1850,10 @@ public class HDRProcessor {
         return bitmap;
     }
 
-    /** Updates every allocation in pyramid0 so that the right hand side comes from the
-     *  right hand side of the corresponding allocation in pyramid1.
+    /** Updates every allocation in pyramid0 to be a blend from the left hand of pyramid0 to the
+     *  right hand of pyramid1.
+     *  Note that the width of the blend region will be half of the width of each image.
+     * @param best_path If non-null, the blend region will follow the supplied best path.
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void mergePyramids(ScriptC_pyramid_blending script, List<Allocation> pyramid0, List<Allocation> pyramid1, int [] best_path, int best_path_n_x) {
@@ -1860,12 +1862,28 @@ public class HDRProcessor {
 
         if( best_path == null ) {
             best_path = new int[1];
-            // leave best_path[0] initialised to 0
-            best_path_n_x = 1;
+            best_path_n_x = 3;
+            best_path[0] = 1;
+            //best_path[0] = 2; // test
         }
-        Allocation bestPathAllocation = Allocation.createSized(rs, Element.I32(rs), best_path.length);
-        script.bind_best_path(bestPathAllocation);
-        bestPathAllocation.copyFrom(best_path);
+        if( MyDebug.LOG ) {
+            for(int i=0;i<best_path.length;i++)
+                Log.d(TAG, "best_path[" + i + "]: " + best_path[i]);
+        }
+        //Allocation bestPathAllocation = Allocation.createSized(rs, Element.I32(rs), best_path.length);
+        //script.bind_best_path(bestPathAllocation);
+        //bestPathAllocation.copyFrom(best_path);
+
+        int max_height = 0;
+        for(int i=0;i<pyramid0.size();i++) {
+            Allocation allocation0 = pyramid0.get(i);
+            int height = allocation0.getType().getY();
+            max_height = Math.max(max_height, height);
+        }
+
+        Allocation interpolatedbestPathAllocation = Allocation.createSized(rs, Element.I32(rs), max_height);
+        script.bind_interpolated_best_path(interpolatedbestPathAllocation);
+        int [] interpolated_best_path = new int[max_height];
 
         for(int i=0;i<pyramid0.size();i++) {
             Allocation allocation0 = pyramid0.get(i);
@@ -1884,31 +1902,104 @@ public class HDRProcessor {
 
             script.set_bitmap(allocation1);
 
-            //int blend_width = (i==pyramid0.size()-1) ? width : 2;
+            // when using best_path, we have a narrower region to blend across
+            //int blend_window_width = width;
+            int blend_window_width = width/2;
+            //int blend_width = (i==pyramid0.size()-1) ? blend_window_width : 2;
             int blend_width;
             if( i==pyramid0.size()-1 ) {
-                blend_width = width;
+                blend_width = blend_window_width;
             }
             else {
                 blend_width = 2;
                 for(int j=0;j<i;j++) {
                     blend_width *= 2;
                 }
-                blend_width = Math.min(blend_width, width);
+                blend_width = Math.min(blend_width, blend_window_width);
             }
-            /*int blend_width = width;
+            /*int blend_width = blend_window_width;
             for(int j=i;j<pyramid0.size()-1;j++) {
                 blend_width /= 2;
             }
             blend_width = Math.max(blend_width, 2);*/
             //blend_width = 1; // test
 
-            float best_path_x_width = width / (best_path_n_x+1.0f); // width of each "bucket" for the best paths
-            // when using best_path, we have a narrower region to blend across
-            blend_width = Math.min(blend_width, (int)(2.0f*best_path_x_width+0.5f));
+            //float best_path_x_width = width / (best_path_n_x+1.0f); // width of each "bucket" for the best paths
+            //blend_width = Math.min(blend_width, (int)(2.0f*best_path_x_width+0.5f));
+            float best_path_y_scale = best_path.length/(float)height;
+            /*if( MyDebug.LOG ) {
+                Log.d(TAG, "i = " + i);
+                Log.d(TAG, "    width: " + width);
+                Log.d(TAG, "    blend_width: " + blend_width);
+                Log.d(TAG, "    height: " + height);
+                //Log.d(TAG, "    best_path_x_width: " + best_path_x_width);
+                Log.d(TAG, "    best_path_y_scale: " + best_path_y_scale);
+            }*/
+
+            // compute interpolated_best_path
+            for(int y=0;y<height;y++) {
+                if( false )
+                {
+                    // no interpolation:
+                    int best_path_y_index = (int)((y+0.5f)*best_path_y_scale);
+                    int best_path_value = best_path[best_path_y_index];
+                    //interpolated_best_path[y] = (int)((best_path_value+1) * best_path_x_width + 0.5f);
+                    float alpha = best_path_value / (best_path_n_x-1.0f);
+                    float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
+                    interpolated_best_path[y] = (int)(frac*width + 0.5f);
+                    /*if( MyDebug.LOG ) {
+                        Log.d(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y] + " (best_path_value " + best_path_value + ")");
+                    }*/
+                }
+                {
+                    // linear interpolation
+                    float best_path_y_index = ((y+0.5f)*best_path_y_scale);
+                    float best_path_value;
+                    if( best_path_y_index <= 0.5f ) {
+                        best_path_value = best_path[0];
+                    }
+                    else if( best_path_y_index >= best_path.length-1+0.5f ) {
+                        best_path_value = best_path[best_path.length-1];
+                    }
+                    else {
+                        best_path_y_index -= 0.5f;
+                        int best_path_y_index_i = (int)best_path_y_index;
+                        float alpha = best_path_y_index - best_path_y_index_i;
+                        int prev_best_path = best_path[best_path_y_index_i];
+                        int next_best_path = best_path[best_path_y_index_i+1];
+                        best_path_value = (1.0f-alpha) * prev_best_path + alpha * next_best_path;
+                        /*if( MyDebug.LOG ) {
+                            Log.d(TAG, "    alpha: " + alpha);
+                            Log.d(TAG, "    prev_best_path: " + prev_best_path);
+                            Log.d(TAG, "    next_best_path: " + next_best_path);
+                        }*/
+                    }
+                    //interpolated_best_path[y] = (int)((best_path_value+1) * best_path_x_width + 0.5f);
+                    float alpha = best_path_value / (best_path_n_x-1.0f);
+                    float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
+                    interpolated_best_path[y] = (int)(frac*width + 0.5f);
+                    /*if( MyDebug.LOG ) {
+                        Log.d(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y] + " (best_path_value " + best_path_value + ")");
+                    }*/
+                }
+                if( interpolated_best_path[y] - blend_width/2 < 0 ) {
+                    Log.e(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y]);
+                    Log.e(TAG, "    blend_width: " + blend_width);
+                    Log.e(TAG, "    width: " + width);
+                    throw new RuntimeException("blend window runs off left hand size");
+                }
+                else if( interpolated_best_path[y] + blend_width/2 > width ) {
+                    Log.e(TAG, "    interpolated_best_path[" + y + "]: " + interpolated_best_path[y]);
+                    Log.e(TAG, "    blend_width: " + blend_width);
+                    Log.e(TAG, "    width: " + width);
+                    throw new RuntimeException("blend window runs off right hand size");
+                }
+            }
+            interpolatedbestPathAllocation.copyFrom(interpolated_best_path);
+
             script.invoke_setBlendWidth(blend_width, width);
-            script.set_best_path_x_width(best_path_x_width);
-            script.set_best_path_y_scale(best_path.length/(float)height);
+            //script.set_best_path_x_width(best_path_x_width);
+            //script.set_best_path_y_scale(best_path.length/(float)height);
 
             if( allocation0.getType().getElement().getDataType() == Element.DataType.FLOAT_32 ) {
                 script.forEach_merge_f(allocation0, allocation0);
@@ -1918,7 +2009,8 @@ public class HDRProcessor {
             }
         }
 
-        bestPathAllocation.destroy();
+        //bestPathAllocation.destroy();
+        interpolatedbestPathAllocation.destroy();
     }
 
     /** For testing.
@@ -1980,6 +2072,10 @@ public class HDRProcessor {
         }
     }
 
+    /** Returns a bitmap that blends between lhs and rhs, using Laplacian pyramid blending.
+     *  Note that the width of the blend region will be half of the width of the image. The blend
+     *  region will follow a path in order to minimise the transition between the images.
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public Bitmap blendPyramids(Bitmap lhs, Bitmap rhs) {
         long time_s = 0;
@@ -2017,8 +2113,8 @@ public class HDRProcessor {
             throw new RuntimeException();
         }
 
-        final boolean find_best_path = false;
-        //final boolean find_best_path = true;
+        //final boolean find_best_path = false;
+        final boolean find_best_path = true;
         final int best_path_n_x = 3;
         final int best_path_n_y = 8;
         int [] best_path = null;
@@ -2038,6 +2134,7 @@ public class HDRProcessor {
 
             script.set_bitmap(rhs_allocation);
 
+            int window_width = Math.max(2, lhs.getWidth()/8);
             int start_y = 0, stop_y;
             for(int y=0;y<best_path_n_y;y++) {
                 best_path[y] = -1;
@@ -2047,11 +2144,17 @@ public class HDRProcessor {
                 launch_options.setY(start_y, stop_y);
                 start_y = stop_y; // set for next iteration
 
-                int start_x = 0, stop_x;
+                //int start_x = 0, stop_x;
                 for(int x=0;x<best_path_n_x;x++) {
-                    stop_x = ((x+1) * lhs.getWidth()) / best_path_n_x;
+                    // windows for computing best path should be centred with the path centres we'll actually take
+                    float alpha = ((float)x)/(best_path_n_x-1.0f);
+                    float frac = (1.0f - alpha) * 0.25f + alpha * 0.75f;
+                    int mid_x = (int)(frac * lhs.getWidth() + 0.5f);
+                    int start_x = mid_x - window_width/2;
+                    int stop_x = mid_x + window_width/2;
+                    //stop_x = ((x+1) * lhs.getWidth()) / best_path_n_x;
                     launch_options.setX(start_x, stop_x);
-                    start_x = stop_x; // set for next iteration
+                    //start_x = stop_x; // set for next iteration
 
                     script.invoke_init_errors();
                     script.forEach_compute_error(lhs_allocation, launch_options);
@@ -2066,6 +2169,7 @@ public class HDRProcessor {
                     }
                 }
 
+                //best_path[y] = 1; // test
                 if( MyDebug.LOG )
                     Log.d(TAG, "best_path [" + y + "]: " + best_path[y]);
             }
