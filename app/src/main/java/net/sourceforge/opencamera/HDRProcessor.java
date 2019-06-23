@@ -2835,7 +2835,7 @@ public class HDRProcessor {
                 	found = true;
                     float ratio = match.distance / match2.distance;
                     if( MyDebug.LOG ) {
-                        Log.d(TAG, "        next best match is with " + match2.index1 + " distance: " + match2.distance + " , ratio: " + ratio);
+                        Log.d(TAG, "        next best match for index0 " + match.index0 + " is with " + match2.index1 + " distance: " + match2.distance + " , ratio: " + ratio);
                     }
 					if( ratio+1.0e-5 > 0.8f ) {
                         if( MyDebug.LOG ) {
