@@ -2835,7 +2835,7 @@ public class HDRProcessor {
                 	found = true;
                     float ratio = match.distance / match2.distance;
                     if( MyDebug.LOG ) {
-                        Log.d(TAG, "        next best match is with " + match2.index0 + " distance: " + match.distance + " , ratio: " + ratio);
+                        Log.d(TAG, "        next best match is with " + match2.index1 + " distance: " + match2.distance + " , ratio: " + ratio);
                     }
 					if( ratio+1.0e-5 > 0.8f ) {
                         if( MyDebug.LOG ) {
@@ -3238,7 +3238,8 @@ public class HDRProcessor {
                 int y0 = points_arrays[0][match.index0].y;
                 int x1 = points_arrays[1][match.index1].x;
                 int y1 = points_arrays[1][match.index1].y;
-                Log.d(TAG, "    coords " + x0 + " , " + y0 + " to " + x1 + " , " + y1);
+                Log.d(TAG, "    index : " + match.index0 + " to " + match.index1);
+                Log.d(TAG, "        coords " + x0 + " , " + y0 + " to " + x1 + " , " + y1);
                 Log.d(TAG, "        distance: " + match.distance);
             }
         }
