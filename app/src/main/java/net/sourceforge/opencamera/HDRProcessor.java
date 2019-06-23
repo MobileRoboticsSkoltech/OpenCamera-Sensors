@@ -2899,6 +2899,7 @@ public class HDRProcessor {
         //final float min_rotation_dist2 = 1.0e-5f;
         final float min_rotation_dist2 = min_rotation_dist*min_rotation_dist;
 
+        List<FeatureMatch> ransac_matches = new ArrayList<>(); // used for debugging: the matches that were used to define the transform
         if( use_ransac ) {
             // RANSAC
             List<FeatureMatch> best_inliers = new ArrayList<>();
@@ -2941,6 +2942,8 @@ public class HDRProcessor {
                         // found an improved model!
                         if( MyDebug.LOG )
                             Log.d(TAG, "match " + i + " gives better translation model: " + inliers.size() + " inliers vs " + best_inliers.size());
+                        ransac_matches.clear();
+                        ransac_matches.add(match);
                         best_inliers.clear();
                         best_inliers.addAll(inliers);
                         use_rotation = false;
@@ -3064,6 +3067,9 @@ public class HDRProcessor {
                                 Log.d(TAG, "    y scale by " + y_scale);
                                 Log.d(TAG, "    translate by: " + (c1_x-c0_x) + " , " + (c1_y-c0_y));
                             }
+                            ransac_matches.clear();
+                            ransac_matches.add(match);
+                            ransac_matches.add(match2);
                             best_inliers.clear();
                             best_inliers.addAll(inliers);
                             use_rotation = true;
@@ -3225,6 +3231,16 @@ public class HDRProcessor {
             Log.d(TAG, "offset_y: " + offset_y);
             Log.d(TAG, "rotation: " + rotation);
             Log.d(TAG, "y_scale: " + y_scale);
+
+            Log.d(TAG, "ransac matches are:");
+            for(FeatureMatch match : ransac_matches) {
+                int x0 = points_arrays[0][match.index0].x;
+                int y0 = points_arrays[0][match.index0].y;
+                int x1 = points_arrays[1][match.index1].x;
+                int y1 = points_arrays[1][match.index1].y;
+                Log.d(TAG, "    coords " + x0 + " , " + y0 + " to " + x1 + " , " + y1);
+                Log.d(TAG, "        distance: " + match.distance);
+            }
         }
 		/*if( Math.abs(rotation) > 30.0f*Math.PI/180.0f ) {
 			// test
@@ -3271,7 +3287,7 @@ public class HDRProcessor {
                 int y0 = points_arrays[0][match.index0].y;
                 int x1 = points_arrays[1][match.index1].x;
                 int y1 = points_arrays[1][match.index1].y;
-                p.setColor(Color.MAGENTA);
+                p.setColor(ransac_matches.contains(match) ? Color.BLUE : Color.MAGENTA);
                 p.setAlpha((int)(255.0f * (1.0f-match.distance)));
                 canvas.drawLine(x0, y0, width + x1, y1, p);
 
