@@ -16198,4 +16198,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
     }
+
+    /** Tests panorama algorithm on test samples "testPanorama16".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama16() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama16");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama16/IMG_20190624_151731_9.jpg");
+        String output_name = "testPanorama16_output.jpg";
+        String gyro_name = panorama_images_path + "testPanorama16/IMG_20190624_151731.xml";
+        //gyro_name = null;
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 0.5f);
+    }
 }
