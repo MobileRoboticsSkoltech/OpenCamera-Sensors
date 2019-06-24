@@ -1865,7 +1865,14 @@ public class DrawPreview {
         Preview preview = main_activity.getPreview();
         CameraController camera_controller = preview.getCameraController();
         boolean has_level_angle = preview.hasLevelAngle();
-        if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
+        boolean actual_show_angle_line_pref;
+        if( photoMode == MyApplicationInterface.PhotoMode.Panorama ) {
+            // in panorama mode, we should the level iff we aren't taking the panorama photos
+            actual_show_angle_line_pref = !main_activity.getApplicationInterface().getGyroSensor().isRecording();
+        }
+        else
+            actual_show_angle_line_pref = show_angle_line_pref;
+        if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( actual_show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
             int ui_rotation = preview.getUIRotation();
             double level_angle = preview.getLevelAngle();
             boolean has_pitch_angle = preview.hasPitchAngle();
@@ -1910,7 +1917,7 @@ public class DrawPreview {
             final int line_alpha = 160;
             float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
             p.setStyle(Paint.Style.FILL);
-            if( show_angle_line_pref && preview.hasLevelAngleStable() ) {
+            if( actual_show_angle_line_pref && preview.hasLevelAngleStable() ) {
                 // only show the angle line if level angle "stable" (i.e., not pointing near vertically up or down)
                 // draw outline
                 p.setColor(Color.BLACK);
