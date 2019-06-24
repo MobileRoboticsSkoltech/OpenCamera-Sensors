@@ -2827,7 +2827,7 @@ public class HDRProcessor {
             }
 
             // Lowe's test
-			/*boolean found = false;
+			boolean found = false;
 			boolean reject = false;
             for(int j=i+1;j<matches.size() && !found;j++) {
                 FeatureMatch match2 = matches.get(j);
@@ -2837,6 +2837,8 @@ public class HDRProcessor {
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "        next best match for index0 " + match.index0 + " is with " + match2.index1 + " distance: " + match2.distance + " , ratio: " + ratio);
                     }
+                    // Need a threshold of 0.8 or less to help testPanorama15 images _5 to _6, otherwise we get too many incorrect
+                    // matches in the grass region
 					if( ratio+1.0e-5 > 0.8f ) {
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "        reject due to Lowe's test, ratio: " + ratio);
@@ -2848,7 +2850,7 @@ public class HDRProcessor {
             if( reject ) {
 				has_matched0[match.index0] = true;
 				continue;
-			}*/
+            }
 
             actual_matches.add(match);
             has_matched0[match.index0] = true;
@@ -2865,8 +2867,10 @@ public class HDRProcessor {
         Log.d(TAG, "### autoAlignmentByFeature: time after finding possible matches: " + (System.currentTimeMillis() - time_s));
 
         // but now choose only best actual matches
+        // using 0.4 rather than 0.7 helps testPanorama15 images _5 to _6, to get rid of incorrect grass matches (together with Lowe's test)
         //int n_matches = (int)(actual_matches.size()*0.1)+1;
-        int n_matches = (int)(actual_matches.size()*0.7)+1;
+        int n_matches = (int)(actual_matches.size()*0.4)+1;
+        //int n_matches = (int)(actual_matches.size()*0.7)+1;
         actual_matches.subList(n_matches,actual_matches.size()).clear();
         if( MyDebug.LOG )
             Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
@@ -2893,7 +2897,10 @@ public class HDRProcessor {
         boolean use_y_scale = false;
         final float max_y_scale = 1.05f + 1.0e-5f;
 
-        final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
+        // needed a larger min_rotation_dist of Math.max(width, height)/4.0f to help testPanorama15 images _5 to _6, otherwise
+        // we risk choose matches that are too close, and getting an incorrect rotation
+        //final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/32.0f);
+        final float min_rotation_dist = Math.max(5.0f, Math.max(width, height)/4.0f);
         if( MyDebug.LOG )
             Log.d(TAG, "min_rotation_dist: " + min_rotation_dist);
         //final float min_rotation_dist2 = 1.0e-5f;
