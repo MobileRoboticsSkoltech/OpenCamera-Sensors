@@ -1506,6 +1506,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         imageSaver.finishImageAverage(do_in_background);
     }
 
+    private void cancelPanorama() {
+        gyroSensor.stopRecording();
+        clearPanoramaPoint();
+    }
+
     private void setNextPanoramaPoint(boolean repeat) {
         if( MyDebug.LOG )
             Log.d(TAG, "setNextPanoramaPoint");
@@ -1530,7 +1535,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         //final float target_angle = 1.0f * 0.01745329252f;
         final float target_angle = 0.5f * 0.01745329252f;
-        gyroSensor.setTarget(x, y, z, target_angle, new GyroSensor.TargetCallback() {
+        final float too_far_angle = 45.0f * 0.01745329252f;
+        gyroSensor.setTarget(x, y, z, target_angle, too_far_angle, new GyroSensor.TargetCallback() {
             @Override
             public void onAchieved() {
                 if( MyDebug.LOG )
@@ -1545,6 +1551,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 gyroSensor.disableTargetCallback();
                 main_activity.takePicturePressed(false, false);
             }
+
+            @Override
+            public void onTooFar() {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "TargetCallback.onTooFar");
+                MyApplicationInterface.this.cancelPanorama();
+            }
+
         });
         drawPreview.setGyroDirectionMarker(x, y, z);
     }

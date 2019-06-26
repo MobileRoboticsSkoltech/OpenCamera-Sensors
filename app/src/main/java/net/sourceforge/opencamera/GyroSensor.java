@@ -43,13 +43,19 @@ public class GyroSensor implements SensorEventListener {
     private final float [] inVector = new float[3];
 
     public interface TargetCallback {
+        /* Called when the target has been achieved.
+         */
         void onAchieved();
+        /* Called when the orientation is significantly far from the target.
+         */
+        void onTooFar();
     }
 
     private boolean hasTarget;
     private final float [] targetVector = new float[3];
     private float targetAngle; // target angle in radians
     private boolean targetAchieved;
+    private float tooFarAngle; // in radians
     private TargetCallback targetCallback;
     private boolean has_lastTargetAngle;
     private float lastTargetAngle;
@@ -185,12 +191,13 @@ public class GyroSensor implements SensorEventListener {
         return this.is_recording;
     }
 
-    void setTarget(float target_x, float target_y, float target_z, float targetAngle, TargetCallback targetCallback) {
+    void setTarget(float target_x, float target_y, float target_z, float targetAngle, float tooFarAngle, TargetCallback targetCallback) {
         this.hasTarget = true;
         this.targetVector[0] = target_x;
         this.targetVector[1] = target_y;
         this.targetVector[2] = target_z;
         this.targetAngle = targetAngle;
+        this.tooFarAngle = tooFarAngle;
         this.targetCallback = targetCallback;
         this.has_lastTargetAngle = false;
         this.lastTargetAngle = 0.0f;
@@ -548,9 +555,9 @@ public class GyroSensor implements SensorEventListener {
             }
 
             targetAchieved = false;
+            float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
+            float angle = (float)Math.acos(cos_angle);
             if( is_upright == 0 ) {
-                float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
-                float angle = (float)Math.acos(cos_angle);
                     /*if( MyDebug.LOG )
                         Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
                 if( angle <= targetAngle ) {
@@ -572,6 +579,12 @@ public class GyroSensor implements SensorEventListener {
                 }
                 has_lastTargetAngle = true;
                 lastTargetAngle = angle;
+            }
+
+            if( angle > tooFarAngle ) {
+                if( targetCallback != null ) {
+                    targetCallback.onTooFar();
+                }
             }
             /*if( MyDebug.LOG )
                 Log.d(TAG, "targetAchieved? " + targetAchieved);*/
