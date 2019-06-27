@@ -54,6 +54,7 @@ public class GyroSensor implements SensorEventListener {
     private boolean hasTarget;
     private final float [] targetVector = new float[3];
     private float targetAngle; // target angle in radians
+    private float uprightAngleTol; // in radians
     private boolean targetAchieved;
     private float tooFarAngle; // in radians
     private TargetCallback targetCallback;
@@ -191,12 +192,13 @@ public class GyroSensor implements SensorEventListener {
         return this.is_recording;
     }
 
-    void setTarget(float target_x, float target_y, float target_z, float targetAngle, float tooFarAngle, TargetCallback targetCallback) {
+    void setTarget(float target_x, float target_y, float target_z, float targetAngle, float uprightAngleTol, float tooFarAngle, TargetCallback targetCallback) {
         this.hasTarget = true;
         this.targetVector[0] = target_x;
         this.targetVector[1] = target_y;
         this.targetVector[2] = target_z;
         this.targetAngle = targetAngle;
+        this.uprightAngleTol = uprightAngleTol;
         this.tooFarAngle = tooFarAngle;
         this.targetCallback = targetCallback;
         this.has_lastTargetAngle = false;
@@ -548,7 +550,7 @@ public class GyroSensor implements SensorEventListener {
                 setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
                 transformVector(tempVector, currentRotationMatrix, inVector);
 
-                if( Math.abs(angle_up) > 0.017452406437f ) {  // 1 degree
+                if( Math.abs(angle_up) > this.uprightAngleTol ) {
                     float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
                     is_upright = (dot < 0) ? 1 : -1;
                 }
