@@ -1034,6 +1034,44 @@ public class HDRProcessor {
             Log.d(TAG, "time for processSingleImage: " + (System.currentTimeMillis() - time_s));
     }
 
+    public void brightenImage(Bitmap bitmap, int brightness, int max_brightness, int brightness_target) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "brightenImage");
+            Log.d(TAG, "brightness: " + brightness);
+            Log.d(TAG, "max_brightness: " + max_brightness);
+            Log.d(TAG, "brightness_target: " + brightness_target);
+        }
+        BrightenFactors brighten_factors = computeBrightenFactors(false, 0, 0, brightness, max_brightness, brightness_target, false);
+        float gain = brighten_factors.gain;
+        float gamma = brighten_factors.gamma;
+        float low_x = brighten_factors.low_x;
+        float mid_x = brighten_factors.mid_x;
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "gain: " + gain);
+            Log.d(TAG, "gamma: " + gamma);
+            Log.d(TAG, "low_x: " + low_x);
+            Log.d(TAG, "mid_x: " + mid_x);
+        }
+
+        if( Math.abs(gain - 1.0) > 1.0e-5 || max_brightness != 255 || Math.abs(gamma - 1.0) > 1.0e-5 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "apply gain/gamma");
+
+            initRenderscript();
+
+            Allocation allocation = Allocation.createFromBitmap(rs, bitmap);
+            ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+            script.invoke_setBrightenParameters(gain, gamma, low_x, mid_x, max_brightness);
+
+            script.forEach_dro_brighten(allocation, allocation);
+
+            allocation.copyTo(bitmap);
+            allocation.destroy();
+
+            freeScripts();
+        }
+    }
+
     private void initRenderscript() {
         if( MyDebug.LOG )
             Log.d(TAG, "initRenderscript");
@@ -4368,11 +4406,11 @@ public class HDRProcessor {
         return histogram;
     }
 
-    private static class HistogramInfo {
+    public static class HistogramInfo {
         final int total;
         final int mean_brightness;
-        final int median_brightness;
-        final int max_brightness;
+        final public int median_brightness;
+        final public int max_brightness;
 
         HistogramInfo(int total, int mean_brightness, int median_brightness, int max_brightness) {
             this.total = total;
@@ -4382,7 +4420,7 @@ public class HDRProcessor {
         }
     }
 
-    private HistogramInfo getHistogramInfo(int [] histo) {
+    public HistogramInfo getHistogramInfo(int[] histo) {
         int total = 0;
         for(int value : histo)
             total += value;
@@ -4454,13 +4492,21 @@ public class HDRProcessor {
             //Log.d(TAG, "max target: " + max_target);
         }
 
+        return computeBrightenFactors(has_iso_exposure, iso, exposure_time, brightness, max_brightness, brightness_target, true);
+    }
+
+    /** Computes various factors used in the avg_brighten.rs script.
+     */
+    public static BrightenFactors computeBrightenFactors(boolean has_iso_exposure, int iso, long exposure_time, int brightness, int max_brightness, int brightness_target, boolean brighten_only) {
         /* We use a combination of gain and gamma to brighten images if required. Gain works best for
          * dark images (e.g., see testAvg8), gamma works better for bright images (e.g., testAvg12).
          */
+        if( brightness <= 0 )
+            brightness = 1;
         float gain = brightness_target / (float)brightness;
         if( MyDebug.LOG )
             Log.d(TAG, "gain " + gain);
-        if( gain < 1.0f ) {
+        if( gain < 1.0f && brighten_only ) {
             gain = 1.0f;
             if( MyDebug.LOG ) {
                 Log.d(TAG, "clamped gain to: " + gain);
@@ -4512,7 +4558,7 @@ public class HDRProcessor {
             mid_x = mid_y / gain;
             gamma = (float)(Math.log(mid_y/255.0f) / Math.log(mid_x/max_brightness));
         }
-        else if( max_possible_value < 255.0f && max_brightness > 0 ) {
+        else if( brighten_only && max_possible_value < 255.0f && max_brightness > 0 ) {
             // slightly brightens testAvg17; also brightens testAvg8 to be clearer
             float alt_gain = 255.0f / max_brightness;
             // okay to allow higher max than max_gain_factor, when it isn't going to take us over 255

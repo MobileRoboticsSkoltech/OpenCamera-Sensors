@@ -15120,6 +15120,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         */
     }
 
+    private void adjustExposures(List<Bitmap> bitmaps, long time_s) {
+        List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
+
+        float mean_median_brightness = 0.0f;
+        for(int i=0;i<bitmaps.size();i++) {
+            Bitmap bitmap = bitmaps.get(i);
+            int [] histo = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, false);
+            HDRProcessor.HistogramInfo histogramInfo = mActivity.getApplicationInterface().getHDRProcessor().getHistogramInfo(histo);
+            histogramInfos.add(histogramInfo);
+            mean_median_brightness += histogramInfo.median_brightness;
+        }
+        mean_median_brightness /= bitmaps.size();
+        final int brightness_target = (int)(mean_median_brightness + 0.1f);
+        Log.d(TAG, "mean_median_brightness: " + mean_median_brightness);
+        Log.d(TAG, "### time after computing brightnesses: " + (System.currentTimeMillis() - time_s));
+        float min_preferred_scale = 1000.0f, max_preferred_scale = 0.0f;
+        for(int i=0;i<bitmaps.size();i++) {
+            Bitmap bitmap = bitmaps.get(i);
+            HDRProcessor.HistogramInfo histogramInfo = histogramInfos.get(i);
+
+            min_preferred_scale = Math.min(min_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
+            max_preferred_scale = Math.max(max_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
+            int min_brightness = (int)(histogramInfo.median_brightness*2.0f/3.0f+0.5f);
+            int max_brightness = (int)(histogramInfo.median_brightness*1.5f+0.5f);
+            int this_brightness_target = brightness_target;
+            this_brightness_target = Math.max(this_brightness_target, min_brightness);
+            this_brightness_target = Math.min(this_brightness_target, max_brightness);
+            Log.d(TAG, "brightness_target: " + brightness_target);
+            Log.d(TAG, "    preferred brightness scale: " + brightness_target/(float)histogramInfo.median_brightness);
+            Log.d(TAG, "    this_brightness_target: " + this_brightness_target);
+            Log.d(TAG, "    actual brightness scale: " + this_brightness_target/(float)histogramInfo.median_brightness);
+
+            mActivity.getApplicationInterface().getHDRProcessor().brightenImage(bitmap, histogramInfo.median_brightness, histogramInfo.max_brightness, this_brightness_target);
+        }
+        Log.d(TAG, "min_preferred_scale: " + min_preferred_scale);
+        Log.d(TAG, "max_preferred_scale: " + max_preferred_scale);
+        Log.d(TAG, "### time after adjusting brightnesses: " + (System.currentTimeMillis() - time_s));
+    }
+
     /**
      * @param panorama_pics_per_screen The value of panorama_pics_per_screen used when taking the input photos.
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
@@ -15605,6 +15644,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 }
             }
         }
+        Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
+
+        adjustExposures(bitmaps, time_s);
 
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "render bitmap: " + i);
