@@ -2396,11 +2396,11 @@ public class DrawPreview {
                     float distance_x = angle_scale_x * (float) Math.tan(angle_x); // angle_scale is already in pixels rather than dps
                     float distance_y = angle_scale_y * (float) Math.tan(angle_y); // angle_scale is already in pixels rather than dps
                     p.setColor(Color.WHITE);
-                    drawGyroSpot(canvas, 0.0f, 0.0f, -1.0f, 0.0f, 48); // draw spot for the centre of the screen, to help the user orient the device
+                    drawGyroSpot(canvas, 0.0f, 0.0f, -1.0f, 0.0f, 48, true); // draw spot for the centre of the screen, to help the user orient the device
                     p.setColor(Color.BLUE);
                     float dir_x = -transformed_gyro_direction_up[1];
                     float dir_y = -transformed_gyro_direction_up[0];
-                    drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y, 45);
+                    drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y, 45, false);
 					/*{
 						// for debug only, draw the gyro spot that isn't calibrated with the accelerometer
 						gyroSensor.getRelativeInverseVectorGyroOnly(transformed_gyro_direction, gyro_direction);
@@ -2471,19 +2471,27 @@ public class DrawPreview {
         }
     }
 
-    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp) {
-        p.setAlpha(64);
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp, boolean outline) {
+        if( outline ) {
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(stroke_width);
+            p.setAlpha(255);
+        }
+        else {
+            p.setAlpha(127);
+        }
         float radius = (radius_dp * scale + 0.5f); // convert dps to pixels
         float cx = canvas.getWidth()/2.0f + distance_x;
         float cy = canvas.getHeight()/2.0f + distance_y;
         canvas.drawCircle(cx, cy, radius, p);
         p.setAlpha(255);
+        p.setStyle(Paint.Style.FILL); // reset
 
         // draw crosshairs
         //p.setColor(Color.WHITE);
-        p.setStrokeWidth(stroke_width);
+        /*p.setStrokeWidth(stroke_width);
         canvas.drawLine(cx - radius*dir_x, cy - radius*dir_y, cx + radius*dir_x, cy + radius*dir_y, p);
-        canvas.drawLine(cx - radius*dir_y, cy + radius*dir_x, cx + radius*dir_y, cy - radius*dir_x, p);
+        canvas.drawLine(cx - radius*dir_y, cy + radius*dir_x, cx + radius*dir_y, cy - radius*dir_x, p);*/
     }
 
     /**
