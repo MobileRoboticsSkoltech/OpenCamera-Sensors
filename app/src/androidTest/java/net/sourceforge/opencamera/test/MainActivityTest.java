@@ -15286,7 +15286,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Rect src_rect = new Rect();
         Rect dst_rect = new Rect();
-        Paint p = new Paint();
+        //Paint p = new Paint();
+        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
         int align_x = 0, align_y = 0;
         int dst_offset_x = 0;
         List<Integer> align_x_values = new ArrayList<>();
@@ -15648,6 +15649,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         adjustExposures(bitmaps, time_s);
 
+        Log.d(TAG, "### time before rendering bitmaps: " + (System.currentTimeMillis() - time_s));
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "render bitmap: " + i);
             Bitmap bitmap = bitmaps.get(i);
@@ -15718,6 +15720,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             Log.d(TAG, "### time after rendering " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
+        Log.d(TAG, "### time after rendering bitmaps: " + (System.currentTimeMillis() - time_s));
 
         for(Bitmap bitmap : bitmaps) {
             bitmap.recycle();
