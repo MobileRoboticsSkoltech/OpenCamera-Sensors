@@ -2909,7 +2909,14 @@ public class HDRProcessor {
         //int n_matches = (int)(actual_matches.size()*0.1)+1;
         int n_matches = (int)(actual_matches.size()*0.4)+1;
         //int n_matches = (int)(actual_matches.size()*0.7)+1;
-        actual_matches.subList(n_matches,actual_matches.size()).clear();
+        // but don't want too few matches - need at least 4 to get a good transform for testPanorama18, images _2 to _3:
+        final int n_minimum_matches_c = 4;
+        /*if( n_matches < n_minimum_matches_c ) {
+            throw new RuntimeException("n_matches: " + n_matches);
+        }*/
+        n_matches = Math.max(n_minimum_matches_c, n_matches);
+        if( n_matches < actual_matches.size() )
+            actual_matches.subList(n_matches,actual_matches.size()).clear();
         if( MyDebug.LOG )
             Log.d(TAG, "### resized to: " + actual_matches.size() + " actual matches");
         // need to reset has_matched arrays
