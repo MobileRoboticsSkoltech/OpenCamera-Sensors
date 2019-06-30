@@ -14939,7 +14939,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void renderPanoramaImage(final int i, final int n_bitmaps, final Rect src_rect_workspace, final Rect dst_rect_workspace,
                                      final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height,
-                                     final int blend_hwidth, final int slice_width, final int offset_x, final boolean x_offsets_cumulative,
+                                     final int blend_hwidth, final int slice_width, final int offset_x,
                                      final Bitmap panorama, final Canvas canvas,
                                      final int align_x, final int align_y, final int dst_offset_x, final int shift_stop_x, final int centre_shift_x,
                                      final double camera_angle, long time_s) throws IOException {
@@ -15010,9 +15010,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             start_x = -offset_x;
         if( i == n_bitmaps-1 )
             stop_x = slice_width+offset_x;
-        if( !x_offsets_cumulative ) {
-            stop_x -= shift_stop_x;
-        }
+        stop_x -= shift_stop_x;
         Log.d(TAG, "    start_x: " + start_x);
         Log.d(TAG, "    stop_x: " + stop_x);
 
@@ -15031,9 +15029,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             start_x = -offset_x;
         if( i == bitmaps.size()-1 )
             stop_x = slice_width+offset_x;
-        if( !x_offsets_cumulative ) {
-            stop_x -= align_x;
-        }
+        stop_x -= align_x;
         Log.d(TAG, "    start_x: " + start_x);
         Log.d(TAG, "    stop_x: " + stop_x);
 
@@ -15193,7 +15189,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
         }
 
-        ImageSaver.GyroDebugInfo gyro_debug_info = null;
+        /*ImageSaver.GyroDebugInfo gyro_debug_info = null;
         if( gyro_debug_info_filename != null ) {
             InputStream inputStream;
             try {
@@ -15214,7 +15210,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Log.e(TAG, "gyro debug xml has unexpected number of images: " + gyro_debug_info.image_info.size());
                 throw new RuntimeException();
             }
-        }
+        }*/
         //bitmaps.subList(2,bitmaps.size()).clear(); // test
 
         // downscale
@@ -15246,7 +15242,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //int max_offset_error_x = (int)(gyro_tol_degrees * bitmap_width / mActivity.getPreview().getViewAngleY() + 0.5f);
         //int max_offset_error_y = (int)(gyro_tol_degrees * bitmap_height / mActivity.getPreview().getViewAngleX() + 0.5f);
         //if we use the above code, remember not to use the camera view angles, but those that the test photos were taken with!
-        double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
+        //double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
         /*int max_offset_error_x = (int)(h * Math.tan(Math.toRadians(gyro_tol_degrees)) + 0.5f);
         max_offset_error_x *= 2; // allow a fudge factor
         int max_offset_error_y = max_offset_error_x;
@@ -15267,11 +15263,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //final int align_hwidth = bitmap_width/5;
         final boolean use_auto_align = true;
         //final boolean use_auto_align = false;
-        gyro_debug_info = null; // test
-        //final boolean x_offsets_cumulative = true; // whether the x offsets (align_x) should be allowed to be cumulative
-        final boolean x_offsets_cumulative = false; // whether the x offsets (align_x) should be allowed to be cumulative
-        //final boolean use_cumulative_transforms = false;
-        final boolean use_cumulative_transforms = true; // n.b., only tested when x_offsets_cumulative==false
         Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
         Log.d(TAG, "    align_hwidth: " + align_hwidth);
         int max_offset_error_x = offset_x - align_hwidth; // prevent cumulative align_x meaning we run out of bitmap!
@@ -15297,95 +15288,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         for(int i=0;i<bitmaps.size();i++) {
             Log.d(TAG, "process bitmap: " + i);
 
-            double angle_x = 0.0;
-            double angle_y = 0.0;
             double angle_z = 0.0;
-
-            if( gyro_debug_info != null ) {
-                float [] vectorScreen = gyro_debug_info.image_info.get(i).vectorScreen;
-                Log.d(TAG, "    vectorScreen: " + vectorScreen[0] + " , " + vectorScreen[1] + " , " + vectorScreen[2]);
-                // project into XZ plane
-                float vx = vectorScreen[0];
-                float vy = 0.0f;
-                float vz = vectorScreen[2];
-                double mag_v = Math.sqrt(vx*vx + vy*vy + vz*vz);
-                if( mag_v < 1.0e-5 ) {
-                    Log.e(TAG, "vectorScreen pointing straight up or down");
-                    throw new RuntimeException();
-                }
-                vx /= mag_v;
-                vy /= mag_v;
-                vz /= mag_v;
-                Log.d(TAG, "    v: " + vx + " , " + vy + " , " + vz);
-
-                if( !use_auto_align )
-                {
-                    // compute align_x
-                    // compute v X (0 0 -1)
-                    float cx = -vy;
-                    float cy = vx;
-                    float cz = 0.0f;
-                    Log.d(TAG, "    c: " + cx + " , " + cy + " , " + cz);
-                    double sin_angle = Math.sqrt(cx*cx + cy*cy + cz*cz);
-                    // compute v DOT (0 0 -1)
-                    double cos_angle = -vz;
-                    angle_x = (float)Math.atan2(sin_angle, cos_angle);
-                    if( angle_x < 0.0f )
-                        angle_x += 2.0*Math.PI;
-                    double angle_x_error = -(angle_x - i*camera_angle/panorama_pics_per_screen);
-                    Log.d(TAG, "    angle_x: " + angle_x + " ( " + Math.toDegrees(angle_x) + " degrees )");
-                    Log.d(TAG, "    angle_x_error: " + angle_x_error + " ( " + Math.toDegrees(angle_x_error) + " degrees )");
-                    align_x = (int)(h * Math.tan(angle_x_error) + 0.5f);
-                    Log.d(TAG, "    align_x: " + align_x);
-                }
-
-                if( !use_auto_align )
-                {
-                    // compute align_y
-                    // compute v DOT vectorScreen
-                    double cos_angle = vx * vectorScreen[0] + vy * vectorScreen[1] + vz * vectorScreen[2];
-                    angle_y = Math.acos(cos_angle);
-                    if( vectorScreen[1] < 0.0f )
-                        angle_y = - angle_y;
-                    Log.d(TAG, "    angle_y: " + angle_y + " ( " + Math.toDegrees(angle_y) + " degrees )");
-                    align_y = (int)(h * Math.tan(angle_y) + 0.5f);
-                    Log.d(TAG, "    align_y: " + align_y);
-                }
-
-                // twist is computed even if using auto-alignment
-                {
-                    // compute twist
-                    // compute vectorScreen X (0 1 0)
-                    float cx = - vectorScreen[2];
-                    float cy = 0.0f;
-                    float cz = vectorScreen[0];
-                    float [] vectorRight = gyro_debug_info.image_info.get(i).vectorRight;
-                    Log.d(TAG, "    vectorRight: " + vectorRight[0] + " , " + vectorRight[1] + " , " + vectorRight[2]);
-                    // compute c DOT vectorRight
-                    double cos_angle = cx * vectorRight[0] + cy * vectorRight[1] + cz * vectorRight[2];
-                    angle_z = Math.acos(cos_angle);
-                    if( vectorRight[1] > 0.0f )
-                        angle_z = - angle_z;
-                    // angle_z is amount of anti-clockwise rotation required
-                    Log.d(TAG, "    angle_z: " + angle_z + " ( " + Math.toDegrees(angle_z) + " degrees )");
-                }
-            }
-
-            // pre-rotate image based on gyro
-            // important to rotate before doing auto-alignment (since we already have the angle from gyro)
-            if( Math.abs(angle_z) > 1.0e-5f ) {
-                Log.d(TAG, "pre-rotate bitmap by: " + angle_z);
-                Log.d(TAG, "### time before rotating " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
-                Canvas rotated_canvas = new Canvas(rotated_bitmap);
-                rotated_canvas.save();
-                rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2.0f, bitmap_height/2.0f);
-                rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
-                rotated_canvas.restore();
-                bitmaps.get(i).recycle();
-                bitmaps.set(i, rotated_bitmap);
-                Log.d(TAG, "### time after rotating " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-            }
 
             if( use_auto_align && i > 0 ) {
                 // autoalignment
@@ -15472,67 +15375,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 this_transform.postScale(1.0f, y_scale);
                 this_transform.postTranslate(this_align_x, this_align_y);
 
-                if( use_cumulative_transforms ) {
+                {
                     // first need to shift cumulative_transform so that it's about the origin of the new bitmap
                     cumulative_transform.preTranslate(slice_width, 0.0f);
                     cumulative_transform.postTranslate(-slice_width, 0.0f);
 
                     cumulative_transform.preConcat(this_transform);
-
-                    this_align_x = 0;
-                    this_align_y = 0;
-                    angle_z = 0;
-                    y_scale = 1.0f;
                 }
 
-                // post-rotate image based on auto-alignment
-                if( !use_cumulative_transforms && gyro_debug_info == null /*&& Math.abs(angle_z) > 1.0e-5f*/ ) {
-                    Log.d(TAG, "post-rotate bitmap by: " + angle_z);
-                    Log.d(TAG, "### time before pre-rotate for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                    // we have rotation about origin followed by translation
-                    // but instead we want to rotate about the bitmap centre and then translate:
-                    // R[x] + d = (R[x-c] + c) + (d - c + R[c])
-                    //float rotated_centre_x = (float)(bitmap_width/2 * Math.cos(angle_z) - bitmap_height/2 * Math.sin(angle_z));
-                    //float rotated_centre_y = (float)(bitmap_width/2 * Math.sin(angle_z) + bitmap_height/2 * Math.cos(angle_z));
-                    //this_align_x += rotated_centre_x - bitmap_width/2;
-                    //this_align_y += rotated_centre_y - bitmap_height/2;
-                    //Log.d(TAG, "    this_align_x is now: " + this_align_x);
-                    //Log.d(TAG, "    this_align_y is now: " + this_align_y);
-
-                    Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
-                    Canvas rotated_canvas = new Canvas(rotated_bitmap);
-                    rotated_canvas.save();
-
-                    // handle the transformation entirely by transforming the bitmap
-                    /*rotated_canvas.translate(this_align_x, this_align_y);
-                    this_align_x = 0;
-                    this_align_y = 0;*/
-
-                    rotated_canvas.scale(1.0f, y_scale,align_x+offset_x-align_hwidth,0);
-                    rotated_canvas.rotate((float)Math.toDegrees(angle_z), align_x+offset_x-align_hwidth, 0);
-
-                    /*rotated_canvas.setMatrix(this_transform);
-                    this_align_x = 0;
-                    this_align_y = 0;*/
-
-                    rotated_canvas.drawBitmap(bitmaps.get(i), 0, 0, p);
-                    rotated_canvas.restore();
-                    bitmaps.get(i).recycle();
-                    bitmaps.set(i, rotated_bitmap);
-                    Log.d(TAG, "### time after pre-rotate for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                }
-
-                // alignments map next image to previous, so this means we need to move the "source" window in the opposite direction
-                this_align_x = - this_align_x;
-                this_align_y = - this_align_y;
-
-                if( x_offsets_cumulative )
-                    align_x += this_align_x;
-                else
-                    align_x = this_align_x;
-                align_y += this_align_y;
-
-                if( use_cumulative_transforms ) {
+                {
                     /*float [] values = new float[9];
                     cumulative_transform.getValues(values);
                     align_x = - (int)values[Matrix.MTRANS_X];*/
@@ -15557,38 +15408,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     Log.d(TAG, "    limit align_x to: " + align_x);
                     //assertTrue(false); // test
                 }
-                /*if( align_y < -max_offset_error_y ) {
-                    align_y = -max_offset_error_y;
-                    Log.d(TAG, "    limit align_y to: " + align_y);
-                    //assertTrue(false); // test
-                }
-                else if( align_y > max_offset_error_y ) {
-                    align_y = max_offset_error_y;
-                    Log.d(TAG, "    limit align_y to: " + align_y);
-                    //assertTrue(false); // test
-                }*/
             }
-
-            //align_x = 0;
-            //align_y = 0;
-            //angle_z = 0;
-
-            //Bitmap bitmap = bitmaps.get(i);
-            /*Bitmap rotated_bitmap = null;
-            if( Math.abs(angle_z) > 1.0e-5f ) {
-                Log.d(TAG, "rotate bitmap");
-                rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
-                Canvas rotated_canvas = new Canvas(rotated_bitmap);
-                rotated_canvas.save();
-                rotated_canvas.rotate((float)Math.toDegrees(-angle_z), bitmap_width/2, bitmap_height/2);
-                rotated_canvas.drawBitmap(bitmap, 0, 0, p);
-                rotated_canvas.restore();
-                bitmap = rotated_bitmap;
-            }*/
 
             /*renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
                 bitmap, p, bitmap_width, bitmap_height,
-                blend_hwidth, slice_width, offset_x, x_offsets_cumulative,
+                blend_hwidth, slice_width, offset_x,
                 panorama, canvas,
                 align_x, align_y, dst_offset_x, align_x, 0,
                 camera_angle, time_s);*/
@@ -15598,24 +15422,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             dst_offset_x_values.add(dst_offset_x);
             cumulative_transforms.add(new Matrix(cumulative_transform));
 
-            if( use_cumulative_transforms ) {
+            {
                 dst_offset_x += slice_width;
                 // set back to zero after we've saved them, so we don't use them in the later iterations of this loop
                 align_x = 0;
                 align_y = 0;
-            }
-            else {
-                dst_offset_x += slice_width;
-                if( !x_offsets_cumulative ) {
-                    dst_offset_x -= align_x;
-                }
             }
             Log.d(TAG, "    dst_offset_x is now: " + dst_offset_x);
 
             Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         }
 
-        if( use_cumulative_transforms ) {
+        {
             float [] values = new float[9];
             float min_rotation = 1000, max_rotation = - 1000;
             float sum_rotation = 0.0f;
@@ -15661,7 +15479,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             int shift_stop_x = align_x;
             int centre_shift_x = 0;
 
-            if( use_cumulative_transforms ) {
+            {
                 final boolean shift_transition = true;
                 centre_shift_x = - align_x;
                 align_x = 0;
@@ -15709,7 +15527,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
                 bitmap, p, bitmap_width, bitmap_height,
-                blend_hwidth, slice_width, offset_x, x_offsets_cumulative,
+                blend_hwidth, slice_width, offset_x,
                 panorama, canvas,
                 align_x, align_y, dst_offset_x, shift_stop_x, centre_shift_x,
                 camera_angle, time_s);
