@@ -861,6 +861,10 @@
     <string name="preference_stamp_style_plain">Plain text</string>
     <string name="preference_stamp_style_background">Text with shaded background</string>
 
+    <string name="image_saving_notification">Saving images…</string>
+
+    <string name="failed_to_process_panorama">Failed to create Panorama image</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

@@ -1393,7 +1393,7 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "save NR image");
             String suffix = "_NR";
-            success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true, true);
+            success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true, true, false);
             if( MyDebug.LOG && !success )
                 Log.e(TAG, "saveSingleImageNow failed for nr image");
             nr_bitmap.recycle();
@@ -1488,7 +1488,7 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "base_image_id: " + base_image_id);
             String suffix = request.jpeg_images.size() == 1 ? "_DRO" : "_HDR";
-            success = saveSingleImageNow(request, request.jpeg_images.get(base_image_id), hdr_bitmap, suffix, true, true, true);
+            success = saveSingleImageNow(request, request.jpeg_images.get(base_image_id), hdr_bitmap, suffix, true, true, true, false);
             if( MyDebug.LOG && !success )
                 Log.e(TAG, "saveSingleImageNow failed for hdr image");
             if( MyDebug.LOG ) {
@@ -1502,7 +1502,7 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "panorama");
 
             // save text file with gyro info
-            if( !request.image_capture_intent ) {
+            if( !request.image_capture_intent && request.save_base != Request.SaveBase.SAVEBASE_NONE ) {
 				/*final StringBuilder gyro_text = new StringBuilder();
 				gyro_text.append("Panorama gyro debug info\n");
 				gyro_text.append("n images: " + request.gyro_rotation_matrix.size() + ":\n");
@@ -1563,13 +1563,86 @@ public class ImageSaver extends Thread {
             }
 
             // for now, just save all the images:
-            String suffix = "_";
-            success = saveImages(request, suffix, false, true, true);
+            //String suffix = "_";
+            //success = saveImages(request, suffix, false, true, true);
 
-			/*saveBaseImages(request, "_");
+			saveBaseImages(request, "_");
+
 			main_activity.savingImage(true);
 
-			main_activity.savingImage(false);*/
+            long time_s = System.currentTimeMillis();
+
+            List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, -1, 1);
+            if( bitmaps == null ) {
+                if( MyDebug.LOG )
+                    Log.e(TAG, "failed to load bitmaps");
+                main_activity.savingImage(false);
+                return false;
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "panorama performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
+            }
+
+            // rotate the bitmaps if necessary for exif tags
+            File exifTempFile = getExifTempFile(request.jpeg_images.get(0));
+            for(int i=0;i<bitmaps.size();i++) {
+                Bitmap bitmap = bitmaps.get(i);
+                bitmap = rotateForExif(bitmap, request.jpeg_images.get(0), exifTempFile);
+                bitmaps.set(i, bitmap);
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "panorama performance: time after rotating for exif: " + (System.currentTimeMillis() - time_s));
+            }
+
+            Bitmap panorama;
+            try {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), main_activity.getPreview().getViewAngleY(false));
+                }
+                else {
+                    Log.e(TAG, "shouldn't have offered panorama as an option if not on Android 5");
+                    throw new RuntimeException();
+                }
+            }
+            catch(HDRProcessorException e) {
+                Log.e(TAG, "HDRProcessorException from panorama: " + e.getCode());
+                e.printStackTrace();
+                if( e.getCode() == HDRProcessorException.UNEQUAL_SIZES ) {
+                    main_activity.getPreview().showToast(null, R.string.failed_to_process_panorama);
+                    Log.e(TAG, "UNEQUAL_SIZES");
+                    bitmaps.clear();
+                    System.gc();
+                    main_activity.savingImage(false);
+                    return false;
+                }
+                else {
+                    // throw RuntimeException, as we shouldn't ever get the error INVALID_N_IMAGES, if we do it's a programming error
+                    throw new RuntimeException();
+                }
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "panorama performance: time after creating panorama image: " + (System.currentTimeMillis() - time_s));
+            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "panorama: " + panorama);
+            bitmaps.clear();
+            System.gc();
+
+			main_activity.savingImage(false);
+
+            if( MyDebug.LOG )
+                Log.d(TAG, "save panorama image");
+            String suffix = "_PANO";
+            success = saveSingleImageNow(request, request.jpeg_images.get(0), panorama, suffix, true, true, true, true);
+            if( MyDebug.LOG && !success )
+                Log.e(TAG, "saveSingleImageNow failed for panorama image");
+            panorama.recycle();
+            System.gc();
+
+            if( exifTempFile != null && !exifTempFile.delete() ) {
+                if( MyDebug.LOG )
+                    Log.e(TAG, "failed to delete temp " + exifTempFile.getAbsolutePath());
+            }
         }
         else {
             // see note above how we used to use "_EXP" for the suffix for multiple images
@@ -1600,7 +1673,7 @@ public class ImageSaver extends Thread {
             boolean multiple_jpegs = request.jpeg_images.size() > 1 && !first_only;
             String filename_suffix = (multiple_jpegs || request.force_suffix) ? suffix + (i + request.suffix_offset) : "";
             boolean share_image = share && (i == mid_image);
-            if( !saveSingleImageNow(request, image, null, filename_suffix, update_thumbnail, share_image, false) ) {
+            if( !saveSingleImageNow(request, image, null, filename_suffix, update_thumbnail, share_image, false, false) ) {
                 if( MyDebug.LOG )
                     Log.e(TAG, "saveSingleImageNow failed for image: " + i);
                 success = false;
@@ -2000,9 +2073,36 @@ public class ImageSaver extends Thread {
         }
     }
 
+    private File getExifTempFile(byte [] data) {
+        File exifTempFile = null;
+        // need to rotate the bitmap according to the exif orientation (which some devices use, e.g., Samsung)
+        // so need to write to a temp file for this - we also use this later on to transfer the exif tags
+        // on Android 7+, we can now read exif tags direct from the jpeg data
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+            try {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "write temp file to record EXIF data");
+                exifTempFile = File.createTempFile("opencamera_exif", "");
+                OutputStream tempOutputStream = new FileOutputStream(exifTempFile);
+                try {
+                    tempOutputStream.write(data);
+                }
+                finally {
+                    tempOutputStream.close();
+                }
+            }
+            catch(IOException e) {
+                if (MyDebug.LOG)
+                    Log.e(TAG, "exception writing to temp file");
+                e.printStackTrace();
+            }
+        }
+        return exifTempFile;
+    }
+
     /** Performs post-processing on the data, or bitmap if non-null, for saveSingleImageNow.
      */
-    private PostProcessBitmapResult postProcessBitmap(final Request request, byte [] data, Bitmap bitmap) throws IOException {
+    private PostProcessBitmapResult postProcessBitmap(final Request request, byte [] data, Bitmap bitmap, boolean ignore_exif_orientation) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "postProcessBitmap");
         long time_s = System.currentTimeMillis();
@@ -2012,37 +2112,18 @@ public class ImageSaver extends Thread {
         File exifTempFile = null;
         if( bitmap != null || request.image_format != Request.ImageFormat.STD || request.do_auto_stabilise || request.mirror || dategeo_stamp || text_stamp ) {
             // either we have a bitmap, or will need to decode the bitmap to do post-processing
-            // need to rotate the bitmap according to the exif orientation (which some devices use, e.g., Samsung)
-            // so need to write to a temp file for this - we also use this later on to transfer the exif tags
-            // on Android 7+, we can now read exif tags direct from the jpeg data
-            if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
-                try {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "write temp file to record EXIF data");
-                    exifTempFile = File.createTempFile("opencamera_exif", "");
-                    OutputStream tempOutputStream = new FileOutputStream(exifTempFile);
-                    try {
-                        tempOutputStream.write(data);
-                    }
-                    finally {
-                        tempOutputStream.close();
-                    }
-                    if( MyDebug.LOG ) {
-                        Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
-                    }
+            if( !ignore_exif_orientation ) {
+                exifTempFile = getExifTempFile(data);
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
                 }
-                catch(IOException e) {
-                    if (MyDebug.LOG)
-                        Log.e(TAG, "exception writing to temp file");
-                    e.printStackTrace();
-                }
-            }
 
-            if( bitmap != null ) {
-                // rotate the bitmap if necessary for exif tags
-                if( MyDebug.LOG )
-                    Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-                bitmap = rotateForExif(bitmap, data, exifTempFile);
+                if( bitmap != null ) {
+                    // rotate the bitmap if necessary for exif tags
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
+                    bitmap = rotateForExif(bitmap, data, exifTempFile);
+                }
             }
         }
         if( request.do_auto_stabilise ) {
@@ -2085,9 +2166,11 @@ public class ImageSaver extends Thread {
      *  @param ignore_raw_only - If true, then save even if RAW Only is set (needed for HDR mode
      *                         where we always save the HDR image even though it's a JPEG - the
      *                         RAW preference only affects the base images.
+     * @param ignore_exif_orientation - If bitmap is non-null, then set this to true if the bitmap has already
+     *                                  been rotated to account for Exif orientation tags in the data.
      */
     @SuppressLint("SimpleDateFormat")
-    private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image, boolean ignore_raw_only) {
+    private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image, boolean ignore_raw_only, boolean ignore_exif_orientation) {
         if( MyDebug.LOG )
             Log.d(TAG, "saveSingleImageNow");
 
@@ -2138,7 +2221,7 @@ public class ImageSaver extends Thread {
         Uri saveUri = null;
         try {
             if( !raw_only ) {
-                PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
+                PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap, ignore_exif_orientation);
                 bitmap = postProcessBitmapResult.bitmap;
                 exifTempFile = postProcessBitmapResult.exifTempFile;
             }

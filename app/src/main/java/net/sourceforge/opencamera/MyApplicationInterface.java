@@ -1571,6 +1571,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         drawPreview.clearGyroDirectionMarker();
     }
 
+    static float getPanoramaPicsPerScreen() {
+        return panorama_pics_per_screen;
+    }
+
     @Override
     public void touchEvent(MotionEvent event) {
         main_activity.getMainUI().clearSeekBar();
@@ -2679,7 +2683,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 first_image = n_capture_images == 1;
             if( first_image ) {
                 ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
-                String save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
+                String save_base_preference = "";
+                if( photo_mode == PhotoMode.NoiseReduction )
+                    save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
+                else if( photo_mode == PhotoMode.Panorama )
+                    save_base_preference = "preference_nr_save_all"; // TODO
+
                 switch( save_base_preference ) {
                     case "preference_nr_save_single":
                         save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
