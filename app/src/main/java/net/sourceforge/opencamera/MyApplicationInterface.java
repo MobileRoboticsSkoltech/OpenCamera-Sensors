@@ -1535,9 +1535,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "setNextPanoramaPoint : " + x + " , " + y + " , " + z);
 
-        //final float target_angle = 1.0f * 0.01745329252f;
-        final float target_angle = 0.5f * 0.01745329252f;
-        final float upright_angle_tol = 1.0f * 0.017452406437f;
+        final float target_angle = 1.0f * 0.01745329252f;
+        //final float target_angle = 0.5f * 0.01745329252f;
+        final float upright_angle_tol = 2.0f * 0.017452406437f;
+        //final float upright_angle_tol = 1.0f * 0.017452406437f;
         final float too_far_angle = 45.0f * 0.01745329252f;
         gyroSensor.setTarget(x, y, z, target_angle, upright_angle_tol, too_far_angle, new GyroSensor.TargetCallback() {
             @Override
