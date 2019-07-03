@@ -81,7 +81,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
     private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
     private int n_panorama_pics = 0;
-    private final static int max_panorama_pics_c = 10;
+    private final static int max_panorama_pics_c = 10; // if we increase this, review against memory requirements under MainActivity.supportsPanorama()
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
 
     private File last_video_file = null;
@@ -401,6 +401,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public Pair<Integer, Integer> getCameraResolutionPref() {
         if( getPhotoMode() == PhotoMode.Panorama ) {
+            // if we allow panorama with higher resolutions, review against memory requirements under MainActivity.supportsPanorama()
+            // also may need to update the downscaling in the testing code
             List<CameraController.Size> sizes = main_activity.getPreview().getSupportedPictureSizes(false);
             final int max_width_c = 2080;
             boolean found = false;
