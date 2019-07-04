@@ -4177,6 +4177,8 @@ public class HDRProcessor {
         }
         bitmaps.clear();
 
+        freeScripts();
+
         if( MyDebug.LOG )
             Log.d(TAG, "panorama complete!");
 
