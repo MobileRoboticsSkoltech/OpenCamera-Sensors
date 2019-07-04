@@ -147,6 +147,7 @@ public class DrawPreview {
     private Bitmap auto_stabilise_bitmap;
     private Bitmap dro_bitmap;
     private Bitmap hdr_bitmap;
+    private Bitmap panorama_bitmap;
     private Bitmap expo_bitmap;
     private Bitmap focus_bracket_bitmap;
     private Bitmap burst_bitmap;
@@ -222,6 +223,7 @@ public class DrawPreview {
         auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
         dro_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.dro_icon);
         hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
+        panorama_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.baseline_panorama_horizontal_white_48);
         expo_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.expo_icon);
         focus_bracket_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.focus_bracket_icon);
         burst_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_burst_mode_white_48dp);
@@ -270,6 +272,10 @@ public class DrawPreview {
         if( hdr_bitmap != null ) {
             hdr_bitmap.recycle();
             hdr_bitmap = null;
+        }
+        if( panorama_bitmap != null ) {
+            panorama_bitmap.recycle();
+            panorama_bitmap = null;
         }
         if( expo_bitmap != null ) {
             expo_bitmap.recycle();
@@ -1198,6 +1204,7 @@ public class DrawPreview {
             if( (
                     photoMode == MyApplicationInterface.PhotoMode.DRO ||
                             photoMode == MyApplicationInterface.PhotoMode.HDR ||
+                            photoMode == MyApplicationInterface.PhotoMode.Panorama ||
                             photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
                             photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ||
                             photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
@@ -1212,11 +1219,12 @@ public class DrawPreview {
                 p.setAlpha(255);
                 Bitmap bitmap = photoMode == MyApplicationInterface.PhotoMode.DRO ? dro_bitmap :
                         photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
-                                photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
-                                        photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
-                                                photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
-                                                        photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
-                                                                null;
+                                photoMode == MyApplicationInterface.PhotoMode.Panorama ? panorama_bitmap :
+                                    photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
+                                            photoMode == MyApplicationInterface.PhotoMode.FocusBracketing ? focus_bracket_bitmap :
+                                                    photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
+                                                            photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
+                                                                    null;
                 if( bitmap != null ) {
                     if( photoMode == MyApplicationInterface.PhotoMode.NoiseReduction && applicationInterface.getNRModePref() == ApplicationInterface.NRModePref.NRMODE_LOW_LIGHT ) {
                         p.setColorFilter(new PorterDuffColorFilter(Color.rgb(255, 235, 59), PorterDuff.Mode.SRC_IN)); // Yellow 500
