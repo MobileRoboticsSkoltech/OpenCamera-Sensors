@@ -1505,7 +1505,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         boolean image_capture_intent = isImageCaptureIntent();
         boolean do_in_background = saveInBackground(image_capture_intent);
-        imageSaver.finishImageAverage(do_in_background);
+        imageSaver.finishImageBatch(do_in_background);
     }
 
     private void cancelPanorama() {
@@ -2129,7 +2129,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( photo_mode == PhotoMode.NoiseReduction ) {
             boolean image_capture_intent = isImageCaptureIntent();
             boolean do_in_background = saveInBackground(image_capture_intent);
-            imageSaver.finishImageAverage(do_in_background);
+            imageSaver.finishImageBatch(do_in_background);
         }
         else if( photo_mode == MyApplicationInterface.PhotoMode.Panorama && gyroSensor.isRecording() ) {
             if( panorama_pic_accepted ) {
@@ -2701,7 +2701,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         break;
                 }
 
-                imageSaver.startImageAverage(true,
+                imageSaver.startImageBatch(true,
                         photo_mode == PhotoMode.NoiseReduction ? ImageSaver.Request.ProcessType.AVERAGE : ImageSaver.Request.ProcessType.PANORAMA,
                         save_base,
                         image_capture_intent, image_capture_intent_uri,
@@ -2726,7 +2726,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 this.gyroSensor.getRotationMatrix(gyro_rotation_matrix);
             }
 
-            imageSaver.addImageAverage(images.get(0), gyro_rotation_matrix);
+            imageSaver.addImageBatch(images.get(0), gyro_rotation_matrix);
             success = true;
         }
         else {

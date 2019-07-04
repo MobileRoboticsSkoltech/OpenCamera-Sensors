@@ -583,7 +583,10 @@ public class ImageSaver extends Thread {
 
     private Request pending_image_average_request = null;
 
-    void startImageAverage(boolean do_in_background,
+    /** Used for a batch of images that will be combined into a single request. This applies to
+     *  processType AVERAGE and PANORAMA.
+     */
+    void startImageBatch(boolean do_in_background,
                            Request.ProcessType processType,
                            Request.SaveBase save_base,
                            boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -602,7 +605,7 @@ public class ImageSaver extends Thread {
                            String custom_tag_copyright,
                            int sample_factor) {
         if( MyDebug.LOG ) {
-            Log.d(TAG, "startImageAverage");
+            Log.d(TAG, "startImageBatch");
             Log.d(TAG, "do_in_background? " + do_in_background);
         }
         pending_image_average_request = new Request(Request.Type.JPEG,
@@ -630,11 +633,11 @@ public class ImageSaver extends Thread {
                 sample_factor);
     }
 
-    void addImageAverage(byte [] image, float [] gyro_rotation_matrix) {
+    void addImageBatch(byte [] image, float [] gyro_rotation_matrix) {
         if( MyDebug.LOG )
-            Log.d(TAG, "addImageAverage");
+            Log.d(TAG, "addImageBatch");
         if( pending_image_average_request == null ) {
-            Log.e(TAG, "addImageAverage called but no pending_image_average_request");
+            Log.e(TAG, "addImageBatch called but no pending_image_average_request");
             return;
         }
         pending_image_average_request.jpeg_images.add(image);
@@ -647,12 +650,12 @@ public class ImageSaver extends Thread {
             Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
     }
 
-    void finishImageAverage(boolean do_in_background) {
+    void finishImageBatch(boolean do_in_background) {
         if( MyDebug.LOG )
-            Log.d(TAG, "finishImageAverage");
+            Log.d(TAG, "finishImageBatch");
         if( pending_image_average_request == null ) {
             if( MyDebug.LOG )
-                Log.d(TAG, "finishImageAverage called but no pending_image_average_request");
+                Log.d(TAG, "finishImageBatch called but no pending_image_average_request");
             return;
         }
         if( do_in_background ) {
