@@ -3915,12 +3915,28 @@ public class HDRProcessor {
                     Log.d(TAG, "### time after creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
                 //final boolean use_align_by_feature = false;
                 final boolean use_align_by_feature = true;
-                final int align_downsample = use_align_by_feature ? 4 : 1;
-                if( align_downsample > 1 ) {
-                    if( MyDebug.LOG )
+                float align_downsample = 1.0f;
+                if( use_align_by_feature ) {
+                    // scale height to 520
+                    // although in theory the alignment algorithm should work on any size, it is best to standardise, as most testing
+                    // was done where input images had height 2080 or 2048, and the alignment images were downscaled by a factor of 4
+                    align_downsample = bitmap_height/520.0f;
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "downscale by: " + align_downsample);
                         Log.d(TAG, "### time before downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+                    }
+                    // snap to power of 2
+                    for(int k=0,power=1;k<=4;k++,power*=2) {
+                        double ratio = power/align_downsample;
+                        if( ratio >= 0.95f && ratio <= 1.05f ) {
+                            align_downsample = power;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "snapped downscale to: " + align_downsample);
+                            break;
+                        }
+                    }
                     Matrix align_scale_matrix = new Matrix();
-                    align_scale_matrix.postScale(1.0f/(float)align_downsample, 1.0f/(float)align_downsample);
+                    align_scale_matrix.postScale(1.0f/align_downsample, 1.0f/align_downsample);
                     for(int j=0;j<alignment_bitmaps.size();j++) {
                         Bitmap new_bitmap = Bitmap.createBitmap(alignment_bitmaps.get(j), 0, 0, alignment_bitmaps.get(j).getWidth(), alignment_bitmaps.get(j).getHeight(), align_scale_matrix, true);
                         alignment_bitmaps.get(j).recycle();
