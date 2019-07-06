@@ -3225,13 +3225,18 @@ public class MainActivity extends Activity {
             Log.d(TAG, "takePicture");
 
         if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
-            if (applicationInterface.getGyroSensor().isRecording()) {
-                if (MyDebug.LOG)
+            if( preview.isTakingPhoto() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "ignore whilst taking panorama photo");
+            }
+            else if( applicationInterface.getGyroSensor().isRecording() ) {
+                if( MyDebug.LOG )
                     Log.d(TAG, "panorama complete");
                 applicationInterface.stopPanorama();
                 return;
-            } else {
-                if (MyDebug.LOG)
+            }
+            else {
+                if( MyDebug.LOG )
                     Log.d(TAG, "start panorama");
                 applicationInterface.startPanorama();
             }
