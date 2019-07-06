@@ -312,6 +312,8 @@ public class MainActivity extends Activity {
         pauseVideoButton.setVisibility(View.GONE);
         View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
         takePhotoVideoButton.setVisibility(View.GONE);
+        View cancelPanoramaButton = findViewById(R.id.cancel_panorama);
+        cancelPanoramaButton.setVisibility(View.GONE);
 
         // We initialise optional controls to invisible/gone, so they don't show while the camera is opening - the actual visibility is
         // set in cameraSetup().
@@ -1124,6 +1126,15 @@ public class MainActivity extends Activity {
         if( preview.isVideoRecording() ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();
+        }
+    }
+
+    public void clickedCancelPanorama(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedCancelPanorama");
+        if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama &&
+                applicationInterface.getGyroSensor().isRecording() ) { // just in case
+            applicationInterface.cancelPanorama();
         }
     }
 

@@ -1495,22 +1495,36 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         gyroSensor.startRecording();
         n_panorama_pics = 0;
         panorama_pic_accepted = false;
+
+        main_activity.getMainUI().setTakePhotoIcon();
+        View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
+        cancelPanoramaButton.setVisibility(View.VISIBLE);
+        View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+        switchVideoButton.setVisibility(View.GONE);
+        View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+        switchCameraButton.setVisibility(View.GONE);
     }
 
     void stopPanorama() {
         if( MyDebug.LOG )
             Log.d(TAG, "stopPanorama");
-        gyroSensor.stopRecording();
-        clearPanoramaPoint();
+        cancelPanorama();
 
         boolean image_capture_intent = isImageCaptureIntent();
         boolean do_in_background = saveInBackground(image_capture_intent);
         imageSaver.finishImageBatch(do_in_background);
     }
 
-    private void cancelPanorama() {
+    void cancelPanorama() {
         gyroSensor.stopRecording();
         clearPanoramaPoint();
+        main_activity.getMainUI().setTakePhotoIcon();
+        View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
+        cancelPanoramaButton.setVisibility(View.GONE);
+        View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+        switchVideoButton.setVisibility(View.VISIBLE);
+        View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+        switchCameraButton.setVisibility(View.VISIBLE);
     }
 
     private void setNextPanoramaPoint(boolean repeat) {

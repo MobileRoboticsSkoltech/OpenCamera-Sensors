@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
+import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -431,6 +432,13 @@ public class MainUI {
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
+            view = main_activity.findViewById(R.id.cancel_panorama);
+            layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            layoutParams.addRule(align_parent_left, 0);
+            layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            view.setLayoutParams(layoutParams);
+            setViewRotation(view, ui_rotation);
+
             view = main_activity.findViewById(R.id.switch_video);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
@@ -709,6 +717,14 @@ public class MainUI {
                 content_description = main_activity.getPreview().isVideoRecording() ? R.string.stop_video : R.string.start_video;
                 switch_video_content_description = R.string.switch_to_photo;
             }
+            else if( main_activity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama &&
+                    main_activity.getApplicationInterface().getGyroSensor().isRecording() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "set icon to recording panorama");
+                resource = R.drawable.baseline_check_white_48;
+                content_description = R.string.finish_panorama;
+                switch_video_content_description = R.string.switch_to_video;
+            }
             else {
                 if( MyDebug.LOG )
                     Log.d(TAG, "set icon to photo");
@@ -904,9 +920,10 @@ public class MainUI {
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
                 View zoomSeekBar = main_activity.findViewById(R.id.zoom_seekbar);
-                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
+                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 && !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
                     switchCameraButton.setVisibility(visibility);
-                switchVideoButton.setVisibility(visibility);
+                if( !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
+                    switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility);
                 if( showExposureLockIcon() )
@@ -954,6 +971,10 @@ public class MainUI {
                     if( main_activity.getPreview().supportsPhotoVideoRecording() && main_activity.getApplicationInterface().usePhotoVideoRecording() && main_activity.getPreview().isVideoRecording() ) {
                         View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
                         takePhotoVideoButton.setVisibility(visibility);
+                    }
+                    if( main_activity.getApplicationInterface().getGyroSensor().isRecording() ) {
+                        View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
+                        cancelPanoramaButton.setVisibility(visibility);
                     }
                 }
                 if( !immersive_mode ) {
@@ -1010,9 +1031,10 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
-                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
+                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 && !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
                     switchCameraButton.setVisibility(visibility);
-                switchVideoButton.setVisibility(visibility);
+                if( !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
+                    switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
                 if( showExposureLockIcon() )

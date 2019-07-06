@@ -863,6 +863,8 @@
 
     <string name="image_saving_notification">Saving images…</string>
 
+    <string name="finish_panorama">Finish panorama</string>
+    <string name="cancel_panorama">Cancel panorama</string>
     <string name="failed_to_process_panorama">Failed to create Panorama image</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->

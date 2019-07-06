@@ -53,6 +53,20 @@
         android:visibility="gone"
         />
 
+    <ImageButton
+        android:id="@+id/cancel_panorama"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/cancel_panorama"
+        android:src="@drawable/baseline_close_white_48"
+        android:onClick="clickedCancelPanorama"
+        android:layout_above="@+id/take_photo"
+        android:background="@null"
+        android:visibility="gone"
+        />
+
     <!-- alpha of 0.5 flags up Google Play prelaunch warning about contrast ratio too low (2.92; should be at least 3)-->
     <ImageButton
         android:id="@+id/switch_video"
