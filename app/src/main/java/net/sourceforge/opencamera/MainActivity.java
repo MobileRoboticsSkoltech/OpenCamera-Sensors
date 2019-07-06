@@ -21,6 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -158,6 +161,10 @@ public class MainActivity extends Activity {
     public volatile String test_last_saved_image;
     public static boolean test_force_supports_camera2; // okay to be static, as this is set for an entire test suite
     public volatile String test_save_settings_file;
+
+    private boolean has_notification;
+    private final String CHANNEL_ID = "open_camera_channel";
+    private final int image_saving_notification_id = 1;
 
     private static final float WATER_DENSITY_FRESHWATER = 1.0f;
     private static final float WATER_DENSITY_SALTWATER = 1.03f;
@@ -533,6 +540,19 @@ public class MainActivity extends Activity {
             }
         }).start();
 
+        // create notification channel
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+            CharSequence name = "Open Camera Image Saving";
+            String description = "Notification channel for processing and saving images in the background";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
     }
@@ -755,6 +775,10 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "activity_count: " + activity_count);
 
+        // should do asap before waiting for images to be saved - as risk the application will be killed whilst waiting for that to happen,
+        // and we want to avoid notifications hanging around
+        cancelImageSavingNotification();
+
         // reduce risk of losing any images
         // we don't do this in onPause or onStop, due to risk of ANRs
         // note that even if we did call this earlier in onPause or onStop, we'd still want to wait again here: as it can happen
@@ -797,6 +821,7 @@ public class MainActivity extends Activity {
             textToSpeech.shutdown();
             textToSpeech = null;
         }
+
         super.onDestroy();
         if( MyDebug.LOG )
             Log.d(TAG, "onDestroy done");
@@ -940,6 +965,8 @@ public class MainActivity extends Activity {
         }
         super.onResume();
 
+        cancelImageSavingNotification();
+
         // Set black window background; also needed if we hide the virtual buttons in immersive mode
         // Note that we do it here rather than customising the theme's android:windowBackground, so this doesn't affect other views - in particular, the MyPreferenceFragment settings
         getWindow().getDecorView().getRootView().setBackgroundColor(Color.BLACK);
@@ -1015,6 +1042,11 @@ public class MainActivity extends Activity {
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
         preview.onPause();
+
+        if( applicationInterface.getImageSaver().getNImagesToSave() > 0) {
+            createImageSavingNotification();
+        }
+
         if( MyDebug.LOG ) {
             Log.d(TAG, "onPause: total time to pause: " + (System.currentTimeMillis() - debug_time));
         }
@@ -2553,6 +2585,47 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "imageQueueChanged");
         applicationInterface.getDrawPreview().setImageQueueFull( !applicationInterface.canTakeNewPhoto() );
+
+        if( applicationInterface.getImageSaver().getNImagesToSave() == 0) {
+            cancelImageSavingNotification();
+        }
+        else if( has_notification) {
+            // call again to update the text of remaining images
+            createImageSavingNotification();
+        }
+    }
+
+    /** Creates a notification to indicate still saving images (or updates an existing one).
+     */
+    private void createImageSavingNotification() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "createImageSavingNotification");
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+            int n_images_to_save = applicationInterface.getImageSaver().getNRealImagesToSave();
+            Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.take_photo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.image_saving_notification) + " " + n_images_to_save + " " + getString(R.string.remaining))
+                    //.setStyle(new Notification.BigTextStyle()
+                    //        .bigText("Much longer text that cannot fit one line..."))
+                    //.setPriority(Notification.PRIORITY_DEFAULT)
+                    ;
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.notify(image_saving_notification_id, builder.build());
+            has_notification = true;
+        }
+    }
+
+    /** Cancels the notification for saving images.
+     */
+    private void cancelImageSavingNotification() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "cancelImageSavingNotification");
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.cancel(image_saving_notification_id);
+            has_notification = false;
+        }
     }
 
     public void clickedGallery(View view) {
