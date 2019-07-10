@@ -15689,4 +15689,92 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
+
+    /** Tests panorama algorithm on test samples "testPanorama25".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama25() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama25");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        //float panorama_pics_per_screen = 3.33333f / 2.0f;
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama25/IMG_20190706_215940_6.jpg");
+        String output_name = "testPanorama25_output.jpg";
+        String gyro_name = null;
+        // taken with Nokia 8, Camera2 API:
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama26".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama26() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama26");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama26/IMG_20190706_214842_6.jpg");
+        String output_name = "testPanorama26_output.jpg";
+        String gyro_name = null;
+        // taken with Nokia 8, Camera2 API:
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama27".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama27() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama27");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama27/IMG_20190706_192120_6.jpg");
+        String output_name = "testPanorama27_output.jpg";
+        String gyro_name = null;
+        // taken with Nokia 8, Camera2 API:
+        float camera_angle_x = 66.708595f;
+        float camera_angle_y = 50.282097f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
 }
