@@ -3755,16 +3755,149 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void adjustExposures(List<Bitmap> bitmaps, long time_s) {
-        List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
+    private void adjustExposuresLocal(List<Bitmap> bitmaps, int bitmap_width, int bitmap_height, int slice_width, long time_s) {
+        final int exposure_hwidth = bitmap_width/10;
+        final int offset_x = (bitmap_width - slice_width)/2;
 
-        float mean_median_brightness = 0.0f;
+        List<Float> relative_brightness = new ArrayList<>();
+        float current_relative_brightness = 1.0f;
+        relative_brightness.add(current_relative_brightness);
+
+        for(int i=0;i<bitmaps.size()-1;i++) {
+            // compute brightness difference between i-th and (i+1)-th images
+            Bitmap bitmap_l = bitmaps.get(i);
+            Bitmap bitmap_r = bitmaps.get(i+1);
+            bitmap_l = Bitmap.createBitmap(bitmap_l, offset_x+slice_width-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
+            bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
+            // debug
+            /*if( MyDebug.LOG )
+            {
+                saveBitmap(bitmap_l, "exposure_bitmap_l.jpg");
+                saveBitmap(bitmap_r, "exposure_bitmap_r.jpg");
+            }*/
+
+            int [] histo_l = computeHistogram(bitmap_l, false);
+            HDRProcessor.HistogramInfo histogramInfo_l = getHistogramInfo(histo_l);
+            int [] histo_r = computeHistogram(bitmap_r, false);
+            HDRProcessor.HistogramInfo histogramInfo_r = getHistogramInfo(histo_r);
+
+            float brightness_scale = ((float)Math.max(histogramInfo_r.median_brightness, 1)) / (float)Math.max(histogramInfo_l.median_brightness, 1);
+            current_relative_brightness *= brightness_scale;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "compare brightnesses from images " + i + " to " + (i+1) + ":");
+                Log.d(TAG, "    left median: " + histogramInfo_l.median_brightness);
+                Log.d(TAG, "    right median: " + histogramInfo_r.median_brightness);
+                Log.d(TAG, "    brightness_scale: " + brightness_scale);
+                Log.d(TAG, "    current_relative_brightness: " + current_relative_brightness);
+            }
+            relative_brightness.add(current_relative_brightness);
+
+            if( bitmap_l != bitmaps.get(i) )
+                bitmap_l.recycle();
+            if( bitmap_r != bitmaps.get(i+1) )
+                bitmap_r.recycle();
+        }
+
+        /*
+        float avg_relative_brightness = 0.0f;
+        int count = 0;
+        for(float b : relative_brightness) {
+            avg_relative_brightness += b;
+            count++;
+        }
+        avg_relative_brightness /= count;
+        if( MyDebug.LOG )
+            Log.d(TAG, "avg_relative_brightness: " + avg_relative_brightness);
+        */
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "### time after computing brightnesses: " + (System.currentTimeMillis() - time_s));
+
+        List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
+        float mean_median_brightness = 0.0f; // mean of the global median brightnesse
+        float mean_equalised_brightness = 0.0f; // mean of the brightnesses if all adjusted to match exposure of the first image
         for(int i=0;i<bitmaps.size();i++) {
             Bitmap bitmap = bitmaps.get(i);
             int [] histo = computeHistogram(bitmap, false);
             HDRProcessor.HistogramInfo histogramInfo = getHistogramInfo(histo);
             histogramInfos.add(histogramInfo);
             mean_median_brightness += histogramInfo.median_brightness;
+            float equalised_brightness = histogramInfo.median_brightness/relative_brightness.get(i);
+            mean_equalised_brightness += equalised_brightness;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "image " + i + " has median brightness " + histogramInfo.median_brightness);
+                Log.d(TAG, "    and equalised_brightness " + equalised_brightness);
+            }
+        }
+        mean_median_brightness /= bitmaps.size();
+        mean_equalised_brightness /= bitmaps.size();
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "mean_median_brightness: " + mean_median_brightness);
+            Log.d(TAG, "mean_equalised_brightness: " + mean_equalised_brightness);
+        }
+
+        float avg_relative_brightness = mean_median_brightness / Math.max(mean_equalised_brightness, 1.0f);
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "### time after computing global histograms: " + (System.currentTimeMillis() - time_s));
+
+        float min_preferred_scale = 1000.0f, max_preferred_scale = 0.0f;
+        for(int i=0;i<bitmaps.size();i++) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "    adjust exposure for image: " + i);
+
+            Bitmap bitmap = bitmaps.get(i);
+            HDRProcessor.HistogramInfo histogramInfo = histogramInfos.get(i);
+
+            int brightness_target = (int)(histogramInfo.median_brightness*avg_relative_brightness/relative_brightness.get(i) + 0.1f);
+            brightness_target = Math.min(255, brightness_target);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "    image " + i + " has initial brightness_target: " + brightness_target);
+                Log.d(TAG, "    median_brightness: " + histogramInfo.median_brightness);
+                Log.d(TAG, "    relative_brightness: " + relative_brightness.get(i));
+                Log.d(TAG, "    avg_relative_brightness: " + avg_relative_brightness);
+            }
+
+            min_preferred_scale = Math.min(min_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
+            max_preferred_scale = Math.max(max_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
+            int min_brightness = (int)(histogramInfo.median_brightness*2.0f/3.0f+0.5f);
+            //int min_brightness = (int)(histogramInfo.median_brightness*1.0f+0.5f);
+            int max_brightness = (int)(histogramInfo.median_brightness*1.5f+0.5f);
+            int this_brightness_target = brightness_target;
+            //this_brightness_target = Math.max(this_brightness_target, min_brightness);
+            //this_brightness_target = Math.min(this_brightness_target, max_brightness);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "    brightness_target: " + brightness_target);
+                Log.d(TAG, "    preferred brightness scale: " + brightness_target / (float) histogramInfo.median_brightness);
+                Log.d(TAG, "    this_brightness_target: " + this_brightness_target);
+                Log.d(TAG, "    actual brightness scale: " + this_brightness_target / (float) histogramInfo.median_brightness);
+            }
+
+            brightenImage(bitmap, histogramInfo.median_brightness, histogramInfo.max_brightness, this_brightness_target);
+        }
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "min_preferred_scale: " + min_preferred_scale);
+            Log.d(TAG, "max_preferred_scale: " + max_preferred_scale);
+            Log.d(TAG, "### time after adjusting brightnesses: " + (System.currentTimeMillis() - time_s));
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void adjustExposures(List<Bitmap> bitmaps, long time_s) {
+        List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
+
+        float mean_median_brightness = 0.0f;
+        List<Integer> median_brightnesses = new ArrayList<>();
+        for(int i=0;i<bitmaps.size();i++) {
+            Bitmap bitmap = bitmaps.get(i);
+            int [] histo = computeHistogram(bitmap, false);
+            HDRProcessor.HistogramInfo histogramInfo = getHistogramInfo(histo);
+            histogramInfos.add(histogramInfo);
+            mean_median_brightness += histogramInfo.median_brightness;
+            median_brightnesses.add(histogramInfo.median_brightness);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "image " + i + " has median brightness " + histogramInfo.median_brightness);
+            }
         }
         mean_median_brightness /= bitmaps.size();
         final int brightness_target = (int)(mean_median_brightness + 0.1f);
@@ -3776,16 +3909,37 @@ public class HDRProcessor {
         for(int i=0;i<bitmaps.size();i++) {
             Bitmap bitmap = bitmaps.get(i);
             HDRProcessor.HistogramInfo histogramInfo = histogramInfos.get(i);
+            if( MyDebug.LOG )
+                Log.d(TAG, "    adjust exposure for image: " + i);
+
+            /*
+            // use local average
+            float local_mean_brightness = median_brightnesses.get(i);
+            int count = 1;
+            if( i > 0 ) {
+                local_mean_brightness += median_brightnesses.get(i-1);
+                count++;
+            }
+            if( i < bitmaps.size()-1 ) {
+                local_mean_brightness += median_brightnesses.get(i+1);
+                count++;
+            }
+            local_mean_brightness /= count;
+            if( MyDebug.LOG )
+                Log.d(TAG, "    local_mean_brightness: " + local_mean_brightness);
+            final int brightness_target = (int)(local_mean_brightness + 0.1f);
+            */
 
             min_preferred_scale = Math.min(min_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
             max_preferred_scale = Math.max(max_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
             int min_brightness = (int)(histogramInfo.median_brightness*2.0f/3.0f+0.5f);
+            //int min_brightness = (int)(histogramInfo.median_brightness*1.0f+0.5f);
             int max_brightness = (int)(histogramInfo.median_brightness*1.5f+0.5f);
             int this_brightness_target = brightness_target;
             this_brightness_target = Math.max(this_brightness_target, min_brightness);
             this_brightness_target = Math.min(this_brightness_target, max_brightness);
             if( MyDebug.LOG ) {
-                Log.d(TAG, "brightness_target: " + brightness_target);
+                Log.d(TAG, "    brightness_target: " + brightness_target);
                 Log.d(TAG, "    preferred brightness scale: " + brightness_target / (float) histogramInfo.median_brightness);
                 Log.d(TAG, "    this_brightness_target: " + this_brightness_target);
                 Log.d(TAG, "    actual brightness scale: " + this_brightness_target / (float) histogramInfo.median_brightness);
@@ -3956,7 +4110,8 @@ public class HDRProcessor {
                 }
 
                 // save bitmaps used for alignments
-                /*for(int j=0;j<alignment_bitmaps.size();j++) {
+                /*if( MyDebug.LOG )
+                for(int j=0;j<alignment_bitmaps.size();j++) {
                     Bitmap alignment_bitmap = alignment_bitmaps.get(j);
                     saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +"_" + output_name);
                 }*/
@@ -4099,7 +4254,8 @@ public class HDRProcessor {
         if( MyDebug.LOG )
             Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
 
-        adjustExposures(bitmaps, time_s);
+        //adjustExposures(bitmaps, time_s);
+        adjustExposuresLocal(bitmaps, bitmap_width, bitmap_height, slice_width, time_s);
 
         if( MyDebug.LOG )
             Log.d(TAG, "### time before rendering bitmaps: " + (System.currentTimeMillis() - time_s));
