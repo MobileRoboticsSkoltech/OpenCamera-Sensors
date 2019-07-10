@@ -1819,7 +1819,8 @@ public class HDRProcessor {
         List<Allocation> gaussianPyramid = createGaussianPyramid(script, bitmap, n_levels);
         if( MyDebug.LOG )
             Log.d(TAG, "### createLaplacianPyramid: time after createGaussianPyramid: " + (System.currentTimeMillis() - time_s));
-		/*{
+        /*if( MyDebug.LOG )
+		{
 			// debug
 			savePyramid("gaussian", gaussianPyramid);
 		}*/
@@ -1838,7 +1839,8 @@ public class HDRProcessor {
                 Log.d(TAG, "next_gauss: " + next_gauss.getType().getX() + " , " + next_gauss.getType().getY());
                 Log.d(TAG, "next_gauss_expanded: " + next_gauss_expanded.getType().getX() + " , " + next_gauss_expanded.getType().getY());
             }
-			/*{
+            /*if( MyDebug.LOG )
+			{
 				// debug
 				saveAllocation(name + "_this_gauss_" + i + ".jpg", this_gauss);
 				saveAllocation(name + "_next_gauss_expanded_" + i + ".jpg", next_gauss_expanded);
@@ -1846,7 +1848,8 @@ public class HDRProcessor {
             Allocation difference = subtractBitmap(script, this_gauss, next_gauss_expanded);
             if( MyDebug.LOG )
                 Log.d(TAG, "### createLaplacianPyramid: time after subtractBitmap for level " + i + ": " + (System.currentTimeMillis() - time_s));
-			/*{
+            /*if( MyDebug.LOG )
+			{
 				// debug
 				saveAllocation(name + "_difference_" + i + ".jpg", difference);
 			}*/
@@ -2142,12 +2145,14 @@ public class HDRProcessor {
         //final int n_levels = 1;
 
         // debug
-        /*{
+        /*if( MyDebug.LOG )
+        {
             saveBitmap(lhs, "lhs.jpg");
             saveBitmap(rhs, "rhs.jpg");
         }*/
         // debug
-        /*{
+        /*if( MyDebug.LOG )
+        {
             List<Allocation> lhs_pyramid = createGaussianPyramid(script, lhs, n_levels);
             List<Allocation> rhs_pyramid = createGaussianPyramid(script, rhs, n_levels);
             savePyramid("lhs_gauss", lhs_pyramid);
@@ -2181,7 +2186,8 @@ public class HDRProcessor {
             Bitmap best_path_lhs = Bitmap.createScaledBitmap(lhs, lhs.getWidth()/scale_factor, lhs.getHeight()/scale_factor, true);
             Bitmap best_path_rhs = Bitmap.createScaledBitmap(rhs, rhs.getWidth()/scale_factor, rhs.getHeight()/scale_factor, true);
             // debug
-            /*{
+            /*if( MyDebug.LOG )
+            {
                 saveBitmap(best_path_lhs, "best_path_lhs.jpg");
                 saveBitmap(best_path_rhs, "best_path_rhs.jpg");
             }*/
@@ -2263,13 +2269,15 @@ public class HDRProcessor {
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
         // debug
-		/*{
+        /*if( MyDebug.LOG )
+		{
 			savePyramid("lhs_laplacian", lhs_pyramid);
 			savePyramid("rhs_laplacian", rhs_pyramid);
 		}*/
 
         // debug
-		/*{
+        /*if( MyDebug.LOG )
+		{
 			Bitmap lhs_collapsed = collapseLaplacianPyramid(script, lhs_pyramid);
 			saveBitmap(lhs_collapsed, "lhs_collapsed.jpg");
 			Bitmap rhs_collapsed = collapseLaplacianPyramid(script, rhs_pyramid);
@@ -2285,7 +2293,8 @@ public class HDRProcessor {
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
         // debug
-        /*{
+        /*if( MyDebug.LOG )
+        {
             savePyramid("merged_laplacian", lhs_pyramid);
             saveBitmap(merged_bitmap, "merged_bitmap.jpg");
         }*/
