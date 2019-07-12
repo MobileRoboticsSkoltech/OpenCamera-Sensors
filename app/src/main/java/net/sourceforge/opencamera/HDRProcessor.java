@@ -3860,12 +3860,11 @@ public class HDRProcessor {
 
             min_preferred_scale = Math.min(min_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
             max_preferred_scale = Math.max(max_preferred_scale, brightness_target/(float)histogramInfo.median_brightness);
-            int min_brightness = (int)(histogramInfo.median_brightness*2.0f/3.0f+0.5f);
-            //int min_brightness = (int)(histogramInfo.median_brightness*1.0f+0.5f);
-            int max_brightness = (int)(histogramInfo.median_brightness*1.5f+0.5f);
+            int min_brightness = (int)(histogramInfo.median_brightness*0.5f+0.5f);
+            int max_brightness = (int)(histogramInfo.median_brightness*2.0f+0.5f);
             int this_brightness_target = brightness_target;
-            //this_brightness_target = Math.max(this_brightness_target, min_brightness);
-            //this_brightness_target = Math.min(this_brightness_target, max_brightness);
+            this_brightness_target = Math.max(this_brightness_target, min_brightness);
+            this_brightness_target = Math.min(this_brightness_target, max_brightness);
             if( MyDebug.LOG ) {
                 Log.d(TAG, "    brightness_target: " + brightness_target);
                 Log.d(TAG, "    preferred brightness scale: " + brightness_target / (float) histogramInfo.median_brightness);
@@ -3880,6 +3879,9 @@ public class HDRProcessor {
             Log.d(TAG, "max_preferred_scale: " + max_preferred_scale);
             Log.d(TAG, "### time after adjusting brightnesses: " + (System.currentTimeMillis() - time_s));
         }
+        /*if( min_preferred_scale < 0.5f || max_preferred_scale > 2.0f ) {
+            throw new RuntimeException("");
+        }*/
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
