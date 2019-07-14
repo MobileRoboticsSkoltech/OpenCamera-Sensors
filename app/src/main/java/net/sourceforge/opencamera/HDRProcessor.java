@@ -4023,9 +4023,6 @@ public class HDRProcessor {
             Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
             Log.d(TAG, "    align_hwidth: " + align_hwidth);
         }
-        int max_offset_error_x = offset_x - align_hwidth; // prevent cumulative align_x meaning we run out of bitmap!
-        if( MyDebug.LOG )
-            Log.d(TAG, "    max_offset_error_x: " + max_offset_error_x);
 
         Matrix cumulative_transform = new Matrix();
         List<Matrix> cumulative_transforms = new ArrayList<>(); // i-th entry is the transform to apply to the i-th bitmap so that it's aligned to the same space as the 1st bitmap
@@ -4180,18 +4177,6 @@ public class HDRProcessor {
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "    align_x is now: " + align_x);
                     Log.d(TAG, "    align_y is now: " + align_y);
-                }
-                if( align_x < -max_offset_error_x ) {
-                    align_x = -max_offset_error_x;
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "    limit align_x to: " + align_x);
-                    //assertTrue(false); // test
-                }
-                else if( align_x > max_offset_error_x ) {
-                    align_x = max_offset_error_x;
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "    limit align_x to: " + align_x);
-                    //assertTrue(false); // test
                 }
             }
 
