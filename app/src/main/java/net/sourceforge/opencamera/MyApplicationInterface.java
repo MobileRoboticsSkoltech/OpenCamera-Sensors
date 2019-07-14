@@ -83,6 +83,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int n_panorama_pics = 0;
     private final static int max_panorama_pics_c = 10; // if we increase this, review against memory requirements under MainActivity.supportsPanorama()
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
+    private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
     private File last_video_file = null;
     private Uri last_video_file_saf = null;
@@ -1495,6 +1496,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         gyroSensor.startRecording();
         n_panorama_pics = 0;
         panorama_pic_accepted = false;
+        panorama_dir_left_to_right = true;
 
         main_activity.getMainUI().setTakePhotoIcon();
         View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
@@ -1508,6 +1510,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     void stopPanorama() {
         if( MyDebug.LOG )
             Log.d(TAG, "stopPanorama");
+
+        imageSaver.getImageBatchRequest().panorama_dir_left_to_right = this.panorama_dir_left_to_right;
+
         cancelPanorama();
 
         boolean image_capture_intent = isImageCaptureIntent();
@@ -1542,7 +1547,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             return;
         }
         float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
-        setNextPanoramaPoint((float) Math.sin(angle / panorama_pics_per_screen), 0.0f, (float) -Math.cos(angle / panorama_pics_per_screen));
+        if( n_panorama_pics > 1 && !panorama_dir_left_to_right ) {
+            angle = - angle; // for right-to-left
+        }
+        float x = (float) Math.sin(angle / panorama_pics_per_screen);
+        float z = (float) -Math.cos(angle / panorama_pics_per_screen);
+        setNextPanoramaPoint(x, 0.0f, z);
+
+        if( n_panorama_pics == 1 ) {
+            // also set target for right-to-left
+            angle = - angle;
+            x = (float) Math.sin(angle / panorama_pics_per_screen);
+            z = (float) -Math.cos(angle / panorama_pics_per_screen);
+            gyroSensor.addTarget(x, 0.0f, z);
+            drawPreview.addGyroDirectionMarker(x, 0.0f, z);
+        }
     }
 
     private void setNextPanoramaPoint(float x, float y, float z) {
@@ -1556,9 +1575,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         final float too_far_angle = 45.0f * 0.01745329252f;
         gyroSensor.setTarget(x, y, z, target_angle, upright_angle_tol, too_far_angle, new GyroSensor.TargetCallback() {
             @Override
-            public void onAchieved() {
+            public void onAchieved(int indx) {
                 if( MyDebug.LOG )
-                    Log.d(TAG, "TargetCallback.onAchieved");
+                    Log.d(TAG, "TargetCallback.onAchieved: " + indx);
                 // Disable the target callback so we avoid risk of multiple callbacks - but note we don't call
                 // clearPanoramaPoint(), as we don't want to call drawPreview.clearGyroDirectionMarker()
                 // at this stage (looks better to keep showing the target market on-screen whilst photo
@@ -1567,6 +1586,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 // the target is still achieved or not (for panorama_pic_accepted).
                 //gyroSensor.clearTarget();
                 gyroSensor.disableTargetCallback();
+                if( n_panorama_pics == 1 ) {
+                    panorama_dir_left_to_right = indx == 0;
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "set panorama_dir_left_to_right to " + panorama_dir_left_to_right);
+                }
                 main_activity.takePicturePressed(false, false);
             }
 

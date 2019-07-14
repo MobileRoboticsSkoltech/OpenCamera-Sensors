@@ -7,6 +7,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Handles gyro sensor.
  */
 public class GyroSensor implements SensorEventListener {
@@ -43,16 +46,18 @@ public class GyroSensor implements SensorEventListener {
     private final float [] inVector = new float[3];
 
     public interface TargetCallback {
-        /* Called when the target has been achieved.
+        /** Called when the target has been achieved.
+         * @param indx Index of the target that has been achieved.
          */
-        void onAchieved();
+        void onAchieved(int indx);
         /* Called when the orientation is significantly far from the target.
          */
         void onTooFar();
     }
 
     private boolean hasTarget;
-    private final float [] targetVector = new float[3];
+    //private final float [] targetVector = new float[3];
+    private final List<float []> targetVectors = new ArrayList<>();
     private float targetAngle; // target angle in radians
     private float uprightAngleTol; // in radians
     private boolean targetAchieved;
@@ -194,9 +199,8 @@ public class GyroSensor implements SensorEventListener {
 
     void setTarget(float target_x, float target_y, float target_z, float targetAngle, float uprightAngleTol, float tooFarAngle, TargetCallback targetCallback) {
         this.hasTarget = true;
-        this.targetVector[0] = target_x;
-        this.targetVector[1] = target_y;
-        this.targetVector[2] = target_z;
+        this.targetVectors.clear();
+        addTarget(target_x, target_y, target_z);
         this.targetAngle = targetAngle;
         this.uprightAngleTol = uprightAngleTol;
         this.tooFarAngle = tooFarAngle;
@@ -205,8 +209,14 @@ public class GyroSensor implements SensorEventListener {
         this.lastTargetAngle = 0.0f;
     }
 
+    void addTarget(float target_x, float target_y, float target_z) {
+        float [] vector = new float[]{target_x, target_y, target_z};
+        this.targetVectors.add(vector);
+    }
+
     void clearTarget() {
         this.hasTarget = false;
+        this.targetVectors.clear();
         this.targetCallback = null;
         this.has_lastTargetAngle = false;
         this.lastTargetAngle = 0.0f;
@@ -498,9 +508,13 @@ public class GyroSensor implements SensorEventListener {
         }
 
         if( hasTarget ) {
-            // first check if we are still "upright"
-            setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
-            transformVector(tempVector, currentRotationMatrix, inVector);
+            int n_too_far = 0;
+            targetAchieved = false;
+            for(int indx=0;indx<targetVectors.size();indx++) {
+                float [] targetVector = targetVectors.get(indx);
+                // first check if we are still "upright"
+                setVector(inVector, 0.0f, 1.0f, 0.0f); // vector pointing in "up" direction
+                transformVector(tempVector, currentRotationMatrix, inVector);
                 /*if( MyDebug.LOG ) {
                     Log.d(TAG, "### transformed vector up: " + tempVector[0] + " , " + tempVector[1] + " , " + tempVector[2]);
                 }*/
@@ -510,86 +524,90 @@ public class GyroSensor implements SensorEventListener {
                 }
                 else
                     is_upright = (sin_angle_up > 0) ? 1 : -1;*/
-            // store up vector
-            is_upright = 0;
+                // store up vector
+                is_upright = 0;
 
-            float ux = tempVector[0];
-            float uy = tempVector[1];
-            float uz = tempVector[2];
+                float ux = tempVector[0];
+                float uy = tempVector[1];
+                float uz = tempVector[2];
 
-            // project up vector into plane perpendicular to targetVector
-            // v' = v - (v.n)n
-            float u_dot_n = ux * targetVector[0] + uy * targetVector[1] + uz * targetVector[2];
-            float p_ux = ux - u_dot_n * targetVector[0];
-            float p_uy = uy - u_dot_n * targetVector[1];
-            float p_uz = uz - u_dot_n * targetVector[2];
+                // project up vector into plane perpendicular to targetVector
+                // v' = v - (v.n)n
+                float u_dot_n = ux * targetVector[0] + uy * targetVector[1] + uz * targetVector[2];
+                float p_ux = ux - u_dot_n * targetVector[0];
+                float p_uy = uy - u_dot_n * targetVector[1];
+                float p_uz = uz - u_dot_n * targetVector[2];
                 /*if( MyDebug.LOG ) {
                     Log.d(TAG, "    u: " + ux + " , " + uy + " , " + uz);
                     Log.d(TAG, "    p_u: " + p_ux + " , " + p_uy + " , " + p_uz);
                 }*/
-            double p_u_mag = Math.sqrt(p_ux*p_ux + p_uy*p_uy + p_uz*p_uz);
-            if( p_u_mag > 1.0e-5 ) {
+                double p_u_mag = Math.sqrt(p_ux*p_ux + p_uy*p_uy + p_uz*p_uz);
+                if( p_u_mag > 1.0e-5 ) {
                     /*if( MyDebug.LOG ) {
                         Log.d(TAG, "    p_u norm: " + p_ux/p_u_mag + " , " + p_uy/p_u_mag + " , " + p_uz/p_u_mag);
                     }*/
-                // normalise p_u
-                p_ux /= p_u_mag;
-                //p_uy /= p_u_mag; // commented out as not needed
-                p_uz /= p_u_mag;
+                    // normalise p_u
+                    p_ux /= p_u_mag;
+                    //p_uy /= p_u_mag; // commented out as not needed
+                    p_uz /= p_u_mag;
 
-                // compute p_u X (0 1 0)
-                float cx = - p_uz;
-                float cy = 0.0f;
-                float cz = p_ux;
+                    // compute p_u X (0 1 0)
+                    float cx = - p_uz;
+                    float cy = 0.0f;
+                    float cz = p_ux;
                     /*if( MyDebug.LOG ) {
                         Log.d(TAG, "    c: " + cx + " , " + cy + " , " + cz);
                     }*/
-                float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
-                float angle_up = (float)Math.asin(sin_angle_up);
+                    float sin_angle_up = (float)Math.sqrt(cx*cx + cy*cy + cz*cz);
+                    float angle_up = (float)Math.asin(sin_angle_up);
 
-                setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
-                transformVector(tempVector, currentRotationMatrix, inVector);
+                    setVector(inVector, 0.0f, 0.0f, -1.0f); // vector pointing behind the device's screen
+                    transformVector(tempVector, currentRotationMatrix, inVector);
 
-                if( Math.abs(angle_up) > this.uprightAngleTol ) {
-                    float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
-                    is_upright = (dot < 0) ? 1 : -1;
-                }
-            }
-
-            targetAchieved = false;
-            float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
-            float angle = (float)Math.acos(cos_angle);
-            if( is_upright == 0 ) {
-                    /*if( MyDebug.LOG )
-                        Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
-                if( angle <= targetAngle ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
-                    targetAchieved = true;
-                    if( targetCallback != null ) {
-                        //targetCallback.onAchieved();
-                        if( has_lastTargetAngle ) {
-                            if( MyDebug.LOG )
-                                Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
-                            if( angle > lastTargetAngle ) {
-                                // started to get worse, so call callback
-                                targetCallback.onAchieved();
-                            }
-                            // else, don't call callback yet, as we may get closer to the target
-                        }
+                    if( Math.abs(angle_up) > this.uprightAngleTol ) {
+                        float dot = cx*tempVector[0] + cy*tempVector[1] + cz*tempVector[2];
+                        is_upright = (dot < 0) ? 1 : -1;
                     }
                 }
-                has_lastTargetAngle = true;
-                lastTargetAngle = angle;
-            }
 
-            if( angle > tooFarAngle ) {
+                float cos_angle = tempVector[0] * targetVector[0] + tempVector[1] * targetVector[1] + tempVector[2] * targetVector[2];
+                float angle = (float)Math.acos(cos_angle);
+                if( is_upright == 0 ) {
+                    /*if( MyDebug.LOG )
+                        Log.d(TAG, "gyro vector angle with target: " + Math.toDegrees(angle) + " degrees");*/
+                    if( angle <= targetAngle ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "    ### achieved target angle: " + Math.toDegrees(angle) + " degrees");
+                        targetAchieved = true;
+                        if( targetCallback != null ) {
+                            //targetCallback.onAchieved(indx);
+                            if( has_lastTargetAngle ) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "        last target angle: " + Math.toDegrees(lastTargetAngle) + " degrees");
+                                if( angle > lastTargetAngle ) {
+                                    // started to get worse, so call callback
+                                    targetCallback.onAchieved(indx);
+                                }
+                                // else, don't call callback yet, as we may get closer to the target
+                            }
+                        }
+                        // only bother setting the lastTargetAngle if within the target angle - otherwise we'll have problems if there is more than one target set
+                        has_lastTargetAngle = true;
+                        lastTargetAngle = angle;
+                    }
+                }
+
+                if( angle > tooFarAngle ) {
+                    n_too_far++;
+                }
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "targetAchieved? " + targetAchieved);*/
+            }
+            if( n_too_far > 0 && n_too_far == targetVectors.size() ) {
                 if( targetCallback != null ) {
                     targetCallback.onTooFar();
                 }
             }
-            /*if( MyDebug.LOG )
-                Log.d(TAG, "targetAchieved? " + targetAchieved);*/
         }
     }
 

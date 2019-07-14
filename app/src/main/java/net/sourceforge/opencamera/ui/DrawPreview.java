@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.opencamera.GyroSensor;
@@ -191,7 +193,7 @@ public class DrawPreview {
     private long continuous_focus_moving_ms;
 
     private boolean enable_gyro_target_spot;
-    private final float [] gyro_direction = new float[3];
+    private final List<float []> gyro_directions = new ArrayList<>();
     private final float [] transformed_gyro_direction = new float[3];
     private final float [] gyro_direction_up = new float[3];
     private final float [] transformed_gyro_direction_up = new float[3];
@@ -437,12 +439,16 @@ public class DrawPreview {
 
     public void setGyroDirectionMarker(float x, float y, float z) {
         enable_gyro_target_spot = true;
-        gyro_direction[0] = x;
-        gyro_direction[1] = y;
-        gyro_direction[2] = z;
+        this.gyro_directions.clear();
+        addGyroDirectionMarker(x, y, z);
         gyro_direction_up[0] = 0.f;
         gyro_direction_up[1] = 1.f;
         gyro_direction_up[2] = 0.f;
+    }
+
+    public void addGyroDirectionMarker(float x, float y, float z) {
+        float [] vector = new float[]{x, y, z};
+        this.gyro_directions.add(vector);
     }
 
     public void clearGyroDirectionMarker() {
@@ -2388,27 +2394,28 @@ public class DrawPreview {
         if( enable_gyro_target_spot && camera_controller != null ) {
             GyroSensor gyroSensor = main_activity.getApplicationInterface().getGyroSensor();
             if( gyroSensor.isRecording() ) {
-                gyroSensor.getRelativeInverseVector(transformed_gyro_direction, gyro_direction);
-                gyroSensor.getRelativeInverseVector(transformed_gyro_direction_up, gyro_direction_up);
-                // note that although X of gyro_direction represents left to right on the device, because we're in landscape mode,
-                // this is y coordinates on the screen
-                float angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
-                float angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
-                if( Math.abs(angle_x) < 0.5f*Math.PI && Math.abs(angle_y) < 0.5f*Math.PI ) {
-                    float camera_angle_x = preview.getViewAngleX(true);
-                    float camera_angle_y = preview.getViewAngleY(true);
-                    float angle_scale_x = (float) (canvas.getWidth() / (2.0 * Math.tan(Math.toRadians((camera_angle_x / 2.0)))));
-                    float angle_scale_y = (float) (canvas.getHeight() / (2.0 * Math.tan(Math.toRadians((camera_angle_y / 2.0)))));
-                    angle_scale_x *= preview.getZoomRatio();
-                    angle_scale_y *= preview.getZoomRatio();
-                    float distance_x = angle_scale_x * (float) Math.tan(angle_x); // angle_scale is already in pixels rather than dps
-                    float distance_y = angle_scale_y * (float) Math.tan(angle_y); // angle_scale is already in pixels rather than dps
-                    p.setColor(Color.WHITE);
-                    drawGyroSpot(canvas, 0.0f, 0.0f, -1.0f, 0.0f, 48, true); // draw spot for the centre of the screen, to help the user orient the device
-                    p.setColor(Color.BLUE);
-                    float dir_x = -transformed_gyro_direction_up[1];
-                    float dir_y = -transformed_gyro_direction_up[0];
-                    drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y, 45, false);
+                for(float [] gyro_direction : gyro_directions) {
+                    gyroSensor.getRelativeInverseVector(transformed_gyro_direction, gyro_direction);
+                    gyroSensor.getRelativeInverseVector(transformed_gyro_direction_up, gyro_direction_up);
+                    // note that although X of gyro_direction represents left to right on the device, because we're in landscape mode,
+                    // this is y coordinates on the screen
+                    float angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
+                    float angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
+                    if( Math.abs(angle_x) < 0.5f*Math.PI && Math.abs(angle_y) < 0.5f*Math.PI ) {
+                        float camera_angle_x = preview.getViewAngleX(true);
+                        float camera_angle_y = preview.getViewAngleY(true);
+                        float angle_scale_x = (float) (canvas.getWidth() / (2.0 * Math.tan(Math.toRadians((camera_angle_x / 2.0)))));
+                        float angle_scale_y = (float) (canvas.getHeight() / (2.0 * Math.tan(Math.toRadians((camera_angle_y / 2.0)))));
+                        angle_scale_x *= preview.getZoomRatio();
+                        angle_scale_y *= preview.getZoomRatio();
+                        float distance_x = angle_scale_x * (float) Math.tan(angle_x); // angle_scale is already in pixels rather than dps
+                        float distance_y = angle_scale_y * (float) Math.tan(angle_y); // angle_scale is already in pixels rather than dps
+                        p.setColor(Color.WHITE);
+                        drawGyroSpot(canvas, 0.0f, 0.0f, -1.0f, 0.0f, 48, true); // draw spot for the centre of the screen, to help the user orient the device
+                        p.setColor(Color.BLUE);
+                        float dir_x = -transformed_gyro_direction_up[1];
+                        float dir_y = -transformed_gyro_direction_up[0];
+                        drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y, 45, false);
 					/*{
 						// for debug only, draw the gyro spot that isn't calibrated with the accelerometer
 						gyroSensor.getRelativeInverseVectorGyroOnly(transformed_gyro_direction, gyro_direction);
@@ -2422,24 +2429,25 @@ public class DrawPreview {
 						dir_y = -transformed_gyro_direction_up[0];
 						drawGyroSpot(canvas, distance_x, distance_y, dir_x, dir_y, 45);
 					}*/
-                }
+                    }
 
-                // show indicator for not being "upright", but only if tilt angle is within 20 degrees
-                if( gyroSensor.isUpright() != 0 && Math.abs(angle_x) <= 20.0f*0.0174532925199f ) {
-                    //applicationInterface.drawTextWithBackground(canvas, p, "not upright", Color.WHITE, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, MyApplicationInterface.Alignment.ALIGNMENT_CENTRE, null, true);
-                    canvas.save();
-                    canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
-                    final int icon_size = (int) (64 * scale + 0.5f); // convert dps to pixels
-                    final int cy_offset = (int) (80 * scale + 0.5f); // convert dps to pixels
-                    int cx = canvas.getWidth()/2, cy = canvas.getHeight()/2 - cy_offset;
-                    icon_dest.set(cx - icon_size/2, cy - icon_size/2, cx + icon_size/2, cy + icon_size/2);
+                    // show indicator for not being "upright", but only if tilt angle is within 20 degrees
+                    if( gyroSensor.isUpright() != 0 && Math.abs(angle_x) <= 20.0f*0.0174532925199f ) {
+                        //applicationInterface.drawTextWithBackground(canvas, p, "not upright", Color.WHITE, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, MyApplicationInterface.Alignment.ALIGNMENT_CENTRE, null, true);
+                        canvas.save();
+                        canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
+                        final int icon_size = (int) (64 * scale + 0.5f); // convert dps to pixels
+                        final int cy_offset = (int) (80 * scale + 0.5f); // convert dps to pixels
+                        int cx = canvas.getWidth()/2, cy = canvas.getHeight()/2 - cy_offset;
+                        icon_dest.set(cx - icon_size/2, cy - icon_size/2, cx + icon_size/2, cy + icon_size/2);
 					/*p.setStyle(Paint.Style.FILL);
 					p.setColor(Color.BLACK);
 					p.setAlpha(64);
 					canvas.drawRect(icon_dest, p);
 					p.setAlpha(255);*/
-                    canvas.drawBitmap(gyroSensor.isUpright() > 0 ? rotate_left_bitmap : rotate_right_bitmap, null, icon_dest, p);
-                    canvas.restore();
+                        canvas.drawBitmap(gyroSensor.isUpright() > 0 ? rotate_left_bitmap : rotate_right_bitmap, null, icon_dest, p);
+                        canvas.restore();
+                    }
                 }
             }
         }

@@ -17,6 +17,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -137,6 +138,7 @@ public class ImageSaver extends Thread {
         final boolean do_auto_stabilise;
         final double level_angle;
         final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
+        boolean panorama_dir_left_to_right; // used for panorama
         final boolean is_front_facing;
         final boolean mirror;
         final Date current_date;
@@ -648,6 +650,10 @@ public class ImageSaver extends Thread {
         }
         if( MyDebug.LOG )
             Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
+    }
+
+    Request getImageBatchRequest() {
+        return pending_image_average_request;
     }
 
     void finishImageBatch(boolean do_in_background) {
@@ -1574,6 +1580,14 @@ public class ImageSaver extends Thread {
 			main_activity.savingImage(true);
 
             long time_s = System.currentTimeMillis();
+
+            if( MyDebug.LOG )
+                Log.d(TAG, "panorama_dir_left_to_right: " + request.panorama_dir_left_to_right);
+            if( !request.panorama_dir_left_to_right ) {
+                Collections.reverse(request.jpeg_images);
+                // shouldn't use gyro_rotation_matrix from this point, but keep in sync with jpeg_images just in case
+                Collections.reverse(request.gyro_rotation_matrix);
+            }
 
             List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, -1, 1);
             if( bitmaps == null ) {
