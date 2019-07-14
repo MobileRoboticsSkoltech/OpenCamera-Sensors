@@ -139,6 +139,8 @@ public class ImageSaver extends Thread {
         final double level_angle;
         final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
         boolean panorama_dir_left_to_right; // used for panorama
+        float camera_view_angle_x; // used for panorama
+        float camera_view_angle_y; // used for panorama
         final boolean is_front_facing;
         final boolean mirror;
         final Date current_date;
@@ -1614,7 +1616,7 @@ public class ImageSaver extends Thread {
             Bitmap panorama;
             try {
                 if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), main_activity.getPreview().getViewAngleY(false));
+                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), request.camera_view_angle_y);
                 }
                 else {
                     Log.e(TAG, "shouldn't have offered panorama as an option if not on Android 5");

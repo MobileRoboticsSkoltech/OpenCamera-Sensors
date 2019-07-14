@@ -2756,6 +2756,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         store_location, location, store_geo_direction, geo_direction,
                         custom_tag_artist, custom_tag_copyright,
                         sample_factor);
+
+                if( photo_mode == PhotoMode.Panorama ) {
+                    imageSaver.getImageBatchRequest().camera_view_angle_x = main_activity.getPreview().getViewAngleX(false);
+                    imageSaver.getImageBatchRequest().camera_view_angle_y = main_activity.getPreview().getViewAngleY(false);
+                }
             }
 
             float [] gyro_rotation_matrix = null;
