@@ -3754,14 +3754,19 @@ public class HDRProcessor {
         */
     }
 
+    /**
+     * @return Returns the ratio between maximum and minimum computed brightnesses.
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void adjustExposuresLocal(List<Bitmap> bitmaps, int bitmap_width, int bitmap_height, int slice_width, long time_s) {
+    private float adjustExposuresLocal(List<Bitmap> bitmaps, int bitmap_width, int bitmap_height, int slice_width, long time_s) {
         final int exposure_hwidth = bitmap_width/10;
         final int offset_x = (bitmap_width - slice_width)/2;
 
         List<Float> relative_brightness = new ArrayList<>();
         float current_relative_brightness = 1.0f;
         relative_brightness.add(current_relative_brightness);
+        float min_relative_brightness = current_relative_brightness;
+        float max_relative_brightness = current_relative_brightness;
 
         for(int i=0;i<bitmaps.size()-1;i++) {
             // compute brightness difference between i-th and (i+1)-th images
@@ -3792,10 +3797,20 @@ public class HDRProcessor {
             }
             relative_brightness.add(current_relative_brightness);
 
+            min_relative_brightness = Math.min(min_relative_brightness, current_relative_brightness);
+            max_relative_brightness = Math.max(max_relative_brightness, current_relative_brightness);
+
             if( bitmap_l != bitmaps.get(i) )
                 bitmap_l.recycle();
             if( bitmap_r != bitmaps.get(i+1) )
                 bitmap_r.recycle();
+        }
+
+        float ratio_brightnesses = (max_relative_brightness/min_relative_brightness);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "min_relative_brightness: " + min_relative_brightness);
+            Log.d(TAG, "max_relative_brightness: " + max_relative_brightness);
+            Log.d(TAG, "ratio of max to min relative brightness: " + ratio_brightnesses);
         }
 
         /*
@@ -3882,6 +3897,8 @@ public class HDRProcessor {
         /*if( min_preferred_scale < 0.5f || max_preferred_scale > 2.0f ) {
             throw new RuntimeException("");
         }*/
+
+        return ratio_brightnesses;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -4242,7 +4259,7 @@ public class HDRProcessor {
             Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
 
         //adjustExposures(bitmaps, time_s);
-        adjustExposuresLocal(bitmaps, bitmap_width, bitmap_height, slice_width, time_s);
+        float ratio_brightnesses = adjustExposuresLocal(bitmaps, bitmap_width, bitmap_height, slice_width, time_s);
 
         if( MyDebug.LOG )
             Log.d(TAG, "### time before rendering bitmaps: " + (System.currentTimeMillis() - time_s));
@@ -4328,6 +4345,25 @@ public class HDRProcessor {
             bitmap.recycle();
         }
         bitmaps.clear();
+
+        if( ratio_brightnesses >= 5.0f ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "apply contrast enhancement, ratio_brightnesses: " + ratio_brightnesses);
+
+            /*if( true )
+                throw new RuntimeException("ratio_brightnesses: " + ratio_brightnesses);*/
+
+            Allocation allocation = Allocation.createFromBitmap(rs, panorama);
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time after creating allocation_out: " + (System.currentTimeMillis() - time_s));
+            adjustHistogram(allocation, allocation, panorama.getWidth(), panorama.getHeight(), 0.25f, 1, true, time_s);
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
+            allocation.copyTo(panorama);
+            allocation.destroy();
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+        }
 
         freeScripts();
 
