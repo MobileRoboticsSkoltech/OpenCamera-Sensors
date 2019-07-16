@@ -14872,6 +14872,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // downscale
         final int max_height = 2080;
+        //final int max_height = 2079; // test non power of 2
         if( bitmap_height > max_height ) {
             float scale = ((float)max_height) / ((float)bitmap_height);
             Log.d(TAG, "scale: " + scale);

@@ -2127,6 +2127,15 @@ public class HDRProcessor {
         }
     }
 
+    private final static int blend_n_levels = 4; // number of levels used for pyramid blending
+
+    /** Bitmaps passed to blendPyramids must have width and height each a multiple of the value
+     *  returned by this function.
+     */
+    private final static int getBlendDimension() {
+        return (int)(Math.pow(2.0, blend_n_levels)+0.5);
+    }
+
     /** Returns a bitmap that blends between lhs and rhs, using Laplacian pyramid blending.
      *  Note that the width of the blend region will be half of the width of the image. The blend
      *  region will follow a path in order to minimise the transition between the images.
@@ -2140,9 +2149,6 @@ public class HDRProcessor {
         ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
-        //final int n_levels = 5;
-        final int n_levels = 4;
-        //final int n_levels = 1;
 
         // debug
         /*if( MyDebug.LOG )
@@ -2153,8 +2159,8 @@ public class HDRProcessor {
         // debug
         /*if( MyDebug.LOG )
         {
-            List<Allocation> lhs_pyramid = createGaussianPyramid(script, lhs, n_levels);
-            List<Allocation> rhs_pyramid = createGaussianPyramid(script, rhs, n_levels);
+            List<Allocation> lhs_pyramid = createGaussianPyramid(script, lhs, blend_n_levels);
+            List<Allocation> rhs_pyramid = createGaussianPyramid(script, rhs, blend_n_levels);
             savePyramid("lhs_gauss", lhs_pyramid);
             savePyramid("rhs_gauss", rhs_pyramid);
             for(Allocation allocation : lhs_pyramid) {
@@ -2167,6 +2173,16 @@ public class HDRProcessor {
 
         if( lhs.getWidth() != rhs.getWidth() || lhs.getHeight() != rhs.getHeight() ) {
             Log.e(TAG, "lhs/rhs bitmaps of different dimensions");
+            throw new RuntimeException();
+        }
+
+        final int blend_dimension = getBlendDimension();
+        if( lhs.getWidth() % blend_dimension != 0 ) {
+            Log.e(TAG, "bitmap width " + lhs.getWidth() + " not a multiple of " + blend_dimension);
+            throw new RuntimeException();
+        }
+        else if( lhs.getHeight() % blend_dimension != 0 ) {
+            Log.e(TAG, "bitmap height " + lhs.getHeight() + " not a multiple of " + blend_dimension);
             throw new RuntimeException();
         }
 
@@ -2261,10 +2277,10 @@ public class HDRProcessor {
                 Log.d(TAG, "### blendPyramids: time after finding best path: " + (System.currentTimeMillis() - time_s));
         }
 
-        List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, n_levels, "lhs");
+        List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, blend_n_levels, "lhs");
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
-        List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, n_levels, "rhs");
+        List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, blend_n_levels, "rhs");
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
@@ -3492,11 +3508,19 @@ public class HDRProcessor {
         return blended_bitmap;
     }
 
-    private int nextPowerOf2(int value) {
+    private static int nextPowerOf2(int value) {
         int power = 1;
         while( value > power )
             power *= 2;
         return power;
+    }
+
+    private static int nextMultiple(int value, int multiple) {
+        int remainder = value % multiple;
+        if( remainder > 0 ) {
+            value += multiple - remainder;
+        }
+        return value;
     }
 
     private Bitmap createProjectedBitmap(final Rect src_rect_workspace, final Rect dst_rect_workspace, final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height, final double camera_angle, final int centre_shift_x) {
@@ -3579,14 +3603,36 @@ public class HDRProcessor {
             if( MyDebug.LOG )
                 Log.d(TAG, "### time before blending for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
             // first blend right hand side of previous image with left hand side of new image
-            Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+            final int blend_dimension = getBlendDimension();
+
+            // ensure we blend images that are a multiple of blend_dimension
+            int blend_width = nextMultiple(2*blend_hwidth, blend_dimension);
+            int blend_height = nextMultiple(bitmap_height, blend_dimension);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "blend_dimension: " + blend_dimension);
+                Log.d(TAG, "blend_hwidth: " + blend_hwidth);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+                Log.d(TAG, "blend_width: " + blend_width);
+                Log.d(TAG, "blend_height: " + blend_height);
+            }
+
+            //Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
+            Bitmap lhs = Bitmap.createBitmap(blend_width, blend_height, Bitmap.Config.ARGB_8888);
+            {
+                Canvas lhs_canvas = new Canvas(lhs);
+                src_rect_workspace.set(offset_x + dst_offset_x - blend_hwidth, 0, offset_x + dst_offset_x + blend_hwidth, bitmap_height);
+                src_rect_workspace.offset(align_x, align_y);
+                dst_rect_workspace.set(0, 0, blend_width, blend_height);
+                lhs_canvas.drawBitmap(panorama, src_rect_workspace, dst_rect_workspace, p);
+            }
+
             //Bitmap rhs = Bitmap.createBitmap(projected_bitmap, offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
-            Bitmap rhs = Bitmap.createBitmap(2*blend_hwidth, bitmap_height, Bitmap.Config.ARGB_8888);
+            Bitmap rhs = Bitmap.createBitmap(blend_width, blend_height, Bitmap.Config.ARGB_8888);
             {
                 Canvas rhs_canvas = new Canvas(rhs);
                 src_rect_workspace.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
                 src_rect_workspace.offset(align_x, align_y);
-                dst_rect_workspace.set(0, 0, 2*blend_hwidth, bitmap_height);
+                dst_rect_workspace.set(0, 0, blend_width, blend_height);
                 rhs_canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
             }
             if( MyDebug.LOG ) {
@@ -4030,7 +4076,8 @@ public class HDRProcessor {
         // is equal to blend_hwidth), because of the code to find a best path.
         //final int blend_hwidth = 0;
         //final int blend_hwidth = nextPowerOf2(bitmap_width/20);
-        final int blend_hwidth = nextPowerOf2(bitmap_width/10);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/10);
+        final int blend_hwidth = nextMultiple((int)(bitmap_width/6.1f+0.5f), getBlendDimension()/2);
         //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
         final int align_hwidth = bitmap_width/10;
         //final int align_hwidth = bitmap_width/5;
