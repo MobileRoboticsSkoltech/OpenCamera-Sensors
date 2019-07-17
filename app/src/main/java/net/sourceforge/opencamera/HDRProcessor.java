@@ -4190,6 +4190,45 @@ public class HDRProcessor {
         }
     }
 
+    /** Typically images will have different rotations. Rather than assuming the first image is the
+     *  optimal transform (with no rotation), we rotate the transforms to the mean of the rotations.
+     *  This is effectively equivalent to rotating the final image to be hopefully more level.
+     */
+    private void adjustPanoramaTransforms(List<Bitmap> bitmaps, List<Matrix> cumulative_transforms,
+                                          int panorama_width, int slice_width, int bitmap_height) {
+        float [] values = new float[9];
+        float min_rotation = 1000, max_rotation = - 1000;
+        float sum_rotation = 0.0f;
+        for(int i=0;i<bitmaps.size();i++) {
+            cumulative_transforms.get(i).getValues(values);
+            // get rotation anticlockwise in degrees - https://stackoverflow.com/questions/12256854/get-the-rotate-value-from-matrix-in-android
+            float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
+            if( MyDebug.LOG )
+                Log.d(TAG, "bitmap " + i + " has rotation " + rotation + " degrees");
+            min_rotation = Math.min(min_rotation, rotation);
+            max_rotation = Math.max(max_rotation, rotation);
+            sum_rotation += rotation;
+        }
+        float mid_rotation = 0.5f*(min_rotation + max_rotation);
+        //float mid_rotation = sum_rotation/bitmaps.size();
+        if( MyDebug.LOG )
+            Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
+        // we now apply a rotation of -mid_rotation about what will be the centre of the resultant panoramic image, remembering
+        // that each matrix in cumulative_transforms is set up for each input images coordinate space
+        for(int i=0;i<bitmaps.size();i++) {
+            float centre_x = panorama_width/2.0f - i*slice_width;
+            float centre_y = bitmap_height/2.0f;
+            // apply a post rotate of mid_rotation clockwise about (centre_x, centre_y)
+            cumulative_transforms.get(i).postRotate(mid_rotation, centre_x, centre_y);
+            {
+                cumulative_transforms.get(i).getValues(values);
+                float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
+                if( MyDebug.LOG )
+                    Log.d(TAG, "bitmap " + i + " now has rotation " + rotation + " degrees");
+            }
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y) throws HDRProcessorException {
         if( MyDebug.LOG ) {
@@ -4276,39 +4315,7 @@ public class HDRProcessor {
             Log.d(TAG, "original panorama_width: " + panorama_width);
         }
 
-        {
-            float [] values = new float[9];
-            float min_rotation = 1000, max_rotation = - 1000;
-            float sum_rotation = 0.0f;
-            for(int i=0;i<bitmaps.size();i++) {
-                cumulative_transforms.get(i).getValues(values);
-                // get rotation anticlockwise in degrees - https://stackoverflow.com/questions/12256854/get-the-rotate-value-from-matrix-in-android
-                float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
-                if( MyDebug.LOG )
-                    Log.d(TAG, "bitmap " + i + " has rotation " + rotation + " degrees");
-                min_rotation = Math.min(min_rotation, rotation);
-                max_rotation = Math.max(max_rotation, rotation);
-                sum_rotation += rotation;
-            }
-            float mid_rotation = 0.5f*(min_rotation + max_rotation);
-            //float mid_rotation = sum_rotation/bitmaps.size();
-            if( MyDebug.LOG )
-                Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
-            // we now apply a rotation of -mid_rotation about what will be the centre of the resultant panoramic image, remembering
-            // that each matrix in cumulative_transforms is set up for each input images coordinate space
-            for(int i=0;i<bitmaps.size();i++) {
-                float centre_x = panorama_width/2.0f - i*slice_width;
-                float centre_y = bitmap_height/2.0f;
-                // apply a post rotate of mid_rotation clockwise about (centre_x, centre_y)
-                cumulative_transforms.get(i).postRotate(mid_rotation, centre_x, centre_y);
-                {
-                    cumulative_transforms.get(i).getValues(values);
-                    float rotation = (float)Math.toDegrees(Math.atan2(values[Matrix.MSKEW_X], values[Matrix.MSCALE_X]));
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "bitmap " + i + " now has rotation " + rotation + " degrees");
-                }
-            }
-        }
+        adjustPanoramaTransforms(bitmaps, cumulative_transforms, panorama_width, slice_width, bitmap_height);
         if( MyDebug.LOG )
             Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
 
