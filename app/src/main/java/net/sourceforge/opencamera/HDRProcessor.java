@@ -4020,90 +4020,17 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y) throws HDRProcessorException {
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "panorama");
-            Log.d(TAG, "camera_angle_y: " + camera_angle_y);
-        }
-
-        long time_s = 0;
-        if (MyDebug.LOG)
-            time_s = System.currentTimeMillis();
-
-        int bitmap_width = bitmaps.get(0).getWidth();
-        int bitmap_height = bitmaps.get(0).getHeight();
-        if (MyDebug.LOG) {
-            Log.d(TAG, "bitmap_width: " + bitmap_width);
-            Log.d(TAG, "bitmap_height: " + bitmap_height);
-        }
-
-        for (int i = 1; i < bitmaps.size(); i++) {
-            Bitmap bitmap = bitmaps.get(i);
-            if (bitmap.getWidth() != bitmap_width || bitmap.getHeight() != bitmap_height) {
-                Log.e(TAG, "bitmaps not of equal sizes");
-                throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
-            }
-        }
-
-        final int slice_width = (int) (bitmap_width / panorama_pics_per_screen);
-        if (MyDebug.LOG)
-            Log.d(TAG, "slice_width: " + slice_width);
-
-        final double camera_angle = Math.toRadians(camera_angle_y);
-        if (MyDebug.LOG) {
-            Log.d(TAG, "camera_angle_y: " + camera_angle_y);
-            Log.d(TAG, "camera_angle: " + camera_angle);
-        }
-        // max offset error of gyro_tol_degrees - convert this to pixels
-        //int max_offset_error_x = (int)(gyro_tol_degrees * bitmap_width / mActivity.getPreview().getViewAngleY() + 0.5f);
-        //int max_offset_error_y = (int)(gyro_tol_degrees * bitmap_height / mActivity.getPreview().getViewAngleX() + 0.5f);
-        //if we use the above code, remember not to use the camera view angles, but those that the test photos were taken with!
-        //double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
-        /*int max_offset_error_x = (int)(h * Math.tan(Math.toRadians(gyro_tol_degrees)) + 0.5f);
-        max_offset_error_x *= 2; // allow a fudge factor
-        int max_offset_error_y = max_offset_error_x;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "h: " + h);
-            Log.d(TAG, "max_offset_error_x: " + max_offset_error_x);
-            Log.d(TAG, "max_offset_error_y: " + max_offset_error_y);
-        }
-        */
-
-        final int offset_x = (bitmap_width - slice_width)/2;
-        // blend_hwidth is the half-width of the region that we blend between.
-        // N.B., when using blendPyramids(), the region we actually have blending over is only half
-        // of the width of the images it receives to blend receive (i.e., the blend region width
-        // is equal to blend_hwidth), because of the code to find a best path.
-        //final int blend_hwidth = 0;
-        //final int blend_hwidth = nextPowerOf2(bitmap_width/20);
-        //final int blend_hwidth = nextPowerOf2(bitmap_width/10);
-        final int blend_hwidth = nextMultiple((int)(bitmap_width/6.1f+0.5f), getBlendDimension()/2);
-        //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
-        final int align_hwidth = bitmap_width/10;
-        //final int align_hwidth = bitmap_width/5;
-        final boolean use_auto_align = true;
-        //final boolean use_auto_align = false;
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
-            Log.d(TAG, "    align_hwidth: " + align_hwidth);
-        }
-
+    private void computePanoramaTransforms(List<Matrix> cumulative_transforms, List<Integer> align_x_values, List<Integer> dst_offset_x_values,
+                                           List<Bitmap> bitmaps, final int bitmap_width, final int bitmap_height,
+                                           final int offset_x, final int slice_width, final int align_hwidth,
+                                           long time_s) throws HDRProcessorException {
         Matrix cumulative_transform = new Matrix();
-        List<Matrix> cumulative_transforms = new ArrayList<>(); // i-th entry is the transform to apply to the i-th bitmap so that it's aligned to the same space as the 1st bitmap
-
-        final int panorama_width = (bitmaps.size()*slice_width+2*offset_x);
-        Bitmap panorama = Bitmap.createBitmap(panorama_width, bitmap_height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(panorama);
-
-        Rect src_rect = new Rect();
-        Rect dst_rect = new Rect();
-        //Paint p = new Paint();
-        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
         int align_x = 0, align_y = 0;
         int dst_offset_x = 0;
-        List<Integer> align_x_values = new ArrayList<>();
         List<Integer> align_y_values = new ArrayList<>();
-        List<Integer> dst_offset_x_values = new ArrayList<>();
+
+        final boolean use_auto_align = true;
+        //final boolean use_auto_align = false;
 
         for(int i=0;i<bitmaps.size();i++) {
             if( MyDebug.LOG )
@@ -4244,13 +4171,6 @@ public class HDRProcessor {
                 }
             }
 
-            /*renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
-                bitmap, p, bitmap_width, bitmap_height,
-                blend_hwidth, slice_width, offset_x,
-                panorama, canvas,
-                align_x, align_y, dst_offset_x, align_x, 0,
-                camera_angle, time_s);*/
-
             align_x_values.add(align_x);
             align_y_values.add(align_y);
             dst_offset_x_values.add(dst_offset_x);
@@ -4267,6 +4187,93 @@ public class HDRProcessor {
 
             if( MyDebug.LOG )
                 Log.d(TAG, "### time after processing " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y) throws HDRProcessorException {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "panorama");
+            Log.d(TAG, "camera_angle_y: " + camera_angle_y);
+        }
+
+        long time_s = 0;
+        if( MyDebug.LOG )
+            time_s = System.currentTimeMillis();
+
+        int bitmap_width = bitmaps.get(0).getWidth();
+        int bitmap_height = bitmaps.get(0).getHeight();
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "bitmap_width: " + bitmap_width);
+            Log.d(TAG, "bitmap_height: " + bitmap_height);
+        }
+
+        for(int i=1;i<bitmaps.size();i++) {
+            Bitmap bitmap = bitmaps.get(i);
+            if( bitmap.getWidth() != bitmap_width || bitmap.getHeight() != bitmap_height ) {
+                Log.e(TAG, "bitmaps not of equal sizes");
+                throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
+            }
+        }
+
+        final int slice_width = (int) (bitmap_width / panorama_pics_per_screen);
+        if( MyDebug.LOG )
+            Log.d(TAG, "slice_width: " + slice_width);
+
+        final double camera_angle = Math.toRadians(camera_angle_y);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "camera_angle_y: " + camera_angle_y);
+            Log.d(TAG, "camera_angle: " + camera_angle);
+        }
+        // max offset error of gyro_tol_degrees - convert this to pixels
+        //int max_offset_error_x = (int)(gyro_tol_degrees * bitmap_width / mActivity.getPreview().getViewAngleY() + 0.5f);
+        //int max_offset_error_y = (int)(gyro_tol_degrees * bitmap_height / mActivity.getPreview().getViewAngleX() + 0.5f);
+        //if we use the above code, remember not to use the camera view angles, but those that the test photos were taken with!
+        //double h = ((double)bitmap_width) / (2.0 * Math.tan(camera_angle/2.0) );
+        /*int max_offset_error_x = (int)(h * Math.tan(Math.toRadians(gyro_tol_degrees)) + 0.5f);
+        max_offset_error_x *= 2; // allow a fudge factor
+        int max_offset_error_y = max_offset_error_x;
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "h: " + h);
+            Log.d(TAG, "max_offset_error_x: " + max_offset_error_x);
+            Log.d(TAG, "max_offset_error_y: " + max_offset_error_y);
+        }
+        */
+
+        final int offset_x = (bitmap_width - slice_width)/2;
+        // blend_hwidth is the half-width of the region that we blend between.
+        // N.B., when using blendPyramids(), the region we actually have blending over is only half
+        // of the width of the images it receives to blend receive (i.e., the blend region width
+        // is equal to blend_hwidth), because of the code to find a best path.
+        //final int blend_hwidth = 0;
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/20);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/10);
+        final int blend_hwidth = nextMultiple((int)(bitmap_width/6.1f+0.5f), getBlendDimension()/2);
+        //final int blend_hwidth = nextPowerOf2(bitmap_width/5);
+        final int align_hwidth = bitmap_width/10;
+        //final int align_hwidth = bitmap_width/5;
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "    blend_hwidth: " + blend_hwidth);
+            Log.d(TAG, "    align_hwidth: " + align_hwidth);
+        }
+
+        List<Matrix> cumulative_transforms = new ArrayList<>(); // i-th entry is the transform to apply to the i-th bitmap so that it's aligned to the same space as the 1st bitmap
+
+        Rect src_rect = new Rect();
+        Rect dst_rect = new Rect();
+        //Paint p = new Paint();
+        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
+        List<Integer> align_x_values = new ArrayList<>();
+        List<Integer> dst_offset_x_values = new ArrayList<>();
+
+        computePanoramaTransforms(cumulative_transforms, align_x_values, dst_offset_x_values, bitmaps,
+                bitmap_width, bitmap_height, offset_x, slice_width, align_hwidth, time_s);
+
+        // note that we crop the panorama_width later on, but for now we still need an estimate, before finalising
+        // the transforms
+        int panorama_width = (bitmaps.size()*slice_width+2*offset_x);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "original panorama_width: " + panorama_width);
         }
 
         {
@@ -4314,9 +4321,10 @@ public class HDRProcessor {
             if( MyDebug.LOG )
                 Log.d(TAG, "render bitmap: " + i);
             Bitmap bitmap = bitmaps.get(i);
-            align_x = align_x_values.get(i);
-            //align_y = align_y_values.get(i);
-            dst_offset_x = dst_offset_x_values.get(i);
+            int align_x = align_x_values.get(i);
+            //int align_y = align_y_values.get(i);
+            int align_y = 0;
+            int dst_offset_x = dst_offset_x_values.get(i);
 
             boolean free_bitmap = false;
             int shift_stop_x = align_x;
@@ -4324,9 +4332,10 @@ public class HDRProcessor {
 
             {
                 final boolean shift_transition = true;
+                //final boolean shift_transition = false;
                 centre_shift_x = - align_x;
                 align_x = 0;
-                align_y = 0;
+                //align_y = 0;
                 if( !shift_transition ) {
                     shift_stop_x = 0;
                 }
@@ -4367,6 +4376,9 @@ public class HDRProcessor {
                     rotated_canvas.restore();
 
                     bitmap = rotated_bitmap;
+                    /*if( MyDebug.LOG ) {
+                        saveBitmap(bitmap, "transformed_bitmap_" + i + ".jpg");
+                    }*/
                     free_bitmap = true;
                 }
             }
