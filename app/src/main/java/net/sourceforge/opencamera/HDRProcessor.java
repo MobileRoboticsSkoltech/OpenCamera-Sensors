@@ -2651,7 +2651,7 @@ public class HDRProcessor {
                 if( MyDebug.LOG )
                     Log.d(TAG, ">>> find corners, chunk " + cy + " / " + n_y_chunks);
                 float threshold = 5000000.0f;
-                // setting a min_thresold fixes testPanorama11, also helps testPanorama1
+                // setting a min_threshold fixes testPanorama11, also helps testPanorama1
                 // note that this needs to be at least 1250000.0f - at 625000.0f, testPanorama1
                 // still has problems and in fact ends up being worse than having no min threshold
                 final float min_threshold = 1250000.0f;
@@ -2664,6 +2664,7 @@ public class HDRProcessor {
                     Log.d(TAG, "    start_y: " + start_y);
                     Log.d(TAG, "    stop_y: " + stop_y);
                 }
+                final int max_iter = 10;
                 for(int count=0;;count++) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "### attempt " + count + " try threshold: " + threshold + " [ " + low_threshold + " : " + high_threshold + " ]");
@@ -2700,6 +2701,14 @@ public class HDRProcessor {
                             all_points.addAll(points);
                             break;
                         }
+                        else if( count+1 == max_iter ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "    too few points but hit max iterations: " + points.size());
+                            all_points.addAll(points);
+                            //if( true )
+                            //    throw new RuntimeException("too few points: " + points.size()); // test
+                            break;
+                        }
                         else {
                             high_threshold = threshold;
                             threshold = 0.5f * ( low_threshold + threshold );
@@ -2712,6 +2721,16 @@ public class HDRProcessor {
 								throw new RuntimeException();
 							}*/
                         }
+                    }
+                    else if( count+1 == max_iter ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "    too many points but hit max iterations: " + points.size());
+                        // arbitrarily take a subset
+                        points.subList(max_corners,points.size()).clear();
+                        all_points.addAll(points);
+                        //if( true )
+                        //    throw new RuntimeException("too many points: " + points.size()); // test
+                        break;
                     }
                     else {
                         low_threshold = threshold;
