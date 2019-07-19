@@ -14899,6 +14899,58 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         saveBitmap(panorama, output_name);
+
+        // check we've cropped correctly:
+        final float black_factor = 0.9f;
+        // top:
+        int n_black = 0;
+        for(int i=0;i<panorama.getWidth();i++) {
+            int color = panorama.getPixel(i, 0);
+            if( ((color >> 16) & 0xff) == 0 && ((color >> 8) & 0xff) == 0 && ((color) & 0xff) == 0 ) {
+                n_black++;
+            }
+        }
+        if( n_black >= panorama.getWidth()*black_factor ) {
+            Log.e(TAG, "too many black pixels on top border: " + n_black);
+            fail();
+        }
+        // bottom:
+        n_black = 0;
+        for(int i=0;i<panorama.getWidth();i++) {
+            int color = panorama.getPixel(i, panorama.getHeight()-1);
+            if( ((color >> 16) & 0xff) == 0 && ((color >> 8) & 0xff) == 0 && ((color) & 0xff) == 0 ) {
+                n_black++;
+            }
+        }
+        if( n_black >= panorama.getWidth()*black_factor ) {
+            Log.e(TAG, "too many black pixels on bottom border: " + n_black);
+            fail();
+        }
+        // left:
+        n_black = 0;
+        for(int i=0;i<panorama.getHeight();i++) {
+            int color = panorama.getPixel(0, i);
+            if( ((color >> 16) & 0xff) == 0 && ((color >> 8) & 0xff) == 0 && ((color) & 0xff) == 0 ) {
+                n_black++;
+            }
+        }
+        if( n_black >= panorama.getHeight()*black_factor ) {
+            Log.e(TAG, "too many black pixels on left border: " + n_black);
+            fail();
+        }
+        // right:
+        n_black = 0;
+        for(int i=0;i<panorama.getHeight();i++) {
+            int color = panorama.getPixel(panorama.getWidth()-1, i);
+            if( ((color >> 16) & 0xff) == 0 && ((color >> 8) & 0xff) == 0 && ((color) & 0xff) == 0 ) {
+                n_black++;
+            }
+        }
+        if( n_black >= panorama.getHeight()*black_factor ) {
+            Log.e(TAG, "too many black pixels on right border: " + n_black);
+            fail();
+        }
+
         Thread.sleep(500);
     }
 

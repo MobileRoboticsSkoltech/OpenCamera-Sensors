@@ -3581,7 +3581,7 @@ public class HDRProcessor {
     private void renderPanoramaImage(final int i, final int n_bitmaps, final Rect src_rect_workspace, final Rect dst_rect_workspace,
                                      final Bitmap bitmap, final Paint p, final int bitmap_width, final int bitmap_height,
                                      final int blend_hwidth, final int slice_width, final int offset_x,
-                                     final Bitmap panorama, final Canvas canvas,
+                                     final Bitmap panorama, final Canvas canvas, final int crop_x0, final int crop_y0,
                                      final int align_x, final int align_y, final int dst_offset_x, final int shift_stop_x, final int centre_shift_x,
                                      final double camera_angle, long time_s) {
         //float alpha = (float)((camera_angle * i)/panorama_pics_per_screen);
@@ -3621,7 +3621,7 @@ public class HDRProcessor {
             {
                 Canvas lhs_canvas = new Canvas(lhs);
                 src_rect_workspace.set(offset_x + dst_offset_x - blend_hwidth, 0, offset_x + dst_offset_x + blend_hwidth, bitmap_height);
-                src_rect_workspace.offset(align_x, align_y);
+                // n.b., shouldn't shift by align_x, align_y
                 dst_rect_workspace.set(0, 0, blend_width, blend_height);
                 lhs_canvas.drawBitmap(panorama, src_rect_workspace, dst_rect_workspace, p);
             }
@@ -3632,7 +3632,7 @@ public class HDRProcessor {
                 Canvas rhs_canvas = new Canvas(rhs);
                 src_rect_workspace.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
                 src_rect_workspace.offset(align_x, align_y);
-                dst_rect_workspace.set(0, 0, blend_width, blend_height);
+                dst_rect_workspace.set(-crop_x0, -crop_y0, blend_width-crop_x0, blend_height-crop_y0);
                 rhs_canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
             }
             if( MyDebug.LOG ) {
@@ -3692,7 +3692,7 @@ public class HDRProcessor {
             Log.d(TAG, "### time before drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
         src_rect_workspace.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
         src_rect_workspace.offset(align_x, align_y);
-        dst_rect_workspace.set(offset_x + dst_offset_x + start_x, 0, offset_x + dst_offset_x + stop_x, bitmap_height);
+        dst_rect_workspace.set(offset_x + dst_offset_x + start_x - crop_x0, -crop_y0, offset_x + dst_offset_x + stop_x - crop_x0, bitmap_height-crop_y0);
         canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
         if( MyDebug.LOG )
             Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
@@ -4230,6 +4230,118 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void renderPanorama(List<Bitmap> bitmaps, int bitmap_width, int bitmap_height,
+                                List<Matrix> cumulative_transforms, List<Integer> align_x_values, List<Integer> dst_offset_x_values,
+                                final int blend_hwidth, final int slice_width, final int offset_x,
+                                final Bitmap panorama, final int crop_x0, final int crop_y0,
+                                final double camera_angle, long time_s) {
+
+        Rect src_rect = new Rect();
+        Rect dst_rect = new Rect();
+        //Paint p = new Paint();
+        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
+        Canvas canvas = new Canvas(panorama);
+
+        for(int i=0;i<bitmaps.size();i++) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "render bitmap: " + i);
+            Bitmap bitmap = bitmaps.get(i);
+            int align_x = align_x_values.get(i);
+            //int align_y = align_y_values.get(i);
+            int align_y = 0;
+            int dst_offset_x = dst_offset_x_values.get(i);
+
+            boolean free_bitmap = false;
+            int shift_stop_x = align_x;
+            int centre_shift_x;
+
+            {
+                final boolean shift_transition = true;
+                //final boolean shift_transition = false;
+                centre_shift_x = - align_x;
+                align_x = 0;
+                //align_y = 0;
+                if( !shift_transition ) {
+                    shift_stop_x = 0;
+                }
+
+                if( i != 0 && shift_transition ) {
+                    int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
+                    dst_offset_x -= shift_start_x;
+                    align_x = - shift_start_x;
+                    shift_stop_x -= shift_start_x;
+                }
+
+                if( align_x != 0 ) {
+                    // Bake the alignment into the transform.
+                    // Otherwise we have risk that we can transform the image too far off the bitmap, only to try to undo
+                    // that translation via align_x in renderPanoramaImage(), which means we get black regions due to having
+                    // lost the parts of the image that were translated too far!
+                    // This can show up when the blend_hwidth is sufficiently large, and means we get dark bands on the
+                    // resultant image.
+
+                    float [] points = new float[2];
+                    points[0] = bitmap_width/2.0f;
+                    points[1] = bitmap_height/2.0f;
+                    cumulative_transforms.get(i).mapPoints(points);
+                    int trans_x = (int)(points[0] - bitmap_width/2.0f);
+
+                    int bake_trans_x = -align_x;
+                    // ...but on the last image, we don't want to shift too far off screen, as we'll then chop
+                    // off part of the image.
+                    // See testPanorama19, where without this fix we lose a bit along the right hand side
+                    if( i == bitmaps.size()-1 && trans_x < 0 && bake_trans_x + trans_x > 0 ) {
+                        bake_trans_x = - trans_x;
+                        //if( true )
+                        //    throw new RuntimeException(); // test
+                    }
+
+                    cumulative_transforms.get(i).postTranslate(bake_trans_x, 0.0f);
+                    //if( MyDebug.LOG )
+                    //Log.d(TAG, "centre_shift_x: " + centre_shift_x);
+                    //if( MyDebug.LOG )
+                    //Log.d(TAG, "    align_x: " + align_x);
+                    centre_shift_x += bake_trans_x;
+                    //if( MyDebug.LOG )
+                    //Log.d(TAG, "new centre_shift_x: " + centre_shift_x);
+                    align_x += bake_trans_x;
+                }
+
+                {
+                    Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
+                    Canvas rotated_canvas = new Canvas(rotated_bitmap);
+                    rotated_canvas.save();
+
+                    rotated_canvas.setMatrix(cumulative_transforms.get(i));
+
+                    rotated_canvas.drawBitmap(bitmap, 0, 0, p);
+                    rotated_canvas.restore();
+
+                    bitmap = rotated_bitmap;
+                    /*if( MyDebug.LOG ) {
+                        saveBitmap(bitmap, "transformed_bitmap_" + i + ".jpg");
+                    }*/
+                    free_bitmap = true;
+                }
+            }
+
+            renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
+                    bitmap, p, bitmap_width, bitmap_height,
+                    blend_hwidth, slice_width, offset_x,
+                    panorama, canvas, crop_x0, crop_y0,
+                    align_x, align_y, dst_offset_x, shift_stop_x, centre_shift_x,
+                    camera_angle, time_s);
+
+            if( free_bitmap ) {
+                bitmap.recycle();
+            }
+
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time after rendering " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y) throws HDRProcessorException {
         if( MyDebug.LOG ) {
             Log.d(TAG, "panorama");
@@ -4298,10 +4410,6 @@ public class HDRProcessor {
 
         List<Matrix> cumulative_transforms = new ArrayList<>(); // i-th entry is the transform to apply to the i-th bitmap so that it's aligned to the same space as the 1st bitmap
 
-        Rect src_rect = new Rect();
-        Rect dst_rect = new Rect();
-        //Paint p = new Paint();
-        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
         List<Integer> align_x_values = new ArrayList<>();
         List<Integer> dst_offset_x_values = new ArrayList<>();
 
@@ -4322,88 +4430,106 @@ public class HDRProcessor {
         //adjustExposures(bitmaps, time_s);
         float ratio_brightnesses = adjustExposuresLocal(bitmaps, bitmap_width, bitmap_height, slice_width, time_s);
 
+        //final boolean crop = false;
+        final boolean crop = true;
+        int panorama_height = bitmap_height;
+        int crop_x0 = 0;
+        int crop_y0 = 0;
+
+        if( crop ) {
+            // compute crop regions
+            int crop_x1 = bitmap_width-1;
+            int crop_y1 = bitmap_height-1;
+            for(int i=0;i<bitmaps.size();i++) {
+                float [] points = new float[8];
+
+                points[0] = 0.0f;
+                points[1] = 0.0f;
+
+                points[2] = bitmap_width-1.0f;
+                points[3] = 0.0f;
+
+                points[4] = 0.0f;
+                points[5] = bitmap_height-1.0f;
+
+                points[6] = bitmap_width-1.0f;
+                points[7] = bitmap_height-1.0f;
+
+                cumulative_transforms.get(i).mapPoints(points);
+
+                crop_y0 = Math.max(crop_y0, (int)points[1]);
+                crop_y0 = Math.max(crop_y0, (int)points[3]);
+
+                crop_y1 = Math.min(crop_y1, (int)points[5]);
+                crop_y1 = Math.min(crop_y1, (int)points[7]);
+
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "i: " + i);
+                    Log.d(TAG, "    points[0]: " + points[0]);
+                    Log.d(TAG, "    points[1]: " + points[1]);
+                    Log.d(TAG, "    points[2]: " + points[2]);
+                    Log.d(TAG, "    points[3]: " + points[3]);
+                    Log.d(TAG, "    points[4]: " + points[4]);
+                    Log.d(TAG, "    points[5]: " + points[5]);
+                    Log.d(TAG, "    points[6]: " + points[6]);
+                    Log.d(TAG, "    points[7]: " + points[7]);
+                }
+                if( i == 0 ) {
+                    crop_x0 = Math.max(crop_x0, (int)points[0]);
+                    crop_x0 = Math.max(crop_x0, (int)points[4]);
+                }
+                if( i == bitmaps.size()-1 ) {
+                    crop_x1 = Math.min(crop_x1, (int)points[2]);
+                    crop_x1 = Math.min(crop_x1, (int)points[6]);
+                }
+            }
+
+            panorama_width -= (bitmap_width - 1) - crop_x1;
+            panorama_width -= crop_x0;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "crop_x0: " + crop_x0);
+                Log.d(TAG, "crop_x1: " + crop_x1);
+                Log.d(TAG, "panorama_width: " + panorama_width);
+            }
+            /*if( crop_x0 > 0 ) {
+                // need to shift transforms over
+                for(int i=0;i<bitmaps.size();i++) {
+                    cumulative_transforms.get(i).postTranslate(-crop_x0, 0.0f);
+                }
+            }*/
+
+            panorama_height = crop_y1 - crop_y0 + 1;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "crop_y0: " + crop_y0);
+                Log.d(TAG, "crop_y1: " + crop_y1);
+                Log.d(TAG, "panorama_height: " + panorama_height);
+            }
+
+            // take cylindrical projection into account
+            float theta = (float)((bitmap_width/2)*camera_angle)/(float)bitmap_width;
+            float yscale = (float)Math.cos(theta);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "theta: " + theta);
+                Log.d(TAG, "yscale: " + yscale);
+            }
+            //yscale = 1.0f;
+            crop_y0 = (int)(bitmap_height/2.0f + yscale*(crop_y0 - bitmap_height/2.0f) + 0.5f);
+            crop_y1 = (int)(bitmap_height/2.0f + yscale*(crop_y1 - bitmap_height/2.0f) + 0.5f);
+
+            panorama_height = crop_y1 - crop_y0 + 1;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "crop_y0: " + crop_y0);
+                Log.d(TAG, "crop_y1: " + crop_y1);
+                Log.d(TAG, "panorama_height: " + panorama_height);
+            }
+        }
+
+        Bitmap panorama = Bitmap.createBitmap(panorama_width, panorama_height, Bitmap.Config.ARGB_8888);
+
         if( MyDebug.LOG )
             Log.d(TAG, "### time before rendering bitmaps: " + (System.currentTimeMillis() - time_s));
-        for(int i=0;i<bitmaps.size();i++) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "render bitmap: " + i);
-            Bitmap bitmap = bitmaps.get(i);
-            int align_x = align_x_values.get(i);
-            //int align_y = align_y_values.get(i);
-            int align_y = 0;
-            int dst_offset_x = dst_offset_x_values.get(i);
-
-            boolean free_bitmap = false;
-            int shift_stop_x = align_x;
-            int centre_shift_x;
-
-            {
-                final boolean shift_transition = true;
-                //final boolean shift_transition = false;
-                centre_shift_x = - align_x;
-                align_x = 0;
-                //align_y = 0;
-                if( !shift_transition ) {
-                    shift_stop_x = 0;
-                }
-
-                if( i != 0 && shift_transition ) {
-                    int shift_start_x = align_x_values.get(i-1); // +ve means shift to the left
-                    dst_offset_x -= shift_start_x;
-                    align_x = - shift_start_x;
-                    shift_stop_x -= shift_start_x;
-                }
-
-                if( align_x != 0 ) {
-                    // Bake the alignment into the transform.
-                    // Otherwise we have risk that we can transform the image too far off the bitmap, only to try to undo
-                    // that translation via align_x in renderPanoramaImage(), which means we get black regions due to having
-                    // lost the parts of the image that were translated too far!
-                    // This can show up when the blend_hwidth is sufficiently large, and means we get dark bands on the
-                    // resultant image.
-                    cumulative_transforms.get(i).postTranslate(-align_x, 0.0f);
-                    //if( MyDebug.LOG )
-                    //Log.d(TAG, "centre_shift_x: " + centre_shift_x);
-                    //if( MyDebug.LOG )
-                    //Log.d(TAG, "    align_x: " + align_x);
-                    centre_shift_x -= align_x;
-                    //if( MyDebug.LOG )
-                    //Log.d(TAG, "new centre_shift_x: " + centre_shift_x);
-                    align_x = 0;
-                }
-
-                {
-                    Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap_width, bitmap_height, Bitmap.Config.ARGB_8888);
-                    Canvas rotated_canvas = new Canvas(rotated_bitmap);
-                    rotated_canvas.save();
-
-                    rotated_canvas.setMatrix(cumulative_transforms.get(i));
-
-                    rotated_canvas.drawBitmap(bitmap, 0, 0, p);
-                    rotated_canvas.restore();
-
-                    bitmap = rotated_bitmap;
-                    /*if( MyDebug.LOG ) {
-                        saveBitmap(bitmap, "transformed_bitmap_" + i + ".jpg");
-                    }*/
-                    free_bitmap = true;
-                }
-            }
-
-            renderPanoramaImage(i, bitmaps.size(), src_rect, dst_rect,
-                    bitmap, p, bitmap_width, bitmap_height,
-                    blend_hwidth, slice_width, offset_x,
-                    panorama, canvas,
-                    align_x, align_y, dst_offset_x, shift_stop_x, centre_shift_x,
-                    camera_angle, time_s);
-
-            if( free_bitmap ) {
-                bitmap.recycle();
-            }
-
-            if( MyDebug.LOG )
-                Log.d(TAG, "### time after rendering " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-        }
+        renderPanorama(bitmaps, bitmap_width, bitmap_height, cumulative_transforms, align_x_values, dst_offset_x_values,
+                blend_hwidth, slice_width, offset_x, panorama, crop_x0, crop_y0, camera_angle, time_s);
         if( MyDebug.LOG )
             Log.d(TAG, "### time after rendering bitmaps: " + (System.currentTimeMillis() - time_s));
 
