@@ -379,6 +379,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public boolean allowZoom() {
+        return true;
+    }
+
+    @Override
     public boolean isTestAlwaysFocus() {
         return false;
     }

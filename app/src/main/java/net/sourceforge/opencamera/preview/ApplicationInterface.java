@@ -122,6 +122,7 @@ public interface ApplicationInterface {
     boolean useCamera2FastBurst(); // whether to enable Camera2's captureBurst() for faster taking of expo-bracketing photos (generally should be true, but some devices have problems with captureBurst())
     boolean usePhotoVideoRecording(); // whether to enable support for taking photos when recording video (if not supported, this won't be called)
     boolean isPreviewInBackground(); // if true, then Preview can disable real-time effects (e.g., computing histogram)
+    boolean allowZoom(); // if false, don't allow zoom functionality even if the device supports it - Preview.supportsZoom() will also return false; if true, allow zoom if the device supports it
 
     // for testing purposes:
     boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful

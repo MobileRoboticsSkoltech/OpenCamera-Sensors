@@ -1471,6 +1471,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
+    public boolean allowZoom() {
+        if( getPhotoMode() == PhotoMode.Panorama ) {
+            // don't allow zooming in panorama mode, the algorithm isn't set up to support this!
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean isTestAlwaysFocus() {
         if( MyDebug.LOG ) {
             Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
