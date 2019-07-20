@@ -399,49 +399,53 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return exposure;
     }
 
-    @Override
-    public Pair<Integer, Integer> getCameraResolutionPref() {
-        if( getPhotoMode() == PhotoMode.Panorama ) {
-            // if we allow panorama with higher resolutions, review against memory requirements under MainActivity.supportsPanorama()
-            // also may need to update the downscaling in the testing code
-            List<CameraController.Size> sizes = main_activity.getPreview().getSupportedPictureSizes(false);
-            final int max_width_c = 2080;
-            boolean found = false;
-            CameraController.Size best_size = null;
-            // find largest width <= max_width_c with aspect ratio 4:3
-            for(CameraController.Size size : sizes) {
-                if( size.width <= max_width_c ) {
-                    double aspect_ratio = ((double)size.width) / (double)size.height;
-                    if( Math.abs(aspect_ratio - 4.0/3.0) < 1.0e-5 ) {
-                        if( !found || size.width > best_size.width ) {
-                            found = true;
-                            best_size = size;
-                        }
-                    }
-                }
-            }
-            if( found ) {
-                return new Pair<>(best_size.width, best_size.height);
-            }
-            // else find largest width <= max_width_c
-            for(CameraController.Size size : sizes) {
-                if( size.width <= max_width_c ) {
+    public static CameraController.Size choosePanoramaResolution(List<CameraController.Size> sizes) {
+        // if we allow panorama with higher resolutions, review against memory requirements under MainActivity.supportsPanorama()
+        // also may need to update the downscaling in the testing code
+        final int max_width_c = 2080;
+        boolean found = false;
+        CameraController.Size best_size = null;
+        // find largest width <= max_width_c with aspect ratio 4:3
+        for(CameraController.Size size : sizes) {
+            if( size.width <= max_width_c ) {
+                double aspect_ratio = ((double)size.width) / (double)size.height;
+                if( Math.abs(aspect_ratio - 4.0/3.0) < 1.0e-5 ) {
                     if( !found || size.width > best_size.width ) {
                         found = true;
                         best_size = size;
                     }
                 }
             }
-            if( found ) {
-                return new Pair<>(best_size.width, best_size.height);
-            }
-            // else find smallest width
-            for(CameraController.Size size : sizes) {
-                if( !found || size.width < best_size.width ) {
+        }
+        if( found ) {
+            return best_size;
+        }
+        // else find largest width <= max_width_c
+        for(CameraController.Size size : sizes) {
+            if( size.width <= max_width_c ) {
+                if( !found || size.width > best_size.width ) {
                     found = true;
                     best_size = size;
                 }
             }
+        }
+        if( found ) {
+            return best_size;
+        }
+        // else find smallest width
+        for(CameraController.Size size : sizes) {
+            if( !found || size.width < best_size.width ) {
+                found = true;
+                best_size = size;
+            }
+        }
+        return best_size;
+    }
+
+    @Override
+    public Pair<Integer, Integer> getCameraResolutionPref() {
+        if( getPhotoMode() == PhotoMode.Panorama ) {
+            CameraController.Size best_size = choosePanoramaResolution(main_activity.getPreview().getSupportedPictureSizes(false));
             return new Pair<>(best_size.width, best_size.height);
         }
         String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");

@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.test;
 
 import android.media.CamcorderProfile;
 
+import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
@@ -433,6 +434,80 @@ public class UnitTest {
         Log.d(TAG, "photo_size2c: " + photo_size2c.width + " x " + photo_size2c.height);
         assertEquals(new CameraController.Size(1440, 1080), photo_size2c);
 
+    }
+
+    /** Test for choosing resolution for panorama mode.
+     */
+    @Test
+    public void testPanoramaResolutions() {
+        {
+            List<CameraController.Size> sizes = new ArrayList<>();
+            sizes.add(new CameraController.Size(4640, 3480));
+            sizes.add(new CameraController.Size(4640, 2610));
+            sizes.add(new CameraController.Size(3488, 3488));
+            sizes.add(new CameraController.Size(3840, 2160));
+            sizes.add(new CameraController.Size(3456, 3456));
+            sizes.add(new CameraController.Size(1920, 1080));
+            sizes.add(new CameraController.Size(1728, 1728));
+            sizes.add(new CameraController.Size(1440, 1080));
+            sizes.add(new CameraController.Size(1200, 900));
+
+            CameraController.Size chosen_size = MyApplicationInterface.choosePanoramaResolution(sizes);
+            assertEquals(chosen_size, new CameraController.Size(1440, 1080));
+        }
+        {
+            List<CameraController.Size> sizes = new ArrayList<>();
+            sizes.add(new CameraController.Size(4640, 3480));
+            sizes.add(new CameraController.Size(4640, 2610));
+            sizes.add(new CameraController.Size(3488, 3488));
+            sizes.add(new CameraController.Size(3840, 2160));
+            sizes.add(new CameraController.Size(3456, 3456));
+            sizes.add(new CameraController.Size(1920, 1080));
+            sizes.add(new CameraController.Size(1728, 1728));
+            sizes.add(new CameraController.Size(1200, 900));
+
+            CameraController.Size chosen_size = MyApplicationInterface.choosePanoramaResolution(sizes);
+            assertEquals(chosen_size, new CameraController.Size(1200, 900));
+        }
+        {
+            List<CameraController.Size> sizes = new ArrayList<>();
+            sizes.add(new CameraController.Size(4640, 3480));
+            sizes.add(new CameraController.Size(4640, 2610));
+            sizes.add(new CameraController.Size(3488, 3488));
+            sizes.add(new CameraController.Size(3840, 2160));
+            sizes.add(new CameraController.Size(3456, 3456));
+            sizes.add(new CameraController.Size(1920, 1080));
+            sizes.add(new CameraController.Size(1728, 1728));
+
+            // no 4:3 with width below 2080
+            CameraController.Size chosen_size = MyApplicationInterface.choosePanoramaResolution(sizes);
+            assertEquals(chosen_size, new CameraController.Size(1920, 1080));
+        }
+        {
+            List<CameraController.Size> sizes = new ArrayList<>();
+            sizes.add(new CameraController.Size(4640, 3480));
+            sizes.add(new CameraController.Size(4640, 2610));
+            sizes.add(new CameraController.Size(3488, 3488));
+            sizes.add(new CameraController.Size(3840, 2160));
+            sizes.add(new CameraController.Size(3456, 3456));
+            sizes.add(new CameraController.Size(1728, 1728));
+
+            // no 4:3 with width below 2080
+            CameraController.Size chosen_size = MyApplicationInterface.choosePanoramaResolution(sizes);
+            assertEquals(chosen_size, new CameraController.Size(1728, 1728));
+        }
+        {
+            List<CameraController.Size> sizes = new ArrayList<>();
+            sizes.add(new CameraController.Size(4640, 3480));
+            sizes.add(new CameraController.Size(4640, 2610));
+            sizes.add(new CameraController.Size(3488, 3488));
+            sizes.add(new CameraController.Size(3840, 2160));
+            sizes.add(new CameraController.Size(3456, 3456));
+
+            // no resolutions with width below 2080
+            CameraController.Size chosen_size = MyApplicationInterface.choosePanoramaResolution(sizes);
+            assertEquals(chosen_size, new CameraController.Size(3456, 3456));
+        }
     }
 
     @Test
