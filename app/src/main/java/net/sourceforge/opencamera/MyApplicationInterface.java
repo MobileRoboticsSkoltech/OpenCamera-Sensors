@@ -1400,6 +1400,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             return sharedPreferences.getBoolean(PreferenceKeys.AllowRawForFocusBracketingPreferenceKey, true) &&
                     main_activity.supportsBurstRaw();
         }
+        // not supported for panorama mode
         return false;
     }
 
