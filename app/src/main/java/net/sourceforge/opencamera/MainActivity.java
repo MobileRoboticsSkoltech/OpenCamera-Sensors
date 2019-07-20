@@ -542,7 +542,7 @@ public class MainActivity extends Activity {
             }
         }).start();
 
-        // create notification channel
+        // create notification channel - only needed on Android 8+
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
             CharSequence name = "Open Camera Image Saving";
             String description = "Notification channel for processing and saving images in the background";
