@@ -1598,7 +1598,7 @@ public class MainUI {
     private int iso_button_manual_index = -1;
     private final static String manual_iso_value = "m";
 
-    private void setupExposureUI() {
+    public void setupExposureUI() {
         if( MyDebug.LOG )
             Log.d(TAG, "setupExposureUI");
         test_ui_buttons.clear();
@@ -1609,7 +1609,10 @@ public class MainUI {
         ViewGroup iso_buttons_container = main_activity.findViewById(R.id.iso_buttons);
         iso_buttons_container.removeAllViews();
         List<String> supported_isos;
-        if( preview.supportsISORange() ) {
+        if( preview.isVideoRecording() ) {
+            supported_isos = null;
+        }
+        else if( preview.supportsISORange() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports ISO range");
             int min_iso = preview.getMinimumISO();

@@ -1655,6 +1655,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 takePhotoVideoButton.setVisibility(View.VISIBLE);
             }
         }
+        if( main_activity.getMainUI().isExposureUIOpen() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "need to update exposure UI for start video recording");
+            // need to update the exposure UI when starting/stopping video recording, to remove/add
+            // ability to switch between auto and manual
+            main_activity.getMainUI().setupExposureUI();
+        }
         final int video_method = this.createOutputVideoMethod();
         boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
         if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
@@ -1891,6 +1898,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         takePhotoVideoButton.setVisibility(View.GONE);
         main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
         main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
+        if( main_activity.getMainUI().isExposureUIOpen() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "need to update exposure UI for stop video recording");
+            // need to update the exposure UI when starting/stopping video recording, to remove/add
+            // ability to switch between auto and manual
+            main_activity.getMainUI().setupExposureUI();
+        }
         if( subtitleVideoTimerTask != null ) {
             subtitleVideoTimerTask.cancel();
             subtitleVideoTimerTask = null;
