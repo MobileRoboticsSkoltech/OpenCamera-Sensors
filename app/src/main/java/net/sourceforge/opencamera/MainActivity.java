@@ -2151,7 +2151,13 @@ public class MainActivity extends Activity {
         // n.b., preview.setImmersiveMode() is called from onSystemUiVisibilityChange()
         if( on ) {
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && usingKitKatImmersiveMode() ) {
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+                if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
+                    // don't allow the kitkat-style immersive mode for panorama mode (problem that in "full" immersive mode, the gyro spot can't be seen - we could fix this, but simplest to just disallow)
+                    getWindow().getDecorView().setSystemUiVisibility(0);
+                }
+                else {
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+                }
             }
             else {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
