@@ -198,6 +198,11 @@ public class DrawPreview {
     private final float [] gyro_direction_up = new float[3];
     private final float [] transformed_gyro_direction_up = new float[3];
 
+    // call updateCachedViewAngles() before reading these values
+    private float view_angle_x_preview;
+    private float view_angle_y_preview;
+    private long last_view_angles_time;
+
     // OSD extra lines
     private String OSDLine1;
     private String OSDLine2;
@@ -590,7 +595,23 @@ public class DrawPreview {
         String focus_peaking_color = sharedPreferences.getString(PreferenceKeys.FocusPeakingColorPreferenceKey, "#ffffff");
         focus_peaking_color_pref = Color.parseColor(focus_peaking_color);
 
+        last_view_angles_time = 0; // force view angles to be recomputed
+
         has_settings = true;
+    }
+
+    private void updateCachedViewAngles(long time_ms) {
+        if( last_view_angles_time == 0 || time_ms > last_view_angles_time + 10000 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "update cached view angles");
+            // don't call this too often, for UI performance
+            // note that updateSettings will force the time to reset anyway, but we check every so often
+            // again just in case...
+            Preview preview = main_activity.getPreview();
+            view_angle_x_preview = preview.getViewAngleX(true);
+            view_angle_y_preview = preview.getViewAngleY(true);
+            last_view_angles_time = time_ms;
+        }
     }
 
     /** Loads the bitmap from the uri. File is optional, and is used on pre-Android 7 devices to
@@ -1876,7 +1897,7 @@ public class DrawPreview {
         canvas.restore();
     }
 
-    private void drawAngleLines(Canvas canvas) {
+    private void drawAngleLines(Canvas canvas, long time_ms) {
         Preview preview = main_activity.getPreview();
         CameraController camera_controller = preview.getCameraController();
         boolean has_level_angle = preview.hasLevelAngle();
@@ -1972,8 +1993,9 @@ public class DrawPreview {
                     canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
                 }
             }
-            float camera_angle_x = preview.getViewAngleX(true);
-            float camera_angle_y = preview.getViewAngleY(true);
+            updateCachedViewAngles(time_ms); // ensure view_angle_x_preview, view_angle_y_preview are computed and up to date
+            float camera_angle_x = this.view_angle_x_preview;
+            float camera_angle_y = this.view_angle_y_preview;
             float angle_scale_x = (float)( canvas.getWidth() / (2.0 * Math.tan( Math.toRadians((camera_angle_x/2.0)) )) );
             float angle_scale_y = (float)( canvas.getHeight() / (2.0 * Math.tan( Math.toRadians((camera_angle_y/2.0)) )) );
 			/*if( MyDebug.LOG ) {
@@ -2374,7 +2396,7 @@ public class DrawPreview {
 
         drawUI(canvas, time_ms);
 
-        drawAngleLines(canvas);
+        drawAngleLines(canvas, time_ms);
 
         doFocusAnimation(canvas, time_ms);
 
@@ -2403,8 +2425,9 @@ public class DrawPreview {
                     float angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
                     float angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
                     if( Math.abs(angle_x) < 0.5f*Math.PI && Math.abs(angle_y) < 0.5f*Math.PI ) {
-                        float camera_angle_x = preview.getViewAngleX(true);
-                        float camera_angle_y = preview.getViewAngleY(true);
+                        updateCachedViewAngles(time_ms); // ensure view_angle_x_preview, view_angle_y_preview are computed and up to date
+                        float camera_angle_x = this.view_angle_x_preview;
+                        float camera_angle_y = this.view_angle_y_preview;
                         float angle_scale_x = (float) (canvas.getWidth() / (2.0 * Math.tan(Math.toRadians((camera_angle_x / 2.0)))));
                         float angle_scale_y = (float) (canvas.getHeight() / (2.0 * Math.tan(Math.toRadians((camera_angle_y / 2.0)))));
                         angle_scale_x *= preview.getZoomRatio();

@@ -6658,8 +6658,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     /** Returns the horizontal angle of view in degrees (when unzoomed).
      */
     public float getViewAngleX(boolean for_preview) {
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "getViewAngleX: " + for_preview);*/
+		if( MyDebug.LOG )
+			Log.d(TAG, "getViewAngleX: " + for_preview);
         CameraController.Size size = for_preview ? this.getCurrentPreviewSize() : this.getCurrentPictureSize();
         if( size == null ) {
             Log.e(TAG, "can't find view angle x size");
@@ -6692,8 +6692,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     /** Returns the vertical angle of view in degrees (when unzoomed).
      */
     public float getViewAngleY(boolean for_preview) {
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "getViewAngleY: " + for_preview);*/
+		if( MyDebug.LOG )
+			Log.d(TAG, "getViewAngleY: " + for_preview);
         CameraController.Size size = for_preview ? this.getCurrentPreviewSize() : this.getCurrentPictureSize();
         if( size == null ) {
             Log.e(TAG, "can't find view angle y size");
