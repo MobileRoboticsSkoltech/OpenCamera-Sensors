@@ -3724,6 +3724,8 @@ public class MainActivity extends Activity {
     public boolean supportsAutoStabilise() {
         if( applicationInterface.isRawOnly() )
             return false; // if not saving JPEGs, no point having auto-stabilise mode, as it won't affect the RAW images
+        if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
+            return false; // not supported in panorama mode
         return this.supports_auto_stabilise;
     }
 
