@@ -1514,19 +1514,20 @@ public class DrawPreview {
         if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-            int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+            int gap_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+            int text_y = (int) (16 * scale + 0.5f); // convert dps to pixels
             // fine tuning to adjust placement of text with respect to the GUI, depending on orientation
             if( ui_placement == MainUI.UIPlacement.UIPLACEMENT_TOP && ( ui_rotation == 0 || ui_rotation == 180 ) ) {
-                text_base_y = canvas.getHeight() - (int)(0.5*text_y);
+                text_base_y = canvas.getHeight() - (int)(0.5*gap_y);
             }
             else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 0 : 180 ) ) {
-                text_base_y = canvas.getHeight() - (int)(0.5*text_y);
+                text_base_y = canvas.getHeight() - (int)(0.5*gap_y);
             }
             else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 180 : 0 ) ) {
-                text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
+                text_base_y = canvas.getHeight() - (int)(2.5*gap_y); // leave room for GUI icons
             }
             else if( ui_rotation == 90 || ui_rotation == 270 ) {
-                //text_base_y = canvas.getHeight() + (int)(0.5*text_y);
+                //text_base_y = canvas.getHeight() + (int)(0.5*gap_y);
 				/*ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 				// align with "top" of the take_photo button, but remember to take the rotation into account!
 				view.getLocationOnScreen(gui_location);
@@ -1548,7 +1549,7 @@ public class DrawPreview {
                 int max_x = canvas.getWidth();
                 if( ui_rotation == 90 ) {
                     // so we don't interfere with the top bar info (datetime, free memory, ISO)
-                    max_x -= (int)(2.5*text_y);
+                    max_x -= (int)(2.5*gap_y);
                 }
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "root view right: " + preview.getView().getRootView().getRight());
@@ -1560,7 +1561,7 @@ public class DrawPreview {
                     // in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
                     diff_x = max_x - canvas.getWidth()/2;
                 }
-                text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
+                text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*gap_y);
             }
 
             boolean draw_angle = has_level_angle && show_angle_pref;
@@ -1658,7 +1659,7 @@ public class DrawPreview {
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
                 p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                 p.setTextAlign(Paint.Align.CENTER);
-                int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
+                int pixels_offset_y = 2*text_y; // avoid overwriting the zoom
                 int color = Color.rgb(244, 67, 54); // Red 500
                 if( main_activity.isScreenLocked() ) {
                     // writing in reverse order, bottom to top
@@ -1732,10 +1733,10 @@ public class DrawPreview {
                     int n_burst_total = camera_controller.getBurstTotal();
                     p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                     p.setTextAlign(Paint.Align.CENTER);
-                    int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
+                    int pixels_offset_y = 2*text_y; // avoid overwriting the zoom
                     if( ui_rotation == 0 && applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing ) {
                         // avoid clashing with the target focus bracketing seekbar in landscape orientation
-                        pixels_offset_y = 5*text_y;
+                        pixels_offset_y = 5*gap_y;
                     }
                     String text = getContext().getResources().getString(R.string.capturing) + " " + n_burst_taken;
                     if( n_burst_total > 0 ) {
@@ -1750,7 +1751,7 @@ public class DrawPreview {
                         if( ((int)(time_ms / 500)) % 2 == 0 ) {
                             p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                             p.setTextAlign(Paint.Align.CENTER);
-                            int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
+                            int pixels_offset_y = 2*text_y; // avoid overwriting the zoom
                             int color = Color.rgb(244, 67, 54); // Red 500
                             applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.capturing), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
                         }
@@ -1761,7 +1762,7 @@ public class DrawPreview {
                 if( ((int)(time_ms / 500)) % 2 == 0 ) {
                     p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
                     p.setTextAlign(Paint.Align.CENTER);
-                    int pixels_offset_y = 3 * text_y; // avoid overwriting the zoom, and also allow a bit extra space
+                    int pixels_offset_y = 2 * text_y; // avoid overwriting the zoom
                     int n_images_to_save = applicationInterface.getImageSaver().getNRealImagesToSave();
                     String string = getContext().getResources().getString(R.string.processing) + " (" + n_images_to_save + " " + getContext().getResources().getString(R.string.remaining) + ")";
                     applicationInterface.drawTextWithBackground(canvas, p, string, Color.LTGRAY, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);

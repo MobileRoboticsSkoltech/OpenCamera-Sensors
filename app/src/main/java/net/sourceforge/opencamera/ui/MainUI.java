@@ -538,6 +538,12 @@ public class MainUI {
             if( ui_rotation == 90 || ui_rotation == 270 ) {
                 view.setTranslationX(2*height_pixels);
             }
+            else if( ui_rotation == 0 ) {
+                view.setTranslationY(1*height_pixels);
+            }
+            else {
+                view.setTranslationY(-1*height_pixels);
+            }
 
             view = main_activity.findViewById(R.id.exposure_seekbar);
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();

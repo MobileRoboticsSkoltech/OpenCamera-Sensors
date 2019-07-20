@@ -3835,7 +3835,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( camera_controller.setExposureCompensation(new_exposure) ) {
                 // now save
                 applicationInterface.setExposureCompensationPref(new_exposure);
-                showToast(getExposureCompensationString(new_exposure), 96, true);
+                showToast(getExposureCompensationString(new_exposure), 0, true);
             }
         }
     }
@@ -3850,7 +3850,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( camera_controller.setWhiteBalanceTemperature(new_temperature) ) {
                 // now save
                 applicationInterface.setWhiteBalanceTemperaturePref(new_temperature);
-                showToast(getResources().getString(R.string.white_balance) + " " + new_temperature, 96, true);
+                showToast(getResources().getString(R.string.white_balance) + " " + new_temperature, 0, true);
             }
         }
     }
@@ -3886,7 +3886,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( camera_controller.setISO(new_iso) ) {
                 // now save
                 applicationInterface.setISOPref("" + new_iso);
-                showToast(getISOString(new_iso), 96, true);
+                showToast(getISOString(new_iso), 0, true);
             }
         }
     }
@@ -3902,7 +3902,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( camera_controller.setExposureTime(new_exposure_time) ) {
                 // now save
                 applicationInterface.setExposureTimePref(new_exposure_time);
-                showToast(getExposureTimeString(new_exposure_time), 96, true);
+                showToast(getExposureTimeString(new_exposure_time), 0, true);
             }
         }
     }

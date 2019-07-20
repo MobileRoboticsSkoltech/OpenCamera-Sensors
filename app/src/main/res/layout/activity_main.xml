@@ -455,15 +455,6 @@
             android:visibility="gone"
             >
 
-            <TextView
-                android:id="@+id/iso_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="@string/iso"
-                android:textStyle="bold"
-                />
-
             <RelativeLayout
                 android:id="@+id/iso_buttons"
                 android:layout_width="wrap_content"
@@ -482,11 +473,11 @@
             android:visibility="gone"
             >
 
-            <TextView
+            <ImageView
                 android:id="@+id/exposure_seekbar_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/exposure_compensation"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_exposure_white_48dp"
                 />
 
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
@@ -495,26 +486,10 @@
                 android:contentDescription="@string/exposure_compensation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/exposure_seekbar_text"
+                android:layout_toRightOf="@+id/exposure_seekbar_text"
+                android:layout_alignTop="@+id/exposure_seekbar_text"
+                android:layout_alignBottom="@+id/exposure_seekbar_text"
                 android:alpha="0.9"
-                />
-
-            <TextView
-                android:id="@+id/exposure_seekbar_text_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dark"
-                android:layout_alignLeft="@+id/exposure_seekbar"
-                android:layout_below="@+id/exposure_seekbar"
-                />
-
-            <TextView
-                android:id="@+id/exposure_seekbar_text_bright"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/bright"
-                android:layout_alignRight="@+id/exposure_seekbar"
-                android:layout_below="@+id/exposure_seekbar"
                 />
 
             <ZoomControls
@@ -522,7 +497,9 @@
                 android:contentDescription="@string/exposure_compensation_zoom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:layout_alignLeft="@+id/exposure_seekbar"
+                android:layout_alignRight="@+id/exposure_seekbar"
+                android:gravity="center"
                 android:layout_below="@+id/exposure_seekbar"
                 />
         </RelativeLayout>
@@ -535,11 +512,11 @@
             android:visibility="gone"
             >
 
-            <TextView
+            <ImageView
                 android:id="@+id/iso_seekbar_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/iso"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/iso_icon"
                 />
 
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
@@ -548,16 +525,18 @@
                 android:contentDescription="@string/iso"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/iso_seekbar_text"
+                android:layout_toRightOf="@+id/iso_seekbar_text"
+                android:layout_alignTop="@+id/iso_seekbar_text"
+                android:layout_alignBottom="@+id/iso_seekbar_text"
                 android:alpha="0.9"
                 />
 
-            <TextView
+            <ImageView
                 android:id="@+id/exposure_time_seekbar_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_below="@+id/iso_seekbar"
-                android:text="@string/exposure_shutter_speed"
+                android:src="@drawable/baseline_shutter_speed_white_48"
                 />
 
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
@@ -566,7 +545,9 @@
                 android:contentDescription="@string/exposure_shutter_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/exposure_time_seekbar_text"
+                android:layout_toRightOf="@+id/exposure_time_seekbar_text"
+                android:layout_alignTop="@+id/exposure_time_seekbar_text"
+                android:layout_alignBottom="@+id/exposure_time_seekbar_text"
                 android:alpha="0.9"
                 />
 
@@ -580,11 +561,12 @@
             android:visibility="gone"
             >
 
-            <TextView
+            <ImageView
                 android:id="@+id/white_balance_seekbar_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/white_balance"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_colorize_white_48dp"
+                />
                 />
 
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
@@ -593,7 +575,9 @@
                 android:contentDescription="@string/white_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/white_balance_seekbar_text"
+                android:layout_toRightOf="@+id/white_balance_seekbar_text"
+                android:layout_alignTop="@+id/white_balance_seekbar_text"
+                android:layout_alignBottom="@+id/white_balance_seekbar_text"
                 android:alpha="0.9"
                 />
 
