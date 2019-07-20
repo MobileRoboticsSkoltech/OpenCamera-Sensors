@@ -2380,7 +2380,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     private void subTestISOButtonAvailability() {
-        if( mPreview.supportsISORange() ) {
+        if( mPreview.isVideoRecording() ) {
+            // shouldn't show ISO buttons when video recording
+            subTestPopupButtonAvailability("TEST_ISO", "auto", false);
+            subTestPopupButtonAvailability("TEST_ISO", "100", false);
+            subTestPopupButtonAvailability("TEST_ISO", "200", false);
+            subTestPopupButtonAvailability("TEST_ISO", "400", false);
+            subTestPopupButtonAvailability("TEST_ISO", "800", false);
+            subTestPopupButtonAvailability("TEST_ISO", "1600", false);
+        }
+        else if( mPreview.supportsISORange() ) {
             subTestPopupButtonAvailability("TEST_ISO", "auto", true);
             subTestPopupButtonAvailability("TEST_ISO", "100", true);
             subTestPopupButtonAvailability("TEST_ISO", "200", true);
@@ -2532,6 +2541,52 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(exposureContainer.getVisibility() == View.GONE);
 
         subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+        // test that switching to video mode removes the ISO buttons
+        View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        assertFalse(mPreview.isVideo());
+        Log.d(TAG, "switch to video mode");
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertTrue(mPreview.isVideo());
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureContainer.getVisibility() == View.GONE);
+
+        clickView(exposureButton);
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+        subTestISOButtonAvailability(); // check that ISO buttons are shown
+
+        assertFalse(mPreview.isVideoRecording());
+        Log.d(TAG, "about to click take video");
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take video");
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+        assertTrue(mPreview.isVideoRecording());
+
+        Thread.sleep(100);
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+        subTestISOButtonAvailability(); // check that ISO buttons are not shown
+
+        Thread.sleep(3000);
+
+        assertTrue(mPreview.isVideoRecording());
+        Log.d(TAG, "about to click stop video");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking stop video");
+        this.getInstrumentation().waitForIdleSync();
+        assertFalse(mPreview.isVideoRecording());
+
+        assertTrue(mPreview.isVideo());
+        Log.d(TAG, "switch to photo mode");
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertFalse(mPreview.isVideo());
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureContainer.getVisibility() == View.GONE);
 
         if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
             Log.d(TAG, "switch camera");
