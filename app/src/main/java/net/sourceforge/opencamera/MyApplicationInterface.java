@@ -2670,6 +2670,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         String preference_stamp_gpsformat = this.getStampGPSFormatPref();
         String preference_stamp_geo_address = this.getStampGeoAddressPref();
         String preference_units_distance = this.getUnitsDistancePref();
+        boolean panorama_crop = sharedPreferences.getString(PreferenceKeys.PanoramaCropPreferenceKey, "preference_panorama_crop_on").equals("preference_panorama_crop_on");
         boolean store_location = getGeotaggingPref() && getLocation() != null;
         Location location = store_location ? getLocation() : null;
         boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
@@ -2771,6 +2772,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         exposure_time,
                         zoom_factor,
                         preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                        panorama_crop,
                         store_location, location, store_geo_direction, geo_direction,
                         custom_tag_artist, custom_tag_copyright,
                         sample_factor);
@@ -2812,6 +2814,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     exposure_time,
                     zoom_factor,
                     preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
+                    false, // panorama doesn't use this codepath
                     store_location, location, store_geo_direction, geo_direction,
                     custom_tag_artist, custom_tag_copyright,
                     sample_factor);

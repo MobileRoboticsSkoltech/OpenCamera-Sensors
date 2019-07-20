@@ -765,6 +765,16 @@
 
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <ListPreference
+                android:key="preference_panorama_crop"
+                android:title="@string/preference_panorama_crop"
+                android:summary="@string/preference_panorama_crop_summary"
+                android:entries="@array/preference_panorama_crop_entries"
+                android:entryValues="@array/preference_panorama_crop_values"
+                android:defaultValue="preference_panorama_crop_on"
+                />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
                 android:key="preference_expo_bracketing_stops"
                 android:title="@string/preference_expo_bracketing_stops"
                 android:summary="@string/preference_expo_bracketing_stops_summary"

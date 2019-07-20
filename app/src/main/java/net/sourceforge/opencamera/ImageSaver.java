@@ -158,6 +158,7 @@ public class ImageSaver extends Thread {
         final String preference_stamp_gpsformat;
         final String preference_stamp_geo_address;
         final String preference_units_distance;
+        final boolean panorama_crop; // used for panorama
         final boolean store_location;
         final Location location;
         final boolean store_geo_direction;
@@ -185,6 +186,7 @@ public class ImageSaver extends Thread {
                 long exposure_time,
                 float zoom_factor,
                 String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                boolean panorama_crop,
                 boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                 String custom_tag_artist,
                 String custom_tag_copyright,
@@ -221,6 +223,7 @@ public class ImageSaver extends Thread {
             this.preference_stamp_gpsformat = preference_stamp_gpsformat;
             this.preference_stamp_geo_address = preference_stamp_geo_address;
             this.preference_units_distance = preference_units_distance;
+            this.panorama_crop = panorama_crop;
             this.store_location = store_location;
             this.location = location;
             this.store_geo_direction = store_geo_direction;
@@ -510,6 +513,7 @@ public class ImageSaver extends Thread {
                           long exposure_time,
                           float zoom_factor,
                           String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                          boolean panorama_crop,
                           boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                           String custom_tag_artist,
                           String custom_tag_copyright,
@@ -539,7 +543,7 @@ public class ImageSaver extends Thread {
                 exposure_time,
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
-                store_location, location, store_geo_direction, geo_direction,
+                panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -580,7 +584,7 @@ public class ImageSaver extends Thread {
                 0,
                 1.0f,
                 null, null, 0, 0, null, null, null, null, null, null,
-                false, null, false, 0.0,
+                false, false, null, false, 0.0,
                 null, null,
                 1);
     }
@@ -604,6 +608,7 @@ public class ImageSaver extends Thread {
                            long exposure_time,
                            float zoom_factor,
                            String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                           boolean panorama_crop,
                            boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                            String custom_tag_artist,
                            String custom_tag_copyright,
@@ -631,7 +636,7 @@ public class ImageSaver extends Thread {
                 exposure_time,
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
-                store_location, location, store_geo_direction, geo_direction,
+                panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -702,6 +707,7 @@ public class ImageSaver extends Thread {
                               long exposure_time,
                               float zoom_factor,
                               String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
+                              boolean panorama_crop,
                               boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
                               String custom_tag_artist,
                               String custom_tag_copyright,
@@ -733,7 +739,7 @@ public class ImageSaver extends Thread {
                 exposure_time,
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
-                store_location, location, store_geo_direction, geo_direction,
+                panorama_crop, store_location, location, store_geo_direction, geo_direction,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -843,7 +849,7 @@ public class ImageSaver extends Thread {
                 0,
                 1.0f,
                 null, null, 0, 0, null, null, null, null, null, null,
-                false, null, false, 0.0,
+                false, false, null, false, 0.0,
                 null, null,
                 1);
         if( MyDebug.LOG )
@@ -1616,7 +1622,7 @@ public class ImageSaver extends Thread {
             Bitmap panorama;
             try {
                 if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), request.camera_view_angle_y);
+                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), request.camera_view_angle_y, request.panorama_crop);
                 }
                 else {
                     Log.e(TAG, "shouldn't have offered panorama as an option if not on Android 5");

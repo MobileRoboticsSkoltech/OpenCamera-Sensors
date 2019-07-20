@@ -14891,7 +14891,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Bitmap panorama = null;
         try {
-            panorama = mActivity.getApplicationInterface().getHDRProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y);
+            panorama = mActivity.getApplicationInterface().getHDRProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y, true);
         }
         catch(HDRProcessorException e) {
             e.printStackTrace();

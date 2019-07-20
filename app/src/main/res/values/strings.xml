@@ -867,6 +867,9 @@
     <string name="cancel_panorama">Cancel panorama</string>
     <string name="failed_to_process_panorama">Failed to create Panorama image</string>
 
+    <string name="preference_panorama_crop">Panorama auto-crop</string>
+    <string name="preference_panorama_crop_summary">For panorama mode, whether to remove the wavy boundaries\n%s</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under

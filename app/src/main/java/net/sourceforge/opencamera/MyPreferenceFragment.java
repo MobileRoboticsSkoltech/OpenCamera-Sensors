@@ -367,6 +367,17 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pg.removePreference(pref);
         }
 
+
+        final boolean supports_panorama = bundle.getBoolean("supports_panorama");
+        if( MyDebug.LOG )
+            Log.d(TAG, "supports_panorama: " + supports_panorama);
+
+        if( !supports_panorama ) {
+            Preference pref = findPreference("preference_panorama_crop");
+            PreferenceGroup pg = (PreferenceGroup) this.findPreference("preference_screen_photo_settings");
+            pg.removePreference(pref);
+        }
+
         final boolean supports_expo_bracketing = bundle.getBoolean("supports_expo_bracketing");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_expo_bracketing: " + supports_expo_bracketing);
@@ -1067,6 +1078,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(getString(supports_raw ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nHDR?: ");
                         about_string.append(getString(supports_hdr ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nPanorama?: ");
+                        about_string.append(getString(supports_panorama ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nExpo?: ");
                         about_string.append(getString(supports_expo_bracketing ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nExpo compensation?: ");

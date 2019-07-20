@@ -909,4 +909,12 @@
         <item>preference_focus_peaking_off</item>
         <item>preference_focus_peaking_on</item>
     </string-array>
+    <string-array name="preference_panorama_crop_entries">
+        <item>@string/off</item>
+        <item>@string/on</item>
+    </string-array>
+    <string-array name="preference_panorama_crop_values">
+        <item>preference_panorama_crop_off</item>
+        <item>preference_panorama_crop_on</item>
+    </string-array>
 </resources>

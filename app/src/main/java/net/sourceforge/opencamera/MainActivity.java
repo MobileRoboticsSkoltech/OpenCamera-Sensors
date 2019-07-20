@@ -1625,6 +1625,7 @@ public class MainActivity extends Activity {
         bundle.putBoolean("supports_burst_raw", this.supportsBurstRaw());
         bundle.putBoolean("supports_hdr", this.supportsHDR());
         bundle.putBoolean("supports_nr", this.supportsNoiseReduction());
+        bundle.putBoolean("supports_panorama", this.supportsPanorama());
         bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
         bundle.putBoolean("supports_preview_bitmaps", this.supportsPreviewBitmaps());
         bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());

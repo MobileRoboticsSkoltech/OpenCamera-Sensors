@@ -4361,7 +4361,7 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y) throws HDRProcessorException {
+    public Bitmap panorama(List<Bitmap> bitmaps, float panorama_pics_per_screen, float camera_angle_y, final boolean crop) throws HDRProcessorException {
         if( MyDebug.LOG ) {
             Log.d(TAG, "panorama");
             Log.d(TAG, "camera_angle_y: " + camera_angle_y);
@@ -4449,8 +4449,6 @@ public class HDRProcessor {
         //adjustExposures(bitmaps, time_s);
         float ratio_brightnesses = adjustExposuresLocal(bitmaps, bitmap_width, bitmap_height, slice_width, time_s);
 
-        //final boolean crop = false;
-        final boolean crop = true;
         int panorama_height = bitmap_height;
         int crop_x0 = 0;
         int crop_y0 = 0;
