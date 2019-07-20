@@ -80,6 +80,7 @@ public class PhotoTests {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDROPhotoStamp"));
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDR"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoBackgroundHDR"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRSaveExpo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRFrontCamera"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRAutoStabilise"));

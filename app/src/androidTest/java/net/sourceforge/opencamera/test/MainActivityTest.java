@@ -2112,6 +2112,71 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( new_count_cameraContinuousFocusMoving == saved_count_cameraContinuousFocusMoving );
     }
 
+    /* Test for taking HDR photo then going to background, also tests notifications.
+     */
+    public void testPhotoBackgroundHDR() throws InterruptedException {
+        Log.d(TAG, "testPhotoBackgroundHDR");
+
+        setToDefault();
+
+        if( !mActivity.supportsHDR() ) {
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+        editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true); // also set auto-stabilise so we have a photo that takes longer to process
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.HDR );
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        int n_files = getNFiles(folder);
+        Log.d(TAG, "n_files at start: " + n_files);
+
+        Thread.sleep(1000);
+        assertTrue(mPreview.count_cameraTakePicture==0);
+
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        Log.d(TAG, "about to click take photo");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take photo");
+
+        Log.d(TAG, "wait until finished taking photo");
+        waitForTakePhoto();
+        Log.d(TAG, "done taking photo");
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+
+        // go to background after a short pause
+        Thread.sleep(500);
+        assertFalse(mActivity.testHasNotification());
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                Log.d(TAG, "pause...");
+                getInstrumentation().callActivityOnPause(mActivity);
+                Log.d(TAG, "done pause");
+            }
+        });
+        this.getInstrumentation().waitForIdleSync();
+
+        assertTrue(mPreview.count_cameraTakePicture==1);
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+            assertTrue(mActivity.testHasNotification());
+        }
+        mActivity.waitUntilImageQueueEmpty();
+        this.getInstrumentation().waitForIdleSync();
+        assertFalse(mActivity.testHasNotification());
+
+        assertTrue( folder.exists() );
+        int n_new_files = getNFiles(folder) - n_files;
+        Log.d(TAG, "n_new_files: " + n_new_files);
+        assertTrue(n_new_files == 1);
+    }
+
     /* Start in photo mode with auto focus:
      * - go to video mode
      * - then switch to front camera

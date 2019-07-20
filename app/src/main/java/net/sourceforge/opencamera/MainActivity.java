@@ -4271,4 +4271,8 @@ public class MainActivity extends Activity {
     public boolean hasThumbnailAnimation() {
         return this.applicationInterface.hasThumbnailAnimation();
     }
+
+    public boolean testHasNotification() {
+        return has_notification;
+    }
 }
