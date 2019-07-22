@@ -2231,12 +2231,26 @@ public class PanoramaProcessor {
         float min_relative_brightness = current_relative_brightness;
         float max_relative_brightness = current_relative_brightness;
 
+        if( MyDebug.LOG )
+            Log.d(TAG, "### time before computing brightnesses: " + (System.currentTimeMillis() - time_s));
+
         for(int i=0;i<bitmaps.size()-1;i++) {
             // compute brightness difference between i-th and (i+1)-th images
             Bitmap bitmap_l = bitmaps.get(i);
             Bitmap bitmap_r = bitmaps.get(i+1);
-            bitmap_l = Bitmap.createBitmap(bitmap_l, offset_x+slice_width-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
-            bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time before cropping bitmaps: " + (System.currentTimeMillis() - time_s));
+
+            // scale down for performance
+            Matrix scale_matrix = new Matrix();
+            scale_matrix.postScale(0.5f, 0.5f);
+
+            //bitmap_l = Bitmap.createBitmap(bitmap_l, offset_x+slice_width-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
+            //bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height);
+            bitmap_l = Bitmap.createBitmap(bitmap_l, offset_x+slice_width-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height, scale_matrix, true);
+            bitmap_r = Bitmap.createBitmap(bitmap_r, offset_x-exposure_hwidth, 0, 2*exposure_hwidth, bitmap_height, scale_matrix, true);
+            if( MyDebug.LOG )
+                Log.d(TAG, "### time after cropping bitmaps: " + (System.currentTimeMillis() - time_s));
             // debug
             /*if( MyDebug.LOG )
             {
