@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.PanoramaProcessorException;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.HDRProcessorException;
@@ -15011,9 +15012,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Bitmap panorama = null;
         try {
-            panorama = mActivity.getApplicationInterface().getHDRProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y, true);
+            panorama = mActivity.getApplicationInterface().getPanoramaProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y, true);
         }
-        catch(HDRProcessorException e) {
+        catch(PanoramaProcessorException e) {
             e.printStackTrace();
             fail();
         }

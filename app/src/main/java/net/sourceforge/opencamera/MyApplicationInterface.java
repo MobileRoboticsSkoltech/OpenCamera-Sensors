@@ -3112,6 +3112,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return imageSaver.getHDRProcessor();
     }
 
+    public PanoramaProcessor getPanoramaProcessor() {
+        return imageSaver.getPanoramaProcessor();
+    }
+
     public boolean test_set_available_memory = false;
     public long test_available_memory = 0;
 }

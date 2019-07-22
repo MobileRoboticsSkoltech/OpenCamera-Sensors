@@ -68,6 +68,7 @@ public class ImageSaver extends Thread {
 
     private final MainActivity main_activity;
     private final HDRProcessor hdrProcessor;
+    private final PanoramaProcessor panoramaProcessor;
 
     /* We use a separate count n_images_to_save, rather than just relying on the queue size, so we can take() an image from queue,
      * but only decrement the count when we've finished saving the image.
@@ -244,6 +245,7 @@ public class ImageSaver extends Thread {
         this.queue = new ArrayBlockingQueue<>(queue_capacity); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 
         this.hdrProcessor = new HDRProcessor(main_activity);
+        this.panoramaProcessor = new PanoramaProcessor(main_activity, hdrProcessor);
 
         p.setAntiAlias(true);
     }
@@ -408,6 +410,9 @@ public class ImageSaver extends Thread {
     void onDestroy() {
         if( MyDebug.LOG )
             Log.d(TAG, "onDestroy");
+        if( panoramaProcessor != null ) {
+            panoramaProcessor.onDestroy();
+        }
         if( hdrProcessor != null ) {
             hdrProcessor.onDestroy();
         }
@@ -1622,17 +1627,17 @@ public class ImageSaver extends Thread {
             Bitmap panorama;
             try {
                 if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-                    panorama = hdrProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), request.camera_view_angle_y, request.panorama_crop);
+                    panorama = panoramaProcessor.panorama(bitmaps, MyApplicationInterface.getPanoramaPicsPerScreen(), request.camera_view_angle_y, request.panorama_crop);
                 }
                 else {
                     Log.e(TAG, "shouldn't have offered panorama as an option if not on Android 5");
                     throw new RuntimeException();
                 }
             }
-            catch(HDRProcessorException e) {
-                Log.e(TAG, "HDRProcessorException from panorama: " + e.getCode());
+            catch(PanoramaProcessorException e) {
+                Log.e(TAG, "PanoramaProcessorException from panorama: " + e.getCode());
                 e.printStackTrace();
-                if( e.getCode() == HDRProcessorException.UNEQUAL_SIZES ) {
+                if( e.getCode() == PanoramaProcessorException.UNEQUAL_SIZES ) {
                     main_activity.getPreview().showToast(null, R.string.failed_to_process_panorama);
                     Log.e(TAG, "UNEQUAL_SIZES");
                     bitmaps.clear();
@@ -3431,5 +3436,9 @@ public class ImageSaver extends Thread {
 
     HDRProcessor getHDRProcessor() {
         return hdrProcessor;
+    }
+
+    public PanoramaProcessor getPanoramaProcessor() {
+        return panoramaProcessor;
     }
 }
