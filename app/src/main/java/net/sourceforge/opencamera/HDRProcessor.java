@@ -38,6 +38,7 @@ public class HDRProcessor {
     private static final String TAG = "HDRProcessor";
 
     private final Context context;
+    private final boolean is_test;
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using HDR
 
     // we lazily create and cache scripts that would otherwise have to be repeatedly created in a single
@@ -74,8 +75,9 @@ public class HDRProcessor {
         DROALGORITHM_GAINGAMMA
     }
 
-    public HDRProcessor(Context context) {
+    public HDRProcessor(Context context, boolean is_test) {
         this.context = context;
+        this.is_test = is_test;
     }
 
     private void freeScripts() {
@@ -2084,8 +2086,7 @@ public class HDRProcessor {
                     Log.e(TAG, "    auto-alignment failed due to overflow");
                     // hitting overflow means behaviour will be unstable under SMP, and auto-alignment won't be reliable anyway
                     best_id = 4; // default to centre
-					MainActivity mActivity = (MainActivity) context;
-					if( mActivity.is_test ) {
+					if( is_test ) {
 						throw new RuntimeException();
 					}
                 }

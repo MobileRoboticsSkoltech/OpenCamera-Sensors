@@ -244,7 +244,7 @@ public class ImageSaver extends Thread {
         this.queue_capacity = computeQueueSize(activityManager.getLargeMemoryClass());
         this.queue = new ArrayBlockingQueue<>(queue_capacity); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 
-        this.hdrProcessor = new HDRProcessor(main_activity);
+        this.hdrProcessor = new HDRProcessor(main_activity, main_activity.is_test);
         this.panoramaProcessor = new PanoramaProcessor(main_activity, hdrProcessor);
 
         p.setAntiAlias(true);
