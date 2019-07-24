@@ -3965,25 +3965,18 @@ public class MainActivity extends Activity {
             }
         }
         else {
-            toast_string = getResources().getString(R.string.photo);
-            CameraController.Size current_size = preview.getCurrentPictureSize();
-            toast_string += " " + current_size.width + "x" + current_size.height;
-            if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 && photo_mode != MyApplicationInterface.PhotoMode.FocusBracketing ) {
-                String focus_value = preview.getCurrentFocusValue();
-                if( focus_value != null && !focus_value.equals("focus_mode_auto") && !focus_value.equals("focus_mode_continuous_picture") ) {
-                    String focus_entry = preview.findFocusEntryForValue(focus_value);
-                    if( focus_entry != null ) {
-                        toast_string += "\n" + focus_entry;
-                    }
-                }
+            if( photo_mode == MyApplicationInterface.PhotoMode.Panorama ) {
+                // don't show resolution in panorama mode
+                toast_string = "";
             }
-            if( applicationInterface.getAutoStabilisePref() ) {
-                // important as users are sometimes confused at the behaviour if they don't realise the option is on
-                toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
-                simple = false;
+            else {
+                toast_string = getResources().getString(R.string.photo);
+                CameraController.Size current_size = preview.getCurrentPictureSize();
+                toast_string += " " + current_size.width + "x" + current_size.height;
             }
+
             String photo_mode_string = null;
-            switch (photo_mode) {
+            switch( photo_mode ) {
                 case DRO:
                     photo_mode_string = getResources().getString(R.string.photo_mode_dro);
                     break;
@@ -4013,7 +4006,23 @@ public class MainActivity extends Activity {
                     break;
             }
             if( photo_mode_string != null ) {
-                toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
+                toast_string += (toast_string.length()==0 ? "" : "\n") + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
+                simple = false;
+            }
+
+            if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 && photo_mode != MyApplicationInterface.PhotoMode.FocusBracketing ) {
+                String focus_value = preview.getCurrentFocusValue();
+                if( focus_value != null && !focus_value.equals("focus_mode_auto") && !focus_value.equals("focus_mode_continuous_picture") ) {
+                    String focus_entry = preview.findFocusEntryForValue(focus_value);
+                    if( focus_entry != null ) {
+                        toast_string += "\n" + focus_entry;
+                    }
+                }
+            }
+
+            if( applicationInterface.getAutoStabilisePref() ) {
+                // important as users are sometimes confused at the behaviour if they don't realise the option is on
+                toast_string += (toast_string.length()==0 ? "" : "\n") + getResources().getString(R.string.preference_auto_stabilise);
                 simple = false;
             }
         }
