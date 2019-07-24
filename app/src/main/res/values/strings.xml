@@ -598,7 +598,7 @@
     <string name="focus_bracketing_add_infinity">Add infinite distance</string>
 
     <string name="magnetic_accuracy_title">Compass direction</string>
-    <string name="magnetic_accuracy_info">Your device\'s compass needs calibrating to improve its accuracy. This can be done by moving your phone in a figure of 8 motion.\n\nCurrent accuracy:</string>
+    <string name="magnetic_accuracy_info">Your device\'s compass needs calibrating to improve its accuracy. This can be done by moving your device in a figure of 8 motion.\n\nCurrent accuracy:</string>
 
     <string name="accuracy_unreliable">Unreliable</string>
     <string name="accuracy_low">Low</string>
