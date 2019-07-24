@@ -3457,7 +3457,7 @@ public class MainActivity extends Activity {
             }
             else {
                 zoomControls.setVisibility(View.GONE);
-                zoomSeekBar.setVisibility(View.GONE);
+                zoomSeekBar.setVisibility(View.INVISIBLE); // should be INVISIBLE not GONE, as the focus_seekbar is aligned to be left to this
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "cameraSetup: time after setting up zoom: " + (System.currentTimeMillis() - debug_time));
