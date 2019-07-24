@@ -1521,22 +1521,32 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         switchCameraButton.setVisibility(View.GONE);
     }
 
-    void stopPanorama() {
+    /** Ends panorama and submits the panoramic images to be processed.
+     */
+    void finishPanorama() {
         if( MyDebug.LOG )
-            Log.d(TAG, "stopPanorama");
+            Log.d(TAG, "finishPanorama");
 
         imageSaver.getImageBatchRequest().panorama_dir_left_to_right = this.panorama_dir_left_to_right;
 
-        cancelPanorama();
+        stopPanorama(false);
 
         boolean image_capture_intent = isImageCaptureIntent();
         boolean do_in_background = saveInBackground(image_capture_intent);
         imageSaver.finishImageBatch(do_in_background);
     }
 
-    void cancelPanorama() {
+    /** Stop the panorama recording.
+     * @param is_cancelled Whether the panorama has been cancelled.
+     */
+    void stopPanorama(boolean is_cancelled) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "stopPanorama");
         gyroSensor.stopRecording();
         clearPanoramaPoint();
+        if( is_cancelled ) {
+            imageSaver.flushImageBatch();
+        }
         main_activity.getMainUI().setTakePhotoIcon();
         View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
         cancelPanoramaButton.setVisibility(View.GONE);
@@ -1557,7 +1567,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( n_panorama_pics == max_panorama_pics_c ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "reached max panorama limit");
-            stopPanorama();
+            finishPanorama();
             return;
         }
         float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
@@ -1612,7 +1622,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             public void onTooFar() {
                 if( MyDebug.LOG )
                     Log.d(TAG, "TargetCallback.onTooFar");
-                MyApplicationInterface.this.cancelPanorama();
+                MyApplicationInterface.this.stopPanorama(true);
             }
 
         });

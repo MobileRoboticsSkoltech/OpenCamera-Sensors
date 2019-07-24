@@ -1134,7 +1134,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedCancelPanorama");
         if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama &&
                 applicationInterface.getGyroSensor().isRecording() ) { // just in case
-            applicationInterface.cancelPanorama();
+            applicationInterface.stopPanorama(true);
         }
     }
 
@@ -3239,7 +3239,7 @@ public class MainActivity extends Activity {
             else if( applicationInterface.getGyroSensor().isRecording() ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "panorama complete");
-                applicationInterface.stopPanorama();
+                applicationInterface.finishPanorama();
                 return;
             }
             else {

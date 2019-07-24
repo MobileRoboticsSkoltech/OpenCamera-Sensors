@@ -690,6 +690,13 @@ public class ImageSaver extends Thread {
         pending_image_average_request = null;
     }
 
+    void flushImageBatch() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "flushImageBatch");
+        // aside from resetting the state, this allows the allocated JPEG data to be garbage collected
+        pending_image_average_request = null;
+    }
+
     /** Internal saveImage method to handle both JPEG and RAW.
      */
     private boolean saveImage(boolean do_in_background,
