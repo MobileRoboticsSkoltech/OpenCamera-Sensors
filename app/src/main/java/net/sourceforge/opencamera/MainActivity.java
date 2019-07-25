@@ -803,11 +803,6 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "release renderscript contexts");
             RenderScript.releaseAllContexts();
         }
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
-            // see note in HDRProcessor.onDestroy() - but from Android M, renderscript contexts are released with releaseAllContexts()
-            // doc for releaseAllContexts() says "If no contexts have been created this function does nothing"
-            RenderScript.releaseAllContexts();
-        }
         // Need to recycle to avoid out of memory when running tests - probably good practice to do anyway
         for(Map.Entry<Integer, Bitmap> entry : preloaded_bitmap_resources.entrySet()) {
             if( MyDebug.LOG )

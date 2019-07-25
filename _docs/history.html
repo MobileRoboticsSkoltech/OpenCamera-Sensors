@@ -56,6 +56,7 @@ FIXED   Crashes related to histogram, zebra stripes, focus peaking - don't crash
         problems.
 FIXED   Don't close Open Camera if bluetooth service (for remote control) fails to initialise.
 FIXED   Crash related to focus assist if camera closed.
+FIXED   Crashes related to multiple instances of Open Camera and Renderscript.releaseAllContexts().
 FIXED   Some devices (e.g., LG G6) defaulted to front camera, hopefully fixed to default to back
         camera on all devices that have a back camera.
 ADDED   New option Settings/Photo settings/Text style/"Text with shaded background" for photo stamp
@@ -78,7 +79,6 @@ FIXED   Improvement to on-screen placement of pitch and compass lines.
 FIXED   Toast for enabling/disabling face detection (via on-screen icon) was hidden by subsequent
         info toast from restarting the camera.
 FIXED   Fixed some crashes for old camera API.
-FIXED   Crashes related to multiple instances of Open Camera and Renderscript.releaseAllContexts().
 FIXED   Problem with Camera2 API where with manual exposure time, preview would display a maximum
         exposure time of 1/12s rather than what the manual exposure time had been set to.
 FIXED   When using "red eye" flash, on-screen flash icon (with Camera2 API) was being shown all the
