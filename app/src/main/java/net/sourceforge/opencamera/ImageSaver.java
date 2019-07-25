@@ -1562,17 +1562,21 @@ public class ImageSaver extends Thread {
 
                     StorageUtils storageUtils = main_activity.getStorageUtils();
                     File saveFile = null;
-					/*Uri saveUri = null;
+					Uri saveUri = null;
 					if( storageUtils.isUsingSAF() ) {
 						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
 					}
-					else*/ {
+					else {
                         saveFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
                         if( MyDebug.LOG )
                             Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
                     }
 
-                    OutputStream outputStream = new FileOutputStream(saveFile);
+                    OutputStream outputStream;
+                    if( saveFile != null )
+                        outputStream = new FileOutputStream(saveFile);
+                    else
+                        outputStream = main_activity.getContentResolver().openOutputStream(saveUri);
                     try {
                         //outputStream.write(gyro_text.toString().getBytes());
                         outputStream.write(writer.toString().getBytes(Charset.forName("UTF-8")));
@@ -1583,6 +1587,9 @@ public class ImageSaver extends Thread {
 
                     if( saveFile != null ) {
                         storageUtils.broadcastFile(saveFile, false, false, false);
+                    }
+                    else {
+                        broadcastSAFFile(saveUri, false);
                     }
                 }
                 catch(IOException e) {
@@ -2457,31 +2464,7 @@ public class ImageSaver extends Thread {
                         copyFileToUri(main_activity, saveUri, picFile);
                     }
                     success = true;
-	    		    /* We still need to broadcastFile for SAF for two reasons:
-	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
-	    		           Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
-	    		           won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
-	    		           corresponding to the real file, if it exists.
-	    		        2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
-	    		           scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
-	    		           scan.
-	    		    */
-                    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "real_file: " + real_file);
-                    if( real_file != null ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "broadcast file");
-                        storageUtils.broadcastFile(real_file, true, false, true);
-                        main_activity.test_last_saved_image = real_file.getAbsolutePath();
-                    }
-                    else if( !request.image_capture_intent ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "announce SAF uri");
-                        // announce the SAF Uri
-                        // (shouldn't do this for a capture intent - e.g., causes crash when calling from Google Keep)
-                        storageUtils.announceUri(saveUri, true, false);
-                    }
+                    broadcastSAFFile(saveUri, request.image_capture_intent);
                 }
             }
         }
@@ -2640,6 +2623,37 @@ public class ImageSaver extends Thread {
             if( inputStream != null ) {
                 inputStream.close();
             }
+        }
+    }
+
+    private void broadcastSAFFile(Uri saveUri, boolean image_capture_intent) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "broadcastSAFFile");
+        /* We still need to broadcastFile for SAF for two reasons:
+            1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
+               Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
+               won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
+               corresponding to the real file, if it exists.
+            2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
+               scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
+               scan.
+        */
+        StorageUtils storageUtils = main_activity.getStorageUtils();
+        File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
+        if( MyDebug.LOG )
+            Log.d(TAG, "real_file: " + real_file);
+        if( real_file != null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "broadcast file");
+            storageUtils.broadcastFile(real_file, true, false, true);
+            main_activity.test_last_saved_image = real_file.getAbsolutePath();
+        }
+        else if( !image_capture_intent ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "announce SAF uri");
+            // announce the SAF Uri
+            // (shouldn't do this for a capture intent - e.g., causes crash when calling from Google Keep)
+            storageUtils.announceUri(saveUri, true, false);
         }
     }
 
