@@ -1071,6 +1071,9 @@ public class ImageSaver extends Thread {
     }
 
     private final static String gyro_info_doc_tag = "open_camera_gyro_info";
+    private final static String gyro_info_panorama_pics_per_screen_tag = "panorama_pics_per_screen";
+    private final static String gyro_info_camera_view_angle_x_tag = "camera_view_angle_x";
+    private final static String gyro_info_camera_view_angle_y_tag = "camera_view_angle_y";
     private final static String gyro_info_image_tag = "image";
     private final static String gyro_info_vector_tag = "vector";
     private final static String gyro_info_vector_right_type = "X";
@@ -1083,6 +1086,9 @@ public class ImageSaver extends Thread {
         xmlSerializer.setOutput(writer);
         xmlSerializer.startDocument("UTF-8", true);
         xmlSerializer.startTag(null, gyro_info_doc_tag);
+        xmlSerializer.attribute(null, gyro_info_panorama_pics_per_screen_tag, "" + MyApplicationInterface.getPanoramaPicsPerScreen());
+        xmlSerializer.attribute(null, gyro_info_camera_view_angle_x_tag, "" + request.camera_view_angle_x);
+        xmlSerializer.attribute(null, gyro_info_camera_view_angle_y_tag, "" + request.camera_view_angle_y);
 
         float [] inVector = new float[3];
         float [] outVector = new float[3];
