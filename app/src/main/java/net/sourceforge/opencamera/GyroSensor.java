@@ -87,6 +87,11 @@ public class GyroSensor implements SensorEventListener {
         setToIdentity();
     }
 
+    boolean hasSensors() {
+        // even though the gyro sensor works if mSensorAccel is not present, for best behaviour we require them both
+        return mSensor != null && mSensorAccel != null;
+    }
+
     private void setToIdentity() {
         for(int i=0;i<9;i++) {
             currentRotationMatrix[i] = 0.0f;
