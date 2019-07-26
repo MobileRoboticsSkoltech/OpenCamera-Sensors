@@ -2531,10 +2531,11 @@ public class PanoramaProcessor {
                 }
 
                 // save bitmaps used for alignments
-                /*if( MyDebug.LOG )
-                for(int j=0;j<alignment_bitmaps.size();j++) {
-                    Bitmap alignment_bitmap = alignment_bitmaps.get(j);
-                    saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +"_" + output_name);
+                /*if( MyDebug.LOG ) {
+                    for(int j=0;j<alignment_bitmaps.size();j++) {
+                        Bitmap alignment_bitmap = alignment_bitmaps.get(j);
+                        saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +".jpg");
+                    }
                 }*/
 
                 int this_align_x, this_align_y;
