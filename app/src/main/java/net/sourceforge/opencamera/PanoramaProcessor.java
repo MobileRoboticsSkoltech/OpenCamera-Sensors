@@ -2482,21 +2482,7 @@ public class PanoramaProcessor {
                     Log.d(TAG, "    align_x+offset_x+slice_width-align_hwidth: " + (align_x + offset_x + slice_width - align_hwidth));
                     Log.d(TAG, "    bitmap(i-1) width: " + bitmaps.get(i - 1).getWidth());
                 }
-                // n.b., we add in reverse order, so we find the transformation to map the next image (i) onto the previous image (i-1)
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, 0, 2*align_hwidth, bitmap_height) );
-                // less tall:
-                //int align_bitmap_height = Math.min(bitmap_height, align_hwidth); // ratio 2:1
-                //int align_bitmap_height = Math.min(bitmap_height, 2*align_hwidth); // ratio 1:1
-                //int align_bitmap_height = Math.min(bitmap_height, 4*align_hwidth); // ratio 1:2
-                //int align_bitmap_height = Math.min(bitmap_height, 8*align_hwidth); // ratio 1:4
-                int align_bitmap_height = (3*bitmap_height)/4;
-                if( MyDebug.LOG )
-                    Log.d(TAG, "### time before creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
-                if( MyDebug.LOG )
-                    Log.d(TAG, "### time after creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+
                 //final boolean use_align_by_feature = false;
                 final boolean use_align_by_feature = true;
                 float align_downsample = 1.0f;
@@ -2519,6 +2505,22 @@ public class PanoramaProcessor {
                             break;
                         }
                     }
+                }
+
+                int align_bitmap_height = (3*bitmap_height)/4;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "### time before creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+                // n.b., we add in reverse order, so we find the transformation to map the next image (i) onto the previous image (i-1)
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                //alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height) );
+                Matrix align_scale_matrix = new Matrix();
+                align_scale_matrix.postScale(1.0f/align_downsample, 1.0f/align_downsample);
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i), align_x+offset_x-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height, align_scale_matrix, true) );
+                alignment_bitmaps.add( Bitmap.createBitmap(bitmaps.get(i-1), align_x+offset_x+slice_width-align_hwidth, (bitmap_height-align_bitmap_height)/2, 2*align_hwidth, align_bitmap_height, align_scale_matrix, true) );
+                if( MyDebug.LOG )
+                    Log.d(TAG, "### time after creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
+
+                /*if( use_align_by_feature ) {
                     Matrix align_scale_matrix = new Matrix();
                     align_scale_matrix.postScale(1.0f/align_downsample, 1.0f/align_downsample);
                     for(int j=0;j<alignment_bitmaps.size();j++) {
@@ -2528,7 +2530,7 @@ public class PanoramaProcessor {
                     }
                     if( MyDebug.LOG )
                         Log.d(TAG, "### time after downscaling creating alignment bitmaps for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
-                }
+                }*/
 
                 // save bitmaps used for alignments
                 /*if( MyDebug.LOG ) {
