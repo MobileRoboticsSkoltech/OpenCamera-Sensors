@@ -3759,6 +3759,10 @@ public class MainActivity extends Activity {
     }
 
     public boolean supportsPanorama() {
+        // don't support panorama mode if called from image capture intent
+        // in theory this works, but problem that currently we'd end up doing the processing on the UI thread, so risk ANR
+        if( applicationInterface.isImageCaptureIntent() )
+            return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
         return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && large_heap_memory >= 256 && applicationInterface.getGyroSensor().hasSensors() );
