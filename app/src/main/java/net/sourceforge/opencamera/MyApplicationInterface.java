@@ -926,6 +926,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public long getTimerPref() {
+        if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
+            return 0; // don't support timer with panorama
         String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
         long timer_delay;
         try {
@@ -942,6 +944,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getRepeatPref() {
+        if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
+            return "1"; // don't support repeat with panorama
         return sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
     }
 

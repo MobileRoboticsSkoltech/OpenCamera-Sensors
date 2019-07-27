@@ -783,91 +783,98 @@ public class PopupView extends LinearLayout {
                 }
             }
 
+            if( photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+                // timer not supported with panorama
 
-            final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
-            String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
-            String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
-            timer_index = Arrays.asList(timer_values).indexOf(timer_value);
-            if( timer_index == -1 ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
-                timer_index = 0;
+                final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
+                String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
+                String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
+                timer_index = Arrays.asList(timer_values).indexOf(timer_value);
+                if( timer_index == -1 ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
+                    timer_index = 0;
+                }
+                // title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
+                addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), !small_screen, false, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
+                    private void update() {
+                        if( timer_index == -1 )
+                            return;
+                        String new_timer_value = timer_values[timer_index];
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
+                        editor.apply();
+                    }
+                    @Override
+                    public int onClickPrev() {
+                        if( timer_index != -1 && timer_index > 0 ) {
+                            timer_index--;
+                            update();
+                            return timer_index;
+                        }
+                        return -1;
+                    }
+                    @Override
+                    public int onClickNext() {
+                        if( timer_index != -1 && timer_index < timer_values.length-1 ) {
+                            timer_index++;
+                            update();
+                            return timer_index;
+                        }
+                        return -1;
+                    }
+                });
             }
-            // title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
-            addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), !small_screen, false, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
-                private void update() {
-                    if( timer_index == -1 )
-                        return;
-                    String new_timer_value = timer_values[timer_index];
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
-                    editor.apply();
-                }
-                @Override
-                public int onClickPrev() {
-                    if( timer_index != -1 && timer_index > 0 ) {
-                        timer_index--;
-                        update();
-                        return timer_index;
-                    }
-                    return -1;
-                }
-                @Override
-                public int onClickNext() {
-                    if( timer_index != -1 && timer_index < timer_values.length-1 ) {
-                        timer_index++;
-                        update();
-                        return timer_index;
-                    }
-                    return -1;
-                }
-            });
             if( MyDebug.LOG )
                 Log.d(TAG, "PopupView time 11: " + (System.nanoTime() - debug_time));
 
-            final String [] repeat_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
-            String [] repeat_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
-            String repeat_mode_value = sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
-            repeat_mode_index = Arrays.asList(repeat_mode_values).indexOf(repeat_mode_value);
-            if( repeat_mode_index == -1 ) {
+            if( photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
+                // auto-repeat not supported with panorama
+
+                final String [] repeat_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
+                String [] repeat_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
+                String repeat_mode_value = sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
+                repeat_mode_index = Arrays.asList(repeat_mode_values).indexOf(repeat_mode_value);
+                if( repeat_mode_index == -1 ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't find repeat_mode_value " + repeat_mode_value + " in repeat_mode_values!");
+                    repeat_mode_index = 0;
+                }
+                // title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
+                // set title_in_options_first_only to true, as displaying "Repeat: Unlimited" can be too long in some languages, e.g., Vietnamese (vi)
+                addArrayOptionsToPopup(Arrays.asList(repeat_mode_entries), getResources().getString(R.string.preference_burst_mode), !small_screen, true, repeat_mode_index, false, "REPEAT_MODE", new ArrayOptionsPopupListener() {
+                    private void update() {
+                        if( repeat_mode_index == -1 )
+                            return;
+                        String new_repeat_mode_value = repeat_mode_values[repeat_mode_index];
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), new_repeat_mode_value);
+                        editor.apply();
+                    }
+                    @Override
+                    public int onClickPrev() {
+                        if( repeat_mode_index != -1 && repeat_mode_index > 0 ) {
+                            repeat_mode_index--;
+                            update();
+                            return repeat_mode_index;
+                        }
+                        return -1;
+                    }
+                    @Override
+                    public int onClickNext() {
+                        if( repeat_mode_index != -1 && repeat_mode_index < repeat_mode_values.length-1 ) {
+                            repeat_mode_index++;
+                            update();
+                            return repeat_mode_index;
+                        }
+                        return -1;
+                    }
+                });
                 if( MyDebug.LOG )
-                    Log.d(TAG, "can't find repeat_mode_value " + repeat_mode_value + " in repeat_mode_values!");
-                repeat_mode_index = 0;
+                    Log.d(TAG, "PopupView time 12: " + (System.nanoTime() - debug_time));
             }
-            // title_in_options should be false for small screens: e.g., problems with pt-rBR or pt-rPT on 4.5" screens or less, see https://sourceforge.net/p/opencamera/discussion/photography/thread/3aa940c636/
-            // set title_in_options_first_only to true, as displaying "Repeat: Unlimited" can be too long in some languages, e.g., Vietnamese (vi)
-            addArrayOptionsToPopup(Arrays.asList(repeat_mode_entries), getResources().getString(R.string.preference_burst_mode), !small_screen, true, repeat_mode_index, false, "REPEAT_MODE", new ArrayOptionsPopupListener() {
-                private void update() {
-                    if( repeat_mode_index == -1 )
-                        return;
-                    String new_repeat_mode_value = repeat_mode_values[repeat_mode_index];
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), new_repeat_mode_value);
-                    editor.apply();
-                }
-                @Override
-                public int onClickPrev() {
-                    if( repeat_mode_index != -1 && repeat_mode_index > 0 ) {
-                        repeat_mode_index--;
-                        update();
-                        return repeat_mode_index;
-                    }
-                    return -1;
-                }
-                @Override
-                public int onClickNext() {
-                    if( repeat_mode_index != -1 && repeat_mode_index < repeat_mode_values.length-1 ) {
-                        repeat_mode_index++;
-                        update();
-                        return repeat_mode_index;
-                    }
-                    return -1;
-                }
-            });
-            if( MyDebug.LOG )
-                Log.d(TAG, "PopupView time 12: " + (System.nanoTime() - debug_time));
 
             final String [] grid_values = getResources().getStringArray(R.array.preference_grid_values);
             String [] grid_entries = getResources().getStringArray(R.array.preference_grid_entries);

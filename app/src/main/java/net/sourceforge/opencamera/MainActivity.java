@@ -4089,7 +4089,7 @@ public class MainActivity extends Activity {
             }
         }
         String timer = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
-        if( !timer.equals("0") ) {
+        if( !timer.equals("0") && photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
             String [] entries_array = getResources().getStringArray(R.array.preference_timer_entries);
             String [] values_array = getResources().getStringArray(R.array.preference_timer_values);
             int index = Arrays.asList(values_array).indexOf(timer);
