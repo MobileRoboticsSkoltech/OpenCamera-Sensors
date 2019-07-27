@@ -1622,6 +1622,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             public void onTooFar() {
                 if( MyDebug.LOG )
                     Log.d(TAG, "TargetCallback.onTooFar");
+
+                main_activity.getPreview().showToast(null, R.string.panorama_cancelled);
                 MyApplicationInterface.this.stopPanorama(true);
             }
 

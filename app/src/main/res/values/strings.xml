@@ -865,6 +865,7 @@
 
     <string name="finish_panorama">Finish panorama</string>
     <string name="cancel_panorama">Cancel panorama</string>
+    <string name="panorama_cancelled">Panorama cancelled</string>
     <string name="failed_to_process_panorama">Failed to create Panorama image</string>
 
     <string name="preference_panorama_crop">Panorama auto-crop</string>
