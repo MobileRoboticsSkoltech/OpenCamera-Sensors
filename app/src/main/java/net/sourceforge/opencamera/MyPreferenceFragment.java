@@ -376,6 +376,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             Preference pref = findPreference("preference_panorama_crop");
             PreferenceGroup pg = (PreferenceGroup) this.findPreference("preference_screen_photo_settings");
             pg.removePreference(pref);
+
+            pref = findPreference("preference_panorama_save");
+            pg = (PreferenceGroup) this.findPreference("preference_screen_photo_settings");
+            pg.removePreference(pref);
         }
 
         final boolean supports_expo_bracketing = bundle.getBoolean("supports_expo_bracketing");

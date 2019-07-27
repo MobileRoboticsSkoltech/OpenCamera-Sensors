@@ -91,6 +91,8 @@ public class PreferenceKeys {
 
     public static final String PanoramaCropPreferenceKey = "preference_panorama_crop";
 
+    public static final String PanoramaSaveExpoPreferenceKey = "preference_panorama_save";
+
     public static final String ExpoBracketingNImagesPreferenceKey = "preference_expo_bracketing_n_images";
 
     public static final String ExpoBracketingStopsPreferenceKey = "preference_expo_bracketing_stops";

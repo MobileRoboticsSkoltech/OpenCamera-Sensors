@@ -775,6 +775,16 @@
 
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <ListPreference
+                android:key="preference_panorama_save"
+                android:title="@string/preference_panorama_save"
+                android:summary="@string/preference_panorama_save_summary"
+                android:entries="@array/preference_panorama_save_entries"
+                android:entryValues="@array/preference_panorama_save_values"
+                android:defaultValue="preference_panorama_save_no"
+                />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
                 android:key="preference_expo_bracketing_stops"
                 android:title="@string/preference_expo_bracketing_stops"
                 android:summary="@string/preference_expo_bracketing_stops_summary"

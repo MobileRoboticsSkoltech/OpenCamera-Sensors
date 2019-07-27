@@ -2763,19 +2763,27 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 first_image = n_capture_images == 1;
             if( first_image ) {
                 ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
-                String save_base_preference = "";
-                if( photo_mode == PhotoMode.NoiseReduction )
-                    save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
-                else if( photo_mode == PhotoMode.Panorama )
-                    save_base_preference = "preference_nr_save_all"; // TODO
-
-                switch( save_base_preference ) {
-                    case "preference_nr_save_single":
-                        save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
-                        break;
-                    case "preference_nr_save_all":
-                        save_base = ImageSaver.Request.SaveBase.SAVEBASE_ALL;
-                        break;
+                if( photo_mode == PhotoMode.NoiseReduction ) {
+                    String save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
+                    switch( save_base_preference ) {
+                        case "preference_nr_save_single":
+                            save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
+                            break;
+                        case "preference_nr_save_all":
+                            save_base = ImageSaver.Request.SaveBase.SAVEBASE_ALL;
+                            break;
+                    }
+                }
+                else if( photo_mode == PhotoMode.Panorama ) {
+                    String save_base_preference = sharedPreferences.getString(PreferenceKeys.PanoramaSaveExpoPreferenceKey, "preference_panorama_save_no");
+                    switch( save_base_preference ) {
+                        case "preference_panorama_save_all":
+                            save_base = ImageSaver.Request.SaveBase.SAVEBASE_ALL;
+                            break;
+                        case "preference_panorama_save_all_plus_debug":
+                            save_base = ImageSaver.Request.SaveBase.SAVEBASE_ALL_PLUS_DEBUG;
+                            break;
+                    }
                 }
 
                 imageSaver.startImageBatch(true,

@@ -917,4 +917,14 @@
         <item>preference_panorama_crop_off</item>
         <item>preference_panorama_crop_on</item>
     </string-array>
+    <string-array name="preference_panorama_save_entries">
+        <item>@string/preference_panorama_save_no</item>
+        <item>@string/preference_panorama_save_all</item>
+        <item>@string/preference_panorama_save_all_plus_debug</item>
+    </string-array>
+    <string-array name="preference_panorama_save_values">
+        <item>preference_panorama_save_no</item>
+        <item>preference_panorama_save_all</item>
+        <item>preference_panorama_save_all_plus_debug</item>
+    </string-array>
 </resources>

@@ -114,9 +114,10 @@ public class ImageSaver extends Thread {
         enum SaveBase {
             SAVEBASE_NONE,
             SAVEBASE_FIRST,
-            SAVEBASE_ALL
+            SAVEBASE_ALL,
+            SAVEBASE_ALL_PLUS_DEBUG // for PANORAMA
         }
-        final SaveBase save_base; // whether to save the base images, for process_type HDR or AVERAGE
+        final SaveBase save_base; // whether to save the base images, for process_type HDR, AVERAGE or PANORAMA
         /* jpeg_images: for jpeg (may be null otherwise).
          * If process_type==HDR, this should be 1 or 3 images, and the images are combined/converted to a HDR image (if there's only 1
          * image, this uses fake HDR or "DRO").
@@ -1537,7 +1538,7 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "panorama");
 
             // save text file with gyro info
-            if( !request.image_capture_intent && request.save_base != Request.SaveBase.SAVEBASE_NONE ) {
+            if( !request.image_capture_intent && request.save_base == Request.SaveBase.SAVEBASE_ALL_PLUS_DEBUG ) {
 				/*final StringBuilder gyro_text = new StringBuilder();
 				gyro_text.append("Panorama gyro debug info\n");
 				gyro_text.append("n images: " + request.gyro_rotation_matrix.size() + ":\n");

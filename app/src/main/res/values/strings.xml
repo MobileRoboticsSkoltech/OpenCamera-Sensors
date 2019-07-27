@@ -872,6 +872,13 @@
 
     <string name="panorama_info">To take a panorama image, hold your device in portrait orientation, and click to take a photo to start the panorama. Then rotate your device either left or right to move the centred white circle over the blue dot. After each new photo is taken, keep rotating your device to cover each new blue dot that appears in turn.\n\nClick the tick icon to save the panorama, or the cross icon to cancel.\n\nNote that panorama photos can take time to process and save.</string>
 
+    <string name="preference_panorama_save">Panorama original images</string>
+    <string name="preference_panorama_save_summary">Whether to save original images in panorama mode. Note this can make saving photos slower. Also allows the option to save an XML file which can be useful reporting problems with panorama.\n%s</string>
+
+    <string name="preference_panorama_save_no">Don\'t save original images</string>
+    <string name="preference_panorama_save_all">Save original images</string>
+    <string name="preference_panorama_save_all_plus_debug">Save original images plus debug XML</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         [This dialog is shown when Open Camera is updated. You can disable it under
