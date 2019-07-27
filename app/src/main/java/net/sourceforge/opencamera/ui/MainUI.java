@@ -926,10 +926,9 @@ public class MainUI {
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
                 View zoomSeekBar = main_activity.findViewById(R.id.zoom_seekbar);
-                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 && !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
+                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
-                if( !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
-                    switchVideoButton.setVisibility(visibility);
+                switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility);
                 if( showExposureLockIcon() )
@@ -1007,7 +1006,7 @@ public class MainUI {
         showGUI();
     }
 
-    private void showGUI() {
+    public void showGUI() {
         if( MyDebug.LOG ) {
             Log.d(TAG, "showGUI");
             Log.d(TAG, "show_gui_photo: " + show_gui_photo);
@@ -1021,8 +1020,9 @@ public class MainUI {
         }
         main_activity.runOnUiThread(new Runnable() {
             public void run() {
-                final int visibility = (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
-                final int visibility_video = show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
+                final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
+                final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
+                final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
                 View exposureButton = main_activity.findViewById(R.id.exposure);
@@ -1037,10 +1037,9 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
-                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 && !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
+                if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
-                if( !main_activity.getApplicationInterface().getGyroSensor().isRecording() )
-                    switchVideoButton.setVisibility(visibility);
+                switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
                 if( showExposureLockIcon() )

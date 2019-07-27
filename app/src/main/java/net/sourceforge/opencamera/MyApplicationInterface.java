@@ -1515,10 +1515,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         main_activity.getMainUI().setTakePhotoIcon();
         View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
         cancelPanoramaButton.setVisibility(View.VISIBLE);
-        View switchVideoButton = main_activity.findViewById(R.id.switch_video);
-        switchVideoButton.setVisibility(View.GONE);
-        View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
-        switchCameraButton.setVisibility(View.GONE);
+        main_activity.getMainUI().clearSeekBar(); // close seekbars if open (popup is already closed when taking a photo)
+        // taking the photo will end up calling MainUI.showGUI(), which will hide the other on-screen icons
     }
 
     /** Ends panorama and submits the panoramic images to be processed.
@@ -1536,12 +1534,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         imageSaver.finishImageBatch(do_in_background);
     }
 
-    /** Stop the panorama recording.
+    /** Stop the panorama recording. Does nothing if panorama isn't currently recording.
      * @param is_cancelled Whether the panorama has been cancelled.
      */
     void stopPanorama(boolean is_cancelled) {
         if( MyDebug.LOG )
             Log.d(TAG, "stopPanorama");
+        if( !gyroSensor.isRecording() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "...nothing to stop");
+            return;
+        }
         gyroSensor.stopRecording();
         clearPanoramaPoint();
         if( is_cancelled ) {
@@ -1550,10 +1553,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         main_activity.getMainUI().setTakePhotoIcon();
         View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
         cancelPanoramaButton.setVisibility(View.GONE);
-        View switchVideoButton = main_activity.findViewById(R.id.switch_video);
-        switchVideoButton.setVisibility(View.VISIBLE);
-        View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
-        switchCameraButton.setVisibility(View.VISIBLE);
+        main_activity.getMainUI().showGUI(); // refresh UI icons now that we've stopped panorama
     }
 
     private void setNextPanoramaPoint(boolean repeat) {
@@ -2241,6 +2241,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public void cameraClosed() {
         if( MyDebug.LOG )
             Log.d(TAG, "cameraClosed");
+        this.stopPanorama(true);
         main_activity.getMainUI().clearSeekBar();
         main_activity.getMainUI().destroyPopup(); // need to close popup - and when camera reopened, it may have different settings
         drawPreview.clearContinuousFocusMove();

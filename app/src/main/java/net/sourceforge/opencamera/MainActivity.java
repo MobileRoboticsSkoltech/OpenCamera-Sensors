@@ -1033,7 +1033,7 @@ public class MainActivity extends Activity {
         freeAudioListener(false);
         speechControl.stopSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
-        applicationInterface.getGyroSensor().stopRecording();
+        applicationInterface.stopPanorama(true); // in practice not needed as we should stop panorama when camera is closed, but good to do it explicitly here, before disabling the gyro sensors
         applicationInterface.getGyroSensor().disableSensors();
         soundPoolManager.releaseSound();
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
@@ -1127,10 +1127,7 @@ public class MainActivity extends Activity {
     public void clickedCancelPanorama(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedCancelPanorama");
-        if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama &&
-                applicationInterface.getGyroSensor().isRecording() ) { // just in case
-            applicationInterface.stopPanorama(true);
-        }
+        applicationInterface.stopPanorama(true);
     }
 
     public void clickedCycleRaw(View view) {
@@ -1402,6 +1399,13 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedSwitchVideo");
         this.closePopup();
         mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
+
+        // In practice stopping the gyro sensor shouldn't be needed as (a) we don't show the switch
+        // photo/video icon when recording, (b) at the time of writing switching to video mode
+        // reopens the camera, which will stop panorama recording anyway, but we do this just to be
+        // safe.
+        applicationInterface.stopPanorama(true);
+
         View switchVideoButton = findViewById(R.id.switch_video);
         switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
         applicationInterface.reset();
@@ -1413,10 +1417,7 @@ public class MainActivity extends Activity {
 
         // ensure icons invisible if they're affected by being in video mode or not
         // (if enabling them, we'll make the icon visible later on)
-        if( !mainUI.showCycleRawIcon() ) {
-            View button = findViewById(R.id.cycle_raw);
-            button.setVisibility(View.GONE);
-        }
+        checkDisableGUIIcons();
 
         if( !block_startup_toast ) {
             this.showPhotoVideoToast(true);
@@ -1604,6 +1605,7 @@ public class MainActivity extends Activity {
         preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
         preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        applicationInterface.stopPanorama(true); // important to stop panorama recording, as we might end up as we'll be changing camera parameters when the settings window closes
         stopAudioListeners();
 
         Bundle bundle = new Bundle();
@@ -1929,42 +1931,8 @@ public class MainActivity extends Activity {
 
         // ensure icons invisible if disabling them from showing from the Settings
         // (if enabling them, we'll make the icon visible later on)
-        if( !mainUI.showExposureLockIcon() ) {
-            View button = findViewById(R.id.exposure_lock);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showWhiteBalanceLockIcon() ) {
-            View button = findViewById(R.id.white_balance_lock);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showCycleRawIcon() ) {
-            View button = findViewById(R.id.cycle_raw);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showStoreLocationIcon() ) {
-            View button = findViewById(R.id.store_location);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showTextStampIcon() ) {
-            View button = findViewById(R.id.text_stamp);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showStampIcon() ) {
-            View button = findViewById(R.id.stamp);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showAutoLevelIcon() ) {
-            View button = findViewById(R.id.auto_level);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showCycleFlashIcon() ) {
-            View button = findViewById(R.id.cycle_flash);
-            button.setVisibility(View.GONE);
-        }
-        if( !mainUI.showFaceDetectionIcon() ) {
-            View button = findViewById(R.id.face_detection);
-            button.setVisibility(View.GONE);
-        }
+        checkDisableGUIIcons();
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if( sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none") ) {
             View speechRecognizerButton = findViewById(R.id.audio_control);
@@ -2015,6 +1983,47 @@ public class MainActivity extends Activity {
 
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: done: " + (System.currentTimeMillis() - debug_time));
+        }
+    }
+
+    private void checkDisableGUIIcons() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkDisableGUIIcons");
+        if( !mainUI.showExposureLockIcon() ) {
+            View button = findViewById(R.id.exposure_lock);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showWhiteBalanceLockIcon() ) {
+            View button = findViewById(R.id.white_balance_lock);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showCycleRawIcon() ) {
+            View button = findViewById(R.id.cycle_raw);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showStoreLocationIcon() ) {
+            View button = findViewById(R.id.store_location);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showTextStampIcon() ) {
+            View button = findViewById(R.id.text_stamp);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showStampIcon() ) {
+            View button = findViewById(R.id.stamp);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showAutoLevelIcon() ) {
+            View button = findViewById(R.id.auto_level);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showCycleFlashIcon() ) {
+            View button = findViewById(R.id.cycle_flash);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showFaceDetectionIcon() ) {
+            View button = findViewById(R.id.face_detection);
+            button.setVisibility(View.GONE);
         }
     }
 
