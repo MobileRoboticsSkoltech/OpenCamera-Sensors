@@ -900,6 +900,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // pause preview in this mode.
             return false;
         }
+        else if( getPhotoMode() == PhotoMode.Panorama ) {
+            // don't pause preview when taking photos for panorama mode
+            return false;
+        }
         return sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
     }
 
