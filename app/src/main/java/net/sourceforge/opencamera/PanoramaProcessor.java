@@ -1489,18 +1489,28 @@ public class PanoramaProcessor {
                     // we need two points, so compare to every other point
                     for(int j=0;j<i;j++) {
                         FeatureMatch match2 = actual_matches.get(j);
-                        int c0_x = (points_arrays[0][match.index0].x + points_arrays[0][match2.index0].x)/2;
-                        int c0_y = (points_arrays[0][match.index0].y + points_arrays[0][match2.index0].y)/2;
-                        int c1_x = (points_arrays[1][match.index1].x + points_arrays[1][match2.index1].x)/2;
-                        int c1_y = (points_arrays[1][match.index1].y + points_arrays[1][match2.index1].y)/2;
+                        final int c0_x = (points_arrays[0][match.index0].x + points_arrays[0][match2.index0].x)/2;
+                        final int c0_y = (points_arrays[0][match.index0].y + points_arrays[0][match2.index0].y)/2;
+                        final int c1_x = (points_arrays[1][match.index1].x + points_arrays[1][match2.index1].x)/2;
+                        final int c1_y = (points_arrays[1][match.index1].y + points_arrays[1][match2.index1].y)/2;
                         // model is a (scale about c0, followed by) rotation about c0, followed by translation
-                        float dx0 = (points_arrays[0][match.index0].x - points_arrays[0][match2.index0].x);
-                        float dy0 = (points_arrays[0][match.index0].y - points_arrays[0][match2.index0].y);
-                        float dx1 = (points_arrays[1][match.index1].x - points_arrays[1][match2.index1].x);
-                        float dy1 = (points_arrays[1][match.index1].y - points_arrays[1][match2.index1].y);
-                        float mag_sq0 = dx0*dx0 + dy0*dy0;
-                        float mag_sq1 = dx1*dx1 + dy1*dy1;
+                        final float dx0 = (points_arrays[0][match.index0].x - points_arrays[0][match2.index0].x);
+                        final float dy0 = (points_arrays[0][match.index0].y - points_arrays[0][match2.index0].y);
+                        final float dx1 = (points_arrays[1][match.index1].x - points_arrays[1][match2.index1].x);
+                        final float dy1 = (points_arrays[1][match.index1].y - points_arrays[1][match2.index1].y);
+                        final float mag_sq0 = dx0*dx0 + dy0*dy0;
+                        final float mag_sq1 = dx1*dx1 + dy1*dy1;
                         if( mag_sq0 < min_rotation_dist2 || mag_sq1 < min_rotation_dist2 ) {
+                            continue;
+                        }
+                        final float min_height = 0.25f*height;
+                        final float max_height = 0.75f*height;
+                        if( points_arrays[0][match.index0].y < min_height || points_arrays[0][match.index0].y > max_height ||
+                                points_arrays[1][match.index1].y < min_height || points_arrays[1][match.index1].y > max_height ||
+                                points_arrays[0][match2.index0].y < min_height || points_arrays[0][match2.index0].y > max_height ||
+                                points_arrays[1][match2.index1].y < min_height || points_arrays[1][match2.index1].y > max_height
+                                ) {
+                            // for testPanorama28 - can get poor rotations if using matches too low or high, as photos more likely to be distorted
                             continue;
                         }
 
@@ -1588,6 +1598,8 @@ public class PanoramaProcessor {
                             // found an improved model!
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "match " + i + " gives better rotation model: " + inliers.size() + " inliers vs " + best_inliers.size());
+                                Log.d(TAG, "    c0_x: " + c0_x + " , c0_y: " + c0_y);
+                                Log.d(TAG, "    c1_x: " + c1_x + " , c1_y: " + c1_y);
                                 Log.d(TAG, "    dx0: " + dx0 + " , dy0: " + dy0);
                                 Log.d(TAG, "    dx1: " + dx1 + " , dy1: " + dy1);
                                 Log.d(TAG, "    rotate by " + angle + " about: " + c0_x + " , " + c0_y);
