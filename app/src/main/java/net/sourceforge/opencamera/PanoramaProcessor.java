@@ -1503,8 +1503,10 @@ public class PanoramaProcessor {
                         if( mag_sq0 < min_rotation_dist2 || mag_sq1 < min_rotation_dist2 ) {
                             continue;
                         }
-                        final float min_height = 0.25f*height;
-                        final float max_height = 0.75f*height;
+                        //final float min_height = 0.25f*height;
+                        //final float max_height = 0.75f*height;
+                        final float min_height = 0.3f*height;
+                        final float max_height = 0.7f*height;
                         if( points_arrays[0][match.index0].y < min_height || points_arrays[0][match.index0].y > max_height ||
                                 points_arrays[1][match.index1].y < min_height || points_arrays[1][match.index1].y > max_height ||
                                 points_arrays[0][match2.index0].y < min_height || points_arrays[0][match2.index0].y > max_height ||
@@ -1665,6 +1667,8 @@ public class PanoramaProcessor {
         float y_scale = 1.0f;
 
         if( estimate_rotation && use_rotation ) {
+			/*if( true )
+				throw new RuntimeException(); // test*/
 
             // first compute an ideal y_scale
 			/*if( estimate_y_scale && use_y_scale ) {
