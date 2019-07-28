@@ -2033,12 +2033,20 @@ public class PanoramaProcessor {
                 Log.d(TAG, "blend_height: " + blend_height);
             }
 
+            // Note that we don't handle the crop_x0 and crop_y0 in the same way: for the x crop, it's
+            // important to shift the x coordinate of the blend window to match what we'll blend if not
+            // cropping. Otherwise we have problems in testPanorama6 and especially testPanorama28
+            // (note, due to instability at the time of writing, testPanorama28 issue was reproduced on
+            // Nokia 8, but not Samsung Galaxy S10e).
+            // For the y crop, there isn't any advantage to shifting.
+
             //Bitmap lhs = Bitmap.createBitmap(panorama, offset_x + dst_offset_x - blend_hwidth, 0, 2*blend_hwidth, bitmap_height);
             Bitmap lhs = Bitmap.createBitmap(blend_width, blend_height, Bitmap.Config.ARGB_8888);
             {
                 Canvas lhs_canvas = new Canvas(lhs);
                 src_rect_workspace.set(offset_x + dst_offset_x - blend_hwidth, 0, offset_x + dst_offset_x + blend_hwidth, bitmap_height);
                 // n.b., shouldn't shift by align_x, align_y
+                src_rect_workspace.offset(-crop_x0, 0);
                 dst_rect_workspace.set(0, 0, blend_width, blend_height);
                 lhs_canvas.drawBitmap(panorama, src_rect_workspace, dst_rect_workspace, p);
             }
@@ -2049,7 +2057,7 @@ public class PanoramaProcessor {
                 Canvas rhs_canvas = new Canvas(rhs);
                 src_rect_workspace.set(offset_x - blend_hwidth, 0, offset_x + blend_hwidth, bitmap_height);
                 src_rect_workspace.offset(align_x, align_y);
-                dst_rect_workspace.set(-crop_x0, -crop_y0, blend_width-crop_x0, blend_height-crop_y0);
+                dst_rect_workspace.set(0, -crop_y0, blend_width, blend_height-crop_y0);
                 rhs_canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
             }
             if( MyDebug.LOG ) {
@@ -2083,7 +2091,8 @@ public class PanoramaProcessor {
             */
 
             // now draw the blended region
-            canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth, 0, p);
+            // note it's intentional that we don't shift for crop_y0, see comment above
+            canvas.drawBitmap(blended_bitmap, offset_x + dst_offset_x - blend_hwidth - crop_x0, 0, p);
 
             lhs.recycle();
             rhs.recycle();
