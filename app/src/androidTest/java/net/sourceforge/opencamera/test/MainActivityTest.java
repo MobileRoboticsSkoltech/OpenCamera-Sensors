@@ -15012,7 +15012,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Bitmap panorama = null;
         try {
-            panorama = mActivity.getApplicationInterface().getPanoramaProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y, true);
+            final boolean crop = true;
+            //final boolean crop = false; // test
+            panorama = mActivity.getApplicationInterface().getPanoramaProcessor().panorama(bitmaps, panorama_pics_per_screen, camera_angle_y, crop);
         }
         catch(PanoramaProcessorException e) {
             e.printStackTrace();
