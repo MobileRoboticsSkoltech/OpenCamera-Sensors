@@ -41,7 +41,7 @@ void __attribute__((kernel)) compute_derivatives(uchar in, uint32_t x, uint32_t 
         int iIx = (pixel5 - pixel3)/2;
         int iIy = (pixel7 - pixel1)/2;
 
-        // convert to we can store as a uchar
+        // convert so we can store as a uchar
 
         iIx = max(iIx, -127);
         iIx = min(iIx, 128);
