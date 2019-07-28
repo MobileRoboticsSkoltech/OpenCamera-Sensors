@@ -472,7 +472,10 @@ public class PanoramaProcessor {
         try {
             File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + name);
             OutputStream outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            if( name.toLowerCase().endsWith(".png") )
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            else
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
             outputStream.close();
             MainActivity mActivity = (MainActivity) context;
             mActivity.getStorageUtils().broadcastFile(file, true, false, true);
@@ -506,6 +509,18 @@ public class PanoramaProcessor {
                 ig = Math.max(Math.min(ig, 255), 0);
                 ib = Math.max(Math.min(ib, 255), 0);
                 pixels[j] = Color.argb(255, ir, ig, ib);
+            }
+            bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        }
+        else if( allocation.getType().getElement().getDataType() == Element.DataType.UNSIGNED_8 ) {
+            byte [] bytes = new byte[width*height];
+            allocation.copyTo(bytes);
+            int [] pixels = new int[width*height];
+            for(int j=0;j<width*height;j++) {
+                int b = bytes[j];
+                if( b < 0 )
+                    b += 255;
+                pixels[j] = Color.argb(255, b, b, b);
             }
             bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         }
@@ -915,6 +930,7 @@ public class PanoramaProcessor {
             //createMTBScript.set_out_bitmap(gs_allocation);
             //createMTBScript.forEach_create_greyscale(allocations[i]);
             featureDetectorScript.forEach_create_greyscale(allocations[i], gs_allocation);
+            //saveAllocation("gs_bitmap" + debug_index + "_" + i + ".png", gs_allocation);
 
             if( MyDebug.LOG )
                 Log.d(TAG, "compute derivatives");
@@ -927,30 +943,44 @@ public class PanoramaProcessor {
 
 			/*if( MyDebug.LOG ) {
 				// debugging
-				byte [] bytes = new byte[width*height];
-				ix_allocation.copyTo(bytes);
-				int [] pixels = new int[width*height];
+                byte [] bytes_x = new byte[width*height];
+                byte [] bytes_y = new byte[width*height];
+                ix_allocation.copyTo(bytes_x);
+                iy_allocation.copyTo(bytes_y);
+                int [] pixels_x = new int[width*height];
+                int [] pixels_y = new int[width*height];
 				for(int j=0;j<width*height;j++) {
-					int b = bytes[j];
-					if( b < 0 )
-						b += 255;
-					pixels[j] = Color.argb(255, b, b, b);
+                    int b = bytes_x[j];
+                    if( b < 0 )
+                        b += 255;
+                    pixels_x[j] = Color.argb(255, b, b, b);
+                    b = bytes_y[j];
+                    if( b < 0 )
+                        b += 255;
+                    pixels_y[j] = Color.argb(255, b, b, b);
 				}
-				Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
-				//File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/ix_bitmap" + debug_index + "_" + i + ".jpg");
-				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/ix_bitmap" + debug_index + "_" + i + ".png");
+                Bitmap bitmap_x = Bitmap.createBitmap(pixels_x, width, height, Bitmap.Config.ARGB_8888);
+                Bitmap bitmap_y = Bitmap.createBitmap(pixels_y, width, height, Bitmap.Config.ARGB_8888);
+                File file_x = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/ix_bitmap" + debug_index + "_" + i + ".png");
+                File file_y = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/iy_bitmap" + debug_index + "_" + i + ".png");
 				try {
-					OutputStream outputStream = new FileOutputStream(file);
-					//bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-					bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    MainActivity mActivity = (MainActivity) context;
+
+					OutputStream outputStream = new FileOutputStream(file_x);
+					bitmap_x.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 					outputStream.close();
-					MainActivity mActivity = (MainActivity) context;
-					mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+					mActivity.getStorageUtils().broadcastFile(file_x, true, false, true);
+
+                    outputStream = new FileOutputStream(file_y);
+                    bitmap_y.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    outputStream.close();
+                    mActivity.getStorageUtils().broadcastFile(file_y, true, false, true);
 				}
 				catch(IOException e) {
 					e.printStackTrace();
 				}
-				bitmap.recycle();
+                bitmap_x.recycle();
+                bitmap_y.recycle();
 			}*/
 
             if( MyDebug.LOG )
@@ -2545,7 +2575,7 @@ public class PanoramaProcessor {
                 /*if( MyDebug.LOG ) {
                     for(int j=0;j<alignment_bitmaps.size();j++) {
                         Bitmap alignment_bitmap = alignment_bitmaps.get(j);
-                        saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +".jpg");
+                        saveBitmap(alignment_bitmap, "alignment_bitmap_" + i + "_" + j +".png");
                     }
                 }*/
 
@@ -2809,6 +2839,13 @@ public class PanoramaProcessor {
                 throw new PanoramaProcessorException(PanoramaProcessorException.UNEQUAL_SIZES);
             }
         }
+        /*{
+            // test
+            for(int i=0;i<bitmaps.size();i++) {
+                Bitmap bitmap = bitmaps.get(i);
+                saveBitmap(bitmap, "input_bitmap_" + i +".png");
+            }
+        }*/
 
         final int slice_width = (int) (bitmap_width / panorama_pics_per_screen);
         if( MyDebug.LOG )
