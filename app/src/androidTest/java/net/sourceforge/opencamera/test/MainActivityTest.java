@@ -16044,4 +16044,37 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
+
+    /** Tests panorama algorithm on test samples "testPanorama29".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama29() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama29");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        // right-to-left:
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_9.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama29/IMG_20190719_145852_0.jpg");
+        String output_name = "testPanorama29_output.jpg";
+        String gyro_name = null;
+        // taken with Nokia 8, old API:
+        float camera_angle_x = 66.1062f;
+        float camera_angle_y = 49.88347f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
 }
