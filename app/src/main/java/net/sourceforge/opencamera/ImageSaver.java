@@ -135,23 +135,23 @@ public class ImageSaver extends Thread {
             WEBP,
             PNG
         }
-        final ImageFormat image_format;
-        final int image_quality;
-        final boolean do_auto_stabilise;
+        ImageFormat image_format;
+        int image_quality;
+        boolean do_auto_stabilise;
         final double level_angle;
         final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
         boolean panorama_dir_left_to_right; // used for panorama
         float camera_view_angle_x; // used for panorama
         float camera_view_angle_y; // used for panorama
         final boolean is_front_facing;
-        final boolean mirror;
+        boolean mirror;
         final Date current_date;
         final String preference_hdr_contrast_enhancement; // for HDR
         final int iso; // not applicable for RAW image
         final long exposure_time; // not applicable for RAW image
         final float zoom_factor; // not applicable for RAW image
-        final String preference_stamp;
-        final String preference_textstamp;
+        String preference_stamp;
+        String preference_textstamp;
         final int font_size;
         final int color;
         final String pref_style;
@@ -233,6 +233,35 @@ public class ImageSaver extends Thread {
             this.custom_tag_artist = custom_tag_artist;
             this.custom_tag_copyright = custom_tag_copyright;
             this.sample_factor = sample_factor;
+        }
+
+        /** Returns a copy of this object. Note that it is not a deep copy - data such as JPEG and RAW
+         *  data will not be copied.
+         */
+        Request copy() {
+            return new Request(this.type,
+                    this.process_type,
+                    this.force_suffix,
+                    this.suffix_offset,
+                    this.save_base,
+                    this.jpeg_images,
+                    this.raw_image,
+                    this.image_capture_intent, this.image_capture_intent_uri,
+                    this.using_camera2,
+                    this.image_format, this.image_quality,
+                    this.do_auto_stabilise, this.level_angle, this.gyro_rotation_matrix,
+                    this.is_front_facing,
+                    this.mirror,
+                    this.current_date,
+                    this.preference_hdr_contrast_enhancement,
+                    this.iso,
+                    this.exposure_time,
+                    this.zoom_factor,
+                    this.preference_stamp, this.preference_textstamp, this.font_size, this.color, this.pref_style, this.preference_stamp_dateformat, this.preference_stamp_timeformat, this.preference_stamp_gpsformat, this.preference_stamp_geo_address, this.preference_units_distance,
+                    this.panorama_crop, this.store_location, this.location, this.store_geo_direction, this.geo_direction,
+                    this.custom_tag_artist,
+                    this.custom_tag_copyright,
+                    this.sample_factor);
         }
     }
 
@@ -1743,9 +1772,27 @@ public class ImageSaver extends Thread {
         if( !request.image_capture_intent && request.save_base != Request.SaveBase.SAVEBASE_NONE ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "save base images");
+
+            Request base_request = request;
+            if( request.process_type == Request.ProcessType.PANORAMA ) {
+                // Important to save base images for panorama in PNG format, to avoid risk of not being able to reproduce the
+                // same issue - decompressing JPEGs can vary between devices!
+                // Also disable options that don't really make sense for base panorama images.
+                base_request = request.copy();
+                base_request.image_format = Request.ImageFormat.PNG;
+                base_request.preference_stamp = "preference_stamp_no";
+                base_request.preference_textstamp = "";
+                base_request.do_auto_stabilise = false;
+                base_request.mirror = false;
+            }
+            else if( request.process_type == Request.ProcessType.AVERAGE ) {
+                // In case the base image needs to be postprocessed, we still want to save base images for NR at the 100% JPEG quality
+                base_request = request.copy();
+                base_request.image_quality = 100;
+            }
             // don't update the thumbnails, only do this for the final image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
             // also don't mark these images as being shared
-            saveImages(request, suffix, request.save_base == Request.SaveBase.SAVEBASE_FIRST, false, false);
+            saveImages(base_request, suffix, base_request.save_base == Request.SaveBase.SAVEBASE_FIRST, false, false);
             // ignore return of saveImages - as for deciding whether to pause preview or not (which is all we use the success return for), all that matters is whether we saved the final HDR image
         }
     }
