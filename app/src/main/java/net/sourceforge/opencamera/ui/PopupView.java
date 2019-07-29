@@ -1084,7 +1084,7 @@ public class PopupView extends LinearLayout {
             else if( new_photo_mode == MyApplicationInterface.PhotoMode.Panorama ) {
                 boolean done_panorama_info = sharedPreferences.contains(PreferenceKeys.PanoramaInfoPreferenceKey);
                 if( !done_panorama_info ) {
-                    main_activity.getMainUI().showInfoDialog(R.string.photo_mode_panorama, R.string.panorama_info, PreferenceKeys.PanoramaInfoPreferenceKey);
+                    main_activity.getMainUI().showInfoDialog(R.string.photo_mode_panorama_full, R.string.panorama_info, PreferenceKeys.PanoramaInfoPreferenceKey);
                     done_dialog = true;
                 }
             }
