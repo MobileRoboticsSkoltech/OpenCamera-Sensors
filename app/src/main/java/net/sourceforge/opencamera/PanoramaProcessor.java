@@ -2692,8 +2692,9 @@ public class PanoramaProcessor {
      *  This is effectively equivalent to rotating the final image to be hopefully more level.
      */
     private void adjustPanoramaTransforms(List<Bitmap> bitmaps, List<Matrix> cumulative_transforms,
-                                          int panorama_width, int slice_width, int bitmap_height) {
+                                          int panorama_width, int slice_width, int bitmap_width, int bitmap_height) {
         float [] values = new float[9];
+
         float min_rotation = 1000, max_rotation = - 1000;
         float sum_rotation = 0.0f;
         for(int i=0;i<bitmaps.size();i++) {
@@ -2706,10 +2707,45 @@ public class PanoramaProcessor {
             max_rotation = Math.max(max_rotation, rotation);
             sum_rotation += rotation;
         }
-        float mid_rotation = 0.5f*(min_rotation + max_rotation);
+        //float mid_rotation = 0.5f*(min_rotation + max_rotation);
         //float mid_rotation = sum_rotation/bitmaps.size();
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "min_rotation: " + min_rotation + " degrees");
+            Log.d(TAG, "max_rotation: " + max_rotation + " degrees");
+            //Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
+        }
+
+        // this method helps testPanorama29
+        float [] points = new float[2];
+        points[0] = 0.0f;
+        points[1] = bitmap_height/2.0f;
+        cumulative_transforms.get(0).mapPoints(points);
+        float x0 = points[0];
+        float y0 = points[1];
+        points[0] = bitmap_width-1.0f;
+        points[1] = bitmap_height/2.0f;
+        cumulative_transforms.get(cumulative_transforms.size()-1).mapPoints(points);
+        float x1 = points[0] + (cumulative_transforms.size()-1) * slice_width;
+        float y1 = points[1];
+        float dx = x1 - x0;
+        float dy = y1 - y0;
+        float mid_rotation = -(float)Math.toDegrees(Math.atan2(dy, dx));
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "x0: " + x0);
+            Log.d(TAG, "y0: " + y0);
+            Log.d(TAG, "x1: " + x1);
+            Log.d(TAG, "y1: " + y1);
+            Log.d(TAG, "dx: " + dx);
+            Log.d(TAG, "dy: " + dy);
             Log.d(TAG, "mid_rotation: " + mid_rotation + " degrees");
+        }
+        // but don't rotate more than the input transforms - helps testPanorama22
+        mid_rotation = Math.max(mid_rotation, min_rotation);
+        mid_rotation = Math.min(mid_rotation, max_rotation);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "limited mid_rotation to: " + mid_rotation + " degrees");
+        }
+
         // we now apply a rotation of -mid_rotation about what will be the centre of the resultant panoramic image, remembering
         // that each matrix in cumulative_transforms is set up for each input images coordinate space
         for(int i=0;i<bitmaps.size();i++) {
@@ -2927,7 +2963,7 @@ public class PanoramaProcessor {
             Log.d(TAG, "original panorama_width: " + panorama_width);
         }
 
-        adjustPanoramaTransforms(bitmaps, cumulative_transforms, panorama_width, slice_width, bitmap_height);
+        adjustPanoramaTransforms(bitmaps, cumulative_transforms, panorama_width, slice_width, bitmap_width, bitmap_height);
         if( MyDebug.LOG )
             Log.d(TAG, "### time after adjusting transforms: " + (System.currentTimeMillis() - time_s));
 
