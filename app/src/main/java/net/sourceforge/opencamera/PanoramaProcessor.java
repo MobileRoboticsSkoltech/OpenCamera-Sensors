@@ -2151,10 +2151,14 @@ public class PanoramaProcessor {
         int stop_x = slice_width+blend_hwidth;
         if( i == 0 )
             start_x = -offset_x;
-        if( i == n_bitmaps-1 )
-            stop_x = slice_width+offset_x;
+        if( i == n_bitmaps-1 ) {
+            stop_x = slice_width + offset_x;
+            stop_x -= align_x; // to undo the shift of src_rect_workspace by align_x below
+        }
         stop_x -= shift_stop_x;
         if( MyDebug.LOG ) {
+            Log.d(TAG, "    offset_x: " + offset_x);
+            Log.d(TAG, "    dst_offset_x: " + dst_offset_x);
             Log.d(TAG, "    start_x: " + start_x);
             Log.d(TAG, "    stop_x: " + stop_x);
         }
@@ -2165,6 +2169,10 @@ public class PanoramaProcessor {
         src_rect_workspace.set(offset_x + start_x, 0, offset_x + stop_x, bitmap_height);
         src_rect_workspace.offset(align_x, align_y);
         dst_rect_workspace.set(offset_x + dst_offset_x + start_x - crop_x0, -crop_y0, offset_x + dst_offset_x + stop_x - crop_x0, bitmap_height-crop_y0);
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "    src_rect_workspace: " + src_rect_workspace);
+            Log.d(TAG, "    dst_rect_workspace: " + dst_rect_workspace);
+        }
         canvas.drawBitmap(projected_bitmap, src_rect_workspace, dst_rect_workspace, p);
         if( MyDebug.LOG )
             Log.d(TAG, "### time after drawing non-blended region for " + i + "th bitmap: " + (System.currentTimeMillis() - time_s));
