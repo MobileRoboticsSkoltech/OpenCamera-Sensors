@@ -1325,6 +1325,7 @@ public class PanoramaProcessor {
         }
 
         // choose matches
+        boolean [] rejected0 = new boolean[points_arrays[0].length];
         boolean [] has_matched0 = new boolean[points_arrays[0].length];
         boolean [] has_matched1 = new boolean[points_arrays[1].length];
         List<FeatureMatch> actual_matches = new ArrayList<>();
@@ -1362,6 +1363,7 @@ public class PanoramaProcessor {
             }
             if( reject ) {
                 has_matched0[match.index0] = true;
+                rejected0[match.index0] = true;
                 continue;
             }
 
@@ -1820,7 +1822,10 @@ public class PanoramaProcessor {
 					/*if( !was_matched ) {
 						continue;
 					}*/
-                    p.setColor(was_matched ? Color.YELLOW : Color.RED);
+					if( i == 0 && rejected0[j] )
+                        p.setColor(Color.CYAN);
+					else
+                        p.setColor(was_matched ? Color.YELLOW : Color.RED);
                     //canvas.drawCircle(points_arrays[i][j].x + off_x, points_arrays[i][j].y, 5.0f, p);
                     canvas.drawRect(points_arrays[i][j].x + off_x - feature_descriptor_radius - 1, points_arrays[i][j].y - feature_descriptor_radius - 1, points_arrays[i][j].x + off_x + feature_descriptor_radius + 1, points_arrays[i][j].y + feature_descriptor_radius + 1, p);
                 }
