@@ -15022,6 +15022,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         saveBitmap(panorama, output_name);
+        Thread.sleep(500);
 
         // check we've cropped correctly:
         final float black_factor = 0.9f;
@@ -15073,8 +15074,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.e(TAG, "too many black pixels on right border: " + n_black);
             fail();
         }
-
-        Thread.sleep(500);
     }
 
     /** Tests panorama algorithm on test samples "testPanorama1".
