@@ -16076,4 +16076,95 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
+
+    /** Tests panorama algorithm on test samples "testPanorama30".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama30() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama30");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        /*inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_9.jpg");*/
+        // converted from original JPEGs to PNG using Nokia 8:
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_0.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_1.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_2.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_3.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_4.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_5.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_6.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_7.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_8.png");
+        inputs.add(panorama_images_path + "testPanorama30/nokia8_input_bitmap_9.png");
+        String output_name = "testPanorama30_output.jpg";
+        String gyro_name = null;
+        // taken with Samsung Galaxy S10e, old API, standard rear camera:
+        // n.b., camera angles are indeed the exact same as with Camera2
+        float camera_angle_x = 66.3177f;
+        float camera_angle_y = 50.04736f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama30", but with a nbnq similar set of
+     *  input images. Instead of converting the original JPEGs to PNG on Nokia 8, this was done on
+     *  the Samsung Galaxy S10e, which gives small differences, but enough to show up potential
+     *  stability issues.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama30_galaxys10e() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama30_galaxys10e");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        /*inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama30/IMG_20190723_142934_9.jpg");*/
+        // converted from original JPEGs to PNG using Samsung Galaxy S10e:
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_0.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_1.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_2.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_3.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_4.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_5.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_6.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_7.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_8.png");
+        inputs.add(panorama_images_path + "testPanorama30/galaxys10e_input_bitmap_9.png");
+        String output_name = "testPanorama30_galaxys10e_output.jpg";
+        String gyro_name = null;
+        // taken with Samsung Galaxy S10e, old API, standard rear camera:
+        // n.b., camera angles are indeed the exact same as with Camera2
+        float camera_angle_x = 66.3177f;
+        float camera_angle_y = 50.04736f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
 }
