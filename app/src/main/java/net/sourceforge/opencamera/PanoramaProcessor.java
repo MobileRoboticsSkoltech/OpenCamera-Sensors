@@ -1517,6 +1517,7 @@ public class PanoramaProcessor {
                                 points_arrays[1][match2.index1].y < min_height || points_arrays[1][match2.index1].y > max_height
                                 ) {
                             // for testPanorama28 - can get poor rotations if using matches too low or high, as photos more likely to be distorted
+                            // also helps testPanorama31, testPanorama34, testPanorama35
                             continue;
                         }
 

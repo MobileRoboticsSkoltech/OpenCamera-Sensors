@@ -16167,4 +16167,251 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
     }
+
+    /** Tests panorama algorithm on test samples "testPanorama31".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama31() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama31");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama31/IMG_20190704_135633_6.jpg");
+        String output_name = "testPanorama31_output.jpg";
+        String gyro_name = null;
+        // taken with OnePlus 3T, Camera2 API:
+        float camera_angle_x = 62.93796f;
+        float camera_angle_y = 47.44656f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama3".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama32() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama32");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama32/IMG_20190705_145938_8.jpg");
+        String output_name = "testPanorama32_output.jpg";
+        String gyro_name = null;
+        // taken with OnePlus 3T, old API:
+        float camera_angle_x = 60.0f;
+        float camera_angle_y = 45.0f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama33".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama33() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama33");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama33/IMG_20190713_013437_5.jpg");
+        String output_name = "testPanorama33_output.jpg";
+        String gyro_name = null;
+        // taken with Nokia 8, old API:
+        float camera_angle_x = 66.1062f;
+        float camera_angle_y = 49.88347f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama34".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama34() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama34");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        // right-to-left:
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_9.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama34/IMG_20190717_144042_0.jpg");
+        String output_name = "testPanorama34_output.jpg";
+        String gyro_name = null;
+        // taken with Nexus 6, old API:
+        float camera_angle_x = 62.7533f;
+        float camera_angle_y = 47.298824f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama35".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama35() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama35");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama35/IMG_20190717_145114_9.jpg");
+        String output_name = "testPanorama35_output.jpg";
+        String gyro_name = null;
+        // taken with Nexus 7, old API:
+        float camera_angle_x = 55.0f;
+        float camera_angle_y = 41.401073f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama36".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama36() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama36");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama36/IMG_20190722_201331_7.jpg");
+        String output_name = "testPanorama36_output.jpg";
+        String gyro_name = null;
+        // taken with Samsung Galaxy S10e, Camera2 API, ultra wide rear camera:
+        float camera_angle_x = 104.00253f;
+        float camera_angle_y = 81.008804f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama37".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama37() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama37");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama37/IMG_20190723_203441_8.jpg");
+        String output_name = "testPanorama37_output.jpg";
+        String gyro_name = null;
+        // taken with Samsung Galaxy S10e, old API, standard rear camera:
+        // n.b., camera angles are indeed the exact same as with Camera2
+        float camera_angle_x = 66.3177f;
+        float camera_angle_y = 50.04736f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
+
+    /** Tests panorama algorithm on test samples "testPanorama38".
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanorama38() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanorama38");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        float panorama_pics_per_screen = 3.33333f;
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_0.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_1.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_2.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_3.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_4.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_5.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_6.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_7.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_8.jpg");
+        inputs.add(panorama_images_path + "testPanorama38/IMG_20190722_141148_9.jpg");
+        String output_name = "testPanorama38_output.jpg";
+        String gyro_name = null;
+        // taken with Samsung Galaxy S10e, Camera2 API, standard rear camera:
+        float camera_angle_x = 66.3177f;
+        float camera_angle_y = 50.04736f;
+
+        subTestPanorama(inputs, output_name, gyro_name, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 1.0f);
+    }
 }
