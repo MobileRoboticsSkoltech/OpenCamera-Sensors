@@ -14956,16 +14956,47 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // we set panorama_pics_per_screen in the test rather than using MyApplicationInterface.panorama_pics_per_screen,
         // in case the latter value is changed
 
+        boolean first = true;
+        Matrix scale_matrix = null;
+        int bitmap_width = 0;
+        int bitmap_height = 0;
         List<Bitmap> bitmaps = new ArrayList<>();
         for(String input : inputs) {
             Bitmap bitmap = getBitmapFromFile(input);
+
+            if( first ) {
+                bitmap_width = bitmap.getWidth();
+                bitmap_height = bitmap.getHeight();
+                Log.d(TAG, "bitmap_width: " + bitmap_width);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+
+                final int max_height = 2080;
+                //final int max_height = 2079; // test non power of 2
+                if( bitmap_height > max_height ) {
+                    float scale = ((float)max_height) / ((float)bitmap_height);
+                    Log.d(TAG, "scale: " + scale);
+                    scale_matrix = new Matrix();
+                    scale_matrix.postScale(scale, scale);
+                }
+
+                first = false;
+            }
+
+            // downscale
+            if( scale_matrix != null ) {
+                Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap_width, bitmap_height, scale_matrix, true);
+                bitmap.recycle();
+                bitmap = new_bitmap;
+            }
+
             bitmaps.add(bitmap);
         }
 
-        int bitmap_width = bitmaps.get(0).getWidth();
-        int bitmap_height = bitmaps.get(0).getHeight();
-        Log.d(TAG, "bitmap_width: " + bitmap_width);
-        Log.d(TAG, "bitmap_height: " + bitmap_height);
+        bitmap_width = bitmaps.get(0).getWidth();
+        bitmap_height = bitmaps.get(0).getHeight();
+        Log.d(TAG, "bitmap_width is now: " + bitmap_width);
+        Log.d(TAG, "bitmap_height is now: " + bitmap_height);
+
 
         /*ImageSaver.GyroDebugInfo gyro_debug_info = null;
         if( gyro_debug_info_filename != null ) {
@@ -14990,25 +15021,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
         }*/
         //bitmaps.subList(2,bitmaps.size()).clear(); // test
-
-        // downscale
-        final int max_height = 2080;
-        //final int max_height = 2079; // test non power of 2
-        if( bitmap_height > max_height ) {
-            float scale = ((float)max_height) / ((float)bitmap_height);
-            Log.d(TAG, "scale: " + scale);
-            Matrix scale_matrix = new Matrix();
-            scale_matrix.postScale(scale, scale);
-            for(int j=0;j<bitmaps.size();j++) {
-                Bitmap new_bitmap = Bitmap.createBitmap(bitmaps.get(j), 0, 0, bitmap_width, bitmap_height, scale_matrix, true);
-                bitmaps.get(j).recycle();
-                bitmaps.set(j, new_bitmap);
-            }
-            bitmap_width = bitmaps.get(0).getWidth();
-            bitmap_height = bitmaps.get(0).getHeight();
-            Log.d(TAG, "bitmap_width is now: " + bitmap_width);
-            Log.d(TAG, "bitmap_height is now: " + bitmap_height);
-        }
 
         Bitmap panorama = null;
         try {
