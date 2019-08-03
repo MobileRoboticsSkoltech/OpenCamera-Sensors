@@ -1386,8 +1386,10 @@ public class PanoramaProcessor {
         //int n_matches = (int)(actual_matches.size()*0.1)+1;
         int n_matches = (int)(actual_matches.size()*0.4)+1;
         //int n_matches = (int)(actual_matches.size()*0.7)+1;
-        // but don't want too few matches - need at least 4 to get a good transform for testPanorama18, images _2 to _3:
-        final int n_minimum_matches_c = 4;
+        // but don't want too few matches - need at least 4 to get a good transform for testPanorama18, images _2 to _3;
+        // and at least 5 to get good transform for testPanorama30_galaxys10e, images _0 to _1
+        //final int n_minimum_matches_c = 4;
+        final int n_minimum_matches_c = 5;
         /*if( n_matches < n_minimum_matches_c ) {
             throw new RuntimeException("n_matches: " + n_matches);
         }*/
