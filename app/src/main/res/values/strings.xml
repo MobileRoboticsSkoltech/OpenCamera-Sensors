@@ -880,6 +880,8 @@
     <string name="preference_panorama_save_all">Save original images</string>
     <string name="preference_panorama_save_all_plus_debug">Save original images plus debug XML</string>
 
+    <string name="camera_id">ID</string> <!-- ID as in camera ID -->
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
@@ -890,6 +892,7 @@
             <li>New option Settings/Photo settings/Text style/\"Text with shaded background\" for photo stamp.\n</li>
             <li>Notifications now displayed on Android 8+ when Open Camera is in background when images are
                 still being processed/saved.\n</li>
+            <li>Camera ID is now displayed when switching cameras, on devices with more than two cameras.\n</li>
             <li>Improved performance on Android 7+ when saving photos when using Storage Access Framework.\n</li>
             <li>Other improvements and bug fixes.\n</li>
 

@@ -1380,6 +1380,15 @@ public class MainActivity extends Activity {
         this.closePopup();
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextCameraId();
+            if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
+                // telling the user which camera is pointless for only two cameras, but on devices that now
+                // expose many cameras it can be confusing, so show a toast to at least display the id
+                String toast_string = getResources().getString(
+                        preview.getCameraControllerManager().isFrontFacing(cameraId) ? R.string.front_camera : R.string.back_camera ) +
+                        " : " + getResources().getString(R.string.camera_id) + " " + cameraId;
+                preview.showToast(null, toast_string);
+            }
+
             View switchCameraButton = findViewById(R.id.switch_camera);
             switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
             applicationInterface.reset();
