@@ -882,22 +882,17 @@
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
-        [This dialog is shown when Open Camera is updated. You can disable it under
-        Settings/On screen GUI/Show What\'s New dialog.]
-        \n\n<b>v1.46:</b>\n\n
+        <small>[This dialog is shown when Open Camera is updated. You can disable it under
+            Settings/On screen GUI/Show What\'s New dialog.]</small>
+        \n\n<b>v1.47:</b>\n
         <ul>
-            <li>New features when Settings/\"Use Camera2 API\" is enabled: histogram, zebra stripes, focus peaking (see
-                Settings/\"Camera preview\"/).\n</li>
-            <li>RAW now supported for expo and focus bracketing on higher end devices (see Settings/Photo settings/ to
-                disable).\n</li>
-            <li>New Settings/Photo settings/\"Use addresses\" to display GPS coordinates as an address.\n</li>
-            <li>More on-screen icons under Settings/On screen GUI/.\n</li>
-            <li>Support for remote control via bluetooth/USB keyboards and Kraken Smart Housing (thanks to Edouard Lafargue).\n</li>
-            <li>Improved DRO algorithm for some scenes.\n</li>
-            <li>Noise Reduction \"NR Mode\" is now saved.\n</li>
-            <li>Some settings now moved from \"On screen GUI\" to \"Camera preview\".\n</li>
-            <li>Corrected display of free space with using external SD cards with Storage Access Framework.\n</li>
+            <li>New panorama photo mode (requires Android 5+, note not all devices are supported).\n</li>
+            <li>New option Settings/Photo settings/Text style/\"Text with shaded background\" for photo stamp.\n</li>
+            <li>Notifications now displayed on Android 8+ when Open Camera is in background when images are
+                still being processed/saved.\n</li>
+            <li>Improved performance on Android 7+ when saving photos when using Storage Access Framework.\n</li>
             <li>Other improvements and bug fixes.\n</li>
+
         </ul>
     </string>
 </resources>
