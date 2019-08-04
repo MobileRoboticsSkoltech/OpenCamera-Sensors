@@ -647,4 +647,14 @@ public class GyroSensor implements SensorEventListener {
     public void getRotationMatrix(float [] out) {
         System.arraycopy(currentRotationMatrix, 0, out, 0, 9);
     }
+
+    // for testing
+
+    public void testForceTargetAchieved(int indx) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "testForceTargetAchieved: " + indx);
+        if( targetCallback != null ) {
+            targetCallback.onAchieved(indx);
+        }
+    }
 }

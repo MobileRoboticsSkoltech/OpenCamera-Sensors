@@ -10376,6 +10376,177 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhotoContinuousBurst(true);
     }
 
+    public void subTestTakePhotoPanorama(boolean to_max, boolean cancel, boolean cancel_by_settings) throws InterruptedException {
+        Log.d(TAG, "subTestTakePhotoPanorama");
+        setToDefault();
+
+        if( !mActivity.supportsPanorama() ) {
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
+        editor.apply();
+        updateForSettings();
+
+        assertTrue( mActivity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama );
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        int n_files = getNFiles(folder);
+        Log.d(TAG, "n_files at start: " + n_files);
+
+        Thread.sleep(1000);
+        assertTrue(mPreview.count_cameraTakePicture==0);
+
+        assertFalse( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+        View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+        View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+        View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+        View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+        View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+        View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+        View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+        View cancelPanoramaButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.cancel_panorama);
+
+        assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+        assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+        assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureLockButton.getVisibility() == View.VISIBLE);
+        assertTrue(audioControlButton.getVisibility() == View.GONE);
+        assertTrue(popupButton.getVisibility() == View.VISIBLE);
+        assertTrue(trashButton.getVisibility() == View.GONE);
+        assertTrue(shareButton.getVisibility() == View.GONE);
+        assertTrue(settingsButton.getVisibility() == View.VISIBLE);
+        assertTrue(cancelPanoramaButton.getVisibility() == View.GONE);
+
+        Log.d(TAG, "about to click take photo");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take photo");
+
+        Log.d(TAG, "wait until finished taking photo");
+        waitForTakePhoto();
+        Log.d(TAG, "done taking photo");
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+        assertTrue(mPreview.count_cameraTakePicture==1);
+
+        for(int i=0;i<(to_max ? MyApplicationInterface.max_panorama_pics_c-1 : 4);i++) {
+            Log.d(TAG, "i = " + i);
+            assertTrue( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+
+            assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+            assertTrue(switchCameraButton.getVisibility() == View.GONE);
+            assertTrue(switchVideoButton.getVisibility() == View.GONE);
+            assertTrue(exposureButton.getVisibility() == View.GONE);
+            assertTrue(exposureLockButton.getVisibility() == View.GONE);
+            assertTrue(audioControlButton.getVisibility() == View.GONE);
+            assertTrue(popupButton.getVisibility() == View.GONE);
+            assertTrue(trashButton.getVisibility() == View.GONE);
+            assertTrue(shareButton.getVisibility() == View.GONE);
+            assertTrue(settingsButton.getVisibility() == View.VISIBLE);
+            assertTrue(cancelPanoramaButton.getVisibility() == View.VISIBLE);
+
+            Thread.sleep(2000);
+
+            assertTrue( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+            mActivity.getApplicationInterface().getGyroSensor().testForceTargetAchieved(0);
+            waitForTakePhoto();
+            Log.d(TAG, "done taking photo");
+            this.getInstrumentation().waitForIdleSync();
+            Log.d(TAG, "after idle sync");
+            assertTrue(mPreview.count_cameraTakePicture==i+2);
+        }
+
+        Thread.sleep(2000);
+
+        if( !to_max ) {
+            assertTrue( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+
+            if( cancel ) {
+                if( cancel_by_settings ) {
+                    Log.d(TAG, "about to click settings");
+                    clickView(settingsButton);
+                    Log.d(TAG, "done clicking settings");
+                    this.getInstrumentation().waitForIdleSync();
+                }
+                else {
+                    Log.d(TAG, "about to click cancel");
+                    clickView(cancelPanoramaButton);
+                    Log.d(TAG, "done clicking cancel");
+                    this.getInstrumentation().waitForIdleSync();
+                }
+            }
+            else {
+                // finish panorama (if to_max, this should have happened automatically)
+                Log.d(TAG, "about to click take photo");
+                clickView(takePhotoButton);
+                Log.d(TAG, "done clicking take photo");
+                this.getInstrumentation().waitForIdleSync();
+                Log.d(TAG, "after idle sync");
+            }
+        }
+
+        assertFalse( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+
+        assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+        assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+        assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+        assertTrue(exposureLockButton.getVisibility() == View.VISIBLE);
+        assertTrue(audioControlButton.getVisibility() == View.GONE);
+        assertTrue(popupButton.getVisibility() == View.VISIBLE);
+        assertTrue(trashButton.getVisibility() == View.GONE);
+        assertTrue(shareButton.getVisibility() == View.GONE);
+        assertTrue(settingsButton.getVisibility() == View.VISIBLE);
+        assertTrue(cancelPanoramaButton.getVisibility() == View.GONE);
+
+        mActivity.waitUntilImageQueueEmpty();
+
+        assertTrue( folder.exists() );
+        int n_new_files = getNFiles(folder) - n_files;
+        Log.d(TAG, "n_new_files: " + n_new_files);
+        assertTrue(n_new_files == (cancel ? 0 : 1));
+    }
+
+    /* Test for panorama photo mode.
+     */
+    public void testTakePhotoPanorama() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoPanorama");
+
+        subTestTakePhotoPanorama(false, false, false);
+    }
+
+    /* Test for panorama photo mode, taking max number of panorama shots.
+     */
+    public void testTakePhotoPanoramaMax() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoPanoramaMax");
+
+        subTestTakePhotoPanorama(true, false, false);
+    }
+
+    /* Test for panorama photo mode, but cancelling.
+     */
+    public void testTakePhotoPanoramaCancel() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoPanoramaCancel");
+
+        subTestTakePhotoPanorama(false, true, false);
+    }
+
+    /* Test for panorama photo mode, but cancelling by going to settings.
+     */
+    public void testTakePhotoPanoramaCancelBySettings() throws InterruptedException {
+        Log.d(TAG, "testTakePhotoPanoramaCancelBySettings");
+
+        subTestTakePhotoPanorama(false, true, true);
+    }
+
     /*private Bitmap getBitmapFromAssets(String filename) throws IOException {
         Log.d(TAG, "getBitmapFromAssets: " + filename);
         AssetManager assetManager = getInstrumentation().getContext().getResources().getAssets();

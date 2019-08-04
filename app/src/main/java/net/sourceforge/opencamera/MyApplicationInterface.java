@@ -81,7 +81,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
     private int n_capture_images_raw = 0; // how many calls to onRawPictureTaken() since the last call to onCaptureStarted()
     private int n_panorama_pics = 0;
-    private final static int max_panorama_pics_c = 10; // if we increase this, review against memory requirements under MainActivity.supportsPanorama()
+    public final static int max_panorama_pics_c = 10; // if we increase this, review against memory requirements under MainActivity.supportsPanorama()
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
@@ -1608,8 +1608,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         gyroSensor.setTarget(x, y, z, target_angle, upright_angle_tol, too_far_angle, new GyroSensor.TargetCallback() {
             @Override
             public void onAchieved(int indx) {
-                if( MyDebug.LOG )
+                if( MyDebug.LOG ) {
                     Log.d(TAG, "TargetCallback.onAchieved: " + indx);
+                    Log.d(TAG, "    n_panorama_pics: " + n_panorama_pics);
+                }
                 // Disable the target callback so we avoid risk of multiple callbacks - but note we don't call
                 // clearPanoramaPoint(), as we don't want to call drawPreview.clearGyroDirectionMarker()
                 // at this stage (looks better to keep showing the target market on-screen whilst photo
@@ -1631,8 +1633,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 if( MyDebug.LOG )
                     Log.d(TAG, "TargetCallback.onTooFar");
 
-                main_activity.getPreview().showToast(null, R.string.panorama_cancelled);
-                MyApplicationInterface.this.stopPanorama(true);
+                if( !main_activity.is_test ) {
+                    main_activity.getPreview().showToast(null, R.string.panorama_cancelled);
+                    MyApplicationInterface.this.stopPanorama(true);
+                }
             }
 
         });
@@ -2757,7 +2761,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             photo_mode = PhotoMode.Standard;
         }
 
-        if( photo_mode == PhotoMode.Panorama && gyroSensor.isRecording() && gyroSensor.hasTarget() && !gyroSensor.isTargetAchieved() ) {
+        if( !main_activity.is_test && photo_mode == PhotoMode.Panorama && gyroSensor.isRecording() && gyroSensor.hasTarget() && !gyroSensor.isTargetAchieved() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "ignore panorama image as target no longer achieved!");
             // n.b., gyroSensor.hasTarget() will be false if this is the first picture in the panorama series

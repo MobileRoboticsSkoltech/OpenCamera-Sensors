@@ -86,6 +86,10 @@ public class PhotoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRAutoStabilise"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRPhotoStamp"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoExpo"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPanorama"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPanoramaMax"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPanoramaCancel"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPanoramaCancelBySettings"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder1"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder2"));
