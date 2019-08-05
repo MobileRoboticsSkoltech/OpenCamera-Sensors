@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.sourceforge.opencamera"
     android:versionCode="71"
-    android:versionName="1.46wip"
+    android:versionName="1.47"
     android:installLocation="auto"
     >
 
