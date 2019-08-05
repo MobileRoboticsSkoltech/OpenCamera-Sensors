@@ -494,7 +494,7 @@ public class MainActivity extends Activity {
                             public void onClick(DialogInterface dialog, int which) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "donate");
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.DonateLink));
                                 startActivity(browserIntent);
                             }
                         });
@@ -3821,9 +3821,7 @@ public class MainActivity extends Activity {
         this.supports_force_video_4k = false;
     }
 
-    public static String getDonateLink() {
-        return "https://play.google.com/store/apps/details?id=harman.mark.donation";
-    }
+    public static final String DonateLink = "https://play.google.com/store/apps/details?id=harman.mark.donation";
 
     /*public static String getDonateMarketLink() {
     	return "market://details?id=harman.mark.donation";

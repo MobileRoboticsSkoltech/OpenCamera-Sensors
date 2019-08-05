@@ -2,12 +2,10 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
@@ -20,7 +18,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
 import android.renderscript.Allocation;
@@ -28,7 +25,6 @@ import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
-import android.renderscript.ScriptIntrinsicHistogram;
 //import android.renderscript.ScriptIntrinsicResize;
 import android.renderscript.Type;
 import android.support.annotation.RequiresApi;
@@ -545,7 +541,7 @@ public class PanoramaProcessor {
     /** Bitmaps passed to blendPyramids must have width and height each a multiple of the value
      *  returned by this function.
      */
-    private final static int getBlendDimension() {
+    private static int getBlendDimension() {
         return (int)(Math.pow(2.0, blend_n_levels)+0.5);
     }
 

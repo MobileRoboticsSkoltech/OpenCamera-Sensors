@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -1790,7 +1791,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     private int getNFiles(File folder) {
         File [] files = folder.listFiles();
-        Log.d(TAG, "getNFiles: " + folder + " has: " + files);
+        Log.d(TAG, "getNFiles: " + folder + " has: " + Arrays.toString(files));
         return files == null ? 0 : files.length;
     }
 
@@ -10376,7 +10377,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhotoContinuousBurst(true);
     }
 
-    public void subTestTakePhotoPanorama(boolean to_max, boolean cancel, boolean cancel_by_settings) throws InterruptedException {
+    private void subTestTakePhotoPanorama(boolean to_max, boolean cancel, boolean cancel_by_settings) throws InterruptedException {
         Log.d(TAG, "subTestTakePhotoPanorama");
         setToDefault();
 

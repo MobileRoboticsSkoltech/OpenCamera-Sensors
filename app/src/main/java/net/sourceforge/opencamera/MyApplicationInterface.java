@@ -2646,12 +2646,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      */
     private boolean forceSuffix(PhotoMode photo_mode) {
         // focus bracketing and fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
-        boolean force_suffix = photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst ||
+        return photo_mode == PhotoMode.FocusBracketing || photo_mode == PhotoMode.FastBurst ||
                 (
                         main_activity.getPreview().getCameraController() != null &&
                                 main_activity.getPreview().getCameraController().isCapturingBurst()
                 );
-        return force_suffix;
     }
 
     /** Saves the supplied image(s)

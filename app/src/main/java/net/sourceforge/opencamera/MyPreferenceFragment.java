@@ -912,7 +912,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
             	        	startActivity(browserIntent);
             			}*/
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.DonateLink));
                         startActivity(browserIntent);
                         return false;
                     }

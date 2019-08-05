@@ -35,7 +35,6 @@ import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video.VideoColumns;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
-import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStatVfs;
 import android.util.Log;
@@ -976,9 +975,18 @@ public class StorageUtils {
                 throw new IllegalArgumentException(); // so that we fall onto the backup
             }
             StatFs statFs = new StatFs(folder.getAbsolutePath());
-            // cast to long to avoid overflow!
-            long blocks = statFs.getAvailableBlocks();
-            long size = statFs.getBlockSize();
+            long blocks, size;
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+                blocks = statFs.getAvailableBlocksLong();
+                size = statFs.getBlockSizeLong();
+            }
+            else {
+                // cast to long to avoid overflow!
+                //noinspection deprecation
+                blocks = statFs.getAvailableBlocks();
+                //noinspection deprecation
+                size = statFs.getBlockSize();
+            }
             return (blocks*size) / 1048576;
         }
         catch(IllegalArgumentException e) {
@@ -991,9 +999,18 @@ public class StorageUtils {
                     if( !folder_name.startsWith("/") ) {
                         File folder = getBaseFolder();
                         StatFs statFs = new StatFs(folder.getAbsolutePath());
-                        // cast to long to avoid overflow!
-                        long blocks = statFs.getAvailableBlocks();
-                        long size = statFs.getBlockSize();
+                        long blocks, size;
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+                            blocks = statFs.getAvailableBlocksLong();
+                            size = statFs.getBlockSizeLong();
+                        }
+                        else {
+                            // cast to long to avoid overflow!
+                            //noinspection deprecation
+                            blocks = statFs.getAvailableBlocks();
+                            //noinspection deprecation
+                            size = statFs.getBlockSize();
+                        }
                         return (blocks*size) / 1048576;
                     }
                 }
