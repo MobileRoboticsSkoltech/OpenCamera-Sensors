@@ -3080,7 +3080,7 @@ public class PanoramaProcessor {
         }
         bitmaps.clear();
 
-        if( ratio_brightnesses >= 5.0f ) {
+        if( ratio_brightnesses >= 3.0f ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "apply contrast enhancement, ratio_brightnesses: " + ratio_brightnesses);
 
