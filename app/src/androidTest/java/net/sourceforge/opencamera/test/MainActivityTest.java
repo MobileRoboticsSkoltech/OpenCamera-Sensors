@@ -2920,6 +2920,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
         boolean is_focus_bracketing = mActivity.supportsFocusBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_focus_bracketing");
+        boolean is_panorama = mActivity.supportsPanorama() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_panorama");
 
         Log.d(TAG, "wait until finished taking photo");
         long time_s = System.currentTimeMillis();
@@ -2927,7 +2928,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
             // also see note at end of setToDefault for Nokia 8, need to sleep briefly to avoid hanging here
             if( !is_focus_bracketing ) {
-                assertTrue(System.currentTimeMillis() - time_s < 20000);
+                assertTrue(System.currentTimeMillis() - time_s < (is_panorama ? 40000 : 20000)); // need longer for panorama on Nexus 7 for testTakePhotoPanoramaMax
             }
             assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
             assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
@@ -3178,7 +3179,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final File [] files, final String suffix, final int max_time_s, final Date date) throws InterruptedException {
         File folder = mActivity.getImageFolder();
-        int n_files = files.length;
+        int n_files = files == null ? 0 : files.length;
         assertTrue( folder.exists() );
         File [] files2 = folder.listFiles();
         int n_new_files = (files2 == null ? 0 : files2.length) - n_files;
@@ -3404,7 +3405,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 int allowed_time_ms = 10000;
                 if( is_hdr || is_nr || is_expo ) {
                     // some devices need longer time (especially Nexus 6)
-                    allowed_time_ms = 12000;
+                    allowed_time_ms = 16000;
                 }
                 assertTrue( System.currentTimeMillis() - time_s < allowed_time_ms );
             }
@@ -10458,6 +10459,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             assertTrue( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
             mActivity.getApplicationInterface().getGyroSensor().testForceTargetAchieved(0);
+            Log.d(TAG, "wait for taking photo");
             waitForTakePhoto();
             Log.d(TAG, "done taking photo");
             this.getInstrumentation().waitForIdleSync();
