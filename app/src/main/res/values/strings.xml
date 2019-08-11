@@ -871,7 +871,7 @@
     <string name="preference_panorama_crop">Panorama auto-crop</string>
     <string name="preference_panorama_crop_summary">For panorama mode, whether to remove the wavy boundaries\n%s</string>
 
-    <string name="panorama_info">To take a panorama image, hold your device in portrait orientation, and click to take a photo to start the panorama. Then rotate your device either left or right to move the centred white circle over the blue dot. After each new photo is taken, keep rotating your device to cover each new blue dot that appears in turn.\n\nClick the tick icon to save the panorama, or the cross icon to cancel.\n\nNote that panorama photos can take time to process and save.</string>
+    <string name="panorama_info">To take a panorama image, hold your device in portrait orientation, and click to take a photo to start the panorama. Then rotate your device either left or right to move the centred white circle over the blue dot. After each new image is captured, keep rotating your device to cover each new blue dot that appears in turn.\n\nClick the tick icon to save the panorama, or the cross icon to cancel.\n\nNote that panorama photos can take time to process and save.</string>
 
     <string name="preference_panorama_save">Panorama original images</string>
     <string name="preference_panorama_save_summary">Whether to save original images in panorama mode. Note this will make saving panorama photos slower. Also allows the option to save an XML file which can be useful reporting problems with panorama.\n%s</string>

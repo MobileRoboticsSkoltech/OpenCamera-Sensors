@@ -80,6 +80,7 @@
 <li><a href="#hdr">HDR</a></li>
 <li><a href="#dro_vs_hdr">DRO vs HDR</a></li>
 <li><a href="#nr_vs_hdr">NR vs HDR</a></li>
+<li><a href="#pano">Panorama</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#widgets">Widgets and tiles</a></li>
 <li><a href="#remote_control">Remote control</a></li>
@@ -206,6 +207,7 @@ will be available which instead work by making the screen light up (note, front 
 	and if Camera2 API is used.)</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
 	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode (requires Android 5).</li>
+	<li><b>Pano</b> - Enables <a href="#pano">Panorama</a> mode (requires Android 5).</li>
 	<li><b>[]]]</b> - Enables Fast Burst mode. Takes multiple images in quick succession. (Only available on some
 	devices, and if Camera2 API is used.) In this mode, you can change the number of photos to take from the
 	popup menu.</li>
@@ -409,9 +411,31 @@ in the sky in the Noise Reduction result, but the HDR mode does even better.</p>
 <img src="avg_image_test45_thumb.jpg" style="max-width:100%" alt="Screenshots demonstrating Noise Reduction vs HDR" title="Screenshots demonstrating Noise Reduction vs HDR">
 </a></p>
 
-
 <p>In summary: NR is better if you just want a "works best in most cases" option. HDR may be a better choice specifically in
 scenes with high dynamic range, that also don't have movement in the scene.</p>
+
+<p><a name="pano"><b>Panorama</b></a></p>
+
+<p>Panorama photo mode allows creating wide photos, by stitching together multiple separate photos.</p>
+
+<p>To take a panorama image, hold your device in portrait orientation, and click to take a photo to start the panorama. Two blue circular dots
+will then appear. Rotate your device about the device's axis, either to the left or right, to move the centred white circle over one of the
+blue dots, which will allow the camera to capture another image. After each new image is captured, keep rotating your device to cover each new
+blue dot that appears in turn. If the device is tilted to one side too much, an icon will appear to indicate you need to rotate the device
+clockwise or anti-clockwise.</p>
+
+<p>Click the tick icon to save the panorama, or the cross icon to cancel. Or the panorama will automatically save after 10 images have been
+captured.</p>
+
+<p>For best results, try to keep your device steady, apart from rotating about the device's axis. Note that panorama photos can take time to process and save.</p>
+
+<p>Note that the following options are not supported with panorama:</p>
+<ul>
+<li>Timer.</li>
+<li>Auto-repeat.</li>
+<li>Immersive mode.</li>
+<li>Pause after taking photo.</li>
+</ul>
 
 <p><a name="settings"><b>Settings</b></a></p>
 
@@ -835,6 +859,15 @@ choose "Always" to have it applied in all cases.</p>
 exposure level to the darkest/brightest image, in Exposure Bracketing Photo Mode. An increase of 1
 stop means a doubling of the amount of light. So a setting of "2", with 3 images, will produce
 images with exposure set to [-2, 0, +2]. For 5 images, this will produce [-2, -1, 0, +1, +2].</p>
+
+<p><b>Panorama auto-crop</b> - Normally <a href="#pano">panoramas</a> are cropped to give a rectangular result.
+Disabling this option will show the full extent of the panorama, but will leave wavy black borders.</p>
+
+<p><b>Panorama original images</b> - Whether to save the original shots in <a href="#pano">Panorama</a> mode. This can be useful
+if you want to use a third party application to stitch the images together to create a panorama. Note that these original
+images are always saved in PNG format. This option can also be useful for debugging purposes, to send me example images when
+reporting problems with panorama - for this, it's best to select to include the debug XML file (note that you'll typically need
+a third party File Explorer application to see and delete XML files on Android).</p>
 
 <p><b>Front camera mirror</b> - Normally for front cameras, the preview will behave like a mirror, but resultant
 photos will still be as the camera (or other people) view the scene. This option can be used to mirror the
