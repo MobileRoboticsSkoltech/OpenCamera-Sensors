@@ -3290,6 +3290,37 @@ public class ImageSaver extends Thread {
         return bitmap;
     }
 
+    /** Creates a new exif interface for reading and writing.
+     *  If picFile==null, then saveUri must be non-null (and the Android version must be Android 7
+     *  or later), and will be used instead to write the exif tags too.
+     *  May return null if unable to create the exif interface.
+     */
+    private ExifInterface createExifInterface(File picFile, Uri saveUri) throws IOException {
+        ExifInterface exif = null;
+        if( picFile != null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "write to picFile: " + picFile);
+            exif = new ExifInterface(picFile.getAbsolutePath());
+        }
+        else if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "write direct to saveUri: " + saveUri);
+            ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
+            if( parcelFileDescriptor != null ) {
+                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                exif = new ExifInterface(fileDescriptor);
+            }
+            else {
+                Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+            }
+        }
+        else {
+            // throw runtimeexception, as this is a programming error
+            throw new RuntimeException("picFile==null but Android version is not 7 or later");
+        }
+        return exif;
+    }
+
     /** Makes various modifications to the saved image file, according to the preferences in request.
      *  This method is used when saving directly from the JPEG data rather than a bitmap.
      *  If picFile==null, then saveUri must be non-null (and the Android version must be Android 7
@@ -3303,28 +3334,7 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "add additional exif info");
             try {
-                ExifInterface exif = null;
-                if( picFile != null ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "write to picFile: " + picFile);
-                    exif = new ExifInterface(picFile.getAbsolutePath());
-                }
-                else if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "write direct to saveUri: " + saveUri);
-                    ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
-                    if( parcelFileDescriptor != null ) {
-                        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                        exif = new ExifInterface(fileDescriptor);
-                    }
-                    else {
-                        Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
-                    }
-                }
-                else {
-                    // throw runtimeexception, as this is a programming error
-                    throw new RuntimeException("picFile==null but Android version is not 7 or later");
-                }
+                ExifInterface exif = createExifInterface(picFile, saveUri);
                 if( exif != null ) {
                     modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
                     exif.saveAttributes();
@@ -3343,9 +3353,11 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "remove GPS timestamp hack");
             try {
-                ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-                fixGPSTimestamp(exif, request.current_date);
-                exif.saveAttributes();
+                ExifInterface exif = createExifInterface(picFile, saveUri);
+                if( exif != null ) {
+                    fixGPSTimestamp(exif, request.current_date);
+                    exif.saveAttributes();
+                }
             }
             catch(NoClassDefFoundError exception) {
                 // have had Google Play crashes from new ExifInterface() elsewhere for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn), so also catch here just in case

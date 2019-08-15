@@ -8105,7 +8105,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void subTestLocationOn(boolean gps_direction) throws IOException {
         Log.d(TAG, "subTestLocationOn");
-        setToDefault();
 
         assertTrue(!mActivity.getLocationSupplier().hasLocationListeners());
         Log.d(TAG, "turn on location");
@@ -8185,6 +8184,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     public void testLocationOn() throws IOException {
         Log.d(TAG, "testLocationOn");
+        setToDefault();
+
         subTestLocationOn(false);
     }
 
@@ -8193,7 +8194,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     public void testLocationDirectionOn() throws IOException {
         Log.d(TAG, "testLocationDirectionOn");
+        setToDefault();
+
         subTestLocationOn(true);
+    }
+
+    /* As testLocationOn, but with SAF enabled.
+     * Important for Camera2 API at least to test the codepath for when
+     * ImageSaver.needGPSTimestampHack() returns true, when using SAF.
+     * May fail on devices without mobile network, especially if we don't even have wifi.
+     */
+    public void testLocationOnSAF() throws IOException {
+        Log.d(TAG, "testLocationOnSAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
+        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+
+        subTestLocationOn(false);
     }
 
     /* Tests we don't save location data; also tests that we save other exif data.

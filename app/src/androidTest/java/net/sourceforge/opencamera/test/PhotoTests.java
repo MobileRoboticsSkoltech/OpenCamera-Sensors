@@ -12,6 +12,7 @@ public class PhotoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOn"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationDirectionOn"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOff"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOnSAF"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOn"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOnSAF"));
