@@ -1406,6 +1406,23 @@ public class PanoramaProcessor {
         if( MyDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after choosing best matches: " + (System.currentTimeMillis() - time_s));
 
+        if( actual_matches.size() == 0 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "no matches!");
+			/*if( true )
+				throw new RuntimeException();*/
+
+            // free allocations
+            for(int i=0;i<allocations.length;i++) {
+                if( allocations[i] != null ) {
+                    allocations[i].destroy();
+                    allocations[i] = null;
+                }
+            }
+
+            return new AutoAlignmentByFeatureResult(0, 0, 0.0f, 1.0f);
+        }
+
         final boolean use_ransac = true;
         //final boolean use_ransac = false;
         //final boolean estimate_rotation = false;
