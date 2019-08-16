@@ -10537,6 +10537,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(settingsButton.getVisibility() == View.VISIBLE);
         assertTrue(cancelPanoramaButton.getVisibility() == View.GONE);
 
+        if( !cancel && !to_max ) {
+            // test trying to take another photo whilst saving
+            Thread.sleep(500);
+            assertTrue( mActivity.getApplicationInterface().getImageSaver().getNImagesToSave() > 0 );
+            Log.d(TAG, "about to click take photo whilst saving images");
+            clickView(takePhotoButton);
+            Log.d(TAG, "done clicking take photo");
+            this.getInstrumentation().waitForIdleSync();
+            Log.d(TAG, "after idle sync");
+            assertFalse( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+
+            // and again (test for crash that occured in 1.47!)
+            Thread.sleep(500);
+            assertTrue( mActivity.getApplicationInterface().getImageSaver().getNImagesToSave() > 0 );
+            Log.d(TAG, "about to click take photo whilst saving images");
+            clickView(takePhotoButton);
+            Log.d(TAG, "done clicking take photo");
+            this.getInstrumentation().waitForIdleSync();
+            Log.d(TAG, "after idle sync");
+            assertFalse( mActivity.getApplicationInterface().getGyroSensor().isRecording() );
+        }
+
         mActivity.waitUntilImageQueueEmpty();
 
         assertTrue( folder.exists() );

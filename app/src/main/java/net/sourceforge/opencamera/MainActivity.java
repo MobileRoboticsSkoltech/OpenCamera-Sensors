@@ -3255,6 +3255,12 @@ public class MainActivity extends Activity {
                 applicationInterface.finishPanorama();
                 return;
             }
+            else if( !applicationInterface.canTakeNewPhoto() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "can't start new panoroma, still saving in background");
+                // we need to test here, otherwise the Preview won't take a new photo - but we'll think we've
+                // started the panorama!
+            }
             else {
                 if( MyDebug.LOG )
                     Log.d(TAG, "start panorama");
