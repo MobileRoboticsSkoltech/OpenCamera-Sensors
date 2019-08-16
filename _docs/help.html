@@ -1332,15 +1332,17 @@ actions, with an option to clear them. There are plenty of gallery apps for Andr
 better for users to have this choice, rather than Open Camera having its own custom gallery.</p>
 
 <p><b>Can you implement disabling shutter sound for my phone?</b> -
-If the option "Shutter sound" under "More camera controls..." isn't shown, it's not available. There
+If your device supports "Settings/Use Camera2 API", then enabling that means you'll be able to disable
+shutter sounds under "Settings/More camera controls...".
+When not using Camera2 API, if the option "Shutter sound" under "More camera controls..." isn't shown,
+then it's not available. There
 are possible workarounds for some of these devices (which is why some third party camera applications
 may be able to silence the shutter), though the issue is these don't work on all devices, and tend
 to use methods that Google now discourage. The fault is with the device for not supporting
 Android's standard method for disabling the shutter sound. In particular, if under Settings/About
 you see that "Can disable shutter sound?" says No, it means the device's camera API is telling 3rd
 party camera apps that shutter sound can't be disabled (so either it can't do it, or the API is lying
-- either way, this should be reported to your manufacturer). Also note that this doesn't apply if using
-Camera2 API - if Camera2 is enabled, then all devices should support disabling the shutter sound.</p>
+- either way, this should be reported to your manufacturer).</p>
 
 <p><b>Why does Open Camera have ads?</b> - Open Camera does <i>not</i> have ads (there may be ads on the online
 webpage you're reading now, but not in the app). There are however some clones on Google Play with ads inserted.
