@@ -35,6 +35,7 @@ import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
+import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.media.Image;
 import android.media.ImageReader;
@@ -1175,8 +1176,7 @@ public class CameraController2 extends CameraController {
                                         // From a user mode, the gap between shots in focus bracketing mode makes this more analogous to the auto-repeat mode
                                         // (at the Preview level), which makes the shutter sound per shot.
 
-                                        if( sounds_enabled )
-                                            media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+                                        playSound(MediaActionSound.SHUTTER_CLICK);
                                         try {
                                             captureSession.capture(slow_burst_capture_requests.get(n_burst_taken), previewCaptureCallback, handler);
                                         }
@@ -4163,6 +4163,16 @@ public class CameraController2 extends CameraController {
         this.sounds_enabled = enabled;
     }
 
+    private void playSound(int soundName) {
+        if( sounds_enabled ) {
+            // on some devices (e.g., Samsung Galaxy S10e), need to check whether phone on silent!
+            AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+            if( audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL ) {
+                media_action_sound.play(soundName);
+            }
+        }
+    }
+
     /** Returns the viewable rect - this is crop region if available.
      *  We need this as callers will pass in (or expect returned) CameraController.Area values that
      *  are relative to the current view (i.e., taking zoom into account) (the old Camera API in
@@ -5370,8 +5380,7 @@ public class CameraController2 extends CameraController {
                     captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
                     //captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
                     //}, handler);
-                    if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-                        media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+                    playSound(MediaActionSound.SHUTTER_CLICK); // play shutter sound asap, otherwise user has the illusion of being slow to take photos
                 }
                 catch(CameraAccessException e) {
                     if( MyDebug.LOG ) {
@@ -5775,8 +5784,7 @@ public class CameraController2 extends CameraController {
                         captureSession.capture(requests.get(0), previewCaptureCallback, handler);
                     }
 
-                    if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-                        media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+                    playSound(MediaActionSound.SHUTTER_CLICK); // play shutter sound asap, otherwise user has the illusion of being slow to take photos
                 }
                 catch(CameraAccessException e) {
                     if( MyDebug.LOG ) {
@@ -6115,8 +6123,9 @@ public class CameraController2 extends CameraController {
                         }.run();
                     }
 
-                    if( sounds_enabled && !continuing_fast_burst ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
-                        media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+                    if( !continuing_fast_burst ) {
+                        playSound(MediaActionSound.SHUTTER_CLICK); // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+                    }
                 }
                 catch(CameraAccessException e) {
                     if( MyDebug.LOG ) {
@@ -6497,8 +6506,7 @@ public class CameraController2 extends CameraController {
     @Override
     public void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
         // if we change where we play the START_VIDEO_RECORDING sound, make sure it can't be heard in resultant video
-        if( sounds_enabled )
-            media_action_sound.play(MediaActionSound.START_VIDEO_RECORDING);
+        playSound(MediaActionSound.START_VIDEO_RECORDING);
     }
 
     @Override
@@ -6536,8 +6544,7 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "reconnect");
         // if we change where we play the STOP_VIDEO_RECORDING sound, make sure it can't be heard in resultant video
-        if( sounds_enabled )
-            media_action_sound.play(MediaActionSound.STOP_VIDEO_RECORDING);
+        playSound(MediaActionSound.STOP_VIDEO_RECORDING);
         createPreviewRequest();
         createCaptureSession(null, false);
         /*if( MyDebug.LOG )
