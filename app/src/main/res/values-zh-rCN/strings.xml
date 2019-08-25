@@ -760,34 +760,34 @@
     <string name="preference_stamp_geo_address_prefer">GPS坐标优先</string>
     <string name="preference_stamp_geo_address_no">不显示地址</string>
 
-    <string name="preference_show_store_location">Show store location data icon</string>
-    <string name="preference_show_store_location_summary">Whether to show an on-screen icon for enabling or disabling location data (geotagging)</string>
-    <string name="preference_location_enable">Store location data</string>
-    <string name="preference_location_disable">Stop storing location data</string>
+    <string name="preference_show_store_location">显示保存位置信息的按钮</string>
+    <string name="preference_show_store_location_summary">在屏幕上显示是否保存GPS位置信息的按钮</string>
+    <string name="preference_location_enable">保存位置信息</string>
+    <string name="preference_location_disable">停止保存位置信息</string>
 
-    <string name="preference_histogram">Show a histogram</string>
-    <string name="preference_histogram_summary">Whether to display histogram of the colors shown on-screen\n%s</string>
-    <string name="preference_histogram_off">Off</string>
-    <string name="preference_histogram_rgb">RGB Colors</string>
-    <string name="preference_histogram_luminance">Luminance</string>
-    <string name="preference_histogram_value">Value (Maximum)</string>
-    <string name="preference_histogram_intensity">Intensity (Average)</string>
+    <string name="preference_histogram">显示直方图</string>
+    <string name="preference_histogram_summary">是否显示颜色直方图\n%s</string>
+    <string name="preference_histogram_off">关闭</string>
+    <string name="preference_histogram_rgb">RGB色彩</string>
+    <string name="preference_histogram_luminance">亮度(luminance)</string>
+    <string name="preference_histogram_value">值(最大)</string>
+    <string name="preference_histogram_intensity">强度(平均)intensity</string>
     <string name="preference_histogram_lightness">Lightness (Average of min-max)</string>
 
     <string name="preference_zebra_stripes">Show zebra stripes</string>
     <string name="preference_zebra_stripes_summary">If this option is enabled, zebra stripes will be drawn on-screen showing where the camera preview is over exposed.\n%s</string>
-    <string name="preference_zebra_stripes_off">Off</string>
+    <string name="preference_zebra_stripes_off">关闭</string>
     <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_90pc">90%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_100pc">100%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
 
-    <string name="preference_focus_peaking">Focus peaking</string>
-    <string name="preference_focus_peaking_summary">If this option is enabled, highlights will be shown on in-focus edges (contours). This is primarily useful for manual focus, and can be used to help determine which regions of the image are in focus.\n%s</string>
-    <string name="preference_focus_peaking_off">Off</string>
-    <string name="preference_focus_peaking_on">On</string>
-    <string name="preference_focus_peaking_color">Focus peaking color</string>
-    <string name="preference_focus_peaking_color_summary">Which color to use for highlighting the in-focus edges\n%s</string>
+    <string name="preference_focus_peaking">对焦峰值</string>
+    <string name="preference_focus_peaking_summary">焦点区域是否高亮显示边缘。这主要用于手动对焦，可用于帮助确定图像的哪些区域处于焦点。\n%s</string>
+    <string name="preference_focus_peaking_off">关闭</string>
+    <string name="preference_focus_peaking_on">打开</string>
+    <string name="preference_focus_peaking_color">焦点峰值色彩</string>
+    <string name="preference_focus_peaking_color_summary">高亮显示对焦的边缘时使用的颜色\n%s</string>
 
     <string name="remaining">Remaining</string> <!-- images remaining for "processing" -->
 
