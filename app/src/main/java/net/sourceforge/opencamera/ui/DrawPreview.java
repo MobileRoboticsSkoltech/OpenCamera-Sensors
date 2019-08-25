@@ -1828,11 +1828,14 @@ public class DrawPreview {
 
         int top_x = (int) (5 * scale + 0.5f); // convert dps to pixels
         int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
-        int top_margin = main_activity.getMainUI().getTopMargin();
-        if( top_margin > 0 ) {
+        View top_icon = main_activity.getMainUI().getTopIcon();
+        if( top_icon != null ) {
+            top_icon.getLocationOnScreen(gui_location);
+            int top_margin = gui_location[0] + top_icon.getWidth();
+            preview.getView().getLocationOnScreen(gui_location);
             int preview_left = gui_location[0];
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "preview_left: " + preview_left);*/
+            /*if( MyDebug.LOG )
+            	Log.d(TAG, "preview_left: " + preview_left);*/
             int shift = top_margin - preview_left;
             if( shift > 0 ) {
                 if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -2321,12 +2324,6 @@ public class DrawPreview {
                 return;
             }
         }
-
-        preview.getView().getLocationOnScreen(gui_location);
-		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "gui_location[0]: " + gui_location[0]);
-			Log.d(TAG, "gui_location[1]: " + gui_location[1]);
-		}*/
 
         if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
             p.setColor(Color.WHITE);

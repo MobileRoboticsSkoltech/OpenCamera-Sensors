@@ -63,7 +63,7 @@ public class MainUI {
         UIPLACEMENT_TOP
     }
     private UIPlacement ui_placement = UIPlacement.UIPLACEMENT_RIGHT;
-    private int top_margin = 0;
+    private View top_icon = null;
     private boolean view_rotate_animation;
 
     private boolean immersive_mode;
@@ -252,7 +252,7 @@ public class MainUI {
         if( !popup_container_only )
         {
             // reset:
-            top_margin = 0;
+            top_icon = null;
 
             // we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
             View view = main_activity.findViewById(R.id.gui_anchor);
@@ -379,7 +379,7 @@ public class MainUI {
                         if( this_view.getVisibility() == View.VISIBLE ) {
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "set view layout for: " + this_view.getContentDescription());
-                                if( this_view==first_visible_view) {
+                                if( this_view==first_visible_view ) {
                                     Log.d(TAG,"    first visible view");
                                 }
                             }
@@ -395,7 +395,7 @@ public class MainUI {
                             this_view.setLayoutParams(layoutParams);
                         }
                     }
-                    top_margin = button_size;
+                    top_icon = first_visible_view;
                 }
             }
             else {
@@ -2776,8 +2776,8 @@ public class MainUI {
         return entry;
     }
 
-    int getTopMargin() {
-        return this.top_margin;
+    View getTopIcon() {
+        return this.top_icon;
     }
 
     // for testing
