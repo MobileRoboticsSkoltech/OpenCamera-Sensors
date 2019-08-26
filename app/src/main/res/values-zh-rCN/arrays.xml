@@ -261,9 +261,9 @@
         <item>立体声 (仅部分设备支持)</item>
     </string-array>
     <string-array name="preference_record_audio_channels_values">
-        <item>默认</item>
-        <item>单声道</item>
-        <item>立体声</item>
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
     </string-array>
     <string-array name="preference_audio_control_entries">
         <item>无</item>
