@@ -37,14 +37,29 @@ public class PanoramaProcessor {
     private final HDRProcessor hdrProcessor;
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using panorama
 
+    // we lazily create and cache scripts that would otherwise have to be repeatedly created in a single
+    // panorama photo
+    // these should be set to null in freeScript(), to help garbage collection
+    private ScriptC_pyramid_blending pyramidBlendingScript = null;
+    private ScriptC_feature_detector featureDetectorScript = null;
+
     public PanoramaProcessor(Context context, HDRProcessor hdrProcessor) {
         this.context = context;
         this.hdrProcessor = hdrProcessor;
     }
 
+    private void freeScripts() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "freeScripts");
+
+        pyramidBlendingScript = null;
+        featureDetectorScript = null;
+    }
     public void onDestroy() {
         if( MyDebug.LOG )
             Log.d(TAG, "onDestroy");
+
+        freeScripts(); // just in case
 
         if( rs != null ) {
             // need to destroy context, otherwise this isn't necessarily garbage collected - we had tests failing with out of memory
@@ -555,7 +570,9 @@ public class PanoramaProcessor {
         if( MyDebug.LOG )
             time_s = System.currentTimeMillis();
 
-        ScriptC_pyramid_blending script = new ScriptC_pyramid_blending(rs);
+        if( pyramidBlendingScript == null ) {
+            pyramidBlendingScript = new ScriptC_pyramid_blending(rs);
+        }
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after creating ScriptC_pyramid_blending: " + (System.currentTimeMillis() - time_s));
 
@@ -622,13 +639,13 @@ public class PanoramaProcessor {
 
             int [] errors = new int[1];
             Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 1);
-            script.bind_errors(errorsAllocation);
+            pyramidBlendingScript.bind_errors(errorsAllocation);
 
             Script.LaunchOptions launch_options = new Script.LaunchOptions();
             if( MyDebug.LOG )
                 Log.d(TAG, "### blendPyramids: time after creating allocations for best path: " + (System.currentTimeMillis() - time_s));
 
-            script.set_bitmap(rhs_allocation);
+            pyramidBlendingScript.set_bitmap(rhs_allocation);
 
             int window_width = Math.max(2, best_path_lhs.getWidth()/8);
             int start_y = 0, stop_y;
@@ -652,8 +669,8 @@ public class PanoramaProcessor {
                     launch_options.setX(start_x, stop_x);
                     //start_x = stop_x; // set for next iteration
 
-                    script.invoke_init_errors();
-                    script.forEach_compute_error(lhs_allocation, launch_options);
+                    pyramidBlendingScript.invoke_init_errors();
+                    pyramidBlendingScript.forEach_compute_error(lhs_allocation, launch_options);
                     errorsAllocation.copyTo(errors);
 
                     int this_error = errors[0];
@@ -686,10 +703,10 @@ public class PanoramaProcessor {
                 Log.d(TAG, "### blendPyramids: time after finding best path: " + (System.currentTimeMillis() - time_s));
         }
 
-        List<Allocation> lhs_pyramid = createLaplacianPyramid(script, lhs, blend_n_levels, "lhs");
+        List<Allocation> lhs_pyramid = createLaplacianPyramid(pyramidBlendingScript, lhs, blend_n_levels, "lhs");
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 1st call: " + (System.currentTimeMillis() - time_s));
-        List<Allocation> rhs_pyramid = createLaplacianPyramid(script, rhs, blend_n_levels, "rhs");
+        List<Allocation> rhs_pyramid = createLaplacianPyramid(pyramidBlendingScript, rhs, blend_n_levels, "rhs");
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after createLaplacianPyramid 2nd call: " + (System.currentTimeMillis() - time_s));
 
@@ -711,10 +728,10 @@ public class PanoramaProcessor {
 			rhs_collapsed.recycle();
 		}*/
 
-        mergePyramids(script, lhs_pyramid, rhs_pyramid, best_path, best_path_n_x);
+        mergePyramids(pyramidBlendingScript, lhs_pyramid, rhs_pyramid, best_path, best_path_n_x);
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after mergePyramids: " + (System.currentTimeMillis() - time_s));
-        Bitmap merged_bitmap = collapseLaplacianPyramid(script, lhs_pyramid);
+        Bitmap merged_bitmap = collapseLaplacianPyramid(pyramidBlendingScript, lhs_pyramid);
         if( MyDebug.LOG )
             Log.d(TAG, "### blendPyramids: time after collapseLaplacianPyramid: " + (System.currentTimeMillis() - time_s));
         // debug
@@ -904,10 +921,9 @@ public class PanoramaProcessor {
             Log.d(TAG, "### autoAlignmentByFeature: time after creating allocations: " + (System.currentTimeMillis() - time_s));
 
         // create RenderScript
-		/*if( createMTBScript == null ) {
-			createMTBScript = new ScriptC_create_mtb(rs);
-		}*/
-        ScriptC_feature_detector featureDetectorScript = new ScriptC_feature_detector(rs);
+		if( featureDetectorScript == null ) {
+            featureDetectorScript = new ScriptC_feature_detector(rs);
+        }
         if( MyDebug.LOG )
             Log.d(TAG, "### autoAlignmentByFeature: time after create featureDetectorScript: " + (System.currentTimeMillis() - time_s));
 
@@ -3118,6 +3134,8 @@ public class PanoramaProcessor {
 
         if( MyDebug.LOG )
             Log.d(TAG, "panorama complete!");
+
+        freeScripts();
 
         if( MyDebug.LOG )
             Log.d(TAG, "### time taken: " + (System.currentTimeMillis() - time_s));
