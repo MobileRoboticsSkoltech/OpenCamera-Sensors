@@ -882,20 +882,4 @@
 
     <string name="camera_id">ID</string> <!-- ID as in camera ID -->
 
-    <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
-    <string name="whats_new_text">
-        <small>[This dialog is shown when Open Camera is updated. You can disable it under
-            Settings/On screen GUI/Show What\'s New dialog.]</small>
-        \n\n<b>v1.47:</b>\n
-        <ul>
-            <li>New panorama photo mode (requires Android 5+, note not all devices are supported).\n</li>
-            <li>New option Settings/Photo settings/Text style/\"Text with shaded background\" for photo stamp.\n</li>
-            <li>Notifications now displayed on Android 8+ when Open Camera is in background when images are
-                still being processed/saved.\n</li>
-            <li>Camera ID is now displayed when switching cameras, on devices with more than two cameras.\n</li>
-            <li>Improved performance on Android 7+ when saving photos when using Storage Access Framework.\n</li>
-            <li>Other improvements and bug fixes.\n</li>
-
-        </ul>
-    </string>
 </resources>
