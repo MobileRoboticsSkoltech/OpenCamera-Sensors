@@ -13,8 +13,8 @@
     </string-array>
     <string-array name="focus_mode_entries">
         <item>自动对焦</item>
-        <item>无限对焦</item>
-        <item>宏对焦</item>
+        <item>无穷远</item>
+        <item>微距</item>
         <item>锁定焦点</item>
         <item>手工对焦</item>
         <item>固定对焦</item>
@@ -261,9 +261,9 @@
         <item>立体声 (仅部分设备支持)</item>
     </string-array>
     <string-array name="preference_record_audio_channels_values">
-        <item>audio_default</item>
-        <item>audio_mono</item>
-        <item>audio_stereo</item>
+        <item>默认</item>
+        <item>单声道</item>
+        <item>立体声</item>
     </string-array>
     <string-array name="preference_audio_control_entries">
         <item>无</item>
