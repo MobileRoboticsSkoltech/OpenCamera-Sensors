@@ -307,7 +307,7 @@
     <string name="permission_rationale_camera">Требуется разрешение на доступ к камере для ее сключения</string>
     <string name="permission_rationale_storage">Требуется разрешение на чтение/запись для сохранения фото</string>
     <string name="permission_rationale_record_audio">Требуется разрешение на доступ к микрофону для записи видео со звуком</string>
-    <string name="permission_rationale_location">Требуется разрешение на определение местоположения для геотеггинга (хранение информации о местоположенииstoring location data in
+    <string name="permission_rationale_location">Требуется разрешение на определение местоположения для геотеггинга (хранение информации о местоположении
         внутри фото и видео). Разрешение на определение местоположения также требуется для подключения к устройствам удаленного управления по Bluetooth LE.</string>
 
     <string name="preference_category_photo_debugging">Настройки отладки</string>
