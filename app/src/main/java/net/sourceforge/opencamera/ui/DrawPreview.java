@@ -2339,7 +2339,9 @@ public class DrawPreview {
 
         drawCropGuides(canvas);
 
-        if( last_thumbnail != null && !last_thumbnail_is_video && camera_controller != null && ( show_last_image || ( allow_ghost_last_image && ghost_image_pref.equals("preference_ghost_image_last") ) ) ) {
+        // n.b., don't display ghost image if front_screen_flash==true (i.e., frontscreen flash is in operation), otherwise
+        // the effectiveness of the "flash" is reduced
+        if( last_thumbnail != null && !last_thumbnail_is_video && camera_controller != null && ( show_last_image || ( allow_ghost_last_image && !front_screen_flash && ghost_image_pref.equals("preference_ghost_image_last") ) ) ) {
             // If changing this code, ensure that pause preview still works when:
             // - Taking a photo in portrait or landscape - and check rotating the device while preview paused
             // - Taking a photo with lock to portrait/landscape options still shows the thumbnail with aspect ratio preserved
@@ -2355,7 +2357,7 @@ public class DrawPreview {
             if( !show_last_image )
                 p.setAlpha(255);
         }
-        else if( camera_controller != null && ghost_selected_image_bitmap != null ) {
+        else if( camera_controller != null && !front_screen_flash && ghost_selected_image_bitmap != null ) {
             setLastImageMatrix(canvas, ghost_selected_image_bitmap, ui_rotation, true);
             p.setAlpha(127);
             canvas.drawBitmap(ghost_selected_image_bitmap, last_image_matrix, p);
