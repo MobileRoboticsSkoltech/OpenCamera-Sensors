@@ -22,6 +22,7 @@ import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
@@ -52,6 +53,7 @@ import android.os.Build;
 import android.os.Environment;
 //import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.support.annotation.RequiresApi;
 import android.test.ActivityInstrumentationTestCase2;
@@ -73,6 +75,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     public MainActivityTest() {
         super("net.sourceforge.opencamera", MainActivity.class);
+    }
+
+    private Intent createDefaultIntent() {
+        Intent intent = new Intent();
+        intent.putExtra("test_project", true);
+        return intent;
     }
 
     @Override
@@ -97,8 +105,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.apply();
         Log.d(TAG, "setUp: 2");
 
-        Intent intent = new Intent();
-        intent.putExtra("test_project", true);
+        Intent intent = createDefaultIntent();
         setActivityIntent(intent);
         Log.d(TAG, "setUp: about to get activity");
         mActivity = getActivity();
@@ -10812,6 +10819,117 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_m", false, null, true, Math.toRadians(74)), "74°");
         assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", "preference_units_distance_m", false, null, true, Math.toRadians(74)), "74°");
         assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", "preference_units_distance_ft", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 349.4ft, 74°");
+    }
+
+    /* Tests launching with ACTION_VIDEO_CAPTURE intent, along with EXTRA_SIZE_LIMIT and
+     * EXTRA_VIDEO_QUALITY.
+     */
+    public void testIntentVideo() throws ApplicationInterface.NoFreeStorageException {
+        Log.d(TAG, "testIntentVideo");
+
+        setToDefault();
+
+        List<String> video_quality = mActivity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
+
+        assertFalse( mActivity.getApplicationInterface().isVideoPref() );
+        assertEquals( 0, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
+        // n.b., will fail if not enough storage space on device!:
+        MyApplicationInterface.VideoMaxFileSize videomaxfilesize = mActivity.getApplicationInterface().getVideoMaxFileSizePref();
+        long max_filesize = videomaxfilesize.max_filesize;
+        assertTrue( max_filesize > 100000000);
+        assertTrue(videomaxfilesize.auto_restart);
+
+        Intent intent = createDefaultIntent();
+        intent.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 50123456L);
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+        setActivityIntent(intent);
+
+        restart();
+
+        assertTrue( mActivity.getApplicationInterface().isVideoPref() );
+        assertEquals( 0, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
+        videomaxfilesize = mActivity.getApplicationInterface().getVideoMaxFileSizePref();
+        assertEquals( 50123456, videomaxfilesize.max_filesize );
+        assertFalse(videomaxfilesize.auto_restart);
+        assertEquals(video_quality.get(video_quality.size()-1), mActivity.getApplicationInterface().getVideoQualityPref());
+
+        intent = createDefaultIntent();
+        intent.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+        setActivityIntent(intent);
+
+        restart();
+
+        assertTrue( mActivity.getApplicationInterface().isVideoPref() );
+        assertEquals( 0, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
+        videomaxfilesize = mActivity.getApplicationInterface().getVideoMaxFileSizePref();
+        assertTrue( videomaxfilesize.max_filesize > 100000000);
+        assertTrue( Math.abs(max_filesize - videomaxfilesize.max_filesize) < 5000000 ); // remaining storage may vary whilst test is running!
+        assertTrue(videomaxfilesize.auto_restart);
+
+        assertEquals(video_quality.get(0), mActivity.getApplicationInterface().getVideoQualityPref());
+    }
+
+    /* Tests launching with ACTION_VIDEO_CAPTURE intent, along with EXTRA_DURATION_LIMIT. The test
+     * then tests we actually record video with the duration limit set.
+     */
+    public void testIntentVideoDurationLimit() throws InterruptedException, ApplicationInterface.NoFreeStorageException {
+        Log.d(TAG, "testIntentVideoDurationLimit");
+
+        setToDefault();
+
+        assertFalse( mActivity.getApplicationInterface().isVideoPref() );
+        assertEquals( 0, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
+        // n.b., will fail if not enough storage space on device!:
+        MyApplicationInterface.VideoMaxFileSize videomaxfilesize = mActivity.getApplicationInterface().getVideoMaxFileSizePref();
+        long max_filesize = videomaxfilesize.max_filesize;
+        assertTrue( max_filesize > 100000000);
+        assertTrue(videomaxfilesize.auto_restart);
+
+        Intent intent = createDefaultIntent();
+        intent.setAction(MediaStore.ACTION_VIDEO_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 5);
+        setActivityIntent(intent);
+
+        restart();
+
+        assertTrue( mActivity.getApplicationInterface().isVideoPref() );
+        assertEquals( 5000, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
+        assertEquals( max_filesize, mActivity.getApplicationInterface().getVideoMaxFileSizePref().max_filesize );
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        int n_files = getNFiles(folder);
+        Log.d(TAG, "n_files at start: " + n_files);
+
+        View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+        Log.d(TAG, "about to click take video");
+        clickView(takePhotoButton);
+        Log.d(TAG, "done clicking take video");
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+
+        assertTrue( mPreview.isVideoRecording() );
+
+        Thread.sleep(4000);
+        Log.d(TAG, "check still taking video");
+        assertTrue( mPreview.isVideoRecording() );
+
+        int n_new_files = getNFiles(folder) - n_files;
+        Log.d(TAG, "n_new_files: " + n_new_files);
+        assertEquals(1, n_new_files);
+
+        Thread.sleep(3000);
+
+        Log.d(TAG, "check stopped taking video");
+        assertTrue( !mPreview.isVideoRecording() );
+
+        assertTrue( folder.exists() );
+        n_new_files = getNFiles(folder) - n_files;
+        Log.d(TAG, "n_new_files: " + n_new_files);
+        assertEquals(1, n_new_files);
+
     }
 
     private static class HistogramDetails {

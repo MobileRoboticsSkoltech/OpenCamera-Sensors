@@ -15,6 +15,9 @@ public class VideoTests {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
         }
+
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideo"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideoDurationLimit"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveMode"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveModeEverything"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoStabilization"));

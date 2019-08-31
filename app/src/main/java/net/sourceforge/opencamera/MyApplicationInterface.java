@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.media.CamcorderProfile;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -548,6 +549,32 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getVideoQualityPref() {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
+                int intent_quality = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "intent_quality: " + intent_quality);
+                if( intent_quality == 0 || intent_quality == 1 ) {
+                    List<String> video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
+                    if( intent_quality == 0 ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "return lowest quality");
+                        // return lowest quality, video_quality is sorted high to low
+                        return video_quality.get(video_quality.size()-1);
+                    }
+                    else {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "return highest quality");
+                        // return highest quality, video_quality is sorted high to low
+                        return video_quality.get(0);
+                    }
+                }
+            }
+        }
+
         // Conceivably, we might get in a state where the fps isn't supported at all (e.g., an upgrade changes the available
         // supported video resolutions/frame-rates).
         return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, fpsIsHighSpeed()), "");
@@ -575,6 +602,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getVideoFPSPref() {
+        // if check for EXTRA_VIDEO_QUALITY, if set, best to fall back to default FPS - see corresponding code in getVideoQualityPref
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
+                int intent_quality = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+                if (MyDebug.LOG)
+                    Log.d(TAG, "intent_quality: " + intent_quality);
+                if (intent_quality == 0 || intent_quality == 1) {
+                    return "default";
+                }
+            }
+        }
+
         float capture_rate_factor = getVideoCaptureRateFactor();
         if( capture_rate_factor < 1.0f-1.0e-5f ) {
             if( MyDebug.LOG )
@@ -713,6 +755,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public long getVideoMaxDurationPref() {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_DURATION_LIMIT) ) {
+                int intent_duration_limit = main_activity.getIntent().getIntExtra(MediaStore.EXTRA_DURATION_LIMIT, 0);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "intent_duration_limit: " + intent_duration_limit);
+                return intent_duration_limit * 1000;
+            }
+        }
+
         String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
         long video_max_duration;
         try {
@@ -746,6 +800,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     long getVideoMaxFileSizeUserPref() {
         if( MyDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizeUserPref");
+
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
+                long intent_size_limit = main_activity.getIntent().getLongExtra(MediaStore.EXTRA_SIZE_LIMIT, 0);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "intent_size_limit: " + intent_size_limit);
+                return intent_size_limit;
+            }
+        }
+
         String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
         long video_max_filesize;
         try {
@@ -763,6 +830,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private boolean getVideoRestartMaxFileSizeUserPref() {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
+                // if called from a video capture intent that set a max file size, this will be expecting a single file with that maximum size
+                return false;
+            }
+        }
+
         return sharedPreferences.getBoolean(PreferenceKeys.getVideoRestartMaxFileSizePreferenceKey(), true);
     }
 
