@@ -1206,28 +1206,28 @@
         <Preference
             android:key="preference_online_help"  
             android:title="@string/preference_online_help"
-            android:summary="@string/preference_online_help_summary"  
+            android:summary="@string/preference_online_help_summary"
             android:icon="@drawable/ic_help_outline_white_48dp"
             />  
 
         <Preference
             android:key="preference_donate"  
             android:title="@string/preference_donate"
-            android:summary="@string/preference_donate_summary"  
+            android:summary="@string/preference_donate_summary"
             />  
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <SwitchPreference
             android:key="preference_use_camera2"  
             android:title="@string/preference_use_camera2"
-            android:summary="@string/preference_use_camera2_summary"  
+            android:summary="@string/preference_use_camera2_summary"
             android:defaultValue="false"
             />  
         
         <Preference
             android:key="preference_about"  
             android:title="@string/preference_about"
-            android:summary="@string/preference_about_summary"  
+            android:summary="@string/preference_about_summary"
             android:icon="@drawable/ic_info_outline_white_48dp"
             />
 
