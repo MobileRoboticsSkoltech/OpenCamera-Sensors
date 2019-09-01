@@ -739,6 +739,23 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
+            final Preference pref = findPreference("preference_privacy_policy");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_privacy_policy") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked privacy policy");
+                        MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                        main_activity.launchOnlinePrivacyPolicy();
+                        return false;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        {
             ListPreference pref = (ListPreference)findPreference("preference_ghost_image");
 
             if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {

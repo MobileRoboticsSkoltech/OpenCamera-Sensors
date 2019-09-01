@@ -1229,8 +1229,15 @@
             android:title="@string/preference_about"
             android:summary="@string/preference_about_summary"  
             android:icon="@drawable/ic_info_outline_white_48dp"
-            />  
-        
+            />
+
+        <Preference
+            android:key="preference_privacy_policy"
+            android:title="@string/preference_privacy_policy"
+            android:summary="@string/preference_privacy_policy_summary"
+            android:icon="@drawable/ic_info_outline_white_48dp"
+            />
+
         <PreferenceScreen
             android:key="preference_screen_settings_manager"
             android:title="@string/preference_screen_settings_manager"

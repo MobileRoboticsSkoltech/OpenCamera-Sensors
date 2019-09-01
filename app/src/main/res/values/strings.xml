@@ -882,6 +882,13 @@
 
     <string name="camera_id">ID</string> <!-- ID as in camera ID -->
 
+    <string name="preference_privacy_policy">Privacy policy</string>
+    <string name="preference_privacy_policy_summary">Please click for full privacy policy.
+        Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
+        Microphone is also used for the optional \"Audio control\".
+        Location permission is required for the optional geotagging and Bluetooth features.
+    </string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under

@@ -853,6 +853,13 @@ public class MainActivity extends Activity {
         startActivity(browserIntent);
     }
 
+    void launchOnlinePrivacyPolicy() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "launchOnlinePrivacyPolicy");
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/index.html#privacy"));
+        startActivity(browserIntent);
+    }
+
     /* Audio trigger - either loud sound, or speech recognition.
      * This performs some additional checks before taking a photo.
      */
