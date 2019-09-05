@@ -212,7 +212,7 @@ public class PopupView extends LinearLayout {
             }
             if( preview.isVideo() ) {
                 // only show photo modes when in photo mode, not video mode!
-                // (photo modes not supported for photo snapshop whilst recording video)
+                // (photo modes not supported for photo snapshot whilst recording video)
             }
             else if( photo_modes.size() > 1 ) {
                 String current_mode = null;
