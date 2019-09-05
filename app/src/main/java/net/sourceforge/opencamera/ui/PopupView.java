@@ -438,7 +438,7 @@ public class PopupView extends LinearLayout {
                 Collections.reverse(video_sizes);
 
                 final List<String> video_sizes_f = video_sizes;
-                video_size_index = 0; // default to largest
+                video_size_index = video_sizes.size()-1; // default to largest (just in case current size not found??)
                 for(int i=0;i<video_sizes.size();i++) {
                     String video_size = video_sizes.get(i);
                     if( video_size.equals(preview.getVideoQualityHander().getCurrentVideoQuality()) ) {
