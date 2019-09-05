@@ -891,6 +891,8 @@
         Please tap here for online privacy policy.
     </string>
 
+    <string name="exposure_compensation_seekbar">Seekbar to change exposure compensation</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under

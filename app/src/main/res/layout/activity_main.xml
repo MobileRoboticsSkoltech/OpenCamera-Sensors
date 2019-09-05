@@ -484,7 +484,7 @@
             <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
             <SeekBar
                 android:id="@+id/exposure_seekbar"
-                android:contentDescription="@string/exposure_compensation"
+                android:contentDescription="@string/exposure_compensation_seekbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/exposure_seekbar_text"
