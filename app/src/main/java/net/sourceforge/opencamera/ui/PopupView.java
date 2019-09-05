@@ -1185,8 +1185,9 @@ public class PopupView extends LinearLayout {
                 actual_max_per_row = Math.min(actual_max_per_row, max_buttons_per_row);
             int button_width_dp = total_width_dp/actual_max_per_row;
             boolean use_scrollview = false;
-            if( button_width_dp < 40 && max_buttons_per_row == 0 ) {
-                button_width_dp = 40;
+            final int min_button_width_dp = 48; // needs to be at least 48dp to avoid Google Play pre-launch accessibility report warnings
+            if( button_width_dp < min_button_width_dp && max_buttons_per_row == 0 ) {
+                button_width_dp = min_button_width_dp;
                 use_scrollview = true;
             }
             int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
