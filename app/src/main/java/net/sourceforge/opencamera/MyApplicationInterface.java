@@ -2690,9 +2690,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( shadow == Shadow.SHADOW_OUTLINE ) {
             paint.setColor(background);
             paint.setStyle(Paint.Style.STROKE);
+            float current_stroke_width = paint.getStrokeWidth();
             paint.setStrokeWidth(1);
             canvas.drawText(text, location_x, location_y, paint);
             paint.setStyle(Paint.Style.FILL); // set back to default
+            paint.setStrokeWidth(current_stroke_width); // reset
         }
         return text_bounds.bottom - text_bounds.top;
     }

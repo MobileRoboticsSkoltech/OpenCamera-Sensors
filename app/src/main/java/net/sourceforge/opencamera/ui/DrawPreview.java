@@ -221,7 +221,7 @@ public class DrawPreview {
         p.setStrokeCap(Paint.Cap.ROUND);
         scale = getContext().getResources().getDisplayMetrics().density;
         this.stroke_width = (1.0f * scale + 0.5f); // convert dps to pixels
-        // don't set stroke_width now - set it when we use STROKE style (as it'll be overridden by drawTextWithBackground())
+        p.setStrokeWidth(this.stroke_width);
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_fixed_white_48dp);
         location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_off_white_48dp);
@@ -712,6 +712,8 @@ public class DrawPreview {
         if( camera_controller == null ) {
             return;
         }
+
+        p.setStrokeWidth(stroke_width);
 
         switch( preference_grid_pref ) {
             case "preference_grid_3x3":
