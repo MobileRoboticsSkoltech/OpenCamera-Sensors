@@ -1933,8 +1933,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                 else {
                                     if( MyDebug.LOG )
                                         Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
-                                    File file = storageUtils.getFileFromDocumentUriSAF(last_video_file_saf, false);
-                                    String subtitle_filename = file.getName();
+                                    String subtitle_filename = storageUtils.getFileName(last_video_file_saf);
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     Uri subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
                                     ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");

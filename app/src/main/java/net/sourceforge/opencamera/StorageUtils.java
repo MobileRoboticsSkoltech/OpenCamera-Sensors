@@ -33,6 +33,7 @@ import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video.VideoColumns;
+import android.provider.OpenableColumns;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.system.Os;
@@ -514,6 +515,45 @@ public class StorageUtils {
                 cursor.close();
         }
         return null;
+    }
+
+    /** Returns the filename (but not full path) for a Uri.
+     * See https://developer.android.com/guide/topics/providers/document-provider.html and
+     * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content.
+     */
+    public String getFileName(Uri uri) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "getFileName: " + uri);
+            Log.d(TAG, "uri has path: " + uri.getPath());
+        }
+        String result = null;
+        if( uri.getScheme() != null && uri.getScheme().equals("content") ) {
+            try( Cursor cursor = context.getContentResolver().query(uri, null, null, null, null) ) {
+                if( cursor != null && cursor.moveToFirst() ) {
+                    final int column_index = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
+                    result = cursor.getString(column_index);
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "found name from database: " + result);
+                }
+            }
+            catch(Exception e) {
+                if( MyDebug.LOG )
+                    Log.e(TAG, "Exception trying to find filename");
+                e.printStackTrace();
+            }
+        }
+        if( result == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "resort to checking the uri's path");
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if( cut != -1 ) {
+                result = result.substring(cut + 1);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "found name from path: " + result);
+            }
+        }
+        return result;
     }
 
     private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
