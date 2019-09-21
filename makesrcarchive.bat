@@ -25,6 +25,7 @@ xcopy %src%\gradle %dst%\gradle /E /Y
 
 mkdir %dst%\_docs
 REM xcopy %src%\_docs %dst%\_docs /E /Y
+copy %src%\_docs\credits.html %dst%\_docs
 copy %src%\_docs\devices.html %dst%\_docs
 copy %src%\_docs\help.html %dst%\_docs
 copy %src%\_docs\history.html %dst%\_docs
