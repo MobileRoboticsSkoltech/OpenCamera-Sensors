@@ -58,8 +58,6 @@
 
 <p><small><b>More of my Free software:</b>
 <a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a> ~
-<a href="http://wifiremoteplay.sourceforge.net">Wifi Remote Play</a> ~
-<a href="http://erebusrpg.sourceforge.net">Erebus RPG</a>
 </small>
 </p>
 
@@ -259,7 +257,7 @@ has a hardware menu button, pressing that should also open the settings.)</p>
 
 <p><b>Gallery</b> - Click to launch the Gallery app, to view the most recent
 photo/video (by default saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
-a Gallery app (e.g., <a href="https://play.google.com/store/apps/details?id=com.moblynx.galleryics">Gallery ICS</a>).
+a Gallery app.
 You can also "long press" on the Gallery icon - this will let you switch between the recent save locations, or take you straight to a
 file dialog to choose a save location if additional locations have yet been defined. See
 <a href="#save_location">Save location</a> under Settings/More camera controls for more details.</p>
@@ -385,7 +383,6 @@ apps that advertise "HDR" don't even make use of multiple images - this is more 
 <li>If you have a Google Pixel with Pixel Visual Core, you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
 is generally little benefit to using Open Camera's HDR mode on these devices. See "Does Open Camera support HDR+" in the
 <a href="#faq">FAQ</a> for more details.</li>
-<li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
 </ul>
 
 <p><a name="dro_vs_hdr"><b>DRO vs HDR</b></a></p>
@@ -564,8 +561,7 @@ OpenCamera will attempt to create the folder (and any sub-folders as required) i
 a path that you don't have write permissions for, then OpenCamera will fail to save images/videos (and this will
 be reported when you try to take a photo or video).-
 You can also use this option to save to an external SD card, though unfortunately the path varies depending on the
-device, so you'll have to look this up yourself (it's usually something inside /mnt/ - a file explorer app such as
-<a href="https://play.google.com/store/apps/details?id=com.estrongs.android.pop">ES File Explorer</a> may help).-->
+device, so you'll have to look this up yourself (it's usually something inside /mnt/ ).-->
 
 <p><b>Save photo prefix</b> - This option allows you to customise save filenames for photos.</p>
 
@@ -684,8 +680,7 @@ default behaviour).</p>
 	<li>4x2</li>
 	<li>Crosshair</li>
 	<li>Golden - displays a <a href="http://en.wikipedia.org/wiki/Golden_spiral">Golden spiral</a> (or technically,
-		a Fibonacci spiral). You can <a href="https://www.apogeephoto.com/how-to-use-the-golden-ratio-to-improve-your-photography/">use
-			this to improve your photography</a>.</li>
+		a Fibonacci spiral). You can use this to improve your photography.</li>
 	<li>Golden Triangles</li>
 	<li>Diagonals</li>
 </ul>
@@ -799,17 +794,10 @@ will only be saved in DNG format. DNG stands for
 uncompressed and unprocessed information from your camera. Please note the following points:</p>
 <ul>
 	<li>Some gallery applications don't recognise DNG files - if this is the case, you won't even see them listed.
-	Either install a gallery application that does (e.g.,
-	<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.photos">Google Photos</a>
-	now has support for RAW), or use specialised RAW viewer or editing tools such as
-	<a href="https://play.google.com/store/apps/details?id=com.niksoftware.snapseed">Google Snapseed</a>
-	and <a href="https://play.google.com/store/apps/details?id=com.adobe.lrmobile">Adobe Photoshop Lightroom</a>.
-	(Note that Snapseed will only show the JPEGs when you try to open a photo - but it will automatically
-	instead load the corresponding DNG file if it exists; Lightroom shows both the JPEG and DNG files
-	separately.) Or transfer to a PC to use DNG editing applications there. Note that newer versions of Android
+	Either install a gallery application that does, or use specialised RAW viewer or editing tools.
+	Or transfer to a PC to use DNG editing applications there. Note that newer versions of Android
 	(7 onwards) seem to have better support for DNG images.</li>
-	<li>If your gallery application doesn't show DNG files, a file explorer application such as
-	<a href="https://play.google.com/store/apps/details?id=com.amaze.filemanager">Amaze</a> may also be useful,
+	<li>If your gallery application doesn't show DNG files, a file explorer application may also be useful,
 	to delete DNGs if you don't want them (DNGs take up a lot of space - and won't be deleted when you delete
 	the corresponding JPEG from a Gallery application).</li>
 	<li>Note that various processing options such as DRO photo mode, "Stamp photos" and <a href="#auto_stabilise">"Auto-level"</a> will only apply
@@ -842,7 +830,7 @@ uncompressed and unprocessed information from your camera. Please note the follo
 then the three base exposure images will be saved as well as the final HDR photo. This is useful if you want
 to use external HDR applications (such as my own
 <a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a> for Android,
-or <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a> for PC) to
+or various HDR applications for PC) to
 create the final HDR image (although if you don't want Open Camera's HDR mode at all, you can instead use the
 Exposure Bracketing Photo Mode). Note this will make saving slower, especially if options like "Stamp photos" or
 <a href="#auto_stabilise">Auto-level</a> are also used.</p>
@@ -1015,9 +1003,7 @@ behaviour of these buttons).</p>
 <p><b>Video subtitles</b> - This option is analogous to the "Stamp photos" option, but rather than embedding text into
 the video itself, it stores the text in a separate subtitles
 (<a href="https://matroska.org/technical/specs/subtitles/srt.html">".SRT"</a>) file. Most decent video players should support
-SRT files, and use them to display the information as subtitles (for Android,
-<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">MX Player</a> will do this; note that Google Photos
-does not seem to support subtitles). The subtitles will record the date and time. If "Store location data" is enabled (see
+SRT files, and use them to display the information as subtitles. The subtitles will record the date and time. If "Store location data" is enabled (see
 "Location settings" below), then the current location latitude and longitude coordinates will also be recorded (if the location is
 known). Similarly for "Store compass direction". Note that you can control the formatting style for date, time and location using
 the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format, Distance unit).</p>
@@ -1182,8 +1168,8 @@ instead you can enable Settings/More camera controls/"Use Storage Access Framewo
 to save to external SD cards. If when choosing a folder, you only see "Recent", you may need to click on the
 three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage".</li>
 <li><b>Android 6.0 onwards</b> - From Android 6, some devices support "Adoptable Storage" allowing you to
-<a href="https://www.androidcentral.com/adoptable-storage">select to use
-an SD card as internal storage</a>. Note that not all devices support this, even if running Android 6 or later. If your device
+select to use
+an SD card as internal storage. Note that not all devices support this, even if running Android 6 or later. If your device
 doesn't support this, or you want to instead use an SD card as "portable storage", you'll have to use
 the Storage Access Framework method as with Android 5 (or the <small>Android/data/net.sourceforge.opencamera/</small> method as
 with Android 4.4).</li>
@@ -1236,19 +1222,14 @@ the standard Android camera API. Some devices do now support high speed frame ra
 
 <p><b>Why doesn't Open Camera show 23MP resolution on my Sony Xperia, only 8MP?</b> - This was a problem on older devices
 	and/or with the old Camera API because of Sony not making this available to third party camera applications. On newer Sony
-	devices, this should become available if you enable Settings/"Use Camera2 API".</p>
-	<!--This is because
-<a href="http://talk.sonymobile.com/t5/Xperia-Z5-Z5-Compact-Z5-Premium/Full-camera-res-in-third-party-apps/td-p/1045437/highlight/true/page/4">Sony
-have restricted the maximum resolution to 8MP for third party apps</a>.-->
+	devices, this should become available if you set Settings/"Camera API" to "Camera2 API".</p>
 
 <p><b>Why does the resolution of my photos not match the specified camera resolution?</b> - This happens if
 <a href="#auto_stabilise">auto-level</a> is enabled. The image is rotated to be level, which means the
 resolution (and aspect-ratio) will change.</p>
 
 <p><b>Why can't I change the ISO?</b> - Even if your device supports ISO, this may not be made available through the
-standard Android API for 3rd party camera apps to use. For example,
-<a href="http://stackoverflow.com/questions/19759068/xperia-z1-camera-parameters-iso-values">this is true of Sony
-devices</a>.</p>
+standard Android API for 3rd party camera apps to use.</p>
 
 <p><b>Why doesn't touch to focus work?</b> - Touching the screen should allow you to choose a particular region to focus
 on. If this doesn't work:</p>
@@ -1277,11 +1258,6 @@ know, but in the meantime you can install the older versions from
 <!-- use &#8203; to limit widths on continuous text to 30 characters, to avoid messing up view on mobile devices -->
 <a href="https://sourceforge.net/projects/opencamera/files/">https://sourceforge.net/&#8203;projects/opencamera/files/</a> .</p>
 
-<p><b>How do I load RAW (DNG) files into Photoshop Express?</b> - Unfortunately the Android version of
-Photoshop Express is limited in the options for importing images, and doesn't let you select DNG files directly.
-See <a href="https://feedback.photoshop.com/photoshop_family/topics/open-dng-files-in-photoshop-express-android">this thread</a>
-for some suggestions.</p>
-
 <p><b>Why doesn't the preview display match the resultant photo/video? One of them is cropped.</b> - Firstly, make
 sure that Settings/Camera preview/Preview size is set to "Match photo size (WYSIWYG)". However if that doesn't fix
 the problem, this is a limitation on some devices and photo/video resolutions (it happens if the device doesn't offer
@@ -1306,12 +1282,7 @@ by going to Settings/On screen GUI/Force maximum brightness.</p>
 <p><b>Does Open Camera support selfie sticks / bluetooth remotes?</b> - Open Camera has support for some selfie sticks
 though different sticks work in different ways, so it's hard to guarantee this. Sticks and bluetooth remote controls
 which work by triggering a volume key press should work (and the behaviour can be configured by
-Settings/More camera controls/"Volume keys"). For example, the
-<a href="https://www.amazon.co.uk/gp/product/B017NA7V1U/">KobraTech TriFlex Mini</a>. If you have a Mi Band 2 or
-Amazfit Bip/Arc, you can try using
-<a href="https://play.google.com/store/apps/details?id=com.miband2.mibandselfie">Mi Band 2 &amp; Amazfit Selfie</a> in
-conjunction with Open Camera. Open Camera also supports connecting to the Kraken Smart Housing via the options in
-"Settings/More camera controls/Bluetooth LE remote control".</p>
+Settings/More camera controls/"Volume keys").</p>
 
 <p><b>Why is auto-level slow?</b> - This feature requires doing a decompress of the JPEG data, followed by a
 rotation of a multi-megapixel image, then recompressing, which typically results in a short pause on most devices.
@@ -1381,7 +1352,8 @@ editing.</p>
 isn't an Open Camera bug - it's an Android issue that the video recording API doesn't stop or report an error when storage
 runs out. As a workaround, Open Camera does try to stop videos when storage space is low (although note this workaround
 may not be feasible in some cases if saving to non-default locations). In order to recover a file, you can try
-<a href="https://play.google.com/store/apps/details?id=com.smamolot.mp4fix">MP4Fix Video Repair Tool</a>.</p>
+<a href="https://play.google.com/store/apps/details?id=com.smamolot.mp4fix">MP4Fix Video Repair Tool</a> (not affiliated
+with Open Camera!).</p>
 
 <p><b>My device ran out of power while recording video, and the video is corrupt! How can I get it back?</b> - This can happen if
 the device is very slow at processing the video file after stopping, and this doesn't finishing when the device powers off. Open
@@ -1409,13 +1381,6 @@ so on from the main view.</p>
 licence (this means making the source of your app available under a GPL-compatible licence). If you would like to
 use the Open Camera in a closed source app, please contact me for a closed source commercial licence, with details
 on your company and app.</p>
-
-<p><b>Why am I unable to install Open Camera on my Lenovo Vibe S1 (error 504)?</b> - At least some Lenovo Vibe S1 devices
-come with a pre-installed app "Stereo Verify" that uses Open Camera's package name (net.sourceforge.opencamera), which
-prevents installation of Open Camera. This is not a bug with Open Camera, but with the pre-installed app. Please contact
-Lenovo to ask them why they are using Open Camera's package name, and if there is a way to install Open Camera (and please
-let me know if you get a response!) Also see
-<a href="http://forum.xda-developers.com/vibe-p1/help/stereo-verify-t3454811">here</a> for further discussion.</p>
 
 <p><a name="contact"><b>Contacting me (bugs etc)</b></a></p>
 
