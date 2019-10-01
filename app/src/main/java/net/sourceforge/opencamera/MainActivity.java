@@ -494,6 +494,7 @@ public class MainActivity extends Activity {
                             public void onClick(DialogInterface dialog, int which) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "donate");
+                                // if we change this, remember that any page linked to must abide by Google Play developer policies!
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.DonateLink));
                                 startActivity(browserIntent);
                             }
@@ -843,12 +844,14 @@ public class MainActivity extends Activity {
     static String getOnlineHelpUrl(String append) {
         if( MyDebug.LOG )
             Log.d(TAG, "getOnlineHelpUrl: " + append);
+        // if we change this, remember that any page linked to must abide by Google Play developer policies!
         return "https://opencamera.sourceforge.io/"+ append;
     }
 
     void launchOnlineHelp() {
         if( MyDebug.LOG )
             Log.d(TAG, "launchOnlineHelp");
+        // if we change this, remember that any page linked to must abide by Google Play developer policies!
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getOnlineHelpUrl("")));
         startActivity(browserIntent);
     }
@@ -856,6 +859,7 @@ public class MainActivity extends Activity {
     void launchOnlinePrivacyPolicy() {
         if( MyDebug.LOG )
             Log.d(TAG, "launchOnlinePrivacyPolicy");
+        // if we change this, remember that any page linked to must abide by Google Play developer policies!
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/index.html#privacy"));
         startActivity(browserIntent);
     }
@@ -3834,6 +3838,7 @@ public class MainActivity extends Activity {
         this.supports_force_video_4k = false;
     }
 
+    // if we change this, remember that any page linked to must abide by Google Play developer policies!
     public static final String DonateLink = "https://play.google.com/store/apps/details?id=harman.mark.donation";
 
     /*public static String getDonateMarketLink() {

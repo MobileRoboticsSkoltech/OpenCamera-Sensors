@@ -1253,7 +1253,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
                         SpannableString span = new SpannableString(about_string);
                         // Google Play prelaunch accessibility warnings suggest using URLSpan instead of ClickableSpan
+                        // if we change this, remember that any page linked to must abide by Google Play developer policies!
                         span.setSpan(new URLSpan("http://www.gnu.org/copyleft/gpl.html"), about_string.indexOf(gpl_link), about_string.indexOf(gpl_link) + gpl_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                        // if we change this, remember that any page linked to must abide by Google Play developer policies!
                         span.setSpan(new URLSpan(MainActivity.getOnlineHelpUrl("#licence")), about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
                         // clickable text is only supported if we call setMovementMethod on the TextView - which means we need to create
