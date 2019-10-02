@@ -746,6 +746,23 @@ public class MainActivity extends Activity {
 
         if( MyDebug.LOG )
             Log.d(TAG, "supports_camera2? " + supports_camera2);
+
+        // handle the switch from a boolean preference_use_camera2 to String preference_camera_api
+        // that occurred in v1.48
+        if( supports_camera2 ) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            if( !sharedPreferences.contains(PreferenceKeys.CameraAPIPreferenceKey) // doesn't have the new key set yet
+                    && sharedPreferences.contains("preference_use_camera2") // has the old key set
+                    && sharedPreferences.getBoolean("preference_use_camera2", false) // and camera2 was enabled
+            ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "transfer legacy camera2 boolean preference to new api option");
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(PreferenceKeys.CameraAPIPreferenceKey, "preference_camera_api_camera2");
+                editor.remove("preference_use_camera2"); // remove the old key, just in case
+                editor.apply();
+            }
+        }
     }
 
     private void preloadIcons(int icons_id) {

@@ -121,7 +121,7 @@ you want to switch off the display, do so on your device manually).</p>
 a photo. In some cases, you can also hold (long press) for a continuous burst:</p>
 <ul>
 	<li>Photo mode must be Standard or Fast Burst</li>
-	<li>Settings/"Use Camera2 API" must be enabled.</li>
+	<li>Settings/"Camera API" must be set to "Camera2 API".</li>
 	<li>Continuous burst only supported on some devices and resolutions.</li>
 </ul>
 
@@ -945,7 +945,7 @@ rate.</p>
     conditions, so there is no guarantee that the resultant video's frame rate will match with the requested value.</li>
 	<li>Some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
     using.</li>
-	<li>For best results (especially for 120fps or higher), please enable Settings/"Use Camera2 API". Even there, some
+	<li>For best results (especially for 120fps or higher), please set Settings/"Camera API" to "Camera2 API". Even there, some
 	devices seem to show buggy behaviour, so please test before using.</li>
 	<li>This setting is ignored in slow motion mode, where instead Open Camera will choose an appropriate high speed frame
 	rate.</li>
@@ -1069,11 +1069,11 @@ specified by using this option.</p>
 <p><b>Donate to support development</b> - Loads the page for
 <a href="https://play.google.com/store/apps/details?id=harman.mark.donation">my donation app</a>.</p>
 
-<p><b>Use Camera2 API</b> - If selected, this enables support for the Camera2 API that was introduced
-in Android 5. Turning this option on or off will cause Open Camera to restart. This enables some new features
+<p><b>Camera API</b> - If set to "Camera2 API", this enables support for the Camera2 API that was introduced
+in Android 5. Changing this setting will cause Open Camera to restart. Camera2 API enables some new features
 (including manual ISO/exposure, manual focus, HDR, exposure bracketing).
 Note that not all Android 5 devices have full support for the Camera2 API (Open Camera will only show this
-option if all cameras report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported).
+option if at least one camera reports either "LIMITED" or "FULL" support for the API; "LEGACY" only devices are not supported).
 Also note that even if devices support Camera2 API, many
 devices have extremely poor support, leading to bugs such as poor flash behaviour, or video recording not working.
 These are not necessarily bugs in Open Camera, but problems with manufacturer support for Camera2 API. If you have
@@ -1204,8 +1204,8 @@ dual back-facing cameras - in some cases the extra camera isn't made available t
 possible for Open Camera to support them. Even where they are, since there is no current standard on what the extra
 cameras are used for, it can't do anything with them other than allowing you to switch between them.</p>
 
-<p><b>Why doesn't Open Camera support the maximum video resolution on my device?</b> - If you have
-Settings/"Use Camera2 API" enabled, make sure that you're not in slow motion mode (see "Speed" under
+<p><b>Why doesn't Open Camera support the maximum video resolution on my device?</b> - If you
+are using Camera2 API, make sure that you're not in slow motion mode (see "Speed" under
 the popup menu), and you don't have a non-default frame rate set (under Settings/Video settings). If
 a high speed frame rate is in use, then this usually limits the maximum video resolution. If this
 isn't the case, then it may be that the device isn't exposing the highest video resolution to third
@@ -1213,8 +1213,7 @@ party applications (e.g., this is common for 4K/UHD video resolutions on older d
 if Camera2 API isn't enabled).</p>
 
 <p><b>Why doesn't the FPS/bitrate setting for video work?</b> - These settings only give "recommendations" to the
-camera, and there is no guarantee that they will be met. For best chance of success, try with Settings/"Use Camera2 API"
-enabled.</p>
+camera, and there is no guarantee that they will be met. For best chance of success, try setting Settings/"Camera API" to "Camera2 API".</p>
 
 <p><b>But my camera can do 60/120FPS, so why can't Open Camera?</b> - High frame rates often are achieved only by the
 "stock" camera app (or "mods" of it) because these are written for a specific device and don't have to go through
@@ -1303,7 +1302,7 @@ actions, with an option to clear them. There are plenty of gallery apps for Andr
 better for users to have this choice, rather than Open Camera having its own custom gallery.</p>
 
 <p><b>Can you implement disabling shutter sound for my phone?</b> -
-If your device supports "Settings/Use Camera2 API", then enabling that means you'll be able to disable
+If Open Camera shows the option Settings/"Camera API", then changing to "Camera2 API" means you'll be able to disable
 shutter sounds under "Settings/More camera controls...".
 When not using Camera2 API, if the option "Shutter sound" under "More camera controls..." isn't shown,
 then it's not available. There
@@ -1320,8 +1319,8 @@ webpage you're reading now, but not in the app). There are however some clones o
 Please ensure that you've downloaded from one of the places listed above
 on this page.</p>
 
-<p><b>Does Open Camera support features like manual controls for exposure/ISO/focus, and RAW?</b> - Enable
-Settings/"Use Camera2 API" for such features (if the option isn't there, it's not supported on your device).
+<p><b>Does Open Camera support features like manual controls for exposure/ISO/focus, and RAW?</b> -
+Set Settings/"Camera API" to "Camera2 API" for such features (if the option isn't there, it's not supported on your device).
 This is turned off by default as some <a href="devices.html">devices</a> have poor behaviour.</p>
 
 <p><b>My device has Android 5 or later, why can't I select the Camera2 API?</b> - Some Android 5+ devices only have

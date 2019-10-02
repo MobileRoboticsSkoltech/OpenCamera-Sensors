@@ -895,6 +895,11 @@
 
     <string name="preference_image_format_summary">Select the file format used for saving photos. This affects \"standard\" (not RAW) photos. Note that PNG format is not truly lossless, instead it is converted from a JPEG at 100%% quality.\n%s</string>
 
+    <string name="preference_camera_api">Camera API</string>
+    <string name="preference_camera_api_summary">Select Camera2 API to enables extra feature such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device), but may not work properly on all devices. Changing the API will cause a restart.\n%s</string>
+    <string name="preference_camera_api_old">Original camera API</string>
+    <string name="preference_camera_api_camera2">Camera2 API</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under

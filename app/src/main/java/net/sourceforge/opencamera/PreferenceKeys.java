@@ -39,7 +39,8 @@ public class PreferenceKeys {
      */
     public static final String MagneticAccuracyPreferenceKey = "done_magnetic_accuracy";
 
-    public static final String UseCamera2PreferenceKey = "preference_use_camera2";
+    public static final String CameraAPIPreferenceDefault = "preference_camera_api_old";
+    public static final String CameraAPIPreferenceKey = "preference_camera_api";
 
     public static String getFlashPreferenceKey(int cameraId) {
         return "flash_value_" + cameraId;

@@ -100,7 +100,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.clear();
         if( test_camera2 ) {
             MainActivity.test_force_supports_camera2 = true;
-            editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
+            //editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
+            editor.putString(PreferenceKeys.CameraAPIPreferenceKey, "preference_camera_api_camera2");
         }
         editor.apply();
         Log.d(TAG, "setUp: 2");
@@ -10930,6 +10931,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
 
+    }
+
+    /** Tests that we handle the upgrade from the preference boolean key "preference_use_camera2"
+     *  to the string key PreferenceKeys.CameraAPIPreferenceKey that occured in v1.48.
+     */
+    public void testCamera2PrefUpgrade() {
+        Log.d(TAG, "testCamera2PrefUpgrade");
+
+        // n.b., don't bother calling setToDefault()
+        waitUntilCameraOpened();
+
+        assertFalse(mPreview.usingCamera2API());
+
+        // test legacy key present, but set to old api
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.clear();
+        editor.putBoolean("preference_use_camera2", false);
+        editor.apply();
+        restart();
+        assertFalse(mPreview.usingCamera2API());
+
+        // now test legacy key present for camera2 api
+        settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        editor = settings.edit();
+        editor.clear();
+        editor.putBoolean("preference_use_camera2", true);
+        editor.apply();
+
+        for(int i=0;i<2;i++) {
+            restart();
+            assertTrue(mPreview.usingCamera2API());
+
+            // also check we switched over to the new key
+            settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            assertFalse(settings.contains("preference_use_camera2"));
+            assertTrue(settings.contains(PreferenceKeys.CameraAPIPreferenceKey));
+            assertEquals("preference_camera_api_camera2", settings.getString(PreferenceKeys.CameraAPIPreferenceKey, PreferenceKeys.CameraAPIPreferenceDefault));
+        }
     }
 
     private static class HistogramDetails {

@@ -1217,13 +1217,12 @@
             />  
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
-        <SwitchPreference
-            android:key="preference_use_camera2"  
-            android:title="@string/preference_use_camera2"
-            android:summary="@string/preference_use_camera2_summary"
-            android:defaultValue="false"
-            />  
-        
+        <ListPreference
+            android:key="preference_camera_api"
+            android:title="@string/preference_camera_api"
+            android:summary="@string/preference_camera_api_summary"
+            />
+
         <Preference
             android:key="preference_about"  
             android:title="@string/preference_about"

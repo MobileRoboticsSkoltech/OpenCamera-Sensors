@@ -233,7 +233,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public boolean useCamera2() {
         if( main_activity.supportsCamera2() ) {
-            return sharedPreferences.getBoolean(PreferenceKeys.UseCamera2PreferenceKey, false);
+            String camera_api = sharedPreferences.getString(PreferenceKeys.CameraAPIPreferenceKey, PreferenceKeys.CameraAPIPreferenceDefault);
+            if( "preference_camera_api_camera2".equals(camera_api) ) {
+                return true;
+            }
         }
         return false;
     }

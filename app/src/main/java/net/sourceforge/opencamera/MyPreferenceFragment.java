@@ -696,7 +696,54 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
         }
 
-        final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
+        {
+            List<String> camera_api_values = new ArrayList<>();
+            List<String> camera_api_entries = new ArrayList<>();
+
+            // all devices support old api
+            camera_api_values.add("preference_camera_api_old");
+            camera_api_entries.add(getActivity().getResources().getString(R.string.preference_camera_api_old));
+
+            final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
+            if( MyDebug.LOG )
+                Log.d(TAG, "supports_camera2: " + supports_camera2);
+            if( supports_camera2 ) {
+                camera_api_values.add("preference_camera_api_camera2");
+                camera_api_entries.add(getActivity().getResources().getString(R.string.preference_camera_api_camera2));
+            }
+
+            if( camera_api_values.size() == 1 ) {
+                // if only supports 1 API, no point showing the preference
+                camera_api_values.clear();
+                camera_api_entries.clear();
+            }
+
+            readFromBundle(camera_api_values.toArray(new String[0]), camera_api_entries.toArray(new String[0]), "preference_camera_api", PreferenceKeys.CameraAPIPreferenceDefault, "preference_category_online");
+
+            if( camera_api_values.size() >= 2 ) {
+                final Preference pref = findPreference("preference_camera_api");
+                pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference arg0, Object newValue) {
+                        if( pref.getKey().equals("preference_camera_api") ) {
+                            ListPreference list_pref = (ListPreference)pref;
+                            if( list_pref.getValue().equals(newValue) ) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "user selected same camera API");
+                            }
+                            else {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "user changed camera API - need to restart");
+                                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                                main_activity.restartOpenCamera();
+                            }
+                        }
+                        return true;
+                    }
+                });
+            }
+        }
+        /*final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_camera2: " + supports_camera2);
         if( supports_camera2 ) {
@@ -719,7 +766,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             Preference pref = findPreference("preference_use_camera2");
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_online");
             pg.removePreference(pref);
-        }
+        }*/
 
         {
             final Preference pref = findPreference("preference_online_help");

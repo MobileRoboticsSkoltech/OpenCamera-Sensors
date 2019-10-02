@@ -19,6 +19,7 @@ public class MainTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmediatelyQuit"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
         if( !MainActivityTest.test_camera2 ) {
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCamera2PrefUpgrade"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveModes"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFlashVideoMode"));
             //suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFlashTorchSwitchCamera"));
