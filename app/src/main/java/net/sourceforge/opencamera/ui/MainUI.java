@@ -1164,7 +1164,7 @@ public class MainUI {
                     view.setImageResource(R.drawable.flash_torch);
                     break;
                 case "flash_red_eye":
-                    view.setImageResource(R.drawable.flash_red_eye);
+                    view.setImageResource(R.drawable.baseline_remove_red_eye_white_48);
                     break;
             }
         }
