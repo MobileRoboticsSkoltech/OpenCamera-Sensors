@@ -513,11 +513,11 @@
         <item>drawable/flash_off</item>
         <item>drawable/flash_auto</item>
         <item>drawable/flash_on</item>
-        <item>drawable/flash_torch</item>
+        <item>drawable/baseline_highlight_white_48</item>
         <item>drawable/baseline_remove_red_eye_white_48</item>
         <item>drawable/flash_auto</item>
         <item>drawable/flash_on</item>
-        <item>drawable/flash_torch</item>
+        <item>drawable/baseline_highlight_white_48</item>
     </string-array>
     <string-array name="flash_entries">
         <item>@string/flash_off</item>
