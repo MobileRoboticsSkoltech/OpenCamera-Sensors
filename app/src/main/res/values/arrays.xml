@@ -3,7 +3,7 @@
     <string-array name="focus_mode_icons">
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>
-        <item>drawable/focus_mode_macro</item>
+        <item>drawable/baseline_filter_vintage_white_48</item>
         <item>drawable/focus_mode_locked</item>
         <item>drawable/focus_mode_manual</item>
         <item>drawable/focus_mode_fixed</item>
