@@ -398,7 +398,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/remote_connected"
-        android:src="@drawable/ic_kraken_icon"
+        android:src="@drawable/baseline_bluetooth_white_48"
         android:background="@color/icons_background"
         android:backgroundTint="@color/icons_background_tint"
         android:backgroundTintMode="src_in"
