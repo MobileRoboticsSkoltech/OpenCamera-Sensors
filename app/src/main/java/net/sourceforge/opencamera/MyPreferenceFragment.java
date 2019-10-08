@@ -47,12 +47,14 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 
 /** Fragment to handle the Settings UI. Note that originally this was a
  *  PreferenceActivity rather than a PreferenceFragment which required all
@@ -802,6 +804,63 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
+        // licences
+
+        {
+            final Preference pref = findPreference("preference_licence_open_camera");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_licence_open_camera") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked open camera licence");
+                        // display the GPL v3 text
+                        displayTextDialog("gpl-3.0.txt");
+                        return false;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        {
+            final Preference pref = findPreference("preference_licence_google_icons");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_licence_google_icons") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked google material design icons licence");
+                        // display the Apache licence 2.0 text
+                        displayTextDialog("google_material_design_icons_LICENSE-2.0.txt");
+                        return false;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // don't bother doing anything for preference_licence_beep - not required since it's CC0
+
+        {
+            final Preference pref = findPreference("preference_licence_online");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_licence_online") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked online licences");
+                        MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                        main_activity.launchOnlineLicences();
+                        return false;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // end licences
+
         {
             ListPreference pref = (ListPreference)findPreference("preference_ghost_image");
 
@@ -996,8 +1055,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
                         alertDialog.setTitle(R.string.preference_about);
                         final StringBuilder about_string = new StringBuilder();
-                        final String gpl_link = "GPL v3 or later";
-                        final String online_help_link = "online help";
                         String version = "UNKNOWN_VERSION";
                         int version_code = -1;
                         try {
@@ -1014,10 +1071,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(version);
                         about_string.append("\nCode: ");
                         about_string.append(version_code);
-                        about_string.append("\n(c) 2013-2019 Mark Harman");
-                        about_string.append("\nReleased under the ");
-                        about_string.append(gpl_link);
-                        about_string.append(" (Open Camera also uses additional third party files, see " + online_help_link + " for full licences and attributions.)");
                         about_string.append("\nPackage: ");
                         about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
                         about_string.append("\nAndroid API version: ");
@@ -1299,11 +1352,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         }
 
                         SpannableString span = new SpannableString(about_string);
-                        // Google Play prelaunch accessibility warnings suggest using URLSpan instead of ClickableSpan
-                        // if we change this, remember that any page linked to must abide by Google Play developer policies!
-                        span.setSpan(new URLSpan("http://www.gnu.org/copyleft/gpl.html"), about_string.indexOf(gpl_link), about_string.indexOf(gpl_link) + gpl_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                        // if we change this, remember that any page linked to must abide by Google Play developer policies!
-                        span.setSpan(new URLSpan(MainActivity.getOnlineHelpUrl("#licence")), about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
                         // clickable text is only supported if we call setMovementMethod on the TextView - which means we need to create
                         // our own for the AlertDialog!
@@ -1487,6 +1535,34 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     return false;
                 }
             });
+        }
+    }
+
+    /* Displays a dialog with text loaded from a file in assets.
+     */
+    private void displayTextDialog(String file) {
+        try {
+            InputStream inputStream = getActivity().getAssets().open(file);
+            Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+            alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_licence_open_camera));
+            alertDialog.setMessage(scanner.next());
+            alertDialog.setPositiveButton(android.R.string.ok, null);
+            final AlertDialog alert = alertDialog.create();
+            // AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+            alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface arg0) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "calibration dialog dismissed");
+                    dialogs.remove(alert);
+                }
+            });
+            alert.show();
+            dialogs.add(alert);
+        }
+        catch(IOException e) {
+            e.printStackTrace();
         }
     }
 

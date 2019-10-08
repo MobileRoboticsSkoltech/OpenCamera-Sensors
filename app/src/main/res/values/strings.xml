@@ -882,6 +882,17 @@
 
     <string name="camera_id">ID</string> <!-- ID as in camera ID -->
 
+    <string name="exposure_compensation_seekbar">Seekbar to change exposure compensation</string>
+
+    <string name="preference_image_format_summary">Select the file format used for saving photos. This affects \"standard\" (not RAW) photos. Note that PNG format is not truly lossless, instead it is converted from a JPEG at 100%% quality.\n%s</string>
+
+    <string name="preference_camera_api">Camera API</string>
+    <string name="preference_camera_api_summary">Select Camera2 API to enables extra feature such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device), but may not work properly on all devices. Changing the API will cause a restart.\n%s</string>
+    <string name="preference_camera_api_old">Original camera API</string>
+    <string name="preference_camera_api_camera2">Camera2 API</string>
+
+    <!-- The following strings should not be translated (in case they need updating) -->
+
     <string name="preference_privacy_policy">Privacy policy</string>
     <string name="preference_privacy_policy_text"> <!-- shouldn't be translated (in case it needs updating) -->
         Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
@@ -891,14 +902,15 @@
         Please tap here for online privacy policy.
     </string>
 
-    <string name="exposure_compensation_seekbar">Seekbar to change exposure compensation</string>
-
-    <string name="preference_image_format_summary">Select the file format used for saving photos. This affects \"standard\" (not RAW) photos. Note that PNG format is not truly lossless, instead it is converted from a JPEG at 100%% quality.\n%s</string>
-
-    <string name="preference_camera_api">Camera API</string>
-    <string name="preference_camera_api_summary">Select Camera2 API to enables extra feature such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device), but may not work properly on all devices. Changing the API will cause a restart.\n%s</string>
-    <string name="preference_camera_api_old">Original camera API</string>
-    <string name="preference_camera_api_camera2">Camera2 API</string>
+    <string name="preference_screen_licences">Open Source licences</string>
+    <string name="preference_licence_open_camera">Open Camera</string>
+    <string name="preference_licence_open_camera_text">Open Camera is © 2013–2019 Mark Harman, released under the GPL v3 or later. Tap here for full licence text.</string>
+    <string name="preference_licence_google_icons">Google\'s Material Design icons</string>
+    <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons (https://design.google.com/icons/) under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
+    <string name="preference_licence_beep">Beep sound effects</string>
+    <string name="preference_licence_beep_text">Open Camera uses sound effects from http://opengameart.org/content/interface-beeps under CC0 (http://creativecommons.org/publicdomain/zero/1.0/)</string>
+    <string name="preference_licence_online">Online licences</string>
+    <string name="preference_licence_online_text">Please tap here for full online licensing information.</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">

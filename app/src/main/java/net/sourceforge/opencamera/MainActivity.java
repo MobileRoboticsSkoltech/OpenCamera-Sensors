@@ -881,6 +881,14 @@ public class MainActivity extends Activity {
         startActivity(browserIntent);
     }
 
+    void launchOnlineLicences() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "launchOnlineLicences");
+        // if we change this, remember that any page linked to must abide by Google Play developer policies!
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getOnlineHelpUrl("#licence")));
+        startActivity(browserIntent);
+    }
+
     /* Audio trigger - either loud sound, or speech recognition.
      * This performs some additional checks before taking a photo.
      */
