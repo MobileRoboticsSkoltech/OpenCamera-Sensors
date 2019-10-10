@@ -815,7 +815,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked open camera licence");
                         // display the GPL v3 text
-                        displayTextDialog("gpl-3.0.txt");
+                        displayTextDialog(R.string.preference_licence_open_camera, "gpl-3.0.txt");
                         return false;
                     }
                     return false;
@@ -832,7 +832,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked google material design icons licence");
                         // display the Apache licence 2.0 text
-                        displayTextDialog("google_material_design_icons_LICENSE-2.0.txt");
+                        displayTextDialog(R.string.preference_licence_google_icons, "google_material_design_icons_LICENSE-2.0.txt");
                         return false;
                     }
                     return false;
@@ -1540,12 +1540,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
     /* Displays a dialog with text loaded from a file in assets.
      */
-    private void displayTextDialog(String file) {
+    private void displayTextDialog(int title_id, String file) {
         try {
             InputStream inputStream = getActivity().getAssets().open(file);
             Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
-            alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_licence_open_camera));
+            alertDialog.setTitle(getActivity().getResources().getString(title_id));
             alertDialog.setMessage(scanner.next());
             alertDialog.setPositiveButton(android.R.string.ok, null);
             final AlertDialog alert = alertDialog.create();
