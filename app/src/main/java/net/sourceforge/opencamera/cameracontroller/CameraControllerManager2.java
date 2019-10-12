@@ -62,7 +62,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
     }
 
     /* Returns true if the device supports the required hardware level, or better.
-     * From http://msdx.github.io/androiddoc/docs//reference/android/hardware/camera2/CameraCharacteristics.html#INFO_SUPPORTED_HARDWARE_LEVEL
+     * See https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL .
      * From Android N, higher levels than "FULL" are possible, that will have higher integer values.
      * Also see https://sourceforge.net/p/opencamera/tickets/141/ .
      */
@@ -90,11 +90,13 @@ public class CameraControllerManager2 extends CameraControllerManager {
                     break;
             }
         }
-        if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+
+        // need to treat legacy and external as special cases; otherwise can then use numerical comparison
+
+        if( deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY ) {
             return requiredLevel == deviceLevel;
         }
 
-        // treat EXTERNAL as LIMITED so we can then use a numerical sort
         if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL ) {
             deviceLevel = CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED;
         }
@@ -102,7 +104,6 @@ public class CameraControllerManager2 extends CameraControllerManager {
             requiredLevel = CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED;
         }
 
-        // can now use numerical sort
         return requiredLevel <= deviceLevel;
     }
 

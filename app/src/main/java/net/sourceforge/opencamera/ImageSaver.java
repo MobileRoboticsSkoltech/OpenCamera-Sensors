@@ -3207,7 +3207,7 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
             boolean needs_tf = false;
             int exif_orientation = 0;
-            // from http://jpegclub.org/exif_orientation.html
+            // see http://jpegclub.org/exif_orientation.html
             // and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
             switch (exif_orientation_s) {
                 case ExifInterface.ORIENTATION_UNDEFINED:

@@ -14,14 +14,13 @@ import android.widget.RemoteViews;
 public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
     private static final String TAG = "MyWidgetProviderTakePho";
     
-    // from http://developer.android.com/guide/topics/appwidgets/index.html
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    // see http://developer.android.com/guide/topics/appwidgets/index.html
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int [] appWidgetIds) {
         if( MyDebug.LOG )
             Log.d(TAG, "onUpdate");
         if( MyDebug.LOG )
             Log.d(TAG, "length = " + appWidgetIds.length);
 
-        // Perform this loop procedure for each App Widget that belongs to this provider
         for(int appWidgetId : appWidgetIds) {
             if( MyDebug.LOG )
                 Log.d(TAG, "appWidgetId: " + appWidgetId);
@@ -29,13 +28,10 @@ public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
             Intent intent = new Intent(context, TakePhoto.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-            // Get the layout for the App Widget and attach an on-click listener
-            // to the button
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout_take_photo);
-            views.setOnClickPendingIntent(R.id.widget_take_photo, pendingIntent);
+            RemoteViews remote_views = new RemoteViews(context.getPackageName(), R.layout.widget_layout_take_photo);
+            remote_views.setOnClickPendingIntent(R.id.widget_take_photo, pendingIntent);
 
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            appWidgetManager.updateAppWidget(appWidgetId, views);
+            appWidgetManager.updateAppWidget(appWidgetId, remote_views);
         }
     }
 

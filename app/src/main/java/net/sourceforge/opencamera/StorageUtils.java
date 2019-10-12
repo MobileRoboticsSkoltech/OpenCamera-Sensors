@@ -427,8 +427,7 @@ public class StorageUtils {
                 }
                 else {
                     try {
-                        final Uri contentUri = ContentUris.withAppendedId(
-                                Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
+                        final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
 
                         String filename = getDataColumn(contentUri, null, null);
                         if( filename != null )
@@ -519,7 +518,7 @@ public class StorageUtils {
 
     /** Returns the filename (but not full path) for a Uri.
      * See https://developer.android.com/guide/topics/providers/document-provider.html and
-     * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content.
+     * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content .
      */
     public String getFileName(Uri uri) {
         if( MyDebug.LOG ) {

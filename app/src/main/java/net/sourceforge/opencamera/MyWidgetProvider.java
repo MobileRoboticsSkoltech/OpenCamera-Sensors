@@ -20,14 +20,13 @@ import android.widget.RemoteViews;
 public class MyWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "MyWidgetProvider";
     
-    // from http://developer.android.com/guide/topics/appwidgets/index.html
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    // see http://developer.android.com/guide/topics/appwidgets/index.html
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int [] appWidgetIds) {
         if( MyDebug.LOG )
             Log.d(TAG, "onUpdate");
         if( MyDebug.LOG )
             Log.d(TAG, "length = " + appWidgetIds.length);
 
-        // Perform this loop procedure for each App Widget that belongs to this provider
         for(int appWidgetId : appWidgetIds) {
             if( MyDebug.LOG )
                 Log.d(TAG, "appWidgetId: " + appWidgetId);
@@ -49,19 +48,16 @@ public class MyWidgetProvider extends AppWidgetProvider {
                 pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             }
 
-            // Get the layout for the App Widget and attach an on-click listener
-            // to the button
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-            views.setOnClickPendingIntent(R.id.widget_launch_open_camera, pendingIntent);
+            RemoteViews remote_views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
+            remote_views.setOnClickPendingIntent(R.id.widget_launch_open_camera, pendingIntent);
             /*if( sharedPreferences.getBoolean(MainActivity.getShowWhenLockedPreferenceKey(), true) ) {
-                views.setTextViewText(R.id.launch_open_camera, "Open Camera (unlocked)");
+                remote_views.setTextViewText(R.id.launch_open_camera, "Open Camera (unlocked)");
             }
             else {
-                views.setTextViewText(R.id.launch_open_camera, "Open Camera (locked)");
+                remote_views.setTextViewText(R.id.launch_open_camera, "Open Camera (locked)");
             }*/
 
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            appWidgetManager.updateAppWidget(appWidgetId, views);
+            appWidgetManager.updateAppWidget(appWidgetId, remote_views);
         }
     }
 

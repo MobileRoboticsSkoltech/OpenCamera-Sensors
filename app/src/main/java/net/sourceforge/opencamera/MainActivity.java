@@ -583,12 +583,13 @@ public class MainActivity extends Activity {
             //Log.d(TAG, "is_pixel_xl_phone? " + is_pixel_xl_phone);
         }
         if( is_samsung || is_oneplus ) {
-            // workaround needed for Samsung S7 at least (tested on Samsung RTL)
+            // workaround needed for Samsung Galaxy S7 at least (tested on Samsung RTL)
             // workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
             // update for v1.37: significant improvements have been made for standard flash and Camera2 API. But OnePlus 3T still has problem
             // that photos come out with a blue tinge if flash is on, and the scene is bright enough not to need it; Samsung devices also seem
             // to work okay, testing on S7 on RTL, but still keeping the fake flash mode in place for these devices, until we're sure of good
             // behaviour
+            // update for testing on Galaxy S10e: still needs fake flash
             if( MyDebug.LOG )
                 Log.d(TAG, "set fake flash for camera2");
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -2313,12 +2314,12 @@ public class MainActivity extends Activity {
         if( sharedPreferences.getBoolean(PreferenceKeys.getKeepDisplayOnPreferenceKey(), true) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "do keep screen on");
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         else {
             if( MyDebug.LOG )
                 Log.d(TAG, "don't keep screen on");
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         if( sharedPreferences.getBoolean(PreferenceKeys.getShowWhenLockedPreferenceKey(), true) ) {
             if( MyDebug.LOG )
@@ -2772,7 +2773,7 @@ public class MainActivity extends Activity {
                 if( MyDebug.LOG )
                     Log.d(TAG, "try ACTION_VIEW");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                // from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
+                // see http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
                 //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
                 if( intent.resolveActivity(getPackageManager()) != null ) {
                     try {
@@ -2875,14 +2876,11 @@ public class MainActivity extends Activity {
                     Uri treeUri = resultData.getData();
                     if( MyDebug.LOG )
                         Log.d(TAG, "returned treeUri: " + treeUri);
-                    // from https://developer.android.com/guide/topics/providers/document-provider.html#permissions :
-                    final int takeFlags = resultData.getFlags()
-                            & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    // see https://developer.android.com/guide/topics/providers/document-provider.html#permissions :
+                    final int takeFlags = resultData.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     try {
 					/*if( true )
 						throw new SecurityException(); // test*/
-                        // Check for the freshest data.
                         getContentResolver().takePersistableUriPermission(treeUri, takeFlags);
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -4309,9 +4307,9 @@ public class MainActivity extends Activity {
             Log.d(TAG, "restartOpenCamera");
         this.waitUntilImageQueueEmpty();
         // see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
-        Intent i = this.getBaseContext().getPackageManager().getLaunchIntentForPackage( this.getBaseContext().getPackageName() );
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
+        Intent intent = this.getBaseContext().getPackageManager().getLaunchIntentForPackage( this.getBaseContext().getPackageName() );
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        this.startActivity(intent);
     }
 
     public void takePhotoButtonLongClickCancelled() {

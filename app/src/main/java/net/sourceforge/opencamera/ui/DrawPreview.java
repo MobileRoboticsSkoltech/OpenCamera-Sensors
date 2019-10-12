@@ -656,7 +656,7 @@ public class DrawPreview {
             int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
             boolean needs_tf = false;
             int exif_orientation = 0;
-            // from http://jpegclub.org/exif_orientation.html
+            // see http://jpegclub.org/exif_orientation.html
             // and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
             if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
                 // leave unchanged

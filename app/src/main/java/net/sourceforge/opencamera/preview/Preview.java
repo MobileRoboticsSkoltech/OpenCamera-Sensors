@@ -457,11 +457,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return;
         camera_to_preview_matrix.reset();
         if( !using_android_l ) {
-            // from http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
+            // see http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
             // Need mirror for front camera
             boolean mirror = camera_controller.isFrontFacing();
             camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
-            // This is the value for android.hardware.Camera.setDisplayOrientation.
             int display_orientation = camera_controller.getDisplayOrientation();
             if( MyDebug.LOG ) {
                 Log.d(TAG, "orientation of display relative to camera orientaton: " + display_orientation);
@@ -471,8 +470,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         else {
             // Unfortunately the transformation for Android L API isn't documented, but this seems to work for Nexus 6.
             // This is the equivalent code for android.hardware.Camera.setDisplayOrientation, but we don't actually use setDisplayOrientation()
-            // for CameraController2, so instead this is the equivalent code to https://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int),
-            // except testing on Nexus 6 shows that we shouldn't change "result" for front facing camera.
+            // for CameraController2, except testing on Nexus 6 shows that we shouldn't change "result" for front facing camera.
             boolean mirror = camera_controller.isFrontFacing();
             camera_to_preview_matrix.setScale(1, mirror ? -1 : 1);
             int degrees = getDisplayRotationDegrees();
@@ -3555,7 +3553,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return degrees;
     }
 
-    // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
     // note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
     public void setCameraDisplayOrientation() {
         if( MyDebug.LOG )
@@ -3578,7 +3575,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
-    // for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
+    // for taking photos - see http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
     private void onOrientationChanged(int orientation) {
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "onOrientationChanged()");
@@ -6358,9 +6355,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             float old_compass = (float)Math.toDegrees(geo_direction[i]);
             float new_compass = (float)Math.toDegrees(new_geo_direction[i]);
             if( has_old_geo_direction ) {
-                float smoothFactorCompass = 0.1f;
-                float smoothThresholdCompass = 10.0f;
-                old_compass = lowPassFilter(old_compass, new_compass, smoothFactorCompass, smoothThresholdCompass);
+                old_compass = lowPassFilter(old_compass, new_compass, 0.1f, 10.0f);
             }
             else {
                 old_compass = new_compass;
@@ -6373,39 +6368,37 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}*/
     }
 
-    /** Low pass filter, for angles.
+    /** Low pass filter, for geommagnetic angles.
      * @param old_value Old value in degrees.
      * @param new_value New value in degrees.
      */
-    private float lowPassFilter(float old_value, float new_value, float smoothFactorCompass, float smoothThresholdCompass) {
+    private float lowPassFilter(float old_value, float new_value, float smooth, float threshold) {
         // see http://stackoverflow.com/questions/4699417/android-compass-orientation-on-unreliable-low-pass-filter
-        // https://www.built.io/blog/applying-low-pass-filter-to-android-sensor-s-readings
-        // http://stackoverflow.com/questions/27846604/how-to-get-smooth-orientation-data-in-android
         float diff = Math.abs(new_value - old_value);
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "diff: " + diff);*/
-        if( diff < 180 ) {
-            if( diff > smoothThresholdCompass ) {
+        if( diff < 180.0f ) {
+            if( diff > threshold ) {
 				/*if( MyDebug.LOG )
-					Log.d(TAG, "jump to new compass");*/
+					Log.d(TAG, "jump to new value");*/
                 old_value = new_value;
             }
             else {
-                old_value = old_value + smoothFactorCompass * (new_value - old_value);
+                old_value = old_value + smooth * (new_value - old_value);
             }
         }
         else {
-            if( 360.0 - diff > smoothThresholdCompass ) {
+            if( 360.0f - diff > threshold ) {
 				/*if( MyDebug.LOG )
-					Log.d(TAG, "jump to new compass");*/
+					Log.d(TAG, "jump to new value");*/
                 old_value = new_value;
             }
             else {
                 if( old_value > new_value ) {
-                    old_value = (old_value + smoothFactorCompass * ((360 + new_value - old_value) % 360) + 360) % 360;
+                    old_value = (old_value + smooth * ((360 + new_value - old_value) % 360) + 360) % 360;
                 }
                 else {
-                    old_value = (old_value - smoothFactorCompass * ((360 - new_value + old_value) % 360) + 360) % 360;
+                    old_value = (old_value - smooth * ((360 - new_value + old_value) % 360) + 360) % 360;
                 }
             }
         }

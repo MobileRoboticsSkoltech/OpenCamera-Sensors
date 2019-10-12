@@ -87,14 +87,6 @@ public class CameraController1 extends CameraController {
             this.release();
             throw new CameraControllerException();
         }
-		/*{
-			// TEST cam_mode workaround from http://stackoverflow.com/questions/7225571/camcorderprofile-quality-high-resolution-produces-green-flickering-video
-			if( MyDebug.LOG )
-				Log.d(TAG, "setting cam_mode workaround");
-	    	Camera.Parameters parameters = this.getParameters();
-	    	parameters.set("cam_mode", 1);
-	    	setCameraParameters(parameters);
-		}*/
 
         final CameraErrorCallback camera_error_callback = new CameraErrorCallback();
         camera.setErrorCallback(camera_error_callback);
@@ -472,10 +464,8 @@ public class CameraController1 extends CameraController {
     @Override
     public boolean sceneModeAffectsFunctionality() {
         // see https://developer.android.com/reference/android/hardware/Camera.Parameters.html#setSceneMode(java.lang.String)
-        // "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance). For example,
-        // suppose originally flash mode is on and supported flash modes are on/off. In night scene mode, both flash mode and
-        // supported flash mode may be changed to off. After setting scene mode, applications should call getParameters to
-        // know if some parameters are changed."
+        // "Changing scene mode may override other parameters ... After setting scene mode, applications should call
+        // getParameters to know if some parameters are changed."
         return true;
     }
 
@@ -1845,11 +1835,11 @@ public class CameraController1 extends CameraController {
     }
 
     public void setDisplayOrientation(int degrees) {
-        // rest of code from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+        // see http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
         int result;
         if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
             result = (camera_info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
+            result = (360 - result) % 360;
         }
         else {
             result = (camera_info.orientation - degrees + 360) % 360;

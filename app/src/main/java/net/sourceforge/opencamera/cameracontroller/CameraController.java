@@ -195,7 +195,7 @@ public abstract class CameraController {
             //return Objects.hash(width, height);
             // as this requires API level 19
             // so use this from http://stackoverflow.com/questions/11742593/what-is-the-hashcode-for-a-custom-class-having-just-two-int-properties
-            return width*31 + height;
+            return width*41 + height;
         }
 
         public String toString() {
