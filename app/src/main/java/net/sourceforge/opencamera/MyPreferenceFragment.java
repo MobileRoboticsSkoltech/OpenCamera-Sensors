@@ -840,8 +840,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
-        // don't bother doing anything for preference_licence_beep - not required since it's CC0
-
         {
             final Preference pref = findPreference("preference_licence_online");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {

@@ -2360,7 +2360,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "play beep!");
             boolean is_last = remaining_time <= 1000;
-            main_activity.getSoundPoolManager().playSound(is_last ? R.raw.beep_hi : R.raw.beep);
+            main_activity.getSoundPoolManager().playSound(is_last ? R.raw.mybeep_hi : R.raw.mybeep);
         }
         if( sharedPreferences.getBoolean(PreferenceKeys.getTimerSpeakPreferenceKey(), false) ) {
             if( MyDebug.LOG )

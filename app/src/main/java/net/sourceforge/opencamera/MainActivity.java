@@ -1018,8 +1018,8 @@ public class MainActivity extends Activity {
         initLocation();
         initGyroSensors();
         soundPoolManager.initSound();
-        soundPoolManager.loadSound(R.raw.beep);
-        soundPoolManager.loadSound(R.raw.beep_hi);
+        soundPoolManager.loadSound(R.raw.mybeep);
+        soundPoolManager.loadSound(R.raw.mybeep_hi);
 
         mainUI.layoutUI();
 

@@ -1256,12 +1256,6 @@
                 />
 
             <Preference
-                android:key="preference_licence_beep"
-                android:title="@string/preference_licence_beep"
-                android:summary="@string/preference_licence_beep_text"
-                />
-
-            <Preference
                 android:key="preference_licence_online"
                 android:title="@string/preference_licence_online"
                 android:summary="@string/preference_licence_online_text"

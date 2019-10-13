@@ -907,8 +907,6 @@
     <string name="preference_licence_open_camera_text">Open Camera is © 2013–2019 Mark Harman, released under the GPL v3 or later. Tap here for full licence text.</string>
     <string name="preference_licence_google_icons">Google\'s Material Design icons</string>
     <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons (https://developer.android.com/design/downloads/index.html, https://github.com/google/material-design-icons/, https://design.google.com/icons/) under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
-    <string name="preference_licence_beep">Beep sound effects</string>
-    <string name="preference_licence_beep_text">Open Camera uses sound effects from http://opengameart.org/content/interface-beeps under CC0 (http://creativecommons.org/publicdomain/zero/1.0/)</string>
     <string name="preference_licence_online">Online licences</string>
     <string name="preference_licence_online_text">Please tap here for full online licensing information.</string>
 
