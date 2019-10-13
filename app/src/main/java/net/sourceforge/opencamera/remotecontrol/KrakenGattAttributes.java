@@ -10,9 +10,6 @@ import java.util.UUID;
  * Bluetooth Low Energy
  */
 public class KrakenGattAttributes {
-    // The Kraken Smart Housing advertises itself as a heart measurement device, talk about
-    // lazy devs...
-    //public static final UUID HEART_RATE_MEASUREMENT = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
     public static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     //public static final UUID KRAKEN_SENSORS_SERVICE = UUID.fromString("00001623-1212-efde-1523-785feabcd123");

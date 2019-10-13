@@ -27,16 +27,16 @@ public class BluetoothRemoteControl {
 
     private final MainActivity main_activity;
 
-    private BluetoothLeService mBluetoothLeService;
-    private String mRemoteDeviceAddress;
-    private String mRemoteDeviceType;
-    private boolean mRemoteConnected;
+    private BluetoothLeService bluetoothLeService;
+    private String remoteDeviceAddress;
+    private String remoteDeviceType;
+    private boolean is_connected;
 
     public BluetoothRemoteControl(MainActivity main_activity) {
         this.main_activity = main_activity;
     }
 
-    // Code to manage Service lifecycle for remote control.
+    // class to manage the Service lifecycle for remote control.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -45,13 +45,13 @@ public class BluetoothRemoteControl {
                 // BluetoothLeService requires Android 4.3+
                 return;
             }
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
+            bluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if( !bluetoothLeService.initialize() ) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
                 stopRemoteControl();
             }
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mRemoteDeviceAddress);
+            // connect to the device
+            bluetoothLeService.connect(remoteDeviceAddress);
         }
 
         @Override
@@ -61,7 +61,7 @@ public class BluetoothRemoteControl {
                 public void run() {
                     if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
                         // BluetoothLeService requires Android 4.3+
-                        mBluetoothLeService.connect(mRemoteDeviceAddress);
+                        bluetoothLeService.connect(remoteDeviceAddress);
                     }
                 }
             }, 5000);
@@ -84,32 +84,33 @@ public class BluetoothRemoteControl {
             final String action = intent.getAction();
             MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
             MainUI mainUI = main_activity.getMainUI();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+            if( BluetoothLeService.ACTION_GATT_CONNECTED.equals(action) ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "Remote connected");
                 // Tell the Bluetooth service what type of remote we want to use
-                mBluetoothLeService.setRemoteDeviceType(mRemoteDeviceType);
+                bluetoothLeService.setRemoteDeviceType(remoteDeviceType);
                 main_activity.setBrightnessForCamera(false);
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            }
+            else if( BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action) ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "Remote disconnected");
-                mRemoteConnected = false;
+                is_connected = false;
                 applicationInterface.getDrawPreview().onExtraOSDValuesChanged("-- \u00B0C", "-- m");
                 mainUI.updateRemoteConnectionIcon();
                 main_activity.setBrightnessToMinimumIfWanted();
                 if (mainUI.isExposureUIOpen())
                     mainUI.toggleExposureUI();
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+            }
+            else if( BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action) ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "Remote services discovered");
-                /*
-                We let the BluetoothLEService subscribe to what is relevant, so we
-                do nothing here, but we wait until this is done to update the UI
-                icon
-                */
-                mRemoteConnected = true;
+                // We let the BluetoothLEService subscribe to what is relevant, so we
+                // do nothing here, but we wait until this is done to update the UI
+                // icon
+                is_connected = true;
                 mainUI.updateRemoteConnectionIcon();
-            } else if (BluetoothLeService.ACTION_SENSOR_VALUE.equals(action)) {
+            }
+            else if( BluetoothLeService.ACTION_SENSOR_VALUE.equals(action) ) {
                 double temp = intent.getDoubleExtra(BluetoothLeService.SENSOR_TEMPERATURE, -1);
                 double depth = intent.getDoubleExtra(BluetoothLeService.SENSOR_DEPTH, -1) / main_activity.getWaterDensity();
                 depth = (Math.round(depth* 10)) / 10.0; // Round to 1 decimal
@@ -119,10 +120,11 @@ public class BluetoothRemoteControl {
                 String line1 = "" + temp + " \u00B0C";
                 String line2 = "" + depth + " m";
                 applicationInterface.getDrawPreview().onExtraOSDValuesChanged(line1, line2);
-            } else if (BluetoothLeService.ACTION_REMOTE_COMMAND.equals(action)) {
+            }
+            else if( BluetoothLeService.ACTION_REMOTE_COMMAND.equals(action) ) {
                 int command = intent.getIntExtra(BluetoothLeService.EXTRA_DATA, -1);
                 // TODO: we could abstract this into a method provided by each remote control model
-                switch (command) {
+                switch( command ) {
                     case BluetoothLeService.COMMAND_SHUTTER:
                         // Easiest - just take a picture (or start/stop camera)
                         main_activity.takePicture(false);
@@ -130,11 +132,13 @@ public class BluetoothRemoteControl {
                     case BluetoothLeService.COMMAND_MODE:
                         // "Mode" key :either toggles photo/video mode, or
                         // closes the settings screen that is currently open
-                        if (mainUI.popupIsOpen()) {
+                        if( mainUI.popupIsOpen() ) {
                             mainUI.togglePopupSettings();
-                        } else if (mainUI.isExposureUIOpen()) {
+                        }
+                        else if( mainUI.isExposureUIOpen() ) {
                             mainUI.toggleExposureUI();
-                        } else {
+                        }
+                        else {
                             main_activity.clickedSwitchVideo(null);
                         }
                         break;
@@ -142,34 +146,38 @@ public class BluetoothRemoteControl {
                         // Open the exposure UI (ISO/Exposure) or
                         // select the current line on an open UI or
                         // select the current option on a button on a selected line
-                        if (!mainUI.popupIsOpen()) {
-                            if (! mainUI.isExposureUIOpen()) {
+                        if( !mainUI.popupIsOpen() ) {
+                            if( !mainUI.isExposureUIOpen() ) {
                                 mainUI.toggleExposureUI();
-                            } else {
+                            }
+                            else {
                                 mainUI.commandMenuExposure();
                             }
-                        } else {
+                        }
+                        else {
                             mainUI.commandMenuPopup();
                         }
                         break;
                     case BluetoothLeService.COMMAND_UP:
-                        if (!mainUI.processRemoteUpButton()) {
+                        if( !mainUI.processRemoteUpButton() ) {
                             // Default up behaviour:
                             // - if we are on manual focus, then adjust focus.
                             // - if we are on autofocus, then adjust zoom.
-                            if (main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2")) {
+                            if( main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ) {
                                 main_activity.changeFocusDistance(-25, false);
-                            } else {
+                            }
+                            else {
                                 // Adjust zoom
                                 main_activity.zoomIn();
                             }
                         }
                         break;
                     case BluetoothLeService.COMMAND_DOWN:
-                        if (!mainUI.processRemoteDownButton()) {
-                            if (main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2")) {
+                        if( !mainUI.processRemoteDownButton() ) {
+                            if( main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ) {
                                 main_activity.changeFocusDistance(25, false);
-                            } else {
+                            }
+                            else {
                                 // Adjust zoom
                                 main_activity.zoomOut();
                             }
@@ -179,14 +187,15 @@ public class BluetoothRemoteControl {
                         // Open the camera settings popup menu (not the app settings)
                         // or selects the current line/icon in the popup menu, and finally
                         // clicks the icon
-                        //if (!mainUI.popupIsOpen()) {
+                        //if( !mainUI.popupIsOpen() ) {
                         mainUI.togglePopupSettings();
                         //}
                         break;
                     default:
                         break;
                 }
-            } else {
+            }
+            else {
                 if( MyDebug.LOG )
                     Log.d(TAG, "Other remote event");
             }
@@ -196,7 +205,7 @@ public class BluetoothRemoteControl {
     public boolean remoteConnected() {
 		/*if( true )
 			return true; // test*/
-        return mRemoteConnected;
+        return is_connected;
     }
 
     // TODO: refactor for a filter than receives generic remote control intents
@@ -223,21 +232,23 @@ public class BluetoothRemoteControl {
             return;
         }
         Intent gattServiceIntent = new Intent(main_activity, BluetoothLeService.class);
-        if ( remoteEnabled()) {
+        if( remoteEnabled()) {
             if( MyDebug.LOG )
                 Log.d(TAG, "Remote enabled, starting service");
             main_activity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
             main_activity.registerReceiver(remoteControlCommandReceiver, makeRemoteCommandIntentFilter());
-        } else {
+        }
+        else {
             if( MyDebug.LOG )
                 Log.d(TAG, "Remote disabled, stopping service");
             // Stop the service if necessary
-            try{
+            try {
                 main_activity.unregisterReceiver(remoteControlCommandReceiver);
                 main_activity.unbindService(mServiceConnection);
-                mRemoteConnected = false; // Unbinding closes the connection, of course
+                is_connected = false; // Unbinding closes the connection, of course
                 main_activity.getMainUI().updateRemoteConnectionIcon();
-            } catch (IllegalArgumentException e){
+            }
+            catch(IllegalArgumentException e){
                 if( MyDebug.LOG )
                     Log.d(TAG, "Remote Service was not running, that's fine");
             }
@@ -247,14 +258,15 @@ public class BluetoothRemoteControl {
     public void stopRemoteControl() {
         if( MyDebug.LOG )
             Log.d(TAG, "BLE Remote control service shutdown...");
-        if ( remoteEnabled()) {
+        if( remoteEnabled()) {
             // Stop the service if necessary
-            try{
+            try {
                 main_activity.unregisterReceiver(remoteControlCommandReceiver);
                 main_activity.unbindService(mServiceConnection);
-                mRemoteConnected = false; // Unbinding closes the connection, of course
+                is_connected = false; // Unbinding closes the connection, of course
                 main_activity.getMainUI().updateRemoteConnectionIcon();
-            } catch (IllegalArgumentException e){
+            }
+            catch(IllegalArgumentException e){
                 Log.e(TAG, "Remote Service was not running, that's strange");
                 e.printStackTrace();
             }
@@ -273,8 +285,8 @@ public class BluetoothRemoteControl {
         }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         boolean remote_enabled = sharedPreferences.getBoolean(PreferenceKeys.EnableRemote, false);
-        mRemoteDeviceType = sharedPreferences.getString(PreferenceKeys.RemoteType, "undefined");
-        mRemoteDeviceAddress = sharedPreferences.getString(PreferenceKeys.RemoteName, "undefined");
-        return remote_enabled && !mRemoteDeviceAddress.equals("undefined");
+        remoteDeviceType = sharedPreferences.getString(PreferenceKeys.RemoteType, "undefined");
+        remoteDeviceAddress = sharedPreferences.getString(PreferenceKeys.RemoteName, "undefined");
+        return remote_enabled && !remoteDeviceAddress.equals("undefined");
     }
 }
