@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Beállítások</string>
     <string name="action_popup">Felugró beállítások</string>
-    <string name="intro_text">Érintéssel állíthatsz élességet, és a kék kamera gombbal tudsz fényképezni. További segítséget a beállítások online súgójában találsz. Az Open Camera teljesen ingyenes. Ha tetszik az alkalmazás, kérlek fontold meg az adományozói verzió megvásárlását :) (lásd a hivatkozást a Beállításokban és az online súgóban). \ N \ nAdatvédelmi feltételek: A helymeghatározás a fényképek geokódolásához szükséges, de alapértelmezésben le van tiltva. Ha engedélyezed, a kép készítésének helye bele lesz mentve a fájlokba (és semmi másra nem lesz használva).</string>
+    <string name="intro_text">Érintéssel állíthatsz élességet, és a kék kamera gombbal tudsz fényképezni. További segítséget a beállítások online súgójában találsz. Az Open Camera teljesen ingyenes. Ha tetszik az alkalmazás, kérlek fontold meg az adományozói verzió megvásárlását :) (lásd a hivatkozást a Beállításokban és az online súgóban).</string>
     <string name="intro_ok">OK (Ez az üzenet nem jelenik meg újra)</string>
 
     <string name="on">Be</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->

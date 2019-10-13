@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Nastavitve</string>
     <string name="action_popup">Nastavitve pojavnih oken</string>
-    <string name="intro_text">Dotaknite se za ostrenje in pritisnite moder gumb za slikanje fotografij. Za več pomoči kliknite Spletna pomoč v nastavitvah. Open Camera je popolnoma brezplačen. Če vam je ta program všeč, prosim razmislite o nakupu mojega programa za darovanje :) (glejte povezavo v nastavitvah ali spletno pomoč).\n\nPravilnik o zasebnosti: za označevanje z zemljepisnim položajem je zahtevano dovoljenje za lokacijo, vendar je to privzeto onemogočeno. Če je omogočeno, se vaša lokacija v shranjenih datotekah kodira (in se uporablja samo za ta namen).</string>
+    <string name="intro_text">Dotaknite se za ostrenje in pritisnite moder gumb za slikanje fotografij. Za več pomoči kliknite Spletna pomoč v nastavitvah. Open Camera je popolnoma brezplačen. Če vam je ta program všeč, prosim razmislite o nakupu mojega programa za darovanje :) (glejte povezavo v nastavitvah ali spletno pomoč).</string>
     <string name="intro_ok">V redu (to sporočilo se ne bo več prikazovalo)</string>
 
     <string name="on">Vkl.</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->

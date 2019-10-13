@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Einstellungen</string>
     <string name="action_popup">Popup-Einstellungen</string>
-    <string name="intro_text">Zum Fokussieren das Display berühren und den blauen Button drücken um Fotos zu machen. Mehr Hilfe erhalten Sie über Einstellungen-&gt;Online-Hilfe. Open Camera ist vollkommen frei. Wenn Sie diese App mögen, wäre es schön, wenn Sie meine Spenden-App kaufen :) (Link hierzu in den Einstellungen oder der Online-Hilfe)\n\nDatenschutz: Der Standortzugriff wird für das Geotagging gebraucht, was jedoch standardmäßig deaktiviert ist. Wenn aktiviert, wird Ihr Standort lediglich in den Aufnahmen gespeichert.</string>
+    <string name="intro_text">Zum Fokussieren das Display berühren und den blauen Button drücken um Fotos zu machen. Mehr Hilfe erhalten Sie über Einstellungen-&gt;Online-Hilfe. Open Camera ist vollkommen frei. Wenn Sie diese App mögen, wäre es schön, wenn Sie meine Spenden-App kaufen :) (Link hierzu in den Einstellungen oder der Online-Hilfe)</string>
     <string name="intro_ok">OK (Diese Nachricht wird nicht wieder angezeigt.)</string>
 
     <string name="on">Ein</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->

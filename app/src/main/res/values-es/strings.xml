@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Ajustes</string>
     <string name="action_popup">Ajustes de ventana emergente</string>
-    <string name="intro_text">Toque para enfocar y presione el botón azul de la cámara para tomar fotos. Para obtener más ayuda, haga clic en Ayuda en línea desde Ajustes. Open Camera es completamente gratuito. Si te gusta esta aplicación, por favor considera comprar mi aplicación de donación :) (encuentra el enlace en Ajustes/Ayuda en línea).\n\nPolítica de privacidad: El permiso de ubicación es necesario para geoetiquetado, pero está desactivado de forma predeterminada. Si lo activa, su ubicación se codifica en los archivos guardados (y sólo se utiliza para este propósito).</string>
+    <string name="intro_text">Toque para enfocar y presione el botón azul de la cámara para tomar fotos. Para obtener más ayuda, haga clic en Ayuda en línea desde Ajustes. Open Camera es completamente gratuito. Si te gusta esta aplicación, por favor considera comprar mi aplicación de donación :) (encuentra el enlace en Ajustes/Ayuda en línea).</string>
     <string name="intro_ok">OK (Este mensaje no se mostrará de nuevo)</string>
 
     <string name="on">Encendido</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->

@@ -3,7 +3,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Parametrlər</string>
     <string name="action_popup">Popup parametrləri</string>
-    <string name="intro_text">Şəkil çəkmək üçün fokusa və göy rəngli kamera düyməsinə toxunun. Daha çox kömək üçün, Parametrlərdə Onlayın köməyə toxunun. Open Camera tamamilə pulsuzdur. Əgər proqram xoşunuza gəlirsə, lütfən mənim proqramımı alaraq ianə vermək barədə düşünün :) (Parametrlərə və ya onlayn köməyə baxın).\n\nMəxfilik Siyasəti: Coğrafi yer bildirişi üçün icazə tələb olunur, lakin susmaya görə bu funksiya bağlıdır. Əgər işə salınarsa, sizin məkan məlumatlarınız saxlanılan fayllarda kodlaşacaq (və o ancaq bu məqsəd üçün istifadə olunur).</string>
+    <string name="intro_text">Şəkil çəkmək üçün fokusa və göy rəngli kamera düyməsinə toxunun. Daha çox kömək üçün, Parametrlərdə Onlayın köməyə toxunun. Open Camera tamamilə pulsuzdur. Əgər proqram xoşunuza gəlirsə, lütfən mənim proqramımı alaraq ianə vermək barədə düşünün :) (Parametrlərə və ya onlayn köməyə baxın).</string>
     <string name="intro_ok">OK (Bu mesaj bir daha göstərilməyəcək)</string>
     <string name="on">Aç</string>
     <string name="off">Bağla</string>

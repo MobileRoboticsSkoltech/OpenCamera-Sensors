@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Paramètres</string>
     <string name="action_popup">Fenêtre de paramètres</string>
-    <string name="intro_text">Touchez pour faire la mise au point, et appuyez sur le bouton bleu «\u00A0Appareil photo\u00A0» pour faire des photos. Pour de l\'aide supplémentaire, cliquez sur «\u00A0Aide en ligne\u00A0» dans les paramètres. Open Camera est totalement gratuit. Si vous aimez cette application, n\'hésitez pas à me faire un don\u00A0:) (voir le lien dans «\u00A0Paramètres\u00A0», ou «\u00A0Aide en ligne\u00A0».\nPolitique de confidentialité\u00A0: la permission «\u00A0Position\u00A0» est requise pour géolocaliser la photo, mais le paramètre est désactivé par défaut. Si vous l\'activez, votre position est encodée dans les photos (et n\'est utilisée qu\'à cet effet).</string>
+    <string name="intro_text">Touchez pour faire la mise au point, et appuyez sur le bouton bleu «\u00A0Appareil photo\u00A0» pour faire des photos. Pour de l\'aide supplémentaire, cliquez sur «\u00A0Aide en ligne\u00A0» dans les paramètres. Open Camera est totalement gratuit. Si vous aimez cette application, n\'hésitez pas à me faire un don\u00A0:) (voir le lien dans «\u00A0Paramètres\u00A0», ou «\u00A0Aide en ligne\u00A0».</string>
     <string name="intro_ok">OK (ce message ne s\'affichera plus)</string>
 
     <string name="on">Actif</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
