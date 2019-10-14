@@ -859,7 +859,7 @@ public class MainActivity extends Activity {
         editor.apply();
     }
 
-    static String getOnlineHelpUrl(String append) {
+    private static String getOnlineHelpUrl(String append) {
         if( MyDebug.LOG )
             Log.d(TAG, "getOnlineHelpUrl: " + append);
         // if we change this, remember that any page linked to must abide by Google Play developer policies!
