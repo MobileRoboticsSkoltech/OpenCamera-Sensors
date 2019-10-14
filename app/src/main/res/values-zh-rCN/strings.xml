@@ -751,7 +751,6 @@
     <string name="preference_remote_type_kraken">Kraken智能家居</string>
 
     <string name="preference_stamp_geo_address">使用地址</string>
-    <string name="preference_stamp_geo_address_summary">尽可能使用地址来标记GPS位置。这需要访问互联网。\n%s</string>
     <string name="preference_stamp_geo_address_both">尽量显示地址和坐标</string>
     <string name="preference_stamp_geo_address_prefer">GPS坐标优先</string>
     <string name="preference_stamp_geo_address_no">不显示地址</string>

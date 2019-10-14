@@ -802,7 +802,7 @@
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
     <string name="preference_stamp_geo_address">Use addresses</string>
-    <string name="preference_stamp_geo_address_summary">If possible, use an address when stamping GPS locations. This option requires an Internet connection.\n%s</string>
+    <!-- preference_stamp_geo_address_summary defined below -->
     <string name="preference_stamp_geo_address_both">Display address if possible, in addition to GPS coords</string>
     <string name="preference_stamp_geo_address_prefer">Prefer address to GPS coords</string>
     <string name="preference_stamp_geo_address_no">Don\'t display address</string>
@@ -895,6 +895,12 @@
         When enabled, use the on-screen microphone button to start/stop listening.
         Note the voice command option uses Android\'s speech recognition service: when using this option, audio data is likely to
         be sent to remote servers to perform speech recognition.
+        \n%s</string>
+
+    <string name="preference_stamp_geo_address_summary">If possible, use an address when stamping GPS locations.
+        This option requires an Internet connection.
+        Note that if enabled, this requires that your device transmits location data across the Internet to a third party
+        in order to convert GPS coordinates to an address. See https://developer.android.com/reference/android/location/Geocoder .
         \n%s</string>
 
     <!-- The following strings should not be translated (in case they need updating) -->

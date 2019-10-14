@@ -756,7 +756,6 @@
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
     <string name="preference_stamp_geo_address">Verwende Adressen</string>
-    <string name="preference_stamp_geo_address_summary">Wenn möglich, verwende Adressdaten wenn die GPS-Position ins Bild gestempelt wird. Diese Option benötigt eine Internetverbindung.\n%s</string>
     <string name="preference_stamp_geo_address_both">Zeige zusätzlich zur GPS-Position die zugehörige Adresse an</string>
     <string name="preference_stamp_geo_address_prefer">Bevorzuge Adressdaten vor GPS-Koordinaten</string>
     <string name="preference_stamp_geo_address_no">Zeige keine Adressdaten an</string>

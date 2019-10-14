@@ -801,7 +801,6 @@
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
     <string name="preference_stamp_geo_address">Использовать адреса</string>
-    <string name="preference_stamp_geo_address_summary">По возможности использовать адрес при выставлении штампа с местоположением по GPS. Для данной настройки требуется подключение к Интернету.\n%s</string>
     <string name="preference_stamp_geo_address_both">По возможности показывать адреса вместе с GPS-координатами</string>
     <string name="preference_stamp_geo_address_prefer">Предпочитать адреса GPS-координатам</string>
     <string name="preference_stamp_geo_address_no">Не показывать адреса</string>
