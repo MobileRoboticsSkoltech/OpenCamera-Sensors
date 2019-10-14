@@ -905,7 +905,7 @@
         Microphone is also used for the optional \"Audio control\".
         Access to files is needed to save resultant photos and videos to your device.
         Location permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
-        Please tap here for online privacy policy.
+        Please tap here to open the online privacy policy in your browser.
     </string>
 
     <string name="speech_recognizer_extra_info">
@@ -919,7 +919,7 @@
     <string name="preference_licence_google_icons">Google\'s Material Design icons</string>
     <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons (https://developer.android.com/design/downloads/index.html, https://github.com/google/material-design-icons/, https://design.google.com/icons/) under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
     <string name="preference_licence_online">Online licences</string>
-    <string name="preference_licence_online_text">Please tap here for full online licensing information.</string>
+    <string name="preference_licence_online_text">Please tap here for full online licensing information (opens in your browser).</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
