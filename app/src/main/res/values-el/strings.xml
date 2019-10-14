@@ -107,7 +107,6 @@
     <string name="preference_shutter_sound_summary">Αναπαραγωγή ήχου κατά την λήψη φωτογραφίας</string>
     <string name="preference_volume_keys">Πλήκτρα ρύθμισης ήχου</string>
     <string name="preference_audio_control">Ρυθμίσεις ελέγχου του ήχου</string>
-    <string name="preference_audio_control_summary">Κατά την λήψη φωτογραφίας η εγγραφή βίντεο, όταν ένας θόρυβος εντοπίζετε, ακούγεται μια φωνητική εντολή (\"cheese\"). Όταν είναι ενεργοποιημένη, χρησιμοποιήστε στην οθόνη, το πλήκτρο μικροφώνου για να ξεκινήσει και να σταματήσει.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     <string name="preference_audio_noise_control_sensitivity">Ευαισθησία ελέγχου του ήχου</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Επίπεδο θορύβου ευαισθησίας για τον ήχο</string>
     <string name="preference_save_location">Χώρος αποθήκευσης</string>

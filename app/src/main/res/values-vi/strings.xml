@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Phát âm thanh khi chụp ảnh</string>
     <string name="preference_volume_keys">Phím âm lượng</string>
     <string name="preference_audio_control">Chụp bằng tiếng</string>
-    <string name="preference_audio_control_summary">Chụp ảnh hoặc quay video khi phát hiện tiếng động lớn hoặc tiếng cheese. Khi kích hoạt, hãy sử dụng nút micrô trên màn hình để bắt đầu và tạm dừng nghe.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     <string name="preference_audio_noise_control_sensitivity">Độ nhạy chụp bằng tiếng</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Độ nhạy cho tùy chọn chụp bằng tiếng động lớn</string>
     <string name="preference_save_location">Vị trí lưu</string>

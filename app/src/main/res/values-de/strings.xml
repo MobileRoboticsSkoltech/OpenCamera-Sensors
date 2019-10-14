@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Abspielen eines Tones bei der Aufnahme (benötigt Android 4.2 oder höher zum Deaktivieren)</string>
     <string name="preference_volume_keys">Lautstärketasten</string>
     <string name="preference_audio_control">Audio Steuerungsoptionen</string>
-    <string name="preference_audio_control_summary">Nimm ein Foto nach einem lauten Geräusch oder Sprachkommando (\"cheese\") auf. When akktiviert, benutze den OnScreen Mikrofone Knopf um die Funktion zu (de)aktivieren.</string>
     <string name="preference_audio_noise_control_sensitivity">Audio Steuerung Empfindlichkeit</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Mikroempfindlichkeit für lautes Geräusch</string>
     <string name="preference_save_location">Speicherort</string>

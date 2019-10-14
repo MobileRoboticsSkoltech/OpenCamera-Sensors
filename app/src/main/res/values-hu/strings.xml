@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Hang lejátszása fotózáskor</string>
     <string name="preference_volume_keys">Hangerő gombok</string>
     <string name="preference_audio_control">Hangvezérlési lehetőségek</string>
-    <string name="preference_audio_control_summary">Fotó, vagy videó készítése zajra, vagy hangjelzésre (pl. \"csíz\"). Ha engedélyezve van, használd a képernyőn megjelenő mikrofon gombot a figyelés indításához és leállításához.</string>
     <string name="preference_audio_noise_control_sensitivity">Hangvezérlés érzékenysége</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Hangvezérlés zajszintérzékenysége</string>
     <string name="preference_save_location">Mentés helye</string>

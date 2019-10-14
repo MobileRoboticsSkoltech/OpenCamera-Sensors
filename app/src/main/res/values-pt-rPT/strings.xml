@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Reproduzir um som quando for tirada uma fotografia</string>
     <string name="preference_volume_keys">Teclas de volume</string>
     <string name="preference_audio_control">Opções de controlo por áudio</string>
-    <string name="preference_audio_control_summary">Tirar fotografia ou gravar vídeo quando for detetado ruído, ou no comando por voz (\"cheese\"). Quando ativado, utilize o botão de microfone no ecrã para iniciar ou terminar a escuta.</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilidade do controlo por áudio</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Definir a sensibilidade do nível de ruído do áudio (ruído alto)</string>
     <string name="preference_save_location">Local de armazenamento</string>

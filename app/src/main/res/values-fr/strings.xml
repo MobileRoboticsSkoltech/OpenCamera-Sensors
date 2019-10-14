@@ -107,7 +107,6 @@
     <string name="preference_shutter_sound_summary">Jouer un son lorsque vous prenez une photo (nécessite Android 4.2 ou supérieur pour désactiver)</string>
     <string name="preference_volume_keys">Touches de volumes</string>
     <string name="preference_audio_control">Option contrôle audio</string>
-    <string name="preference_audio_control_summary">Prend une photo ou une vidéo quand un bruit est détecté, ou sur commande vocale («\u00A0cheese\u00A0»). Si activé alors utilisez le bouton micro pour démarrer/stopper la détection.</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilité contrôle audio</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Niveau de la sensibilité sonore pour l\'option contrôle audio (bruit fort)</string>
     <string name="preference_save_location">Dossier de stockage</string>

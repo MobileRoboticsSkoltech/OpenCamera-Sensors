@@ -107,7 +107,6 @@
     <string name="preference_shutter_sound_summary">Odtwarza dźwięk podczas wykonywania zdjęcia</string>
     <string name="preference_volume_keys">Klawisze głośności</string>
     <string name="preference_audio_control">Aktywacja za pomocą dźwięków</string>
-    <string name="preference_audio_control_summary">Wykonuje zdjęcie lub nagrywa film po wykryciu dźwięku lub komendy głosowej (\"cheese\"). Jeśli włączone, użyj ikony mikrofonu w celu rozpoczęcia nasłuchu</string>
     <string name="preference_audio_noise_control_sensitivity">Wrażliwość sterowania dźwiękiem</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Poziom wrażliwości na dźwięki aktywujące aparat</string>
     <string name="preference_save_location">Lokalizacja zapisu</string>

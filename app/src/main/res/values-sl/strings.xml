@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Predvajaj zvok ob slikanju fotografije</string>
     <string name="preference_volume_keys">Gumba za glasnost</string>
     <string name="preference_audio_control">Možnosti nadzora zvoka</string>
-    <string name="preference_audio_control_summary">Posnemi fotografijo ali videoposnetek ob zaznavanju zvoka ali glasovnemu ukazu (\"cheese\"). Ko je omogočeno, uporabite gumb mikrofona na zaslonu za začetek in ustavitev poslušanja.</string>
     <string name="preference_audio_noise_control_sensitivity">Nadzor občutljivosti zvoka</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Možnost občutljivosti ravni šuma za zvok (glasen šum)</string>
     <string name="preference_save_location">Mesto za shranjevanje</string>

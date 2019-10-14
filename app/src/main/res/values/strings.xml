@@ -108,7 +108,7 @@
     <string name="preference_shutter_sound_summary">Play a sound when taking a photo</string>
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_audio_control">Audio control options</string>
-    <string name="preference_audio_control_summary">Take photo or record video when a noise is detected, or on a voice command (\"cheese\"). When enabled, use the on-screen microphone button to start and stop listening.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    <!-- preference_audio_control_summary defined below -->
     <string name="preference_audio_noise_control_sensitivity">Audio control sensitivity</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Noise level sensitivity for audio (loud noise) option</string>
     <string name="preference_save_location">Save location</string>
@@ -891,6 +891,12 @@
     <string name="preference_camera_api_old">Original camera API</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
+    <string name="preference_audio_control_summary">Take photo/video when a noise is detected, or on voice command.
+        When enabled, use the on-screen microphone button to start/stop listening.
+        Note the voice command option uses Android\'s speech recognition service: when using this option, audio data is likely to
+        be sent to remote servers to perform speech recognition.
+        \n%s</string>
+
     <!-- The following strings should not be translated (in case they need updating) -->
 
     <string name="preference_privacy_policy">Privacy policy</string>
@@ -901,6 +907,11 @@
         Location permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
         Please tap here for online privacy policy.
     </string>
+
+    <string name="speech_recognizer_extra_info">
+        (Your audio may be sent to remote\n
+        servers by Android to perform speech\n
+        recognition.)</string>
 
     <string name="preference_screen_licences">Open Source licences</string>
     <string name="preference_licence_open_camera">Open Camera</string>

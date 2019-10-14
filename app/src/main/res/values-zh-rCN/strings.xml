@@ -107,7 +107,6 @@
     <string name="preference_shutter_sound_summary">拍照时播放声音(需要 Android 4.2 或更高才能禁用)</string>
     <string name="preference_volume_keys">音量键功能</string>
     <string name="preference_audio_control">语音识别</string>
-    <string name="preference_audio_control_summary">当检测到声音，或者在收到语音命令(\"cheese\")时拍照或录像。启用此功能后，可以通过点击屏幕上的麦克风启动和停止识别语音。</string> <!-- symbol short for megabytes -->
     <string name="preference_audio_noise_control_sensitivity">麦克风灵敏度</string>
     <string name="preference_audio_noise_control_sensitivity_summary">使用语音识别时麦克风过滤噪声的阈值</string>
     <string name="preference_save_location">保存位置</string>

@@ -107,7 +107,6 @@
     <string name="preference_shutter_sound_summary">Emette un suono quando scatta una foto (richiede Android 4.2 o versioni superiori per disabilitarlo)</string>
     <string name="preference_volume_keys">Tasti volume</string>
     <string name="preference_audio_control">Opzioni controllo Audio</string>
-    <string name="preference_audio_control_summary">Scatta foto o registra video non appena viene rilevato un rumore o un comando vocale (\"cheese\"). Se abilitato, usa il bottone del Microfono sullo schermo per iniziare e terminare l\'ascolto.</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilità controllo Audio</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Opzione per sensibilità del livello di rumore per il controllo audio (forte rumore)</string>
     <string name="preference_save_location">Posizione di salvataggio</string>

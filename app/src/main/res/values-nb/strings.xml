@@ -108,7 +108,6 @@
     <string name="preference_shutter_sound_summary">Spill av en lyd når du tar et bilde.</string>
     <string name="preference_volume_keys">Volumknapper</string>
     <string name="preference_audio_control">Lydkontrollalternativer</string>
-    <string name="preference_audio_control_summary">Ta et bilde eller ta opp video når lyder blir oppdager, eller ved en stemmekommande (\"Cheese!\"). Når det er aktivert, bruk mikrofonknappen på skjermen til å begynne og slutte å lytte.</string>
     <string name="preference_audio_noise_control_sensitivity">Lydkontrollsensitivitet</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Innstillingen for støynivåsensitiviteten for lyd (Høy støy)</string>
     <string name="preference_save_location">Lagringsplasseringen</string>
