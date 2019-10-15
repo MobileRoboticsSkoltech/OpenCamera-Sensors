@@ -932,7 +932,12 @@
     <string name="preference_licence_open_camera">Open Camera</string>
     <string name="preference_licence_open_camera_text">Open Camera is © 2013–2019 Mark Harman, released under the GPL v3 or later. Tap here for full licence text.</string>
     <string name="preference_licence_google_icons">Google\'s Material Design icons</string>
-    <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons (https://developer.android.com/design/downloads/index.html, https://github.com/google/material-design-icons/, https://design.google.com/icons/) under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
+    <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons
+        (https://developer.android.com/design/downloads/index.html ,
+        https://design.google.com/icons/ ,
+        https://github.com/google/material-design-icons/ ,
+        https://google.github.io/material-design-icons/)
+        under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
     <string name="preference_licence_online">Online licences</string>
     <string name="preference_licence_online_text">Please tap here for full online licensing information (opens in your browser).</string>
 
