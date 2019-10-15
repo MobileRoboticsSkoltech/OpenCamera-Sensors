@@ -1586,7 +1586,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 @Override
                 public void onDismiss(DialogInterface arg0) {
                     if( MyDebug.LOG )
-                        Log.d(TAG, "calibration dialog dismissed");
+                        Log.d(TAG, "text dialog dismissed");
                     dialogs.remove(alert);
                 }
             });
