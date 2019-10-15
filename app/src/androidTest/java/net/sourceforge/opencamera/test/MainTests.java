@@ -68,6 +68,7 @@ public class MainTests {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistory"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistorySAF"));
         }
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSettingsPrivacyPolicy"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPreviewRotation"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCameraModes"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFailOpenCamera"));

@@ -2075,7 +2075,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private MyPreferenceFragment getPreferenceFragment() {
+    public MyPreferenceFragment getPreferenceFragment() {
         return (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
     }
 

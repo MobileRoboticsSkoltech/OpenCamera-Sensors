@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.MyPreferenceFragment;
 import net.sourceforge.opencamera.PanoramaProcessorException;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
@@ -8986,6 +8987,30 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         clickView(settingsButton);
         this.getInstrumentation().waitForIdleSync();
         assertTrue(mActivity.isCameraInBackground());
+    }
+
+    /* Tests going to settings and opening the privacy policy window.
+     */
+    public void testSettingsPrivacyPolicy() throws InterruptedException {
+        Log.d(TAG, "testSettingsPrivacyPolicy");
+        setToDefault();
+
+        assertFalse(mActivity.isCameraInBackground());
+        View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+        clickView(settingsButton);
+        this.getInstrumentation().waitForIdleSync();
+        assertTrue(mActivity.isCameraInBackground());
+        Thread.sleep(500);
+
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                MyPreferenceFragment fragment = mActivity.getPreferenceFragment();
+                assertNotNull(fragment);
+                fragment.clickedPrivacyPolicy();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+        Thread.sleep(1000);
     }
 
     /* Tests save and load settings.
