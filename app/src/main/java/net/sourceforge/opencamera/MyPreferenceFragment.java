@@ -795,9 +795,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     if( pref.getKey().equals("preference_privacy_policy") ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked privacy policy");
-                        MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-                        main_activity.launchOnlinePrivacyPolicy();
-                        return false;
+
+                        clickedPrivacyPolicy();
                     }
                     return false;
                 }
@@ -1534,6 +1533,41 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }
+    }
+
+    /* The user clicked the privacy policy preference.
+     */
+    public void clickedPrivacyPolicy() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedPrivacyPolicy()");
+        /*MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+        main_activity.launchOnlinePrivacyPolicy();*/
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+        alertDialog.setTitle(R.string.preference_privacy_policy);
+        alertDialog.setMessage(R.string.preference_privacy_policy_text);
+        alertDialog.setPositiveButton(android.R.string.ok, null);
+        alertDialog.setNegativeButton(R.string.preference_privacy_policy_online, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "online privacy policy");
+                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                main_activity.launchOnlinePrivacyPolicy();
+            }
+        });
+        final AlertDialog alert = alertDialog.create();
+        // AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface arg0) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "reset dialog dismissed");
+                dialogs.remove(alert);
+            }
+        });
+        alert.show();
+        dialogs.add(alert);
     }
 
     /* Displays a dialog with text loaded from a file in assets.

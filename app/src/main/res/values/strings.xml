@@ -906,12 +906,21 @@
     <!-- The following strings should not be translated (in case they need updating) -->
 
     <string name="preference_privacy_policy">Privacy policy</string>
-    <string name="preference_privacy_policy_text"> <!-- shouldn't be translated (in case it needs updating) -->
+    <string name="preference_privacy_policy_summary">Tap to display privacy policy</string>
+    <string name="preference_privacy_policy_online">Online privacy policy</string>
+    <string name="preference_privacy_policy_text"> <!-- if changing this, remember to consider if the online privacy policy needs updating -->
         Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
         Microphone is also used for the optional \"Audio control\".
-        Access to files is needed to save resultant photos and videos to your device.
-        Location permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
-        Please tap here to open the online privacy policy in your browser.
+        \nAccess to files is needed to save resultant photos and videos to your device.
+        \nLocation permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
+        \nSince Open Camera also uses operating system APIs, you should review relevant privacy policies
+        such as for your device, manufacturer, operating system and/or Google accounts. For example:
+        \n*The optional voice control option uses Android\'s speech recognition service. When enabled,
+        audio data is likely to be sent to remote servers by Android to perform speech recognition.
+        \n*The \"addresses\" option for photo stamp or video subtitles uses Android\'s Geocoder API, which
+        requires your device transmits location data across the Internet to a third party (which may
+        depend on what "backend services" are installed on your device).
+        \n*Apps/services such as cloud services on your device may auto-upload photos and videos that are saved on your device.
     </string>
 
     <string name="speech_recognizer_extra_info">
