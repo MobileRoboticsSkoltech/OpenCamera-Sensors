@@ -489,7 +489,7 @@ public class MainActivity extends Activity {
                         alertDialog.setTitle(R.string.whats_new);
                         alertDialog.setMessage(R.string.whats_new_text);
                         alertDialog.setPositiveButton(android.R.string.ok, null);
-                        alertDialog.setNegativeButton(R.string.donate, new DialogInterface.OnClickListener() {
+                        /*alertDialog.setNegativeButton(R.string.donate, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if( MyDebug.LOG )
@@ -498,7 +498,7 @@ public class MainActivity extends Activity {
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.DonateLink));
                                 startActivity(browserIntent);
                             }
-                        });
+                        });*/
                         alertDialog.show();
                     }
                 }
