@@ -1013,7 +1013,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
-        {
+        /*{
             final Preference pref = findPreference("preference_donate");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
@@ -1021,17 +1021,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     if( pref.getKey().equals("preference_donate") ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked to donate");
-            	        /*Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateMarketLink()));
-            	        try {
-            	        	startActivity(browserIntent);
-            	        }
-            			catch(ActivityNotFoundException e) {
-            				// needed in case market:// not supported
-            				if( MyDebug.LOG )
-            					Log.d(TAG, "can't launch market:// intent");
-                	        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
-            	        	startActivity(browserIntent);
-            			}*/
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.DonateLink));
                         startActivity(browserIntent);
                         return false;
@@ -1039,7 +1028,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     return false;
                 }
             });
-        }
+        }*/
 
         {
             final Preference pref = findPreference("preference_about");

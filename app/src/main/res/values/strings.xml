@@ -893,7 +893,7 @@
 
     <string name="preference_audio_control_summary">Take photo/video when a noise is detected, or on voice command.
         When enabled, use the on-screen microphone button to start/stop listening.
-        Note the voice command option uses Android\'s speech recognition service: when using this option, audio data is likely to
+        Note the voice command option uses the Android speech recognition service: when using this option, audio data is likely to
         be sent to remote servers to perform speech recognition.
         \n%s</string>
 
@@ -915,9 +915,9 @@
         \nLocation permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
         \nSince Open Camera also uses operating system APIs, you should review relevant privacy policies
         such as for your device, manufacturer, operating system and/or Google accounts. For example:
-        \n*The optional voice control option uses Android\'s speech recognition service. When enabled,
+        \n*The optional voice control option uses the Android speech recognition service. When enabled,
         audio data is likely to be sent to remote servers by Android to perform speech recognition.
-        \n*The \"addresses\" option for photo stamp or video subtitles uses Android\'s Geocoder API, which
+        \n*The \"addresses\" option for photo stamp or video subtitles uses the Android Geocoder API, which
         requires your device transmits location data across the Internet to a third party (which may
         depend on what "backend services" are installed on your device).
         \n*Apps/services such as cloud services on your device may auto-upload photos and videos that are saved on your device.

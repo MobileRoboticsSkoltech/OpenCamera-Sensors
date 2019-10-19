@@ -47,7 +47,7 @@
 
 <p>&lt; <small><a href="index.html">Main Page.</a></small></p>
 
-<p>This page provides some guidance on compatibility of various Android devices with Open Camera. Please note the following:</p>
+<p>This page provides some guidance on possible issues of Open Camera on various Android&trade; devices. Please note the following:</p>
 <ul>
         <li>Sometimes behaviour can be affected by things like operating system version or can differ between variants of the same
                 model. Behaviour may also change over time depending on different versions of Open Camera, and different
@@ -69,8 +69,8 @@
                 all.</li>
         <li>If you're wanting to save to external SD cards, you'll need to follow the advice at
                 <a href="http://opencamera.org.uk/help.html#faq">the FAQ</a> . Note that in some cases, it seems that SD cards
-                can't be selected even when using the Storage Access Framework option - this is an operating system issue, and
-                something out of my control (due to the way Google have locked down on SD cards). If you're wanting to have lots
+                can't be selected even when using the Storage Access Framework option - this is a device issue, and
+                something out of my control. If you're wanting to have lots
                 of storage for taking photos or videos, it's probably better to make sure you get a device with plenty of
                 internal storage (internal storage is faster anyway, so means faster taking of photos, and more reliable high
                 resolution video recording).</li>
@@ -92,8 +92,7 @@
 
 <p>In general, Google Nexuses have worked well for Open Camera. Firstly because Google provide good support for their own
         Android camera API, both old and Camera2 (as you'd hope!) - and they use it for their own Google camera. Secondly because
-        I've owned several Nexuses (Galaxy Nexus, Nexus 7, Nexus 6), and so have been able to test Open Camera against them.
-        That's not to say they're bug free (exposure lock has sometimes been flaky for example).</p>
+        I've owned several Nexuses (Galaxy Nexus, Nexus 7, Nexus 6), and so have been able to test Open Camera against them.</p>
 
 <p>Camera2 on the Nexus 6 works well (there are some minor issues, e.g., manual exposure doesn't work well when recording
         video). It's hard to be sure about other Nexuses though.</p>
@@ -113,9 +112,9 @@ seem to work including Camera2 features. Open Camera also supports Google's HDR+
 
 <h3>Lenovo Vibe S1</h3>
 
-<p>A special prize goes to this device - several people have told me they can't even install Open Camera (error 504 from
-        Google Play) on at least some versions of this device. This appears to be due to a pre-installed app "Stereo Verify"
-        that uses Open Camera's package name (net.sourceforge.opencamera), which prevents installation of Open Camera.
+<p>A special prize goes to this device - several people have told me they can't even install Open Camera (Google Play
+        gives error 504) on at least some versions of this device. This appears to be due to a pre-installed app "Stereo Verify"
+        that clashes with Open Camera's package name (net.sourceforge.opencamera), which prevents installation of Open Camera.
         Also see
         <a href="http://forum.xda-developers.com/vibe-p1/help/stereo-verify-t3454811">here</a> for further discussion.</p>
 

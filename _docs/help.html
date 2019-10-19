@@ -286,7 +286,7 @@ a dash will be shown through the gps icon.</p>
 
 <p><a name="auto_stabilise"><b>Auto-level feature</b></a></p>
 
-<p>All Android cameras will rotate the photo depending on the orientation of the camera, but only to the nearest 90 degrees - so the
+<p>All mobile phone cameras will rotate the photo depending on the orientation of the camera, but only to the nearest 90 degrees - so the
 photos look right whether you hold the device in "portrait" or "landscape" mode. But Open Camera has the option to rotate the
 photos so they are perfectly level, so your shots come out looking perfectly level every time!</p>
 
@@ -369,7 +369,7 @@ to reduce the problem, but this isn't perfect.</li>
 <li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
 being taken.</li>
 <li>HDR can sometimes result in less accurate color reproduction (due to trying to estimate the colors from multiple exposures).</li>
-<li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
+<li>Some camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
 unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
 apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
 <li>If you have a Google Pixel with Pixel Visual Core, you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
@@ -513,9 +513,8 @@ key to focus, then both to take a photo.</li>
 by making a noise. An on-screen microphone button <img src="ic_mic_white_48dp.png" alt="Microphone icon" width="32" height="32"> will appear, to
 start/stop listening. The "loud noise" option will listen for any noise (so you can remotely take a photo by saying "cheese",
 whistling, or whatever you prefer). Note that leaving the listening turned on may use additional battery. The "voice command" option
-listens specifically for saying "cheese" - so this has the advantage that it's less likely to be triggered unintentionally, but
-the downside is that in voice command mode, listening is limited to only a few seconds (this is a restriction of speech recognition
-in Android apps). Note that this can't be used to stop video recording - if you want to have some remote control on video recording,
+listens specifically for saying "cheese" - so this has the advantage that it's less likely to be triggered unintentionally.
+Note that this can't be used to stop video recording - if you want to have some remote control on video recording,
 see the "Max duration of video" option.</p>
 
 <p><b>Audio control sensitivity</b> - This controls how sensitive Open Camera is to noises, if "Audio control" is set to "Loud noise".
@@ -536,11 +535,11 @@ be in portrait. This option allows fixing the camera to either be in portrait or
 displayed folder. Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some
 folders that cannot be written to - Open Camera will display a message if you try to use one of these folders. Once
 you have specified a new save location, you can long press on the Gallery icon to quickly switch between recent save
-locations. Note that if "Use Storage Access Framework" is selected, this option will instead show up Android's standard
+locations. Note that if "Use Storage Access Framework" is selected, this option will instead show up the Android standard
 file chooser - navigate to the desired folder, and click "SELECT". If you want to save to an SD card, see "How can I
 save to my external SD card?" under the <a href="#faq">FAQ</a>.</p>
 
-<p><b>Use Storage Access Framework</b> - If selected, Open Camera will instead use Android's
+<p><b>Use Storage Access Framework</b> - If selected, Open Camera will instead use the Android
 <a href="https://developer.android.com/guide/topics/providers/document-provider.html">Storage Access Framework</a>. This
 has some advantages, such as using the standard Android file picker, and being the only way to save to SD cards on Android 5
 - though it may be slightly slower to take photos. (Requires Android 5.0 or higher.)</p>
@@ -697,8 +696,8 @@ default behaviour).</p>
 <p><b>Immersive mode</b> - Allows you to choose between various modes which affect the behaviour of the user-interface, in order to
 make it more immersive (requires Android 4.4 or higher):</p>
 <ul>
-<li><b>Off</b> - Don't use Android's immersive mode, and on-screen virtual navigation buttons are always visible.</li>
-<li><b>Only hide on-screen virtual navigation buttons (default)</b> - Don't use Android's immersive mode, but on-screen virtual
+<li><b>Off</b> - Don't use immersive mode, and on-screen virtual navigation buttons are always visible.</li>
+<li><b>Only hide on-screen virtual navigation buttons (default)</b> - Don't use immersive mode, but on-screen virtual
 navigation buttons are dimmed.</li>
 <li><b>Hide GUI</b> - After a short delay, any on-screen virtual navigation buttons will disappear, along with most of the GUI buttons.
 To exit this immersive mode, either touch on-screen, or swipe in from the top/bottom sides when the device is held in landscape (or
@@ -1171,12 +1170,6 @@ the Storage Access Framework method as with Android 5 (or the <small>Android/dat
 with Android 4.4).</li>
 </ul>
 
-<!--<p><b>But I have Android 5 (Lollipop), wasn't this supposed to fix saving to SD cards?</b> - Android 5 Lollipop does
-<i>not</i> revert the restrictions introduced by Google in Android 4.4. It does introduce a new API for saving to SD
-cards and I am looking into this. Note that (a) this requires rewriting portions of the code, it isn't a simple
-fix, and (b) this new API is unfortunately not compatible with some of Google/Android's own APIs (e.g., for Exif
-reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>-->
-
 <p><b>Photos or videos fail to save!</b> - Firstly, if you're trying to save to an
 external SD card, see "How can I save to my external SD card?" above. Otherwise:</p>
 <ul>
@@ -1305,7 +1298,7 @@ then it's not available. There
 are possible workarounds for some of these devices (which is why some third party camera applications
 may be able to silence the shutter), though the issue is these don't work on all devices, and tend
 to use methods that Google now discourage. The fault is with the device for not supporting
-Android's standard method for disabling the shutter sound. In particular, if under Settings/About
+standard method for cameras to disable the shutter sound on Android. In particular, if under Settings/About
 you see that "Can disable shutter sound?" says No, it means the device's camera API is telling 3rd
 party camera apps that shutter sound can't be disabled (so either it can't do it, or the API is lying
 - either way, this should be reported to your manufacturer).</p>
@@ -1333,7 +1326,7 @@ camera applications (see <a href="https://sourceforge.net/p/opencamera/tickets/5
 
 <p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
 of applying a HDR algorithm, some may do better or worse in different circumstances; some may look more or less pleasing
-depending on what you are after. Also note that some Android camera apps use "HDR" to mean "apply a whacky-looking filter".
+depending on what you are after. Also note that some camera apps use "HDR" to mean "apply a whacky-looking filter".
 Whilst HDR filters can be used to apply a rather unreal or vivid image, for now Open Camera's HDR is more geared towards
 capturing the range of exposures.</p>
 
@@ -1344,11 +1337,10 @@ Camera's HDR algorithm tries to get the best results for most purposes automatic
 editing.</p>
 
 <p><b>I ran out of space while recording video, and the video is corrupted, how can I get it back?</b> - Firstly, this sadly
-isn't an Open Camera bug - it's an Android issue that the video recording API doesn't stop or report an error when storage
+isn't an Open Camera bug - it's an issue that the video recording API doesn't stop or report an error when storage
 runs out. As a workaround, Open Camera does try to stop videos when storage space is low (although note this workaround
 may not be feasible in some cases if saving to non-default locations). In order to recover a file, you can try
-<a href="https://play.google.com/store/apps/details?id=com.smamolot.mp4fix">MP4Fix Video Repair Tool</a> (not affiliated
-with Open Camera!).</p>
+"MP4Fix Video Repair Tool" by Smamolot (com.smamolot.mp4fix) (not affiliated with me or Open Camera!).</p>
 
 <p><b>My device ran out of power while recording video, and the video is corrupt! How can I get it back?</b> - This can happen if
 the device is very slow at processing the video file after stopping, and this doesn't finishing when the device powers off. Open
@@ -1398,7 +1390,7 @@ settings to the defaults (under Settings/Settings manager/"Reset settings").</p>
 <p>If you find a bug, please
 <a href="https://sourceforge.net/p/opencamera/tickets/">report it here</a> (please check for existing tickets first).
 It is helpful to supply the "About" information - please go to Settings/About, then click "Copy to clipboard", then you
-can paste the information into your web browser, Google Keep, email or whatever.</p>
+can paste the information into your web browser, email or whatever.</p>
 
 <p>For more general questions or things like feature suggestions, please use the
 <a href="http://sourceforge.net/p/opencamera/discussion/">forums</a>.

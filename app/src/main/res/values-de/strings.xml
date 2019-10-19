@@ -113,7 +113,7 @@
     <string name="preference_save_location">Speicherort</string>
     <string name="preference_save_location_summary">Ordner, wo die Fotos/Videos gespeichert werden</string>
     <string name="preference_using_saf">Benutze Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Für das Speichern der Fotos/Videos Androids Storage Access Framework verwenden</string>
+    <string name="preference_using_saf_summary">Für das Speichern der Fotos/Videos Storage Access Framework verwenden</string>
     <string name="preference_save_photo_prefix">Foto-Präfix</string>
     <string name="preference_save_photo_prefix_summary">Den Präfix für die Dateinamen der Fotos einstellen</string>
     <string name="preference_save_video_prefix">Video-Präfix</string>
