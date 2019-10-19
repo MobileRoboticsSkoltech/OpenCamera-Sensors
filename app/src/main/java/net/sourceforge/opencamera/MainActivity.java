@@ -2674,7 +2674,7 @@ public class MainActivity extends Activity {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
             int n_images_to_save = applicationInterface.getImageSaver().getNRealImagesToSave();
             Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.take_photo)
+                    .setSmallIcon(R.drawable.ic_stat_notify_take_photo)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(getString(R.string.image_saving_notification) + " " + n_images_to_save + " " + getString(R.string.remaining))
                     //.setStyle(new Notification.BigTextStyle()
