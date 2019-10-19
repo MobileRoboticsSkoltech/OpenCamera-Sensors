@@ -11,7 +11,7 @@ import android.util.Log;
 
 /** Handles magnetic sensor.
  */
-public class MagneticSensor {
+class MagneticSensor {
     private static final String TAG = "MagneticSensor";
 
     private final MainActivity main_activity;

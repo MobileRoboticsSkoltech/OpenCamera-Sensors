@@ -2453,8 +2453,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             int [] test_isos = {0, 50, 100, 200, 400, 800, 1600, 3200, 6400, 10000};
             int min_iso = mPreview.getMinimumISO();
             int max_iso = mPreview.getMaximumISO();
-            for(int i=0;i<test_isos.length;i++) {
-                int test_iso = test_isos[i];
+            for(int test_iso : test_isos) {
                 subTestPopupButtonAvailability("TEST_ISO", "" + test_iso, test_iso >= min_iso && test_iso <= max_iso);
             }
             subTestPopupButtonAvailability("TEST_ISO", "" + (min_iso-1), false);

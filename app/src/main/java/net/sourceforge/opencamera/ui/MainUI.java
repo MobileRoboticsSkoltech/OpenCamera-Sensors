@@ -539,7 +539,7 @@ public class MainUI {
                 view.setTranslationX(2*height_pixels);
             }
             else if( ui_rotation == 0 ) {
-                view.setTranslationY(1*height_pixels);
+                view.setTranslationY(height_pixels);
             }
             else {
                 view.setTranslationY(-1*height_pixels);
