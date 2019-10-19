@@ -10966,6 +10966,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // n.b., don't bother calling setToDefault()
         waitUntilCameraOpened();
 
+        if( !mActivity.supportsCamera2() ) {
+            Log.d(TAG, "test requires camera2 support");
+            return;
+        }
+
         assertFalse(mPreview.usingCamera2API());
 
         // test legacy key present, but set to old api
