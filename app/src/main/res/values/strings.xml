@@ -945,16 +945,13 @@
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
             Settings/On screen GUI/Show What\'s New dialog.]</small>
-        \n\n<b>v1.47:</b>\n
+        \n\n<b>v1.47.3:</b>\n
         <ul>
-            <li>New panorama photo mode (requires Android 5+, note not all devices are supported).\n</li>
-            <li>New option Settings/Photo settings/Text style/\"Text with shaded background\" for photo stamp.\n</li>
-            <li>Notifications now displayed on Android 8+ when Open Camera is in background when images are
-                still being processed/saved.\n</li>
-            <li>Camera ID is now displayed when switching cameras, on devices with more than two cameras.\n</li>
-            <li>Improved performance on Android 7+ when saving photos when using Storage Access Framework.\n</li>
-            <li>Other improvements and bug fixes.\n</li>
-
+            <li>Camera2 API option is now a \"list\" selection rather than a toggle switch. This option
+            should be copied over, but just in case, if you had enabled Camera2 API and Camera2 features
+            are no longer available, please check Settings/\"Camera API\".\n</li>
+            <li>Grids were being drawing too faintly.\n</li>
+            <li>Updated appearance of some icons.\n</li>
         </ul>
     </string>
 </resources>
