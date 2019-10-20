@@ -30,6 +30,7 @@ copy %src%\_docs\devices.html %dst%\_docs
 copy %src%\_docs\help.html %dst%\_docs
 copy %src%\_docs\history.html %dst%\_docs
 copy %src%\_docs\index.html %dst%\_docs
+copy %src%\_docs\privacy_oc.html %dst%\_docs
 copy %src%\_docs\stylesheet.css %dst%\_docs
 
 REM exit
