@@ -917,9 +917,9 @@
         such as for your device, manufacturer, operating system and/or Google accounts. For example:
         \n*The optional voice control option uses the Android speech recognition service. When enabled,
         audio data is likely to be sent to remote servers by Android to perform speech recognition.
-        \n*The \"addresses\" option for photo stamp or video subtitles uses the Android Geocoder API, which
-        requires your device transmits location data across the Internet to a third party (which may
-        depend on what "backend services" are installed on your device).
+        \n*The \"addresses\" option for photo stamp or video subtitles uses the Android Geocoder API.
+        When enabled, this requires that your device transmits location data across the Internet to a
+        third party (which may depend on what "backend services" are installed on your device).
         \n*Apps/services such as cloud services on your device may auto-upload photos and videos that are saved on your device.
     </string>
 
