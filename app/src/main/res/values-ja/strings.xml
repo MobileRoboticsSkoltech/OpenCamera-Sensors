@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">設定</string>
     <string name="action_popup">ポップアップ設定</string>
-    <string name="intro_text">写真を撮るには青いカメラボタンを押してください。ヘルプの参照は「設定」から「オンラインヘルプ」をタップして行います。Open Cameraは無料ですが寄付を受け付けておりますのでご検討ください(リンクまたはオンラインヘルプから参照してください)。</string>
     <string name="intro_ok">了解しました (この内容を再度表示しない)</string>
 
     <string name="on">有効</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->

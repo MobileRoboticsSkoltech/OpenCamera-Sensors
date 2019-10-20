@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Settings</string>
     <string name="action_popup">Popup settings</string>
-    <string name="intro_text">Touch to focus, and press the blue camera button to take photos. For more help, click Online help from Settings. Open Camera is completely free. If you like this app, please consider buying my donate app :) (see link in Settings, or Online help).</string>
     <string name="intro_ok">OK (This message won\'t show again)</string>
 
     <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
@@ -902,6 +901,12 @@
         Note that if enabled, this requires that your device transmits location data across the Internet to a third party
         in order to convert GPS coordinates to an address. See https://developer.android.com/reference/android/location/Geocoder .
         \n%s</string>
+
+    <string name="intro_text">Touch to focus, and press the blue camera button to take photos.
+        \n\nTo disable maximum screen brightness, see Settings/On screen GUI/\"Force maximum brightness\".
+        To save to SD cards on Android 5+, see Settings/More camera controls/\"Use Storage Access Framework\".
+        For more help, click \"Online help\" from Settings.
+    </string>
 
     <!-- The following strings should not be translated (in case they need updating) -->
 

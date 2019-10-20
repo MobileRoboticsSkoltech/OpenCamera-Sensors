@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Ayarlar</string>
     <string name="action_popup">Popup Ayarları</string>
-    <string name="intro_text">Odaklamak için dokunun ve fotoğraf çekmek için mavi kamera butonuna basın. Daha fazla yardım için, Online yardım formu ayarlarına tıklayın. Open Camera tamamen ücretsizdir. Bu uygulamayı beğendiyseniz, bağış uygulamamı satın almayı düşünebilirsiniz. :) (Ayarlar ya da Online yardımdaki linke gözatın).</string>
     <string name="intro_ok">TAMAM (Bu mesaj tekrar gösterilmeyecektir.)</string>
 
     <string name="on">Açık</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->

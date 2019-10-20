@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Cài đặt</string>
     <string name="action_popup">Cài đặt cửa sổ bật lên</string>
-    <string name="intro_text">Chạm để lấy nét và nhấn nút camera trên màn hình để chụp ảnh. Để nhận thêm trợ giúp, nhấn Trợ giúp trực tuyến trong Cài đặt. Open Camera hoàn toàn miễn phí và không có quảng cáo. Nếu bạn thích ứng dụng này, vui lòng cân nhắc việc quyên góp cho tôi :) (xem liên kết trong Cài đặt hoặc Trợ giúp trực tuyến).</string>
     <string name="intro_ok">OK (Thông báo này không hiển thị nữa)</string>
 
     <string name="on">Bật</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->

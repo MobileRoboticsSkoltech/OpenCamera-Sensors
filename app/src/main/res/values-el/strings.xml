@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Ρυθμίσεις</string>
     <string name="action_popup">Ρυθμίσεις Παραθύρου</string>
-    <string name="intro_text">Πατήστε για να εστιάσετε και πατήστε το μπλε πλήκτρο της κάμερας για να τραβήξετε φωτογραφίες. Για περισσότερη βοήθεια, κάντε κλικ στην βοήθεια στις Ρυθμίσεις. Το Open Camera είναι εντελώς δωρεάν. Αν σας αρέσει αυτή η εφαρμογή, παρακαλείστε να εξετάσετε την πιθανότητα μιας δωρεάς :) (βλέπε σύνδεσμο σε Ρυθμίσεις, η στην Διαδικτυακή Βοήθεια).</string>
     <string name="intro_ok">OK (Καμμία εμφάνιση αυτού του μυνήματος ξανά)</string>
 
     <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->

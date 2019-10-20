@@ -4,7 +4,6 @@
     <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
     <string name="action_settings">Innstillinger</string>
     <string name="action_popup">Oppsprettsinnstillinger</string>
-    <string name="intro_text">Trykk for å fokusere, og trykk på den blå kameraknappen for å ta bilder. For mere hjelp, trykk på Netthjelp i Innstillinger. Open Camera er fullstendig gratis. Hvis du liker appen, så kan du gjerne kjøpe min donasjonsapp 🙂 (Se lenken i Innstillinger, eller Netthjelp).</string>
     <string name="intro_ok">OK (Denne meldingen vil ikke bli vist igjen)</string>
 
     <string name="on">På</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
