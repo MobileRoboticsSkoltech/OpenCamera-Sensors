@@ -394,6 +394,8 @@ public class CameraController2 extends CameraController {
                         Log.d(TAG, "raw_sensitivity_boost: " + (raw_sensitivity_boost==null ? "null" : raw_sensitivity_boost));
                     }*/
                 }
+                //Integer ois_mode = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+                //Log.d(TAG, "ois_mode: " + (ois_mode==null ? "null" : ois_mode));
             }
         }
 
