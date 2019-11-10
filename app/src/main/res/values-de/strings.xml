@@ -812,4 +812,15 @@
     <string name="preference_stamp_style_shadowed">Schattierter Text</string>
     <string name="preference_stamp_style_plain">Normaler Text</string>
 
+    <string name="exposure_compensation_seekbar">Suchfeld zur Änderung der Belichtungskorrektur</string>
+
+    <string name="preference_image_format_summary">Wähle das Dateiformat zum Speichern der Fotos. Das wirkt sich nur auf \"Standard-\" (nicht RAW-) Fotos aus. Merke: Das PNG-Format ist nicht verlustlos, es wird aus einem JPEG mit 100%%iger Qualität konvertiert.\n%s</string>
+
+    <string name="preference_camera_api">Camera-API</string>
+    <string name="preference_camera_api_summary">Wähle das Camera2-API um extra Features wie manuelle Modi für Belichtung, Fokus, Weißabgleich sowie RAW-Format (falls vom Gerät unterstützt) zu nutzen. Die Änderung des API verursacht einen Neustart der App.\n%s</string>
+    <string name="preference_camera_api_old">Original Camera-API</string>
+    <string name="preference_camera_api_camera2">Camera2-API</string>
+
+    <string name="preference_select_remote">Wähle eine Fernsteuerung</string>
+
 </resources>
