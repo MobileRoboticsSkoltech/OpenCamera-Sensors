@@ -886,7 +886,7 @@
     <string name="preference_image_format_summary">Select the file format used for saving photos. This affects \"standard\" (not RAW) photos. Note that PNG format is not truly lossless, instead it is converted from a JPEG at 100%% quality.\n%s</string>
 
     <string name="preference_camera_api">Camera API</string>
-    <string name="preference_camera_api_summary">Select Camera2 API to enables extra feature such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device), but may not work properly on all devices. Changing the API will cause a restart.\n%s</string>
+    <string name="preference_camera_api_summary">Select Camera2 API to enable extra features such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device). Changing the API will cause a restart.\n%s</string>
     <string name="preference_camera_api_old">Original camera API</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
 
@@ -907,6 +907,8 @@
         To save to SD cards on Android 5+, see Settings/More camera controls/\"Use Storage Access Framework\".
         For more help, click \"Online help\" from Settings.
     </string>
+
+    <string name="preference_select_remote">Select remote device</string>
 
     <!-- The following strings should not be translated (in case they need updating) -->
 

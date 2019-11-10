@@ -202,8 +202,10 @@
 
                 <PreferenceScreen
                     android:key="preference_remote_device_name"
-                    android:title="Select remote device" >
+                    android:title="@string/preference_select_remote">
+
                     <intent android:action="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"/>
+
                 </PreferenceScreen>
 
                 <SwitchPreference
