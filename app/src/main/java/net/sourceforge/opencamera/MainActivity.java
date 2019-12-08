@@ -3415,7 +3415,7 @@ public class MainActivity extends Activity {
         if( preview.getCameraController() == null )
             return false;
         if( preview.isVideoHighSpeed() ) {
-            // manuai ISO/exposure not supported for high speed video mode
+            // manual ISO/exposure not supported for high speed video mode
             // it's safer not to allow opening the panel at all (otherwise the user could open it, and switch to manual)
             return false;
         }
