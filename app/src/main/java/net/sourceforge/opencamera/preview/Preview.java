@@ -3082,7 +3082,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 }
             }
             else if( capture_rate_factor > 1.0 ) {
-                // resultant framerate remains the same, instead adjst the capture rate
+                // resultant framerate remains the same, instead adjust the capture rate
                 video_profile.videoCaptureRate = video_profile.videoCaptureRate / (double)capture_rate_factor;
                 if( MyDebug.LOG )
                     Log.d(TAG, "scaled capture rate to: " + video_profile.videoCaptureRate);
