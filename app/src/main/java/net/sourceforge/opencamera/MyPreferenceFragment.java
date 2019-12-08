@@ -383,6 +383,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pg.removePreference(pref);
         }
 
+        final boolean has_gyro_sensors = bundle.getBoolean("has_gyro_sensors");
+        if( MyDebug.LOG )
+            Log.d(TAG, "has_gyro_sensors: " + has_gyro_sensors);
+
         final boolean supports_expo_bracketing = bundle.getBoolean("supports_expo_bracketing");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_expo_bracketing: " + supports_expo_bracketing);
@@ -1186,6 +1190,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(getString(supports_hdr ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nPanorama?: ");
                         about_string.append(getString(supports_panorama ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nGyro sensors?: ");
+                        about_string.append(getString(has_gyro_sensors ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nExpo?: ");
                         about_string.append(getString(supports_expo_bracketing ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nExpo compensation?: ");
