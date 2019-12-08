@@ -112,7 +112,7 @@
     <string name="preference_save_location">Carpeta de almacenamiento</string>
     <string name="preference_save_location_summary">Carpeta para guardar los archivos de foto/video</string>
     <string name="preference_using_saf">Utilizar el Framework de Acceso del Almacenamiento</string>
-    <string name="preference_using_saf_summary">Utilice el Framework de Acceso del Almacenamiento de Android 5 para guardar fotos y videos</string>
+    <string name="preference_using_saf_summary">Utilice el Framework de Acceso del Almacenamiento para guardar fotos y videos</string>
     <string name="preference_save_photo_prefix">Prefijo de foto</string>
     <string name="preference_save_photo_prefix_summary">Prefijo utilizado para el nombre de las fotos</string>
     <string name="preference_save_video_prefix">Prefijo de video</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Done para apoyar el proyecto</string>
     <string name="preference_donate_summary">Si te gusta esta aplicación, por favor considera hacer una donación para apoyar el proyecto. Puedes hacerlo comprando mi "aplicación de donación" - haz clic en esta opción para abrir la página de mi aplicación de donación. ¡Gracias!</string>
     <string name="preference_use_camera2">Utiliza Camera2 API</string>
-    <string name="preference_use_camera2_summary">Utiliza la Camara2 de Android 5 - ofrece funcionalidades extra, pero esta en fase experimental (causara un reseteo de la aplicación)</string>
+    <string name="preference_use_camera2_summary">Utiliza la Camara2 - ofrece funcionalidades extra, pero esta en fase experimental (causara un reseteo de la aplicación)</string>
     <string name="preference_about">Acerca de</string>
     <string name="preference_about_summary">Información de aplicación y depuración</string>
     <string name="preference_reset">Restablecer ajustes</string>

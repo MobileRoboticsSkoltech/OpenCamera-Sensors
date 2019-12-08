@@ -104,7 +104,7 @@
     <string name="preference_pause_preview">Pause nach der Fotoaufnahme</string>
     <string name="preference_pause_preview_summary">Nach der Aufnahme pausieren mit der Möglichkeit, das Foto zu teilen oder zu löschen</string>
     <string name="preference_shutter_sound">Auslöseton</string>
-    <string name="preference_shutter_sound_summary">Abspielen eines Tones bei der Aufnahme (benötigt Android 4.2 oder höher zum Deaktivieren)</string>
+    <string name="preference_shutter_sound_summary">Abspielen eines Tones bei der Aufnahme</string>
     <string name="preference_volume_keys">Lautstärketasten</string>
     <string name="preference_audio_control">Audio Steuerungsoptionen</string>
     <string name="preference_audio_noise_control_sensitivity">Audio Steuerung Empfindlichkeit</string>
@@ -229,7 +229,7 @@
     <string name="preference_donate">Spende</string>
     <string name="preference_donate_summary">Wenn Ihnen diese App gefällt, würde ich mich über eine Spende freuen, indem Sie meine Spenden-App kaufen. Dazu brauchen Sie nur diese Option anzuklicken. Danke!</string>
     <string name="preference_use_camera2">Camera2-API verwenden</string>
-    <string name="preference_use_camera2_summary">Aktiviert die Android-5-Camera2-API mit Zusatzfunktionen (experimentell, Neustart erforderlich)</string>
+    <string name="preference_use_camera2_summary">Aktiviert die Camera2-API mit Zusatzfunktionen (experimentell, Neustart erforderlich)</string>
     <string name="preference_about">Über</string>
     <string name="preference_about_summary">Anwendungs- und Debug-Informationen</string>
     <string name="preference_reset">Einstellungen zurücksetzen</string>

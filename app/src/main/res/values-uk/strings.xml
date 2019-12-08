@@ -104,7 +104,7 @@
     <string name="preference_pause_preview">Пауза після знімку</string>
     <string name="preference_pause_preview_summary">Пауза після зняття фото, з можливістю поділитися чи видалити фотографію</string>
     <string name="preference_shutter_sound">Звук затвору</string>
-    <string name="preference_shutter_sound_summary">Відтворення звуку під час знімку фотографії (потрібно версія Android 4.2+ аби вимкнути)</string>
+    <string name="preference_shutter_sound_summary">Відтворення звуку під час знімку фотографії</string>
     <string name="preference_volume_keys">Кнопки гучності</string>
     <string name="preference_audio_control">Налаштування керування звуком</string>
 
@@ -113,7 +113,7 @@
     <string name="preference_save_location">Тека збереження</string>
     <string name="preference_save_location_summary">"Ім'я теки для збереження фото та відео (також може бути повний шлях)"</string>
     <string name="preference_using_saf">Використовувати Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Для Android 5 використовувати Storage Access Framework для збереження фото та відео</string>
+    <string name="preference_using_saf_summary">Використовувати Storage Access Framework для збереження фото та відео</string>
     <string name="preference_save_photo_prefix">Префікс для фото</string>
     <string name="preference_save_photo_prefix_summary">Префікс імен файлів для знімків</string>
     <string name="preference_save_video_prefix">Префікс для відео</string>
@@ -229,7 +229,7 @@
     <string name="preference_donate">Подякувати</string>
     <string name="preference_donate_summary">Якщо вам сподобався цей додаток, киньте монетку. Ви можете зробити це, придбавши мій додаток. Дякую!</string>
     <string name="preference_use_camera2">Використовувати Camera2 API</string>
-    <string name="preference_use_camera2_summary">Дозволяє використання Camera2 API для Android 5 - додаткові, але експериментальні можливості (потрібно перезавантажити)</string>
+    <string name="preference_use_camera2_summary">Дозволяє використання Camera2 API - додаткові, але експериментальні можливості (потрібно перезавантажити)</string>
     <string name="preference_about">Про додаток</string>
     <string name="preference_about_summary">Інформація</string>
     <string name="preference_reset">Скидання налаштувань</string>

@@ -111,7 +111,7 @@
     <string name="preference_save_location">Χώρος αποθήκευσης</string>
     <string name="preference_save_location_summary">Φάκελος για αποθήκευση φωτογραφίας/βίντεο</string>
     <string name="preference_using_saf">Χρήση αποθήκευσης πρόσβασης πλαισίου</string>
-    <string name="preference_using_saf_summary">Αν θέλετε χρησιμοποιήστε την Android 5\'s Πρόσβαση αποθήκευσης πλαισίου για την αποθήκευση φωτογραφιών και βίντεο</string>
+    <string name="preference_using_saf_summary">Αν θέλετε χρησιμοποιήστε την Πρόσβαση αποθήκευσης πλαισίου για την αποθήκευση φωτογραφιών και βίντεο</string>
     <string name="preference_save_photo_prefix">Αποθήκευση προθέματος φωτογραφιών</string>
     <string name="preference_save_photo_prefix_summary">Πρόθεμα για την αποθήκευση αρχείων φωτογραφιών</string>
     <string name="preference_save_video_prefix">Αποθήκευση βίντεο προθέματος</string>
@@ -227,7 +227,7 @@
     <string name="preference_donate">Δωρεά για υποστήριξη της ανάπτυξης</string>
     <string name="preference_donate_summary">Αν σας αρέσει αυτή η εφαρμογή, παρακαλούμε κάντε μια δωρεά για υποστήριξη της ανάπτυξης. Μπορείτε να το κάνετε αυτό μέσω της επιλογής "Δωρεά" - κάντε αυτή την επιλογή για να ανοίξει η σελίδα δωρεών. Ευχαριστούμε!</string>
     <string name="preference_use_camera2">Χρήση τού Camera2 API</string>
-    <string name="preference_use_camera2_summary">Ενεργοποίηση του Camera2 API σε συσκεύες Android 5 - προσφέρει επιπλέον χαρακτηριστικά, αλλά ενδέχεται να μην λειτουργούν σωστά σε όλες τις συσκευές (θα προκαλέσει μια επανεκκίνηση)</string>
+    <string name="preference_use_camera2_summary">Ενεργοποίηση του Camera2 API - προσφέρει επιπλέον χαρακτηριστικά, αλλά ενδέχεται να μην λειτουργούν σωστά σε όλες τις συσκευές (θα προκαλέσει μια επανεκκίνηση)</string>
     <string name="preference_about">Σχετικά με</string>
     <string name="preference_about_summary">Εφαρμογή και πληροφορίες εντοπισμού σφαλμάτων</string>
     <string name="preference_reset">Ρυθμίσεις επαναφοράς</string>

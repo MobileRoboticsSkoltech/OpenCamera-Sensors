@@ -103,12 +103,12 @@
     <string name="preference_pause_preview">Паўза пасля фатаграфавання</string>
     <string name="preference_pause_preview_summary">Паўза  пасля фатаграфавання, падчас якой магчыма падзяліцца або выдаліць фота</string>
     <string name="preference_shutter_sound">Гук засаўкі</string>
-    <string name="preference_shutter_sound_summary">Прайграванне гуку пры фатаграфаванні (патрабуецца Android 4.2 або вышэй, каб адключыць)</string>
+    <string name="preference_shutter_sound_summary">Прайграванне гуку пры фатаграфаванні</string>
     <string name="preference_volume_keys">Клавішы рэгулявання гучнасці</string>
     <string name="preference_save_location">Захаваць месца</string>
     <string name="preference_save_location_summary">Тэчка для захавання фота / відэа файлаў</string>
     <string name="preference_using_saf">Выкарыстоўваць сховішча Access Framework</string>
-    <string name="preference_using_saf_summary">Ці варта выкарыстоўваць сховішча  Android 5 Access Framework для захавання фотаздымкаў і відэазапісаў</string>
+    <string name="preference_using_saf_summary">Ці варта выкарыстоўваць сховішча Access Framework для захавання фотаздымкаў і відэазапісаў</string>
     <string name="preference_save_photo_prefix">Захаваць фотапрэфікс</string>
     <string name="preference_save_photo_prefix_summary">Выкарыстоўваць прэфікс для захавання фотаздымкаў</string>
     <string name="preference_save_video_prefix">Захаваць відэапрэфікс</string>
@@ -210,7 +210,7 @@
     <string name="preference_donate">Ахвяруйце на распрацоўку </string>
     <string name="preference_donate_summary">Калі вам падабаецца гэты дадатак, калі ласка, падтрымайце распрацоўку . Вы можаце зрабіць гэта, купіўшы мой дадатак .Абярыце гэты параметр і адкрыецца старонка для ахвяравання . Дзякую!</string>
     <string name="preference_use_camera2">Выкарыстоўваць Camera2 API</string>
-    <string name="preference_use_camera2_summary">Дазваляе выкарыстоўваць Camera2 API Android 5</string>
+    <string name="preference_use_camera2_summary">Дазваляе выкарыстоўваць Camera2 API</string>
     <string name="preference_about">Інфармацыя</string>
     <string name="preference_about_summary">Інфармацыя </string>
     <string name="preference_reset">Скід налад</string>

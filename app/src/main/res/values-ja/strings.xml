@@ -103,13 +103,13 @@
     <string name="preference_pause_preview">撮影の後に一時停止する</string>
     <string name="preference_pause_preview_summary">一時停止した画面上で写真の共有もしくは削除ができます</string>
     <string name="preference_shutter_sound">シャッター音</string>
-    <string name="preference_shutter_sound_summary">撮影時に音を再生する (無効にする場合はAndroid 4.2以上が必要です)</string>
+    <string name="preference_shutter_sound_summary">撮影時に音を再生する</string>
     <string name="preference_volume_keys">音量キー</string>
 
     <string name="preference_save_location">保存場所</string>
     <string name="preference_save_location_summary">写真/ビデオを保存するフォルダを決めます</string>
     <string name="preference_using_saf">ストレージへのフレームワークを使用する</string>
-    <string name="preference_using_saf_summary">写真やビデオを保存する際にAndroid 5.0以降のフレームワークを使用するかどうかを選択します</string>
+    <string name="preference_using_saf_summary">写真やビデオを保存する際にStorage Accessフレームワークを使用するかどうかを選択します</string>
     <string name="preference_save_photo_prefix">保存する写真の命名ルール</string>
     <string name="preference_save_photo_prefix_summary">保存する写真のファイル名の手前につける内容を設定します</string>
     <string name="preference_save_video_prefix">保存するビデオの命名ルール</string>
@@ -214,7 +214,7 @@
     <string name="preference_donate">サポートのために寄付をする</string>
     <string name="preference_donate_summary">このアプリが気に入りましたら寄付をお願いします。この項目を押すと寄付への窓口が開きます。寄付権を購入する事で寄付ができます。寄付してくれたらありがとう！</string>
     <string name="preference_use_camera2">Camera2 APIを使う</string>
-    <string name="preference_use_camera2_summary">有効にするとAndroid 5.0以降に搭載のCamera2 APIを使用します。この設定は試験的に提供しています (再起動が必要です)</string>
+    <string name="preference_use_camera2_summary">有効にするとCamera2 APIを使用します。この設定は試験的に提供しています (再起動が必要です)</string>
     <string name="preference_about">このアプリについて</string>
     <string name="preference_about_summary">アプリとデバッグの情報を表示します</string>
     <string name="preference_reset">設定をリセットする</string>

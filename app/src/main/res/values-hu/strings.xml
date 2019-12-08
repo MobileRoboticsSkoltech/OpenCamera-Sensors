@@ -112,7 +112,7 @@
     <string name="preference_save_location">Mentés helye</string>
     <string name="preference_save_location_summary">Fotók, videofájlok mentésének könyvtára</string>
     <string name="preference_using_saf">Storage Access Framework használata</string>
-    <string name="preference_using_saf_summary">Használja-e az Android 5 Storage Access Frameworkjét a fotók és videók mentéséhez</string>
+    <string name="preference_using_saf_summary">Használja-e az Storage Access Frameworkjét a fotók és videók mentéséhez</string>
     <string name="preference_save_photo_prefix">Fotó fájlnév előtag</string>
     <string name="preference_save_photo_prefix_summary">A fényképek mentésekor használt fájlnév előtag</string>
     <string name="preference_save_video_prefix">Videó fájlnév előtag</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Támogasd a fejlesztést adománnyal</string>
     <string name="preference_donate_summary">A tetszik az alkalmazás, fontold meg adomány küldését a fejlesztés támogatására. Ezt a „támogatói alkalmazás” megvásárlásával teheted meg – kattints ide, hogy megnyisd a támogató alkalmazás oldalát. Köszönjük!</string>
     <string name="preference_use_camera2">Camera2 API használata</string>
-    <string name="preference_use_camera2_summary">Lehetővé teszi az Android 5-ös Camera2 API használatát - extra funkciókat kínál, de nem minden eszközön működik megfelelően (újraindulást eredményez)</string>
+    <string name="preference_use_camera2_summary">Lehetővé teszi az Camera2 API használatát - extra funkciókat kínál, de nem minden eszközön működik megfelelően (újraindulást eredményez)</string>
     <string name="preference_about">Névjegy</string>
     <string name="preference_about_summary">App és hibakeresési információk</string>
     <string name="preference_reset">Beállítások visszaállítása</string>

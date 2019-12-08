@@ -104,7 +104,7 @@
     <string name="preference_pause_preview">Пауза после съёмки</string>
     <string name="preference_pause_preview_summary">Пауза после снятия фото, с возможностью поделиться или удалить фотографию</string>
     <string name="preference_shutter_sound">Звук затвора</string>
-    <string name="preference_shutter_sound_summary">Воспроизведение звука при съемке фотографии (требуется Android 4.2+ для отключения)</string>
+    <string name="preference_shutter_sound_summary">Воспроизведение звука при съемке фотографии</string>
     <string name="preference_volume_keys">Клавиши громкости</string>
     <string name="preference_audio_control">Настройки управления звуком</string>
     <string name="preference_audio_noise_control_sensitivity">Чувствительность управления звуком</string>
@@ -112,7 +112,7 @@
     <string name="preference_save_location">Папка сохранения</string>
     <string name="preference_save_location_summary">Имя папки для сохранения фото и видео (также может быть полный путь)</string>
     <string name="preference_using_saf">Использовать Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Для Android 5 использовать  Storage Access Framework для сохранения фото и видео</string>
+    <string name="preference_using_saf_summary">Использовать  Storage Access Framework для сохранения фото и видео</string>
     <string name="preference_save_photo_prefix">Префикс для фото</string>
     <string name="preference_save_photo_prefix_summary">Префикс имен файлов для сохраняемых фото</string>
     <string name="preference_save_video_prefix">Префикс для видео</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Пожертвовать</string>
     <string name="preference_donate_summary">Если вам нравится это приложение, киньте мне копейку. Вы можете сделать это, купив мое приложение. Спасибо!</string>
     <string name="preference_use_camera2">Использовать Camera2 API</string>
-    <string name="preference_use_camera2_summary">Разрешает использование Camera2 API для Android 5 - дополнительные, но экспериментальные возможности (требуется перезапуск)</string>
+    <string name="preference_use_camera2_summary">Разрешает использование Camera2 API - дополнительные, но экспериментальные возможности (требуется перезапуск)</string>
     <string name="preference_about">О программе</string>
     <string name="preference_about_summary">Информация</string>
     <string name="preference_reset">Сброс настроек</string>

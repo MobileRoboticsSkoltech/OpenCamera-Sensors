@@ -112,7 +112,7 @@
     <string name="preference_save_location">Lagringsplasseringen</string>
     <string name="preference_save_location_summary">Mappen som bildene/videoen skal lagres i.</string>
     <string name="preference_using_saf">Bruk lagringstilgangsrammeverket</string>
-    <string name="preference_using_saf_summary">Hvorvidt Android 5.x sin lagringstilgangsrammeverk skal brukes til å lagre bilder og videoer.</string>
+    <string name="preference_using_saf_summary">Hvorvidt lagringstilgangsrammeverk skal brukes til å lagre bilder og videoer.</string>
     <string name="preference_save_photo_prefix">Forstavelsen til fotolagring</string>
     <string name="preference_save_photo_prefix_summary">Forstavelsen som skal brukes til lagringsfilnavnene til bildene.</string>
     <string name="preference_save_video_prefix">Forstavelsen til videolagring</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Doner for å støtte utviklingen.</string>
     <string name="preference_donate_summary">Hvis du liker denne appen, så tenk gjerne på om du vil gi meg en donasjon for å støtte utviklingen. Du kan gjøre dette ved å kjøpe min "donasjonsapp" — Klikk på denne innstillingen for å gå til siden for min donasjonsapp. Takk!</string>
     <string name="preference_use_camera2">Bruk Camera2-APIen</string>
-    <string name="preference_use_camera2_summary">Aktiverer Android 5.x sin Camera2-API - Den tilbyr ekstra egenskaper, men kan kanskje ikke virke riktig på alle enheter (Vil føre til en omstart).</string>
+    <string name="preference_use_camera2_summary">Aktiverer Camera2-API - Den tilbyr ekstra egenskaper, men kan kanskje ikke virke riktig på alle enheter (Vil føre til en omstart).</string>
     <string name="preference_about">Om Open Camera</string>
     <string name="preference_about_summary">App- og avlusings-informasjon</string>
     <string name="preference_reset">Tilbakestill innstillinger</string>

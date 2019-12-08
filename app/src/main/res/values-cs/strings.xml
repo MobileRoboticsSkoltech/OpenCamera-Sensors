@@ -103,13 +103,13 @@
     <string name="preference_pause_preview">Pauza po pořízení fotografie</string>
     <string name="preference_pause_preview_summary">Zobrazit fotografii po pořízení s možností sdílení nebo vymazání fotografie</string>
     <string name="preference_shutter_sound">Zvuk závěrky</string>
-    <string name="preference_shutter_sound_summary">Přehrát zvuk při pořizování fotografie (vyžaduje Android 4.2 a vyšší pro vypnutí)</string>
+    <string name="preference_shutter_sound_summary">Přehrát zvuk při pořizování fotografie</string>
     <string name="preference_volume_keys">Tlačítka hlasitosti</string>
 
     <string name="preference_save_location">Uložit polohu</string>
     <string name="preference_save_location_summary">Složka pro uložení fotek/videa</string>
     <string name="preference_using_saf">Použít Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Zdali použít Android 5\'s Storage Access Framework pro uložení fotek a videí</string>
+    <string name="preference_using_saf_summary">Zdali použít Storage Access Framework pro uložení fotek a videí</string>
     <string name="preference_save_photo_prefix">Uložit předponu pro fotografie</string>
     <string name="preference_save_photo_prefix_summary">Předpona používaná při ukládání fotografií</string>
     <string name="preference_save_video_prefix">Uložit předponu pro videa</string>
@@ -214,7 +214,7 @@
     <string name="preference_donate">Přispět na podporu vývoje</string>
     <string name="preference_donate_summary">Pokud se Vám tato aplikace líbí, prosím zvažte přispění koupí mé "darovací aplikace" - tato volba otevře stránku mé darovací aplikace. Díky!</string>
     <string name="preference_use_camera2">Použít Camera2 API</string>
-    <string name="preference_use_camera2_summary">Zapne Camera2 API Androidu 5 - nabízí možnosti navíc, ale je v současné době experimentální (způsobí restart aplikace)</string>
+    <string name="preference_use_camera2_summary">Zapne Camera2 API - nabízí možnosti navíc, ale je v současné době experimentální (způsobí restart aplikace)</string>
     <string name="preference_about">O programu</string>
     <string name="preference_about_summary">Informace aplikace a ladění</string>
     <string name="preference_reset">Obnovit nastavení</string>

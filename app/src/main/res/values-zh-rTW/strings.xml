@@ -102,12 +102,12 @@
     <string name="preference_pause_preview">拍照後暫停</string>
     <string name="preference_pause_preview_summary">拍照後暫停螢幕，顯示分享或刪除照片選項</string>
     <string name="preference_shutter_sound">快門聲音</string>
-    <string name="preference_shutter_sound_summary">拍照時播放聲音(需要 Android 4.2 或更高才能停用)</string>
+    <string name="preference_shutter_sound_summary">拍照時播放聲音</string>
     <string name="preference_volume_keys">音量鍵</string>
     <string name="preference_save_location">儲存位置</string>
     <string name="preference_save_location_summary">用來儲存照片/影片檔的資料夾</string>
 	<string name="preference_using_saf">使用 Storage Access Framework</string>
-    <string name="preference_using_saf_summary">是否使用 Android 5 的 Storage Access Framework 來儲存照片和影片</string>
+    <string name="preference_using_saf_summary">是否使用 Storage Access Framework 來儲存照片和影片</string>
     <string name="preference_save_photo_prefix">照片檔名前綴</string>
     <string name="preference_save_photo_prefix_summary">用於儲存照片檔名的前置字串</string>
     <string name="preference_save_video_prefix">影片檔名前綴</string>
@@ -210,7 +210,7 @@
     <string name="preference_donate">捐贈以支援開發</string>
     <string name="preference_donate_summary">如果您喜歡這個程式，請考慮捐助。您可以透過購買我的“捐助 app”來進行捐助 - 點擊此選項將打開我的捐助 app 頁面。謝謝！</string>
     <string name="preference_use_camera2">使用 Camera2 API</string>
-    <string name="preference_use_camera2_summary">啟用 Android 5 的 Camera2 API - 提供更多功能，但仍在實驗中 (會造成重新啟動)</string>
+    <string name="preference_use_camera2_summary">啟用 Camera2 API - 提供更多功能，但仍在實驗中 (會造成重新啟動)</string>
     <string name="preference_about">關於</string>
     <string name="preference_about_summary">應用程式和除錯資訊</string>
     <string name="preference_reset">復原設定</string>

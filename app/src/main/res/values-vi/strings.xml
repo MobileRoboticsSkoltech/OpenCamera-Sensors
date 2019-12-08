@@ -112,7 +112,7 @@
     <string name="preference_save_location">Vị trí lưu</string>
     <string name="preference_save_location_summary">Thư mục lưu tệp tin ảnh/video</string>
     <string name="preference_using_saf">Sử dụng Khung Truy cập Lưu trữ</string>
-    <string name="preference_using_saf_summary">Sử dụng Khung Truy cập Lưu trữ để lưu ảnh và video. Nên kích hoạt (từ Android 5 trở lên) để có thể lưu vào thẻ nhớ ngoài.</string>
+    <string name="preference_using_saf_summary">Sử dụng Khung Truy cập Lưu trữ để lưu ảnh và video. Nên kích hoạt để có thể lưu vào thẻ nhớ ngoài.</string>
     <string name="preference_save_photo_prefix">Tiền tố ảnh</string>
     <string name="preference_save_photo_prefix_summary">Đặt tiền tố trong tên tệp khi lưu ảnh</string>
     <string name="preference_save_video_prefix">Tiền tố video</string>

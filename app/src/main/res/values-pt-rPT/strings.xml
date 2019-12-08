@@ -112,7 +112,7 @@
     <string name="preference_save_location">Local de armazenamento</string>
     <string name="preference_save_location_summary">Pasta para guardar os ficheiros das fotografias/vídeos</string>
     <string name="preference_using_saf">Usar Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Optar por usar o Storage Access Framework do Android 5 para guardar fotografias e vídeos</string>
+    <string name="preference_using_saf_summary">Optar por usar o Storage Access Framework para guardar fotografias e vídeos</string>
     <string name="preference_save_photo_prefix">Prefixo das fotografias guardadas</string>
     <string name="preference_save_photo_prefix_summary">O prefixo usado para guardar o nome dos ficheiros das fotografias</string>
     <string name="preference_save_video_prefix">Prefixo dos vídeos guardados</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Doar para apoiar o desenvolvimento</string>
     <string name="preference_donate_summary">Se gosta desta aplicação, por favor concidere fazer um donativo para apoiar o desenvolvimento. Pode fazê-lo ao comprar a minha "aplicação de donativo" - clique nesta opção para abrir a página da minha aplicação de donativo. Obrigado!</string>
     <string name="preference_use_camera2">Usar API Camera2</string>
-    <string name="preference_use_camera2_summary">Ativa a API Camera2 do Android 5 - oferece funcionalidades extra, mas é atualmente experimental (causará reinício)</string>
+    <string name="preference_use_camera2_summary">Ativa a API Camera2 - oferece funcionalidades extra, mas é atualmente experimental (causará reinício)</string>
     <string name="preference_about">Sobre</string>
     <string name="preference_about_summary">Informações da aplicação e de depuração</string>
     <string name="preference_reset">Repor definições</string>

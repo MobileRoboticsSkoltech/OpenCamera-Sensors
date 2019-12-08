@@ -103,13 +103,13 @@
     <string name="preference_pause_preview">Fotoğraf çektikten sonra beklet</string>
     <string name="preference_pause_preview_summary">Fotoğraf çektikten sonra fotoğrafı paylaşma ya da silme seçeneği için ekranı duraklat</string>
     <string name="preference_shutter_sound">Fotoğraf çekme sesi</string>
-    <string name="preference_shutter_sound_summary">Fotoğraf çekerken ses çal(kapatmak için Android 4.2 ya da daha üstü gereklidir)</string>
+    <string name="preference_shutter_sound_summary">Fotoğraf çekerken ses çal</string>
     <string name="preference_volume_keys">Ses seviyesi tuşları</string>
 
     <string name="preference_save_location">Kaydetme yeri</string>
     <string name="preference_save_location_summary">Fotoğraf/vidyo dosyaları için kayıt klasörü</string>
     <string name="preference_using_saf">Storage Access Framework kullan</string>
-    <string name="preference_using_saf_summary">Android 5\'s fotoğraf ve vidyoları kaydetmek için Storage Access Framework kullan</string>
+    <string name="preference_using_saf_summary">Fotoğraf ve vidyoları kaydetmek için Storage Access Framework kullan</string>
     <string name="preference_save_photo_prefix">Fotoğraf adlandırma öneki kaydet</string>
     <string name="preference_save_photo_prefix_summary">Fotoğraflarda dosya adlarını kaydetmede kullanılacak önek</string>
     <string name="preference_save_video_prefix">vidyo adlandırma öneki kaydet</string>
@@ -213,7 +213,7 @@
     <string name="preference_donate">Geliştirmeyi desteklemek için bağışta bulunun</string>
     <string name="preference_donate_summary">Uygulamayı beğendiyseniz, bağış yapmayı düşünebilirsiniz. "donation app" satın alarak bunu yapabilirsiniz - bu seçeneğe tıkladığınızda bağış uygulaması için sayfam açılacaktır. Teşekkürler!</string>
     <string name="preference_use_camera2">Camera2 API sini kullan</string>
-    <string name="preference_use_camera2_summary">Etkinleştirir Android 5\'s Camera2 API - ekstra özellikler sunar fakat şuan deneyseldir(yeniden başlatacaktır)</string>
+    <string name="preference_use_camera2_summary">Etkinleştirir Camera2 API - ekstra özellikler sunar fakat şuan deneyseldir(yeniden başlatacaktır)</string>
     <string name="preference_about">Hakkında</string>
     <string name="preference_about_summary">Uygulama ve eksiklik bilgisi</string>
     <string name="preference_reset">Ayarları temizle</string>

@@ -112,7 +112,7 @@
     <string name="preference_save_location">Mesto za shranjevanje</string>
     <string name="preference_save_location_summary">Mapa za shranjevanje datotek fotografij/videoposnetkov</string>
     <string name="preference_using_saf">Uporabi ogrodje za dostop do pomnilniške naprave</string>
-    <string name="preference_using_saf_summary">Ali naj se uporabi ogrodje za dostop do pomnilniške naprave Androida 5 za shranjevanje fotografij in videoposnetkov</string>
+    <string name="preference_using_saf_summary">Ali naj se uporabi ogrodje za dostop do pomnilniške naprave za shranjevanje fotografij in videoposnetkov</string>
     <string name="preference_save_photo_prefix">Predpona shranjenih fotografij</string>
     <string name="preference_save_photo_prefix_summary">Predpona imena datotek fotografij</string>
     <string name="preference_save_video_prefix">Predpona shranjenih videoposnetkov</string>
@@ -228,7 +228,7 @@
     <string name="preference_donate">Daruj za podporo razvoju</string>
     <string name="preference_donate_summary">Če vam je ta program všeč, razmislite o darovanju, da podprete razvoj. To lahko naredite z nakupom mojega "programa za darovanje" - kliknite na to možnost za odpiranje strani z mojim programom. Hvala!</string>
     <string name="preference_use_camera2">Uporabi API Camera2</string>
-    <string name="preference_use_camera2_summary">Omogoči API Camera2 Androida 5 - ponuja dodatne značilnosti, vendar morda ne bo pravilno deloval na vseh napravah (lahko povzroči ponovni zagon)</string>
+    <string name="preference_use_camera2_summary">Omogoči API Camera2 - ponuja dodatne značilnosti, vendar morda ne bo pravilno deloval na vseh napravah (lahko povzroči ponovni zagon)</string>
     <string name="preference_about">O programu</string>
     <string name="preference_about_summary">Program in podatki za razhroščevanje</string>
     <string name="preference_reset">Ponastavi nastavitve</string>

@@ -103,7 +103,7 @@
     <string name="preference_pause_preview">Mettre en pause après la prise de photo</string>
     <string name="preference_pause_preview_summary">Mettre en pause l\'écran après avoir pris une photo, avec la possibilité de partager ou supprimer la photo</string>
     <string name="preference_shutter_sound">Son de l\'obturateur</string>
-    <string name="preference_shutter_sound_summary">Jouer un son lorsque vous prenez une photo (nécessite Android 4.2 ou supérieur pour désactiver)</string>
+    <string name="preference_shutter_sound_summary">Jouer un son lorsque vous prenez une photo</string>
     <string name="preference_volume_keys">Touches de volumes</string>
     <string name="preference_audio_control">Option contrôle audio</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilité contrôle audio</string>
@@ -111,7 +111,7 @@
     <string name="preference_save_location">Dossier de stockage</string>
     <string name="preference_save_location_summary">Dossier où sont stockés les fichiers photo/vidéo</string>
     <string name="preference_using_saf">Utilisation «\u00A0Storage Access Framework\u00A0»</string>
-    <string name="preference_using_saf_summary">Utilise le Storage Access Framework d\'Android 5 pour enregistrer les photos et vidéos</string>
+    <string name="preference_using_saf_summary">Utilise le Storage Access Framework pour enregistrer les photos et vidéos</string>
     <string name="preference_save_photo_prefix">Préfixe du nom de photo</string>
     <string name="preference_save_photo_prefix_summary">Le préfixe est utilisé pour le nom de fichier des photos</string>
     <string name="preference_save_video_prefix">Préfixe du nom de la vidéo</string>
@@ -224,7 +224,7 @@
     <string name="preference_donate">Faire un don pour soutenir le développement</string>
     <string name="preference_donate_summary">Si vous aimez ce logiciel, n\'hésitez pas à faire un don. Vous pouvez le faire via l\'achat de mon «\u00A0application de don\u00A0» - Cliquer sur cette option va ouvrir la page de l\'application de don. Merci\u00A0!</string>
     <string name="preference_use_camera2">Utiliser l\'API Camera2</string>
-    <string name="preference_use_camera2_summary">Active l\'API Camera2 d\'Android 5 - permet d\'utiliser des fonctionnalités supplémentaires, mais reste encore expérimental (peut provoquer un redémarrage)</string>
+    <string name="preference_use_camera2_summary">Active l\'API Camera2 - permet d\'utiliser des fonctionnalités supplémentaires, mais reste encore expérimental (peut provoquer un redémarrage)</string>
     <string name="preference_about">À propos</string>
     <string name="preference_about_summary">Informations de l\'application et de debug</string>
     <string name="preference_reset">Réinitialiser les paramètres</string>

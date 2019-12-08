@@ -91,7 +91,7 @@
     <string name="preference_pause_preview">Çəkilişdən sonra fasilə</string>
     <string name="preference_pause_preview_summary">Şəkil çəkildikdən sonra paylaşma və ya silinmə imkanları yaradan fasilə</string>
     <string name="preference_shutter_sound">Çəkiliş səsi</string>
-    <string name="preference_shutter_sound_summary">Şəkil çəkilən zaman eşidilən səs (bağlanması üçün Android 4.2+ tələb olunur)</string>
+    <string name="preference_shutter_sound_summary">Şəkil çəkilən zaman eşidilən səs</string>
     <string name="preference_volume_keys">Səs səviyyəsi düyməsi</string>
     <string name="preference_save_location">Saxlanma yeri</string>
     <string name="preference_save_location_summary">Şəkil və videonun saxlanması üçün qovluq adı</string>
@@ -182,7 +182,7 @@
     <string name="preference_donate">Dəstək üçün İanə</string>
     <string name="preference_donate_summary">Əgər bu proqram xoşunuza gəlirsə, lütfən ianə vermək haqqında düşünün. Siz bunu Proqram üçün ianə - toxunaraq almaqla edə bilərsiniz, bu funksiya proqrama ianə vermək üçün səhifəni açacaq. Təşəkkürlər!</string>
     <string name="preference_use_camera2">Camera2 API istifadəsi</string>
-    <string name="preference_use_camera2_summary">Android 5 Camera2 API işə salınması - əlavə funksiyalar təqdim edir, amma hazırda bu ekperimentaldır (yenidənbaşlamalara səbəb ola bilər)</string>
+    <string name="preference_use_camera2_summary">Camera2 API işə salınması - əlavə funksiyalar təqdim edir, amma hazırda bu ekperimentaldır (yenidənbaşlamalara səbəb ola bilər)</string>
     <string name="preference_about">Haqqında</string>
     <string name="preference_about_summary">Proqram məlumatları</string>
     <string name="preference_reset">Parametrləri sıfırla</string>

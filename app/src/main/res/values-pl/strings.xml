@@ -111,7 +111,7 @@
     <string name="preference_save_location">Lokalizacja zapisu</string>
     <string name="preference_save_location_summary">Folder, do którego będą zapisywane pliki</string>
     <string name="preference_using_saf">Używaj SAF (systemowa obsługa dostępu do pamięci)</string>
-    <string name="preference_using_saf_summary">Używa Storage Access Framework Androida 5 do zapisu plików zdjęć i filmów</string>
+    <string name="preference_using_saf_summary">Używa Storage Access Framework do zapisu plików zdjęć i filmów</string>
     <string name="preference_save_photo_prefix">Przedrostek nazw zdjęć</string>
     <string name="preference_save_photo_prefix_summary">Przedrostek używany w nazwach plików zdjęć</string>
     <string name="preference_save_video_prefix">Przedrostek nazw filmów</string>
@@ -227,7 +227,7 @@
     <string name="preference_donate">Przekaż darowiznę</string>
     <string name="preference_donate_summary">Jeśli spodobała Ci się ta aplikacja rozważ przekazanie darowizny, która wesprze rozwój aplikacji. Możesz to zrobić poprzez zakup specjalnej aplikacji - dotknij tutaj aby otworzyć stronę. Dzięki!</string>
     <string name="preference_use_camera2">Używaj Camera2 API</string>
-    <string name="preference_use_camera2_summary">Włącza Camera2 API Androida 5, które oferuje wiele dodatkowych funkcji, ale może działać niepoprawnie na niektórych urządzeniach (może spowodować restart)</string>
+    <string name="preference_use_camera2_summary">Włącza Camera2 API, które oferuje wiele dodatkowych funkcji, ale może działać niepoprawnie na niektórych urządzeniach (może spowodować restart)</string>
     <string name="preference_about">O aplikacji</string>
     <string name="preference_about_summary">Informacje o aplikacji i debugowanie</string>
     <string name="preference_reset">Reset ustawień</string>

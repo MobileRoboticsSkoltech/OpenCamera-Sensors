@@ -99,7 +99,7 @@
     <string name="preference_pause_preview">Pausar depois de tirar foto</string>
     <string name="preference_pause_preview_summary">Pausar a tela depois de tirar uma foto, com a opção para compartilhar ou deletar foto</string>
     <string name="preference_shutter_sound">Som de captura</string>
-    <string name="preference_shutter_sound_summary">Toca um som quando tira uma foto (requer Android 4.2+ para desabilitar)</string>
+    <string name="preference_shutter_sound_summary">Toca um som quando tira uma foto</string>
     <string name="preference_volume_keys">Teclas de volume</string>
     <string name="preference_save_location">Local de armazenamento</string>
     <string name="preference_save_location_summary">Escolha a pasta para salvar os arquivos de foto/vídeo</string>
