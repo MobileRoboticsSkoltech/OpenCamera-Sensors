@@ -549,6 +549,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean touchEvent(MotionEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "touch event at : " + event.getX() + " , " + event.getY() + " at time " + event.getEventTime());
+
+        boolean was_paused = !this.is_preview_started;
+        if( MyDebug.LOG )
+            Log.d(TAG, "was_paused: " + was_paused);
+
         if( gestureDetector.onTouchEvent(event) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "touch event handled by gestureDetector");
@@ -619,7 +624,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         cancelAutoFocus();
 
-        if( camera_controller != null && !this.using_face_detection ) {
+        // don't set focus areas on touch if the user is touching to unpause!
+        if( camera_controller != null && !this.using_face_detection && !was_paused ) {
             this.has_focus_area = false;
             ArrayList<CameraController.Area> areas = getAreas(event.getX(), event.getY());
             if( camera_controller.setFocusAndMeteringArea(areas) ) {
@@ -636,7 +642,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
         }
 
-        if( !this.is_video && applicationInterface.getTouchCapturePref() ) {
+        // don't take a photo on touch if the user is touching to unpause!
+        if( !this.is_video && !was_paused && applicationInterface.getTouchCapturePref() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "touch to capture");
             // interpret as if user had clicked take photo/video button, except that we set the focus/metering areas
@@ -644,7 +651,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return true;
         }
 
-        tryAutoFocus(false, true);
+        // don't auto focus on touch if the user is touching to unpause!
+        if( !was_paused ) {
+            tryAutoFocus(false, true);
+        }
         return true;
     }
 
