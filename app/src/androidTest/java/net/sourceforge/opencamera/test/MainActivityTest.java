@@ -4032,7 +4032,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhoto(false, false, true, false, false, false, false, false);
     }
 
-    /* Tests taking a photo with front camera.
+    /* Tests taking a photo with all non-default cameras.
      * Also tests the content descriptions for switch camera button.
      * And tests that we save the current camera when pausing and resuming.
      */
@@ -4040,50 +4040,68 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testTakePhotoFrontCamera");
         setToDefault();
 
-        if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
+        int n_cameras = mPreview.getCameraControllerManager().getNumberOfCameras();
+        if( n_cameras <= 1 ) {
             return;
         }
-        int cameraId = mPreview.getCameraId();
-        boolean is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(cameraId);
+        for(int i=0;i<n_cameras-1;i++) {
+            Log.d(TAG, "i: " + i);
+            int cameraId = mPreview.getCameraId();
+            boolean is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(cameraId);
 
-        View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-        CharSequence contentDescription = switchCameraButton.getContentDescription();
-        clickView(switchCameraButton);
-        waitUntilCameraOpened();
+            View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+            CharSequence contentDescription = switchCameraButton.getContentDescription();
+            clickView(switchCameraButton);
+            waitUntilCameraOpened();
 
-        int new_cameraId = mPreview.getCameraId();
-        assertTrue(new_cameraId != cameraId);
-        boolean new_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(new_cameraId);
-        CharSequence new_contentDescription = switchCameraButton.getContentDescription();
+            int new_cameraId = mPreview.getCameraId();
+            assertTrue(new_cameraId != cameraId);
+            boolean new_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(new_cameraId);
+            CharSequence new_contentDescription = switchCameraButton.getContentDescription();
 
-        Log.d(TAG, "cameraId: " + cameraId);
-        Log.d(TAG, "is_front_facing: " + is_front_facing);
-        Log.d(TAG, "contentDescription: " + contentDescription);
-        Log.d(TAG, "new_cameraId: " + new_cameraId);
-        Log.d(TAG, "new_is_front_facing: " + new_is_front_facing);
-        Log.d(TAG, "new_contentDescription: " + new_contentDescription);
+            int next_cameraId = (new_cameraId+1) % n_cameras;
+            boolean next_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(next_cameraId);
 
-        assertTrue(cameraId != new_cameraId);
-        assertTrue( contentDescription.equals( mActivity.getResources().getString(new_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
-        assertTrue( new_contentDescription.equals( mActivity.getResources().getString(is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
-        subTestTakePhoto(false, false, true, true, false, false, false, false);
+            Log.d(TAG, "cameraId: " + cameraId);
+            Log.d(TAG, "is_front_facing: " + is_front_facing);
+            Log.d(TAG, "contentDescription: " + contentDescription);
+            Log.d(TAG, "new_cameraId: " + new_cameraId);
+            Log.d(TAG, "new_is_front_facing: " + new_is_front_facing);
+            Log.d(TAG, "new_contentDescription: " + new_contentDescription);
+            Log.d(TAG, "next_cameraId: " + next_cameraId);
+            Log.d(TAG, "next_is_front_facing: " + next_is_front_facing);
 
-        // check still front camera after pause/resume
-        pauseAndResume();
+            assertEquals(contentDescription, mActivity.getResources().getString(new_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
+            assertEquals(new_contentDescription, mActivity.getResources().getString(next_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
+            subTestTakePhoto(false, false, true, true, false, false, false, false);
 
-        int restart_cameraId = mPreview.getCameraId();
-        CharSequence restart_contentDescription = switchCameraButton.getContentDescription();
-        Log.d(TAG, "restart_contentDescription: " + restart_contentDescription);
-        assertTrue(restart_cameraId == new_cameraId);
-        assertTrue( restart_contentDescription.equals( mActivity.getResources().getString(is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
+            if( i == 0 ) {
+                // check still front camera after pause/resume
+                pauseAndResume();
 
-        // now test mirror mode
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_photo");
-        editor.apply();
-        updateForSettings();
-        subTestTakePhoto(false, false, true, true, false, false, false, false);
+                int restart_cameraId = mPreview.getCameraId();
+                CharSequence restart_contentDescription = switchCameraButton.getContentDescription();
+                Log.d(TAG, "restart_contentDescription: " + restart_contentDescription);
+                assertEquals(restart_cameraId, new_cameraId);
+                assertEquals(restart_contentDescription, mActivity.getResources().getString(next_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
+            }
+
+            if( i == 0 ) {
+                // now test mirror mode
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_photo");
+                editor.apply();
+                updateForSettings();
+                subTestTakePhoto(false, false, true, true, false, false, false, false);
+                // disable mirror mode again
+                settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+                editor = settings.edit();
+                editor.putString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no");
+                editor.apply();
+                updateForSettings();
+            }
+        }
     }
 
     /* Tests taking a photo with front camera and screen flash.
