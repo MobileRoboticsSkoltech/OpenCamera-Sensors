@@ -5912,7 +5912,7 @@ public class CameraController2 extends CameraController {
                         // For Nexus 6, max reported ISO is 1196, so the limit for dark scenes shouldn't be more than this
                         // Nokia 8's max reported ISO is 1551
                         // Note that OnePlus 3T has max reported ISO of 800, but this is a device bug
-                        if( capture_result_iso >= 1100 ) {
+                        if( capture_result_iso >= ISO_FOR_DARK ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "optimise for dark scene");
                             n_burst = noise_reduction_low_light ? N_IMAGES_NR_DARK_LOW_LIGHT : N_IMAGES_NR_DARK;

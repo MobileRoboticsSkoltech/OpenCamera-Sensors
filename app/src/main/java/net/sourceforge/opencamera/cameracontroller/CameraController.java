@@ -38,6 +38,7 @@ public abstract class CameraController {
     public static final String ISO_DEFAULT = "auto";
     public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30; // note, responsibility of callers to check that this is within the valid min/max range
 
+    public static final int ISO_FOR_DARK = 1100;
     public static final int N_IMAGES_NR_DARK = 8;
     public static final int N_IMAGES_NR_DARK_LOW_LIGHT = 15;
 

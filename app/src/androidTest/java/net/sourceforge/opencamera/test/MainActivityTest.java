@@ -3434,6 +3434,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         else if( is_nr ) {
             suffix = "_NR";
+            if( mActivity.getApplicationInterface().getNRModePref() == MyApplicationInterface.NRModePref.NRMODE_LOW_LIGHT )
+                max_time_s += 2; // takes longer to save low light photo
         }
         else if( is_expo ) {
             suffix = "_" + (n_expo_images-1);
@@ -10390,13 +10392,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhoto(false, false, true, true, false, false, false, false);
         Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
         assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        assertTrue(mActivity.getPreview().getCameraController().getBurstTotal() < CameraController.N_IMAGES_NR_DARK_LOW_LIGHT);
 
         // then try again without waiting
         for(int i=1;i<n_back_photos;i++) {
             subTestTakePhoto(false, false, true, false, false, false, false, false);
             Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
             assertTrue(mPreview.getCameraController().test_capture_results == i+1);
+            assertTrue(mActivity.getPreview().getCameraController().getBurstTotal() < CameraController.N_IMAGES_NR_DARK_LOW_LIGHT);
         }
+
+        // then try low light mode
+        Log.d(TAG, "test low light mode");
+        mActivity.getApplicationInterface().setNRMode("preference_nr_mode_low_light");
+        mActivity.getPreview().setupBurstMode();
+        subTestTakePhoto(false, false, true, true, false, false, false, false);
+        Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+        assertTrue(mPreview.getCameraController().test_capture_results == n_back_photos+1);
+        if( mActivity.getPreview().getCameraController().captureResultHasIso() && mActivity.getPreview().getCameraController().captureResultIso() >= CameraController.ISO_FOR_DARK )
+            assertEquals(CameraController.N_IMAGES_NR_DARK_LOW_LIGHT, mActivity.getPreview().getCameraController().getBurstTotal());
+        // reset
+        mActivity.getApplicationInterface().setNRMode("preference_nr_mode_normal");
+        mActivity.getPreview().setupBurstMode();
 
         // then try front camera
 
@@ -10420,6 +10437,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhoto(false, false, true, true, false, false, false, false);
         Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
         assertTrue(mPreview.getCameraController().test_capture_results == 1);
+        assertTrue(mActivity.getPreview().getCameraController().getBurstTotal() < CameraController.N_IMAGES_NR_DARK_LOW_LIGHT);
     }
 
     /** Tests fast burst with 20 images.
