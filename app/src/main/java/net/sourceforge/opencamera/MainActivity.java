@@ -3818,6 +3818,7 @@ public class MainActivity extends Activity {
             return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
+        // remember to update the FAQ "Why isn't Paranoram supported on my device?" if this changes
         return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && large_heap_memory >= 256 && applicationInterface.getGyroSensor().hasSensors() );
         //return false; // currently blocked for release
     }
