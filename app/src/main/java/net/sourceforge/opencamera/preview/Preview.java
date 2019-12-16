@@ -1591,7 +1591,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         boolean take_photo = false;
         if( camera_controller != null ) {
             Activity activity = (Activity)Preview.this.getContext();
-            if( MyDebug.LOG )
+            /*if( MyDebug.LOG )
                 Log.d(TAG, "intent: " + activity.getIntent());
             if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
                 take_photo = activity.getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
@@ -1600,7 +1600,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             else {
                 if( MyDebug.LOG )
                     Log.d(TAG, "no intent data");
-            }
+            }*/
+            take_photo = TakePhoto.TAKE_PHOTO;
+            if( take_photo )
+                TakePhoto.TAKE_PHOTO = false;
             if( MyDebug.LOG )
                 Log.d(TAG, "take_photo?: " + take_photo);
 
