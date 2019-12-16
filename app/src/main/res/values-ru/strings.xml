@@ -98,7 +98,7 @@
     <string name="preference_timer_speak_summary">Озвучивать обратный отсчет для таймера или пакетного режима (от 60 секунд)</string>
     <string name="preference_burst_mode">Пакетный</string>
     <string name="preference_burst_interval">Интервал в пакетном режиме</string>
-    <string name="preference_screen_camera_controls_more">Дополнительные настройки</string>
+    <string name="preference_screen_camera_controls_more">Дополнительные настройки…</string>
     <string name="preference_touch_capture">Касание для съемки</string>
     <string name="preference_touch_capture_summary">Делать снимок по одинарному или двойному касанию области просмотра</string>
     <string name="preference_pause_preview">Пауза после съёмки</string>
@@ -107,6 +107,7 @@
     <string name="preference_shutter_sound_summary">Воспроизведение звука при съемке фотографии</string>
     <string name="preference_volume_keys">Клавиши громкости</string>
     <string name="preference_audio_control">Настройки управления звуком</string>
+    <!-- preference_audio_control_summary defined below -->
     <string name="preference_audio_noise_control_sensitivity">Чувствительность управления звуком</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Чувствительность уровня шума для управления звуком (опция \"громкий шум\")</string>
     <string name="preference_save_location">Папка сохранения</string>
@@ -126,7 +127,7 @@
     <string name="preference_lock_video_summary">При записи видео графический интерфейс будет заблокирован для предотвращения случайной остановки записи. Проведите по экрану, чтобы разблокировать. Обратите внимание, что запись видео остановится, если приложение перейдет в фоновый режим или погаснет экран.</string>
     <string name="preference_rotate_preview">Поворот предпросмотра</string>
     <string name="preference_rotate_preview_summary">Возможность поворота предпросмотра (не повлияет на фото/видео)\n%s</string>
-    <string name="preference_screen_gui">Настройки интерфейса</string>
+    <string name="preference_screen_gui">Настройки интерфейса…</string>
     <string name="preference_preview_size">Размер предпросмотра</string>
     <string name="preference_ui_placement">Расположение интерфейса</string>
     <string name="preference_immersive_mode">Режим погружения</string>
@@ -180,14 +181,14 @@
     <string name="preference_gps_direction">Хранить направление компаса</string>
     <string name="preference_gps_direction_summary">Хранить данные о направлении компаса в фотографиях</string>
     <string name="preference_require_location">Требовать данные о местоположении</string>
-    <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только, если они доступны</string>
+    <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только при их доступности</string>
     <string name="preference_stamp">Штампы</string>
     <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение\n%s</string>
     <string name="preference_stamp_dateformat">Формат даты</string>
     <string name="preference_stamp_timeformat">Формат времени</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
-    <string name="preference_textstamp">Подписывание фото</string>
-    <string name="preference_textstamp_summary">Добавление текста на фотографию</string>
+    <string name="preference_textstamp">Подписывать фото</string>
+    <string name="preference_textstamp_summary">Добавлять текст на фотографию</string>
     <string name="preference_stamp_fontsize">Размер шрифта</string>
     <string name="preference_stamp_fontsize_summary">Размер шрифта для добавляемого на фотографию текста</string>
     <string name="preference_stamp_font_color">Цвет</string>
@@ -201,16 +202,16 @@
     <string name="preference_force_video_4k_summary">При выборе разрешения (3840х2160) для записи через заднюю камеру она будет работать только, если ваше устройство поддерживает данный формат!</string>
     <string name="preference_video_stabilization">Включить стабилизацию видео</string>
     <string name="preference_video_stabilization_summary">Стабилизация видео уменьшает тряску в связи с движением камеры</string>
-    <string name="preference_video_bitrate">Видео битрейт (примерно)</string>
+    <string name="preference_video_bitrate">Битрейт видео (примерно)</string>
     <string name="preference_video_bitrate_summary">Выбор битрейта видео. (чем выше, тем лучше качество, но файл будет занимать больше места на диске. Неподдерживаемый битрейт может стать причиной ошибки при записи видео).\n%s</string>
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
     <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается\n%s</string>
     <string name="preference_video_max_duration">Максимальная длительность видео</string>
     <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности\n%s</string>
-    <string name="preference_video_restart">Записать новое видео после достижения лимита</string>
-    <string name="preference_video_restart_summary">При достижении лимита продолжительности, будет записано новое видео (столько раз, сколько вы выбрали)\n%s</string>
+    <string name="preference_video_restart">Записывать новое видео после достижения лимита</string>
+    <string name="preference_video_restart_summary">При достижении лимита продолжительности будет записано новое видео (столько раз, сколько вы выбрали)\n%s</string>
     <string name="preference_video_max_filesize">Максимальный размер файла видео</string>
-    <string name="preference_video_max_filesize_summary">Видеозапись прекратится или начнется заново (смотрите опцию ниже), когда размер файла достигнет указанной величины (приблизительно). Стоит заметить, что почти у всех Android-устройств есть ограничение на максимальный размер видео (обычно около 2 или 4 Гб), однако с помощью этой опции можно указать конкретное значение\n%s</string>
+    <string name="preference_video_max_filesize_summary">Видеозапись прекратится или начнется заново (смотрите опцию ниже), когда размер файла достигнет указанной величины (приблизительно). Важно: почти у всех Android-устройств есть ограничение на максимальный размер видео (обычно около 2 или 4 Гб), однако с помощью этой опции можно указать конкретное значение\n%s</string>
     <string name="preference_video_restart_max_filesize">Начать видеозапись заново при достижении максимального размера файла</string>
     <string name="preference_video_restart_max_filesize_summary">Автоматически начать видеозапись заново при достижении максимального размера файла (обусловленного ограничениями устройства или указанного пользователем)</string>
     <string name="preference_record_audio">Запись звука</string>
@@ -223,7 +224,7 @@
     <string name="preference_video_flash_summary">Если включено, вспышка будет включаться/выключаться при записи видео (можно использовать, чтобы выполнить запись на расстоянии)</string>
     
     <string name="preference_category_online">Разное</string>
-    <string name="preference_online_help">Онлайн помощь</string>
+    <string name="preference_online_help">Помощь в Интернете</string>
     <string name="preference_online_help_summary">Запустить веб-сайт Open Camera в вашем браузере</string>
     <string name="preference_donate">Пожертвовать</string>
     <string name="preference_donate_summary">Если вам нравится это приложение, киньте мне копейку. Вы можете сделать это, купив мое приложение. Спасибо!</string>
@@ -280,9 +281,9 @@
     <string name="speech_recognizer_started">Скажите \"cheese\"</string>
     <string name="audio_listener_started">Создайте громкий шум</string>
 
-    <string name="auto_stabilise_info">Автоматическая стабилизация будет поворачивать фотографии для их выравнивания.\n\nСтоит заметить, что разрешение полученных фото слегка уменьшится из-за поворота и обрезки.</string>
-    <string name="raw_info">Файлы DNG содержат несжатую и необработанную информацию с вашей камеры.\n\nБольшинство программ для просмотра изображений не поддерживают DNG. Их нужно открывать специальными программами наподобие Snapseed или Lightroom.\n\nСтоит заметить, что различные опции наподобие "Штамп на фото" или "Автоматическая стабилизация" работают только для изображений формата JPEG, а не DNG.\n\nФайлы DNG имеют большой объем. Для их копирования или удаления может быть полезен файловый менеджер.\n\nФайлы DNG сохраняются только в режиме фото "Стандарт".</string>
-    <string name="hdr_info">Режим HDR полезен для фото с большой разницей яркости. В нем делается несколько фото с различной экспозицией, которые объединяются в окончательное фото.\n\nСтоит заметить, что HDR не рекомендуется для съемки кадров с быстрым движением, что может привести к менее корректной цветопередаче.\n\nСъемка фото в режиме HDR будет гораздо медленнее, чем в обычном режиме.</string>
+    <string name="auto_stabilise_info">Автоматическая стабилизация будет поворачивать фотографии для их выравнивания.\n\nВажно: разрешение полученных фото слегка уменьшится из-за поворота и обрезки.</string>
+    <string name="raw_info">Файлы DNG содержат несжатую и необработанную информацию с вашей камеры.\n\nБольшинство программ для просмотра изображений не поддерживают DNG. Их нужно открывать специальными программами наподобие Snapseed или Lightroom.\n\nВажно: различные опции наподобие "Штамп на фото" или "Автоматическая стабилизация" работают только для изображений формата JPEG, а не DNG.\n\nФайлы DNG имеют большой объем. Для их копирования или удаления может быть полезен файловый менеджер.\n\nФайлы DNG сохраняются только в режиме фото "Стандарт".</string>
+    <string name="hdr_info">Режим HDR полезен для фото с большой разницей яркости. В нем делается несколько фото с различной экспозицией, которые объединяются в окончательное фото.\n\nВажно: HDR не рекомендуется для съемки кадров с быстрым движением, это может привести к менее корректной цветопередаче.\n\nСъемка фото в режиме HDR будет гораздо медленнее, чем в обычном режиме.</string>
 
     <string name="dont_show_again">Больше не показывать</string>
 
@@ -298,7 +299,7 @@
     <string name="photo_mode_noise_reduction_full">Снижение шума</string>
     <string name="preference_category_stamp">Штамп на фото</string>
     <string name="preference_hdr_save_expo">Сохранять все изображения в режиме HDR</string>
-    <string name="preference_hdr_save_expo_summary">Если эта опция включена, то в режиме HDR вместе с окончательным фото HDR будут сохранены три основных фото экспозиции. Стоит заметить, что сохранение фото будет медленнее, особенно при включенных опциях наподобие "Штамп на фото" или "Автоматическая стабилизация".</string>
+    <string name="preference_hdr_save_expo_summary">Если эта опция включена, то в режиме HDR вместе с окончательным фото HDR будут сохранены три основных фото экспозиции. Важно: сохранение фото будет медленнее, особенно при включенных опциях наподобие "Штамп на фото" или "Автоматическая стабилизация".</string>
 
     <string name="no_permission">РАЗРЕШЕНИЯ НЕ ДОСТУПНЫ</string>
     <string name="permission_rationale_title">Требуется разрешение</string>
@@ -520,7 +521,7 @@
     <string name="flash_frontscreen_torch">Экранный фонарик</string>
 
     <string name="preference_antibanding">Антибэндинг</string>
-    <string name="preference_antibanding_summary">Алгоритмы для борьюы с мерцанием света.\n%s</string>
+    <string name="preference_antibanding_summary">Алгоритмы для борьбы с мерцанием света.\n%s</string>
     <string name="anti_banding_auto">Автоматически</string>
     <string name="anti_banding_50hz">50 Гц</string>
     <string name="anti_banding_60hz">60 Гц</string>
@@ -800,6 +801,7 @@
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
     <string name="preference_stamp_geo_address">Использовать адреса</string>
+    <!-- preference_stamp_geo_address_summary defined below -->
     <string name="preference_stamp_geo_address_both">По возможности показывать адреса вместе с GPS-координатами</string>
     <string name="preference_stamp_geo_address_prefer">Предпочитать адреса GPS-координатам</string>
     <string name="preference_stamp_geo_address_no">Не показывать адреса</string>
@@ -868,7 +870,7 @@
     <string name="preference_panorama_crop">Автоматическая обрезка панорамы</string>
     <string name="preference_panorama_crop_summary">Удалять волнистые края в режиме панорамы\n%s</string>
 
-    <string name="panorama_info">Чтобы снять панораму, удерживайте ваше устройство в портретной ориентации и нажмите на кнопку снятия фото для начала формирования панорамыa. Затем поворачивайте устройство влево или вправо, сдвигая белый круг в центре на синюю точку. После захвата нового изображения продолжайте поворачивать устройство, чтобы захватить следующую синюю точку.\n\nНажмите на галочку, чтобы сохранить панораму, или крестик, чтобы отменить ее.\n\nВажно: обработка и сохранение фото панорамы могут занять некоторое время.</string>
+    <string name="panorama_info">Чтобы снять панораму, удерживайте ваше устройство в портретной ориентации и нажмите на кнопку снятия фото для начала формирования панорамы. Затем поворачивайте устройство влево или вправо, сдвигая белый круг в центре на синюю точку. После захвата нового изображения продолжайте поворачивать устройство, чтобы захватить следующую синюю точку.\n\nНажмите на галочку, чтобы сохранить панораму, или крестик, чтобы отменить ее.\n\nВажно: обработка и сохранение фото панорамы могут занять некоторое время.</string>
 
     <string name="preference_panorama_save">Оригинальные изображения панорамы</string>
     <string name="preference_panorama_save_summary">Сохранять оригинальные изображения в режиме панорамы. Важно: фото панорам будут сохраняться медленнее. Также позволяет сохранять файл XML, который может быть полезен при сообщении об ошибках с панорамами.\n%s</string>
@@ -878,5 +880,34 @@
     <string name="preference_panorama_save_all_plus_debug">Сохранять оригинальные изображения и файл XML для отладки</string>
 
     <string name="camera_id">ID</string> <!-- ID as in camera ID -->
+
+    <string name="exposure_compensation_seekbar">Шкала для изменения компенсации экспозиции</string>
+
+    <string name="preference_image_format_summary">Выберите формат файла для сохранения фото. Это влияет на \"обычные\" (не RAW) фото. Важно: формат PNG не является настоящим форматом "без потерь", вместо этого он конвертируется из JPEG со 100% качеством.\n%s</string>
+
+    <string name="preference_camera_api">Camera API</string>
+    <string name="preference_camera_api_summary">Выберите Camera2 API, чтобы включить дополнительные возможности, например ручные режимы экспозиции, фокус, баланс белого, вместе с форматом RAW (если поддерживается устройством). При изменении API потребуется перезапуск.\n%s</string>
+    <string name="preference_camera_api_old">Оригинальный API камеры</string>
+    <string name="preference_camera_api_camera2">Camera2 API</string>
+
+    <string name="preference_audio_control_summary">Снимать фото/видео при обнаружении шума или по голосовой команде.
+        Если включено, используйте экранную кнопку микрофона для запуска/остановки слушания.
+        Важно: настройка голосовой команды использует службу распознавания речи Android. При использовании этой опции аудиоданные
+        могут быть переданы на удаленные серверы для распознавания речи.
+        \n%s</string>
+
+    <string name="preference_stamp_geo_address_summary">По возможности использовать адрес при штамповании геолокации по GPS.
+        Для данной опции требуется наличие Интернет-соединения.
+        Важно: если включено, ваше устройство будет передавать данные геолокации сторонним лицам
+        для преобразования координат GPS в адрес. Смотрите https://developer.android.com/reference/android/location/Geocoder .
+        \n%s</string>
+
+    <string name="intro_text">Коснитесь для фокуса и нажмите синюю кнопку камеры, чтобы сделать фото.
+        \n\nДля отключения максимальной яркости экрана перейдите в Настройки/Настройки интерфейса…/\"Максимальная яркость\".
+        Для сохранения на SD-карту на Android 5+ перейдите в Настройки/Дополнительные настройки…/\"Использовать Storage Access Framework\".
+        Для получения подробностей нажмите \"Помощь в Интернете\" в меню Настройки.
+    </string>
+
+    <string name="preference_select_remote">Выбрать удаленное устройство</string>
 
 </resources>
