@@ -910,7 +910,7 @@
 
     <string name="preference_select_remote">Select remote device</string>
 
-    <!-- The following strings should not be translated (in case they need updating) -->
+    <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>
     <string name="preference_privacy_policy_summary">Tap to display privacy policy</string>
@@ -948,7 +948,7 @@
     <string name="preference_licence_online">Online licences</string>
     <string name="preference_licence_online_text">Please tap here for full online licensing information (opens in your browser).</string>
 
-    <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
+    <!-- There's no point translating the What's New text (and shouldn't be included in language-specific strings.xml) - it'll be updated constantly, and change each version -->
     <string name="whats_new_text">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
             Settings/On screen GUI/Show What\'s New dialog.]</small>
