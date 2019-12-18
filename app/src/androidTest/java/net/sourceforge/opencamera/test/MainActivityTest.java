@@ -15618,6 +15618,29 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    /** Tests panorama algorithm on test samples "testPanoramaWhite".
+     *  This tests that auto-alignment fails gracefully if we can't find any matches.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void testPanoramaWhite() throws IOException, InterruptedException {
+        Log.d(TAG, "testPanoramaWhite");
+
+        setToDefault();
+
+        // list assets
+        List<String> inputs = new ArrayList<>();
+
+        inputs.add(panorama_images_path + "testPanoramaWhite/input0.jpg");
+        inputs.add(panorama_images_path + "testPanoramaWhite/input0.jpg");
+        float camera_angle_x = 66.3177f;
+        float camera_angle_y = 50.04736f;
+        float panorama_pics_per_screen = 2.0f;
+        String output_name = "testPanoramaWhite_output.jpg";
+
+        subTestPanorama(inputs, output_name, null, panorama_pics_per_screen, camera_angle_x, camera_angle_y, 2.0f);
+    }
+
     /** Tests panorama algorithm on test samples "testPanorama1".
      * @throws IOException
      * @throws InterruptedException

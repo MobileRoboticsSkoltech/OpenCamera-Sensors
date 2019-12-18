@@ -12,6 +12,7 @@ public class PanoramaTests {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite(MainTests.class.getName());
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanoramaWhite"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama1"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama2"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPanorama3"));
