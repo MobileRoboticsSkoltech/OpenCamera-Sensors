@@ -1738,6 +1738,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         this.updateFocusForVideo();
 
         try {
+            initCameraParameters();
+        }
+        catch(CameraControllerException e) {
+            e.printStackTrace();
+            applicationInterface.onCameraError();
+            closeCamera(false, null);
+            return;
+        }
+
+        try {
             setupCameraParameters();
         }
         catch(CameraControllerException e) {
@@ -1965,13 +1975,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
-    private void setupCameraParameters() throws CameraControllerException {
+    private void initCameraParameters() throws CameraControllerException {
         if( MyDebug.LOG )
-            Log.d(TAG, "setupCameraParameters()");
-        long debug_time = 0;
-        if( MyDebug.LOG ) {
-            debug_time = System.currentTimeMillis();
-        }
+            Log.d(TAG, "initCameraParameters()");
         {
             // get available scene modes
             // important, from old Camera API docs:
@@ -1996,9 +2002,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
                 applicationInterface.clearSceneModePref();
             }
-        }
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "setupCameraParameters: time after setting scene mode: " + (System.currentTimeMillis() - debug_time));
         }
 
         {
@@ -2053,8 +2056,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.video_quality_handler.setVideoSizesHighSpeed(camera_features.video_sizes_high_speed);
             this.supported_preview_sizes = camera_features.preview_sizes;
         }
+    }
+
+    private void setupCameraParameters() throws CameraControllerException {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setupCameraParameters()");
+        long debug_time = 0;
         if( MyDebug.LOG ) {
-            Log.d(TAG, "setupCameraParameters: time after getting read only info: " + (System.currentTimeMillis() - debug_time));
+            debug_time = System.currentTimeMillis();
         }
 
         {
