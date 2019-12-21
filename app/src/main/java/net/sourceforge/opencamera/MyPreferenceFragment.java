@@ -533,6 +533,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
             pg.removePreference(pref);
         }
+        final boolean video_stabilization_enabled = bundle.getBoolean("video_stabilization_enabled");
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
             filterArrayEntry("preference_video_output_format", "preference_video_output_format_mpeg4_hevc");
@@ -1228,6 +1229,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         }
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nVideo stabilization enabled?: ");
+                        about_string.append(video_stabilization_enabled);
                         about_string.append("\nTonemap max curve points: ");
                         about_string.append(tonemap_max_curve_points);
                         about_string.append("\nCan disable shutter sound?: ");
