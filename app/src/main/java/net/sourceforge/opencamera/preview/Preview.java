@@ -6431,6 +6431,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return supports_face_detection;
     }
 
+    /** Whether video digital stabilization is supported by the device.
+     */
     public boolean supportsVideoStabilization() {
         if( MyDebug.LOG )
             Log.d(TAG, "supportsVideoStabilization");
