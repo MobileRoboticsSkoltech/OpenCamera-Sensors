@@ -1692,6 +1692,8 @@ public class MainActivity extends Activity {
         bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
         bundle.putInt("white_balance_temperature_min", this.preview.getMinimumWhiteBalanceTemperature());
         bundle.putInt("white_balance_temperature_max", this.preview.getMaximumWhiteBalanceTemperature());
+        bundle.putBoolean("supports_optical_stabilization", this.preview.supportsOpticalStabilization());
+        bundle.putBoolean("optical_stabilization_enabled", this.preview.getOpticalStabilization());
         bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
         bundle.putBoolean("video_stabilization_enabled", this.preview.getVideoStabilization());
         bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());

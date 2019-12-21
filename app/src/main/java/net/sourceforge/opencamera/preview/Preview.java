@@ -307,6 +307,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private CameraController.Face [] faces_detected;
     private final RectF face_rect = new RectF();
     private final AccessibilityManager accessibility_manager;
+    private boolean supports_optical_stabilization;
     private boolean supports_video_stabilization;
     private boolean supports_photo_video_recording;
     private boolean can_disable_shutter_sound;
@@ -1338,6 +1339,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         faces_detected = null;
         supports_face_detection = false;
         using_face_detection = false;
+        supports_optical_stabilization = false;
         supports_video_stabilization = false;
         supports_photo_video_recording = false;
         can_disable_shutter_sound = false;
@@ -2027,6 +2029,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.max_num_focus_areas = camera_features.max_num_focus_areas;
             this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
             this.is_white_balance_lock_supported = camera_features.is_white_balance_lock_supported;
+            this.supports_optical_stabilization = camera_features.is_optical_stabilization_supported;
             this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
             this.supports_photo_video_recording = camera_features.is_photo_video_recording_supported;
             this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
@@ -6438,6 +6441,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean supportsFaceDetection() {
         // don't log this, as we call from DrawPreview!
         return supports_face_detection;
+    }
+
+    /** Whether optical image stabilization (OIS) is supported by the device.
+     */
+    public boolean supportsOpticalStabilization() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "supportsOpticalStabilization");
+        return supports_optical_stabilization;
+    }
+
+    public boolean getOpticalStabilization() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getOpticalStabilization");
+        if( camera_controller == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "camera not opened!");
+            return false;
+        }
+        return camera_controller.getOpticalStabilization();
     }
 
     /** Whether video digital stabilization is supported by the device.

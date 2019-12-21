@@ -75,6 +75,7 @@ public class CameraController2 extends CameraController {
     private int current_zoom_value;
     private boolean supports_face_detect_mode_simple;
     private boolean supports_face_detect_mode_full;
+    private boolean supports_optical_stabilization;
     private boolean supports_photo_video_recording;
     private final static int tonemap_max_curve_points_c = 64;
     private final ErrorCallback preview_error_cb;
@@ -1950,20 +1951,6 @@ public class CameraController2 extends CameraController {
             }
         }
 
-        if( MyDebug.LOG ) {
-            int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION); // may be null on some devices
-            if (ois_modes != null) {
-                for (int ois_mode : ois_modes) {
-                    if (MyDebug.LOG)
-                        Log.d(TAG, "ois mode: " + ois_mode);
-                    if (ois_mode == CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON) {
-                        if (MyDebug.LOG)
-                            Log.d(TAG, "supports ois");
-                    }
-                }
-            }
-        }
-
         int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         //boolean capabilities_manual_sensor = false;
         boolean capabilities_manual_post_processing = false;
@@ -2226,6 +2213,19 @@ public class CameraController2 extends CameraController {
         camera_features.is_exposure_lock_supported = true;
 
         camera_features.is_white_balance_lock_supported = true;
+
+        camera_features.is_optical_stabilization_supported = false;
+        int [] supported_optical_stabilization_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+        if( supported_optical_stabilization_modes != null ) {
+            for(int supported_optical_stabilization_mode : supported_optical_stabilization_modes) {
+                if( supported_optical_stabilization_mode == CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON ) {
+                    camera_features.is_optical_stabilization_supported = true;
+                }
+            }
+        }
+        if( MyDebug.LOG )
+            Log.d(TAG, "is_optical_stabilization_supported: " + camera_features.is_optical_stabilization_supported);
+        supports_optical_stabilization = camera_features.is_optical_stabilization_supported;
 
         camera_features.is_video_stabilization_supported = false;
         int [] supported_video_stabilization_modes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
@@ -3625,6 +3625,8 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setVideoStabilization(boolean enabled) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setVideoStabilization: " + enabled);
         camera_settings.video_stabilization = enabled;
         camera_settings.setVideoStabilization(previewBuilder);
         try {
@@ -3638,6 +3640,14 @@ public class CameraController2 extends CameraController {
             }
             e.printStackTrace();
         } 
+    }
+
+    @Override
+    public boolean getOpticalStabilization() {
+        Integer ois_mode = previewBuilder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+        if( ois_mode == null )
+            return false;
+        return( ois_mode == CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON );
     }
 
     @Override

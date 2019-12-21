@@ -69,6 +69,7 @@ public abstract class CameraController {
         public float minimum_focus_distance;
         public boolean is_exposure_lock_supported;
         public boolean is_white_balance_lock_supported;
+        public boolean is_optical_stabilization_supported;
         public boolean is_video_stabilization_supported;
         public boolean is_photo_video_recording_supported;
         public boolean supports_white_balance_temperature;
@@ -441,6 +442,7 @@ public abstract class CameraController {
     public boolean getUseCamera2FakeFlash() {
         return false;
     }
+    public abstract boolean getOpticalStabilization();
     public abstract void setVideoStabilization(boolean enabled);
     public abstract boolean getVideoStabilization();
     public abstract void setLogProfile(boolean use_log_profile, float log_profile_strength);

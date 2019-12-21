@@ -525,6 +525,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pg.removePreference(pref);
         }
 
+        final boolean supports_optical_stabilization = bundle.getBoolean("supports_optical_stabilization");
+        final boolean optical_stabilization_enabled = bundle.getBoolean("optical_stabilization_enabled");
+
         final boolean supports_video_stabilization = bundle.getBoolean("supports_video_stabilization");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_video_stabilization: " + supports_video_stabilization);
@@ -1227,6 +1230,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                             about_string.append(" to ");
                             about_string.append(white_balance_temperature_max);
                         }
+                        about_string.append("\nOptical stabilization?: ");
+                        about_string.append(getString(supports_optical_stabilization ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nOptical stabilization enabled?: ");
+                        about_string.append(optical_stabilization_enabled);
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nVideo stabilization enabled?: ");
