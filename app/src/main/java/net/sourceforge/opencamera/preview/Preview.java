@@ -6437,6 +6437,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return supports_video_stabilization;
     }
 
+    public boolean getVideoStabilization() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getVideoStabilization");
+        if( camera_controller == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "camera not opened!");
+            return false;
+        }
+        return camera_controller.getVideoStabilization();
+    }
+
     public boolean supportsPhotoVideoRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "supportsPhotoVideoRecording");
