@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 public class VideoTests {
     // Tests related to video recording; note that tests to do with video mode that don't record are still part of MainTests
     public static Test suite() {
