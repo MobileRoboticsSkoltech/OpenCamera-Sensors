@@ -10989,7 +10989,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertTrue( mActivity.getApplicationInterface().isVideoPref() );
         assertEquals( 5000, mActivity.getApplicationInterface().getVideoMaxDurationPref() );
-        assertEquals( max_filesize, mActivity.getApplicationInterface().getVideoMaxFileSizePref().max_filesize );
+        // note that max_filesize may vary if device filesize has changed whilst test is running
+        assertEquals( max_filesize, mActivity.getApplicationInterface().getVideoMaxFileSizePref().max_filesize, 5*1048576 );
 
         // count initial files in folder
         File folder = mActivity.getImageFolder();
