@@ -1749,16 +1749,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return;
         }
 
-        try {
-            setupCameraParameters();
-        }
-        catch(CameraControllerException e) {
-            e.printStackTrace();
-            applicationInterface.onCameraError();
-            closeCamera(false, null);
-            return;
-        }
-
         // now switch to video if saved
         boolean saved_is_video = applicationInterface.isVideoPref();
         if( MyDebug.LOG ) {
@@ -1769,12 +1759,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.d(TAG, "but video not supported");
             saved_is_video = false;
         }
-        // must switch video before starting preview
+        // must switch video before setupCameraParameters(), and starting preview
         if( saved_is_video != this.is_video ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "switch video mode as not in correct mode");
             this.switchVideo(true, false);
         }
+
+        try {
+            setupCameraParameters();
+        }
+        catch(CameraControllerException e) {
+            e.printStackTrace();
+            applicationInterface.onCameraError();
+            closeCamera(false, null);
+            return;
+        }
+
         updateFlashForVideo();
         if( take_photo ) {
             if( this.is_video ) {
@@ -2264,10 +2265,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         {
-            if( MyDebug.LOG )
+            if( MyDebug.LOG ) {
                 Log.d(TAG, "set up video stabilization");
+                Log.d(TAG, "is_video?: " + is_video);
+            }
             if( this.supports_video_stabilization ) {
-                boolean using_video_stabilization = applicationInterface.getVideoStabilizationPref();
+                boolean using_video_stabilization = is_video && applicationInterface.getVideoStabilizationPref();
                 if( MyDebug.LOG )
                     Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
                 camera_controller.setVideoStabilization(using_video_stabilization);

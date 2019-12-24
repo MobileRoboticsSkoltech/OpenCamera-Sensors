@@ -263,6 +263,7 @@ public class CameraController2 extends CameraController {
         private MeteringRectangle [] ae_regions; // no need for has_scalar_crop_region, as we can set to null instead
         private boolean has_face_detect_mode;
         private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
+        private Integer default_optical_stabilization;
         private boolean video_stabilization;
         private boolean use_log_profile;
         private float log_profile_strength;
@@ -326,7 +327,7 @@ public class CameraController2 extends CameraController {
             setAERegions(builder);
             setFaceDetectMode(builder);
             setRawMode(builder);
-            setVideoStabilization(builder);
+            setStabilization(builder);
             setLogProfile(builder);
 
             if( is_still ) {
@@ -734,8 +735,29 @@ public class CameraController2 extends CameraController {
             }
         }
         
-        private void setVideoStabilization(CaptureRequest.Builder builder) {
+        private void setStabilization(CaptureRequest.Builder builder) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "setStabilization: " + video_stabilization);
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
+            if( supports_optical_stabilization ) {
+                if( video_stabilization ) {
+                    // should also disable OIS
+                    if( default_optical_stabilization == null ) {
+                        // save the default optical_stabilization
+                        default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "default_optical_stabilization: " + default_optical_stabilization);
+                    }
+                    builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
+                }
+                else if( default_optical_stabilization != null ) {
+                    if( builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE) != null && !builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE).equals(default_optical_stabilization) ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "set optical stabilization back to: " + default_optical_stabilization);
+                        builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, default_optical_stabilization);
+                    }
+                }
+            }
         }
 
         private float getLogProfile(float in) {
@@ -3628,7 +3650,7 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "setVideoStabilization: " + enabled);
         camera_settings.video_stabilization = enabled;
-        camera_settings.setVideoStabilization(previewBuilder);
+        camera_settings.setStabilization(previewBuilder);
         try {
             setRepeatingRequest();
         }

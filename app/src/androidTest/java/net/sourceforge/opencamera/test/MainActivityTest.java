@@ -6258,18 +6258,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "video stabilization not supported");
             return;
         }
+        boolean supports_ois = mPreview.supportsOpticalStabilization();
+
         assertFalse(mPreview.getCameraController().getVideoStabilization());
+        assertEquals(supports_ois, mPreview.getOpticalStabilization()); // OIS should be on if supported
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), true);
         editor.apply();
         updateForSettings();
+
+        // video stabilization should only actually be enabled when in video mode
+        assertFalse(mPreview.isVideo());
+        assertFalse(mPreview.getCameraController().getVideoStabilization());
+        assertEquals(supports_ois, mPreview.getOpticalStabilization()); // OIS should be on if supported
+
+        // now switch to video mode
+        View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertTrue(mPreview.isVideo());
         assertTrue(mPreview.getCameraController().getVideoStabilization());
+        assertFalse(mPreview.getCameraController().getOpticalStabilization()); // OIS should always be disabled when using digital video stabilization
 
         subTestTakeVideo(false, false, false, false, null, 5000, false, false);
 
+        assertTrue(mPreview.isVideo());
         assertTrue(mPreview.getCameraController().getVideoStabilization());
+        assertFalse(mPreview.getCameraController().getOpticalStabilization()); // OIS should always be disabled when using digital video stabilization
+
+        // restart when in video mode, and ensure still as expected
+        restart();
+        switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        Thread.sleep(1000);
+        assertTrue(mPreview.isVideo());
+        assertTrue(mPreview.getCameraController().getVideoStabilization());
+        assertFalse(mPreview.getCameraController().getOpticalStabilization()); // OIS should always be disabled when using digital video stabilization
+
+        // now switch back to photo mode
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertFalse(mPreview.isVideo());
+        assertFalse(mPreview.getCameraController().getVideoStabilization());
+        assertEquals(supports_ois, mPreview.getOpticalStabilization()); // OIS should be on if supported
     }
 
     public void testTakeVideoExposureLock() throws InterruptedException {

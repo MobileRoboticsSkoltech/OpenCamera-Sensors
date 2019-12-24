@@ -443,6 +443,9 @@ public abstract class CameraController {
         return false;
     }
     public abstract boolean getOpticalStabilization();
+    /** Whether to enable digital video stabilization. Should only be set to true when intending to
+     *  capture video.
+     */
     public abstract void setVideoStabilization(boolean enabled);
     public abstract boolean getVideoStabilization();
     public abstract void setLogProfile(boolean use_log_profile, float log_profile_strength);
