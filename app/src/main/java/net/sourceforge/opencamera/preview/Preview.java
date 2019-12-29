@@ -195,6 +195,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
     private VideoFileInfo videoFileInfo = new VideoFileInfo();
+    private VideoFileInfo nextVideoFileInfo; // used for Android 8+ to handle seamless restart (see MediaRecorder.setNextOutputFile())
 
     private static final int PHASE_NORMAL = 0;
     private static final int PHASE_TIMER = 1;
@@ -951,6 +952,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // else don't delete if a plain Uri
 
                 videoFileInfo = new VideoFileInfo();
+                nextVideoFileInfo = null;
                 // if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
                 if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
                     VideoProfile profile = getVideoProfile();
@@ -974,6 +976,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         videoFileInfo = new VideoFileInfo();
+        nextVideoFileInfo = null;
     }
 
     private Context getContext() {
@@ -4925,7 +4928,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "onVideoInfo: " + what + " extra: " + extra);
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING && video_restart_on_max_filesize ) {
             if( MyDebug.LOG )
-                Log.d(TAG, "restart due to max filesize approaching - try setNextOutputFile");
+                Log.d(TAG, "seamless restart due to max filesize approaching - try setNextOutputFile");
             if( video_recorder == null ) {
                 // just in case?
                 if( MyDebug.LOG )
@@ -4981,7 +4984,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             }
                             if( MyDebug.LOG )
                                 Log.d(TAG, "setNextOutputFile succeeded");
-                            videoFileInfo = info;
+                            nextVideoFileInfo = info;
                         }
                         catch(IOException e) {
                             Log.e(TAG, "failed to setNextOutputFile");
@@ -4992,6 +4995,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             // no need to explicitly stop if createVideoFile() or setNextOutputFile() fails - just let video reach max filesize
             // normally
+        }
+        else if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED && video_restart_on_max_filesize ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "seamless restart with setNextOutputFile has now occurred");
+            if( nextVideoFileInfo == null ) {
+                Log.e(TAG, "received MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED but nextVideoFileInfo is null");
+            }
+            else {
+                applicationInterface.restartedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+                videoFileInfo = nextVideoFileInfo;
+                nextVideoFileInfo = null;
+            }
         }
         else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
             // note, if the restart was handled via MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING, then we shouldn't ever
@@ -5164,6 +5179,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "startVideoRecording");
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
+        nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
         if( info == null ) {

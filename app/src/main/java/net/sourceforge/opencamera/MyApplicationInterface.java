@@ -140,6 +140,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     // camera properties that aren't saved even in the bundle; these should be initialised/reset in reset()
     private int zoom_factor; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
 
+    // for testing:
+    public volatile static int test_n_videos_scanned;
+
     MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
         long debug_time = 0;
         if( MyDebug.LOG ) {
@@ -2026,24 +2029,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             subtitleVideoTimerTask = null;
         }
 
-        boolean done = false;
-        if( video_method == VIDEOMETHOD_FILE ) {
-            if( filename != null ) {
-                File file = new File(filename);
-                storageUtils.broadcastFile(file, false, true, true);
-                done = true;
-            }
-        }
-        else {
-            if( uri != null ) {
-                // see note in onPictureTaken() for where we call broadcastFile for SAF photos
-                File real_file = storageUtils.broadcastUri(uri, false, true, true);
-                if( real_file != null ) {
-                    main_activity.test_last_saved_image = real_file.getAbsolutePath();
-                }
-                done = true;
-            }
-        }
+        boolean done = broadcastVideo(video_method, uri, filename);
         if( MyDebug.LOG )
             Log.d(TAG, "done? " + done);
 
@@ -2129,6 +2115,50 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - debug_time));
         }
+    }
+
+    @Override
+    public void restartedVideo(final int video_method, final Uri uri, final String filename) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "restartedVideo");
+            Log.d(TAG, "video_method " + video_method);
+            Log.d(TAG, "uri " + uri);
+            Log.d(TAG, "filename " + filename);
+        }
+        broadcastVideo(video_method, uri, filename);
+    }
+
+    private boolean broadcastVideo(final int video_method, final Uri uri, final String filename) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "broadcastVideo");
+            Log.d(TAG, "video_method " + video_method);
+            Log.d(TAG, "uri " + uri);
+            Log.d(TAG, "filename " + filename);
+        }
+        boolean done = false;
+        if( video_method == VIDEOMETHOD_FILE ) {
+            if( filename != null ) {
+                File file = new File(filename);
+                storageUtils.broadcastFile(file, false, true, true);
+                done = true;
+            }
+        }
+        else {
+            if( uri != null ) {
+                // see note in onPictureTaken() for where we call broadcastFile for SAF photos
+                File real_file = storageUtils.broadcastUri(uri, false, true, true);
+                if( real_file != null ) {
+                    main_activity.test_last_saved_image = real_file.getAbsolutePath();
+                }
+                done = true;
+            }
+        }
+        if( done ) {
+            test_n_videos_scanned++;
+            if( MyDebug.LOG )
+                Log.d(TAG, "test_n_videos_scanned is now: " + test_n_videos_scanned);
+        }
+        return done;
     }
 
     @Override

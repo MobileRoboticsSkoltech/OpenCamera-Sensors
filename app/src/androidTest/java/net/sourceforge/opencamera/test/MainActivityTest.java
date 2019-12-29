@@ -5500,6 +5500,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( pauseVideoButton.getVisibility() == View.GONE );
         assertTrue( takePhotoVideoButton.getVisibility() == View.GONE );
 
+
+        Log.d(TAG, "test_n_videos_scanned: " + MyApplicationInterface.test_n_videos_scanned);
+        assertEquals(n_new_files, MyApplicationInterface.test_n_videos_scanned);
+
         return n_new_files;
     }
 
@@ -5508,7 +5512,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         setToDefault();
 
-        subTestTakeVideo(false, false, false, false, null, 5000, false, false);
+        int n_new_files = subTestTakeVideo(false, false, false, false, null, 5000, false, false);
+
+        assertEquals(1, n_new_files);
     }
 
     public void testTakeVideoAudioControl() throws InterruptedException {
@@ -5541,7 +5547,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.apply();
         updateForSettings();
 
-        subTestTakeVideo(false, false, false, false, null, 5000, false, false);
+        int n_new_files = subTestTakeVideo(false, false, false, false, null, 5000, false, false);
+
+        assertEquals(1, n_new_files);
     }
 
     public void testTakeVideoSubtitles() throws InterruptedException {

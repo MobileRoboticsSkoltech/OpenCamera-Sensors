@@ -419,6 +419,10 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public void restartedVideo(final int video_method, final Uri uri, final String filename) {
+    }
+
+    @Override
     public void onFailedStartPreview() {
 
     }
