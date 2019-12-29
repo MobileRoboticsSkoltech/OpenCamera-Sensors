@@ -926,34 +926,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
                 if( MyDebug.LOG )
                     Log.d(TAG, "runtime exception when stopping video");
-                if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
-                    if( videoFileInfo.video_uri != null ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "delete corrupt video: " + videoFileInfo.video_uri);
-                        try {
-                            DocumentsContract.deleteDocument(getContext().getContentResolver(), videoFileInfo.video_uri);
-                        }
-                        catch(FileNotFoundException e2) {
-                            // note, Android Studio reports a warning that FileNotFoundException isn't thrown, but it can be
-                            // thrown by DocumentsContract.deleteDocument - and we get an error if we try to remove the catch!
-                            if( MyDebug.LOG )
-                                Log.e(TAG, "exception when deleting " + videoFileInfo.video_uri);
-                            e2.printStackTrace();
-                        }
-                    }
-                }
-                else if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-                    if( videoFileInfo.video_filename != null ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "delete corrupt video: " + videoFileInfo.video_filename);
-                        File file = new File(videoFileInfo.video_filename);
-                        if( !file.delete() ) {
-                            if( MyDebug.LOG )
-                                Log.e(TAG, "failed to delete corrupt video: " + videoFileInfo.video_filename);
-                        }
-                    }
-                }
-                // else don't delete if a plain Uri
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
 
                 videoFileInfo = new VideoFileInfo();
                 nextVideoFileInfo = null;
