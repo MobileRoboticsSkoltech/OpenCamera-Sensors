@@ -373,6 +373,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_video_failure;
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
     public volatile boolean test_called_next_output_file;
+    public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
 
     public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
@@ -915,6 +916,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             try {
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to call video_recorder.stop()");
+                if( test_runtime_on_video_stop )
+                    throw new RuntimeException();
                 video_recorder.stop();
                 if( MyDebug.LOG )
                     Log.d(TAG, "done video_recorder.stop()");

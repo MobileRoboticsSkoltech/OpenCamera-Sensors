@@ -6409,10 +6409,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideo(false, true, false, false, null, 5000, false, false);
     }
 
+    /** Tests starting and stopping video quickly, to simulate failing to create a video (but needs Open Camera to delete
+     *  the corrupt resultant video).
+     */
     public void testTakeVideoQuick() throws InterruptedException {
         Log.d(TAG, "testTakeVideoQuick");
 
         setToDefault();
+
+        mPreview.test_runtime_on_video_stop = true; // as RuntimeException on short delay doesn't seem to occur on Galaxy S10e at least, for 500ms delay
 
         // still need a short delay (at least 500ms, otherwise Open Camera will ignore the repeated stop)
         subTestTakeVideo(false, false, false, false, null, 500, false, false);
@@ -6434,6 +6439,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
+
+        mPreview.test_runtime_on_video_stop = true; // as RuntimeException on short delay doesn't seem to occur on Galaxy S10e at least, for 500ms delay
 
         // still need a short delay (at least 500ms, otherwise Open Camera will ignore the repeated stop)
         subTestTakeVideo(false, false, false, false, null, 500, false, false);
