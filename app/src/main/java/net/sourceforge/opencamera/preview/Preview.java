@@ -3287,10 +3287,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( camera_controller == null )
             return "";
         CamcorderProfile profile = getCamcorderProfile(quality);
-        String highest = "";
-        if( profile.quality == CamcorderProfile.QUALITY_HIGH ) {
-            highest = "Highest: ";
-        }
         String type = "";
         if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
             type = "4K Ultra HD ";
@@ -3316,7 +3312,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
             type = "QCIF ";
         }
-        return highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(getResources(), profile.videoFrameWidth, profile.videoFrameHeight, true);
+        return type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(getResources(), profile.videoFrameWidth, profile.videoFrameHeight, true);
     }
 
     public double getTargetRatio() {
