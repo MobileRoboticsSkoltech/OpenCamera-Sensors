@@ -53,6 +53,8 @@ public class VideoTests {
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize2"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize4"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize4SAF"));
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoTimeLapse"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));

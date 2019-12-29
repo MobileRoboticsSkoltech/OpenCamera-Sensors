@@ -423,6 +423,10 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public void deleteUnusedVideo(final int video_method, final Uri uri, final String filename) {
+    }
+
+    @Override
     public void onFailedStartPreview() {
 
     }

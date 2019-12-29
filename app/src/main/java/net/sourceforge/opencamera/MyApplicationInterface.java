@@ -2162,6 +2162,23 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
+    public void deleteUnusedVideo(final int video_method, final Uri uri, final String filename) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "deleteUnusedVideo");
+            Log.d(TAG, "video_method " + video_method);
+            Log.d(TAG, "uri " + uri);
+            Log.d(TAG, "filename " + filename);
+        }
+        if( video_method == VIDEOMETHOD_FILE ) {
+            trashImage(false, uri, filename, false);
+        }
+        else if( video_method == VIDEOMETHOD_SAF ) {
+            trashImage(true, uri, filename, false);
+        }
+        // else can't delete Uri
+    }
+
+    @Override
     public void onVideoInfo(int what, int extra) {
         // we don't show a toast for MEDIA_RECORDER_INFO_MAX_DURATION_REACHED - conflicts with "n repeats to go" toast from Preview
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && what == MediaRecorder.MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED ) {
@@ -3149,7 +3166,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void trashImage(boolean image_saf, Uri image_uri, String image_name) {
+    private void trashImage(boolean image_saf, Uri image_uri, String image_name, boolean from_user) {
         if( MyDebug.LOG )
             Log.d(TAG, "trashImage");
         Preview preview  = main_activity.getPreview();
@@ -3165,7 +3182,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "successfully deleted " + image_uri);
-                    preview.showToast(null, R.string.photo_deleted);
+                    if( from_user )
+                        preview.showToast(null, R.string.photo_deleted);
                     if( file != null ) {
                         // SAF doesn't broadcast when deleting them
                         storageUtils.broadcastFile(file, false, false, true);
@@ -3191,7 +3209,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             else {
                 if( MyDebug.LOG )
                     Log.d(TAG, "successfully deleted " + image_name);
-                preview.showToast(photo_delete_toast, R.string.photo_deleted);
+                if( from_user )
+                    preview.showToast(photo_delete_toast, R.string.photo_deleted);
                 storageUtils.broadcastFile(file, false, false, true);
             }
         }
@@ -3204,7 +3223,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( preview.isPreviewPaused() ) {
             for(int i=0;i<last_images.size();i++) {
                 LastImage last_image = last_images.get(i);
-                trashImage(last_images_saf, last_image.uri, last_image.name);
+                trashImage(last_images_saf, last_image.uri, last_image.name, true);
             }
             clearLastImages();
             drawPreview.clearGhostImage(); // doesn't make sense to show the last image as a ghost, if the user has trashed it!

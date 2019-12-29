@@ -135,6 +135,8 @@ public interface ApplicationInterface {
     void stoppingVideo(); // called just before video recording stops; note that if startingVideo() is called but then video recording fails to start, this method will still be called, but startedVideo() and stoppedVideo() won't be called
     void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
     void restartedVideo(final int video_method, final Uri uri, final String filename); // called after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
+    void deleteUnusedVideo(final int video_method, final Uri uri, final String filename); // called on Android 8+ after stoppedVideo() if the Preview requested a video file be created due to approaching max filesize, but the video was stopped before restarting - therefore this video should be deleted
+    // after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
     void onFailedStartPreview(); // called if failed to start camera preview
     void onCameraError(); // called if the camera closes due to serious error.
     void onPhotoError(); // callback for failing to take a photo

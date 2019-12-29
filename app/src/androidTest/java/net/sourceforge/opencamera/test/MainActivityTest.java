@@ -67,6 +67,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ZoomControls;
 
+import static junit.framework.Assert.fail;
+
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private static final String TAG = "MainActivityTest";
     private MainActivity mActivity = null;
@@ -6254,6 +6256,86 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 return -1; // the number of videos recorded can very, as the max duration corresponding to max filesize can vary widly
             }
         }, 5000, true, false);
+    }
+
+
+    private void subTestTakeVideoMaxFileSize4() throws InterruptedException {
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.O ) {
+            // as this tests Android 8+'s seamless restart
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Galaxy S10e)
+        editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "30000000"); // about 19s on Galaxy S10e at 4K
+        editor.apply();
+        updateForSettings();
+
+        subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+            @Override
+            public int doTest() {
+                assertTrue(mPreview.isVideoRecording());
+
+                while( !mPreview.test_called_next_output_file ) {
+                    Log.d(TAG, "waiting for test_called_next_output_file");
+                    try {
+                        Thread.sleep(1000);
+                    }
+                    catch(InterruptedException e) {
+                        e.printStackTrace();
+                        fail();
+                    }
+                }
+
+                Log.d(TAG, "test_called_next_output_file is now set");
+                assertTrue(mPreview.isVideoRecording());
+
+                // wait a little bit longer... but needs to be before seamless restart actually occurs!
+                try {
+                    Thread.sleep(100);
+                }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                    fail();
+                }
+
+                return 1;
+            }
+        }, 5000, true, false);
+    }
+
+    /** Tests stopping video when MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING has been received, but before
+     *  we receive MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED. Tests that we delete the leftover zero-length file
+     *  that would have been created.
+     */
+    public void testTakeVideoMaxFileSize4() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoMaxFileSize4");
+
+        setToDefault();
+
+        subTestTakeVideoMaxFileSize4();
+    }
+
+    /** As testTakeVideoMaxFileSize4(), but using Storage Access Framework.
+     */
+    public void testTakeVideoMaxFileSize4SAF() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoMaxFileSize4SAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
+        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+
+        subTestTakeVideoMaxFileSize4();
     }
 
     public void testTakeVideoStabilization() throws InterruptedException {

@@ -372,6 +372,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_fail_open_camera;
     public volatile boolean test_video_failure;
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
+    public volatile boolean test_called_next_output_file;
 
     public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
@@ -975,6 +976,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         applicationInterface.cameraInOperation(false, true);
         reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+        if( nextVideoFileInfo != null ) {
+            // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
+            // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
+            // video file that will have been created
+            applicationInterface.deleteUnusedVideo(nextVideoFileInfo.video_method, nextVideoFileInfo.video_uri, nextVideoFileInfo.video_filename);
+        }
         videoFileInfo = new VideoFileInfo();
         nextVideoFileInfo = null;
     }
@@ -4984,6 +4991,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             }
                             if( MyDebug.LOG )
                                 Log.d(TAG, "setNextOutputFile succeeded");
+                            test_called_next_output_file = true;
                             nextVideoFileInfo = info;
                         }
                         catch(IOException e) {
@@ -5179,6 +5187,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "startVideoRecording");
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
+        test_called_next_output_file = false;
         nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
