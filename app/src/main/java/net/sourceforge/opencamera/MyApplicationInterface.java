@@ -141,7 +141,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int zoom_factor; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
 
     // for testing:
-    public volatile static int test_n_videos_scanned;
+    public volatile int test_n_videos_scanned;
 
     MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
         long debug_time = 0;
