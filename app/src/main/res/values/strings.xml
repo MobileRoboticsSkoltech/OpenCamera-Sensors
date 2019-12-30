@@ -205,7 +205,7 @@
     <string name="preference_video_bitrate">Video bitrate (approx)</string>
     <string name="preference_video_bitrate_summary">Set the approximate bitrate of videos (higher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)\n%s</string>
     <string name="preference_video_fps">Video frame rate (approx)</string>
-    <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported). Note that this setting is ignored for slow motion videos.\n%s</string>
+    <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported). Please check resultant videos to find the actual frame rate used. Note that this setting is ignored for slow motion videos.\n%s</string>
     <string name="preference_video_max_duration">Maximum duration of video</string>
     <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration\n%s</string>
     <string name="preference_video_restart">Restart video after max duration</string>

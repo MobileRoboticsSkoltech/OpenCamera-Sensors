@@ -927,12 +927,14 @@ to that requested.</p>
 <p><b>Video frame rate (approx)</b> - If set to a value other than "default", the camera will try to match this frame
 rate.</p>
 <ul>
-	<li>This is very approximate, as frame rate depends on many factors such as your device and lighting
-    conditions, so there is no guarantee that the resultant video's frame rate will match with the requested value.</li>
+    <li>This is very approximate, as frame rate depends on many factors such as your device and lighting
+    conditions, and this is only a "recommendation" to the camera driver, so there is no guarantee that the
+	resultant video's frame rate will match with the requested value.</li>
 	<li>Some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
     using.</li>
-	<li>For best results (especially for 120fps or higher), please set Settings/"Camera API" to "Camera2 API". Even there, some
-	devices seem to show buggy behaviour, so please test before using.</li>
+	<li>Even if video recording is successful, if achieving a specific FPS is desired, please check the resultant video's
+	frame rate rather than assuming that it was achieved.</li>
+	<li>For best results (especially for 120fps or higher), please set Settings/"Camera API" to "Camera2 API".</li>
 	<li>This setting is ignored in slow motion mode, where instead Open Camera will choose an appropriate high speed frame
 	rate.</li>
 </ul>

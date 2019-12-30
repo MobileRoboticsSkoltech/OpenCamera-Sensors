@@ -205,7 +205,7 @@
     <string name="preference_video_bitrate">Битрейт видео (примерно)</string>
     <string name="preference_video_bitrate_summary">Выбор битрейта видео. (чем выше, тем лучше качество, но файл будет занимать больше места на диске. Неподдерживаемый битрейт может стать причиной ошибки при записи видео).\n%s</string>
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
-    <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается\n%s</string>
+    <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается. Не гарантируется, что будет достигнуто. Пожалуйста, проверьте итоговые видео, чтобы узнать фактическую частоту кадров.\n%s</string>
     <string name="preference_video_max_duration">Максимальная длительность видео</string>
     <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности\n%s</string>
     <string name="preference_video_restart">Записывать новое видео после достижения лимита</string>
