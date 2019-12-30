@@ -918,27 +918,6 @@ not work properly on all devices! Also note:</p><ul>
     <li>If using 3GPP, then restarting video when hitting maximum filesize will not be seamless (even on Android 8).</li>
 </ul>
 
-<p><b>Video bitrate (approx)</b> - If set to a value other than "default", the default video bitrate is overridden. Higher values mean better
-quality video, but the files take up more disk space. Note that some values may be unsupported by your device, and may
-cause the recording to fail - in some cases, this can cause problems with the camera that require a reboot to fix. So
-please test before using. Also note that the bitrate setting is approximate - the resultant video file will typically be slightly different
-to that requested.</p>
-
-<p><b>Video frame rate (approx)</b> - If set to a value other than "default", the camera will try to match this frame
-rate.</p>
-<ul>
-    <li>This is very approximate, as frame rate depends on many factors such as your device and lighting
-    conditions, and this is only a "recommendation" to the camera driver, so there is no guarantee that the
-    resultant video's frame rate will match with the requested value.</li>
-    <li>Some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
-    using.</li>
-    <li>Even if video recording is successful, if achieving a specific FPS is desired, please check the resultant video's
-    frame rate rather than assuming that it was achieved.</li>
-    <li>For best results (especially for 120fps or higher), please set Settings/"Camera API" to "Camera2 API".</li>
-    <li>This setting is ignored in slow motion mode, where instead Open Camera will choose an appropriate high speed frame
-    rate.</li>
-</ul>
-
 <p><b>Video flat (log) profile</b> - Enables a "flat" or "log" color profile for recording video. Only available if Camera2
     API is used. This is intended to create videos for further editing in post production. Note that it may be necessary to
     increase the video bitrate when shooting with a log profile. This feature is currently experimental,
@@ -995,6 +974,27 @@ SRT files, and use them to display the information as subtitles. The subtitles w
 "Location settings" below), then the current location latitude and longitude coordinates will also be recorded (if the location is
 known). Similarly for "Store compass direction". Note that you can control the formatting style for date, time and location using
 the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format, Distance unit).</p>
+
+<p><b>Video bitrate (approx)</b> - If set to a value other than "default", the default video bitrate is overridden. Higher values mean better
+    quality video, but the files take up more disk space. Note that some values may be unsupported by your device, and may
+    cause the recording to fail - in some cases, this can cause problems with the camera that require a reboot to fix. So
+    please test before using. Also note that the bitrate setting is approximate - the resultant video file will typically be slightly different
+    to that requested.</p>
+
+<p><b>Video frame rate (approx)</b> - If set to a value other than "default", the camera will try to match this frame
+    rate.</p>
+<ul>
+    <li>This is very approximate, as frame rate depends on many factors such as your device and lighting
+        conditions, and this is only a "recommendation" to the camera driver, so there is no guarantee that the
+        resultant video's frame rate will match with the requested value.</li>
+    <li>Some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
+        using.</li>
+    <li>Even if video recording is successful, if achieving a specific FPS is desired, please check the resultant video's
+        frame rate rather than assuming that it was achieved.</li>
+    <li>For best results (especially for 120fps or higher), please set Settings/"Camera API" to "Camera2 API".</li>
+    <li>This setting is ignored in slow motion mode, where instead Open Camera will choose an appropriate high speed frame
+        rate.</li>
+</ul>
 
 <p><b>Force 4K UHD video (may not work on all devices)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked,
 this overrides the setting in "Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps
