@@ -1996,7 +1996,7 @@ public class MainActivity extends Activity {
 
         speechControl.initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
         initLocation(); // in case we've enabled or disabled GPS
-        initGyroSensors(); // in case we've entered or left panoram
+        initGyroSensors(); // in case we've entered or left panorama
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: time after init speech and location: " + (System.currentTimeMillis() - debug_time));
         }
@@ -3823,7 +3823,7 @@ public class MainActivity extends Activity {
             return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
-        // remember to update the FAQ "Why isn't Paranoram supported on my device?" if this changes
+        // remember to update the FAQ "Why isn't Panorama supported on my device?" if this changes
         return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && large_heap_memory >= 256 && applicationInterface.getGyroSensor().hasSensors() );
         //return false; // currently blocked for release
     }
