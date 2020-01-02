@@ -218,7 +218,30 @@ public class ManualSeekbars {
         }
 
         // 20 to 60, per 5s
-        for(int i=20;i<=60;i+=5) {
+        for(int i=20;i<60;i+=5) {
+            long exposure = 1000000000L*i;
+            if( exposure > min_exposure_time && exposure < max_exposure_time )
+                seekbar_values.add(exposure);
+        }
+
+        // n.b., very long exposure times are not widely supported, but requested at https://sourceforge.net/p/opencamera/code/merge-requests/49/
+
+        // 60 to 180, per 15s
+        for(int i=60;i<180;i+=15) {
+            long exposure = 1000000000L*i;
+            if( exposure > min_exposure_time && exposure < max_exposure_time )
+                seekbar_values.add(exposure);
+        }
+
+        // 180 to 600, per 60s
+        for(int i=180;i<600;i+=60) {
+            long exposure = 1000000000L*i;
+            if( exposure > min_exposure_time && exposure < max_exposure_time )
+                seekbar_values.add(exposure);
+        }
+
+        // 600 to 1200, per 120s
+        for(int i=600;i<=1200;i+=120) {
             long exposure = 1000000000L*i;
             if( exposure > min_exposure_time && exposure < max_exposure_time )
                 seekbar_values.add(exposure);
