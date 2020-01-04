@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
@@ -1033,6 +1034,36 @@ public class MainActivity extends Activity {
 
         preview.onResume();
 
+        {
+            // show a toast for the camera if it's not the first for front of back facing (otherwise on multi-front/back camera
+            // devices, it's easy to forget if set to a different camera)
+            // but we only show this when resuming, not every time the camera opens
+            int cameraId = applicationInterface.getCameraIdPref();
+            if( cameraId > 0 ) {
+                CameraControllerManager camera_controller_manager = preview.getCameraControllerManager();
+                boolean front_facing = camera_controller_manager.isFrontFacing(cameraId);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "front_facing: " + front_facing);
+                if( camera_controller_manager.getNumberOfCameras() > 2 ) {
+                    boolean camera_is_default = true;
+                    for(int i=0;i<cameraId;i++) {
+                        boolean that_front_facing = camera_controller_manager.isFrontFacing(i);
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "camera " + i + " that_front_facing: " + that_front_facing);
+                        if( that_front_facing == front_facing ) {
+                            // found an earlier camera with same front/back facing
+                            camera_is_default = false;
+                        }
+                    }
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "camera_is_default: " + camera_is_default);
+                    if( !camera_is_default ) {
+                        this.showCameraIdToast(cameraId);
+                    }
+                }
+            }
+        }
+
         if( MyDebug.LOG ) {
             Log.d(TAG, "onResume: total time to resume: " + (System.currentTimeMillis() - debug_time));
         }
@@ -1407,6 +1438,17 @@ public class MainActivity extends Activity {
         return cameraId;
     }
 
+    private void showCameraIdToast(int cameraId) {
+        if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
+            // telling the user which camera is pointless for only two cameras, but on devices that now
+            // expose many cameras it can be confusing, so show a toast to at least display the id
+            String toast_string = getResources().getString(
+                    preview.getCameraControllerManager().isFrontFacing(cameraId) ? R.string.front_camera : R.string.back_camera ) +
+                    " : " + getResources().getString(R.string.camera_id) + " " + cameraId;
+            preview.showToast(null, toast_string);
+        }
+    }
+
     /**
      * Selects the next camera on the phone - in practice, switches between
      * front and back cameras
@@ -1423,14 +1465,8 @@ public class MainActivity extends Activity {
         this.closePopup();
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextCameraId();
-            if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
-                // telling the user which camera is pointless for only two cameras, but on devices that now
-                // expose many cameras it can be confusing, so show a toast to at least display the id
-                String toast_string = getResources().getString(
-                        preview.getCameraControllerManager().isFrontFacing(cameraId) ? R.string.front_camera : R.string.back_camera ) +
-                        " : " + getResources().getString(R.string.camera_id) + " " + cameraId;
-                preview.showToast(null, toast_string);
-            }
+
+            showCameraIdToast(cameraId);
 
             View switchCameraButton = findViewById(R.id.switch_camera);
             switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
