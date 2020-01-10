@@ -2611,6 +2611,8 @@ public class MainActivity extends Activity {
                         }
                     }
                     if( thumbnail != null ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "thumbnail orientation is " + media.orientation);
                         if( media.orientation != 0 ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
