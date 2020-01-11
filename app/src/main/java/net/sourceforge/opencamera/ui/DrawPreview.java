@@ -1550,8 +1550,11 @@ public class DrawPreview {
                 text_base_y = canvas.getHeight() - (int)(2.5*gap_y); // leave room for GUI icons
             }
             else if( ui_rotation == 90 || ui_rotation == 270 ) {
+                // ui_rotation 90 is upside down portrait
+                // 270 is portrait
+
                 //text_base_y = canvas.getHeight() + (int)(0.5*gap_y);
-				/*ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+				View view = main_activity.findViewById(R.id.take_photo);
 				// align with "top" of the take_photo button, but remember to take the rotation into account!
 				view.getLocationOnScreen(gui_location);
 				int view_left = gui_location[0];
@@ -1559,19 +1562,27 @@ public class DrawPreview {
 				int this_left = gui_location[0];
 				// diff_x is the difference from the centre of the canvas to the position we want
 				int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
-				*/
+
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "view left: " + view_left);
 					Log.d(TAG, "this left: " + this_left);
 					Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
+                    Log.d(TAG, "compare offset_x: " + (preview.getView().getRootView().getRight()/2 - diff_x)/scale);
 				}*/
+
                 // diff_x is the difference from the centre of the canvas to the position we want
                 // assumes canvas is centered
                 // avoids calling getLocationOnScreen for performance
-                int diff_x = preview.getView().getRootView().getRight()/2 - (int) (100 * scale + 0.5f); // convert dps to pixels
+                /*int offset_x = (int) (124 * scale + 0.5f); // convert dps to pixels
+                // offset_x should be enough such that on-screen level angle (this is the lowest display on-screen text) does not
+                // interfere with take photo icon when using at least a 16:9 preview aspect ratio
+                // should correspond to the logged "compare offset_x" above
+                int diff_x = preview.getView().getRootView().getRight()/2 - offset_x;
+                */
+
                 int max_x = canvas.getWidth();
                 if( ui_rotation == 90 ) {
-                    // so we don't interfere with the top bar info (datetime, free memory, ISO)
+                    // so we don't interfere with the top bar info (datetime, free memory, ISO) when upside down
                     max_x -= (int)(2.5*gap_y);
                 }
 				/*if( MyDebug.LOG ) {
@@ -1581,7 +1592,7 @@ public class DrawPreview {
 					Log.d(TAG, "max_x: " + max_x);
 				}*/
                 if( canvas.getWidth()/2 + diff_x > max_x ) {
-                    // in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
+                    // in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio < screen aspect ratio)
                     diff_x = max_x - canvas.getWidth()/2;
                 }
                 text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*gap_y);
