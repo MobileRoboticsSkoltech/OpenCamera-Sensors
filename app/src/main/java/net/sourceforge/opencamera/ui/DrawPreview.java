@@ -203,6 +203,12 @@ public class DrawPreview {
     private float view_angle_y_preview;
     private long last_view_angles_time;
 
+    private int take_photo_top; // coordinate (in canvas x coordinates) of top of the take photo icon
+    private long last_take_photo_top_time;
+
+    private int top_icon_shift; // shift that may be needed for on-screen text to avoid clashing with icons (when arranged "along top")
+    private long last_top_icon_shift_time;
+
     // OSD extra lines
     private String OSDLine1;
     private String OSDLine2;
@@ -596,6 +602,8 @@ public class DrawPreview {
         focus_peaking_color_pref = Color.parseColor(focus_peaking_color);
 
         last_view_angles_time = 0; // force view angles to be recomputed
+        last_take_photo_top_time = 0;  // force take_photo_top to be recomputed
+        last_top_icon_shift_time = 0; // for top_icon_shift to be recomputed
 
         has_settings = true;
     }
@@ -1554,14 +1562,24 @@ public class DrawPreview {
                 // 270 is portrait
 
                 //text_base_y = canvas.getHeight() + (int)(0.5*gap_y);
-				View view = main_activity.findViewById(R.id.take_photo);
-				// align with "top" of the take_photo button, but remember to take the rotation into account!
-				view.getLocationOnScreen(gui_location);
-				int view_left = gui_location[0];
-				preview.getView().getLocationOnScreen(gui_location);
-				int this_left = gui_location[0];
+
+                if( last_take_photo_top_time == 0 || time_ms > last_take_photo_top_time + 1000 ) {
+                    /*if( MyDebug.LOG )
+                        Log.d(TAG, "update cached take_photo_top");*/
+                    // don't call this too often, for UI performance (due to calling View.getLocationOnScreen())
+                    View view = main_activity.findViewById(R.id.take_photo);
+                    // align with "top" of the take_photo button, but remember to take the rotation into account!
+                    view.getLocationOnScreen(gui_location);
+                    int view_left = gui_location[0];
+                    preview.getView().getLocationOnScreen(gui_location);
+                    int this_left = gui_location[0];
+                    take_photo_top = view_left - this_left;
+
+                    last_take_photo_top_time = time_ms;
+                }
+
 				// diff_x is the difference from the centre of the canvas to the position we want
-				int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
+                int diff_x = take_photo_top - canvas.getWidth()/2;
 
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "view left: " + view_left);
@@ -1843,19 +1861,25 @@ public class DrawPreview {
         int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
         View top_icon = main_activity.getMainUI().getTopIcon();
         if( top_icon != null ) {
-            top_icon.getLocationOnScreen(gui_location);
-            int top_margin = gui_location[0] + top_icon.getWidth();
-            preview.getView().getLocationOnScreen(gui_location);
-            int preview_left = gui_location[0];
-            /*if( MyDebug.LOG )
-            	Log.d(TAG, "preview_left: " + preview_left);*/
-            int shift = top_margin - preview_left;
-            if( shift > 0 ) {
+            if( last_top_icon_shift_time == 0 || time_ms > last_top_icon_shift_time + 1000 ) {
+                // avoid computing every time, due to cost of calling View.getLocationOnScreen()
+                /*if( MyDebug.LOG )
+                    Log.d(TAG, "update cached top_icon_shift");*/
+                top_icon.getLocationOnScreen(gui_location);
+                int top_margin = gui_location[0] + top_icon.getWidth();
+                preview.getView().getLocationOnScreen(gui_location);
+                int preview_left = gui_location[0];
+                this.top_icon_shift = top_margin - preview_left;
+
+                last_top_icon_shift_time = time_ms;
+            }
+
+            if( this.top_icon_shift > 0 ) {
                 if( ui_rotation == 90 || ui_rotation == 270 ) {
-                    top_y += shift;
+                    top_y += top_icon_shift;
                 }
                 else {
-                    top_x += shift;
+                    top_x += top_icon_shift;
                 }
             }
         }
