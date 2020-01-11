@@ -77,7 +77,18 @@ public class CameraController2 extends CameraController {
     private boolean supports_face_detect_mode_full;
     private boolean supports_optical_stabilization;
     private boolean supports_photo_video_recording;
-    private final static int tonemap_max_curve_points_c = 64;
+
+    private final static int tonemap_log_max_curve_points_c = 64;
+    private final static float [] jtlog_values = new float[] {
+        0.0000f, 0.0000f,  0.0230f, 0.2295f,  0.0280f, 0.2783f,  0.0319f, 0.3049f,  0.0369f, 0.3321f,  0.0430f, 0.3589f,
+        0.0500f, 0.3844f,  0.0583f, 0.4098f,  0.0680f, 0.4351f,  0.0800f, 0.4619f,  0.0930f, 0.4870f,  0.1051f, 0.5076f,
+        0.1180f, 0.5275f,  0.1430f, 0.5612f,  0.1680f, 0.5904f,  0.1930f, 0.6162f,  0.2180f, 0.6395f,  0.2430f, 0.6608f,
+        0.2680f, 0.6804f,  0.2930f, 0.6986f,  0.3180f, 0.7157f,  0.3430f, 0.7318f,  0.3680f, 0.7471f,  0.3930f, 0.7615f,
+        0.4180f, 0.7753f,  0.4430f, 0.7885f,  0.4680f, 0.8011f,  0.4930f, 0.8132f,  0.5180f, 0.8249f,  0.5430f, 0.8361f,
+        0.5680f, 0.8470f,  0.5930f, 0.8575f,  0.6180f, 0.8677f,  0.6430f, 0.8776f,  0.6680f, 0.8872f,  0.6930f, 0.8966f,
+        0.7180f, 0.9057f,  0.7430f, 0.9145f,  1.0000f, 1.0000f
+    };
+
     private final ErrorCallback preview_error_cb;
     private final ErrorCallback camera_error_cb;
     private CameraCaptureSession captureSession;
@@ -265,7 +276,7 @@ public class CameraController2 extends CameraController {
         private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
         private Integer default_optical_stabilization;
         private boolean video_stabilization;
-        private boolean use_log_profile;
+        private TonemapProfile tonemap_profile = TonemapProfile.TONEMAPPROFILE_OFF;
         private float log_profile_strength;
         private Integer default_tonemap_mode; // since we don't know what a device's tonemap mode is, we save it so we can switch back to it
         private Range<Integer> ae_target_fps_range;
@@ -328,7 +339,7 @@ public class CameraController2 extends CameraController {
             setFaceDetectMode(builder);
             setRawMode(builder);
             setStabilization(builder);
-            setLogProfile(builder);
+            setTonemapProfile(builder);
 
             if( is_still ) {
                 if( location != null ) {
@@ -782,60 +793,78 @@ public class CameraController2 extends CameraController {
             return out;
         }
 
-        private void setLogProfile(CaptureRequest.Builder builder) {
+        private void setTonemapProfile(CaptureRequest.Builder builder) {
             if( MyDebug.LOG ) {
-                Log.d(TAG, "setLogProfile");
-                Log.d(TAG, "use_log_profile: " + use_log_profile);
+                Log.d(TAG, "setTonemapProfile");
+                Log.d(TAG, "tonemap_profile: " + tonemap_profile);
                 Log.d(TAG, "log_profile_strength: " + log_profile_strength);
                 Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
             }
-            if( use_log_profile && log_profile_strength > 0.0f ) {
+            boolean have_tonemap_profile = tonemap_profile != TonemapProfile.TONEMAPPROFILE_OFF;
+            if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_LOG && log_profile_strength == 0.0f )
+                have_tonemap_profile = false;
+
+            if( have_tonemap_profile ) {
                 if( default_tonemap_mode == null ) {
                     // save the default tonemap_mode
                     default_tonemap_mode = builder.get(CaptureRequest.TONEMAP_MODE);
                     if( MyDebug.LOG )
                         Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
                 }
-                // if changing this, make sure we don't exceed tonemap_max_curve_points_c
-                // we want:
-                // 0-15: step 1 (16 values)
-                // 16-47: step 2 (16 values)
-                // 48-111: step 4 (16 values)
-                // 112-231 : step 8 (15 values)
-                // 232-255: step 24 (1 value)
-                int step = 1, c = 0;
-                float [] values = new float[2*tonemap_max_curve_points_c];
-                for(int i=0;i<232;i+=step) {
-                    float in = ((float)i) / 255.0f;
-                    float out = getLogProfile(in);
-                    values[c++] = in;
-                    values[c++] = out;
-                    if( (c/2) % 16 == 0 ) {
-                        step *= 2;
-                    }
+
+                float [] values = null;
+                switch( tonemap_profile ) {
+                    case TONEMAPPROFILE_LOG:
+                        // if changing this, make sure we don't exceed tonemap_log_max_curve_points_c
+                        // we want:
+                        // 0-15: step 1 (16 values)
+                        // 16-47: step 2 (16 values)
+                        // 48-111: step 4 (16 values)
+                        // 112-231 : step 8 (15 values)
+                        // 232-255: step 24 (1 value)
+                        int step = 1, c = 0;
+                        values = new float[2*tonemap_log_max_curve_points_c];
+                        for(int i=0;i<232;i+=step) {
+                            float in = ((float)i) / 255.0f;
+                            float out = getLogProfile(in);
+                            values[c++] = in;
+                            values[c++] = out;
+                            if( (c/2) % 16 == 0 ) {
+                                step *= 2;
+                            }
+                        }
+                        values[c++] = 1.0f;
+                        values[c++] = getLogProfile(1.0f);
+                        /*{
+                            int n_values = 257;
+                            float [] values = new float [2*n_values];
+                            for(int i=0;i<n_values;i++) {
+                                float in = ((float)i) / (n_values-1.0f);
+                                float out = getLogProfile(in);
+                                values[2*i] = in;
+                                values[2*i+1] = out;
+                            }
+                        }*/
+                        if( MyDebug.LOG ) {
+                            int n_values = c/2;
+                            for(int i=0;i<n_values;i++) {
+                                float in = values[2*i];
+                                float out = values[2*i+1];
+                                Log.d(TAG, "i = " + i);
+                                Log.d(TAG, "    in: " + (int)(in*255.0f+0.5f));
+                                Log.d(TAG, "    out: " + (int)(out*255.0f+0.5f));
+                            }
+                        }
+                        break;
+                    case TONEMAPPROFILE_JTLOG:
+                        values = jtlog_values;
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "setting JTLog profile");
+                        break;
                 }
-                values[c++] = 1.0f;
-                values[c++] = getLogProfile(1.0f);
-                /*{
-                    int n_values = 257;
-                    float [] values = new float [2*n_values];
-                    for(int i=0;i<n_values;i++) {
-                        float in = ((float)i) / (n_values-1.0f);
-                        float out = getLogProfile(in);
-                        values[2*i] = in;
-                        values[2*i+1] = out;
-                    }
-                }*/
-                if( MyDebug.LOG ) {
-                    int n_values = c/2;
-                    for(int i=0;i<n_values;i++) {
-                        float in = values[2*i];
-                        float out = values[2*i+1];
-                        Log.d(TAG, "i = " + i);
-                        Log.d(TAG, "    in: " + (int)(in*255.0f+0.5f));
-                        Log.d(TAG, "    out: " + (int)(out*255.0f+0.5f));
-                    }
-                }
+                if( MyDebug.LOG  )
+                    Log.d(TAG, "values: " + Arrays.toString(values));
+
                 // sRGB:
                 /*float [] values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
                         0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
@@ -847,10 +876,15 @@ public class CameraController2 extends CameraController {
                 /*float [] values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
                         0.5f, 0.78f, 1.0f, 1.0f};*/
                 //float [] values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
-                builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
-                TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
-                builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
-                test_used_tonemap_curve = true;
+                if( values != null ) {
+                    builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
+                    TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
+                    builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
+                    test_used_tonemap_curve = true;
+                }
+                else {
+                    Log.e(TAG, "unknown log type: " + tonemap_profile);
+                }
             }
             else if( default_tonemap_mode != null ) {
                 builder.set(CaptureRequest.TONEMAP_MODE, default_tonemap_mode);
@@ -2309,7 +2343,11 @@ public class CameraController2 extends CameraController {
                 if( MyDebug.LOG )
                     Log.d(TAG, "tonemap_max_curve_points: " + tonemap_max_curve_points);
                 camera_features.tonemap_max_curve_points = tonemap_max_curve_points;
-                camera_features.supports_tonemap_curve = tonemap_max_curve_points >= tonemap_max_curve_points_c;
+                // for now we only expose supporting of custom tonemap curves if there are enough curve points for all the
+                // profiles we support
+                camera_features.supports_tonemap_curve =
+                    tonemap_max_curve_points >= tonemap_log_max_curve_points_c &&
+                    tonemap_max_curve_points >= jtlog_values.length;
             }
             else {
                 if( MyDebug.LOG )
@@ -3678,19 +3716,19 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public void setLogProfile(boolean use_log_profile, float log_profile_strength) {
+    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength) {
         if( MyDebug.LOG ) {
-            Log.d(TAG, "setLogProfile: " + use_log_profile);
+            Log.d(TAG, "setTonemapProfile: " + tonemap_profile);
             Log.d(TAG, "log_profile_strength: " + log_profile_strength);
         }
-        if( camera_settings.use_log_profile == use_log_profile && camera_settings.log_profile_strength == log_profile_strength )
+        if( camera_settings.tonemap_profile == tonemap_profile && camera_settings.log_profile_strength == log_profile_strength )
             return; // no change
-        camera_settings.use_log_profile = use_log_profile;
-        if( use_log_profile )
+        camera_settings.tonemap_profile = tonemap_profile;
+        if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_LOG )
             camera_settings.log_profile_strength = log_profile_strength;
         else
             camera_settings.log_profile_strength = 0.0f;
-        camera_settings.setLogProfile(previewBuilder);
+        camera_settings.setTonemapProfile(previewBuilder);
         try {
             setRepeatingRequest();
         }
@@ -3704,10 +3742,10 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    @Override
+    /*@Override
     public boolean isLogProfile() {
         return camera_settings.use_log_profile;
-    }
+    }*/
 
     /** For testing.
      */
@@ -7134,15 +7172,15 @@ public class CameraController2 extends CameraController {
         private void handleContinuousFocusMove(CaptureResult result) {
             Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
             if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "continuous focusing started");
+                /*if( MyDebug.LOG )
+                    Log.d(TAG, "continuous focusing started");*/
                 if( continuous_focus_move_callback != null ) {
                     continuous_focus_move_callback.onContinuousFocusMove(true);
                 }
             }
             else if( af_state != null && last_af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "continuous focusing stopped");
+                /*if( MyDebug.LOG )
+                    Log.d(TAG, "continuous focusing stopped");*/
                 if( continuous_focus_move_callback != null ) {
                     continuous_focus_move_callback.onContinuousFocusMove(false);
                 }
@@ -7173,8 +7211,8 @@ public class CameraController2 extends CameraController {
 
             Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
             if( af_state != null && af_state != last_af_state ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);
+                /*if( MyDebug.LOG )
+                    Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);*/
                 last_af_state = af_state;
             }
 

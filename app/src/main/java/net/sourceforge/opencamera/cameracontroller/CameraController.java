@@ -448,8 +448,18 @@ public abstract class CameraController {
      */
     public abstract void setVideoStabilization(boolean enabled);
     public abstract boolean getVideoStabilization();
-    public abstract void setLogProfile(boolean use_log_profile, float log_profile_strength);
-    public abstract boolean isLogProfile();
+    public enum TonemapProfile {
+        TONEMAPPROFILE_OFF,
+        TONEMAPPROFILE_LOG,
+        TONEMAPPROFILE_JTLOG
+    }
+
+    /** Sets a tonemap profile.
+     * @param tonemap_profile The type of the tonemap profile.
+     * @param log_profile_strength Only relevant if tonemap_profile set to TONEMAPPROFILE_LOG.
+     */
+    public abstract void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength);
+    //public abstract boolean isLogProfile();
     public abstract int getJpegQuality();
     public abstract void setJpegQuality(int quality);
     public abstract int getZoom();

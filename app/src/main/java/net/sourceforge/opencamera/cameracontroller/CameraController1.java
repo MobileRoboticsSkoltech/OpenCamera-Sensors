@@ -890,15 +890,15 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
-    public void setLogProfile(boolean use_log_profile, float log_profile_strength) {
+    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength) {
         // not supported for CameraController1!
     }
 
-    @Override
+    /*@Override
     public boolean isLogProfile() {
         // not supported for CameraController1!
         return false;
-    }
+    }*/
 
     public int getJpegQuality() {
         Camera.Parameters parameters = this.getParameters();

@@ -141,8 +141,8 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
-    public boolean useVideoLogProfile() {
-        return false;
+    public CameraController.TonemapProfile getVideoTonemapProfile() {
+        return CameraController.TonemapProfile.TONEMAPPROFILE_OFF;
     }
 
     @Override

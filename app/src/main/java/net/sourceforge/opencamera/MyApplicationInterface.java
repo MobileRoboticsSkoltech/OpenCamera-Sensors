@@ -721,26 +721,28 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public boolean useVideoLogProfile() {
+    public CameraController.TonemapProfile getVideoTonemapProfile() {
         String video_log = sharedPreferences.getString(PreferenceKeys.VideoLogPreferenceKey, "off");
-        // only return true for values recognised by getVideoLogProfileStrength()
+        // only return TONEMAPPROFILE_LOG for values recognised by getVideoLogProfileStrength()
         switch( video_log ) {
             case "off":
-                return false;
+                return CameraController.TonemapProfile.TONEMAPPROFILE_OFF;
             case "fine":
             case "low":
             case "medium":
             case "strong":
             case "extra_strong":
-                return true;
+                return CameraController.TonemapProfile.TONEMAPPROFILE_LOG;
+            case "jtlog":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLOG;
         }
-        return false;
+        return CameraController.TonemapProfile.TONEMAPPROFILE_OFF;
     }
 
     @Override
     public float getVideoLogProfileStrength() {
         String video_log = sharedPreferences.getString(PreferenceKeys.VideoLogPreferenceKey, "off");
-        // remember to update useVideoLogProfile() if adding/changing modes
+        // remember to update getVideoTonemapProfile() if adding/changing modes
         switch( video_log ) {
             case "off":
                 return 0.0f;
@@ -754,6 +756,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return 100.0f;
             case "extra_strong":
                 return 500.0f;
+            case "jtlog":
+                return 0.0f;
         }
         return 0.0f;
     }

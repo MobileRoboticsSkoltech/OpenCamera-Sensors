@@ -4027,9 +4027,28 @@ public class MainActivity extends Activity {
                 simple = false;
             }
 
-            if( applicationInterface.useVideoLogProfile() && preview.supportsTonemapCurve() ) {
-                simple = false;
-                toast_string += "\n" + getResources().getString(R.string.video_log);
+            {
+                CameraController.TonemapProfile tonemap_profile = applicationInterface.getVideoTonemapProfile();
+                if( tonemap_profile != CameraController.TonemapProfile.TONEMAPPROFILE_OFF && preview.supportsTonemapCurve() ) {
+                    if( applicationInterface.getVideoTonemapProfile() != CameraController.TonemapProfile.TONEMAPPROFILE_OFF && preview.supportsTonemapCurve() ) {
+                        int string_id = 0;
+                        switch( tonemap_profile ) {
+                            case TONEMAPPROFILE_LOG:
+                                string_id = R.string.video_log;
+                                break;
+                            case TONEMAPPROFILE_JTLOG:
+                                string_id = R.string.preference_video_jtlog;
+                                break;
+                        }
+                        if( string_id != 0 ) {
+                            simple = false;
+                            toast_string += "\n" + getResources().getString(string_id);
+                        }
+                        else {
+                            Log.e(TAG, "unknown tonemap_profile: " + tonemap_profile);
+                        }
+                    }
+                }
             }
 
             boolean record_audio = applicationInterface.getRecordAudioPref();

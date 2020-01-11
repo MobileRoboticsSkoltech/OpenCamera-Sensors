@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
 
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 
 /** Provides communication between the Preview and the rest of the application
@@ -66,8 +67,8 @@ public interface ApplicationInterface {
     String getVideoBitratePref(); // return "default" to let Preview choose
     String getVideoFPSPref(); // return "default" to let Preview choose; if getVideoCaptureRateFactor() returns a value other than 1.0, this is the capture fps; the resultant video's fps will be getVideoFPSPref()*getVideoCaptureRateFactor()
     float getVideoCaptureRateFactor(); // return 1.0f for standard operation, less than 1.0 for slow motion, more than 1.0 for timelapse; consider using a higher fps for slow motion, see getVideoFPSPref()
-    boolean useVideoLogProfile(); // whether to use a log profile for video mode
-    float getVideoLogProfileStrength(); // strength of the log profile for video mode, if useVideoLogProfile() returns true
+    CameraController.TonemapProfile getVideoTonemapProfile(); // tonemap profile to use for video mode
+    float getVideoLogProfileStrength(); // strength of the log profile for video mode, if getVideoTonemapProfile() returns TONEMAPPROFILE_LOG
     long getVideoMaxDurationPref(); // time in ms after which to automatically stop video recording (return 0 for off)
     int getVideoRestartTimesPref(); // number of times to restart video recording after hitting max duration (return 0 for never auto-restarting)
     VideoMaxFileSize getVideoMaxFileSizePref() throws NoFreeStorageException; // see VideoMaxFileSize class for details

@@ -539,14 +539,14 @@
     <string name="preference_camera2_photo_video_recording">Allow photos whilst recording video</string>
     <string name="preference_camera2_photo_video_recording_summary">Allows taking photos whilst recording videos. Disable this if there are problems with video recording with Camera2 API enabled on your device.</string>
 
-    <string name="preference_video_log">Video flat (log) profile</string>
-    <string name="preference_video_log_summary">Enable a flat (log) profile for video mode\n%s</string>
-    <string name="preference_video_log_off">Off</string>
-    <string name="preference_video_log_fine">Fine</string>
-    <string name="preference_video_log_low">Low</string>
-    <string name="preference_video_log_medium">Medium</string>
-    <string name="preference_video_log_strong">Strong</string>
-    <string name="preference_video_log_extra_strong">Extra strong</string>
+    <string name="preference_video_log">Video picture profiles</string>
+    <string name="preference_video_log_summary">Set standard or flat picture profile for video mode\n%s</string>
+    <string name="preference_video_log_off">Default</string>
+    <string name="preference_video_log_fine">Log (Fine)</string>
+    <string name="preference_video_log_low">Log (Low)</string>
+    <string name="preference_video_log_medium">Log (Medium)</string>
+    <string name="preference_video_log_strong">Log (Strong)</string>
+    <string name="preference_video_log_extra_strong">Log (Extra strong)</string>
     <string name="video_log">Log profile</string>
 
     <string name="preference_record_audio_src_camcorder">Camcorder</string>
@@ -909,6 +909,8 @@
     </string>
 
     <string name="preference_select_remote">Select remote device</string>
+
+    <string name="preference_video_jtlog">JTLog</string>
 
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
