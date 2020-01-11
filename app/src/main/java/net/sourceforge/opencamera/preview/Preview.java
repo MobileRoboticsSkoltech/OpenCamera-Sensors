@@ -1781,11 +1781,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
             }
             float video_log_profile_strength = (tonemap_profile == CameraController.TonemapProfile.TONEMAPPROFILE_LOG) ? applicationInterface.getVideoLogProfileStrength() : 0.0f;
+            float video_gamma = (tonemap_profile == CameraController.TonemapProfile.TONEMAPPROFILE_GAMMA) ? applicationInterface.getVideoProfileGamma() : 0.0f;
             if( MyDebug.LOG ) {
                 Log.d(TAG, "tonemap_profile: " + tonemap_profile);
                 Log.d(TAG, "video_log_profile_strength: " + video_log_profile_strength);
+                Log.d(TAG, "video_gamma: " + video_gamma);
             }
-            camera_controller.setTonemapProfile(tonemap_profile, video_log_profile_strength);
+            camera_controller.setTonemapProfile(tonemap_profile, video_log_profile_strength, video_gamma);
         }
 
         // in theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect

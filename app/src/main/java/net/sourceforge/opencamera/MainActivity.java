@@ -4036,6 +4036,9 @@ public class MainActivity extends Activity {
                             case TONEMAPPROFILE_LOG:
                                 string_id = R.string.video_log;
                                 break;
+                            case TONEMAPPROFILE_GAMMA:
+                                string_id = R.string.preference_video_gamma;
+                                break;
                             case TONEMAPPROFILE_JTLOG:
                                 string_id = R.string.preference_video_jtlog;
                                 break;

@@ -277,7 +277,8 @@ public class CameraController2 extends CameraController {
         private Integer default_optical_stabilization;
         private boolean video_stabilization;
         private TonemapProfile tonemap_profile = TonemapProfile.TONEMAPPROFILE_OFF;
-        private float log_profile_strength;
+        private float log_profile_strength; // for TONEMAPPROFILE_LOG
+        private float gamma_profile; // for TONEMAPPROFILE_GAMMA
         private Integer default_tonemap_mode; // since we don't know what a device's tonemap mode is, we save it so we can switch back to it
         private Range<Integer> ae_target_fps_range;
         private long sensor_frame_duration;
@@ -793,15 +794,22 @@ public class CameraController2 extends CameraController {
             return out;
         }
 
+        private float getGammaProfile(float in) {
+            return (float)Math.pow(in, 1.0f/gamma_profile);
+        }
+
         private void setTonemapProfile(CaptureRequest.Builder builder) {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "setTonemapProfile");
                 Log.d(TAG, "tonemap_profile: " + tonemap_profile);
                 Log.d(TAG, "log_profile_strength: " + log_profile_strength);
+                Log.d(TAG, "gamma_profile: " + gamma_profile);
                 Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
             }
             boolean have_tonemap_profile = tonemap_profile != TonemapProfile.TONEMAPPROFILE_OFF;
             if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_LOG && log_profile_strength == 0.0f )
+                have_tonemap_profile = false;
+            else if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_GAMMA && gamma_profile == 0.0f )
                 have_tonemap_profile = false;
 
             if( have_tonemap_profile ) {
@@ -815,6 +823,7 @@ public class CameraController2 extends CameraController {
                 float [] values = null;
                 switch( tonemap_profile ) {
                     case TONEMAPPROFILE_LOG:
+                    case TONEMAPPROFILE_GAMMA:
                         // if changing this, make sure we don't exceed tonemap_log_max_curve_points_c
                         // we want:
                         // 0-15: step 1 (16 values)
@@ -826,7 +835,7 @@ public class CameraController2 extends CameraController {
                         values = new float[2*tonemap_log_max_curve_points_c];
                         for(int i=0;i<232;i+=step) {
                             float in = ((float)i) / 255.0f;
-                            float out = getLogProfile(in);
+                            float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
                             values[c++] = in;
                             values[c++] = out;
                             if( (c/2) % 16 == 0 ) {
@@ -834,7 +843,7 @@ public class CameraController2 extends CameraController {
                             }
                         }
                         values[c++] = 1.0f;
-                        values[c++] = getLogProfile(1.0f);
+                        values[c++] = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(1.0f) : getGammaProfile(1.0f);
                         /*{
                             int n_values = 257;
                             float [] values = new float [2*n_values];
@@ -862,20 +871,21 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "setting JTLog profile");
                         break;
                 }
-                if( MyDebug.LOG  )
-                    Log.d(TAG, "values: " + Arrays.toString(values));
 
                 // sRGB:
-                /*float [] values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+                /*values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
                         0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
                         0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
                         0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
-                /*float [] values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
+                /*values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
                         0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
                         0.5f, 0.78f, 1.0000f, 1.0000f};*/
-                /*float [] values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
+                /*values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
                         0.5f, 0.78f, 1.0f, 1.0f};*/
-                //float [] values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+                //values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+
+                if( MyDebug.LOG  )
+                    Log.d(TAG, "values: " + Arrays.toString(values));
                 if( values != null ) {
                     builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
                     TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
@@ -3716,18 +3726,29 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength) {
+    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength, float gamma) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "setTonemapProfile: " + tonemap_profile);
             Log.d(TAG, "log_profile_strength: " + log_profile_strength);
+            Log.d(TAG, "gamma: " + gamma);
         }
-        if( camera_settings.tonemap_profile == tonemap_profile && camera_settings.log_profile_strength == log_profile_strength )
+        if( camera_settings.tonemap_profile == tonemap_profile &&
+                camera_settings.log_profile_strength == log_profile_strength &&
+                camera_settings.gamma_profile == gamma )
             return; // no change
+
         camera_settings.tonemap_profile = tonemap_profile;
+
         if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_LOG )
             camera_settings.log_profile_strength = log_profile_strength;
         else
             camera_settings.log_profile_strength = 0.0f;
+
+        if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_GAMMA )
+            camera_settings.gamma_profile = gamma;
+        else
+            camera_settings.gamma_profile = 0.0f;
+
         camera_settings.setTonemapProfile(previewBuilder);
         try {
             setRepeatingRequest();

@@ -324,6 +324,8 @@ public class PreferenceKeys {
 
     public static final String VideoLogPreferenceKey = "preference_video_log";
 
+    public static final String VideoProfileGammaPreferenceKey = "preference_video_profile_gamma";
+
     public static String getVideoMaxDurationPreferenceKey() {
         return "preference_video_max_duration";
     }

@@ -451,14 +451,16 @@ public abstract class CameraController {
     public enum TonemapProfile {
         TONEMAPPROFILE_OFF,
         TONEMAPPROFILE_LOG,
+        TONEMAPPROFILE_GAMMA,
         TONEMAPPROFILE_JTLOG
     }
 
     /** Sets a tonemap profile.
      * @param tonemap_profile The type of the tonemap profile.
      * @param log_profile_strength Only relevant if tonemap_profile set to TONEMAPPROFILE_LOG.
+     * @param gamma Only relevant if tonemap_profile set to TONEMAPPROFILE_GAMMA
      */
-    public abstract void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength);
+    public abstract void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength, float gamma);
     //public abstract boolean isLogProfile();
     public abstract int getJpegQuality();
     public abstract void setJpegQuality(int quality);

@@ -1014,6 +1014,16 @@
                 android:defaultValue="off"
                 />
 
+            <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
+            <ListPreference
+                android:key="preference_video_profile_gamma"
+                android:title="@string/preference_video_profile_gamma"
+                android:summary="@string/preference_video_profile_gamma_summary"
+                android:entries="@array/preference_video_profile_gamma_entries"
+                android:entryValues="@array/preference_video_profile_gamma_values"
+                android:defaultValue="2.2"
+                />
+
             <ListPreference
                 android:key="preference_video_max_duration"
                 android:title="@string/preference_video_max_duration"

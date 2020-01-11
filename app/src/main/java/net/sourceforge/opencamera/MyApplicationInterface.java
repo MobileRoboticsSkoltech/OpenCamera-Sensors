@@ -733,6 +733,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             case "strong":
             case "extra_strong":
                 return CameraController.TonemapProfile.TONEMAPPROFILE_LOG;
+            case "gamma":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_GAMMA;
             case "jtlog":
                 return CameraController.TonemapProfile.TONEMAPPROFILE_JTLOG;
         }
@@ -756,10 +758,28 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return 100.0f;
             case "extra_strong":
                 return 500.0f;
+            case "gamma":
             case "jtlog":
                 return 0.0f;
         }
         return 0.0f;
+    }
+
+    @Override
+    public float getVideoProfileGamma() {
+        String gamma_value = sharedPreferences.getString(PreferenceKeys.VideoProfileGammaPreferenceKey, "2.2");
+        float gamma = 0.0f;
+        try {
+            gamma = Float.parseFloat(gamma_value);
+            if( MyDebug.LOG )
+                Log.d(TAG, "gamma: " + gamma);
+        }
+        catch(NumberFormatException e) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "failed to parse gamma value: " + gamma_value);
+            e.printStackTrace();
+        }
+        return gamma;
     }
 
     @Override

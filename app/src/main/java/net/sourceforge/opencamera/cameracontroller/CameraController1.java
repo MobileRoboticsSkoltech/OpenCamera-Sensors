@@ -890,7 +890,7 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
-    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength) {
+    public void setTonemapProfile(TonemapProfile tonemap_profile, float log_profile_strength, float gamma) {
         // not supported for CameraController1!
     }
 

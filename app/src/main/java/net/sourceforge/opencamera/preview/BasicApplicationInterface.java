@@ -151,6 +151,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public float getVideoProfileGamma() {
+        return 0;
+    }
+
+    @Override
     public long getVideoMaxDurationPref() {
         return 0;
     }
