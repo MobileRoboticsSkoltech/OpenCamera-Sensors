@@ -931,6 +931,11 @@
     <string name="preference_video_profile_gamma_3.2">3.2</string>
     <string name="preference_video_profile_gamma_4.0">4.0</string>
 
+    <string name="preference_immersive_mode_off">Off</string>
+    <string name="preference_immersive_mode_low_profile">Only hide on-screen virtual navigation buttons</string>
+    <string name="preference_immersive_mode_gui">Hide GUI</string>
+    <string name="preference_immersive_mode_everything">Hide everything</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>

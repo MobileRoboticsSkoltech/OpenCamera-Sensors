@@ -823,4 +823,8 @@
 
     <string name="preference_select_remote">Wähle eine Fernsteuerung</string>
 
+    <string name="preference_immersive_mode_off">Nichts ausblenden</string>
+    <string name="preference_immersive_mode_low_profile">Nur Navigationstasten ausblenden</string>
+    <string name="preference_immersive_mode_gui">Alle Einstellelemente ausblenden</string>
+    <string name="preference_immersive_mode_everything">Alles ausblenden</string>
 </resources>

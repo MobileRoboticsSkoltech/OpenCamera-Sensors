@@ -104,18 +104,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>Desligado</item>
-        <item>Apenas ocultar os botões de navegação virtuais</item>
-        <item>Ocultar interface</item>
-        <item>Ocultar tudo</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-        </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Vermelho</item>
         <item>Verde</item>

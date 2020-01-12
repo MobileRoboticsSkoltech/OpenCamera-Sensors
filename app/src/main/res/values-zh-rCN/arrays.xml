@@ -104,18 +104,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>关闭</item>
-        <item>只隐藏屏幕上的虚拟导航按钮</item>
-        <item>隐藏图形用户界面</item>
-        <item>隐藏一切</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-        </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>红色</item>
         <item>绿色</item>

@@ -104,18 +104,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>Выключана</item>
-        <item>Хаваць віртуальныя кнопкі навігацыі на экране</item>
-        <item>Хаваць GUI</item>
-        <item>Хаваць усе</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-    </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Чырвоны</item>
         <item>Зялёны</item>

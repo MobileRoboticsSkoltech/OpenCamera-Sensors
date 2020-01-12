@@ -592,4 +592,8 @@
     <string name="preference_stamp_style_shadowed">Texto sombreado</string>
     <string name="preference_stamp_style_plain">Texto plano</string>
 
+    <string name="preference_immersive_mode_off">Apagado</string>
+    <string name="preference_immersive_mode_low_profile">Sólo ocultar los botones de navegación en pantalla</string>
+    <string name="preference_immersive_mode_gui">Ocultar interfaz de usuario</string>
+    <string name="preference_immersive_mode_everything">Ocultar todo</string>
 </resources>

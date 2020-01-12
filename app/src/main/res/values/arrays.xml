@@ -115,18 +115,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>Off</item>
-        <item>Only hide on-screen virtual navigation buttons</item>
-        <item>Hide GUI</item>
-        <item>Hide everything</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-    </string-array>
     <string-array name="preference_angle_highlight_color_entries"> <!-- n.b., also used for focus peaking colors -->
         <item>Red</item>
         <item>Green</item>
@@ -966,5 +954,17 @@
         <item>preference_panorama_save_no</item>
         <item>preference_panorama_save_all</item>
         <item>preference_panorama_save_all_plus_debug</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_entries">
+        <item>@string/preference_immersive_mode_off</item>
+        <item>@string/preference_immersive_mode_low_profile</item>
+        <item>@string/preference_immersive_mode_gui</item>
+        <item>@string/preference_immersive_mode_everything</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_values">
+        <item>immersive_mode_off</item>
+        <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_gui</item>
+        <item>immersive_mode_everything</item>
     </string-array>
 </resources>

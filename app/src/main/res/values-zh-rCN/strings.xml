@@ -826,5 +826,8 @@
 
     <string name="camera_id">ID</string> <!-- ID as in camera ID -->
 
-
+    <string name="preference_immersive_mode_off">关闭</string>
+    <string name="preference_immersive_mode_low_profile">只隐藏屏幕上的虚拟导航按钮</string>
+    <string name="preference_immersive_mode_gui">隐藏图形用户界面</string>
+    <string name="preference_immersive_mode_everything">隐藏一切</string>
 </resources>

@@ -473,4 +473,8 @@
     <string name="preference_stamp_style_shadowed">Cieniowany tekst</string>
     <string name="preference_stamp_style_plain">Czysty tekst</string>
 
+    <string name="preference_immersive_mode_off">Wyłączone</string>
+    <string name="preference_immersive_mode_low_profile">Ukryj tylko przyciski nawigacyjne</string>
+    <string name="preference_immersive_mode_gui">Ukryj graficzny interfejs</string>
+    <string name="preference_immersive_mode_everything">Ukryj wszystko</string>
 </resources>

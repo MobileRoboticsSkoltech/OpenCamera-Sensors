@@ -104,18 +104,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>Kapalı</item>
-        <item>Sadece sanal ekran navigasyon butonlarını gizle</item>
-        <item>GUI(Grafik arayüz) gizle</item>
-        <item>Herşeyi gizle</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-        </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Kırmızı</item>
         <item>Yeşil</item>

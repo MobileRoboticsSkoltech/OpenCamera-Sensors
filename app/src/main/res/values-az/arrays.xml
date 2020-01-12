@@ -94,18 +94,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>Bağla</item>
-        <item>Hərəkət düyməsini gizlə</item>
-        <item>GUI gizlə</item>
-        <item>Hamısını gizlə</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-        </string-array>
     <string-array name="preference_grid_entries">
         <item>Yox</item>
         <item>3x3</item>

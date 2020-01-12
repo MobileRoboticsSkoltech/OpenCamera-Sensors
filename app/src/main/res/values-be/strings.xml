@@ -357,4 +357,8 @@
     <string name="preference_stamp_style_shadowed">Тэкст з ценем</string>
     <string name="preference_stamp_style_plain">Звычайны тэкст</string>
 
+    <string name="preference_immersive_mode_off">Выключана</string>
+    <string name="preference_immersive_mode_low_profile">Хаваць віртуальныя кнопкі навігацыі на экране</string>
+    <string name="preference_immersive_mode_gui">Хаваць GUI</string>
+    <string name="preference_immersive_mode_everything">Хаваць усе</string>
 </resources>

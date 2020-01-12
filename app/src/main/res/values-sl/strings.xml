@@ -552,4 +552,8 @@
     <string name="preference_stamp_style_shadowed">Osenčeno besedilo</string>
     <string name="preference_stamp_style_plain">Golo besedilo</string>
 
+    <string name="preference_immersive_mode_off">Izk.</string>
+    <string name="preference_immersive_mode_low_profile">Skrij samo zaslonske gumbe za navidezno krmarjenje</string>
+    <string name="preference_immersive_mode_gui">Skrij gr. up. vmsnik</string>
+    <string name="preference_immersive_mode_everything">Skrij vse</string>
 </resources>

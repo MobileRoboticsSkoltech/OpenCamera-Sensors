@@ -497,4 +497,8 @@
     <string name="preference_stamp_style_shadowed">Árnyékos szöveg</string>
     <string name="preference_stamp_style_plain">Sima szöveg</string>
 
+    <string name="preference_immersive_mode_off">Ki</string>
+    <string name="preference_immersive_mode_low_profile">Csak a virtuális navigációs gombok elrejtése</string>
+    <string name="preference_immersive_mode_gui">Kezelőfelület elrejtése</string>
+    <string name="preference_immersive_mode_everything">Minden elrejtése</string>
 </resources>

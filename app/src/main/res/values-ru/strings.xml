@@ -910,4 +910,8 @@
 
     <string name="preference_select_remote">Выбрать удаленное устройство</string>
 
+    <string name="preference_immersive_mode_off">Выключить</string>
+    <string name="preference_immersive_mode_low_profile">Скрыть кнопки навигации</string>
+    <string name="preference_immersive_mode_gui">Скрыть интерфейс</string>
+    <string name="preference_immersive_mode_everything">Скрыть все</string>
 </resources>

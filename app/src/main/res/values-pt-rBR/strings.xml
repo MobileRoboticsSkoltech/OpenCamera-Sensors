@@ -323,4 +323,8 @@
     <string name="preference_ui_placement_left">Interface para canhoto</string>
     <string name="preference_ui_placement_right">Interface para destro</string>
 
+    <string name="preference_immersive_mode_off">Desligado</string>
+    <string name="preference_immersive_mode_low_profile">Somente esconder as teclas virtuais de navegação</string>
+    <string name="preference_immersive_mode_gui">Esconder IGU</string>
+    <string name="preference_immersive_mode_everything">Esconder tudo</string>
 </resources>

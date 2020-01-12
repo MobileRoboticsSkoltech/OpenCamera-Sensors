@@ -94,18 +94,6 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_immersive_mode_entries">
-        <item>끄기</item>
-        <item>화면상의 가상 탐색 버튼만 숨기기</item>
-        <item>GUI 숨기기</item>
-        <item>모두 숨기기</item>
-    </string-array>
-    <string-array name="preference_immersive_mode_values">
-        <item>immersive_mode_off</item>
-        <item>immersive_mode_low_profile</item>
-        <item>immersive_mode_gui</item>
-        <item>immersive_mode_everything</item>
-        </string-array>
     <string-array name="preference_grid_entries">
         <item>없음</item>
         <item>3x3</item>
