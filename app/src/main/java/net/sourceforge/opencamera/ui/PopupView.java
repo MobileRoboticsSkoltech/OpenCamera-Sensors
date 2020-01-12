@@ -358,8 +358,8 @@ public class PopupView extends LinearLayout {
                 final List<String> picture_size_strings = new ArrayList<>();
                 for(int i=0;i<picture_sizes.size();i++) {
                     CameraController.Size picture_size = picture_sizes.get(i);
-                    // don't display MP here, as call to Preview.getMPString() here would contribute to poor performance!
-                    String size_string = picture_size.width + " x " + picture_size.height;
+                    //String size_string = picture_size.width + " x " + picture_size.height;
+                    String size_string = picture_size.width + " x " + picture_size.height + " (" + Preview.getMPString(picture_size.width, picture_size.height) +")";
                     picture_size_strings.add(size_string);
                     if( picture_size.equals( current_picture_size ) ) {
                         picture_size_index = i;

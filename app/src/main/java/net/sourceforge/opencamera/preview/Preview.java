@@ -3266,7 +3266,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return width + ":" + height;
     }
 
-    private static String getMPString(int width, int height) {
+    public static String getMPString(int width, int height) {
         float mp = (width*height)/1000000.0f;
         return formatFloatToString(mp) + "MP";
     }
@@ -3280,45 +3280,52 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return "(" + getAspectRatio(width, height) + ", " + getMPString(width, height) + getBurstString(resources, supports_burst) + ")";
     }
 
+    private String getCamcorderProfileDescriptionType(CamcorderProfile profile) {
+        String type = "";
+        // keep strings short, as displayed on the PopupView
+        if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
+            type = "4K";
+        }
+        else if( profile.videoFrameWidth == 1920 && profile.videoFrameHeight == 1080 ) {
+            type = "FullHD";
+        }
+        else if( profile.videoFrameWidth == 1280 && profile.videoFrameHeight == 720 ) {
+            type = "HD";
+        }
+        else if( profile.videoFrameWidth == 720 && profile.videoFrameHeight == 480 ) {
+            type = "SD";
+        }
+        else if( profile.videoFrameWidth == 640 && profile.videoFrameHeight == 480 ) {
+            type = "VGA";
+        }
+        else if( profile.videoFrameWidth == 352 && profile.videoFrameHeight == 288 ) {
+            type = "CIF";
+        }
+        else if( profile.videoFrameWidth == 320 && profile.videoFrameHeight == 240 ) {
+            type = "QVGA";
+        }
+        else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
+            type = "QCIF";
+        }
+        return type;
+    }
+
     public String getCamcorderProfileDescriptionShort(String quality) {
         if( camera_controller == null )
             return "";
         CamcorderProfile profile = getCamcorderProfile(quality);
-        // don't display MP here, as call to Preview.getMPString() here would contribute to poor performance (in PopupView)!
-        // this is meant to be a quick simple string
-        return profile.videoFrameWidth + "x" + profile.videoFrameHeight;
+        String type = getCamcorderProfileDescriptionType(profile);
+        String space = type.length() == 0 ? "" : " ";
+        return profile.videoFrameWidth + "x" + profile.videoFrameHeight + space + type;
     }
 
     public String getCamcorderProfileDescription(String quality) {
         if( camera_controller == null )
             return "";
         CamcorderProfile profile = getCamcorderProfile(quality);
-        String type = "";
-        if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
-            type = "4K Ultra HD ";
-        }
-        else if( profile.videoFrameWidth == 1920 && profile.videoFrameHeight == 1080 ) {
-            type = "Full HD ";
-        }
-        else if( profile.videoFrameWidth == 1280 && profile.videoFrameHeight == 720 ) {
-            type = "HD ";
-        }
-        else if( profile.videoFrameWidth == 720 && profile.videoFrameHeight == 480 ) {
-            type = "SD ";
-        }
-        else if( profile.videoFrameWidth == 640 && profile.videoFrameHeight == 480 ) {
-            type = "VGA ";
-        }
-        else if( profile.videoFrameWidth == 352 && profile.videoFrameHeight == 288 ) {
-            type = "CIF ";
-        }
-        else if( profile.videoFrameWidth == 320 && profile.videoFrameHeight == 240 ) {
-            type = "QVGA ";
-        }
-        else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
-            type = "QCIF ";
-        }
-        return type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(getResources(), profile.videoFrameWidth, profile.videoFrameHeight, true);
+        String type = getCamcorderProfileDescriptionType(profile);
+        String space = type.length() == 0 ? "" : " ";
+        return type + space + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(getResources(), profile.videoFrameWidth, profile.videoFrameHeight, true);
     }
 
     public double getTargetRatio() {
