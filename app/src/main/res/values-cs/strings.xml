@@ -362,7 +362,7 @@
     <string name="preference_stamp_style_plain">Prostý text</string>
 
     <string name="preference_immersive_mode_off">Vypnuto</string>
-    <string name="preference_immersive_mode_low_profile">Skrýt pouze virtuální navigační tlačítka</string>
+    <string name="preference_immersive_mode_navigation">Skrýt pouze virtuální navigační tlačítka</string>
     <string name="preference_immersive_mode_gui">Skrýt grafické rozhraní</string>
     <string name="preference_immersive_mode_everything">Skrýt vše</string>
 </resources>

@@ -499,7 +499,7 @@
     <string name="preference_stamp_style_plain">Звичайний текст</string>
 
     <string name="preference_immersive_mode_off">Вимкнути</string>
-    <string name="preference_immersive_mode_low_profile">Приховати кнопки навігації</string>
+    <string name="preference_immersive_mode_navigation">Приховати кнопки навігації</string>
     <string name="preference_immersive_mode_gui">Приховати GUI</string>
     <string name="preference_immersive_mode_everything">Приховати все</string>
 </resources>

@@ -361,7 +361,7 @@
     <string name="preference_stamp_style_plain">Düz yazı</string>
 
     <string name="preference_immersive_mode_off">Kapalı</string>
-    <string name="preference_immersive_mode_low_profile">Sadece sanal ekran navigasyon butonlarını gizle</string>
+    <string name="preference_immersive_mode_navigation">Sadece sanal ekran navigasyon butonlarını gizle</string>
     <string name="preference_immersive_mode_gui">GUI(Grafik arayüz) gizle</string>
     <string name="preference_immersive_mode_everything">Herşeyi gizle</string>
 </resources>

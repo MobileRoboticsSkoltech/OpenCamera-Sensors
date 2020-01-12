@@ -932,7 +932,8 @@
     <string name="preference_video_profile_gamma_4.0">4.0</string>
 
     <string name="preference_immersive_mode_off">Off</string>
-    <string name="preference_immersive_mode_low_profile">Only hide on-screen virtual navigation buttons</string>
+    <string name="preference_immersive_mode_low_profile">Only dim on-screen virtual navigation buttons</string>
+    <string name="preference_immersive_mode_navigation">Hide on-screen virtual navigation buttons</string>
     <string name="preference_immersive_mode_gui">Hide GUI</string>
     <string name="preference_immersive_mode_everything">Hide everything</string>
 

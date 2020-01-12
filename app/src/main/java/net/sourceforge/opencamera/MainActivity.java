@@ -440,13 +440,19 @@ public class MainActivity extends Activity {
                             return;
                         if( MyDebug.LOG )
                             Log.d(TAG, "onSystemUiVisibilityChange: " + visibility);
+
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                        String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
+                        boolean hide_ui = immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything");
+
                         if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "system bars now visible");
                             // The system bars are visible. Make any desired
                             // adjustments to your UI, such as showing the action bar or
                             // other navigational controls.
-                            mainUI.setImmersiveMode(false);
+                            if( hide_ui )
+                                mainUI.setImmersiveMode(false);
                             setImmersiveTimer();
                         }
                         else {
@@ -455,7 +461,8 @@ public class MainActivity extends Activity {
                             // The system bars are NOT visible. Make any desired
                             // adjustments to your UI, such as hiding the action bar or
                             // other navigational controls.
-                            mainUI.setImmersiveMode(true);
+                            if( hide_ui )
+                                mainUI.setImmersiveMode(true);
                         }
                     }
                 });
@@ -2238,7 +2245,7 @@ public class MainActivity extends Activity {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
-            if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
+            if( immersive_mode.equals("immersive_mode_navigation") || immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
                 return true;
         }
         return false;

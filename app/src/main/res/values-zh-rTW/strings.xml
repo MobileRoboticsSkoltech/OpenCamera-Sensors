@@ -351,7 +351,7 @@
     <string name="preference_ui_placement_right">右手使用者介面</string>
 
     <string name="preference_immersive_mode_off">關閉</string>
-    <string name="preference_immersive_mode_low_profile">只隱藏螢幕上的虛擬按鈕</string>
+    <string name="preference_immersive_mode_navigation">只隱藏螢幕上的虛擬按鈕</string>
     <string name="preference_immersive_mode_gui">隱藏圖形化使用者介面</string>
     <string name="preference_immersive_mode_everything">隱藏全部</string>
 </resources>

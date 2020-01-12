@@ -526,7 +526,7 @@
     <string name="preference_stamp_style_plain">Testo piano</string>
 
     <string name="preference_immersive_mode_off">Off</string>
-    <string name="preference_immersive_mode_low_profile">Nascondi solamente i bottoni di navigazione virtuali on-screen</string>
+    <string name="preference_immersive_mode_navigation">Nascondi solamente i bottoni di navigazione virtuali on-screen</string>
     <string name="preference_immersive_mode_gui">Nascondi GUI</string>
     <string name="preference_immersive_mode_everything">Nascondi tutto</string>
 </resources>

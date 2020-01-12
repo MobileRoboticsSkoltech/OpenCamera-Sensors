@@ -548,7 +548,7 @@
     <string name="preference_stamp_style_plain">Ren tekst</string>
 
     <string name="preference_immersive_mode_off">Av</string>
-    <string name="preference_immersive_mode_low_profile">Skjul bare de virtuelle navigasjonsknappene</string>
+    <string name="preference_immersive_mode_navigation">Skjul bare de virtuelle navigasjonsknappene</string>
     <string name="preference_immersive_mode_gui">Skjul grensesnittet</string>
     <string name="preference_immersive_mode_everything">Skjul alt</string>
 </resources>

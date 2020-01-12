@@ -958,12 +958,14 @@
     <string-array name="preference_immersive_mode_entries">
         <item>@string/preference_immersive_mode_off</item>
         <item>@string/preference_immersive_mode_low_profile</item>
+        <item>@string/preference_immersive_mode_navigation</item>
         <item>@string/preference_immersive_mode_gui</item>
         <item>@string/preference_immersive_mode_everything</item>
     </string-array>
     <string-array name="preference_immersive_mode_values">
         <item>immersive_mode_off</item>
         <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_navigation</item>
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
     </string-array>

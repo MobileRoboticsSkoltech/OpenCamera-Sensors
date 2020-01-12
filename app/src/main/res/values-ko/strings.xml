@@ -324,7 +324,7 @@
     <string name="preference_ui_placement_right">오른손잡이 사용자 인터페이스</string>
 
     <string name="preference_immersive_mode_off">끄기</string>
-    <string name="preference_immersive_mode_low_profile">화면상의 가상 탐색 버튼만 숨기기</string>
+    <string name="preference_immersive_mode_navigation">화면상의 가상 탐색 버튼만 숨기기</string>
     <string name="preference_immersive_mode_gui">GUI 숨기기</string>
     <string name="preference_immersive_mode_everything">모두 숨기기</string>
 </resources>

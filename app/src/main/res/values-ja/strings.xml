@@ -358,7 +358,7 @@
     <string name="preference_stamp_style_plain">普通の文字</string>
 
     <string name="preference_immersive_mode_off">オフ</string>
-    <string name="preference_immersive_mode_low_profile">スクリーンボタンのみ除外</string>
+    <string name="preference_immersive_mode_navigation">スクリーンボタンのみ除外</string>
     <string name="preference_immersive_mode_gui">GUIを除外</string>
     <string name="preference_immersive_mode_everything">すべてを除外</string>
 </resources>

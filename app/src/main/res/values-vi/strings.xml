@@ -781,7 +781,7 @@
     <string name="preference_stamp_style_plain">Thuần túy</string>
 
     <string name="preference_immersive_mode_off">Tắt</string>
-    <string name="preference_immersive_mode_low_profile">Chỉ ẩn các nút điều hướng</string>
+    <string name="preference_immersive_mode_navigation">Chỉ ẩn các nút điều hướng</string>
     <string name="preference_immersive_mode_gui">Ẩn giao diện người dùng</string>
     <string name="preference_immersive_mode_everything">Ẩn mọi thứ</string>
 </resources>

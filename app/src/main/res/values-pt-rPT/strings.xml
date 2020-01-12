@@ -414,7 +414,7 @@
     <string name="preference_stamp_style_plain">Texto simples</string>
 
     <string name="preference_immersive_mode_off">Desligado</string>
-    <string name="preference_immersive_mode_low_profile">Apenas ocultar os botões de navegação virtuais</string>
+    <string name="preference_immersive_mode_navigation">Apenas ocultar os botões de navegação virtuais</string>
     <string name="preference_immersive_mode_gui">Ocultar interface</string>
     <string name="preference_immersive_mode_everything">Ocultar tudo</string>
 </resources>

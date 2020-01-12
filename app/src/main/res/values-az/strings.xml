@@ -312,7 +312,7 @@
     <string name="preference_ui_placement_right">Sağ əllə işləyənlər üçün</string>
 
     <string name="preference_immersive_mode_off">Bağla</string>
-    <string name="preference_immersive_mode_low_profile">Hərəkət düyməsini gizlə</string>
+    <string name="preference_immersive_mode_navigation">Hərəkət düyməsini gizlə</string>
     <string name="preference_immersive_mode_gui">GUI gizlə</string>
     <string name="preference_immersive_mode_everything">Hamısını gizlə</string>
 

@@ -440,7 +440,7 @@
     <string name="preference_stamp_style_plain">Texte brut</string>
 
     <string name="preference_immersive_mode_off">Off</string>
-    <string name="preference_immersive_mode_low_profile">Masquer uniquement les boutons de navigation virtuelle de l\'écran</string>
+    <string name="preference_immersive_mode_navigation">Masquer uniquement les boutons de navigation virtuelle de l\'écran</string>
     <string name="preference_immersive_mode_gui">Masquer l\'interface graphique</string>
     <string name="preference_immersive_mode_everything">Tout masquer</string>
 </resources>
