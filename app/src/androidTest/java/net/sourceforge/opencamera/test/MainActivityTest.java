@@ -63,6 +63,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ZoomControls;
@@ -95,6 +96,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "setUp: 1");
 
         // initialise test statics (to avoid the persisting between tests in a test suite run!)
+        MainActivity.test_preview_want_no_limits = false;
+        MainActivity.test_preview_want_no_limits_value = false;
         ImageSaver.test_small_queue_size = false;
 
         // use getTargetContext() as we haven't started the activity yet (and don't want to, as we want to set prefs before starting)
@@ -145,6 +148,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.clear();
         editor.apply();
 
+        Log.d(TAG, "tearDown done");
         super.tearDown();
     }
 
@@ -4517,6 +4521,102 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
         assertTrue(pauseVideoButton.getVisibility() == View.GONE);
         assertTrue(takePhotoVideoButton.getVisibility() == View.GONE);
+    }
+
+    /** Tests the use of the FLAG_LAYOUT_NO_LIMITS flag introduced in 1.48.
+     */
+    public void testLayoutNoLimits() throws InterruptedException {
+        Log.d(TAG, "testLayoutNoLimits");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            // we don't support FLAG_LAYOUT_NO_LIMITS
+            return;
+        }
+
+        MainActivity.test_preview_want_no_limits = true;
+        MainActivity.test_preview_want_no_limits_value = false;
+        // need to restart for test_preview_want_no_limits static to take effect
+        restart();
+
+        setToDefault();
+
+        Thread.sleep(1000);
+        assertEquals(0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(0, mActivity.getMainUI().test_navigation_gap);
+
+        // test changing resolution
+        MainActivity.test_preview_want_no_limits_value = true;
+        updateForSettings();
+        Thread.sleep(1000);
+        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
+        MainActivity.test_preview_want_no_limits_value = false;
+        updateForSettings();
+        Thread.sleep(1000);
+        assertEquals(0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(0, mActivity.getMainUI().test_navigation_gap);
+
+        if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
+            // test switching camera
+            MainActivity.test_preview_want_no_limits_value = true;
+            switchToCamera(1);
+            Thread.sleep(1000);
+            assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
+            MainActivity.test_preview_want_no_limits_value = false;
+            switchToCamera(0);
+            Thread.sleep(1000);
+            assertEquals(0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            assertEquals(0, mActivity.getMainUI().test_navigation_gap);
+        }
+
+        // test switching to video and back
+        View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        MainActivity.test_preview_want_no_limits_value = true;
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertTrue(mPreview.isVideo());
+        Thread.sleep(1000);
+        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
+        MainActivity.test_preview_want_no_limits_value = false;
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertFalse(mPreview.isVideo());
+        Thread.sleep(1000);
+        assertEquals(0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(0, mActivity.getMainUI().test_navigation_gap);
+
+        // test after restart
+        MainActivity.test_preview_want_no_limits_value = true;
+        restart();
+        Thread.sleep(1000);
+        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
+    }
+
+    /** Tests the use of the FLAG_LAYOUT_NO_LIMITS flag introduced in 1.48, with the mode set from startup.
+     */
+    public void testLayoutNoLimitsStartup() throws InterruptedException {
+        Log.d(TAG, "testLayoutNoLimitsStartup");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            // we don't support FLAG_LAYOUT_NO_LIMITS
+            return;
+        }
+
+        MainActivity.test_preview_want_no_limits = true;
+        MainActivity.test_preview_want_no_limits_value = true;
+        // need to restart for test_preview_want_no_limits static to take effect
+        restart();
+
+        setToDefault();
+
+        Thread.sleep(1000);
+        Log.d(TAG, "check FLAG_LAYOUT_NO_LIMITS");
+        Log.d(TAG, "test_navigation_gap: " + mActivity.getMainUI().test_navigation_gap);
+        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
     }
 
     private void subTestTakePhotoPreviewPaused(boolean immersive_mode, boolean is_raw) throws InterruptedException {

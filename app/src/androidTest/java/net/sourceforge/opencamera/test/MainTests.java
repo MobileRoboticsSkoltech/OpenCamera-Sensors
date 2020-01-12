@@ -70,6 +70,8 @@ public class MainTests {
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSettingsPrivacyPolicy"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPreviewRotation"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLayoutNoLimits"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLayoutNoLimitsStartup"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCameraModes"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFailOpenCamera"));
         if( !MainActivityTest.test_camera2 ) {

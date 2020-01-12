@@ -91,6 +91,7 @@ public class MainUI {
     private final Map<String, View> test_ui_buttons = new Hashtable<>();
     public int test_saved_popup_width;
     public int test_saved_popup_height;
+    public volatile int test_navigation_gap;
 
     public MainUI(MainActivity main_activity) {
         if( MyDebug.LOG )
@@ -249,6 +250,25 @@ public class MainUI {
         display.getSize(display_size);
         final int display_height = Math.min(display_size.x, display_size.y);
 
+        /*int navigation_gap = 0;
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+            final int display_width = Math.max(display_size.x, display_size.y);
+            Point real_display_size = new Point();
+            display.getRealSize(real_display_size);
+            final int real_display_width = Math.max(real_display_size.x, real_display_size.y);
+            navigation_gap = real_display_width - display_width;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "display_width: " + display_width);
+                Log.d(TAG, "real_display_width: " + real_display_width);
+                Log.d(TAG, "navigation_gap: " + navigation_gap);
+            }
+        }*/
+        int navigation_gap = main_activity.getNavigationGap();
+        test_navigation_gap = navigation_gap;
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "navigation_gap: " + navigation_gap);
+        }
+
         if( !popup_container_only )
         {
             // reset:
@@ -282,6 +302,7 @@ public class MainUI {
                 layoutParams.addRule(below, 0);
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, 0);
+                layoutParams.setMargins(0, 0, navigation_gap, 0);
                 view.setLayoutParams(layoutParams);
                 setViewRotation(view, ui_rotation);
             }
@@ -415,6 +436,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -422,6 +444,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -429,6 +452,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -436,6 +460,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -443,6 +468,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -450,6 +476,7 @@ public class MainUI {
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
@@ -459,6 +486,7 @@ public class MainUI {
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
             layoutParams.addRule(align_parent_top, 0);
             layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
             view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
 
@@ -475,12 +503,14 @@ public class MainUI {
                 layoutParams.addRule(align_parent_right, 0);
                 layoutParams.addRule(align_parent_top, 0);
                 layoutParams.addRule(align_parent_bottom, 0);
+                layoutParams.setMargins(0, 0, 0, 0);
             }
             else {
                 layoutParams.addRule(align_parent_left, 0);
                 layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
                 layoutParams.addRule(align_parent_top, 0);
                 layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                layoutParams.setMargins(0, 0, navigation_gap, 0);
                 // need to clear the others, in case we turn zoom controls on/off
                 layoutParams.addRule(align_left, 0);
                 layoutParams.addRule(align_right, 0);

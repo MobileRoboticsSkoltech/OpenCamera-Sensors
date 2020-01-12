@@ -79,6 +79,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -130,6 +131,12 @@ public class MainActivity extends Activity {
     private AudioListener audio_listener; // may be null - created when needed
 
     //private boolean ui_placement_right = true;
+
+    private boolean want_no_limits; // whether we want to run with FLAG_LAYOUT_NO_LIMITS
+    private boolean set_window_insets_listener; // whether we've enabled a setOnApplyWindowInsetsListener()
+    private int navigation_gap;
+    public static volatile boolean test_preview_want_no_limits; // test flag, if set to true then instead use test_preview_want_no_limits_value; needs to be static, as it needs to be set before activity is created to take effect
+    public static volatile boolean test_preview_want_no_limits_value;
 
     private final ToastBoxer switch_video_toast = new ToastBoxer();
     private final ToastBoxer screen_locked_toast = new ToastBoxer();
@@ -391,8 +398,38 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating gesture detector: " + (System.currentTimeMillis() - debug_time));
 
-        // set up listener to handle immersive mode options
         View decorView = getWindow().getDecorView();
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+            // set a window insets listener to find the navigation_gap
+            if( MyDebug.LOG )
+                Log.d(TAG, "set a window insets listener");
+            this.set_window_insets_listener = true;
+            decorView.getRootView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "inset: " + insets.getSystemWindowInsetRight());
+                    if( navigation_gap == 0 ) {
+                        navigation_gap = insets.getSystemWindowInsetRight();
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "navigation_gap is " + navigation_gap);
+                        // Sometimes when this callback is called, the navigation_gap may still be 0 even if
+                        // the device doesn't have physical navigation buttons - we need to wait
+                        // until we have found a non-zero value before switching to no limits.
+                        // On devices with physical navigation bar, navigation_gap should remain 0
+                        // (and there's no point setting FLAG_LAYOUT_NO_LIMITS)
+                        if( want_no_limits && navigation_gap != 0 ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "set FLAG_LAYOUT_NO_LIMITS");
+                            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                        }
+                    }
+                    return getWindow().getDecorView().getRootView().onApplyWindowInsets(insets);
+                }
+            });
+        }
+
+        // set up listener to handle immersive mode options
         decorView.setOnSystemUiVisibilityChangeListener
                 (new View.OnSystemUiVisibilityChangeListener() {
                     @Override
@@ -563,6 +600,10 @@ public class MainActivity extends Activity {
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
+    }
+
+    public int getNavigationGap() {
+        return want_no_limits ? navigation_gap : 0;
     }
 
     /* This method sets the preference defaults which are set specific for a particular device.
@@ -2381,6 +2422,12 @@ public class MainActivity extends Activity {
             showWhenLocked(false);
         }
 
+        if( want_no_limits && navigation_gap != 0 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "set FLAG_LAYOUT_NO_LIMITS");
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+
         setBrightnessForCamera(false);
 
         initImmersiveMode();
@@ -2409,6 +2456,11 @@ public class MainActivity extends Activity {
 
         // revert to standard screen blank behaviour
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if( want_no_limits && navigation_gap != 0 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "clear FLAG_LAYOUT_NO_LIMITS");
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
         if( set_lock_protect ) {
             // settings should still be protected by screen lock
             showWhenLocked(false);
@@ -3477,6 +3529,58 @@ public class MainActivity extends Activity {
             Log.d(TAG, "cameraSetup");
             debug_time = System.currentTimeMillis();
         }
+
+        boolean old_want_no_limits = want_no_limits;
+        this.want_no_limits = false;
+        if( set_window_insets_listener ) {
+            Point display_size = new Point();
+            Display display = getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+            int display_width = Math.max(display_size.x, display_size.y);
+            int display_height = Math.min(display_size.x, display_size.y);
+            double display_aspect_ratio = ((double)display_width)/(double)display_height;
+            double preview_aspect_ratio = preview.getCurrentPreviewAspectRatio();
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "display_aspect_ratio: " + display_aspect_ratio);
+                Log.d(TAG, "preview_aspect_ratio: " + preview_aspect_ratio);
+            }
+            boolean preview_is_wide = preview_aspect_ratio > display_aspect_ratio + 1.0e-5f;
+            if( test_preview_want_no_limits ) {
+                preview_is_wide = test_preview_want_no_limits_value;
+            }
+            if( preview_is_wide ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview is wide, set want_no_limits");
+                this.want_no_limits = true;
+
+                if( !old_want_no_limits ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "need to change to FLAG_LAYOUT_NO_LIMITS");
+                    // Ideally we'd just go straight to FLAG_LAYOUT_NO_LIMITS mode, but then all calls to onApplyWindowInsets()
+                    // end up returning a value of 0 for the navigation_gap! So we need to wait until we know the navigation_gap.
+                    if( navigation_gap != 0 ) {
+                        // already have navigation gap, can go straight into no limits mode
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "set FLAG_LAYOUT_NO_LIMITS");
+                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                        // need to layout the UI again due to now taking the navigation gap into account
+                        mainUI.layoutUI();
+                    }
+                    else {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "but navigation_gap is 0");
+                    }
+                }
+            }
+            else if( old_want_no_limits && navigation_gap != 0 ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "clear FLAG_LAYOUT_NO_LIMITS");
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                // need to layout the UI again due to no longer taking the navigation gap into account
+                mainUI.layoutUI();
+            }
+        }
+
         if( this.supportsForceVideo4K() && preview.usingCamera2API() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
