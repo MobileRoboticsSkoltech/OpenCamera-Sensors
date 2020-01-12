@@ -284,7 +284,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private List<CameraController.Size> supported_preview_sizes;
 
-    private List<CameraController.Size> sizes;
+    private List<CameraController.Size> photo_sizes;
     private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
     private boolean supports_video;
@@ -1357,7 +1357,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         supports_raw = false;
         view_angle_x = 55.0f; // set a sensible default
         view_angle_y = 43.0f; // set a sensible default
-        sizes = null;
+        photo_sizes = null;
         current_size_index = -1;
         has_capture_rate_factor = false;
         capture_rate_factor = 1.0f;
@@ -1826,8 +1826,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.d(TAG, "burst mode: current picture size doesn't support burst");
                 // set to next largest that supports burst
                 CameraController.Size new_size = null;
-                for(int i=0;i<sizes.size();i++) {
-                    CameraController.Size size = sizes.get(i);
+                for(int i=0;i<photo_sizes.size();i++) {
+                    CameraController.Size size = photo_sizes.get(i);
                     if( size.supports_burst && size.width*size.height <= current_size.width*current_size.height ) {
                         if( new_size == null || size.width*size.height > new_size.width*new_size.height ) {
                             current_size_index = i;
@@ -1838,8 +1838,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 if( new_size == null ) {
                     Log.e(TAG, "can't find burst-supporting picture size smaller than the current picture size");
                     // just find largest that supports burst
-                    for(int i=0;i<sizes.size();i++) {
-                        CameraController.Size size = sizes.get(i);
+                    for(int i=0;i<photo_sizes.size();i++) {
+                        CameraController.Size size = photo_sizes.get(i);
                         if( size.supports_burst ) {
                             if( new_size == null || size.width*size.height > new_size.width*new_size.height ) {
                                 current_size_index = i;
@@ -2016,7 +2016,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             this.minimum_focus_distance = camera_features.minimum_focus_distance;
             this.supports_face_detection = camera_features.supports_face_detection;
-            this.sizes = camera_features.picture_sizes;
+            this.photo_sizes = camera_features.picture_sizes;
             supported_flash_values = camera_features.supported_flash_values;
             supported_focus_values = camera_features.supported_focus_values;
             this.max_num_focus_areas = camera_features.max_num_focus_areas;
@@ -2499,8 +2499,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( MyDebug.LOG )
                 Log.d(TAG, "set up picture sizes");
             if( MyDebug.LOG ) {
-                for(int i=0;i<sizes.size();i++) {
-                    CameraController.Size size = sizes.get(i);
+                for(int i=0;i<photo_sizes.size();i++) {
+                    CameraController.Size size = photo_sizes.get(i);
                     Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
                 }
             }
@@ -2510,8 +2510,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 int resolution_w = resolution.first;
                 int resolution_h = resolution.second;
                 // now find size in valid list
-                for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
-                    CameraController.Size size = sizes.get(i);
+                for(int i=0;i<photo_sizes.size() && current_size_index==-1;i++) {
+                    CameraController.Size size = photo_sizes.get(i);
                     if( size.width == resolution_w && size.height == resolution_h ) {
                         current_size_index = i;
                         if( MyDebug.LOG )
@@ -2527,8 +2527,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( current_size_index == -1 ) {
                 // set to largest
                 CameraController.Size current_size = null;
-                for(int i=0;i<sizes.size();i++) {
-                    CameraController.Size size = sizes.get(i);
+                for(int i=0;i<photo_sizes.size();i++) {
+                    CameraController.Size size = photo_sizes.get(i);
                     if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
                         current_size_index = i;
                         current_size = size;
@@ -2845,7 +2845,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             else {
                 double targetRatio = ((double) profile.videoFrameWidth) / (double) profile.videoFrameHeight;
-                new_size = getOptimalVideoPictureSize(sizes, targetRatio);
+                new_size = getOptimalVideoPictureSize(photo_sizes, targetRatio);
             }
         }
         else {
@@ -6820,14 +6820,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( MyDebug.LOG )
                 Log.d(TAG, "need to filter picture sizes for a burst mode");
             List<CameraController.Size> filtered_sizes = new ArrayList<>();
-            for(CameraController.Size size : sizes) {
+            for(CameraController.Size size : photo_sizes) {
                 if( size.supports_burst ) {
                     filtered_sizes.add(size);
                 }
             }
             return filtered_sizes;
         }
-        return this.sizes;
+        return this.photo_sizes;
     }
 
     /*public int getCurrentPictureSizeIndex() {
@@ -6837,9 +6837,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }*/
 
     public CameraController.Size getCurrentPictureSize() {
-        if( current_size_index == -1 || sizes == null )
+        if( current_size_index == -1 || photo_sizes == null )
             return null;
-        return sizes.get(current_size_index);
+        return photo_sizes.get(current_size_index);
     }
 
     public VideoQualityHandler getVideoQualityHander() {
