@@ -201,12 +201,14 @@ public class MainActivity extends Activity {
             if( MyDebug.LOG )
                 Log.d(TAG, "is_test: " + is_test);
         }
-        if( getIntent() != null && getIntent().getExtras() != null ) {
+        /*if( getIntent() != null && getIntent().getExtras() != null ) {
             // whether called from Take Photo widget
-            if( MyDebug.LOG ) {
-                //Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
-                Log.d(TAG, "take_photo?: " + TakePhoto.TAKE_PHOTO);
-            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
+        }*/
+        if( MyDebug.LOG ) {
+            // whether called from Take Photo widget
+            Log.d(TAG, "take_photo?: " + TakePhoto.TAKE_PHOTO);
         }
         if( getIntent() != null && getIntent().getAction() != null ) {
             // invoked via the manifest shortcut?
