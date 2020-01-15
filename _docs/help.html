@@ -1188,12 +1188,21 @@ external SD card, see "How can I save to my external SD card?" above. Otherwise:
 <ul>
     <li>If Settings/More camera controls/"Use Storage Access Framework" is enabled,
     in some cases the permission may be lost, try rechoosing the save location (from
-    Settings/More camera controls/"Save location".</li>
+    Settings/More camera controls/"Save location").</li>
     <li>If not using Storage Access Framework, but you have changed the save location,
     it may be you've chosen somewhere where applications don't have permission to save
     files.</li>
     <li>Or sometimes simply restarting the devices fixes such problems.</li>
 </ul>
+
+<p><b>I switched to a new phone, and now something doesn't work!</b> - Google's auto-backup will
+typically transfer settings to a new phone, but this may mean a camera-specific setting is no
+longer relevant. In particular, if you set a non-default save location, it may be that the path is
+not valid on the new device, or if using Settings/More camera controls/"Use Storage Access Framework",
+you may need to rechoose the save location (from Settings/More camera controls/"Save location") to
+grant permission to the new device. You can use Settings/Settings manager/"Reset settings" to reset
+Open Camera to its original state, to rule out any issues from an Android backup from another
+device.</p>
 
 <p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-level</a>
 option is on. (If they're being rotated even when the phone is held level, it may mean the accelerometer sensor on your
