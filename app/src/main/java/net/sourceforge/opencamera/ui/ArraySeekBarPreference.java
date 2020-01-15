@@ -33,8 +33,13 @@ public class ArraySeekBarPreference extends DialogPreference {
 
         String namespace = "http://schemas.android.com/apk/res/android";
         this.default_value = attrs.getAttributeValue(namespace, "defaultValue");
-        this.setEntries(attrs.getAttributeResourceValue(namespace, "entries", 0));
-        this.setEntryValues(attrs.getAttributeResourceValue(namespace, "entryValues", 0));
+
+        int entries_id = attrs.getAttributeResourceValue(namespace, "entries", 0);
+        if( entries_id > 0 )
+            this.setEntries(entries_id);
+        int values_id = attrs.getAttributeResourceValue(namespace, "entryValues", 0);
+        if( values_id > 0 )
+            this.setEntryValues(values_id);
 
         setDialogLayoutResource(R.layout.arrayseekbarpreference);
     }
