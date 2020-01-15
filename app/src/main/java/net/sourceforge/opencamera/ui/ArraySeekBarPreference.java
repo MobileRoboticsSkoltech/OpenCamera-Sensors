@@ -110,7 +110,7 @@ public class ArraySeekBarPreference extends DialogPreference {
         }
     }
 
-    private void setEntries(CharSequence[] entries) {
+    public void setEntries(CharSequence[] entries) {
         this.entries = entries;
     }
 
@@ -118,7 +118,7 @@ public class ArraySeekBarPreference extends DialogPreference {
         setEntries(getContext().getResources().getTextArray(entries));
     }
 
-    private void setEntryValues(CharSequence[] values) {
+    public void setEntryValues(CharSequence[] values) {
         this.values = values;
     }
 

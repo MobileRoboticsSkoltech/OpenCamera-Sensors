@@ -329,6 +329,13 @@
                 android:defaultValue="preference_ghost_image_off"
                 />
 
+            <net.sourceforge.opencamera.ui.ArraySeekBarPreference
+                android:key="ghost_image_alpha"
+                android:title="@string/preference_ghost_image_alpha"
+                android:summary="@string/preference_ghost_image_alpha_summary"
+                android:defaultValue="50"
+                />
+
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <ListPreference
                 android:key="preference_focus_assist"

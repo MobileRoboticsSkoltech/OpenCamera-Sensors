@@ -88,6 +88,7 @@ public class DrawPreview {
     private String ghost_image_pref;
     private String ghost_selected_image_pref = "";
     private Bitmap ghost_selected_image_bitmap;
+    private int ghost_image_alpha;
     private boolean want_histogram;
     private Preview.HistogramType histogram_type;
     private boolean want_zebra_stripes;
@@ -560,6 +561,7 @@ public class DrawPreview {
             }
             ghost_selected_image_pref = "";
         }
+        ghost_image_alpha = applicationInterface.getGhostImageAlpha();
 
         String histogram_pref = sharedPreferences.getString(PreferenceKeys.HistogramPreferenceKey, "preference_histogram_off");
         want_histogram = !histogram_pref.equals("preference_histogram_off") && main_activity.supportsPreviewBitmaps();
@@ -2389,14 +2391,14 @@ public class DrawPreview {
             }
             setLastImageMatrix(canvas, last_thumbnail, ui_rotation, !show_last_image);
             if( !show_last_image )
-                p.setAlpha(127);
+                p.setAlpha(ghost_image_alpha);
             canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
             if( !show_last_image )
                 p.setAlpha(255);
         }
         else if( camera_controller != null && !front_screen_flash && ghost_selected_image_bitmap != null ) {
             setLastImageMatrix(canvas, ghost_selected_image_bitmap, ui_rotation, true);
-            p.setAlpha(127);
+            p.setAlpha(ghost_image_alpha);
             canvas.drawBitmap(ghost_selected_image_bitmap, last_image_matrix, p);
             p.setAlpha(255);
         }

@@ -2,6 +2,7 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.ui.ArraySeekBarPreference;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 
 import android.app.Activity;
@@ -281,6 +282,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             ListPreference lp = (ListPreference)findPreference("preference_quality");
             lp.setEntries(entries);
             lp.setEntryValues(values);
+        }
+
+        {
+            final int n_ghost_image_alpha = 20;
+            CharSequence [] entries = new CharSequence[n_ghost_image_alpha];
+            CharSequence [] values = new CharSequence[n_ghost_image_alpha];
+            for(int i=0;i<n_ghost_image_alpha;i++) {
+                entries[i] = "" + 5*(i+1) + "%";
+                values[i] = "" + 5*(i+1);
+            }
+            ArraySeekBarPreference sp = (ArraySeekBarPreference)findPreference("ghost_image_alpha");
+            sp.setEntries(entries);
+            sp.setEntryValues(values);
         }
 
         final boolean supports_raw = bundle.getBoolean("supports_raw");

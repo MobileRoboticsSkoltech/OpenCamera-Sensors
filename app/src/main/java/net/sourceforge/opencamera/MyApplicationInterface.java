@@ -1112,6 +1112,25 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return auto_stabilise && main_activity.supportsAutoStabilise();
     }
 
+    /** Returns the alpha value to use for ghost image, as a number from 0 to 255.
+     *  Note that we store the preference as a percentage from 0 to 100, but scale this to 0 to 255.
+     */
+    public int getGhostImageAlpha() {
+        String ghost_image_alpha_value = sharedPreferences.getString(PreferenceKeys.GhostImageAlphaPreferenceKey, "50");
+        int ghost_image_alpha;
+        try {
+            ghost_image_alpha = Integer.parseInt(ghost_image_alpha_value);
+        }
+        catch(NumberFormatException e) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "failed to parse ghost_image_alpha_value: " + ghost_image_alpha_value);
+            e.printStackTrace();
+            ghost_image_alpha = 50;
+        }
+        ghost_image_alpha = (int)(ghost_image_alpha*2.55f+0.1f);
+        return ghost_image_alpha;
+    }
+
     public String getStampPref() {
         return sharedPreferences.getString(PreferenceKeys.StampPreferenceKey, "preference_stamp_no");
     }

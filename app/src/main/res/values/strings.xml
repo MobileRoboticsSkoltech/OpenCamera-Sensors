@@ -937,6 +937,9 @@
     <string name="preference_immersive_mode_gui">Hide GUI</string>
     <string name="preference_immersive_mode_everything">Hide everything</string>
 
+    <string name="preference_ghost_image_alpha">Ghost image opacity</string>
+    <string name="preference_ghost_image_alpha_summary">Alpha value to use for ghost images. A lower value means more transparent, 100%% means opaque.\n%s</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>
