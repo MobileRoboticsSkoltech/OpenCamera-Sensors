@@ -32,6 +32,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -45,6 +46,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 
@@ -626,13 +628,60 @@ public class DrawPreview {
 
     /** Loads the bitmap from the uri. File is optional, and is used on pre-Android 7 devices to
      *  read the exif orientation.
+     *  The image will be downscaled if required to be comparable to the preview width.
      */
     private Bitmap loadBitmap(Uri uri, File file) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "loadBitmap: " + uri);
         Bitmap bitmap;
         try {
-            bitmap = MediaStore.Images.Media.getBitmap(main_activity.getContentResolver(), uri);
+            //bitmap = MediaStore.Images.Media.getBitmap(main_activity.getContentResolver(), uri);
+
+            int sample_size = 1;
+            {
+                // attempt to compute appropriate scaling
+                BitmapFactory.Options bounds = new BitmapFactory.Options();
+                bounds.inJustDecodeBounds = true;
+                InputStream input = main_activity.getContentResolver().openInputStream(uri);
+                BitmapFactory.decodeStream(input, null, bounds);
+                if( input != null )
+                    input.close();
+
+                if( bounds.outWidth != -1 && bounds.outHeight != -1 ) {
+                    // compute appropriate scaling
+                    int image_size = Math.max(bounds.outWidth, bounds.outHeight);
+
+                    Point point = new Point();
+                    Display display = main_activity.getWindowManager().getDefaultDisplay();
+                    display.getSize(point);
+                    int display_size = Math.max(point.x, point.y);
+
+                    int ratio = (int) Math.ceil((double) image_size / display_size);
+                    sample_size = Integer.highestOneBit(ratio);
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "display_size: " + display_size);
+                        Log.d(TAG, "image_size: " + image_size);
+                        Log.d(TAG, "ratio: " + ratio);
+                        Log.d(TAG, "sample_size: " + sample_size);
+                    }
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.e(TAG, "failed to obtain width/height of bitmap");
+                }
+            }
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inMutable = false;
+            options.inSampleSize = sample_size;
+            InputStream input = main_activity.getContentResolver().openInputStream(uri);
+            bitmap = BitmapFactory.decodeStream(input, null, options);
+            if( input != null )
+                input.close();
+            if( MyDebug.LOG && bitmap != null ) {
+                Log.d(TAG, "bitmap width: " + bitmap.getWidth());
+                Log.d(TAG, "bitmap height: " + bitmap.getHeight());
+            }
         }
         catch(Exception e) {
             // Although Media.getBitmap() is documented as only throwing FileNotFoundException, IOException
