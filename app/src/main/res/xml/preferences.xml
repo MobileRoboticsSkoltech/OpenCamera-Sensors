@@ -1079,6 +1079,7 @@
                 android:entries="@array/preference_record_audio_src_entries"
                 android:entryValues="@array/preference_record_audio_src_values"
                 android:defaultValue="audio_src_camcorder"
+                android:dependency="preference_record_audio"
                 />
 
             <ListPreference 
@@ -1088,6 +1089,7 @@
                 android:entries="@array/preference_record_audio_channels_entries"
                 android:entryValues="@array/preference_record_audio_channels_values"
                 android:defaultValue="audio_default"
+                android:dependency="preference_record_audio"
                 />
 
             <SwitchPreference
@@ -1179,6 +1181,7 @@
                 android:title="@string/preference_require_location"
                 android:summary="@string/preference_require_location_summary"
                 android:defaultValue="false"
+                android:dependency="preference_location"
                 />
 
         </PreferenceScreen>
