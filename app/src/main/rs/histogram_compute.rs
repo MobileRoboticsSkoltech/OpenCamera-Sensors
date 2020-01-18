@@ -85,6 +85,14 @@ void __attribute__((kernel)) histogram_compute_rgb(uchar4 in, uint32_t x, uint32
 }
 
 int zebra_stripes_threshold = 255;
+int zebra_stripes_foreground_r = 0;
+int zebra_stripes_foreground_g = 0;
+int zebra_stripes_foreground_b = 0;
+int zebra_stripes_foreground_a = 255;
+int zebra_stripes_background_r = 255;
+int zebra_stripes_background_g = 255;
+int zebra_stripes_background_b = 255;
+int zebra_stripes_background_a = 255;
 int zebra_stripes_width = 40;
 
 uchar4 __attribute__((kernel)) generate_zebra_stripes(uchar4 in, uint32_t x, uint32_t y) {
@@ -98,16 +106,17 @@ uchar4 __attribute__((kernel)) generate_zebra_stripes(uchar4 in, uint32_t x, uin
         out.a = 255;*/
         int stripe = (x+y)/zebra_stripes_width;
         if( stripe % 2 == 0 ) {
-            out.r = 255;
-            out.g = 255;
-            out.b = 255;
+            out.r = zebra_stripes_background_r;
+            out.g = zebra_stripes_background_g;
+            out.b = zebra_stripes_background_b;
+            out.a = zebra_stripes_background_a;
         }
         else {
-            out.r = 0;
-            out.g = 0;
-            out.b = 0;
+            out.r = zebra_stripes_foreground_r;
+            out.g = zebra_stripes_foreground_g;
+            out.b = zebra_stripes_foreground_b;
+            out.a = zebra_stripes_foreground_a;
         }
-        out.a = 255;
     }
     else {
         out.r = 0;

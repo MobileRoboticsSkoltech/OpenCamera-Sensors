@@ -945,6 +945,17 @@
     <string name="preference_ghost_image_alpha">Ghost image opacity</string>
     <string name="preference_ghost_image_alpha_summary">Alpha value to use for ghost images. A lower value means more transparent, 100%% means opaque.\n%s</string>
 
+    <string name="preference_zebra_stripes_foreground_color">Zebra stripes foreground color</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">Color to use for the foreground stripe when showing zebra stripes.\n%s</string>
+    <string name="preference_zebra_stripes_background_color">Zebra stripes background color</string>
+    <string name="preference_zebra_stripes_background_color_summary">Color to use for the background stripe when showing zebra stripes.\n%s</string>
+
+    <string name="preference_zebra_stripes_color_black">Black</string>
+    <string name="preference_zebra_stripes_color_red">Red</string>
+    <string name="preference_zebra_stripes_color_orange">Orange</string>
+    <string name="preference_zebra_stripes_color_transparent">Transparent</string>
+    <string name="preference_zebra_stripes_color_white">White</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>

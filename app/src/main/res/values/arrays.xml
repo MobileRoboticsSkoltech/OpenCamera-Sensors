@@ -979,4 +979,22 @@
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
     </string-array>
+    <string-array name="preference_zebra_stripes_foreground_color_entries">
+        <item>@string/preference_zebra_stripes_color_black</item>
+        <item>@string/preference_zebra_stripes_color_red</item>
+        <item>@string/preference_zebra_stripes_color_orange</item>
+    </string-array>
+    <string-array name="preference_zebra_stripes_foreground_color_values">
+        <item>#ff000000</item> <!-- Black -->
+        <item>#fff44336</item> <!-- Red 500 -->
+        <item>#ffff9800</item> <!-- Orange 500 -->
+    </string-array>
+    <string-array name="preference_zebra_stripes_background_color_entries">
+        <item>@string/preference_zebra_stripes_color_white</item>
+        <item>@string/preference_zebra_stripes_color_transparent</item>
+    </string-array>
+    <string-array name="preference_zebra_stripes_background_color_values">
+        <item>#ffffffff</item> <!-- White -->
+        <item>#00000000</item> <!-- Transparent -->
+    </string-array>
 </resources>

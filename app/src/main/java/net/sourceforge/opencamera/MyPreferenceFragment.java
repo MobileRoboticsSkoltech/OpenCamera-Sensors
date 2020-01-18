@@ -656,6 +656,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pref = findPreference("preference_zebra_stripes");
             pg.removePreference(pref);
 
+            pref = findPreference("preference_zebra_stripes_foreground_color");
+            pg.removePreference(pref);
+
+            pref = findPreference("preference_zebra_stripes_background_color");
+            pg.removePreference(pref);
+
             pref = findPreference("preference_focus_peaking");
             pg.removePreference(pref);
 

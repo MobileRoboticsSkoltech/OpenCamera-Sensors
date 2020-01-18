@@ -448,6 +448,26 @@
 
             <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <ListPreference
+                android:key="preference_zebra_stripes_foreground_color"
+                android:title="@string/preference_zebra_stripes_foreground_color"
+                android:summary="@string/preference_zebra_stripes_foreground_color_summary"
+                android:entries="@array/preference_zebra_stripes_foreground_color_entries"
+                android:entryValues="@array/preference_zebra_stripes_foreground_color_values"
+                android:defaultValue="#ff000000"
+                />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
+                android:key="preference_zebra_stripes_background_color"
+                android:title="@string/preference_zebra_stripes_background_color"
+                android:summary="@string/preference_zebra_stripes_background_color_summary"
+                android:entries="@array/preference_zebra_stripes_background_color_entries"
+                android:entryValues="@array/preference_zebra_stripes_background_color_values"
+                android:defaultValue="#ffffffff"
+                />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <ListPreference
                 android:key="preference_focus_peaking"
                 android:title="@string/preference_focus_peaking"
                 android:summary="@string/preference_focus_peaking_summary"

@@ -262,6 +262,10 @@ public class PreferenceKeys {
 
     public static final String ZebraStripesPreferenceKey = "preference_zebra_stripes";
 
+    public static final String ZebraStripesForegroundColorPreferenceKey = "preference_zebra_stripes_foreground_color";
+
+    public static final String ZebraStripesBackgroundColorPreferenceKey = "preference_zebra_stripes_background_color";
+
     public static final String FocusPeakingPreferenceKey = "preference_focus_peaking";
 
     public static final String FocusPeakingColorPreferenceKey = "preference_focus_peaking_color";

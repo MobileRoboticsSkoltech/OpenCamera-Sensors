@@ -95,6 +95,8 @@ public class DrawPreview {
     private Preview.HistogramType histogram_type;
     private boolean want_zebra_stripes;
     private int zebra_stripes_threshold;
+    private int zebra_stripes_color_foreground;
+    private int zebra_stripes_color_background;
     private boolean want_focus_peaking;
     private int focus_peaking_color_pref;
 
@@ -599,6 +601,11 @@ public class DrawPreview {
             zebra_stripes_threshold = 0;
         }
         want_zebra_stripes = zebra_stripes_threshold != 0 & main_activity.supportsPreviewBitmaps();
+
+        String zebra_stripes_color_foreground_value = sharedPreferences.getString(PreferenceKeys.ZebraStripesForegroundColorPreferenceKey, "#ff000000");
+        zebra_stripes_color_foreground = Color.parseColor(zebra_stripes_color_foreground_value);
+        String zebra_stripes_color_background_value = sharedPreferences.getString(PreferenceKeys.ZebraStripesBackgroundColorPreferenceKey, "#ffffffff");
+        zebra_stripes_color_background = Color.parseColor(zebra_stripes_color_background_value);
 
         String focus_peaking_pref = sharedPreferences.getString(PreferenceKeys.FocusPeakingPreferenceKey, "preference_focus_peaking_off");
         want_focus_peaking = !focus_peaking_pref.equals("preference_focus_peaking_off") && main_activity.supportsPreviewBitmaps();
@@ -2377,7 +2384,7 @@ public class DrawPreview {
                 preview.disableHistogram();
 
             if( want_zebra_stripes )
-                preview.enableZebraStripes(zebra_stripes_threshold);
+                preview.enableZebraStripes(zebra_stripes_threshold, zebra_stripes_color_foreground, zebra_stripes_color_background);
             else
                 preview.disableZebraStripes();
 

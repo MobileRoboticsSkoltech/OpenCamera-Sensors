@@ -137,6 +137,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private boolean want_zebra_stripes; // whether to generate zebra stripes bitmap, requires want_preview_bitmap==true
     private int zebra_stripes_threshold; // pixels with max rgb value equal to or greater than this threshold are marked with zebra stripes
+    private int zebra_stripes_color_foreground;
+    private int zebra_stripes_color_background;
     private Bitmap zebra_stripes_bitmap_buffer;
     private Bitmap zebra_stripes_bitmap;
 
@@ -7521,9 +7523,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.histogram;
     }
 
-    public void enableZebraStripes(int zebra_stripes_threshold) {
+    public void enableZebraStripes(int zebra_stripes_threshold, int zebra_stripes_color_foreground, int zebra_stripes_color_background) {
         this.want_zebra_stripes = true;
         this.zebra_stripes_threshold = zebra_stripes_threshold;
+        this.zebra_stripes_color_foreground = zebra_stripes_color_foreground;
+        this.zebra_stripes_color_background = zebra_stripes_color_background;
         if( this.zebra_stripes_bitmap_buffer == null ) {
             createZebraStripesBitmap();
         }
@@ -7763,6 +7767,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Allocation output_allocation = Allocation.createFromBitmap(preview.rs, zebra_stripes_bitmap_buffer);
 
                     histogramScript.set_zebra_stripes_threshold(preview.zebra_stripes_threshold);
+                    histogramScript.set_zebra_stripes_foreground_r(Color.red(preview.zebra_stripes_color_foreground));
+                    histogramScript.set_zebra_stripes_foreground_g(Color.green(preview.zebra_stripes_color_foreground));
+                    histogramScript.set_zebra_stripes_foreground_b(Color.blue(preview.zebra_stripes_color_foreground));
+                    histogramScript.set_zebra_stripes_foreground_a(Color.alpha(preview.zebra_stripes_color_foreground));
+                    histogramScript.set_zebra_stripes_background_r(Color.red(preview.zebra_stripes_color_background));
+                    histogramScript.set_zebra_stripes_background_g(Color.green(preview.zebra_stripes_color_background));
+                    histogramScript.set_zebra_stripes_background_b(Color.blue(preview.zebra_stripes_color_background));
+                    histogramScript.set_zebra_stripes_background_a(Color.alpha(preview.zebra_stripes_color_background));
                     histogramScript.set_zebra_stripes_width(zebra_stripes_bitmap_buffer.getWidth()/20);
 
                     if( MyDebug.LOG )
