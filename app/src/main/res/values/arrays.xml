@@ -920,6 +920,11 @@
         <item>@string/preference_zebra_stripes_70pc</item>
         <item>@string/preference_zebra_stripes_80pc</item>
         <item>@string/preference_zebra_stripes_90pc</item>
+        <item>@string/preference_zebra_stripes_93pc</item>
+        <item>@string/preference_zebra_stripes_95pc</item>
+        <item>@string/preference_zebra_stripes_97pc</item>
+        <item>@string/preference_zebra_stripes_98pc</item>
+        <item>@string/preference_zebra_stripes_99pc</item>
         <item>@string/preference_zebra_stripes_100pc</item>
     </string-array>
     <string-array name="preference_zebra_stripes_values">
@@ -927,6 +932,11 @@
         <item>179</item>
         <item>204</item>
         <item>230</item>
+        <item>237</item>
+        <item>242</item>
+        <item>247</item>
+        <item>250</item>
+        <item>252</item>
         <item>255</item>
     </string-array>
     <string-array name="preference_focus_peaking_entries">
