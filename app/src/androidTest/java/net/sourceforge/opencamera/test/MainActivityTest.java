@@ -4548,7 +4548,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         MainActivity.test_preview_want_no_limits_value = true;
         updateForSettings();
         Thread.sleep(1000);
-        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        boolean supports_no_limits = mActivity.getNavigationGap() != 0;
+        Log.d(TAG, "supports_no_limits: " + supports_no_limits);
+
+        assertEquals(supports_no_limits ? WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS : 0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
         MainActivity.test_preview_want_no_limits_value = false;
         updateForSettings();
@@ -4561,7 +4564,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             MainActivity.test_preview_want_no_limits_value = true;
             switchToCamera(1);
             Thread.sleep(1000);
-            assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            assertEquals(supports_no_limits ? WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS : 0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
             MainActivity.test_preview_want_no_limits_value = false;
             switchToCamera(0);
@@ -4577,7 +4580,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         waitUntilCameraOpened();
         assertTrue(mPreview.isVideo());
         Thread.sleep(1000);
-        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(supports_no_limits ? WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS : 0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
         MainActivity.test_preview_want_no_limits_value = false;
         clickView(switchVideoButton);
@@ -4591,7 +4594,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         MainActivity.test_preview_want_no_limits_value = true;
         restart();
         Thread.sleep(1000);
-        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(supports_no_limits ? WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS : 0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
     }
 
@@ -4613,9 +4616,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
 
         Thread.sleep(1000);
+        boolean supports_no_limits = mActivity.getNavigationGap() != 0;
+        Log.d(TAG, "supports_no_limits: " + supports_no_limits);
+
         Log.d(TAG, "check FLAG_LAYOUT_NO_LIMITS");
         Log.d(TAG, "test_navigation_gap: " + mActivity.getMainUI().test_navigation_gap);
-        assertEquals(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        assertEquals(supports_no_limits ? WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS : 0, mActivity.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         assertEquals(mActivity.getNavigationGap(), mActivity.getMainUI().test_navigation_gap);
     }
 
