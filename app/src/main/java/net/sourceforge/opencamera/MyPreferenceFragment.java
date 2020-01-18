@@ -704,6 +704,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             Preference pref = findPreference("preference_video_log");
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
             pg.removePreference(pref);
+
+            pref = findPreference("preference_video_profile_gamma");
+            pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
+            pg.removePreference(pref);
         }
 
         final float camera_view_angle_x = bundle.getFloat("camera_view_angle_x");
