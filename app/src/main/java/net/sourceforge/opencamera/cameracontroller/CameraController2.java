@@ -821,9 +821,9 @@ public class CameraController2 extends CameraController {
                 have_tonemap_profile = false;
 
             // to use test_new, also need to uncomment the test code in setFocusValue() to call setTonemapProfile()
-            /*boolean test_new = this.af_mode == CaptureRequest.CONTROL_AF_MODE_AUTO; // testing
-            if( test_new )
-                have_tonemap_profile = false;*/
+            //boolean test_new = this.af_mode == CaptureRequest.CONTROL_AF_MODE_AUTO; // testing
+            //if( test_new )
+            //    have_tonemap_profile = false;
 
             if( have_tonemap_profile ) {
                 if( default_tonemap_mode == null ) {
@@ -4152,7 +4152,7 @@ public class CameraController2 extends CameraController {
         camera_settings.af_mode = focus_mode;
         camera_settings.setFocusMode(previewBuilder);
         camera_settings.setFocusDistance(previewBuilder); // also need to set distance, in case changed between infinity, manual or other modes
-        //camera_settings.setTonemapProfile(previewBuilder); // testing - if using focus mode to test video profiles
+        //camera_settings.setTonemapProfile(previewBuilder); // testing - if using focus mode to test video profiles, see test_new flag
         try {
             setRepeatingRequest();
         }
