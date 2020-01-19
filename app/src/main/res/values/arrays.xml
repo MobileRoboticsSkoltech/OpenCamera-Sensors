@@ -554,6 +554,7 @@
         <item>@string/preference_video_log_extra_strong</item>
         <item>@string/preference_video_gamma</item>
         <item>@string/preference_video_jtlog</item>
+        <item>@string/preference_video_jtlnp1</item>
     </string-array>
     <string-array name="preference_video_log_values">
         <item>off</item>
@@ -564,6 +565,7 @@
         <item>extra_strong</item>
         <item>gamma</item>
         <item>jtlog</item>
+        <item>jtlnp1</item>
     </string-array>
     <string-array name="preference_video_profile_gamma_entries">
         <item>@string/preference_video_profile_gamma_1.0</item>

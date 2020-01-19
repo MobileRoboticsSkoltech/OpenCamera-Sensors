@@ -917,6 +917,7 @@
 
     <string name="preference_video_gamma">Gamma</string>
     <string name="preference_video_jtlog">JTLog</string>
+    <string name="preference_video_jtlnp1">JTLNP1</string>
     <string name="preference_video_profile_gamma">Video gamma value</string>
     <string name="preference_video_profile_gamma_summary">Gamma value to use for video if video picture profile is set to Gamma\n%s</string>
     <string name="preference_video_profile_gamma_1.0">1.0</string>

@@ -46,6 +46,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.util.SizeF;
 import android.view.Display;
@@ -79,7 +80,7 @@ public class CameraController2 extends CameraController {
     private boolean supports_photo_video_recording;
 
     private final static int tonemap_log_max_curve_points_c = 64;
-    private final static float [] jtlog_values = new float[] {
+    private final static float [] jtlog_values_base = new float[] {
         0.0000f, 0.0000f,  0.0230f, 0.2295f,  0.0280f, 0.2783f,  0.0319f, 0.3049f,  0.0369f, 0.3321f,  0.0430f, 0.3589f,
         0.0500f, 0.3844f,  0.0583f, 0.4098f,  0.0680f, 0.4351f,  0.0800f, 0.4619f,  0.0930f, 0.4870f,  0.1051f, 0.5076f,
         0.1180f, 0.5275f,  0.1430f, 0.5612f,  0.1680f, 0.5904f,  0.1930f, 0.6162f,  0.2180f, 0.6395f,  0.2430f, 0.6608f,
@@ -88,6 +89,12 @@ public class CameraController2 extends CameraController {
         0.5680f, 0.8470f,  0.5930f, 0.8575f,  0.6180f, 0.8677f,  0.6430f, 0.8776f,  0.6680f, 0.8872f,  0.6930f, 0.8966f,
         0.7180f, 0.9057f,  0.7430f, 0.9145f,  1.0000f, 1.0000f
     };
+    private final float [] jtlog_values;
+    private final static float [] jtlnp1_values_base = new float[] {
+        0.0f, 0.0f,  0.01f, 0.06f,  0.02f, 0.1f,  0.03f, 0.13f,  0.1f, 0.27f,  0.73f, 0.9f,  0.79f, 0.93f,
+        0.84f, 0.95f,  1.0f, 1.0f
+    };
+    private final float [] jtlnp1_values;
 
     private final ErrorCallback preview_error_cb;
     private final ErrorCallback camera_error_cb;
@@ -869,6 +876,11 @@ public class CameraController2 extends CameraController {
                         values = jtlog_values;
                         if( MyDebug.LOG )
                             Log.d(TAG, "setting JTLog profile");
+                        break;
+                    case TONEMAPPROFILE_JTLNP1:
+                        values = jtlnp1_values;
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "setting JTLNP1 profile");
                         break;
                 }
 
@@ -1783,6 +1795,10 @@ public class CameraController2 extends CameraController {
         media_action_sound.load(MediaActionSound.START_VIDEO_RECORDING);
         media_action_sound.load(MediaActionSound.STOP_VIDEO_RECORDING);
         media_action_sound.load(MediaActionSound.SHUTTER_CLICK);
+
+        // expand tonemap curves
+        jtlog_values = enforceMinTonemapCurvePoints(jtlog_values_base);
+        jtlnp1_values = enforceMinTonemapCurvePoints(jtlnp1_values_base);
     }
 
     @Override
@@ -1821,7 +1837,63 @@ public class CameraController2 extends CameraController {
             }
         }
     }
-    
+
+    /** Enforce a minimum number of points in tonemap curves - needed due to Galaxy S10e having wrong behaviour if fewer
+     *  than 16 points?! OnePlus 3T meanwhile has more gradual behaviour where it gets better at 64 points.
+     */
+    private float [] enforceMinTonemapCurvePoints(float[] in_values) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "enforceMinTonemapCurvePoints: " + Arrays.toString(in_values));
+            Log.d(TAG, "length: " + in_values.length/2);
+        }
+        final int min_points_c = 64;
+        //final int min_points_c = 16;
+        if( in_values.length >= 2*min_points_c ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "already enough points");
+            return in_values; // fine
+        }
+        List<Pair<Float, Float>> points = new ArrayList<>();
+        for(int i=0;i<in_values.length/2;i++) {
+            Pair<Float, Float> point = new Pair<>(in_values[2*i], in_values[2*i+1]);
+            points.add(point);
+        }
+
+        while( points.size() < min_points_c ) {
+            // find largest interval, and subdivide
+            int largest_indx = 0;
+            float largest_dist = 0.0f;
+            for(int i=0;i<points.size()-1;i++) {
+                Pair<Float, Float> p0 = points.get(i);
+                Pair<Float, Float> p1 = points.get(i+1);
+                float dist = p1.first - p0.first;
+                if( dist > largest_dist ) {
+                    largest_indx = i;
+                    largest_dist = dist;
+                }
+            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "largest indx " + largest_indx + " dist: " + largest_dist);
+            Pair<Float, Float> p0 = points.get(largest_indx);
+            Pair<Float, Float> p1 = points.get(largest_indx+1);
+            float mid_x = 0.5f*(p0.first + p1.first);
+            float mid_y = 0.5f*(p0.second + p1.second);
+            if( MyDebug.LOG )
+                Log.d(TAG, "    insert: " + mid_x + " , " + mid_y);
+            points.add(largest_indx+1, new Pair<>(mid_x, mid_y));
+        }
+
+        float [] out_values = new float[2*points.size()];
+        for(int i=0;i<points.size();i++) {
+            Pair<Float, Float> point = points.get(i);
+            out_values[2*i] = point.first;
+            out_values[2*i+1] = point.second;
+            if( MyDebug.LOG )
+                Log.d(TAG, "out point[" + i + "]: " + point.first + " , " + point.second);
+        }
+        return out_values;
+    }
+
     private void closePictureImageReader() {
         if( MyDebug.LOG )
             Log.d(TAG, "closePictureImageReader()");
@@ -2357,7 +2429,8 @@ public class CameraController2 extends CameraController {
                 // profiles we support
                 camera_features.supports_tonemap_curve =
                     tonemap_max_curve_points >= tonemap_log_max_curve_points_c &&
-                    tonemap_max_curve_points >= jtlog_values.length;
+                            tonemap_max_curve_points >= jtlog_values.length &&
+                            tonemap_max_curve_points >= jtlnp1_values.length;
             }
             else {
                 if( MyDebug.LOG )

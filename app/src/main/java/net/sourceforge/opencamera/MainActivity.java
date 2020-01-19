@@ -4155,6 +4155,9 @@ public class MainActivity extends Activity {
                             case TONEMAPPROFILE_JTLOG:
                                 string_id = R.string.preference_video_jtlog;
                                 break;
+                            case TONEMAPPROFILE_JTLNP1:
+                                string_id = R.string.preference_video_jtlnp1;
+                                break;
                         }
                         if( string_id != 0 ) {
                             simple = false;
