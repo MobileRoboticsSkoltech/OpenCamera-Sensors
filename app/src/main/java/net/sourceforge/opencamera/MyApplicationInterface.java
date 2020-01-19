@@ -750,7 +750,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         switch( video_log ) {
             case "off":
                 return 0.0f;
-            case "fine":
+            /*case "fine":
                 return 1.0f;
             case "low":
                 return 5.0f;
@@ -758,6 +758,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return 10.0f;
             case "strong":
                 return 100.0f;
+            case "extra_strong":
+                return 500.0f;*/
+            // need a range of values as behaviour can vary between devices - e.g., "fine" has more effect on Nexus 6 than
+            // other devices such as OnePlus 3T or Galaxy S10e
+            // recalibrated in v1.48 to correspond to improvements made in CameraController2
+            case "fine":
+                return 10.0f;
+            case "low":
+                return 32.0f;
+            case "medium":
+                return 100.0f;
+            case "strong":
+                return 224.0f;
             case "extra_strong":
                 return 500.0f;
             case "gamma":

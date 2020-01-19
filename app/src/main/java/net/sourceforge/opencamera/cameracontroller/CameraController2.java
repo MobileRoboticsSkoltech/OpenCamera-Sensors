@@ -781,7 +781,7 @@ public class CameraController2 extends CameraController {
 
         private float getLogProfile(float in) {
             //final float black_level = 4.0f/255.0f;
-            final float power = 1.0f/2.2f;
+            //final float power = 1.0f/2.2f;
             final float log_A = log_profile_strength;
             /*float out;
             if( in <= black_level ) {
@@ -795,7 +795,8 @@ public class CameraController2 extends CameraController {
             float out = (float) (Math.log1p(log_A * in) / Math.log1p(log_A));
 
             // apply gamma
-            out = (float)Math.pow(out, power);
+            // update: no longer need to do this with improvements made in 1.48 onwards
+            //out = (float)Math.pow(out, power);
             //out = Math.max(out, 0.5f);
 
             return out;
@@ -819,6 +820,11 @@ public class CameraController2 extends CameraController {
             else if( tonemap_profile == TonemapProfile.TONEMAPPROFILE_GAMMA && gamma_profile == 0.0f )
                 have_tonemap_profile = false;
 
+            // to use test_new, also need to uncomment the test code in setFocusValue() to call setTonemapProfile()
+            /*boolean test_new = this.af_mode == CaptureRequest.CONTROL_AF_MODE_AUTO; // testing
+            if( test_new )
+                have_tonemap_profile = false;*/
+
             if( have_tonemap_profile ) {
                 if( default_tonemap_mode == null ) {
                     // save the default tonemap_mode
@@ -831,44 +837,104 @@ public class CameraController2 extends CameraController {
                 switch( tonemap_profile ) {
                     case TONEMAPPROFILE_LOG:
                     case TONEMAPPROFILE_GAMMA:
-                        // if changing this, make sure we don't exceed tonemap_log_max_curve_points_c
-                        // we want:
-                        // 0-15: step 1 (16 values)
-                        // 16-47: step 2 (16 values)
-                        // 48-111: step 4 (16 values)
-                        // 112-231 : step 8 (15 values)
-                        // 232-255: step 24 (1 value)
-                        int step = 1, c = 0;
-                        values = new float[2*tonemap_log_max_curve_points_c];
-                        for(int i=0;i<232;i+=step) {
-                            float in = ((float)i) / 255.0f;
-                            float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
-                            values[c++] = in;
-                            values[c++] = out;
-                            if( (c/2) % 16 == 0 ) {
-                                step *= 2;
-                            }
-                        }
-                        values[c++] = 1.0f;
-                        values[c++] = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(1.0f) : getGammaProfile(1.0f);
-                        /*{
-                            int n_values = 257;
-                            float [] values = new float [2*n_values];
+                        {
+                            // better to use uniformly spaced values, otherwise we get a weird looking effect - this can be
+                            // seen most prominently when using gamma 1.0f, which should look linear (and hence be independent
+                            // of the x values we use)
+                            // can be reproduced on at least OnePlus 3T and Galaxy S10e (although the exact behaviour of the
+                            // poor results is different on those devices)
+                            int n_values = tonemap_log_max_curve_points_c;
+                            //int n_values = test_new ? 32 : 128;
+                            values = new float [2*n_values];
+                            int c = 0;
                             for(int i=0;i<n_values;i++) {
                                 float in = ((float)i) / (n_values-1.0f);
-                                float out = getLogProfile(in);
+                                float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
                                 values[2*i] = in;
                                 values[2*i+1] = out;
+                                c += 2;
+                            }
+                        }
+
+                        /*if( test_new ) {
+                            // if changing this, make sure we don't exceed tonemap_log_max_curve_points_c
+                            // we want:
+                            // 0-15: step 1 (16 values)
+                            // 16-47: step 2 (16 values)
+                            // 48-111: step 4 (16 values)
+                            // 112-231 : step 8 (15 values)
+                            // 232-255: step 24 (1 value)
+                            int step = 1, c = 0;
+                            //int step = 4, c = 0;
+                            //int step = test_new ? 4 : 1, c = 0;
+                            values = new float[2*tonemap_log_max_curve_points_c];
+                            for(int i=0;i<232;i+=step) {
+                                float in = ((float)i) / 255.0f;
+                                float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
+                                if( tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG )
+                                    out = (float)Math.pow(out, 1.0f/2.2f);
+                                values[c++] = in;
+                                values[c++] = out;
+                                if( (c/2) % 16 == 0 ) {
+                                    step *= 2;
+                                }
+                            }
+                            values[c++] = 1.0f;
+                            float last_out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(1.0f) : getGammaProfile(1.0f);
+                            if( tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG )
+                                last_out = (float)Math.pow(last_out, 1.0f/2.2f);
+                            values[c++] = last_out;
+                            values = Arrays.copyOfRange(values,0,c);
+                        }*/
+                        /*if( test_new )
+                        {
+                            // x values are ranged 0 to 255
+                            float [] x_values = new float[] {
+                                    0.0f, 4.0f, 8.0f, 12.0f, 16.0f, 20.0f, 24.0f, 28.0f,
+                                    //0.0f, 8.0f, 16.0f, 24.0f,
+                                    32.0f, 40.0f, 48.0f, 56.0f,
+                                    64.0f, 72.0f, 80.0f, 88.0f,
+                                    96.0f, 104.0f, 112.0f, 120.0f,
+                                    128.0f, 136.0f, 144.0f, 152.0f,
+                                    160.0f, 168.0f, 176.0f, 184.0f,
+                                    192.0f, 200.0f, 208.0f, 216.0f,
+                                    224.0f, 232.0f, 240.0f, 248.0f,
+                                    255.0f
+                            };
+                            values = new float[2*x_values.length];
+                            c = 0;
+                            for(float x_value : x_values) {
+                                float in = x_value / 255.0f;
+                                float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
+                                values[c++] = in;
+                                values[c++] = out;
                             }
                         }*/
+                        /*if( test_new )
+                        {
+                            values = new float [2*256];
+                            step = 8;
+                            c = 0;
+                            for(int i=0;i<254;i+=step) {
+                                float in = ((float)i) / 255.0f;
+                                float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
+                                values[c++] = in;
+                                values[c++] = out;
+                            }
+                            values[c++] = 1.0f;
+                            values[c++] = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(1.0f) : getGammaProfile(1.0f);
+                            values = Arrays.copyOfRange(values,0,c);
+                        }*/
                         if( MyDebug.LOG ) {
-                            int n_values = c/2;
+                            int n_values = values.length/2;
                             for(int i=0;i<n_values;i++) {
                                 float in = values[2*i];
                                 float out = values[2*i+1];
                                 Log.d(TAG, "i = " + i);
-                                Log.d(TAG, "    in: " + (int)(in*255.0f+0.5f));
-                                Log.d(TAG, "    out: " + (int)(out*255.0f+0.5f));
+                                //Log.d(TAG, "    in: " + (int)(in*255.0f+0.5f));
+                                //Log.d(TAG, "    out: " + (int)(out*255.0f+0.5f));
+                                Log.d(TAG, "    in: " + (in*255.0f));
+                                Log.d(TAG, "    out: " + (out*255.0f));
                             }
                         }
                         break;
@@ -894,7 +960,27 @@ public class CameraController2 extends CameraController {
                         0.5f, 0.78f, 1.0000f, 1.0000f};*/
                 /*values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
                         0.5f, 0.78f, 1.0f, 1.0f};*/
+                /*values = new float[]{0.0f, 0.0f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+                        1.0f, 1.0f};*/
                 //values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+                /*values = new float []{0.0f, 0.0f,
+                        0.05f, 0.05f,
+                        0.1f, 0.1f,
+                        0.15f, 0.15f,
+                        0.2f, 0.2f,
+                        0.25f, 0.25f,
+                        0.3f, 0.3f,
+                        0.35f, 0.35f,
+                        0.4f, 0.4f,
+                        0.5f, 0.5f,
+                        0.6f, 0.6f,
+                        0.7f, 0.7f,
+                        0.8f, 0.8f,
+                        0.9f, 0.9f,
+                        0.95f, 0.95f,
+                        1.0f, 1.0f};*/
+                //values = enforceMinTonemapCurvePoints(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
+                //values = enforceMinTonemapCurvePoints(values);
 
                 if( MyDebug.LOG  )
                     Log.d(TAG, "values: " + Arrays.toString(values));
@@ -4066,6 +4152,7 @@ public class CameraController2 extends CameraController {
         camera_settings.af_mode = focus_mode;
         camera_settings.setFocusMode(previewBuilder);
         camera_settings.setFocusDistance(previewBuilder); // also need to set distance, in case changed between infinity, manual or other modes
+        //camera_settings.setTonemapProfile(previewBuilder); // testing - if using focus mode to test video profiles
         try {
             setRepeatingRequest();
         }
