@@ -198,11 +198,14 @@
                     android:entries="@array/preference_remote_type_entries"
                     android:entryValues="@array/preference_remote_type_values"
                     android:defaultValue="preference_remote_type_kraken"
+                    android:dependency="preference_enable_remote"
                     />
 
                 <PreferenceScreen
                     android:key="preference_remote_device_name"
-                    android:title="@string/preference_select_remote">
+                    android:title="@string/preference_select_remote"
+                    android:dependency="preference_enable_remote"
+                    >
 
                     <intent android:action="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"/>
 
@@ -213,6 +216,7 @@
                     android:title="@string/preference_remote_disconnect_screen_dim"
                     android:summary="@string/preference_remote_disconnect_screen_dim_summary"
                     android:defaultValue="false"
+                    android:dependency="preference_enable_remote"
                     />
 
                 <SwitchPreference
@@ -220,6 +224,7 @@
                     android:title="@string/preference_water_type"
                     android:summary="@string/preference_water_type_summary"
                     android:defaultValue="true"
+                    android:dependency="preference_enable_remote"
                     />
 
             </PreferenceScreen>

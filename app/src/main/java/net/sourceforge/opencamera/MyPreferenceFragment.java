@@ -1561,6 +1561,61 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }
+
+        setupDependencies();
+    }
+
+    /** Programmatically set up dependencies for preference types (e.g., ListPreference) that don't
+     *  support this in xml (such as SwitchPreference and CheckBoxPreference).
+     */
+    private void setupDependencies() {
+        // set up dependency for preference_audio_noise_control_sensitivity on preference_audio_control
+        ListPreference pref = (ListPreference)findPreference("preference_audio_control");
+        if( pref != null ) { // may be null if preference not supported
+            pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference arg0, Object newValue) {
+                    String value = newValue.toString();
+                    setAudioNoiseControlSensitivityDependency(value);
+                    return true;
+                }
+            });
+            setAudioNoiseControlSensitivityDependency(pref.getValue()); // ensure dependency is enabled/disabled as required for initial value
+        }
+
+        // set up dependency for preference_video_profile_gamma on preference_video_log
+        pref = (ListPreference)findPreference("preference_video_log");
+        if( pref != null ) { // may be null if preference not supported
+            pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference arg0, Object newValue) {
+                    String value = newValue.toString();
+                    setVideoProfileGammaDependency(value);
+                    return true;
+                }
+            });
+            setVideoProfileGammaDependency(pref.getValue()); // ensure dependency is enabled/disabled as required for initial value
+        }
+    }
+
+    private void setAudioNoiseControlSensitivityDependency(String newValue) {
+        Preference dependent = findPreference("preference_audio_noise_control_sensitivity");
+        if( dependent != null ) { // just in case
+            boolean enable_dependent = "noise".equals(newValue);
+            if( MyDebug.LOG )
+                Log.d(TAG, "clicked audio control: " + newValue + " enable_dependent: " + enable_dependent);
+            dependent.setEnabled(enable_dependent);
+        }
+    }
+
+    private void setVideoProfileGammaDependency(String newValue) {
+        Preference dependent = findPreference("preference_video_profile_gamma");
+        if( dependent != null ) { // just in case
+            boolean enable_dependent = "gamma".equals(newValue);
+            if( MyDebug.LOG )
+                Log.d(TAG, "clicked video log: " + newValue + " enable_dependent: " + enable_dependent);
+            dependent.setEnabled(enable_dependent);
+        }
     }
 
     /* The user clicked the privacy policy preference.
