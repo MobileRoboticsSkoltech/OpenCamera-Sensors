@@ -4162,6 +4162,9 @@ public class MainActivity extends Activity {
                         if( string_id != 0 ) {
                             simple = false;
                             toast_string += "\n" + getResources().getString(string_id);
+                            if( tonemap_profile == CameraController.TonemapProfile.TONEMAPPROFILE_GAMMA ) {
+                                toast_string += " " + applicationInterface.getVideoProfileGamma();
+                            }
                         }
                         else {
                             Log.e(TAG, "unknown tonemap_profile: " + tonemap_profile);
