@@ -2061,6 +2061,20 @@ public class MainActivity extends Activity {
                     }
                 }
             }
+
+            if( !need_reopen ) {
+                CameraController.TonemapProfile old_tonemap_profile = preview.getCameraController().getTonemapProfile();
+                if( old_tonemap_profile != CameraController.TonemapProfile.TONEMAPPROFILE_OFF ) {
+                    CameraController.TonemapProfile new_tonemap_profile = applicationInterface.getVideoTonemapProfile();
+                    if( new_tonemap_profile != CameraController.TonemapProfile.TONEMAPPROFILE_OFF && new_tonemap_profile != old_tonemap_profile ) {
+                        // needed for Galaxy S10e when changing from TONEMAP_MODE_CONTRAST_CURVE to TONEMAP_MODE_PRESET_CURVE,
+                        // otherwise the contrast curve remains active!
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "switching between tonemap profiles");
+                        need_reopen = true;
+                    }
+                }
+            }
         }
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: time after check need_reopen: " + (System.currentTimeMillis() - debug_time));
@@ -4146,6 +4160,12 @@ public class MainActivity extends Activity {
                     if( applicationInterface.getVideoTonemapProfile() != CameraController.TonemapProfile.TONEMAPPROFILE_OFF && preview.supportsTonemapCurve() ) {
                         int string_id = 0;
                         switch( tonemap_profile ) {
+                            case TONEMAPPROFILE_REC709:
+                                string_id = R.string.preference_video_rec709;
+                                break;
+                            case TONEMAPPROFILE_SRGB:
+                                string_id = R.string.preference_video_srgb;
+                                break;
                             case TONEMAPPROFILE_LOG:
                                 string_id = R.string.video_log;
                                 break;

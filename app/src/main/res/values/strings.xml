@@ -915,6 +915,8 @@
 
     <string name="preference_select_remote">Select remote device</string>
 
+    <string name="preference_video_rec709">REC709</string>
+    <string name="preference_video_srgb">sRGB</string>
     <string name="preference_video_gamma">Gamma</string>
     <string name="preference_video_jtlog">JTLog</string>
     <string name="preference_video_jtlnp1">JTLNP1</string>

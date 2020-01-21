@@ -894,11 +894,11 @@ public class CameraController1 extends CameraController {
         // not supported for CameraController1!
     }
 
-    /*@Override
-    public boolean isLogProfile() {
+    @Override
+    public TonemapProfile getTonemapProfile() {
         // not supported for CameraController1!
-        return false;
-    }*/
+        return TonemapProfile.TONEMAPPROFILE_OFF;
+    }
 
     public int getJpegQuality() {
         Camera.Parameters parameters = this.getParameters();

@@ -547,6 +547,8 @@
     </string-array>
     <string-array name="preference_video_log_entries">
         <item>@string/preference_video_log_off</item>
+        <item>@string/preference_video_rec709</item>
+        <item>@string/preference_video_srgb</item>
         <item>@string/preference_video_log_fine</item>
         <item>@string/preference_video_log_low</item>
         <item>@string/preference_video_log_medium</item>
@@ -558,6 +560,8 @@
     </string-array>
     <string-array name="preference_video_log_values">
         <item>off</item>
+        <item>rec709</item>
+        <item>srgb</item>
         <item>fine</item>
         <item>low</item>
         <item>medium</item>

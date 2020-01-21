@@ -833,10 +833,58 @@ public class CameraController2 extends CameraController {
                         Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
                 }
 
-                float [] values = null;
-                switch( tonemap_profile ) {
-                    case TONEMAPPROFILE_LOG:
-                    case TONEMAPPROFILE_GAMMA:
+                final boolean use_preset_curve = true;
+                //final boolean use_preset_curve = false; // test
+                //final boolean use_preset_curve = test_new; // test
+                if( use_preset_curve && tonemap_profile == TonemapProfile.TONEMAPPROFILE_REC709 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "set TONEMAP_PRESET_CURVE_REC709");
+                    builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_PRESET_CURVE);
+                    builder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CaptureRequest.TONEMAP_PRESET_CURVE_REC709);
+                }
+                else if( use_preset_curve && tonemap_profile == TonemapProfile.TONEMAPPROFILE_SRGB && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "set TONEMAP_PRESET_CURVE_SRGB");
+                    builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_PRESET_CURVE);
+                    builder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CaptureRequest.TONEMAP_PRESET_CURVE_SRGB);
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "handle via TONEMAP_MODE_CONTRAST_CURVE / TONEMAP_CURVE");
+                    float [] values = null;
+                    switch( tonemap_profile ) {
+                        case TONEMAPPROFILE_REC709:
+                            // y = 4.5x if x < 0.018, else y = 1.099*x^0.45 - 0.099
+                            float [] x_values = new float[] {
+                                    0.0000f, 0.0667f, 0.1333f, 0.2000f,
+                                    0.2667f, 0.3333f, 0.4000f, 0.4667f,
+                                    0.5333f, 0.6000f, 0.6667f, 0.7333f,
+                                    0.8000f, 0.8667f, 0.9333f, 1.0000f
+                            };
+                            values = new float[2*x_values.length];
+                            int c = 0;
+                            for(float x_value : x_values) {
+                                float out;
+                                if( x_value < 0.018f ) {
+                                    out = 4.5f * x_value;
+                                }
+                                else {
+                                    out = (float)(1.099*Math.pow(x_value, 0.45) - 0.099);
+                                }
+                                values[c++] = x_value;
+                                values[c++] = out;
+                            }
+                            break;
+                        case TONEMAPPROFILE_SRGB:
+                            values = new float [] {
+                                    0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+                                    0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
+                                    0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
+                                    0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f
+                            };
+                            break;
+                        case TONEMAPPROFILE_LOG:
+                        case TONEMAPPROFILE_GAMMA:
                         {
                             // better to use uniformly spaced values, otherwise we get a weird looking effect - this can be
                             // seen most prominently when using gamma 1.0f, which should look linear (and hence be independent
@@ -846,13 +894,11 @@ public class CameraController2 extends CameraController {
                             int n_values = tonemap_log_max_curve_points_c;
                             //int n_values = test_new ? 32 : 128;
                             values = new float [2*n_values];
-                            int c = 0;
                             for(int i=0;i<n_values;i++) {
                                 float in = ((float)i) / (n_values-1.0f);
                                 float out = (tonemap_profile==TonemapProfile.TONEMAPPROFILE_LOG) ? getLogProfile(in) : getGammaProfile(in);
                                 values[2*i] = in;
                                 values[2*i+1] = out;
-                                c += 2;
                             }
                         }
 
@@ -938,60 +984,61 @@ public class CameraController2 extends CameraController {
                             }
                         }
                         break;
-                    case TONEMAPPROFILE_JTLOG:
-                        values = jtlog_values;
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "setting JTLog profile");
-                        break;
-                    case TONEMAPPROFILE_JTLNP1:
-                        values = jtlnp1_values;
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "setting JTLNP1 profile");
-                        break;
-                }
+                        case TONEMAPPROFILE_JTLOG:
+                            values = jtlog_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLog profile");
+                            break;
+                        case TONEMAPPROFILE_JTLNP1:
+                            values = jtlnp1_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLNP1 profile");
+                            break;
+                    }
 
-                // sRGB:
-                /*values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
-                        0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
-                        0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
-                        0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
-                /*values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
-                        0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
-                        0.5f, 0.78f, 1.0000f, 1.0000f};*/
-                /*values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
-                        0.5f, 0.78f, 1.0f, 1.0f};*/
-                /*values = new float[]{0.0f, 0.0f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
-                        1.0f, 1.0f};*/
-                //values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
-                /*values = new float []{0.0f, 0.0f,
-                        0.05f, 0.05f,
-                        0.1f, 0.1f,
-                        0.15f, 0.15f,
-                        0.2f, 0.2f,
-                        0.25f, 0.25f,
-                        0.3f, 0.3f,
-                        0.35f, 0.35f,
-                        0.4f, 0.4f,
-                        0.5f, 0.5f,
-                        0.6f, 0.6f,
-                        0.7f, 0.7f,
-                        0.8f, 0.8f,
-                        0.9f, 0.9f,
-                        0.95f, 0.95f,
-                        1.0f, 1.0f};*/
-                //values = enforceMinTonemapCurvePoints(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
-                //values = enforceMinTonemapCurvePoints(values);
+                    // sRGB:
+                    /*values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+                            0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
+                            0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
+                            0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
+                    /*values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
+                            0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
+                            0.5f, 0.78f, 1.0000f, 1.0000f};*/
+                    /*values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
+                            0.5f, 0.78f, 1.0f, 1.0f};*/
+                    /*values = new float[]{0.0f, 0.0f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+                            1.0f, 1.0f};*/
+                    //values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+                    /*values = new float []{0.0f, 0.0f,
+                            0.05f, 0.05f,
+                            0.1f, 0.1f,
+                            0.15f, 0.15f,
+                            0.2f, 0.2f,
+                            0.25f, 0.25f,
+                            0.3f, 0.3f,
+                            0.35f, 0.35f,
+                            0.4f, 0.4f,
+                            0.5f, 0.5f,
+                            0.6f, 0.6f,
+                            0.7f, 0.7f,
+                            0.8f, 0.8f,
+                            0.9f, 0.9f,
+                            0.95f, 0.95f,
+                            1.0f, 1.0f};*/
+                    //values = enforceMinTonemapCurvePoints(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
+                    //values = enforceMinTonemapCurvePoints(values);
 
-                if( MyDebug.LOG  )
-                    Log.d(TAG, "values: " + Arrays.toString(values));
-                if( values != null ) {
-                    builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
-                    TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
-                    builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
-                    test_used_tonemap_curve = true;
-                }
-                else {
-                    Log.e(TAG, "unknown log type: " + tonemap_profile);
+                    if( MyDebug.LOG  )
+                        Log.d(TAG, "values: " + Arrays.toString(values));
+                    if( values != null ) {
+                        builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
+                        TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
+                        builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
+                        test_used_tonemap_curve = true;
+                    }
+                    else {
+                        Log.e(TAG, "unknown log type: " + tonemap_profile);
+                    }
                 }
             }
             else if( default_tonemap_mode != null ) {
@@ -3922,10 +3969,10 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    /*@Override
-    public boolean isLogProfile() {
-        return camera_settings.use_log_profile;
-    }*/
+    @Override
+    public TonemapProfile getTonemapProfile() {
+        return camera_settings.tonemap_profile;
+    }
 
     /** For testing.
      */

@@ -727,6 +727,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         switch( video_log ) {
             case "off":
                 return CameraController.TonemapProfile.TONEMAPPROFILE_OFF;
+            case "rec709":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_REC709;
+            case "srgb":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_SRGB;
             case "fine":
             case "low":
             case "medium":
@@ -749,6 +753,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         // remember to update getVideoTonemapProfile() if adding/changing modes
         switch( video_log ) {
             case "off":
+            case "rec709":
+            case "srgb":
+            case "gamma":
+            case "jtlog":
+            case "jtlnp1":
                 return 0.0f;
             /*case "fine":
                 return 1.0f;
@@ -773,10 +782,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return 224.0f;
             case "extra_strong":
                 return 500.0f;
-            case "gamma":
-            case "jtlog":
-            case "jtlnp1":
-                return 0.0f;
         }
         return 0.0f;
     }
