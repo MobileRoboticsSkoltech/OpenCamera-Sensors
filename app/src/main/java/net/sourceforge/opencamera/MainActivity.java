@@ -1620,7 +1620,7 @@ public class MainActivity extends Activity {
     class PreferencesListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         private static final String TAG = "PreferencesListener";
 
-        private boolean any_significant_change; // whether any changes that require updateForSettings have been made since startListening()
+        private boolean any_significant_change; // whether any changes have been made since startListening()
         private boolean any_change; // whether any changes that require updateForSettings have been made since startListening()
 
         void startListening() {
