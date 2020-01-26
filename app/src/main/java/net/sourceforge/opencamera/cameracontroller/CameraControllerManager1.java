@@ -1,7 +1,9 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.R;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.util.Log;
 
@@ -28,5 +30,11 @@ public class CameraControllerManager1 extends CameraControllerManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public String getDescription(Context context, int cameraId) {
+        boolean is_front_facing = isFrontFacing(cameraId);
+        return context.getResources().getString(is_front_facing ? R.string.front_camera : R.string.back_camera);
     }
 }

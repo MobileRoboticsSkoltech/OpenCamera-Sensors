@@ -2573,27 +2573,9 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "supports_tonemap_curve?: " + camera_features.supports_tonemap_curve);
 
-        {
-            // Calculate view angles
-            // Note this is an approximation (see http://stackoverflow.com/questions/39965408/what-is-the-android-camera2-api-equivalent-of-camera-parameters-gethorizontalvie ).
-            // This does not take into account the aspect ratio of the preview or camera, it's up to the caller to do this (e.g., see Preview.getViewAngleX(), getViewAngleY()).
-            Rect active_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-            SizeF physical_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-            android.util.Size pixel_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
-            float [] focal_lengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-            //camera_features.view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth(), (2.0 * focal_lengths[0])));
-            //camera_features.view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight(), (2.0 * focal_lengths[0])));
-            float frac_x = ((float)active_size.width())/(float)pixel_size.getWidth();
-            float frac_y = ((float)active_size.height())/(float)pixel_size.getHeight();
-            camera_features.view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth() * frac_x, (2.0 * focal_lengths[0])));
-            camera_features.view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight() * frac_y, (2.0 * focal_lengths[0])));
-            if( MyDebug.LOG ) {
-                Log.d(TAG, "frac_x: " + frac_x);
-                Log.d(TAG, "frac_y: " + frac_y);
-                Log.d(TAG, "view_angle_x: " + camera_features.view_angle_x);
-                Log.d(TAG, "view_angle_y: " + camera_features.view_angle_y);
-            }
-        }
+        SizeF view_angle = CameraControllerManager2.computeViewAngles(characteristics);
+        camera_features.view_angle_x = view_angle.getWidth();
+        camera_features.view_angle_y = view_angle.getHeight();
 
         return camera_features;
     }

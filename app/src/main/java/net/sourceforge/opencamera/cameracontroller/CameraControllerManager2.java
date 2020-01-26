@@ -1,14 +1,17 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.R;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.os.Build;
 import android.util.Log;
+import android.util.SizeF;
 
 /** Provides support using Android 5's Camera 2 API
  *  android.hardware.camera2.*.
@@ -59,6 +62,70 @@ public class CameraControllerManager2 extends CameraControllerManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public String getDescription(Context context, int cameraId) {
+        CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+        String description = null;
+        try {
+            String cameraIdS = manager.getCameraIdList()[cameraId];
+            CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
+
+            switch( characteristics.get(CameraCharacteristics.LENS_FACING) ) {
+                case CameraMetadata.LENS_FACING_FRONT:
+                    description = context.getResources().getString(R.string.front_camera);
+                    break;
+                case CameraMetadata.LENS_FACING_BACK:
+                    description = context.getResources().getString(R.string.back_camera);
+                    break;
+                case CameraMetadata.LENS_FACING_EXTERNAL:
+                    description = context.getResources().getString(R.string.external_camera);
+                    break;
+                default:
+                    Log.e(TAG, "unknown camera type");
+                    return null;
+            }
+
+            SizeF view_angle = CameraControllerManager2.computeViewAngles(characteristics);
+            if( view_angle.getWidth() > 90.5f ) {
+                // count as ultra-wide
+                description += ", " + context.getResources().getString(R.string.ultrawide);
+            }
+        }
+        catch(Throwable e) {
+            // see note under isFrontFacing() why we catch anything, not just CameraAccessException
+            if( MyDebug.LOG )
+                Log.e(TAG, "exception trying to get camera characteristics");
+            e.printStackTrace();
+        }
+        return description;
+    }
+
+    /** Helper class to compute view angles from the CameraCharacteristics.
+     * @return The width and height of the returned size represent the x and y view angles in
+     *         degrees.
+     */
+    static SizeF computeViewAngles(CameraCharacteristics characteristics) {
+        // Note this is an approximation (see http://stackoverflow.com/questions/39965408/what-is-the-android-camera2-api-equivalent-of-camera-parameters-gethorizontalvie ).
+        // This does not take into account the aspect ratio of the preview or camera, it's up to the caller to do this (e.g., see Preview.getViewAngleX(), getViewAngleY()).
+        Rect active_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+        SizeF physical_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+        android.util.Size pixel_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+        float [] focal_lengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+        //camera_features.view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth(), (2.0 * focal_lengths[0])));
+        //camera_features.view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight(), (2.0 * focal_lengths[0])));
+        float frac_x = ((float)active_size.width())/(float)pixel_size.getWidth();
+        float frac_y = ((float)active_size.height())/(float)pixel_size.getHeight();
+        float view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth() * frac_x, (2.0 * focal_lengths[0])));
+        float view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight() * frac_y, (2.0 * focal_lengths[0])));
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "frac_x: " + frac_x);
+            Log.d(TAG, "frac_y: " + frac_y);
+            Log.d(TAG, "view_angle_x: " + view_angle_x);
+            Log.d(TAG, "view_angle_y: " + view_angle_y);
+        }
+        return new SizeF(view_angle_x, view_angle_y);
     }
 
     /* Returns true if the device supports the required hardware level, or better.

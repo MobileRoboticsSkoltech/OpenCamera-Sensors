@@ -1492,10 +1492,12 @@ public class MainActivity extends Activity {
         if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
             // telling the user which camera is pointless for only two cameras, but on devices that now
             // expose many cameras it can be confusing, so show a toast to at least display the id
-            String toast_string = getResources().getString(
-                    preview.getCameraControllerManager().isFrontFacing(cameraId) ? R.string.front_camera : R.string.back_camera ) +
-                    " : " + getResources().getString(R.string.camera_id) + " " + cameraId;
-            preview.showToast(null, toast_string);
+            String description = preview.getCameraControllerManager().getDescription(this, cameraId);
+            if( description != null ) {
+                String toast_string = description + ": ";
+                toast_string += getResources().getString(R.string.camera_id) + " " + cameraId;
+                preview.showToast(null, toast_string);
+            }
         }
     }
 

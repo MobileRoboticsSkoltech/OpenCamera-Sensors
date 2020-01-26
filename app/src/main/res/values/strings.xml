@@ -959,6 +959,9 @@
     <string name="preference_zebra_stripes_color_transparent">Transparent</string>
     <string name="preference_zebra_stripes_color_white">White</string>
 
+    <string name="external_camera">External camera</string>
+    <string name="ultrawide">Ultra-wide</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>
