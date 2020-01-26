@@ -99,6 +99,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
         final String camera_api = bundle.getString("camera_api");
 
+        final String photo_mode_string = bundle.getString("photo_mode_string");
+
         final boolean using_android_l = bundle.getBoolean("using_android_l");
         if( MyDebug.LOG )
             Log.d(TAG, "using_android_l: " + using_android_l);
@@ -1130,6 +1132,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(nCameras);
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
+                        about_string.append("\nPhoto mode: ");
+                        about_string.append(photo_mode_string==null ? "UNKNOWN" : photo_mode_string);
                         {
                             String last_video_error = sharedPreferences.getString("last_video_error", "");
                             if( last_video_error.length() > 0 ) {

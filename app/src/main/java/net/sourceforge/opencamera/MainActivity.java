@@ -1751,6 +1751,7 @@ public class MainActivity extends Activity {
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
         bundle.putString("camera_api", this.preview.getCameraAPI());
         bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
+        bundle.putString("photo_mode_string", getPhotoModeString(applicationInterface.getPhotoMode(), true));
         bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
         bundle.putBoolean("supports_flash", this.preview.supportsFlash());
         bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
@@ -4096,6 +4097,44 @@ public class MainActivity extends Activity {
         return changed_auto_stabilise_toast;
     }
 
+    private String getPhotoModeString(MyApplicationInterface.PhotoMode photo_mode, boolean string_for_std) {
+        String photo_mode_string = null;
+        switch( photo_mode ) {
+            case Standard:
+                if( string_for_std )
+                    photo_mode_string = getResources().getString(R.string.photo_mode_standard_full);
+                break;
+            case DRO:
+                photo_mode_string = getResources().getString(R.string.photo_mode_dro);
+                break;
+            case HDR:
+                photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
+                break;
+            case ExpoBracketing:
+                photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+                break;
+            case FocusBracketing: {
+                photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
+                int n_images = applicationInterface.getFocusBracketingNImagesPref();
+                photo_mode_string += " (" + n_images + ")";
+                break;
+            }
+            case FastBurst: {
+                photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);
+                int n_images = applicationInterface.getBurstNImages();
+                photo_mode_string += " (" + n_images + ")";
+                break;
+            }
+            case NoiseReduction:
+                photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
+                break;
+            case Panorama:
+                photo_mode_string = getResources().getString(R.string.photo_mode_panorama_full);
+                break;
+        }
+        return photo_mode_string;
+    }
+
     /** Displays a toast with information about the current preferences.
      *  If always_show is true, the toast is always displayed; otherwise, we only display
      *  a toast if it's important to notify the user (i.e., unusual non-default settings are
@@ -4238,36 +4277,7 @@ public class MainActivity extends Activity {
                 toast_string += " " + current_size.width + "x" + current_size.height;
             }
 
-            String photo_mode_string = null;
-            switch( photo_mode ) {
-                case DRO:
-                    photo_mode_string = getResources().getString(R.string.photo_mode_dro);
-                    break;
-                case HDR:
-                    photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
-                    break;
-                case ExpoBracketing:
-                    photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
-                    break;
-                case FocusBracketing: {
-                    photo_mode_string = getResources().getString(R.string.photo_mode_focus_bracketing_full);
-                    int n_images = applicationInterface.getFocusBracketingNImagesPref();
-                    photo_mode_string += " (" + n_images + ")";
-                    break;
-                }
-                case FastBurst: {
-                    photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);
-                    int n_images = applicationInterface.getBurstNImages();
-                    photo_mode_string += " (" + n_images + ")";
-                    break;
-                }
-                case NoiseReduction:
-                    photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
-                    break;
-                case Panorama:
-                    photo_mode_string = getResources().getString(R.string.photo_mode_panorama_full);
-                    break;
-            }
+            String photo_mode_string = getPhotoModeString(photo_mode, false);
             if( photo_mode_string != null ) {
                 toast_string += (toast_string.length()==0 ? "" : "\n") + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
                 simple = false;
