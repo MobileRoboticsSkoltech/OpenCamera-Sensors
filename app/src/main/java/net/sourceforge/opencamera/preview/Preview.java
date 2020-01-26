@@ -467,7 +467,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( !using_android_l ) {
             // see http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
             // Need mirror for front camera
-            boolean mirror = camera_controller.isFrontFacing();
+            boolean mirror = (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT);
             camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
             int display_orientation = camera_controller.getDisplayOrientation();
             if( MyDebug.LOG ) {
@@ -479,7 +479,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             // Unfortunately the transformation for Android L API isn't documented, but this seems to work for Nexus 6.
             // This is the equivalent code for android.hardware.Camera.setDisplayOrientation, but we don't actually use setDisplayOrientation()
             // for CameraController2, except testing on Nexus 6 shows that we shouldn't change "result" for front facing camera.
-            boolean mirror = camera_controller.isFrontFacing();
+            boolean mirror = (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT);
             camera_to_preview_matrix.setScale(1, mirror ? -1 : 1);
             int degrees = getDisplayRotationDegrees();
             int result = (camera_controller.getCameraOrientation() - degrees + 360) % 360;
@@ -3672,7 +3672,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         this.current_orientation = orientation % 360;
         int new_rotation;
         int camera_orientation = camera_controller.getCameraOrientation();
-        if( camera_controller.isFrontFacing() ) {
+        if( (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT) ) {
             new_rotation = (camera_orientation - orientation + 360) % 360;
         }
         else {
@@ -3715,7 +3715,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             int result;
             if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
                 // should be equivalent to onOrientationChanged(270)
-                if( camera_controller.isFrontFacing() ) {
+                if( (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT) ) {
                     result = (camera_orientation + 90) % 360;
                 }
                 else {
@@ -3740,7 +3740,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             else {
                 // should be equivalent to onOrientationChanged(90)
-                if( camera_controller.isFrontFacing() ) {
+                if( (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT) ) {
                     result = (camera_orientation + 270) % 360;
                 }
                 else {

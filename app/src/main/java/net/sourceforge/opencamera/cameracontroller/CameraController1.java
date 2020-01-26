@@ -208,7 +208,7 @@ public class CameraController1 extends CameraController {
                 Log.d(TAG, "flash supported");
         }
         else {
-            if( isFrontFacing() ) {
+            if( getFacing() == Facing.FACING_FRONT ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "front-screen with no flash");
                 output_modes.clear(); // clear any pre-existing mode (see note above about Samsung Galaxy S7)
@@ -1874,8 +1874,16 @@ public class CameraController1 extends CameraController {
         return camera_info.orientation;
     }
 
-    public boolean isFrontFacing() {
-        return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+    @Override
+    public Facing getFacing() {
+        switch( camera_info.facing ) {
+            case Camera.CameraInfo.CAMERA_FACING_FRONT:
+                return Facing.FACING_FRONT;
+            case Camera.CameraInfo.CAMERA_FACING_BACK:
+                return Facing.FACING_BACK;
+        }
+        Log.e(TAG, "unknown camera_facing: " + camera_info.facing);
+        return Facing.FACING_UNKNOWN;
     }
 
     public void unlock() {

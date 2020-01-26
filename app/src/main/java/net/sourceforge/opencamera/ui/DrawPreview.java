@@ -2598,7 +2598,7 @@ public class DrawPreview {
         }
         last_image_matrix.preRotate(this_ui_rotation, bitmap.getWidth()/2.0f, bitmap.getHeight()/2.0f);
         if( flip_front ) {
-            boolean is_front_facing = camera_controller != null && camera_controller.isFrontFacing();
+            boolean is_front_facing = camera_controller != null && (camera_controller.getFacing() == CameraController.Facing.FACING_FRONT);
             if( is_front_facing && !sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo") ) {
                 last_image_matrix.preScale(-1.0f, 1.0f, bitmap.getWidth()/2.0f, 0.0f);
             }

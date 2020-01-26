@@ -2900,7 +2900,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( do_auto_stabilise && main_activity.test_low_memory )
             level_angle = 45.0;
         // I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
-        boolean is_front_facing = main_activity.getPreview().getCameraController() != null && main_activity.getPreview().getCameraController().isFrontFacing();
+        boolean is_front_facing = main_activity.getPreview().getCameraController() != null && (main_activity.getPreview().getCameraController().getFacing() == CameraController.Facing.FACING_FRONT);
         boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
         String preference_stamp = this.getStampPref();
         String preference_textstamp = this.getTextStampPref();

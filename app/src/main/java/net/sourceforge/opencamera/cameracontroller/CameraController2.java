@@ -70,7 +70,7 @@ public class CameraController2 extends CameraController {
     private CameraCharacteristics characteristics;
     // cached characteristics (use this for values that need to be frequently accessed, e.g., per frame, to improve performance);
     private int characteristics_sensor_orientation;
-    private boolean characteristics_is_front_facing;
+    private Facing characteristics_facing;
 
     private List<Integer> zoom_ratios;
     private int current_zoom_value;
@@ -297,7 +297,7 @@ public class CameraController2 extends CameraController {
                     exif_orientation = ExifInterface.ORIENTATION_NORMAL;
                     break;
                 case 90:
-                    exif_orientation = isFrontFacing() ?
+                    exif_orientation = (getFacing() == Facing.FACING_FRONT) ?
                             ExifInterface.ORIENTATION_ROTATE_270 :
                             ExifInterface.ORIENTATION_ROTATE_90;
                     break;
@@ -305,7 +305,7 @@ public class CameraController2 extends CameraController {
                     exif_orientation = ExifInterface.ORIENTATION_ROTATE_180;
                     break;
                 case 270:
-                    exif_orientation = isFrontFacing() ?
+                    exif_orientation = (getFacing() == Facing.FACING_FRONT) ?
                             ExifInterface.ORIENTATION_ROTATE_90 :
                             ExifInterface.ORIENTATION_ROTATE_270;
                     break;
@@ -1701,10 +1701,26 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "successfully obtained camera characteristics");
                         // now read cached values
                         characteristics_sensor_orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-                        characteristics_is_front_facing = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+
+                        switch( characteristics.get(CameraCharacteristics.LENS_FACING) ) {
+                            case CameraMetadata.LENS_FACING_FRONT:
+                                characteristics_facing = Facing.FACING_FRONT;
+                                break;
+                            case CameraMetadata.LENS_FACING_BACK:
+                                characteristics_facing = Facing.FACING_BACK;
+                                break;
+                            case CameraMetadata.LENS_FACING_EXTERNAL:
+                                characteristics_facing = Facing.FACING_EXTERNAL;
+                                break;
+                            default:
+                                Log.e(TAG, "unknown camera_facing: " + characteristics.get(CameraCharacteristics.LENS_FACING));
+                                characteristics_facing = Facing.FACING_UNKNOWN;
+                                break;
+                        }
+
                         if( MyDebug.LOG ) {
                             Log.d(TAG, "characteristics_sensor_orientation: " + characteristics_sensor_orientation);
-                            Log.d(TAG, "characteristics_is_front_facing: " + characteristics_is_front_facing);
+                            Log.d(TAG, "characteristics_facing: " + characteristics_facing);
                         }
 
                         CameraController2.this.camera = cam;
@@ -2456,7 +2472,7 @@ public class CameraController2 extends CameraController {
                 camera_features.supported_flash_values.add("flash_red_eye");
             }
         }
-        else if( isFrontFacing() ) {
+        else if( (getFacing() == Facing.FACING_FRONT) ) {
             camera_features.supported_flash_values = new ArrayList<>();
             camera_features.supported_flash_values.add("flash_off");
             camera_features.supported_flash_values.add("flash_frontscreen_auto");
@@ -6775,9 +6791,9 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public boolean isFrontFacing() {
+    public Facing getFacing() {
         // cached for performance, as this method is frequently called from Preview.onOrientationChanged
-        return characteristics_is_front_facing;
+        return characteristics_facing;
     }
 
     @Override
