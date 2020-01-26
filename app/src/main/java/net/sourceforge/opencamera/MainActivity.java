@@ -1506,7 +1506,6 @@ public class MainActivity extends Activity {
     /**
      * Selects the next camera on the phone - in practice, switches between
      * front and back cameras
-     * @param view
      */
     public void clickedSwitchCamera(View view) {
         if( MyDebug.LOG )
