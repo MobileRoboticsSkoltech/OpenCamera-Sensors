@@ -789,11 +789,19 @@ public class MainUI {
             ImageButton view = main_activity.findViewById(R.id.switch_camera);
             int content_description;
             int cameraId = main_activity.getNextCameraId();
-            if( main_activity.getPreview().getCameraControllerManager().isFrontFacing( cameraId ) ) {
-                content_description = R.string.switch_to_front_camera;
-            }
-            else {
-                content_description = R.string.switch_to_back_camera;
+            switch( main_activity.getPreview().getCameraControllerManager().getFacing( cameraId  ) ) {
+                case FACING_FRONT:
+                    content_description = R.string.switch_to_front_camera;
+                    break;
+                case FACING_BACK:
+                    content_description = R.string.switch_to_back_camera;
+                    break;
+                case FACING_EXTERNAL:
+                    content_description = R.string.switch_to_external_camera;
+                    break;
+                default:
+                    content_description = R.string.switch_to_unknown_camera;
+                    break;
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));

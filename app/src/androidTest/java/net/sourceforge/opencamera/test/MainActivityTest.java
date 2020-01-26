@@ -3238,7 +3238,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-        assertTrue(mPreview.count_cameraAutoFocus == (manual_can_auto_focus ? saved_count+1 : saved_count));
+        assertEquals((manual_can_auto_focus ? saved_count + 1 : saved_count), mPreview.count_cameraAutoFocus);
         assertTrue(mPreview.hasFocusArea() == can_focus_area);
         if( can_focus_area ) {
             assertTrue(mPreview.getCameraController().getFocusAreas() != null);
@@ -4263,7 +4263,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         for(int i=0;i<n_cameras-1;i++) {
             Log.d(TAG, "i: " + i);
             int cameraId = mPreview.getCameraId();
-            boolean is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(cameraId);
+            CameraController.Facing facing = mPreview.getCameraControllerManager().getFacing(cameraId);
 
             View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
             CharSequence contentDescription = switchCameraButton.getContentDescription();
@@ -4272,23 +4272,48 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
             int new_cameraId = mPreview.getCameraId();
             assertTrue(new_cameraId != cameraId);
-            boolean new_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(new_cameraId);
+            CameraController.Facing new_facing = mPreview.getCameraControllerManager().getFacing(new_cameraId);
             CharSequence new_contentDescription = switchCameraButton.getContentDescription();
 
             int next_cameraId = (new_cameraId+1) % n_cameras;
-            boolean next_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(next_cameraId);
+            CameraController.Facing next_facing = mPreview.getCameraControllerManager().getFacing(next_cameraId);
 
             Log.d(TAG, "cameraId: " + cameraId);
-            Log.d(TAG, "is_front_facing: " + is_front_facing);
+            Log.d(TAG, "facing: " + facing);
             Log.d(TAG, "contentDescription: " + contentDescription);
             Log.d(TAG, "new_cameraId: " + new_cameraId);
-            Log.d(TAG, "new_is_front_facing: " + new_is_front_facing);
+            Log.d(TAG, "new_facing: " + new_facing);
             Log.d(TAG, "new_contentDescription: " + new_contentDescription);
             Log.d(TAG, "next_cameraId: " + next_cameraId);
-            Log.d(TAG, "next_is_front_facing: " + next_is_front_facing);
+            Log.d(TAG, "next_facing: " + next_facing);
 
-            assertEquals(contentDescription, mActivity.getResources().getString(new_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
-            assertEquals(new_contentDescription, mActivity.getResources().getString(next_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
+            switch( new_facing ) {
+                case FACING_FRONT:
+                    assertEquals(contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_front_camera));
+                    break;
+                case FACING_BACK:
+                    assertEquals(contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_back_camera));
+                    break;
+                case FACING_EXTERNAL:
+                    assertEquals(contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_external_camera));
+                    break;
+                default:
+                    fail();
+            }
+            switch( next_facing ) {
+                case FACING_FRONT:
+                    assertEquals(new_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_front_camera));
+                    break;
+                case FACING_BACK:
+                    assertEquals(new_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_back_camera));
+                    break;
+                case FACING_EXTERNAL:
+                    assertEquals(new_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_external_camera));
+                    break;
+                default:
+                    fail();
+            }
+
             subTestTakePhoto(false, false, true, true, false, false, false, false);
 
             if( i == 0 ) {
@@ -4299,7 +4324,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 CharSequence restart_contentDescription = switchCameraButton.getContentDescription();
                 Log.d(TAG, "restart_contentDescription: " + restart_contentDescription);
                 assertEquals(restart_cameraId, new_cameraId);
-                assertEquals(restart_contentDescription, mActivity.getResources().getString(next_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera));
+                switch( next_facing ) {
+                    case FACING_FRONT:
+                        assertEquals(restart_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_front_camera));
+                        break;
+                    case FACING_BACK:
+                        assertEquals(restart_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_back_camera));
+                        break;
+                    case FACING_EXTERNAL:
+                        assertEquals(restart_contentDescription, mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_external_camera));
+                        break;
+                    default:
+                        fail();
+                }
             }
 
             if( i == 0 ) {

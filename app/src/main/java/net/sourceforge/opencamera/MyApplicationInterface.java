@@ -2509,8 +2509,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "switchToCamera: " + front_facing);
         int n_cameras = main_activity.getPreview().getCameraControllerManager().getNumberOfCameras();
+        CameraController.Facing want_facing = front_facing ? CameraController.Facing.FACING_FRONT : CameraController.Facing.FACING_BACK;
         for(int i=0;i<n_cameras;i++) {
-            if( main_activity.getPreview().getCameraControllerManager().isFrontFacing(i) == front_facing ) {
+            if( main_activity.getPreview().getCameraControllerManager().getFacing(i) == want_facing ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "found desired camera: " + i);
                 this.setCameraIdPref(i);

@@ -45,12 +45,20 @@ public class CameraControllerManager2 extends CameraControllerManager {
     }
 
     @Override
-    public boolean isFrontFacing(int cameraId) {
+    public CameraController.Facing getFacing(int cameraId) {
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         try {
             String cameraIdS = manager.getCameraIdList()[cameraId];
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
-            return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT;
+            switch( characteristics.get(CameraCharacteristics.LENS_FACING) ) {
+                case CameraMetadata.LENS_FACING_FRONT:
+                    return CameraController.Facing.FACING_FRONT;
+                case CameraMetadata.LENS_FACING_BACK:
+                    return CameraController.Facing.FACING_BACK;
+                case CameraMetadata.LENS_FACING_EXTERNAL:
+                    return CameraController.Facing.FACING_EXTERNAL;
+            }
+            Log.e(TAG, "unknown camera_facing: " + characteristics.get(CameraCharacteristics.LENS_FACING));
         }
         catch(Throwable e) {
             // in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
@@ -61,7 +69,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
                 Log.e(TAG, "exception trying to get camera characteristics");
             e.printStackTrace();
         }
-        return false;
+        return CameraController.Facing.FACING_UNKNOWN;
     }
 
     @Override

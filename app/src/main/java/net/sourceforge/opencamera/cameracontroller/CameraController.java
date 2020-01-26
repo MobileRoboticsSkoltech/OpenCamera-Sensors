@@ -539,6 +539,12 @@ public abstract class CameraController {
     public abstract void setDisplayOrientation(int degrees);
     public abstract int getDisplayOrientation();
     public abstract int getCameraOrientation();
+    public enum Facing {
+        FACING_BACK,
+        FACING_FRONT,
+        FACING_EXTERNAL,
+        FACING_UNKNOWN // returned if the Camera API returned an error or an unknown type
+    }
     public abstract boolean isFrontFacing();
     public abstract void unlock();
     /** Call to initialise video recording, should call before MediaRecorder.prepare().

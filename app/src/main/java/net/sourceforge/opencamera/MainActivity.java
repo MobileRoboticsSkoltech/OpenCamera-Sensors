@@ -1091,13 +1091,13 @@ public class MainActivity extends Activity {
             int cameraId = applicationInterface.getCameraIdPref();
             if( cameraId > 0 ) {
                 CameraControllerManager camera_controller_manager = preview.getCameraControllerManager();
-                boolean front_facing = camera_controller_manager.isFrontFacing(cameraId);
+                CameraController.Facing front_facing = camera_controller_manager.getFacing(cameraId);
                 if( MyDebug.LOG )
                     Log.d(TAG, "front_facing: " + front_facing);
                 if( camera_controller_manager.getNumberOfCameras() > 2 ) {
                     boolean camera_is_default = true;
                     for(int i=0;i<cameraId;i++) {
-                        boolean that_front_facing = camera_controller_manager.isFrontFacing(i);
+                        CameraController.Facing that_front_facing = camera_controller_manager.getFacing(i);
                         if( MyDebug.LOG )
                             Log.d(TAG, "camera " + i + " that_front_facing: " + that_front_facing);
                         if( that_front_facing == front_facing ) {
@@ -1489,6 +1489,8 @@ public class MainActivity extends Activity {
     }
 
     private void showCameraIdToast(int cameraId) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "showCameraIdToast: " + cameraId);
         if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
             // telling the user which camera is pointless for only two cameras, but on devices that now
             // expose many cameras it can be confusing, so show a toast to at least display the id
