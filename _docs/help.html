@@ -756,9 +756,22 @@ features and other options. You can disable this dialog from being displayed if 
 
 <p><b>Photo settings</b> - Select to access the following controls:</p>
 
-<p><b>Camera resolution</b> - Select the resolution of photo images taken by the camera. Note that if
-<a href="#auto_stabilise">auto-level</a> is enabled, images will in general come out as a slightly lower resolution
-(due to the rotation and cropping that's required).</p>
+<p><b>Camera resolution</b> - Select the resolution of photo images taken by the camera.</p>
+<ul>
+    <li>If <a href="#auto_stabilise">auto-level</a> is enabled, images will in general come out as a
+        slightly lower resolution (due to the rotation and cropping that's required).
+    </li>
+    <li>Note that in some photo modes, the actual photo mode may be different to that selected here.
+        For example, advanced photo modes such as HDR, NR, Fast Burst, Expo Bracketing may have a
+        maximum supported resolution - if the resolution selected here is too high, the largest
+        allowed resolution will instead be used. To see the resolution currently used (or to change
+        it), see the "Camera resolution" setting on the popup menu.
+    </li>
+    <li>The resolution setting is ignored altogether in Panorama mode.
+    </li>
+</ul>
+
+
 
 <p><b>Image quality</b> - The image quality of saved JPEG or WebP images. Higher means better quality, but the image files will take up
 more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum

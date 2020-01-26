@@ -142,6 +142,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     // for testing:
     public volatile int test_n_videos_scanned;
+    public volatile int test_max_mp;
 
     MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
         long debug_time = 0;
@@ -449,14 +450,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public Pair<Integer, Integer> getCameraResolutionPref() {
-        if( getPhotoMode() == PhotoMode.Panorama ) {
+    public Pair<Integer, Integer> getCameraResolutionPref(CameraResolutionConstraints constraints) {
+        PhotoMode photo_mode = getPhotoMode();
+        if( photo_mode == PhotoMode.Panorama ) {
             CameraController.Size best_size = choosePanoramaResolution(main_activity.getPreview().getSupportedPictureSizes(false));
             return new Pair<>(best_size.width, best_size.height);
         }
+
         String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");
         if( MyDebug.LOG )
             Log.d(TAG, "resolution_value: " + resolution_value);
+        Pair<Integer, Integer> result = null;
         if( resolution_value.length() > 0 ) {
             // parse the saved size, and make sure it is still valid
             int index = resolution_value.indexOf(' ');
@@ -478,7 +482,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     int resolution_h = Integer.parseInt(resolution_h_s);
                     if( MyDebug.LOG )
                         Log.d(TAG, "resolution_h: " + resolution_h);
-                    return new Pair<>(resolution_w, resolution_h);
+                    result = new Pair<>(resolution_w, resolution_h);
                 }
                 catch(NumberFormatException exception) {
                     if( MyDebug.LOG )
@@ -486,7 +490,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 }
             }
         }
-        return null;
+
+        if( photo_mode == PhotoMode.NoiseReduction || photo_mode == PhotoMode.HDR ) {
+            // set a maximum resolution for modes that require decompressing multiple images for processing,
+            // due to risk of running out of memory!
+            constraints.has_max_mp = true;
+            constraints.max_mp = 22000000; // max of 22MP
+            //constraints.max_mp = 7800000; // test!
+            if( main_activity.is_test && test_max_mp != 0 ) {
+                constraints.max_mp = test_max_mp;
+            }
+        }
+
+        return result;
     }
 
     /** getImageQualityPref() returns the image quality used for the Camera Controller for taking a

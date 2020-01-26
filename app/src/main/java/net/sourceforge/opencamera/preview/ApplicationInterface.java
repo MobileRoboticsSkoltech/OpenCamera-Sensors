@@ -9,9 +9,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 
+import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 
@@ -57,7 +59,46 @@ public interface ApplicationInterface {
     String getCameraNoiseReductionModePref(); // CameraController.NOISE_REDUCTION_MODE_DEFAULT for device default, or "off", "minimal", "fast", "high_quality"
     String getISOPref(); // "auto" for auto-ISO, otherwise a numerical value; see documentation for Preview.supportsISORange().
     int getExposureCompensationPref(); // 0 for default
-    Pair<Integer, Integer> getCameraResolutionPref(); // return null to let Preview choose size
+
+    class CameraResolutionConstraints {
+        private static final String TAG = "CameraResConstraints";
+
+        public boolean has_max_mp;
+        public int max_mp;
+
+        boolean hasConstraints() {
+            return has_max_mp;
+        }
+
+        boolean satisfies(CameraController.Size size) {
+            if( this.has_max_mp && size.width * size.height > this.max_mp ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "size index larger than max_mp: " + this.max_mp);
+                return false;
+            }
+            return true;
+        }
+    }
+    /** The resolution to use for photo mode.
+     *  If the returned resolution is not supported by the device, or this method returns null, then
+     *  the preview will choose a size, and then call setCameraResolutionPref() with the chosen
+     *  size.
+     *  If the returned resolution is supported by the device, setCameraResolutionPref() will be
+     *  called with the returned resolution.
+     *  Note that even if the device supports the resolution in general, the Preview may choose a
+     *  different resolution in some circumstances:
+     *  * A burst mode as been requested, but the resolution does not support burst.
+     *  * A constraint has been set via constraints.
+     *  In such cases, the resolution actually in use should be found by calling
+     *  Preview.getCurrentPictureSize() rather than relying on the setCameraResolutionPref(). (The
+     *  logic behind this is that if a resolution is not supported by the device at all, it's good
+     *  practice to correct the preference stored in user settings; but this shouldn't be done if
+     *  the resolution is changed for something more temporary such as enabling burst mode.)
+     * @param constraints Optional constraints that may be set. If the returned resolution does not
+     *                    satisfy these constraints, then the preview will choose the closest
+     *                    resolution that does.
+     */
+    Pair<Integer, Integer> getCameraResolutionPref(CameraResolutionConstraints constraints); // return null to let Preview choose size
     int getImageQualityPref(); // jpeg quality for taking photos; "90" is a recommended default
     boolean getFaceDetectionPref(); // whether to use face detection mode
     String getVideoQualityPref(); // should be one of Preview.getSupportedVideoQuality() (use Preview.getCamcorderProfile() or Preview.getCamcorderProfileDescription() for details); or return "" to let Preview choose quality

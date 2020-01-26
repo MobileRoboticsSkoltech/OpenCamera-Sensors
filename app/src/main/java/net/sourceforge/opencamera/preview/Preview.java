@@ -287,6 +287,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private List<CameraController.Size> supported_preview_sizes;
 
     private List<CameraController.Size> photo_sizes;
+    private ApplicationInterface.CameraResolutionConstraints photo_size_constraints;
     private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
     private boolean supports_video;
@@ -376,6 +377,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
     public volatile boolean test_called_next_output_file;
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
+    public volatile boolean test_burst_resolution;
 
     public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
@@ -1361,6 +1363,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         view_angle_y = 43.0f; // set a sensible default
         photo_sizes = null;
         current_size_index = -1;
+        photo_size_constraints = null;
         has_capture_rate_factor = false;
         capture_rate_factor = 1.0f;
         video_high_speed = false;
@@ -1821,8 +1824,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         setupBurstMode();
 
         if( camera_controller.isBurstOrExpo() ) {
-            // check photo resolution supports burst
+            if( MyDebug.LOG )
+                Log.d(TAG, "check photo resolution supports burst");
             CameraController.Size current_size = getCurrentPictureSize();
+            if( MyDebug.LOG && current_size != null ) {
+                Log.d(TAG, "current_size: " + current_size.width + " x " + current_size.height + " supports_burst? " + current_size.supports_burst);
+            }
             if( current_size != null && !current_size.supports_burst ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "burst mode: current picture size doesn't support burst");
@@ -2019,6 +2026,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.minimum_focus_distance = camera_features.minimum_focus_distance;
             this.supports_face_detection = camera_features.supports_face_detection;
             this.photo_sizes = camera_features.picture_sizes;
+            if( test_burst_resolution ) {
+                // this flag means we pretend the largest resolution doesn't support burst
+                CameraController.Size current_size = null;
+                for(int i=0;i<photo_sizes.size();i++) {
+                    CameraController.Size size = photo_sizes.get(i);
+                    if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
+                        current_size = size;
+                    }
+                }
+                if( current_size != null )
+                    current_size.supports_burst = false;
+            }
             supported_flash_values = camera_features.supported_flash_values;
             supported_focus_values = camera_features.supported_focus_values;
             this.max_num_focus_areas = camera_features.max_num_focus_areas;
@@ -2507,7 +2526,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 }
             }
             current_size_index = -1;
-            Pair<Integer, Integer> resolution = applicationInterface.getCameraResolutionPref();
+            photo_size_constraints = new ApplicationInterface.CameraResolutionConstraints();
+            Pair<Integer, Integer> resolution = applicationInterface.getCameraResolutionPref(photo_size_constraints);
             if( resolution != null ) {
                 int resolution_w = resolution.first;
                 int resolution_h = resolution.second;
@@ -2545,8 +2565,43 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
                     // now save, so it's available for PreferenceActivity
                     applicationInterface.setCameraResolutionPref(current_size.width, current_size.height);
+
+                    // check against constraints
+                    // we intentionally do this after calling applicationInterface.setCameraResolutionPref() (as the constraints are
+                    // used to just temporarily change resolution, e.g., if a maximum resolution has been enforced for HDR or NR photo
+                    // mode, but we don't want to update the saved resolution preference in such cases
+                    if( !photo_size_constraints.satisfies(current_size) ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "current size index fail to satisfy constraints");
+                        CameraController.Size new_size = null;
+                        // find the largest size that satisfies the constraint
+                        for(int i=0;i<photo_sizes.size();i++) {
+                            CameraController.Size size = photo_sizes.get(i);
+                            if( photo_size_constraints.satisfies(size) ) {
+                                if( new_size == null || size.width*size.height > new_size.width*new_size.height ) {
+                                    current_size_index = i;
+                                    new_size = size;
+                                }
+                            }
+                        }
+                        if( new_size == null ) {
+                            Log.e(TAG, "can't find picture size that satisfies the constraints!");
+                            // so just choose the smallest
+                            for(int i=0;i<photo_sizes.size();i++) {
+                                CameraController.Size size = photo_sizes.get(i);
+                                if( new_size == null || size.width*size.height < new_size.width*new_size.height ) {
+                                    current_size_index = i;
+                                    new_size = size;
+                                }
+                            }
+                        }
+
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "Updated size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
+                    }
                 }
             }
+
             // size set later in setPreviewSize()
             // also note that we check for compatibility with burst (CameraController.Size.supports_burst) later on
         }
@@ -6819,18 +6874,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     /**
-     * @param check_burst If true, and a burst mode is in use (fast burst, expo, HDR), then the
-     *                    returned list will be filtered to remove sizes that don't support burst.
+     * @param check_supported If true, and a burst mode is in use (fast burst, expo, HDR), and/or
+     *                        a constraint was set via getCameraResolutionPref(), then the returned
+     *                        list will be filtered to remove sizes that don't support burst and/or
+     *                        these constraints.
      */
-    public List<CameraController.Size> getSupportedPictureSizes(boolean check_burst) {
+    public List<CameraController.Size> getSupportedPictureSizes(boolean check_supported) {
         if( MyDebug.LOG )
             Log.d(TAG, "getSupportedPictureSizes");
-        if( check_burst && camera_controller != null && camera_controller.isBurstOrExpo() ) {
+        boolean is_burst = ( camera_controller != null && camera_controller.isBurstOrExpo() );
+        boolean has_constraints = photo_size_constraints != null && photo_size_constraints.hasConstraints();
+        if( check_supported && ( is_burst || has_constraints ) ) {
             if( MyDebug.LOG )
-                Log.d(TAG, "need to filter picture sizes for a burst mode");
+                Log.d(TAG, "need to filter picture sizes for burst mode and/or constraints");
             List<CameraController.Size> filtered_sizes = new ArrayList<>();
             for(CameraController.Size size : photo_sizes) {
-                if( size.supports_burst ) {
+                if( is_burst && !size.supports_burst ) {
+                    // burst mode not supported
+                }
+                else if( !photo_size_constraints.satisfies(size) ) {
+                    // doesn't satisfy imposed constraints
+                }
+                else {
                     filtered_sizes.add(size);
                 }
             }

@@ -1026,6 +1026,214 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
+    private void subTestResolutionMaxMP(String photo_mode_preference, MyApplicationInterface.PhotoMode photo_mode, int max_mp, boolean test_change_resolution, boolean expect_reduce_resolution, boolean expect_supports_burst) {
+        Log.d(TAG, "subTestResolutionMaxMP");
+        Log.d(TAG, "    photo_mode_preference: " + photo_mode_preference);
+        Log.d(TAG, "    photo_mode: " + photo_mode);
+        Log.d(TAG, "    max_mp: " + max_mp);
+        Log.d(TAG, "    test_change_resolution: " + test_change_resolution);
+
+        assertSame(mActivity.getApplicationInterface().getPhotoMode(), MyApplicationInterface.PhotoMode.Standard);
+
+        CameraController.Size std_size = mPreview.getCurrentPictureSize();
+        assertNotNull(std_size);
+        Log.d(TAG, "std_size: " + std_size.width + " x " + std_size.height);
+        final List<CameraController.Size> all_picture_sizes = new ArrayList<>(mPreview.getSupportedPictureSizes(false));
+        final List<CameraController.Size> std_picture_sizes = new ArrayList<>(mPreview.getSupportedPictureSizes(true));
+        assertEquals(all_picture_sizes, std_picture_sizes);
+        assertTrue(all_picture_sizes.contains(std_size));
+
+        // switch to the photo mode and check we reduce the resolution
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, photo_mode_preference);
+        editor.apply();
+        updateForSettings();
+        assertSame(mActivity.getApplicationInterface().getPhotoMode(), photo_mode);
+
+        CameraController.Size new_size = mPreview.getCurrentPictureSize();
+        Log.d(TAG, "new_size: " + new_size.width + " x " + new_size.height);
+        if( expect_reduce_resolution ) {
+            assertFalse(new_size.equals(std_size));
+            assertTrue(new_size.width*new_size.height <= max_mp);
+        }
+        else {
+            assertEquals(new_size, std_size);
+        }
+        if( expect_supports_burst ) {
+            assertTrue(new_size.supports_burst);
+        }
+        final List<CameraController.Size> all_picture_sizes_new = new ArrayList<>(mPreview.getSupportedPictureSizes(false));
+        final List<CameraController.Size> picture_sizes_new = new ArrayList<>(mPreview.getSupportedPictureSizes(true));
+        assertEquals(all_picture_sizes, all_picture_sizes_new);
+        if( expect_reduce_resolution ) {
+            assertTrue(picture_sizes_new.size() < all_picture_sizes.size());
+            // check the filtered modes are a subset of all of them
+            assertTrue(all_picture_sizes.containsAll(picture_sizes_new));
+            // check all of the filtered modes satisfy the max_mp
+            for(CameraController.Size size : picture_sizes_new) {
+                assertTrue(size.width*size.height <= max_mp);
+            }
+        }
+        else {
+            assertEquals(all_picture_sizes, picture_sizes_new);
+        }
+        if( expect_supports_burst ) {
+            // check all of the filtered modes support burst
+            for(CameraController.Size size : picture_sizes_new) {
+                assertTrue(size.supports_burst);
+            }
+        }
+        // check the filtered modes include the chosen mode
+        assertTrue(picture_sizes_new.contains(new_size));
+
+        // pause and resume, check resolutions unchanged
+        pauseAndResume();
+        assertSame(mActivity.getApplicationInterface().getPhotoMode(), photo_mode);
+        CameraController.Size new_size2 = mPreview.getCurrentPictureSize();
+        assertEquals(new_size, new_size2);
+        final List<CameraController.Size> all_picture_sizes_new2 = new ArrayList<>(mPreview.getSupportedPictureSizes(false));
+        final List<CameraController.Size> picture_sizes_new2 = new ArrayList<>(mPreview.getSupportedPictureSizes(true));
+        assertEquals(all_picture_sizes_new, all_picture_sizes_new2);
+        assertEquals(picture_sizes_new, picture_sizes_new2);
+
+        CameraController.Size change_to_size = null;
+        String settings_size = "";
+        if( test_change_resolution ) {
+            // test changing the resolution in the new mode
+
+            // save old resolution
+            settings_size = settings.getString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), "");
+
+            // find a different resolution
+            for(CameraController.Size size : picture_sizes_new) {
+                if( !size.equals(new_size) ) {
+                    change_to_size = size;
+                    break;
+                }
+            }
+            assertNotNull(change_to_size);
+            Log.d(TAG, "set size to " + change_to_size.width + " x " + change_to_size.height);
+            settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            editor = settings.edit();
+            editor.putString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), change_to_size.width + " " + change_to_size.height);
+            editor.apply();
+            updateForSettings();
+
+            CameraController.Size new_size3 = mPreview.getCurrentPictureSize();
+            assertEquals(change_to_size, new_size3);
+            assertFalse(new_size.equals(new_size3));
+        }
+
+        // switch back to STD, and check we return to the original resolution (or not, if test_change_resolution==true)
+        settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        editor = settings.edit();
+        editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
+        editor.apply();
+        updateForSettings();
+        assertSame(mActivity.getApplicationInterface().getPhotoMode(), MyApplicationInterface.PhotoMode.Standard);
+
+        new_size = mPreview.getCurrentPictureSize();
+        if( test_change_resolution ) {
+            assertEquals(change_to_size, new_size);
+        }
+        else {
+            assertEquals(std_size, new_size);
+        }
+        final List<CameraController.Size> all_picture_sizes2 = new ArrayList<>(mPreview.getSupportedPictureSizes(false));
+        final List<CameraController.Size> std_picture_sizes2 = new ArrayList<>(mPreview.getSupportedPictureSizes(true));
+        assertEquals(all_picture_sizes, all_picture_sizes2);
+        assertEquals(all_picture_sizes, std_picture_sizes2);
+        assertTrue(std_picture_sizes2.contains(new_size));
+
+        if( test_change_resolution ) {
+            // set back, so we don't confuse later parts of the test
+            settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            editor = settings.edit();
+            editor.putString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), settings_size);
+            editor.apply();
+            updateForSettings();
+        }
+    }
+
+    /* Ensures that we enforce a maximum resolution correctly in some photo modes.
+     */
+    public void testResolutionMaxMP() {
+        Log.d(TAG, "testResolutionMaxMP");
+
+        setToDefault();
+
+        CameraController.Size std_size = mPreview.getCurrentPictureSize();
+        assertNotNull(std_size);
+        Log.d(TAG, "std_size: " + std_size.width + " x " + std_size.height);
+
+        int max_mp = (std_size.width*std_size.height-100);
+        mActivity.getApplicationInterface().test_max_mp = max_mp;
+        Log.d(TAG, "test_max_mp: " + mActivity.getApplicationInterface().test_max_mp);
+
+        if( mActivity.supportsHDR() ) {
+            subTestResolutionMaxMP("preference_photo_mode_hdr", MyApplicationInterface.PhotoMode.HDR, max_mp, false, true, true);
+            subTestResolutionMaxMP("preference_photo_mode_hdr", MyApplicationInterface.PhotoMode.HDR, max_mp, true, true, true);
+        }
+        if( mActivity.supportsNoiseReduction() ) {
+            subTestResolutionMaxMP("preference_photo_mode_noise_reduction", MyApplicationInterface.PhotoMode.NoiseReduction, max_mp, false, true, true);
+            subTestResolutionMaxMP("preference_photo_mode_noise_reduction", MyApplicationInterface.PhotoMode.NoiseReduction, max_mp, true, true, true);
+        }
+        if( mActivity.supportsDRO() ) {
+            subTestResolutionMaxMP("preference_photo_mode_dro", MyApplicationInterface.PhotoMode.DRO, max_mp, false, false, false);
+            subTestResolutionMaxMP("preference_photo_mode_dro", MyApplicationInterface.PhotoMode.DRO, max_mp, true, false, false);
+        }
+    }
+
+    /* Ensures that we handle correctly when the largest resolution doesn't support burst.
+     */
+    public void testResolutionBurst() {
+        Log.d(TAG, "testResolutionBurst");
+
+        if( !mPreview.usingCamera2API() ) {
+            Log.d(TAG, "test requires camera2 api");
+            return;
+        }
+
+        setToDefault();
+
+        mPreview.test_burst_resolution = true;
+        pauseAndResume(); // needed for test_burst_resolution to take effect
+
+        CameraController.Size std_size = mPreview.getCurrentPictureSize();
+        // check the test_burst_resolution flag took effect:
+        assertFalse(std_size.supports_burst);
+
+        // now find the maximum mp that supports burst
+        final List<CameraController.Size> all_picture_sizes = new ArrayList<>(mPreview.getSupportedPictureSizes(false));
+        int max_mp = 0;
+        for(CameraController.Size size : all_picture_sizes) {
+            if( size.supports_burst ) {
+                int mp = size.width*size.height;
+                max_mp = Math.max(max_mp, mp);
+            }
+        }
+        Log.d(TAG, "max_mp: " + max_mp);
+        assertTrue(max_mp < std_size.width*std_size.height);
+
+        if( mActivity.supportsHDR() ) {
+            subTestResolutionMaxMP("preference_photo_mode_hdr", MyApplicationInterface.PhotoMode.HDR, max_mp, false, true, true);
+            subTestResolutionMaxMP("preference_photo_mode_hdr", MyApplicationInterface.PhotoMode.HDR, max_mp, true, true, true);
+        }
+        if( mActivity.supportsNoiseReduction() ) {
+            subTestResolutionMaxMP("preference_photo_mode_noise_reduction", MyApplicationInterface.PhotoMode.NoiseReduction, max_mp, false, true, true);
+            subTestResolutionMaxMP("preference_photo_mode_noise_reduction", MyApplicationInterface.PhotoMode.NoiseReduction, max_mp, true, true, true);
+        }
+        if( mActivity.supportsDRO() ) {
+            subTestResolutionMaxMP("preference_photo_mode_dro", MyApplicationInterface.PhotoMode.DRO, max_mp, false, false, false);
+            subTestResolutionMaxMP("preference_photo_mode_dro", MyApplicationInterface.PhotoMode.DRO, max_mp, true, false, false);
+        }
+        if( mActivity.supportsFastBurst() ) {
+            subTestResolutionMaxMP("preference_photo_mode_fast_burst", MyApplicationInterface.PhotoMode.FastBurst, max_mp, false, true, true);
+            subTestResolutionMaxMP("preference_photo_mode_fast_burst", MyApplicationInterface.PhotoMode.FastBurst, max_mp, true, true, true);
+        }
+    }
+
     /* Tests camera error handling.
      */
     public void testOnError() {

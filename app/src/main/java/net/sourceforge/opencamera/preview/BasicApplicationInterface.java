@@ -91,7 +91,7 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
-    public Pair<Integer, Integer> getCameraResolutionPref() {
+    public Pair<Integer, Integer> getCameraResolutionPref(CameraResolutionConstraints constraints) {
         return null;
     }
 
