@@ -346,7 +346,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private final float [] new_geo_direction = new float[3];
 
     private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
-    private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
+
+    // use use '0' instead of '#' to display e.g. 1.20 instead of 1.2, so that text lengths are consistent (e.g., for the
+    // toasts shown when changing sliders for manual focus distance or exposure compensation).
+    private final DecimalFormat decimal_format_2dp_force0 = new DecimalFormat("0.00");
 
     /* If the user touches to focus in continuous mode, and in photo mode, we switch the camera_controller to autofocus mode.
      * autofocus_in_continuous_mode is set to true when this happens; the runnable reset_continuous_focus_runnable
@@ -3890,7 +3893,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     String focus_distance_s;
                     if( new_focus_distance > 0.0f ) {
                         float real_focus_distance = 1.0f / new_focus_distance;
-                        focus_distance_s = decimal_format_2dp.format(real_focus_distance) + getResources().getString(R.string.metres_abbreviation);
+                        focus_distance_s = decimal_format_2dp_force0.format(real_focus_distance) + getResources().getString(R.string.metres_abbreviation);
                     }
                     else {
                         focus_distance_s = getResources().getString(R.string.infinite);
@@ -4002,7 +4005,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     public String getExposureCompensationString(int exposure) {
         float exposure_ev = exposure * exposure_step;
-        return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + decimal_format_2dp.format(exposure_ev) + " EV";
+        // show a "+" even for exactly 0, so that we have a consistent text length (useful for the toast when adjusting the exposure compensation slider)
+        return getResources().getString(R.string.exposure_compensation) + " " + (exposure >= 0 ? "+" : "") + decimal_format_2dp_force0.format(exposure_ev) + " EV";
     }
 
     public String getISOString(int iso) {
