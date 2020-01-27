@@ -146,6 +146,7 @@ public class MainActivity extends Activity {
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
     private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
+    private String push_info_toast_text; // can be used to "push" extra text to the info text for showPhotoVideoToast()
 
     // application shortcuts:
     static private final String ACTION_SHORTCUT_CAMERA = "net.sourceforge.opencamera.SHORTCUT_CAMERA";
@@ -1108,7 +1109,7 @@ public class MainActivity extends Activity {
                     if( MyDebug.LOG )
                         Log.d(TAG, "camera_is_default: " + camera_is_default);
                     if( !camera_is_default ) {
-                        this.showCameraIdToast(cameraId);
+                        this.pushCameraIdToast(cameraId);
                     }
                 }
             }
@@ -1488,9 +1489,9 @@ public class MainActivity extends Activity {
         return cameraId;
     }
 
-    private void showCameraIdToast(int cameraId) {
+    private void pushCameraIdToast(int cameraId) {
         if( MyDebug.LOG )
-            Log.d(TAG, "showCameraIdToast: " + cameraId);
+            Log.d(TAG, "pushCameraIdToast: " + cameraId);
         if( preview.getCameraControllerManager().getNumberOfCameras() > 2 ) {
             // telling the user which camera is pointless for only two cameras, but on devices that now
             // expose many cameras it can be confusing, so show a toast to at least display the id
@@ -1498,7 +1499,8 @@ public class MainActivity extends Activity {
             if( description != null ) {
                 String toast_string = description + ": ";
                 toast_string += getResources().getString(R.string.camera_id) + " " + cameraId;
-                preview.showToast(null, toast_string);
+                //preview.showToast(null, toast_string);
+                this.push_info_toast_text = toast_string;
             }
         }
     }
@@ -1519,7 +1521,7 @@ public class MainActivity extends Activity {
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextCameraId();
 
-            showCameraIdToast(cameraId);
+            pushCameraIdToast(cameraId);
 
             View switchCameraButton = findViewById(R.id.switch_camera);
             switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
@@ -4389,9 +4391,18 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG ) {
             Log.d(TAG, "toast_string: " + toast_string);
             Log.d(TAG, "simple?: " + simple);
+            Log.d(TAG, "push_info_toast_text: " + push_info_toast_text);
         }
-        if( !simple || always_show )
+        if( !simple || always_show ) {
+            if( push_info_toast_text != null ) {
+                toast_string = push_info_toast_text + "\n" + toast_string;
+            }
             preview.showToast(switch_video_toast, toast_string);
+        }
+        else if( push_info_toast_text != null ) {
+            preview.showToast(switch_video_toast, push_info_toast_text);
+        }
+        push_info_toast_text = null; // reset
     }
 
     private void freeAudioListener(boolean wait_until_done) {
