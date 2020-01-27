@@ -55,6 +55,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.Typeface;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -7151,12 +7152,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         private final Rect bounds = new Rect();
         private final Rect sub_bounds = new Rect();
         private final RectF rect = new RectF();
+        private final boolean style_outline; // if true, display text with outline rather than background
 
-        RotatedTextView(String text, int offset_y, Context context) {
+        RotatedTextView(String text, int offset_y, boolean style_outline, Context context) {
             super(context);
 
             this.lines = text.split("\n");
             this.offset_y = offset_y;
+            this.style_outline = style_outline;
+
+            if( style_outline ) {
+                // outline style looks clearer when using bold text
+                this.paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            }
         }
 
         void setText(String text) {
@@ -7171,7 +7179,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         protected void onDraw(Canvas canvas) {
             final float scale = Preview.this.getResources().getDisplayMetrics().density;
             paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-            paint.setShadowLayer(1, 0, 1, Color.BLACK);
+            if( !style_outline ) {
+                paint.setShadowLayer(1, 0, 1, Color.BLACK);
+            }
             //paint.getTextBounds(text, 0, text.length(), bounds);
             boolean first_line = true;
             for(String line : lines) {
@@ -7213,15 +7223,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             rect.bottom = canvas.getHeight()/2.0f + bounds.bottom + padding + offset_y;
 
             paint.setStyle(Paint.Style.FILL);
-            paint.setColor(Color.rgb(50, 50, 50));
-            //canvas.drawRect(rect, paint);
-            final float radius = (24 * scale + 0.5f); // convert dps to pixels
-            canvas.drawRoundRect(rect, radius, radius, paint);
+            if( !style_outline ) {
+                paint.setColor(Color.rgb(50, 50, 50));
+                //paint.setColor(Color.argb(32, 0, 0, 0));
+                //canvas.drawRect(rect, paint);
+                final float radius = (24 * scale + 0.5f); // convert dps to pixels
+                canvas.drawRoundRect(rect, radius, radius, paint);
+            }
 
             paint.setColor(Color.WHITE);
             int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
             for(String line : lines) {
                 canvas.drawText(line, canvas.getWidth()/2.0f - bounds.width()/2.0f, ypos, paint);
+
+                if( style_outline ) {
+                    // draw outline
+                    int current_color = paint.getColor();
+                    paint.setColor(Color.BLACK);
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setStrokeWidth(1);
+                    canvas.drawText(line, canvas.getWidth()/2.0f - bounds.width()/2.0f, ypos, paint);
+                    paint.setStyle(Paint.Style.FILL);
+                    paint.setColor(current_color);
+                }
+
                 ypos += height;
             }
             canvas.restore();
@@ -7291,7 +7316,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         fake_toast_handler.removeCallbacksAndMessages(null);
                     }
                     else {
-                        active_fake_toast = new RotatedTextView(message, offset_y, activity);
+                        active_fake_toast = new RotatedTextView(message, offset_y, true, activity);
                         Activity activity = (Activity) Preview.this.getContext();
                         final FrameLayout rootLayout = activity.findViewById(android.R.id.content);
                         rootLayout.addView(active_fake_toast);
@@ -7354,7 +7379,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         Log.d(TAG, "created new toast: " + toast);
                     if( clear_toast != null )
                         clear_toast.toast = toast;
-                    View text = new RotatedTextView(message, offset_y, activity);
+                    View text = new RotatedTextView(message, offset_y, false, activity);
                     toast.setView(text);
                     last_toast_time_ms = time_now;
                 }
