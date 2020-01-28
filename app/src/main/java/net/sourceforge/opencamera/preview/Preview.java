@@ -300,8 +300,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private Toast last_toast;
     private long last_toast_time_ms;
-    private final ToastBoxer flash_toast = new ToastBoxer();
-    private final ToastBoxer focus_toast = new ToastBoxer();
+    private final ToastBoxer focus_flash_toast = new ToastBoxer();
     private final ToastBoxer take_photo_toast = new ToastBoxer();
     private final ToastBoxer pause_video_toast = new ToastBoxer();
 
@@ -4549,7 +4548,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     if( MyDebug.LOG )
                         Log.d(TAG, "    found entry: " + i);
                     if( !initial ) {
-                        showToast(flash_toast, flash_entries[i]);
+                        showToast(focus_flash_toast, flash_entries[i]);
                     }
                     break;
                 }
@@ -4664,7 +4663,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( !quiet ) {
                 String focus_entry = findFocusEntryForValue(focus_value);
                 if( focus_entry != null ) {
-                    showToast(focus_toast, focus_entry);
+                    showToast(focus_flash_toast, focus_entry);
                 }
             }
             this.setFocusValue(focus_value, auto_focus);
