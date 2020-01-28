@@ -1505,6 +1505,18 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void userSwitchToCamera(int cameraId) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "userSwitchToCamera: " + cameraId);
+        View switchCameraButton = findViewById(R.id.switch_camera);
+        switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
+        applicationInterface.reset();
+        this.preview.setCamera(cameraId);
+        switchCameraButton.setEnabled(true);
+        // no need to call mainUI.setSwitchCameraContentDescription - this will be called from PreviewcameraSetup when the
+        // new camera is opened
+    }
+
     /**
      * Selects the next camera on the phone - in practice, switches between
      * front and back cameras
@@ -1523,13 +1535,7 @@ public class MainActivity extends Activity {
 
             pushCameraIdToast(cameraId);
 
-            View switchCameraButton = findViewById(R.id.switch_camera);
-            switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
-            applicationInterface.reset();
-            this.preview.setCamera(cameraId);
-            switchCameraButton.setEnabled(true);
-            // no need to call mainUI.setSwitchCameraContentDescription - this will be called from PreviewcameraSetup when the
-            // new camera is opened
+            userSwitchToCamera(cameraId);
         }
     }
 
