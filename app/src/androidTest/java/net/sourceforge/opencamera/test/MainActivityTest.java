@@ -1270,7 +1270,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Thread.sleep(2000); // wait until autofocus startup
         Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
-        assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
+        assertEquals(saved_count + 1, mPreview.count_cameraAutoFocus);
         assertTrue(!mPreview.hasFocusArea());
         assertTrue(mPreview.getCameraController().getFocusAreas() == null);
         assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
@@ -1281,7 +1281,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
         Log.d(TAG, "done touch preview to auto-focus");
         Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
-        assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
+        assertEquals(saved_count + 1, mPreview.count_cameraAutoFocus);
         assertTrue(mPreview.hasFocusArea());
         assertTrue(mPreview.getCameraController().getFocusAreas() != null);
         assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
@@ -10088,9 +10088,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         TextView photoResolutionButton = (TextView)mActivity.getUIButton("PHOTO_RESOLUTIONS");
         assertTrue(photoResolutionButton != null);
         //String exp_size_string = old_picture_size.width + " x " + old_picture_size.height + " " + Preview.getMPString(old_picture_size.width, old_picture_size.height);
-        String exp_size_string = old_picture_size.width + " x " + old_picture_size.height;
+        //String exp_size_string = old_picture_size.width + " x " + old_picture_size.height;
+        String exp_size_string = old_picture_size.width + " x " + old_picture_size.height + " (" + Preview.getMPString(old_picture_size.width, old_picture_size.height) + ")";
         Log.d(TAG, "size string: " + photoResolutionButton.getText());
-        assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
+        assertEquals(exp_size_string, photoResolutionButton.getText());
 
         // change photo resolution
         View photoResolutionChangeButton = mActivity.getUIButton("PHOTO_RESOLUTIONS_PREV");
@@ -10107,9 +10108,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mActivity.popupIsOpen() );
 
         //exp_size_string = new_picture_size.width + " x " + new_picture_size.height + " " + Preview.getMPString(new_picture_size.width, new_picture_size.height);
-        exp_size_string = new_picture_size.width + " x " + new_picture_size.height;
+        //exp_size_string = new_picture_size.width + " x " + new_picture_size.height;
+        exp_size_string = new_picture_size.width + " x " + new_picture_size.height + " (" + Preview.getMPString(new_picture_size.width, new_picture_size.height) + ")";
         Log.d(TAG, "size string: " + photoResolutionButton.getText());
-        assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
+        assertEquals(photoResolutionButton.getText(), exp_size_string);
 
         // switch to video mode
         View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
