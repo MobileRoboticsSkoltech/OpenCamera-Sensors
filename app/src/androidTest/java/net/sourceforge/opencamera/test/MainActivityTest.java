@@ -1268,7 +1268,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.getCameraController().getFocusAreas() == null);
         assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
 
-        Thread.sleep(2000); // wait until autofocus startup
+        Thread.sleep(2000); // wait until autofocus startup (and for toasts to clear, for Android 10+ toast behaviour)
         Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
         assertEquals(saved_count + 1, mPreview.count_cameraAutoFocus);
         assertTrue(!mPreview.hasFocusArea());
