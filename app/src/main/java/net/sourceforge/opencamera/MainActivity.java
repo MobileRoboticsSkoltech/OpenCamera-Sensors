@@ -4399,14 +4399,15 @@ public class MainActivity extends Activity {
             Log.d(TAG, "simple?: " + simple);
             Log.d(TAG, "push_info_toast_text: " + push_info_toast_text);
         }
+        final boolean use_fake_toast = true;
         if( !simple || always_show ) {
             if( push_info_toast_text != null ) {
                 toast_string = push_info_toast_text + "\n" + toast_string;
             }
-            preview.showToast(switch_video_toast, toast_string);
+            preview.showToast(switch_video_toast, toast_string, use_fake_toast);
         }
         else if( push_info_toast_text != null ) {
-            preview.showToast(switch_video_toast, push_info_toast_text);
+            preview.showToast(switch_video_toast, push_info_toast_text, use_fake_toast);
         }
         push_info_toast_text = null; // reset
     }

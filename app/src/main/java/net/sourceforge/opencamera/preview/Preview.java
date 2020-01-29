@@ -561,6 +561,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "touch event at : " + event.getX() + " , " + event.getY() + " at time " + event.getEventTime());
 
+        // doesn't seem a bad idea to clear fake toasts (touching screen gets rid of standard toasts on Android 10+ at least)
+        this.clearActiveFakeToast();
+
         boolean was_paused = !this.is_preview_started;
         if( MyDebug.LOG )
             Log.d(TAG, "was_paused: " + was_paused);
@@ -7255,6 +7258,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private final Handler fake_toast_handler = new Handler();
     private RotatedTextView active_fake_toast = null;
 
+    public void clearActiveFakeToast() {
+        clearActiveFakeToast(false);
+    }
+
+    /** Removes any fake toast, if it exists.
+     *  @param called_from_handler Should be false, unless called from the fake_toast_handler.
+     */
+    private void clearActiveFakeToast(boolean called_from_handler) {
+        if( !called_from_handler ) {
+            // important to remove the callback, otherwise when it runs, it may end up deleting a
+            // new fake toast that is created after this method call, but before the callback runs
+            fake_toast_handler.removeCallbacksAndMessages(null);
+        }
+        // run on UI thread, to avoid threading issues
+        final Activity activity = (Activity)this.getContext();
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                if( active_fake_toast != null ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "remove fake toast: " + active_fake_toast);
+                    ViewParent parent = active_fake_toast.getParent();
+                    if( parent != null ) {
+                        ((ViewGroup)parent).removeView(active_fake_toast);
+                    }
+                    active_fake_toast = null;
+                }
+            }
+        });
+    }
+
     public void showToast(final ToastBoxer clear_toast, final int message_id) {
         showToast(clear_toast, getResources().getString(message_id), false);
     }
@@ -7291,6 +7324,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      *                       means that the toasts don't have the fade out effect.
      */
     private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp, final boolean use_fake_toast) {
+        //final boolean use_fake_toast = true;
+        //final boolean use_fake_toast = old_use_fake_toast;
         if( !applicationInterface.getShowToastsPref() ) {
             return;
         }
@@ -7300,7 +7335,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         final Activity activity = (Activity)this.getContext();
         // We get a crash on emulator at least if Toast constructor isn't run on main thread (e.g., the toast for taking a photo when on timer).
         // Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
-        // Also for the use_fake_toast code, running the creation code, and the postDelayed code, on the UI thread avoids threading issues
+        // Also for the use_fake_toast code, running the creation code, and the postDelayed code (and the code in clearActiveFakeToast()), on the UI thread avoids threading issues
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 final float scale = Preview.this.getResources().getDisplayMetrics().density;
@@ -7309,28 +7344,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 if( use_fake_toast ) {
                     if( active_fake_toast != null ) {
                         // re-use existing fake toast
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "re-use fake toast: " + active_fake_toast);
                         active_fake_toast.setText(message);
                         active_fake_toast.setOffsetY(offset_y);
                         active_fake_toast.invalidate(); // make sure the view is redrawn
-                        fake_toast_handler.removeCallbacksAndMessages(null);
                     }
                     else {
                         active_fake_toast = new RotatedTextView(message, offset_y, true, activity);
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "create new fake toast: " + active_fake_toast);
                         Activity activity = (Activity) Preview.this.getContext();
                         final FrameLayout rootLayout = activity.findViewById(android.R.id.content);
                         rootLayout.addView(active_fake_toast);
                     }
 
+                    // in theory the fake_toast_handler should only have a callback on it if re-using an existing fake toast,
+                    // but we remove callbacks always just in case
+                    fake_toast_handler.removeCallbacksAndMessages(null);
+
                     fake_toast_handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             if( MyDebug.LOG )
-                                Log.d(TAG, "remove fake toast: " + active_fake_toast);
-                            ViewParent parent = active_fake_toast.getParent();
-                            if( parent != null ) {
-                                ((ViewGroup)parent).removeView(active_fake_toast);
-                            }
-                            active_fake_toast = null;
+                                Log.d(TAG, "destroy fake toast due to time expired");
+                            clearActiveFakeToast(true);
                         }
                     }, 2000); // supposedly matches Toast.LENGTH_SHORT
 
