@@ -5854,7 +5854,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( takePhotoVideoButton.getVisibility() == View.GONE );
 
         Log.d(TAG, "test_n_videos_scanned: " + mActivity.getApplicationInterface().test_n_videos_scanned);
-        assertEquals(n_new_files, mActivity.getApplicationInterface().test_n_videos_scanned);
+        // if subtitles, we'll have the extra .SRT file which won't have been scanned
+        assertEquals((subtitles ? n_new_files-1 : n_new_files), mActivity.getApplicationInterface().test_n_videos_scanned);
 
         return n_new_files;
     }
