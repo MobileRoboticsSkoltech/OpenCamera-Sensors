@@ -1631,8 +1631,8 @@ public class MainActivity extends Activity {
     class PreferencesListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         private static final String TAG = "PreferencesListener";
 
-        private boolean any_significant_change; // whether any changes have been made since startListening()
-        private boolean any_change; // whether any changes that require updateForSettings have been made since startListening()
+        private boolean any_significant_change; // whether any changes that require updateForSettings have been made since startListening()
+        private boolean any_change; // whether any changes have been made since startListening()
 
         void startListening() {
             if( MyDebug.LOG )
@@ -1662,23 +1662,32 @@ public class MainActivity extends Activity {
 
             switch( key ) {
                 // we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
+                //case "preference_face_detection": // need to update camera controller
                 case "preference_timer":
                 case "preference_burst_mode":
                 case "preference_burst_interval":
-                    //case "preference_ghost_image": // don't whitelist this, as may need to reload ghost image (at fullscreen resolution) if "last" is enabled
                 case "preference_touch_capture":
                 case "preference_pause_preview":
                 case "preference_shutter_sound":
                 case "preference_timer_beep":
                 case "preference_timer_speak":
                 case "preference_volume_keys":
+                    //case "preference_audio_control": // need to update the UI
                 case "preference_audio_noise_control_sensitivity":
+                    //case "preference_enable_remote": // handled below
+                    //case "preference_remote_type":
+                    //case "preference_remote_device_name": // handled below
+                    //case "preference_remote_disconnect_screen_dim":
+                    //case "preference_water_type": // handled below
+                    //case "preference_save_location": // we could probably whitelist this, but accessed it a lot of places...
                 case "preference_using_saf":
                 case "preference_save_photo_prefix":
                 case "preference_save_video_prefix":
                 case "preference_save_zulu_time":
                 case "preference_show_when_locked":
                 case "preference_startup_focus":
+                    //case "preference_preview_size": // need to update preview
+                    //case "preference_ghost_image": // don't whitelist this, as may need to reload ghost image (at fullscreen resolution) if "last" is enabled
                 case "preference_show_zoom":
                 case "preference_show_angle":
                 case "preference_show_angle_line":
@@ -1692,12 +1701,37 @@ public class MainActivity extends Activity {
                 case "preference_show_iso":
                 case "preference_grid":
                 case "preference_crop_guide":
-                case "preference_show_toasts":
                 case "preference_thumbnail_animation":
                 case "preference_take_photo_border":
+                    //case "preference_rotate_preview": // need to update the Preview
+                    //case "preference_ui_placement": // need to update the UI
+                    //case "preference_immersive_mode": // probably could whitelist?
+                    //case "preference_show_face_detection": // need to update the UI
+                    //case "preference_show_cycle_flash": // need to update the UI
+                    //case "preference_show_auto_level": // need to update the UI
+                    //case "preference_show_stamp": // need to update the UI
+                    //case "preference_show_textstamp": // need to update the UI
+                    //case "preference_show_store_location": // need to update the UI
+                    //case "preference_show_cycle_raw": // need to update the UI
+                    //case "preference_show_white_balance_lock": // need to update the UI
+                    //case "preference_show_exposure_lock": // need to update the UI
+                    //case "preference_show_zoom_controls": // need to update the UI
+                    //case "preference_show_zoom_slider_controls": // need to update the UI
+                    //case "preference_show_take_photo": // need to update the UI
+                case "preference_show_toasts":
                 case "preference_keep_display_on":
                 case "preference_max_brightness":
+                    //case "preference_resolution": // need to set up camera controller and preview
+                    //case "preference_quality": // need to set up camera controller
+                    //case "preference_image_format": // need to set up camera controller (as it can affect the image quality that we set)
+                    //case "preference_raw": // need to update as it affects how we set up camera controller
+                    //case "preference_raw_expo_bracketing": // as above
+                    //case "preference_raw_focus_bracketing": // as above
+                    //case "preference_nr_save": // we could probably whitelist this, but have not done so in case in future we allow RAW to be saved for the base image
                     //case "preference_hdr_save_expo": // we need to update if this is changed, as it affects whether we request RAW or not in HDR mode when RAW is enabled
+                    //case "preference_expo_bracketing_n_images": // need to set up camera controller
+                    //case "preference_expo_bracketing_stops": // need to set up camera controller
+                    //case "preference_panorama_save": // we could probably whitelist this, but have not done so in case in future we allow RAW to be saved for the base images
                 case "preference_front_camera_mirror":
                 case "preference_stamp":
                 case "preference_stamp_dateformat":
@@ -1707,13 +1741,34 @@ public class MainActivity extends Activity {
                 case "preference_stamp_fontsize":
                 case "preference_stamp_font_color":
                 case "preference_stamp_style":
+                    //case "preference_camera2_fake_flash": // need to update camera controller
+                    //case "preference_camera2_fast_burst": // could probably whitelist?
+                    //case "preference_camera2_photo_video_recording": // need to update camera controller
                 case "preference_background_photo_saving":
+                    //case "preference_video_quality": // need to update camera controller and preview
+                    //case "preference_video_stabilization": // need to update camera controller
+                    //case "preference_video_output_format": // could probably whitelist, but safest to restart camera
+                    //case "preference_video_log": // need to update camera controller
+                    //case "preference_video_profile_gamma": // as above
+                    //case "preference_video_max_duration": // could probably whitelist, but safest to restart camera
+                    //case "preference_video_restart": // could probably whitelist, but safest to restart camera
+                    //case "preference_video_max_filesize": // could probably whitelist, but safest to restart camera
+                    //case "preference_video_restart_max_filesize": // could probably whitelist, but safest to restart camera
                 case "preference_record_audio":
                 case "preference_record_audio_src":
                 case "preference_record_audio_channels":
                 case "preference_lock_video":
                 case "preference_video_subtitle":
+                    //case "preference_video_bitrate": // could probably whitelist, but safest to restart camera
+                    //case "preference_video_fps": // could probably whitelist, but safest to restart camera
+                    //case "preference_force_video_4k": // could probably whitelist, but safest to restart camera
+                    //case "preference_location": // need to enable/disable gps listeners etc
+                    //case "preference_gps_direction": // need to update listeners
                 case "preference_require_location":
+                    //case "preference_antibanding": // need to set up camera controller
+                    //case "preference_edge_mode": // need to set up camera controller
+                    //case "preference_noise_reduction_mode": // need to set up camera controller
+                    //case "preference_camera_api": // no point whitelisting as we restart anyway
                     if( MyDebug.LOG )
                         Log.d(TAG, "this change doesn't require update");
                     break;
@@ -2214,7 +2269,7 @@ public class MainActivity extends Activity {
         preferencesListener.stopListening();
 
         // Update the cached settings in DrawPreview
-        // Note that some GUI related settings won't trigger preferencesListener.anyChanges(), so
+        // Note that some GUI related settings won't trigger preferencesListener.anyChange(), so
         // we always call this. Perhaps we could add more classifications to PreferencesListener
         // to mark settings that need us to update DrawPreview but not call updateForSettings().
         // However, DrawPreview.updateSettings() should be a quick function (the main point is
@@ -2222,7 +2277,6 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings();
 
         if( preferencesListener.anyChange() ) {
-            // in case face detection etc enabled/disabled in settings:
             mainUI.updateOnScreenIcons();
         }
 
