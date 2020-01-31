@@ -1679,6 +1679,7 @@ public class MainActivity extends Activity {
                     //case "preference_remote_device_name": // handled below
                     //case "preference_remote_disconnect_screen_dim":
                     //case "preference_water_type": // handled below
+                case "preference_lock_orientation":
                     //case "preference_save_location": // we could probably whitelist this, but accessed it a lot of places...
                 case "preference_using_saf":
                 case "preference_save_photo_prefix":
@@ -1688,6 +1689,8 @@ public class MainActivity extends Activity {
                 case "preference_startup_focus":
                     //case "preference_preview_size": // need to update preview
                     //case "preference_ghost_image": // don't whitelist this, as may need to reload ghost image (at fullscreen resolution) if "last" is enabled
+                case "ghost_image_alpha":
+                case "preference_focus_assist":
                 case "preference_show_zoom":
                 case "preference_show_angle":
                 case "preference_show_angle_line":
@@ -1699,6 +1702,13 @@ public class MainActivity extends Activity {
                 case "preference_show_time":
                 case "preference_free_memory":
                 case "preference_show_iso":
+                case "preference_histogram":
+                case "preference_zebra_stripes":
+                case "preference_zebra_stripes_foreground_color":
+                case "preference_zebra_stripes_background_color":
+                case "preference_focus_peaking":
+                case "preference_focus_peaking_color":
+                case "preference_show_video_max_amp":
                 case "preference_grid":
                 case "preference_crop_guide":
                 case "preference_thumbnail_animation":
@@ -1719,6 +1729,7 @@ public class MainActivity extends Activity {
                     //case "preference_show_zoom_slider_controls": // need to update the UI
                     //case "preference_show_take_photo": // need to update the UI
                 case "preference_show_toasts":
+                case "preference_show_whats_new":
                 case "preference_keep_display_on":
                 case "preference_max_brightness":
                     //case "preference_resolution": // need to set up camera controller and preview
@@ -1729,14 +1740,20 @@ public class MainActivity extends Activity {
                     //case "preference_raw_focus_bracketing": // as above
                     //case "preference_nr_save": // we could probably whitelist this, but have not done so in case in future we allow RAW to be saved for the base image
                     //case "preference_hdr_save_expo": // we need to update if this is changed, as it affects whether we request RAW or not in HDR mode when RAW is enabled
+                case "preference_hdr_contrast_enhancement":
                     //case "preference_expo_bracketing_n_images": // need to set up camera controller
                     //case "preference_expo_bracketing_stops": // need to set up camera controller
+                case "preference_panorama_crop":
                     //case "preference_panorama_save": // we could probably whitelist this, but have not done so in case in future we allow RAW to be saved for the base images
                 case "preference_front_camera_mirror":
+                case "preference_exif_artist":
+                case "preference_exif_copyright":
                 case "preference_stamp":
                 case "preference_stamp_dateformat":
                 case "preference_stamp_timeformat":
                 case "preference_stamp_gpsformat":
+                case "preference_stamp_geo_address":
+                case "preference_units_distance":
                 case "preference_textstamp":
                 case "preference_stamp_fontsize":
                 case "preference_stamp_font_color":
@@ -1762,6 +1779,8 @@ public class MainActivity extends Activity {
                     //case "preference_video_bitrate": // could probably whitelist, but safest to restart camera
                     //case "preference_video_fps": // could probably whitelist, but safest to restart camera
                     //case "preference_force_video_4k": // could probably whitelist, but safest to restart camera
+                case "preference_video_low_power_check":
+                case "preference_video_flash":
                     //case "preference_location": // need to enable/disable gps listeners etc
                     //case "preference_gps_direction": // need to update listeners
                 case "preference_require_location":
