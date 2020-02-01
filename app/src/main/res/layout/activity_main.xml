@@ -40,6 +40,29 @@
         />
 
     <ImageButton
+        android:id="@+id/switch_multi_camera"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="18dp"
+        android:layout_marginRight="5dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_multi_camera"
+        android:src="@drawable/baseline_add_a_photo_white_48"
+        android:onClick="clickedSwitchMultiCamera"
+        android:layout_below="@+id/switch_video"
+        android:layout_toLeftOf="@+id/switch_camera"
+        android:layout_alignTop="@+id/switch_camera"
+        android:layout_alignBottom="@+id/switch_camera"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/pause_video"
         android:layout_width="70dp"
         android:layout_height="70dp"

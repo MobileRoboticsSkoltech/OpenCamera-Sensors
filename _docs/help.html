@@ -125,7 +125,17 @@ a photo. In some cases, you can also hold (long press) for a continuous burst:</
     start/stop video recording, and click the smaller photo icon to switch back to photo mode.</p>
 
 <p><img src="switch_camera.png" alt="Switch Camera icon" width="32" height="32"><b>Switch camera</b> - Switches between front and back camera (if your
-device has two cameras).</p>
+device has both front and back cameras). If your device has more than one front and/or back camera, then this will switch
+between the first front and back camera.</p>
+
+<p><img src="baseline_add_a_photo_white_48.png" alt="Switch multi-camera icon" width="32" height="32"><b>Switch multi-camera icon</b> -
+    This icon only shows on devices with more than one front and/or back cameras, and allows you to switch between those
+    cameras. For example, a device might have two back cameras, one standard and one ultra-wide, this icon will switch between
+    the standard and ultra-wide camera.
+    If Settings/On screen GUI/"Multiple cameras icon" is disabled, then this icon will not show; instead the "Switch camera"
+    icon can by used to cycle through all the cameras.
+    Note that some devices do not allow third party applications to access their multiple cameras, in which case Open Camera isn't
+    able to use them.</p>
 
 <p><img src="exposure_unlocked.png" alt="Lock Exposure icon" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
 When locked, the icon will change to <img src="exposure_locked.png" alt="Exposure Locked icon" width="32" height="32">. Locking the exposure means
@@ -752,6 +762,11 @@ rather take photos by other methods (e.g., if your device has a hardware shutter
 <p><b>Show What's New dialog</b> - When updating to a major new version, Open Camera displays a dialog explaining the new
 features and other options. You can disable this dialog from being displayed if you prefer.</p>
 
+<p><b>Multiple cameras icon</b> - This option only shows on devices with more than one front and/or back cameras. When
+enabled (the default), such devices will have two on-screen icons: one to switch between front/back cameras, and another
+to switch between the multiple front or back cameras. If this option is disabled, only a single icon will show, which
+will cycle between all cameras.</p>
+
 <p><b>Keep display on</b> - Whether to force keeping the screen display on, while the main Open Camera UI is active.</p>
 
 <p><b>Force maximum brightness</b> - Whether to force the screen display to maximum brightness.</p>
@@ -1231,9 +1246,11 @@ and untick Auto-level.</p>
 
 <p><b>Why doesn't Open Camera support dual / multiple cameras?</b> - Open Camera supports switching between all cameras
 that are made available to third party applications. Usually this means front and back cameras, but some devices have
-dual back-facing cameras - in some cases the extra camera isn't made available to third party applications, so it isn't
-possible for Open Camera to support them. Even where they are, since there is no current standard on what the extra
-cameras are used for, it can't do anything with them other than allowing you to switch between them.</p>
+multiple front and/or back-facing cameras. Use the
+<img src="baseline_add_a_photo_white_48.png" alt="Switch multi-camera icon" width="16" height="16">switch multi-camera icon
+to switch between multiple front or back cameras. In some cases the extra cameras aren't made available to third party
+applications, so it isn't possible for Open Camera to support them. Even where they are, since there is no current standard
+on what the extra cameras are used for, it can't do anything with them other than allowing you to switch between them.</p>
 
 <p><b>Why doesn't Open Camera support the maximum video resolution on my device?</b> - If you
 are using Camera2 API, make sure that you're not in slow motion mode (see "Speed" under

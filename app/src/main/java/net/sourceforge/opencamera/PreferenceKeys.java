@@ -198,6 +198,8 @@ public class PreferenceKeys {
         return "preference_startup_focus";
     }
 
+    public static final String MultiCamButtonPreferenceKey = "preference_multi_cam_button";
+
     public static String getKeepDisplayOnPreferenceKey() {
         return "preference_keep_display_on";
     }

@@ -680,6 +680,14 @@
                 android:defaultValue="true"
                 />
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <SwitchPreference
+                android:key="preference_multi_cam_button"
+                android:title="@string/preference_multi_cam_button"
+                android:summary="@string/preference_multi_cam_button_summary"
+                android:defaultValue="true"
+                />
+
             <SwitchPreference
                 android:key="preference_keep_display_on"
                 android:title="@string/preference_keep_display_on"

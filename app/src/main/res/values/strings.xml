@@ -964,6 +964,9 @@
 
     <string name="switch_to_external_camera">Switch to external camera</string>
     <string name="switch_to_unknown_camera">Switch camera</string>
+    <string name="switch_multi_camera">Switch between multiple cameras</string>
+    <string name="preference_multi_cam_button">Multiple cameras icon</string>
+    <string name="preference_multi_cam_button_summary">If enabled, use separate buttons to switch between front/back cameras, and to switch between multiple front/back facing cameras. If disabled, the Switch Camera icon will cycle through all cameras.</string>
 
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 

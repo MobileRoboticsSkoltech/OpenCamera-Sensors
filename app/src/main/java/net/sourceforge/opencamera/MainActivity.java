@@ -138,6 +138,16 @@ public class MainActivity extends Activity {
     public static volatile boolean test_preview_want_no_limits; // test flag, if set to true then instead use test_preview_want_no_limits_value; needs to be static, as it needs to be set before activity is created to take effect
     public static volatile boolean test_preview_want_no_limits_value;
 
+    // whether this is a multi-camera device (note, this isn't simply having more than 1 camera, but also having more than one with the same facing)
+    // note that in most cases, code should check the MultiCamButtonPreferenceKey preference as well as the is_multi_cam flag,
+    // this can be done via isMultiCamEnabled().
+    private boolean is_multi_cam;
+    // These lists are lists of camera IDs with the same "facing" (front, back or external).
+    // Only initialised if is_multi_cam==true.
+    private List<Integer> back_camera_ids;
+    private List<Integer> front_camera_ids;
+    private List<Integer> other_camera_ids;
+
     private final ToastBoxer switch_video_toast = new ToastBoxer();
     private final ToastBoxer screen_locked_toast = new ToastBoxer();
     private final ToastBoxer stamp_toast = new ToastBoxer();
@@ -314,9 +324,61 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 
+        // Setup multi-camera buttons (must be done after creating preview so we know which Camera API is being used,
+        // and before initialising on-screen visibility).
+        // We only allow the separate icon for switching cameras if:
+        // - there are at least 2 types of "facing" camera, and
+        // - there are at least 2 cameras with the same "facing".
+        // If there are multiple cameras but all with different "facing", then the switch camera
+        // icon is used to iterate over all cameras.
+        // If there are more than two cameras, but all cameras have the same "facing, we still stick
+        // with using the switch camera icon to iterate over all cameras.
+        int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+        if( n_cameras > 2 ) {
+            this.back_camera_ids = new ArrayList<>();
+            this.front_camera_ids = new ArrayList<>();
+            this.other_camera_ids = new ArrayList<>();
+            for(int i=0;i<n_cameras;i++) {
+                switch( preview.getCameraControllerManager().getFacing(i) ) {
+                    case FACING_BACK:
+                        back_camera_ids.add(i);
+                        break;
+                    case FACING_FRONT:
+                        front_camera_ids.add(i);
+                        break;
+                    default:
+                        // we assume any unknown cameras are also external
+                        other_camera_ids.add(i);
+                        break;
+                }
+            }
+            boolean multi_same_facing = back_camera_ids.size() >= 2 || front_camera_ids.size() >= 2 || other_camera_ids.size() >= 2;
+            int n_facing = 0;
+            if( back_camera_ids.size() > 0 )
+                n_facing++;
+            if( front_camera_ids.size() > 0 )
+                n_facing++;
+            if( other_camera_ids.size() > 0 )
+                n_facing++;
+            this.is_multi_cam = multi_same_facing && n_facing >= 2;
+            //this.is_multi_cam = false; // test
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "multi_same_facing: " + multi_same_facing);
+                Log.d(TAG, "n_facing: " + n_facing);
+                Log.d(TAG, "is_multi_cam: " + is_multi_cam);
+            }
+
+            if( !is_multi_cam ) {
+                this.back_camera_ids = null;
+                this.front_camera_ids = null;
+                this.other_camera_ids = null;
+            }
+        }
+
         // initialise on-screen button visibility
         View switchCameraButton = findViewById(R.id.switch_camera);
-        switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+        switchCameraButton.setVisibility(n_cameras > 1 ? View.VISIBLE : View.GONE);
+        // switchMultiCameraButton visibility updated below in mainUI.updateOnScreenIcons(), as it also depends on user preference
         View speechRecognizerButton = findViewById(R.id.audio_control);
         speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
         if( MyDebug.LOG )
@@ -614,6 +676,41 @@ public class MainActivity extends Activity {
         return want_no_limits ? navigation_gap : 0;
     }
 
+    /** Whether this is a multi camera device, and the user preference is set to enable the multi-camera button.
+     */
+    public boolean isMultiCamEnabled() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return is_multi_cam && sharedPreferences.getBoolean(PreferenceKeys.MultiCamButtonPreferenceKey, true);
+    }
+
+    /** Whether the icon switch_multi_camera should be displayed. This is if the following are all
+     *  true:
+     *  - The device is a multi camera device (MainActivity.is_multi_cam==true).
+     *  - The user preference for using the separate icons is enabled
+     *    (PreferenceKeys.MultiCamButtonPreferenceKey).
+     *  - For the current camera ID, there is only one camera with the same front/back/external
+     *    "facing" (e.g., imagine a device with two back cameras, but only one front camera).
+     */
+    public boolean showSwitchMultiCamIcon() {
+        if( isMultiCamEnabled() ) {
+            int cameraId = preview.getCameraId();
+            switch( preview.getCameraControllerManager().getFacing(cameraId) ) {
+                case FACING_BACK:
+                    if( back_camera_ids.size() > 0 )
+                        return true;
+                    break;
+                case FACING_FRONT:
+                    if( front_camera_ids.size() > 0 )
+                        return true;
+                    break;
+                default:
+                    if( other_camera_ids.size() > 0 )
+                        return true;
+                    break;
+            }
+        }
+        return false;
+    }
     /* This method sets the preference defaults which are set specific for a particular device.
      * This method should be called when Open Camera is run for the very first time after installation,
      * or when the user has requested to "Reset settings".
@@ -1473,6 +1570,8 @@ public class MainActivity extends Activity {
     }
 
     /* Returns the cameraId that the "Switch camera" button will switch to.
+     * Note that this may not necessarily be the next camera ID, on multi camera devices (if
+     * isMultiCamEnabled() returns true).
      */
     public int getNextCameraId() {
         if( MyDebug.LOG )
@@ -1481,8 +1580,33 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "current cameraId: " + cameraId);
         if( this.preview.canSwitchCamera() ) {
-            int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
-            cameraId = (cameraId+1) % n_cameras;
+            if( isMultiCamEnabled() ) {
+                // don't use preview.getCameraController(), as it may be null if user quickly switches between cameras
+                switch( preview.getCameraControllerManager().getFacing(cameraId) ) {
+                    case FACING_BACK:
+                        if( front_camera_ids.size() > 0 )
+                            cameraId = front_camera_ids.get(0);
+                        else if( other_camera_ids.size() > 0 )
+                            cameraId = other_camera_ids.get(0);
+                        break;
+                    case FACING_FRONT:
+                        if( other_camera_ids.size() > 0 )
+                            cameraId = other_camera_ids.get(0);
+                        else if( back_camera_ids.size() > 0 )
+                            cameraId = back_camera_ids.get(0);
+                        break;
+                    default:
+                        if( back_camera_ids.size() > 0 )
+                            cameraId = back_camera_ids.get(0);
+                        else if( front_camera_ids.size() > 0 )
+                            cameraId = front_camera_ids.get(0);
+                        break;
+                }
+            }
+            else {
+                int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+                cameraId = (cameraId+1) % n_cameras;
+            }
         }
         if( MyDebug.LOG )
             Log.d(TAG, "next cameraId: " + cameraId);
@@ -1509,11 +1633,15 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "userSwitchToCamera: " + cameraId);
         View switchCameraButton = findViewById(R.id.switch_camera);
-        switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
+        View switchMultiCameraButton = findViewById(R.id.switch_multi_camera);
+        // prevent slowdown if user repeatedly clicks:
+        switchCameraButton.setEnabled(false);
+        switchMultiCameraButton.setEnabled(false);
         applicationInterface.reset();
         this.preview.setCamera(cameraId);
         switchCameraButton.setEnabled(true);
-        // no need to call mainUI.setSwitchCameraContentDescription - this will be called from PreviewcameraSetup when the
+        switchMultiCameraButton.setEnabled(true);
+        // no need to call mainUI.setSwitchCameraContentDescription - this will be called from Preview.cameraSetup when the
         // new camera is opened
     }
 
@@ -1532,9 +1660,62 @@ public class MainActivity extends Activity {
         this.closePopup();
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextCameraId();
+            if( !isMultiCamEnabled() ) {
+                pushCameraIdToast(cameraId);
+            }
+            else {
+                // In multi-cam mode, no need to show the toast when just switching between front and back cameras.
+                // But it is useful to clear an active fake toast, otherwise have issue if the user uses
+                // clickedSwitchMultiCamera() (which displays a fake toast for the camera via the info toast), then
+                // immediately uses clickedSwitchCamera() - the toast for the wrong camera will still be lingering
+                // until it expires, which looks a bit strange.
+                // (If using non-fake toasts, this isn't an issue, at least on Android 10+, as now toasts seem to
+                // disappear when the user touches the screen anyway.)
+                preview.clearActiveFakeToast();
+            }
+            userSwitchToCamera(cameraId);
+        }
+    }
 
+    public void clickedSwitchMultiCamera(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSwitchMultiCamera");
+        if( !isMultiCamEnabled() ) {
+            Log.e(TAG, "switch multi camera icon shouldn't have been visible");
+            return;
+        }
+        if( preview.isOpeningCamera() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "already opening camera in background thread");
+            return;
+        }
+        this.closePopup();
+        if( this.preview.canSwitchCamera() ) {
+            List<Integer> camera_set;
+            // don't use preview.getCameraController(), as it may be null if user quickly switches between cameras
+            switch( preview.getCameraControllerManager().getFacing(preview.getCameraId()) ) {
+                case FACING_BACK:
+                    camera_set = back_camera_ids;
+                    break;
+                case FACING_FRONT:
+                    camera_set = front_camera_ids;
+                    break;
+                default:
+                    camera_set = other_camera_ids;
+                    break;
+            }
+            int cameraId;
+            int indx = camera_set.indexOf(preview.getCameraId());
+            if( indx == -1 ) {
+                Log.e(TAG, "camera id not in current camera set");
+                // this shouldn't happen, but if it does, revert to the first camera id in the set
+                cameraId = camera_set.get(0);
+            }
+            else {
+                indx = (indx+1) % camera_set.size();
+                cameraId = camera_set.get(indx);
+            }
             pushCameraIdToast(cameraId);
-
             userSwitchToCamera(cameraId);
         }
     }
@@ -1730,6 +1911,7 @@ public class MainActivity extends Activity {
                     //case "preference_show_take_photo": // need to update the UI
                 case "preference_show_toasts":
                 case "preference_show_whats_new":
+                case "preference_multi_cam_button":
                 case "preference_keep_display_on":
                 case "preference_max_brightness":
                     //case "preference_resolution": // need to set up camera controller and preview
@@ -1865,6 +2047,7 @@ public class MainActivity extends Activity {
         bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
         bundle.putInt("white_balance_temperature_min", this.preview.getMinimumWhiteBalanceTemperature());
         bundle.putInt("white_balance_temperature_max", this.preview.getMaximumWhiteBalanceTemperature());
+        bundle.putBoolean("is_multi_cam", this.is_multi_cam);
         bundle.putBoolean("supports_optical_stabilization", this.preview.supportsOpticalStabilization());
         bundle.putBoolean("optical_stabilization_enabled", this.preview.getOpticalStabilization());
         bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());

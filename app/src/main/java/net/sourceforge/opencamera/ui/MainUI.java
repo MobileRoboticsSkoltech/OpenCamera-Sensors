@@ -448,6 +448,11 @@ public class MainUI {
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
+            view = main_activity.findViewById(R.id.switch_multi_camera);
+            layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            view.setLayoutParams(layoutParams);
+            setViewRotation(view, ui_rotation);
+
             view = main_activity.findViewById(R.id.pause_video);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);
@@ -947,6 +952,7 @@ public class MainUI {
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+                View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
                 View exposureButton = main_activity.findViewById(R.id.exposure);
                 View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
@@ -966,6 +972,8 @@ public class MainUI {
                 View zoomSeekBar = main_activity.findViewById(R.id.zoom_seekbar);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
+                if( main_activity.showSwitchMultiCamIcon() )
+                    switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility);
@@ -1062,6 +1070,7 @@ public class MainUI {
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+                View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
                 View exposureButton = main_activity.findViewById(R.id.exposure);
                 View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
@@ -1077,6 +1086,8 @@ public class MainUI {
                 View popupButton = main_activity.findViewById(R.id.popup);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
+                if( main_activity.showSwitchMultiCamIcon() )
+                    switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
@@ -1227,6 +1238,9 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+
+        View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
+        switchMultiCameraButton.setVisibility(main_activity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE);
     }
 
     public void audioControlStarted() {

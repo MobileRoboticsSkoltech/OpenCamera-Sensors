@@ -476,6 +476,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pg.removePreference(pref);
         }
 
+        final boolean is_multi_cam = bundle.getBoolean("is_multi_cam");
+        if( MyDebug.LOG )
+            Log.d(TAG, "is_multi_cam: " + is_multi_cam);
+
 		/* Set up video resolutions.
 		   Note that this will be the resolutions for either standard or high speed frame rate (where
 		   the latter may also include being in slow motion mode), depending on the current setting when
@@ -602,6 +606,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
         if( !supports_exposure_lock ) {
             Preference pref = findPreference("preference_show_exposure_lock");
+            PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+            pg.removePreference(pref);
+        }
+
+        if( !is_multi_cam ) {
+            Preference pref = findPreference("preference_multi_cam_button");
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
             pg.removePreference(pref);
         }
@@ -1130,6 +1140,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(cameraId);
                         about_string.append("\nNo. of cameras: ");
                         about_string.append(nCameras);
+                        about_string.append("\nMulti-camera?: ");
+                        about_string.append(is_multi_cam);
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
                         about_string.append("\nPhoto mode: ");
