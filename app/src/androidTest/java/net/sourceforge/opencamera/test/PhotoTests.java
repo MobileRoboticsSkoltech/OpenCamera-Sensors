@@ -38,7 +38,9 @@ public class PhotoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNoAutofocus"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNoThumbnail"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashBug"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCameraAll"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCamera"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCameraMulti"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCameraScreenFlash"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoFocus"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoLockedFocus"));

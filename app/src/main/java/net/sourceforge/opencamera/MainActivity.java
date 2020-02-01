@@ -1613,6 +1613,45 @@ public class MainActivity extends Activity {
         return cameraId;
     }
 
+    /* Returns the cameraId that the "Switch multi camera" button will switch to.
+     * Should only be called if isMultiCamEnabled() returns true.
+     */
+    public int getNextMultiCameraId() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getNextMultiCameraId");
+        if( !isMultiCamEnabled() ) {
+            Log.e(TAG, "getNextMultiCameraId() called but not in multi-cam mode");
+            throw new RuntimeException("getNextMultiCameraId() called but not in multi-cam mode");
+        }
+        List<Integer> camera_set;
+        // don't use preview.getCameraController(), as it may be null if user quickly switches between cameras
+        switch( preview.getCameraControllerManager().getFacing(preview.getCameraId()) ) {
+            case FACING_BACK:
+                camera_set = back_camera_ids;
+                break;
+            case FACING_FRONT:
+                camera_set = front_camera_ids;
+                break;
+            default:
+                camera_set = other_camera_ids;
+                break;
+        }
+        int cameraId;
+        int indx = camera_set.indexOf(preview.getCameraId());
+        if( indx == -1 ) {
+            Log.e(TAG, "camera id not in current camera set");
+            // this shouldn't happen, but if it does, revert to the first camera id in the set
+            cameraId = camera_set.get(0);
+        }
+        else {
+            indx = (indx+1) % camera_set.size();
+            cameraId = camera_set.get(indx);
+        }
+        if( MyDebug.LOG )
+            Log.d(TAG, "next multi cameraId: " + cameraId);
+        return cameraId;
+    }
+
     private void pushCameraIdToast(int cameraId) {
         if( MyDebug.LOG )
             Log.d(TAG, "pushCameraIdToast: " + cameraId);
@@ -1691,30 +1730,7 @@ public class MainActivity extends Activity {
         }
         this.closePopup();
         if( this.preview.canSwitchCamera() ) {
-            List<Integer> camera_set;
-            // don't use preview.getCameraController(), as it may be null if user quickly switches between cameras
-            switch( preview.getCameraControllerManager().getFacing(preview.getCameraId()) ) {
-                case FACING_BACK:
-                    camera_set = back_camera_ids;
-                    break;
-                case FACING_FRONT:
-                    camera_set = front_camera_ids;
-                    break;
-                default:
-                    camera_set = other_camera_ids;
-                    break;
-            }
-            int cameraId;
-            int indx = camera_set.indexOf(preview.getCameraId());
-            if( indx == -1 ) {
-                Log.e(TAG, "camera id not in current camera set");
-                // this shouldn't happen, but if it does, revert to the first camera id in the set
-                cameraId = camera_set.get(0);
-            }
-            else {
-                indx = (indx+1) % camera_set.size();
-                cameraId = camera_set.get(indx);
-            }
+            int cameraId = getNextMultiCameraId();
             pushCameraIdToast(cameraId);
             userSwitchToCamera(cameraId);
         }
