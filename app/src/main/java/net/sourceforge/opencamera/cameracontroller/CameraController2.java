@@ -65,6 +65,7 @@ public class CameraController2 extends CameraController {
     private CameraDevice camera;
     private String cameraIdS;
 
+    private final boolean is_samsung;
     private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
 
     private CameraCharacteristics characteristics;
@@ -892,7 +893,17 @@ public class CameraController2 extends CameraController {
                             // can be reproduced on at least OnePlus 3T and Galaxy S10e (although the exact behaviour of the
                             // poor results is different on those devices)
                             int n_values = tonemap_log_max_curve_points_c;
+                            if( is_samsung ) {
+                                // unfortunately odd bug on Samsung devices (at least S7 and S10e) where if more than 32 control points,
+                                // the maximum brightness value is reduced (can best be seen with 64 points, and using gamma==1.0)
+                                // note that Samsung devices also need at least 16 control points
+                                // we choose 32 rather than 16, as better to have more points for finer curve where possible
+                                n_values = 32;
+                            }
                             //int n_values = test_new ? 32 : 128;
+                            //int n_values = 32;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "n_values: " + n_values);
                             values = new float [2*n_values];
                             for(int i=0;i<n_values;i++) {
                                 float in = ((float)i) / (n_values-1.0f);
@@ -1670,9 +1681,12 @@ public class CameraController2 extends CameraController {
         this.preview_error_cb = preview_error_cb;
         this.camera_error_cb = camera_error_cb;
 
+        this.is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
         this.is_samsung_s7 = Build.MODEL.toLowerCase(Locale.US).contains("sm-g93");
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "is_samsung: " + is_samsung);
             Log.d(TAG, "is_samsung_s7: " + is_samsung_s7);
+        }
 
         thread = new HandlerThread("CameraBackground"); 
         thread.start(); 
@@ -1995,8 +2009,16 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "enforceMinTonemapCurvePoints: " + Arrays.toString(in_values));
             Log.d(TAG, "length: " + in_values.length/2);
         }
-        final int min_points_c = 64;
-        //final int min_points_c = 16;
+        int min_points_c = 64;
+        if( is_samsung ) {
+            // unfortunately odd bug on Samsung devices (at least S7 and S10e) where if more than 32 control points,
+            // the maximum brightness value is reduced (can best be seen with 64 points, and using gamma==1.0)
+            // note that Samsung devices also need at least 16 control points
+            // So choose 16 for simplicity (seems to be no benefit to using 32 over 16, unlike OnePlus 3T devices as noted above)
+            min_points_c = 16;
+        }
+        if( MyDebug.LOG )
+            Log.d(TAG, "min_points_c: " + min_points_c);
         if( in_values.length >= 2*min_points_c ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "already enough points");
