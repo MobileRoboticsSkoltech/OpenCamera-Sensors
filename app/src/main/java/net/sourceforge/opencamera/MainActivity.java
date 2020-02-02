@@ -2278,6 +2278,9 @@ public class MainActivity extends Activity {
 
     /** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
      *  camera, and make any other necessary changes.
+     * @param toast_message If non-null, display this toast instead of the usual camera "startup" toast
+     *                      that's shown in showPhotoVideoToast(). If non-null but an empty string, then
+     *                      this means no toast is shown at all.
      * @param keep_popup If false, the popup will be closed and destroyed. Set to true if you're sure
      *                   that the changed setting isn't one that requires the PopupView to be recreated
      */
