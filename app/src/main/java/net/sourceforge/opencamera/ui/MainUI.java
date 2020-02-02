@@ -550,9 +550,11 @@ public class MainUI {
             // set seekbar info
             int width_dp;
             if( ui_rotation == 0 || ui_rotation == 180 ) {
+                // landscape
                 width_dp = 350;
             }
             else {
+                // portrait
                 width_dp = 250;
                 // prevent being too large on smaller devices (e.g., Galaxy Nexus or smaller)
                 int max_width_dp = getMaxHeightDp(true);
