@@ -4189,12 +4189,17 @@ public class MainActivity extends Activity {
         setManualFocusSeekBarVisibility(is_target_distance);
     }
 
-    void setManualFocusSeekBarVisibility(final boolean is_target_distance) {
-        SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
+    public boolean showManualFocusSeekbar(final boolean is_target_distance) {
         boolean is_visible = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2");
         if( is_target_distance ) {
             is_visible = is_visible && (applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.FocusBracketing) && !preview.isVideo();
         }
+        return is_visible;
+    }
+
+    void setManualFocusSeekBarVisibility(final boolean is_target_distance) {
+        boolean is_visible = showManualFocusSeekbar(is_target_distance);
+        SeekBar focusSeekBar = findViewById(is_target_distance ? R.id.focus_bracketing_target_seekbar : R.id.focus_seekbar);
         final int visibility = is_visible ? View.VISIBLE : View.GONE;
         focusSeekBar.setVisibility(visibility);
     }
