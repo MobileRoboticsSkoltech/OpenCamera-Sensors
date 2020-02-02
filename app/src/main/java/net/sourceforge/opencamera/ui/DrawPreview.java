@@ -43,7 +43,6 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
