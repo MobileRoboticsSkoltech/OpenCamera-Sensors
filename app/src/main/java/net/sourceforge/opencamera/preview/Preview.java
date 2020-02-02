@@ -7304,7 +7304,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         showToast(clear_toast, message, 32, use_fake_toast);
     }
 
-    private void showToast(final String message, final int offset_y_dp, final boolean use_fake_toast) {
+    public void showToast(final String message, final int offset_y_dp, final boolean use_fake_toast) {
         showToast(null, message, offset_y_dp, use_fake_toast);
     }
 

@@ -1719,7 +1719,8 @@ public class MainUI {
                         // also reset exposure time when changing from manual to auto from the popup menu:
                         editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
                         editor.apply();
-                        main_activity.updateForSettings("ISO: " + toast_option);
+                        preview.showToast("ISO: " + toast_option, 0, true); // supply offset_y_dp to be consistent with preview.setExposure(), preview.setISO()
+                        main_activity.updateForSettings(""); // already showed the toast, so block from showing again
                     }
                     else if( old_iso.equals(CameraController.ISO_DEFAULT) ) {
                         if( MyDebug.LOG )
@@ -1756,7 +1757,8 @@ public class MainUI {
                         }
 
                         editor.apply();
-                        main_activity.updateForSettings("ISO: " + toast_option);
+                        preview.showToast("ISO: " + toast_option, 0, true); // supply offset_y_dp to be consistent with preview.setExposure(), preview.setISO()
+                        main_activity.updateForSettings(""); // already showed the toast, so block from showing again
                     }
                     else {
                         if( MyDebug.LOG )
