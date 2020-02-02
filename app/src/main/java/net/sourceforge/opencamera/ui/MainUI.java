@@ -572,13 +572,17 @@ public class MainUI {
             setViewRotation(view, ui_rotation);
             view.setTranslationX(0.0f);
             view.setTranslationY(0.0f);
+
             if( ui_rotation == 90 || ui_rotation == 270 ) {
+                // portrait
                 view.setTranslationX(2*height_pixels);
             }
             else if( ui_rotation == 0 ) {
+                // landscape (or upside-down landscape if ui-left)
                 view.setTranslationY(height_pixels);
             }
             else {
+                // upside-down landscape (or landscape if ui-left)
                 view.setTranslationY(-1*height_pixels);
             }
 
