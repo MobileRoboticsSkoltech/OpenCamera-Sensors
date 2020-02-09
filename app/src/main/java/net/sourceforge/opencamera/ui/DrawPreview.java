@@ -1628,6 +1628,11 @@ public class DrawPreview {
                     // align with "top" of the take_photo button, but remember to take the rotation into account!
                     view.getLocationOnScreen(gui_location);
                     int view_left = gui_location[0];
+                    if( view.getRotation() == 180.0f ) {
+                        // annoying behaviour that getLocationOnScreen takes the rotation into account, at least when
+                        // entirely upside down
+                        view_left -= view.getWidth();
+                    }
                     preview.getView().getLocationOnScreen(gui_location);
                     int this_left = gui_location[0];
                     take_photo_top = view_left - this_left;
@@ -1929,6 +1934,11 @@ public class DrawPreview {
                     Log.d(TAG, "update cached top_icon_shift");*/
                 top_icon.getLocationOnScreen(gui_location);
                 int top_margin = gui_location[0] + top_icon.getWidth();
+                if( top_icon.getRotation() == 180.0f ) {
+                    // annoying behaviour that getLocationOnScreen takes the rotation into account, at least when
+                    // entirely upside down
+                    top_margin -= top_icon.getWidth();
+                }
                 preview.getView().getLocationOnScreen(gui_location);
                 int preview_left = gui_location[0];
                 this.top_icon_shift = top_margin - preview_left;
@@ -1943,9 +1953,11 @@ public class DrawPreview {
 
             if( this.top_icon_shift > 0 ) {
                 if( ui_rotation == 90 || ui_rotation == 270 ) {
+                    // portrait
                     top_y += top_icon_shift;
                 }
                 else {
+                    // landscape
                     top_x += top_icon_shift;
                 }
             }

@@ -893,6 +893,9 @@ public class MainUI {
                 // displayed when in 16:9 preview.
                 // Potentially we could use Animation.setAnimationListener(), but we set a separate
                 // animation for every icon.
+                // Note, this seems to be unneeded due to the fix in DrawPreview for
+                // "getRotation() == 180.0f", but good to clear the cached values (e.g., in case we
+                // compute them during when the icons are being rotated).
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
