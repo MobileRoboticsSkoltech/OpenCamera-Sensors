@@ -611,8 +611,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         if( !is_multi_cam ) {
-            Preference pref = findPreference("preference_multi_cam_button");
-            PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+            Preference pref = findPreference("preference_show_camera_id");
+            PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_preview");
+            pg.removePreference(pref);
+
+            pref = findPreference("preference_multi_cam_button");
+            pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
             pg.removePreference(pref);
         }
 

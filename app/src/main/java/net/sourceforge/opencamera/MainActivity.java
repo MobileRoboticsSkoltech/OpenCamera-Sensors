@@ -683,6 +683,13 @@ public class MainActivity extends Activity {
         return is_multi_cam && sharedPreferences.getBoolean(PreferenceKeys.MultiCamButtonPreferenceKey, true);
     }
 
+    /** Whether this is a multi camera device, whether or not the user preference is set to enable
+     *  the multi-camera button.
+     */
+    public boolean isMultiCam() {
+        return is_multi_cam;
+    }
+
     /** Whether the icon switch_multi_camera should be displayed. This is if the following are all
      *  true:
      *  - The device is a multi camera device (MainActivity.is_multi_cam==true).

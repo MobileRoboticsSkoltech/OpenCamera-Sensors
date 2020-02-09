@@ -62,6 +62,7 @@ public class DrawPreview {
     private boolean has_settings;
     private MyApplicationInterface.PhotoMode photoMode;
     private boolean show_time_pref;
+    private boolean show_camera_id_pref;
     private boolean show_free_memory_pref;
     private boolean show_iso_pref;
     private boolean show_video_max_amp_pref;
@@ -112,6 +113,7 @@ public class DrawPreview {
     private final int [] temp_histogram_channel = new int[256];
     // cached Rects for drawTextWithBackground() calls
     private Rect text_bounds_time;
+    private Rect text_bounds_camera_id;
     private Rect text_bounds_free_memory;
     private Rect text_bounds_angle_single;
     private Rect text_bounds_angle_double;
@@ -127,6 +129,9 @@ public class DrawPreview {
 
     private String current_time_string;
     private long last_current_time_time;
+
+    private String camera_id_string;
+    private long last_camera_id_time;
 
     private String iso_exposure_string;
     private boolean is_scanning;
@@ -482,6 +487,7 @@ public class DrawPreview {
             Log.d(TAG, "photoMode: " + photoMode);
 
         show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
+        show_camera_id_pref = main_activity.isMultiCam() && sharedPreferences.getBoolean(PreferenceKeys.ShowCameraIDPreferenceKey, true);
         show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
         show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowISOPreferenceKey, true);
         show_video_max_amp_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowVideoMaxAmpPreferenceKey, false);
@@ -611,6 +617,7 @@ public class DrawPreview {
         String focus_peaking_color = sharedPreferences.getString(PreferenceKeys.FocusPeakingColorPreferenceKey, "#ffffff");
         focus_peaking_color_pref = Color.parseColor(focus_peaking_color);
 
+        last_camera_id_time = 0; // in case camera id changed
         last_view_angles_time = 0; // force view angles to be recomputed
         last_take_photo_top_time = 0;  // force take_photo_top to be recomputed
         last_top_icon_shift_time = 0; // for top_icon_shift to be recomputed
@@ -1034,6 +1041,7 @@ public class DrawPreview {
         p.setTextAlign(Paint.Align.LEFT);
         int location_x = top_x;
         int location_y = top_y;
+        final int gap_x = (int) (8 * scale + 0.5f); // convert dps to pixels
         final int gap_y = (int) (0 * scale + 0.5f); // convert dps to pixels
         final int icon_gap_y = (int) (2 * scale + 0.5f); // convert dps to pixels
         if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -1044,11 +1052,15 @@ public class DrawPreview {
         if( ui_rotation == 90 ) {
             location_y = canvas.getHeight() - location_y - (int) (20 * scale + 0.5f);
         }
+        boolean align_right = false;
         if( ui_rotation == 180 ) {
             location_x = canvas.getWidth() - location_x;
             p.setTextAlign(Paint.Align.RIGHT);
+            align_right = true;
         }
 
+        int first_line_height = 0;
+        int first_line_xshift = 0;
         if( show_time_pref ) {
             if( current_time_string == null || time_ms/1000 > last_current_time_time/1000 ) {
                 // avoid creating a new calendar object every time
@@ -1075,14 +1087,38 @@ public class DrawPreview {
                 String bounds_time_string = "00:00:00";
                 p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);
             }
+            first_line_xshift += text_bounds_time.width() + gap_x;
             int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_time);
             height += gap_y;
-            if( ui_rotation == 90 ) {
-                location_y -= height;
+            // don't update location_y yet, as we have time and cameraid shown on the same line
+            first_line_height = Math.max(first_line_height, height);
+        }
+        if( show_camera_id_pref && camera_controller != null ) {
+            if( camera_id_string == null || time_ms > last_camera_id_time + 10000 ) {
+                // cache string for performance
+
+                camera_id_string = getContext().getResources().getString(R.string.camera_id) + ":" + preview.getCameraId(); // intentionally don't put a space
+                last_camera_id_time = time_ms;
             }
-            else {
-                location_y += height;
+            if( text_bounds_camera_id == null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "compute text_bounds_camera_id");
+                text_bounds_camera_id = new Rect();
+                p.getTextBounds(camera_id_string, 0, camera_id_string.length(), text_bounds_camera_id);
             }
+            int xpos = align_right ? location_x - first_line_xshift : location_x + first_line_xshift;
+            int height = applicationInterface.drawTextWithBackground(canvas, p, camera_id_string, Color.WHITE, Color.BLACK, xpos, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, MyApplicationInterface.Shadow.SHADOW_OUTLINE, text_bounds_camera_id);
+            height += gap_y;
+            // don't update location_y yet, as we have time and cameraid shown on the same line
+            first_line_height = Math.max(first_line_height, height);
+        }
+        // update location_y for first line (time and camera id)
+        if( ui_rotation == 90 ) {
+            // upside-down portrait
+            location_y -= first_line_height;
+        }
+        else {
+            location_y += first_line_height;
         }
 
         if( camera_controller != null && show_free_memory_pref ) {

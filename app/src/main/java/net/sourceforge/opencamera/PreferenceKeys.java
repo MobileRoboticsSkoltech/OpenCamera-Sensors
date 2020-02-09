@@ -292,6 +292,8 @@ public class PreferenceKeys {
 
     public static final String ShowTimePreferenceKey = "preference_show_time";
 
+    public static final String ShowCameraIDPreferenceKey = "preference_show_camera_id";
+
     public static final String ShowBatteryPreferenceKey = "preference_show_battery";
 
     public static final String ShowGridPreferenceKey = "preference_grid";
