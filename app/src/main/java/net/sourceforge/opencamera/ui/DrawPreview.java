@@ -1633,6 +1633,11 @@ public class DrawPreview {
                     take_photo_top = view_left - this_left;
 
                     last_take_photo_top_time = time_ms;
+                    /*if( MyDebug.LOG ) {
+                        Log.d(TAG, "view_left: " + view_left);
+                        Log.d(TAG, "this_left: " + this_left);
+                        Log.d(TAG, "take_photo_top: " + take_photo_top);
+                    }*/
                 }
 
 				// diff_x is the difference from the centre of the canvas to the position we want
@@ -1927,6 +1932,11 @@ public class DrawPreview {
                 preview.getView().getLocationOnScreen(gui_location);
                 int preview_left = gui_location[0];
                 this.top_icon_shift = top_margin - preview_left;
+                /*if( MyDebug.LOG ) {
+                    Log.d(TAG, "preview_left: " + preview_left);
+                    Log.d(TAG, "top_margin: " + top_margin);
+                    Log.d(TAG, "top_icon_shift: " + top_icon_shift);
+                }*/
 
                 last_top_icon_shift_time = time_ms;
             }
