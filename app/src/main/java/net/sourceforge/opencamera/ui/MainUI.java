@@ -19,6 +19,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -65,6 +66,7 @@ public class MainUI {
     private UIPlacement ui_placement = UIPlacement.UIPLACEMENT_RIGHT;
     private View top_icon = null;
     private boolean view_rotate_animation;
+    private final static int view_rotate_animation_duration = 100; // duration in ms of the icon rotation animation
 
     private boolean immersive_mode;
     private boolean show_gui_photo = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
@@ -151,7 +153,7 @@ public class MainUI {
             rotate_by += 360.0f;
         // view.animate() modifies the view's rotation attribute, so it ends up equivalent to view.setRotation()
         // we use rotationBy() instead of rotation(), so we get the minimal rotation for clockwise vs anti-clockwise
-        view.animate().rotationBy(rotate_by).setDuration(100).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        view.animate().rotationBy(rotate_by).setDuration(view_rotate_animation_duration).setInterpolator(new AccelerateDecelerateInterpolator()).start();
     }
 
     public void layoutUI() {
@@ -578,11 +580,11 @@ public class MainUI {
                 view.setTranslationX(2*height_pixels);
             }
             else if( ui_rotation == 0 ) {
-                // landscape (or upside-down landscape if ui-left)
+                // landscape
                 view.setTranslationY(height_pixels);
             }
             else {
-                // upside-down landscape (or landscape if ui-left)
+                // upside-down landscape
                 view.setTranslationY(-1*height_pixels);
             }
 
@@ -881,6 +883,26 @@ public class MainUI {
                 view_rotate_animation = true;
                 layoutUI();
                 view_rotate_animation = false;
+
+                // Call DrawPreview.updateSettings() so that we reset calculations that depend on
+                // getLocationOnScreen() - since the result is affected by a View's rotation, we need
+                // to recompute - this also means we need to delay slightly until after the rotation
+                // animation is complete.
+                // To reproduce issues, rotate from upside-down-landscape to portrait, and observe
+                // the info-text placement (when using icons-along-top), or with on-screen angle
+                // displayed when in 16:9 preview.
+                // Potentially we could use Animation.setAnimationListener(), but we set a separate
+                // animation for every icon.
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "onOrientationChanged->postDelayed()");
+
+                        main_activity.getApplicationInterface().getDrawPreview().updateSettings();
+                    }
+                }, view_rotate_animation_duration+20);
             }
         }
     }
