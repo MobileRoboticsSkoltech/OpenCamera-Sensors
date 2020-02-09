@@ -363,6 +363,28 @@ public class DrawPreview {
         return main_activity;
     }
 
+    /** Computes the x coordinate on screen of left side of the view, equivalent to
+     *  view.getLocationOnScreen(), but we undo the effect of the view's rotation.
+     *  This is because getLocationOnScreen() will return the coordinates of the view's top-left
+     *  *after* applying the rotation, when we want the top left of the icon as shown on screen.
+     *  This should not be called every frame but instead should be cached, due to cost of calling
+     *  view.getLocationOnScreen().
+     */
+    private int getViewOnScreenX(View view) {
+        view.getLocationOnScreen(gui_location);
+        int xpos = gui_location[0];
+        int rotation = Math.round(view.getRotation());
+        // rotation can be outside [0, 359] if the user repeatedly rotates in same direction!
+        rotation = (rotation % 360 + 360) % 360; // version of (rotation % 360) that work if rotation is -ve
+        /*if( MyDebug.LOG )
+            Log.d(TAG, "    mod rotation: " + rotation);*/
+        if( rotation == 180 || rotation == 90 ) {
+            // annoying behaviour that getLocationOnScreen takes the rotation into account
+            xpos -= view.getWidth();
+        }
+        return xpos;
+    }
+
     /** Sets a current thumbnail for a photo or video just taken. Used for thumbnail animation,
      *  and when ghosting the last image.
      */
@@ -1662,13 +1684,7 @@ public class DrawPreview {
                     // don't call this too often, for UI performance (due to calling View.getLocationOnScreen())
                     View view = main_activity.findViewById(R.id.take_photo);
                     // align with "top" of the take_photo button, but remember to take the rotation into account!
-                    view.getLocationOnScreen(gui_location);
-                    int view_left = gui_location[0];
-                    if( view.getRotation() == 180.0f ) {
-                        // annoying behaviour that getLocationOnScreen takes the rotation into account, at least when
-                        // entirely upside down
-                        view_left -= view.getWidth();
-                    }
+                    int view_left = getViewOnScreenX(view);
                     preview.getView().getLocationOnScreen(gui_location);
                     int this_left = gui_location[0];
                     take_photo_top = view_left - this_left;
@@ -1968,17 +1984,12 @@ public class DrawPreview {
                 // avoid computing every time, due to cost of calling View.getLocationOnScreen()
                 /*if( MyDebug.LOG )
                     Log.d(TAG, "update cached top_icon_shift");*/
-                top_icon.getLocationOnScreen(gui_location);
-                int top_margin = gui_location[0] + top_icon.getWidth();
-                if( top_icon.getRotation() == 180.0f ) {
-                    // annoying behaviour that getLocationOnScreen takes the rotation into account, at least when
-                    // entirely upside down
-                    top_margin -= top_icon.getWidth();
-                }
+                int top_margin = getViewOnScreenX(top_icon) + top_icon.getWidth();
                 preview.getView().getLocationOnScreen(gui_location);
                 int preview_left = gui_location[0];
                 this.top_icon_shift = top_margin - preview_left;
                 /*if( MyDebug.LOG ) {
+                    Log.d(TAG, "top_icon.getRotation(): " + top_icon.getRotation());
                     Log.d(TAG, "preview_left: " + preview_left);
                     Log.d(TAG, "top_margin: " + top_margin);
                     Log.d(TAG, "top_icon_shift: " + top_icon_shift);
