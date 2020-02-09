@@ -91,11 +91,130 @@ public class CameraController2 extends CameraController {
         0.7180f, 0.9057f,  0.7430f, 0.9145f,  1.0000f, 1.0000f
     };
     private final float [] jtlog_values;
-    private final static float [] jtlnp1_values_base = new float[] {
+    private final static float [] jtlogv2_values_base = new float[] {
+            0.0000f,	0.0000f,
+            0.0070f,	0.0700f,
+            0.0140f,	0.1400f,
+            0.0230f,	0.2295f,
+            0.0280f,	0.2783f,
+            0.0369f,	0.3321f,
+            0.0500f,	0.3844f,
+            0.0680f,	0.4351f,
+            0.0930f,	0.4870f,
+            0.1180f,	0.5275f,
+            0.1430f,	0.5612f,
+            0.1680f,	0.5904f,
+            0.1930f,	0.6162f,
+            0.2180f,	0.6395f,
+            0.2430f,	0.6608f,
+            0.2680f,	0.6804f,
+            0.2930f,	0.6986f,
+            0.3430f,	0.7318f,
+            0.3930f,	0.7615f,
+            0.4430f,	0.7885f,
+            0.4930f,	0.8132f,
+            0.5430f,	0.8361f,
+            0.5930f,	0.8575f,
+            0.6430f,	0.8776f,
+            0.6930f,	0.8966f,
+            0.7430f,	0.9145f,
+            0.8000f,	0.9330f,
+            0.8500f,	0.9500f,
+            0.9000f,	0.9670f,
+            0.9700f,	0.9900f,
+            1.00f,	1.00f,
+    };
+    private final float [] jtlogv2_values;
+    private final static float [] jtlogv3_values_base = new float[] {
+            0.0000f,	0.0000f,
+            0.0020f,	0.0400f,
+            0.0130f,	0.1500f,
+            0.0220f,	0.2295f,
+            0.0280f,	0.2783f,
+            0.0369f,	0.3321f,
+            0.0500f,	0.3844f,
+            0.0680f,	0.4351f,
+            0.0930f,	0.4870f,
+            0.1180f,	0.5275f,
+            0.1430f,	0.5612f,
+            0.1680f,	0.5904f,
+            0.1930f,	0.6162f,
+            0.2180f,	0.6395f,
+            0.2430f,	0.6608f,
+            0.2680f,	0.6804f,
+            0.2930f,	0.6986f,
+            0.3430f,	0.7318f,
+            0.3930f,	0.7615f,
+            0.4430f,	0.7885f,
+            0.4930f,	0.8132f,
+            0.5430f,	0.8361f,
+            0.5930f,	0.8575f,
+            0.6430f,	0.8750f,
+            0.6930f,	0.8930f,
+            0.740f,	0.908f,
+            0.8000f,	0.9230f,
+            0.8600f,	0.9380f,
+            0.9200f,	0.9535f,
+            0.9900f,	0.9700f,
+            1.00f,	1.00f,
+    };
+    private final float [] jtlogv3_values;
+    /*private final static float [] jtlnp1_values_base = new float[] {
         0.0f, 0.0f,  0.01f, 0.06f,  0.02f, 0.1f,  0.03f, 0.13f,  0.1f, 0.27f,  0.73f, 0.9f,  0.79f, 0.93f,
         0.84f, 0.95f,  1.0f, 1.0f
     };
-    private final float [] jtlnp1_values;
+    private final float [] jtlnp1_values;*/
+    private final static float [] jtlin1_values_base = new float[] {
+            0.000f,	0.000f,
+            0.010f,	0.070f,
+            0.020f,	0.120f,
+            0.040f,	0.180f,
+            0.080f,	0.260f,
+            0.110f,	0.320f,
+            0.160f,	0.370f,
+            0.210f,	0.420f,
+            0.260f,	0.470f,
+            0.310f,	0.520f,
+            0.360f,	0.570f,
+            0.410f,	0.620f,
+            0.460f,	0.670f,
+            0.510f,	0.720f,
+            0.565f,	0.770f,
+            0.600f,	0.800f,
+            0.660f,	0.840f,
+            0.700f,	0.860f,
+            0.740f,	0.880f,
+            0.780f,	0.900f,
+            0.860f,	0.940f,
+            0.930f,	0.970f,
+            1.000f,	1.000f,
+    };
+    private final float [] jtlin1_values;
+    private final static float [] jtlin2_values_base = new float[] {
+            0.000f,	0.000f,
+            0.007f,	0.080f,
+            0.012f,	0.140f,
+            0.040f,	0.260f,
+            0.100f,	0.380f,
+            0.150f,	0.430f,
+            0.200f,	0.480f,
+            0.250f,	0.530f,
+            0.300f,	0.580f,
+            0.350f,	0.630f,
+            0.400f,	0.680f,
+            0.450f,	0.730f,
+            0.490f,	0.770f,
+            0.530f,	0.790f,
+            0.570f,	0.810f,
+            0.610f,	0.830f,
+            0.680f,	0.860f,
+            0.750f,	0.890f,
+            0.800f,	0.910f,
+            0.900f,	0.950f,
+            0.990f,	0.980f,
+            1.000f,	1.000f,
+    };
+    private final float [] jtlin2_values;
 
     private final ErrorCallback preview_error_cb;
     private final ErrorCallback camera_error_cb;
@@ -896,8 +1015,9 @@ public class CameraController2 extends CameraController {
                             if( is_samsung ) {
                                 // unfortunately odd bug on Samsung devices (at least S7 and S10e) where if more than 32 control points,
                                 // the maximum brightness value is reduced (can best be seen with 64 points, and using gamma==1.0)
-                                // note that Samsung devices also need at least 16 control points
-                                // we choose 32 rather than 16, as better to have more points for finer curve where possible
+                                // note that Samsung devices also need at least 16 control points - or in some cases 32, see comments for
+                                // enforceMinTonemapCurvePoints().
+                                // 32 is better than 16 anyway, as better to have more points for finer curve where possible.
                                 n_values = 32;
                             }
                             //int n_values = test_new ? 32 : 128;
@@ -1000,10 +1120,30 @@ public class CameraController2 extends CameraController {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "setting JTLog profile");
                             break;
-                        case TONEMAPPROFILE_JTLNP1:
+                        case TONEMAPPROFILE_JTLOGV2:
+                            values = jtlogv2_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLogv2 profile");
+                            break;
+                        case TONEMAPPROFILE_JTLOGV3:
+                            values = jtlogv3_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLogv3 profile");
+                            break;
+                        /*case TONEMAPPROFILE_JTLNP1:
                             values = jtlnp1_values;
                             if( MyDebug.LOG )
                                 Log.d(TAG, "setting JTLNP1 profile");
+                            break;*/
+                        case TONEMAPPROFILE_JTLIN1:
+                            values = jtlin1_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLin1 profile");
+                            break;
+                        case TONEMAPPROFILE_JTLIN2:
+                            values = jtlin2_values;
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "setting JTLin2 profile");
                             break;
                     }
 
@@ -1961,7 +2101,11 @@ public class CameraController2 extends CameraController {
 
         // expand tonemap curves
         jtlog_values = enforceMinTonemapCurvePoints(jtlog_values_base);
-        jtlnp1_values = enforceMinTonemapCurvePoints(jtlnp1_values_base);
+        jtlogv2_values = enforceMinTonemapCurvePoints(jtlogv2_values_base);
+        jtlogv3_values = enforceMinTonemapCurvePoints(jtlogv3_values_base);
+        //jtlnp1_values = enforceMinTonemapCurvePoints(jtlnp1_values_base);
+        jtlin1_values = enforceMinTonemapCurvePoints(jtlin1_values_base);
+        jtlin2_values = enforceMinTonemapCurvePoints(jtlin2_values_base);
     }
 
     @Override
@@ -2002,7 +2146,7 @@ public class CameraController2 extends CameraController {
     }
 
     /** Enforce a minimum number of points in tonemap curves - needed due to Galaxy S10e having wrong behaviour if fewer
-     *  than 16 points?! OnePlus 3T meanwhile has more gradual behaviour where it gets better at 64 points.
+     *  than 16 or in some cases 32 points?! OnePlus 3T meanwhile has more gradual behaviour where it gets better at 64 points.
      */
     private float [] enforceMinTonemapCurvePoints(float[] in_values) {
         if( MyDebug.LOG ) {
@@ -2011,11 +2155,12 @@ public class CameraController2 extends CameraController {
         }
         int min_points_c = 64;
         if( is_samsung ) {
-            // unfortunately odd bug on Samsung devices (at least S7 and S10e) where if more than 32 control points,
-            // the maximum brightness value is reduced (can best be seen with 64 points, and using gamma==1.0)
-            // note that Samsung devices also need at least 16 control points
-            // So choose 16 for simplicity (seems to be no benefit to using 32 over 16, unlike OnePlus 3T devices as noted above)
-            min_points_c = 16;
+            // Unfortunately odd bug on Samsung devices (at least S7 and S10e) where if more than 32 control points,
+            // the maximum brightness value is reduced (can best be seen with 64 points, and using gamma==1.0).
+            // Also note that Samsung devices also need at least 16 control points, or in some cases 32, due to problem
+            // where things come out almost all black with some white. So choose 32!
+            //min_points_c = 16;
+            min_points_c = 32;
         }
         if( MyDebug.LOG )
             Log.d(TAG, "min_points_c: " + min_points_c);
@@ -2028,6 +2173,10 @@ public class CameraController2 extends CameraController {
         for(int i=0;i<in_values.length/2;i++) {
             Pair<Float, Float> point = new Pair<>(in_values[2*i], in_values[2*i+1]);
             points.add(point);
+        }
+        if( points.size() < 2 ) {
+            Log.e(TAG, "less than 2 points?!");
+            return in_values;
         }
 
         while( points.size() < min_points_c ) {
@@ -2601,7 +2750,11 @@ public class CameraController2 extends CameraController {
                 camera_features.supports_tonemap_curve =
                     tonemap_max_curve_points >= tonemap_log_max_curve_points_c &&
                             tonemap_max_curve_points >= jtlog_values.length &&
-                            tonemap_max_curve_points >= jtlnp1_values.length;
+                            tonemap_max_curve_points >= jtlogv2_values.length &&
+                            tonemap_max_curve_points >= jtlogv3_values.length &&
+                            //tonemap_max_curve_points >= jtlnp1_values.length;
+                            tonemap_max_curve_points >= jtlin1_values.length &&
+                            tonemap_max_curve_points >= jtlin2_values.length;
             }
             else {
                 if( MyDebug.LOG )

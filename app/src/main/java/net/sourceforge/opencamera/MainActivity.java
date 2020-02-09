@@ -4505,8 +4505,20 @@ public class MainActivity extends Activity {
                             case TONEMAPPROFILE_JTLOG:
                                 string_id = R.string.preference_video_jtlog;
                                 break;
-                            case TONEMAPPROFILE_JTLNP1:
+                            case TONEMAPPROFILE_JTLOGV2:
+                                string_id = R.string.preference_video_jtlogv2;
+                                break;
+                            case TONEMAPPROFILE_JTLOGV3:
+                                string_id = R.string.preference_video_jtlogv3;
+                                break;
+                            /*case TONEMAPPROFILE_JTLNP1:
                                 string_id = R.string.preference_video_jtlnp1;
+                                break;*/
+                            case TONEMAPPROFILE_JTLIN1:
+                                string_id = R.string.preference_video_jtlin1;
+                                break;
+                            case TONEMAPPROFILE_JTLIN2:
+                                string_id = R.string.preference_video_jtlin2;
                                 break;
                         }
                         if( string_id != 0 ) {

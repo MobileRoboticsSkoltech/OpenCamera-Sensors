@@ -757,8 +757,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return CameraController.TonemapProfile.TONEMAPPROFILE_GAMMA;
             case "jtlog":
                 return CameraController.TonemapProfile.TONEMAPPROFILE_JTLOG;
-            case "jtlnp1":
-                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLNP1;
+            case "jtlogv2":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLOGV2;
+            case "jtlogv3":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLOGV3;
+            /*case "jtlnp1":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLNP1;*/
+            case "jtlin1":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLIN1;
+            case "jtlin2":
+                return CameraController.TonemapProfile.TONEMAPPROFILE_JTLIN2;
         }
         return CameraController.TonemapProfile.TONEMAPPROFILE_OFF;
     }
@@ -773,7 +781,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             case "srgb":
             case "gamma":
             case "jtlog":
-            case "jtlnp1":
+            case "jtlogv2":
+            case "jtlogv3":
+            //case "jtlnp1":
+            case "jtlin1":
+            case "jtlin2":
                 return 0.0f;
             /*case "fine":
                 return 1.0f;
