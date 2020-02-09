@@ -155,6 +155,7 @@ public class CameraController2 extends CameraController {
             0.8000f,    0.9230f,
             0.8600f,    0.9380f,
             0.9200f,    0.9535f,
+            0.9500f,    0.9600f,
             0.9900f,    0.9700f,
             1.00f,  1.00f,
     };
