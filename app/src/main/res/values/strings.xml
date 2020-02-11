@@ -975,6 +975,9 @@
     <string name="preference_show_camera_id">Show Camera ID</string>
     <string name="preference_show_camera_id_summary">Display the current camera ID number on screen</string>
 
+    <string name="preference_allow_long_press">Allow long press actions</string>
+    <string name="preference_allow_long_press_summary">Whether to allow long press actions (e.g., long press on gallery to change save location).</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy">Privacy policy</string>

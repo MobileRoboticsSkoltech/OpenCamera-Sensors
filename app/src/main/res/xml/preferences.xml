@@ -302,6 +302,13 @@
                 android:defaultValue="true"
                 />
 
+            <SwitchPreference
+                android:key="preference_allow_long_press"
+                android:title="@string/preference_allow_long_press"
+                android:summary="@string/preference_allow_long_press_summary"
+                android:defaultValue="true"
+                />
+
             <Preference
                 android:key="preference_calibrate_level"
                 android:title="@string/preference_calibrate_level"

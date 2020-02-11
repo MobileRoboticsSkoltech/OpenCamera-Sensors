@@ -194,6 +194,8 @@ public class PreferenceKeys {
         return "preference_show_when_locked";
     }
 
+    public static final String AllowLongPressPreferenceKey = "preference_allow_long_press";
+
     public static String getStartupFocusPreferenceKey() {
         return "preference_startup_focus";
     }

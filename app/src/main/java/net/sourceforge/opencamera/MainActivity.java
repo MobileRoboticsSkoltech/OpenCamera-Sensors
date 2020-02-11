@@ -420,6 +420,10 @@ public class MainActivity extends Activity {
         takePhotoButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                if( !allowLongPress() ) {
+                    // return false, so a regular click will still be triggered when the user releases the touch
+                    return false;
+                }
                 return longClickedTakePhoto();
             }
         });
@@ -448,6 +452,10 @@ public class MainActivity extends Activity {
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                if( !allowLongPress() ) {
+                    // return false, so a regular click will still be triggered when the user releases the touch
+                    return false;
+                }
                 //preview.showToast(null, "Long click");
                 longClickedGallery();
                 return true;
@@ -718,6 +726,14 @@ public class MainActivity extends Activity {
         }
         return false;
     }
+
+    /** Whether user preference is set to allow long press actions.
+     */
+    private boolean allowLongPress() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean(PreferenceKeys.AllowLongPressPreferenceKey, true);
+    }
+
     /* This method sets the preference defaults which are set specific for a particular device.
      * This method should be called when Open Camera is run for the very first time after installation,
      * or when the user has requested to "Reset settings".
