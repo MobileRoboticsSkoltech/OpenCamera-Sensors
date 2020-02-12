@@ -588,6 +588,58 @@ public class MainUI {
                 view.setTranslationY(-1*height_pixels);
             }
 
+            /*
+            // align sliders_container
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            if( ui_rotation == 90 || ui_rotation == 270 ) {
+                // portrait
+                view.setTranslationX(2*height_pixels);
+                lp.addRule(left_of, 0);
+                lp.addRule(right_of, 0);
+                lp.addRule(above, 0);
+                lp.addRule(below, 0);
+                lp.addRule(align_parent_top, 0);
+                lp.addRule(align_parent_bottom, 0);
+            }
+            else if( ui_rotation == (ui_placement == UIPlacement.UIPLACEMENT_LEFT ? 180 : 0) ) {
+                // landscape (or upside-down landscape if ui-left)
+                view.setTranslationY(0);
+                lp.addRule(left_of, R.id.zoom_seekbar);
+                lp.addRule(right_of, 0);
+
+                if( main_activity.showManualFocusSeekbar(true) ) {
+                    lp.addRule(above, R.id.focus_bracketing_target_seekbar);
+                    lp.addRule(below, 0);
+                    lp.addRule(align_parent_top, 0);
+                    lp.addRule(align_parent_bottom, 0);
+                }
+                else if( main_activity.showManualFocusSeekbar(false) ) {
+                    lp.addRule(above, R.id.focus_seekbar);
+                    lp.addRule(below, 0);
+                    lp.addRule(align_parent_top, 0);
+                    lp.addRule(align_parent_bottom, 0);
+                }
+                else {
+                    lp.addRule(above, 0);
+                    lp.addRule(below, 0);
+                    lp.addRule(align_parent_top, 0);
+                    lp.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                }
+            }
+            else {
+                // upside-down landscape (or landscape if ui-left)
+                if( ui_rotation == 0 )
+                    view.setTranslationY(height_pixels);
+                else
+                    view.setTranslationY(-1*height_pixels);
+                lp.addRule(left_of, 0);
+                lp.addRule(right_of, 0);
+                lp.addRule(above, 0);
+                lp.addRule(below, 0);
+                lp.addRule(align_parent_bottom, 0);
+            }
+            view.setLayoutParams(lp);*/
+
             view = main_activity.findViewById(R.id.exposure_seekbar);
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
             lp.width = width_pixels;
@@ -1876,6 +1928,8 @@ public class MainUI {
         else {
             manual_white_balance_seek_bar.setVisibility(View.GONE);
         }
+
+        //layoutUI(); // needed to update alignment of exposure UI
     }
 
     /** If the exposure panel is open, updates the selected ISO button to match the current ISO value,
