@@ -499,8 +499,8 @@
             <ImageView
                 android:id="@+id/exposure_seekbar_text"
                 android:contentDescription="@string/exposure_compensation"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_exposure_white_48dp"
                 />
 
@@ -539,8 +539,8 @@
             <ImageView
                 android:id="@+id/iso_seekbar_text"
                 android:contentDescription="@string/iso"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/iso_icon"
                 />
 
@@ -559,8 +559,8 @@
             <ImageView
                 android:id="@+id/exposure_time_seekbar_text"
                 android:contentDescription="@string/exposure_shutter_speed"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_below="@+id/iso_seekbar"
                 android:src="@drawable/baseline_shutter_speed_white_48"
                 />
@@ -590,8 +590,8 @@
             <ImageView
                 android:id="@+id/white_balance_seekbar_text"
                 android:contentDescription="@string/white_balance"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_colorize_white_48dp"
                 />
 
