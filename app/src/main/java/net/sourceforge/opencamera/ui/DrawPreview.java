@@ -1662,12 +1662,15 @@ public class DrawPreview {
 					canvas.getHeight() / 2, p);*/
             int gap_y = (int) (20 * scale + 0.5f); // convert dps to pixels
             int text_y = (int) (16 * scale + 0.5f); // convert dps to pixels
+            boolean avoid_ui = false;
             // fine tuning to adjust placement of text with respect to the GUI, depending on orientation
             if( ui_placement == MainUI.UIPlacement.UIPLACEMENT_TOP && ( ui_rotation == 0 || ui_rotation == 180 ) ) {
-                text_base_y = canvas.getHeight() - (int)(0.5*gap_y);
+                text_base_y = canvas.getHeight() - (int)(0.1*gap_y);
+                avoid_ui = true;
             }
             else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 0 : 180 ) ) {
-                text_base_y = canvas.getHeight() - (int)(0.5*gap_y);
+                text_base_y = canvas.getHeight() - (int)(0.1*gap_y);
+                avoid_ui = true;
             }
             else if( ui_rotation == ( ui_placement == MainUI.UIPlacement.UIPLACEMENT_RIGHT ? 180 : 0 ) ) {
                 text_base_y = canvas.getHeight() - (int)(2.5*gap_y); // leave room for GUI icons
@@ -1675,8 +1678,6 @@ public class DrawPreview {
             else if( ui_rotation == 90 || ui_rotation == 270 ) {
                 // ui_rotation 90 is upside down portrait
                 // 270 is portrait
-
-                //text_base_y = canvas.getHeight() + (int)(0.5*gap_y);
 
                 if( last_take_photo_top_time == 0 || time_ms > last_take_photo_top_time + 1000 ) {
                     /*if( MyDebug.LOG )
@@ -1733,6 +1734,22 @@ public class DrawPreview {
                     diff_x = max_x - canvas.getWidth()/2;
                 }
                 text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*gap_y);
+            }
+
+            if( avoid_ui ) {
+                // avoid parts of the UI
+                View view = main_activity.findViewById(R.id.focus_seekbar);
+                if(view.getVisibility() == View.VISIBLE ) {
+                    text_base_y -= view.getHeight();
+                }
+                view = main_activity.findViewById(R.id.focus_bracketing_target_seekbar);
+                if(view.getVisibility() == View.VISIBLE ) {
+                    text_base_y -= view.getHeight();
+                }
+                /*view = main_activity.findViewById(R.id.sliders_container);
+                if(view.getVisibility() == View.VISIBLE ) {
+                    text_base_y -= view.getHeight();
+                }*/
             }
 
             boolean draw_angle = has_level_angle && show_angle_pref;
