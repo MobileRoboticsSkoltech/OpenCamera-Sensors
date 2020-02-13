@@ -972,7 +972,7 @@
     <string name="preference_multi_cam_button">Multiple cameras icon</string>
     <string name="preference_multi_cam_button_summary">If enabled, use separate buttons to switch between front/back cameras, and to switch between multiple front/back facing cameras. If disabled, the Switch Camera icon will cycle through all cameras.</string>
 
-    <string name="preference_show_camera_id">Show Camera ID</string>
+    <string name="preference_show_camera_id">Show camera ID</string>
     <string name="preference_show_camera_id_summary">Display the current camera ID number on screen</string>
 
     <string name="preference_allow_long_press">Allow long press actions</string>
