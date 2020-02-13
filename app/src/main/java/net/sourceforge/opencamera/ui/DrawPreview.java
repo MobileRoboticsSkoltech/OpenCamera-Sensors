@@ -48,6 +48,7 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 public class DrawPreview {
     private static final String TAG = "DrawPreview";
@@ -218,9 +219,14 @@ public class DrawPreview {
     private int top_icon_shift; // shift that may be needed for on-screen text to avoid clashing with icons (when arranged "along top")
     private long last_top_icon_shift_time;
 
+    private int focus_seekbars_margin_left = -1; // margin left that's been set for the focus seekbars
+
     // OSD extra lines
     private String OSDLine1;
     private String OSDLine2;
+
+    private final static int histogram_width_dp = 100;
+    private final static int histogram_height_dp = 60;
 
     public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
         if( MyDebug.LOG )
@@ -643,6 +649,8 @@ public class DrawPreview {
         last_view_angles_time = 0; // force view angles to be recomputed
         last_take_photo_top_time = 0;  // force take_photo_top to be recomputed
         last_top_icon_shift_time = 0; // for top_icon_shift to be recomputed
+
+        focus_seekbars_margin_left = -1; // just in case??
 
         has_settings = true;
     }
@@ -1518,8 +1526,8 @@ public class DrawPreview {
                 if( histogram != null ) {
 					/*if( MyDebug.LOG )
 						Log.d(TAG, "histogram length: " + histogram.length);*/
-                    final int histogram_width = (int) (100 * scale + 0.5f); // convert dps to pixels
-                    final int histogram_height = (int) (60 * scale + 0.5f); // convert dps to pixels
+                    final int histogram_width = (int) (histogram_width_dp * scale + 0.5f); // convert dps to pixels
+                    final int histogram_height = (int) (histogram_height_dp * scale + 0.5f); // convert dps to pixels
                     // n.b., if changing the histogram_height, remember to update focus_seekbar and
                     // focus_bracketing_target_seekbar margins in activity_main.xml
                     int location_x2 = location_x - flash_padding;
@@ -2024,6 +2032,35 @@ public class DrawPreview {
                     // landscape
                     top_x += top_icon_shift;
                 }
+            }
+        }
+
+        {
+            /*int focus_seekbars_margin_left_dp = 85;
+            if( want_histogram )
+                focus_seekbars_margin_left_dp += DrawPreview.histogram_height_dp;*/
+            // 135 needed to make room for on-screen info lines in DrawPreview.onDrawInfoLines(), including the histogram
+            // but we also need to take the top_icon_shift into account, for widescreen aspect ratios and "icons along top" UI placement
+            int focus_seekbars_margin_left_dp = 135;
+            int new_focus_seekbars_margin_left = (int) (focus_seekbars_margin_left_dp * scale + 0.5f); // convert dps to pixels
+            if( top_icon_shift > 0 )
+                new_focus_seekbars_margin_left += top_icon_shift;
+
+            if( focus_seekbars_margin_left == -1 || new_focus_seekbars_margin_left != focus_seekbars_margin_left ) {
+                // we check whether focus_seekbars_margin_left has changed, in case there is a performance cost for setting layoutparams
+                this.focus_seekbars_margin_left = new_focus_seekbars_margin_left;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "set focus_seekbars_margin_left to " + focus_seekbars_margin_left);
+
+                View view = main_activity.findViewById(R.id.focus_seekbar);
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+                layoutParams.setMargins(focus_seekbars_margin_left, 0, 0, 0);
+                view.setLayoutParams(layoutParams);
+
+                view = main_activity.findViewById(R.id.focus_bracketing_target_seekbar);
+                layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+                layoutParams.setMargins(focus_seekbars_margin_left, 0, 0, 0);
+                view.setLayoutParams(layoutParams);
             }
         }
 
