@@ -139,8 +139,7 @@
         android:background="@color/seekbar_background"
         />
 
-    <!-- n.b., layout_marginLeft is to make room for on-screen info lines in DrawPreview.onDrawInfoLines(), including the
-         histogram -->
+    <!-- n.b., layout_marginLeft set programmatically in DrawPreview -->
     <SeekBar
         android:id="@+id/focus_seekbar"
         android:contentDescription="@string/focus_distance"
@@ -154,8 +153,7 @@
         android:background="@color/seekbar_background"
         />
 
-    <!-- n.b., layout_marginLeft is to make room for on-screen info lines in DrawPreview.onDrawInfoLines(), including the
-         histogram -->
+    <!-- n.b., layout_marginLeft set programmatically in DrawPreview -->
     <SeekBar
         android:id="@+id/focus_bracketing_target_seekbar"
         android:contentDescription="@string/focus_bracketing_target_distance"
