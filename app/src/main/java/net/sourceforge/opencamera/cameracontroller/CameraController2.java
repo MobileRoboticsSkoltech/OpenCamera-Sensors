@@ -932,6 +932,7 @@ public class CameraController2 extends CameraController {
 
             // to use test_new, also need to uncomment the test code in setFocusValue() to call setTonemapProfile()
             //boolean test_new = this.af_mode == CaptureRequest.CONTROL_AF_MODE_AUTO; // testing
+
             //if( test_new )
             //    have_tonemap_profile = false;
 
