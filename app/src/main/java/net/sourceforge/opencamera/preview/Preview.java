@@ -2399,7 +2399,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
         }
 
-        // must be done before setting flash modes, as we may remove flash modes if in manual mode
+        // must be done before setting flash modes, as we may remove flash modes if in manual mode (update: we now support flash for manual ISO anyway)
         if( MyDebug.LOG )
             Log.d(TAG, "set up iso");
         String value = applicationInterface.getISOPref();
