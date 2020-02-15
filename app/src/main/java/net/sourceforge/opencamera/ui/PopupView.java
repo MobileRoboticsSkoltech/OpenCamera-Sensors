@@ -1705,10 +1705,17 @@ public class PopupView extends LinearLayout {
 
             final TextView text_view = new TextView(this.getContext());
             setArrayOptionsText(supported_options, title, text_view, title_in_options, title_in_options_first_only, current_index);
+            //text_view.setBackgroundColor(Color.GRAY); // debug
             text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
             text_view.setTextColor(Color.WHITE);
             text_view.setGravity(Gravity.CENTER);
+            text_view.setSingleLine(true); // if text too long for the button, we'd rather not have wordwrap, even if it means cutting some text off
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+            // Yuck! We want the arrow_button_w to be fairly large so that users can touch the arrow buttons easily, but if
+            // the text is too much for the button size, we'd rather it extend into the arrow buttons (which the user won't see
+            // anyway, since the button backgrounds are transparent).
+            // Needed for OnePlus 3T and Nokia 8, for camera resolution
+            params.setMargins(-arrow_button_w/2, 0, -arrow_button_w/2, 0);
             text_view.setLayoutParams(params);
 
             final float scale = getResources().getDisplayMetrics().density;
