@@ -8190,6 +8190,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.supported_focus_values != null;
     }
 
+    /** Whether flash is supported by the camera.
+     */
     public boolean supportsFlash() {
         return this.supported_flash_values != null;
     }
