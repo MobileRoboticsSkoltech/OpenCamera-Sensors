@@ -1125,6 +1125,11 @@ public class PopupView extends LinearLayout {
                         editor.apply();
                     }
                     // otherwise default to the saved value
+
+                    if( !main_activity.getMainUI().isExposureUIOpen() ) {
+                        // also open the exposure UI, to show the
+                        main_activity.getMainUI().toggleExposureUI();
+                    }
                 }
             }
         }

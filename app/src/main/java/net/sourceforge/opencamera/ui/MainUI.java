@@ -1355,7 +1355,7 @@ public class MainUI {
         closePopup();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
-            clearSeekBar();
+            closeExposureUI();
         }
         else if( main_activity.getPreview().getCameraController() != null ) {
             setupExposureUI();
@@ -1732,12 +1732,16 @@ public class MainUI {
     private int iso_button_manual_index = -1;
     private final static String manual_iso_value = "m";
 
+    /** Opens the exposure UI if not already open, and sets up or updates the UI.
+     */
     public void setupExposureUI() {
         if( MyDebug.LOG )
             Log.d(TAG, "setupExposureUI");
         test_ui_buttons.clear();
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         final Preview preview = main_activity.getPreview();
+        ImageButton view = main_activity.findViewById(R.id.exposure);
+        view.setImageResource(R.drawable.ic_exposure_red_48dp);
         View sliders_container = main_activity.findViewById(R.id.sliders_container);
         sliders_container.setVisibility(View.VISIBLE);
         ViewGroup iso_buttons_container = main_activity.findViewById(R.id.iso_buttons);
@@ -2001,7 +2005,12 @@ public class MainUI {
         }
     }
 
-    public void clearSeekBar() {
+    /** Closes the exposure UI.
+     */
+    public void closeExposureUI() {
+        ImageButton image_button = main_activity.findViewById(R.id.exposure);
+        image_button.setImageResource(R.drawable.ic_exposure_white_48dp);
+
         clearRemoteControlForExposureUI(); // must be called before we actually close the exposure panel
         View view = main_activity.findViewById(R.id.sliders_container);
         view.setVisibility(View.GONE);
@@ -2256,7 +2265,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "open popup");
 
-        clearSeekBar();
+        closeExposureUI();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
 

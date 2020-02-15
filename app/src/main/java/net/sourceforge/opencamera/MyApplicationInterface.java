@@ -1697,7 +1697,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         main_activity.getMainUI().setTakePhotoIcon();
         View cancelPanoramaButton = main_activity.findViewById(R.id.cancel_panorama);
         cancelPanoramaButton.setVisibility(View.VISIBLE);
-        main_activity.getMainUI().clearSeekBar(); // close seekbars if open (popup is already closed when taking a photo)
+        main_activity.getMainUI().closeExposureUI(); // close seekbars if open (popup is already closed when taking a photo)
         // taking the photo will end up calling MainUI.showGUI(), which will hide the other on-screen icons
     }
 
@@ -1830,7 +1830,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void touchEvent(MotionEvent event) {
-        main_activity.getMainUI().clearSeekBar();
+        main_activity.getMainUI().closeExposureUI();
         main_activity.getMainUI().closePopup();
         if( main_activity.usingKitKatImmersiveMode() ) {
             main_activity.setImmersiveMode(false);
@@ -2473,7 +2473,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "cameraClosed");
         this.stopPanorama(true);
-        main_activity.getMainUI().clearSeekBar();
+        main_activity.getMainUI().closeExposureUI();
         main_activity.getMainUI().destroyPopup(); // need to close popup - and when camera reopened, it may have different settings
         drawPreview.clearContinuousFocusMove();
     }

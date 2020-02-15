@@ -317,7 +317,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "onCreate: time after creating magnetic sensor: " + (System.currentTimeMillis() - debug_time));
 
         // clear any seek bars (just in case??)
-        mainUI.clearSeekBar();
+        mainUI.closeExposureUI();
 
         // set up the camera and its preview
         preview = new Preview(applicationInterface, ((ViewGroup) this.findViewById(R.id.preview)));
