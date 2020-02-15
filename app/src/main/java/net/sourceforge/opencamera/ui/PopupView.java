@@ -1471,6 +1471,7 @@ public class PopupView extends LinearLayout {
         text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
         text_view.setTypeface(null, Typeface.BOLD);
         //text_view.setBackgroundColor(Color.GRAY); // debug
+        text_view.setBackgroundColor(Color.argb(255, 32,  32, 32));
         this.addView(text_view);
     }
 
