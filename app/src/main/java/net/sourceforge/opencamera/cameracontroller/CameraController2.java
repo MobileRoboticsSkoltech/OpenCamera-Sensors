@@ -727,24 +727,13 @@ public class CameraController2 extends CameraController {
                 }
                 //builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L);
                 //builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 0L);
-                // for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
-                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-                // set flash via CaptureRequest.FLASH
-                /*if( flash_value.equals("flash_off") ) {
-                    builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-                }
-                else if( flash_value.equals("flash_auto") ) {
-                    builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
-                }
-                else if( flash_value.equals("flash_on") ) {
-                    builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
-                }
-                else if( flash_value.equals("flash_torch") ) {
+                // only need to account for FLASH_MODE_TORCH, otherwise we use fake flash mode for manual ISO
+                if( flash_value.equals("flash_torch") ) {
                     builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
                 }
-                else if( flash_value.equals("flash_red_eye") ) {
-                    builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
-                }*/
+                else {
+                    builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+                }
             }
             else {
                 if( MyDebug.LOG ) {
@@ -3592,6 +3581,7 @@ public class CameraController2 extends CameraController {
                 camera_settings.has_iso = false;
                 camera_settings.iso = 0;
             }
+            updateUseFakePrecaptureMode(camera_settings.flash_value);
 
             if( camera_settings.setAEMode(previewBuilder, false) ) {
                 setRepeatingRequest();
@@ -4501,6 +4491,8 @@ public class CameraController2 extends CameraController {
             use_fake_precapture_mode = true;
         }
         else if( burst_type != BurstType.BURSTTYPE_NONE )
+            use_fake_precapture_mode = true;
+        else if( camera_settings.has_iso )
             use_fake_precapture_mode = true;
         else {
             use_fake_precapture_mode = use_fake_precapture;
@@ -5500,7 +5492,7 @@ public class CameraController2 extends CameraController {
             this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
             this.autofocus_cb = cb;
             try {
-                if( use_fake_precapture_mode && !camera_settings.has_iso ) {
+                if( use_fake_precapture_mode ) {
                     boolean want_flash = false;
                     if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
                         // calling fireAutoFlash() also caches the decision on whether to flash - otherwise if the flash fires now, we'll then think the scene is bright enough to not need the flash!
@@ -5513,7 +5505,11 @@ public class CameraController2 extends CameraController {
                     if( want_flash ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "turn on torch for fake flash");
-                        afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+                        if( !camera_settings.has_iso ) {
+                            // in auto-mode, need to ensure CONTROL_AE_MODE isn't est to flash auto/on for torch to work
+                            // in manual-mode, fine as CONTROL_AE_MODE will be off
+                            afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+                        }
                         afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
                         test_fake_flash_focus++;
                         fake_precapture_torch_focus_performed = true;
@@ -6705,7 +6701,11 @@ public class CameraController2 extends CameraController {
                 case "flash_on":
                     if(MyDebug.LOG)
                         Log.d(TAG, "turn on torch");
-                    previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+                    if( !camera_settings.has_iso ) {
+                        // in auto-mode, need to ensure CONTROL_AE_MODE isn't est to flash auto/on for torch to work
+                        // in manual-mode, fine as CONTROL_AE_MODE will be off
+                        previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+                    }
                     previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
                     test_fake_flash_precapture++;
                     fake_precapture_torch_performed = true;
@@ -6864,8 +6864,7 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "use_fake_precapture_mode: " + use_fake_precapture_mode);
                 }
                 // Don't need precapture if flash off or torch
-                // And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
-                if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") || camera_settings.flash_value.equals("flash_frontscreen_torch") ) {
+                if( camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") || camera_settings.flash_value.equals("flash_frontscreen_torch") ) {
                     call_takePictureAfterPrecapture = true;
                 }
                 else if( use_fake_precapture_mode ) {
@@ -7524,6 +7523,18 @@ public class CameraController2 extends CameraController {
                 }
 
                 if( fake_precapture_turn_on_torch_id == null && (ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING) ) {
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "fake precapture started after: " + (System.currentTimeMillis() - precapture_state_change_time_ms));
+                    }
+                    state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
+                    precapture_state_change_time_ms = System.currentTimeMillis();
+                }
+                else if( fake_precapture_turn_on_torch_id == null && camera_settings.has_iso && precapture_state_change_time_ms != -1 && System.currentTimeMillis() - precapture_state_change_time_ms > 100 ) {
+                    // When using manual ISO, we can't make use of changes to the ae_state - but at the same time, we don't
+                    // need ISO/exposure to re-adjust anyway.
+                    // If fake_precapture_turn_on_torch_id != null, we still wait for the physical torch to turn on.
+                    // But if fake_precapture_turn_on_torch_id==null (i.e., for flash_frontscreen_torch), just wait a short
+                    // period to ensure the frontscreen flash has enabled.
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "fake precapture started after: " + (System.currentTimeMillis() - precapture_state_change_time_ms));
                     }

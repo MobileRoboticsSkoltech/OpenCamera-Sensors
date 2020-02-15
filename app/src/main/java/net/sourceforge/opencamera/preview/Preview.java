@@ -2470,12 +2470,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 applicationInterface.clearExposureTimePref();
             }
 
-            if( this.using_android_l && supported_flash_values != null ) {
+            if( supported_flash_values != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "restrict flash modes for manual mode");
+                List<String> new_supported_flash_values = new ArrayList<>();
+                for(String supported_flash_value : supported_flash_values) {
+                    switch( supported_flash_value ) {
+                        case "flash_off":
+                        case "flash_on":
+                        case "flash_torch":
+                        case "flash_frontscreen_on":
+                        case "flash_frontscreen_torch":
+                            new_supported_flash_values.add(supported_flash_value);
+                            break;
+                    }
+                }
+                supported_flash_values = new_supported_flash_values;
+                /*
                 // flash modes not supported when using Camera2 and manual ISO
                 // (it's unclear flash is useful - ideally we'd at least offer torch, but ISO seems to reset to 100 when flash/torch is on!)
                 supported_flash_values = null;
                 if( MyDebug.LOG )
                     Log.d(TAG, "flash not supported in Camera2 manual mode");
+                */
             }
         }
         if( MyDebug.LOG ) {
@@ -2771,7 +2788,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     if( !updateFlash(flash_value, false) ) { // don't need to save, as this is the value that's already saved
                         if( MyDebug.LOG )
                             Log.d(TAG, "flash value no longer supported!");
-                        updateFlash(0, true);
+                        // if in manual ISO mode, we'll have restricted the available flash modes - so although we want to
+                        // communicate this to the application, we don't want to save the new value we've chosen (otherwise
+                        // if user goes to manual ISO and back, we might switch saved flash say from auto to off)
+                        updateFlash(0, !is_manual_iso);
                     }
                 }
                 else {
