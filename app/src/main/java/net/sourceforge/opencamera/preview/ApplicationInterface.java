@@ -154,6 +154,7 @@ public interface ApplicationInterface {
         NRMODE_LOW_LIGHT
     }
     NRModePref getNRModePref(); // only relevant if getBurstForNoiseReduction() returns true; if this changes without reopening the preview's camera, call Preview.setupBurstMode()
+    float getAperturePref(); // get desired aperture (called if Preview.getSupportedApertures() returns non-null); return -1.0f for no preference
     boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
     enum RawPref {
         RAWPREF_JPEG_ONLY, // JPEG only

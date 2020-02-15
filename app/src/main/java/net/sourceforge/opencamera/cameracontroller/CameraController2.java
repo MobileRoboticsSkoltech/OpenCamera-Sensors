@@ -330,6 +330,8 @@ public class CameraController2 extends CameraController {
     private long capture_result_exposure_time;
     private boolean capture_result_has_frame_duration;
     private long capture_result_frame_duration;
+    private boolean capture_result_has_aperture;
+    private float capture_result_aperture;
     /*private boolean capture_result_has_focus_distance;
     private float capture_result_focus_distance_min;
     private float capture_result_focus_distance_max;*/
@@ -389,6 +391,8 @@ public class CameraController2 extends CameraController {
         //private int flash_mode = CameraMetadata.FLASH_MODE_OFF;
         private int iso;
         private long exposure_time = EXPOSURE_TIME_DEFAULT;
+        private boolean has_aperture;
+        private float aperture;
         private Rect scalar_crop_region; // no need for has_scalar_crop_region, as we can set to null instead
         private boolean has_ae_exposure_compensation;
         private int ae_exposure_compensation;
@@ -701,6 +705,19 @@ public class CameraController2 extends CameraController {
                 }
             }
             return changed;
+        }
+
+        private boolean setAperture(CaptureRequest.Builder builder) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "setAperture");
+            // don't set at all if has_aperture==false
+            if( has_aperture ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "    aperture: " + aperture);
+                builder.set(CaptureRequest.LENS_APERTURE, aperture);
+                return true;
+            }
+            return false;
         }
 
         private boolean setAEMode(CaptureRequest.Builder builder, boolean is_still) {
@@ -2755,6 +2772,15 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "supports_tonemap_curve?: " + camera_features.supports_tonemap_curve);
 
+        float [] apertures = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_APERTURES);
+        //float [] apertures = new float[]{1.5f, 1.9f, 2.0f, 2.2f, 2.4f, 4.0f, 8.0f, 16.0f}; // test
+        if( MyDebug.LOG )
+            Log.d(TAG, "apertures: " + Arrays.toString(apertures));
+        // no point supporting if only a single aperture
+        if( apertures != null && apertures.length > 1 ) {
+            camera_features.apertures = apertures;
+        }
+
         SizeF view_angle = CameraControllerManager2.computeViewAngles(characteristics);
         camera_features.view_angle_x = view_angle.getWidth();
         camera_features.view_angle_y = view_angle.getHeight();
@@ -3669,6 +3695,33 @@ public class CameraController2 extends CameraController {
             e.printStackTrace();
         } 
         return true;
+    }
+
+    @Override
+    public void setAperture(float aperture) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "setAperture: " + aperture);
+            Log.d(TAG, "current aperture: " + camera_settings.aperture);
+        }
+        if( camera_settings.has_aperture && camera_settings.aperture == aperture ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "already set");
+        }
+        try {
+            camera_settings.has_aperture = true;
+            camera_settings.aperture = aperture;
+            if( camera_settings.setAperture(previewBuilder) ) {
+                setRepeatingRequest();
+            }
+        }
+        catch(CameraAccessException e) {
+            if( MyDebug.LOG ) {
+                Log.e(TAG, "failed to set aperture");
+                Log.e(TAG, "reason: " + e.getReason());
+                Log.e(TAG, "message: " + e.getMessage());
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -7091,7 +7144,17 @@ public class CameraController2 extends CameraController {
     public long captureResultFrameDuration() {
         return capture_result_frame_duration;
     }
-    
+
+    @Override
+    public boolean captureResultHasAperture() {
+        return capture_result_has_aperture;
+    }
+
+    @Override
+    public float captureResultAperture() {
+        return capture_result_aperture;
+    }
+
     /*
     @Override
     public boolean captureResultHasFocusDistance() {
@@ -7738,6 +7801,19 @@ public class CameraController2 extends CameraController {
             else {
                 capture_result_has_focus_distance = false;
             }*/
+            if( modified_from_camera_settings ) {
+                // see note above
+            }
+            else if( result.get(CaptureResult.LENS_APERTURE) != null ) {
+                capture_result_has_aperture = true;
+                capture_result_aperture = result.get(CaptureResult.LENS_APERTURE);
+                /*if( MyDebug.LOG ) {
+                    Log.d(TAG, "capture_result_aperture: " + capture_result_aperture);
+                }*/
+            }
+            else {
+                capture_result_has_aperture = false;
+            }
             {
                 RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
                 if( modified_from_camera_settings ) {

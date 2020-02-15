@@ -137,6 +137,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private int cameraId = cameraId_default;
     private final static String nr_mode_default = "preference_nr_mode_normal";
     private String nr_mode = nr_mode_default;
+    private final static float aperture_default = -1.0f;
+    private float aperture = aperture_default;
     // camera properties that aren't saved even in the bundle; these should be initialised/reset in reset()
     private int zoom_factor; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
 
@@ -164,7 +166,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         this.imageSaver = new ImageSaver(main_activity);
         this.imageSaver.start();
 
-        this.reset();
+        this.reset(false);
         if( savedInstanceState != null ) {
             // load the things we saved in onSaveInstanceState().
             if( MyDebug.LOG )
@@ -176,6 +178,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             nr_mode = savedInstanceState.getString("nr_mode", nr_mode_default);
             if( MyDebug.LOG )
                 Log.d(TAG, "found nr_mode: " + nr_mode);
+            aperture = savedInstanceState.getFloat("aperture", aperture_default);
+            if( MyDebug.LOG )
+                Log.d(TAG, "found aperture: " + aperture);
         }
 
         if( MyDebug.LOG )
@@ -195,6 +200,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "save nr_mode: " + nr_mode);
         state.putString("nr_mode", nr_mode);
+        if( MyDebug.LOG )
+            Log.d(TAG, "save aperture: " + aperture);
+        state.putFloat("aperture", aperture);
     }
 
     void onDestroy() {
@@ -1427,6 +1435,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return NRModePref.NRMODE_LOW_LIGHT;
         }
         return NRModePref.NRMODE_NORMAL;
+    }
+
+    public void setAperture(float aperture) {
+        this.aperture = aperture;
+    }
+
+    @Override
+    public float getAperturePref() {
+        return aperture;
     }
 
     @Override
@@ -2730,9 +2747,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     /** Should be called to reset parameters which aren't expected to be saved (e.g., resetting zoom when application is paused,
      *  when switching between photo/video modes, or switching cameras).
      */
-    void reset() {
+    void reset(boolean switched_camera) {
         if( MyDebug.LOG )
             Log.d(TAG, "reset");
+        if( switched_camera ) {
+            // aperture is reset when switching camera, but not when application is paused or switching between photo/video etc
+            this.aperture = aperture_default;
+        }
         this.zoom_factor = 0;
     }
 

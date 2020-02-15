@@ -1201,7 +1201,7 @@ public class MainActivity extends Activity {
 
         updateGalleryIcon(); // update in case images deleted whilst idle
 
-        applicationInterface.reset(); // should be called before opening the camera in preview.onResume()
+        applicationInterface.reset(false); // should be called before opening the camera in preview.onResume()
 
         preview.onResume();
 
@@ -1699,7 +1699,7 @@ public class MainActivity extends Activity {
         // prevent slowdown if user repeatedly clicks:
         switchCameraButton.setEnabled(false);
         switchMultiCameraButton.setEnabled(false);
-        applicationInterface.reset();
+        applicationInterface.reset(true);
         this.preview.setCamera(cameraId);
         switchCameraButton.setEnabled(true);
         switchMultiCameraButton.setEnabled(true);
@@ -1777,7 +1777,7 @@ public class MainActivity extends Activity {
 
         View switchVideoButton = findViewById(R.id.switch_video);
         switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
-        applicationInterface.reset();
+        applicationInterface.reset(false);
         this.preview.switchVideo(false, true);
         switchVideoButton.setEnabled(true);
 

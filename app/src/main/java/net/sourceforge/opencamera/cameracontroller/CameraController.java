@@ -65,6 +65,7 @@ public abstract class CameraController {
         public List<CameraController.Size> preview_sizes;
         public List<String> supported_flash_values;
         public List<String> supported_focus_values;
+        public float [] apertures; // may be null if not supported, else will have at least 2 values
         public int max_num_focus_areas;
         public float minimum_focus_distance;
         public boolean is_exposure_lock_supported;
@@ -360,6 +361,7 @@ public abstract class CameraController {
     public abstract int getISO();
     public abstract long getExposureTime();
     public abstract boolean setExposureTime(long exposure_time);
+    public abstract void setAperture(float aperture);
     public abstract CameraController.Size getPictureSize();
     public abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
@@ -601,6 +603,12 @@ public abstract class CameraController {
     }
     public long captureResultFrameDuration() {
         return 0;
+    }
+    public boolean captureResultHasAperture() {
+        return false;
+    }
+    public float captureResultAperture() {
+        return 0.0f;
     }
 	/*public boolean captureResultHasFocusDistance() {
 		return false;

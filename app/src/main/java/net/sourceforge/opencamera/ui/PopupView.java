@@ -8,6 +8,7 @@ import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,6 +69,8 @@ public class PopupView extends LinearLayout {
     private int timer_index = -1;
     private int repeat_mode_index = -1;
     private int grid_index = -1;
+
+    private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
 
     public PopupView(Context context) {
         super(context);
@@ -501,6 +504,60 @@ public class PopupView extends LinearLayout {
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
+
+            if( preview.getSupportedApertures() != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "add apertures");
+
+                addTitleToPopup(getResources().getString(R.string.aperture));
+
+                final List<Float> apertures = new ArrayList<>();
+                final List<String> apertures_strings = new ArrayList<>();
+                float current_aperture = main_activity.getApplicationInterface().getAperturePref();
+                String prefix = "F/";
+
+                boolean found_default = false;
+                String current_aperture_s = "";
+                for(float aperture : preview.getSupportedApertures()) {
+                    apertures.add(aperture);
+                    String aperture_string = prefix + decimal_format_1dp_force0.format(aperture);
+                    apertures_strings.add(aperture_string);
+                    if( current_aperture == aperture ) {
+                        found_default = true;
+                        current_aperture_s = aperture_string;
+                    }
+                }
+
+                if( !found_default ) {
+                    // read from Camera API
+                    if( preview.getCameraController() != null && preview.getCameraController().captureResultHasAperture() ) {
+                        current_aperture = preview.getCameraController().captureResultAperture();
+                        current_aperture_s = prefix + decimal_format_1dp_force0.format(current_aperture);
+                    }
+                }
+
+                addButtonOptionsToPopup(apertures_strings, -1, -1, "", current_aperture_s, 0, "TEST_APERTURE", new ButtonOptionsPopupListener() {
+                    @Override
+                    public void onClick(String option) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "clicked aperture: " + option);
+                        int index = apertures_strings.indexOf(option);
+                        if( index != -1 ) {
+                            float new_aperture = apertures.get(index);
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "new_aperture: " + new_aperture);
+                            main_activity.getApplicationInterface().setAperture(new_aperture);
+                            if( preview.getCameraController() != null ) {
+                                preview.getCameraController().setAperture(new_aperture);
+                            }
+                        }
+                        else {
+                            Log.e(TAG, "unknown aperture: " + option);
+                        }
+                        main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+                    }
+                });
+            }
 
             if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
                 if( MyDebug.LOG )

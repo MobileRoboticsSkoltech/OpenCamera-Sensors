@@ -112,6 +112,7 @@ public class DrawPreview {
     private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
     private final String ybounds_text;
     private final int [] temp_histogram_channel = new int[256];
+    //private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
     // cached Rects for drawTextWithBackground() calls
     private Rect text_bounds_time;
     private Rect text_bounds_camera_id;
@@ -1223,6 +1224,12 @@ public class DrawPreview {
                         iso_exposure_string += " ";
                     iso_exposure_string += preview.getFrameDurationString(frame_duration);
                 }
+                /*if( camera_controller.captureResultHasAperture() ) {
+                    float aperture = camera_controller.captureResultAperture();
+                    if( iso_exposure_string.length() > 0 )
+                        iso_exposure_string += " F";
+                    iso_exposure_string += decimal_format_1dp_force0.format(aperture);
+                }*/
 
                 is_scanning = false;
                 if( camera_controller.captureResultIsAEScanning() ) {

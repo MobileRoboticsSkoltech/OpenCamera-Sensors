@@ -317,6 +317,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean can_disable_shutter_sound;
     private int tonemap_max_curve_points;
     private boolean supports_tonemap_curve;
+    private float [] supported_apertures;
     private boolean has_focus_area;
     private int focus_screen_x;
     private int focus_screen_y;
@@ -2055,6 +2056,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
             this.tonemap_max_curve_points = camera_features.tonemap_max_curve_points;
             this.supports_tonemap_curve = camera_features.supports_tonemap_curve;
+            this.supported_apertures = camera_features.apertures;
             this.supports_white_balance_temperature = camera_features.supports_white_balance_temperature;
             this.min_temperature = camera_features.min_temperature;
             this.max_temperature = camera_features.max_temperature;
@@ -2537,6 +2539,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         if( MyDebug.LOG ) {
             Log.d(TAG, "setupCameraParameters: time after exposures: " + (System.currentTimeMillis() - debug_time));
+        }
+
+        if( supported_apertures != null ) {
+            // set up aperture
+            float aperture = applicationInterface.getAperturePref();
+            if( aperture > 0.0f ) {
+                // check supported
+                for(float this_aperture : supported_apertures) {
+                    if( this_aperture == aperture ) {
+                        camera_controller.setAperture(aperture);
+                    }
+                }
+                // else don't set any aperture (leave as the device default)
+            }
         }
 
         {
@@ -6608,6 +6624,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "supportsTonemapCurve");
         return supports_tonemap_curve;
+    }
+
+    /** Return the supported apertures for this camera.
+     */
+    public float [] getSupportedApertures() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getSupportedApertures");
+        return supported_apertures;
     }
 
     public List<String> getSupportedColorEffects() {

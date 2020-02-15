@@ -349,6 +349,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public float getAperturePref() {
+        return -1.0f;
+    }
+
+    @Override
     public boolean getOptimiseAEForDROPref() {
         return false;
     }
