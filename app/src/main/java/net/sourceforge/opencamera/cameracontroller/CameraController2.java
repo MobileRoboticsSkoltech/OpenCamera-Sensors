@@ -79,6 +79,7 @@ public class CameraController2 extends CameraController {
     private boolean supports_face_detect_mode_full;
     private boolean supports_optical_stabilization;
     private boolean supports_photo_video_recording;
+    private boolean supports_white_balance_temperature;
 
     private final static int tonemap_log_max_curve_points_c = 64;
     private final static float [] jtlog_values_base = new float[] {
@@ -2711,6 +2712,10 @@ public class CameraController2 extends CameraController {
         int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
         if( white_balance_modes != null ) {
             for(int value : white_balance_modes) {
+                // n.b., Galaxy S10e for front and ultra-wide cameras offers CONTROL_AWB_MODE_OFF despite
+                // capabilities_manual_post_processing==false; if we don't check for capabilities_manual_post_processing,
+                // adjusting white balance temperature seems to work, but seems safest to require
+                // capabilities_manual_post_processing anyway
                 if( value == CameraMetadata.CONTROL_AWB_MODE_OFF && capabilities_manual_post_processing && allowManualWB() ) {
                     camera_features.supports_white_balance_temperature = true;
                     camera_features.min_temperature = min_white_balance_temperature_c;
@@ -2718,6 +2723,7 @@ public class CameraController2 extends CameraController {
                 }
             }
         }
+        supports_white_balance_temperature = camera_features.supports_white_balance_temperature;
 
         // see note above
         //if( capabilities_manual_sensor )
@@ -3148,7 +3154,7 @@ public class CameraController2 extends CameraController {
         for(int value2 : values2) {
             String this_value = convertWhiteBalance(value2);
             if( this_value != null ) {
-                if( value2 == CameraMetadata.CONTROL_AWB_MODE_OFF && !allowManualWB() ) {
+                if( value2 == CameraMetadata.CONTROL_AWB_MODE_OFF && !supports_white_balance_temperature ) {
                     // filter
                 }
                 else {
