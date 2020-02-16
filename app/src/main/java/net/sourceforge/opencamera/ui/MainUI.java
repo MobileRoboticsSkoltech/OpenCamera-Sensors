@@ -1276,6 +1276,8 @@ public class MainUI {
     }
 
     public void updateCycleFlashIcon() {
+        // n.b., read from preview rather than saved application preference - so the icon updates correctly when in flash
+        // auto mode, but user switches to manual ISO where flash auto isn't supported
         String flash_value = main_activity.getPreview().getCurrentFlashValue();
         if( flash_value != null ) {
             ImageButton view = main_activity.findViewById(R.id.cycle_flash);
