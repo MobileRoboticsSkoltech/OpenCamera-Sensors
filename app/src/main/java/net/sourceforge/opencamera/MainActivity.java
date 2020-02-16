@@ -2453,45 +2453,60 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void checkDisableGUIIcons() {
+    /** Disables the optional on-screen icons if either user doesn't want to enable them, or not
+     *  supported). Note that displaying icons is done via MainUI.showGUI.
+     * @return Whether an icon's visibility was changed.
+     */
+    private boolean checkDisableGUIIcons() {
         if( MyDebug.LOG )
             Log.d(TAG, "checkDisableGUIIcons");
+        boolean changed = false;
         if( !mainUI.showExposureLockIcon() ) {
             View button = findViewById(R.id.exposure_lock);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showWhiteBalanceLockIcon() ) {
             View button = findViewById(R.id.white_balance_lock);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showCycleRawIcon() ) {
             View button = findViewById(R.id.cycle_raw);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showStoreLocationIcon() ) {
             View button = findViewById(R.id.store_location);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showTextStampIcon() ) {
             View button = findViewById(R.id.text_stamp);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showStampIcon() ) {
             View button = findViewById(R.id.stamp);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showAutoLevelIcon() ) {
             View button = findViewById(R.id.auto_level);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showCycleFlashIcon() ) {
             View button = findViewById(R.id.cycle_flash);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
         if( !mainUI.showFaceDetectionIcon() ) {
             View button = findViewById(R.id.face_detection);
+            changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
+        return changed;
     }
 
     public MyPreferenceFragment getPreferenceFragment() {
@@ -4140,6 +4155,14 @@ public class MainActivity extends Activity {
         // not supported for high speed video frame rates - see testTakeVideoFPSHighSpeedManual().
         View exposureButton = findViewById(R.id.exposure);
         exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+
+        // needed as availability of some icons is per-camera (e.g., flash, RAW)
+        // for making icons visible, this is done elsewhere in call to MainUI.showGUI()
+        if( checkDisableGUIIcons() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "cameraSetup: need to layoutUI as we hid some icons");
+            mainUI.layoutUI();
+        }
 
         // need to update some icons, e.g., white balance and exposure lock due to them being turned off when pause/resuming
         mainUI.updateOnScreenIcons();
