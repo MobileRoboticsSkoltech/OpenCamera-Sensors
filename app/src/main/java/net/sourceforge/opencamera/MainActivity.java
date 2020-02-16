@@ -1950,7 +1950,7 @@ public class MainActivity extends Activity {
                     //case "preference_show_take_photo": // need to update the UI
                 case "preference_show_toasts":
                 case "preference_show_whats_new":
-                case "preference_multi_cam_button":
+                //case "preference_multi_cam_button": // need to update the UI
                 case "preference_keep_display_on":
                 case "preference_max_brightness":
                     //case "preference_resolution": // need to set up camera controller and preview
@@ -2503,6 +2503,13 @@ public class MainActivity extends Activity {
         }
         if( !mainUI.showFaceDetectionIcon() ) {
             View button = findViewById(R.id.face_detection);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
+        if( !showSwitchMultiCamIcon() ) {
+            // also handle the multi-cam icon here, as this can change when switching between front/back cameras
+            // (e.g., if say a device only has multiple back cameras)
+            View button = findViewById(R.id.switch_multi_camera);
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }

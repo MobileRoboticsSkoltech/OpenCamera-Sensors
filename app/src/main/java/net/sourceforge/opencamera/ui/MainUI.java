@@ -1334,9 +1334,6 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
-
-        View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
-        switchMultiCameraButton.setVisibility(main_activity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE);
     }
 
     public void audioControlStarted() {
