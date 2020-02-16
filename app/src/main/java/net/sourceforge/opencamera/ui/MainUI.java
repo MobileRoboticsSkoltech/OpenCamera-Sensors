@@ -1276,7 +1276,7 @@ public class MainUI {
     }
 
     public void updateCycleFlashIcon() {
-        String flash_value = main_activity.getApplicationInterface().getFlashPref();
+        String flash_value = main_activity.getPreview().getCurrentFlashValue();
         if( flash_value != null ) {
             ImageButton view = main_activity.findViewById(R.id.cycle_flash);
             switch( flash_value ) {
@@ -1298,7 +1298,16 @@ public class MainUI {
                 case "flash_red_eye":
                     view.setImageResource(R.drawable.baseline_remove_red_eye_white_48);
                     break;
+                default:
+                    // just in case??
+                    Log.e(TAG, "unknown flash value " + flash_value);
+                    view.setImageResource(R.drawable.flash_off);
+                    break;
             }
+        }
+        else {
+            ImageButton view = main_activity.findViewById(R.id.cycle_flash);
+            view.setImageResource(R.drawable.flash_off);
         }
     }
 
