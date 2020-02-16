@@ -1784,7 +1784,7 @@ public class MainActivity extends Activity {
         mainUI.setTakePhotoIcon();
         mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
 
-        // ensure icons invisible if they're affected by being in video mode or not
+        // ensure icons invisible if they're affected by being in video mode or not (e.g., on-screen RAW icon)
         // (if enabling them, we'll make the icon visible later on)
         checkDisableGUIIcons();
 
