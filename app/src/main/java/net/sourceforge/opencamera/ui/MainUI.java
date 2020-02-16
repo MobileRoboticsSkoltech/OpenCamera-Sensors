@@ -1010,6 +1010,8 @@ public class MainUI {
     public boolean showCycleFlashIcon() {
         if( !main_activity.getPreview().supportsFlash() )
             return false;
+        if( main_activity.getPreview().isVideo() )
+            return false; // no point showing flash icon in video mode, as we only allow flash auto and flash torch, and we don't support torch on the on-screen cycle flash icon
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowCycleFlashPreferenceKey, false);
     }

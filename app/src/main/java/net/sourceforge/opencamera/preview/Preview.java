@@ -4554,12 +4554,39 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "cycleFlash()");
         if( supported_flash_values != null ) {
             int new_flash_index = (current_flash_index+1) % supported_flash_values.size();
-            if( skip_torch && supported_flash_values.get(new_flash_index).equals("flash_torch") ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "cycle past torch");
-                new_flash_index = (new_flash_index+1) % supported_flash_values.size();
+            int start_index = new_flash_index;
+            boolean done = false;
+            while( !done ) {
+                done = true;
+
+                if( skip_torch && supported_flash_values.get(new_flash_index).equals("flash_torch") ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "cycle past torch");
+                    new_flash_index = (new_flash_index+1) % supported_flash_values.size();
+                    // don't bother setting done to false as we shouldn't have two torches in a row...
+                }
+
+                if( is_video ) {
+                    // check supported for video
+                    String new_flash_value = supported_flash_values.get(new_flash_index);
+                    if( !isFlashSupportedForVideo(new_flash_value) ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "cycle past flash mode not supported for video: " + new_flash_value);
+                        new_flash_index = (new_flash_index+1) % supported_flash_values.size();
+                        done = false;
+                    }
+                }
+
+                if( !done && new_flash_index == start_index ) {
+                    // just in case, prevent infinite loop
+                    Log.e(TAG, "flash looped to start - couldn't find valid flash!");
+                    break;
+                }
             }
-            updateFlash(new_flash_index, save);
+
+            if( done ) {
+                updateFlash(new_flash_index, save);
+            }
         }
     }
 
