@@ -527,7 +527,9 @@ public class StorageUtils {
         }
         String result = null;
         if( uri.getScheme() != null && uri.getScheme().equals("content") ) {
-            try( Cursor cursor = context.getContentResolver().query(uri, null, null, null, null) ) {
+            Cursor cursor = null;
+            try {
+                cursor = context.getContentResolver().query(uri, null, null, null, null);
                 if( cursor != null && cursor.moveToFirst() ) {
                     final int column_index = cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);
                     result = cursor.getString(column_index);
@@ -539,6 +541,10 @@ public class StorageUtils {
                 if( MyDebug.LOG )
                     Log.e(TAG, "Exception trying to find filename");
                 e.printStackTrace();
+            }
+            finally {
+                if (cursor != null)
+                    cursor.close();
             }
         }
         if( result == null ) {
