@@ -293,7 +293,6 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Брекетинг экспозиции</string>
-    <string name="photo_mode_fast_burst">[]]]</string>
     <string name="photo_mode_fast_burst_full">Серийная съемка</string>
     <string name="photo_mode_noise_reduction">NR</string>
     <string name="photo_mode_noise_reduction_full">Снижение шума</string>

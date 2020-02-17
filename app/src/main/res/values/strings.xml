@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <string name="app_name">Open Camera</string> <!-- shouldn't be translated, unless deemed appropriate e.g. alternative alphabets -->
     <string name="action_settings">Settings</string>
     <string name="action_popup">Popup settings</string>
     <string name="intro_ok">OK (This message won\'t show again)</string>
@@ -293,7 +293,7 @@
     <string name="photo_mode_hdr">HDR</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
-    <string name="photo_mode_fast_burst">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
+    <string name="photo_mode_fast_burst" translatable="false">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
     <string name="photo_mode_fast_burst_full">Fast Burst</string>
     <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_noise_reduction_full">Noise Reduction</string>
@@ -982,10 +982,10 @@
 
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
-    <string name="preference_privacy_policy">Privacy policy</string>
-    <string name="preference_privacy_policy_summary">Tap to display privacy policy</string>
-    <string name="preference_privacy_policy_online">Online privacy policy</string>
-    <string name="preference_privacy_policy_text"> <!-- if changing this, remember to consider if the online privacy policy needs updating -->
+    <string name="preference_privacy_policy" translatable="false">Privacy policy</string>
+    <string name="preference_privacy_policy_summary" translatable="false">Tap to display privacy policy</string>
+    <string name="preference_privacy_policy_online" translatable="false">Online privacy policy</string>
+    <string name="preference_privacy_policy_text" translatable="false"> <!-- if changing this, remember to consider if the online privacy policy needs updating -->
         Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
         Microphone is also used for the optional \"Audio control\".
         \nAccess to files is needed to save resultant photos and videos to your device.
@@ -1000,26 +1000,26 @@
         \n*Apps/services such as cloud services on your device may auto-upload photos and videos that are saved on your device.
     </string>
 
-    <string name="speech_recognizer_extra_info">
+    <string name="speech_recognizer_extra_info" translatable="false">
         (Your audio may be sent to remote\n
         servers by Android to perform speech\n
         recognition.)</string>
 
-    <string name="preference_screen_licences">Open Source licences</string>
-    <string name="preference_licence_open_camera">Open Camera</string>
-    <string name="preference_licence_open_camera_text">Open Camera is © 2013–2020 Mark Harman, released under the GPL v3 or later. Tap here for full licence text and terms of service.</string>
-    <string name="preference_licence_google_icons">Google\'s Material Design icons</string>
-    <string name="preference_licence_google_icons_text">Open Camera uses icons from Google\'s Material Design icons
+    <string name="preference_screen_licences" translatable="false">Open Source licences</string>
+    <string name="preference_licence_open_camera" translatable="false">Open Camera</string>
+    <string name="preference_licence_open_camera_text" translatable="false">Open Camera is © 2013–2020 Mark Harman, released under the GPL v3 or later. Tap here for full licence text and terms of service.</string>
+    <string name="preference_licence_google_icons" translatable="false">Google\'s Material Design icons</string>
+    <string name="preference_licence_google_icons_text" translatable="false">Open Camera uses icons from Google\'s Material Design icons
         (https://developer.android.com/design/downloads/index.html ,
         https://design.google.com/icons/ ,
         https://github.com/google/material-design-icons/ ,
         https://google.github.io/material-design-icons/)
         under the Apache license version 2.0. Some icons include modifications. Tap here for full licence text.</string>
-    <string name="preference_licence_online">Online licences</string>
-    <string name="preference_licence_online_text">Please tap here for full online licensing information (opens in your browser).</string>
+    <string name="preference_licence_online" translatable="false">Online licences</string>
+    <string name="preference_licence_online_text" translatable="false">Please tap here for full online licensing information (opens in your browser).</string>
 
     <!-- There's no point translating the What's New text (and shouldn't be included in language-specific strings.xml) - it'll be updated constantly, and change each version -->
-    <string name="whats_new_text">
+    <string name="whats_new_text" translatable="false">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
             Settings/On screen GUI/Show What\'s New dialog.]</small>
         \n\n<b>v1.47.3:</b>\n

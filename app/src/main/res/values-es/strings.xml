@@ -292,7 +292,6 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">BKT {}</string>
     <string name="photo_mode_expo_bracketing_full">Horquillado de exposición</string>
-    <string name="photo_mode_fast_burst">[]]]</string>
     <string name="photo_mode_fast_burst_full">Ráfaga rápida</string>
     <string name="photo_mode_noise_reduction">NR</string>
     <string name="photo_mode_noise_reduction_full">Reducción de ruido</string>

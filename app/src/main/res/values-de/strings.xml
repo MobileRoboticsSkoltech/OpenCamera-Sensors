@@ -293,7 +293,6 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- needs to not be too long, so this shows okay on the popup menu's photo mode buttons -->
     <string name="photo_mode_expo_bracketing_full">Belichtungsreihe</string>
-    <string name="photo_mode_fast_burst">[]]]</string>
     <string name="photo_mode_fast_burst_full">Schnelle Fotofolge</string>
     <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_noise_reduction_full">Rauschunterdrückung</string>
