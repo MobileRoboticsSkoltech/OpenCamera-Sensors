@@ -520,7 +520,7 @@ public class StorageUtils {
      * See https://developer.android.com/guide/topics/providers/document-provider.html and
      * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content .
      */
-    public String getFileName(Uri uri) {
+    String getFileName(Uri uri) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "getFileName: " + uri);
             Log.d(TAG, "uri has path: " + uri.getPath());
