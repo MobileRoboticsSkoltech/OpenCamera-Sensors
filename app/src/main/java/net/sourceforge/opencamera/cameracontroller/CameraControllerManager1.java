@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
 
 import android.content.Context;

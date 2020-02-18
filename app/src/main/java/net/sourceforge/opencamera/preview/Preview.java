@@ -1588,11 +1588,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "cameraOpened()");
             debug_time = System.currentTimeMillis();
         }
-        boolean take_photo = false;
         if( camera_controller != null ) {
             Activity activity = (Activity)Preview.this.getContext();
             /*if( MyDebug.LOG )
                 Log.d(TAG, "intent: " + activity.getIntent());
+            boolean take_photo = false;
             if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
                 take_photo = activity.getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
                 activity.getIntent().removeExtra(TakePhoto.TAKE_PHOTO);
@@ -1601,7 +1601,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 if( MyDebug.LOG )
                     Log.d(TAG, "no intent data");
             }*/
-            take_photo = TakePhoto.TAKE_PHOTO;
+            boolean take_photo = TakePhoto.TAKE_PHOTO;
             if( take_photo )
                 TakePhoto.TAKE_PHOTO = false;
             if( MyDebug.LOG )
@@ -1764,15 +1764,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.switchVideo(true, false);
         }
 
-        try {
-            setupCameraParameters();
-        }
-        catch(CameraControllerException e) {
-            e.printStackTrace();
-            applicationInterface.onCameraError();
-            closeCamera(false, null);
-            return;
-        }
+        setupCameraParameters();
 
         updateFlashForVideo();
         if( take_photo ) {
@@ -2083,7 +2075,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
-    private void setupCameraParameters() throws CameraControllerException {
+    private void setupCameraParameters() {
         if( MyDebug.LOG )
             Log.d(TAG, "setupCameraParameters()");
         long debug_time = 0;
@@ -2930,7 +2922,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.cancelAutoFocus();
         }
         // first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
-        CameraController.Size new_size = null;
+        CameraController.Size new_size;
         if( this.is_video ) {
             // see comments for getOptimalVideoPictureSize()
             VideoProfile profile = getVideoProfile();
@@ -6315,7 +6307,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
         }
 
-        boolean local_take_photo_after_autofocus = false;
+        boolean local_take_photo_after_autofocus;
         synchronized(this) {
             local_take_photo_after_autofocus = take_photo_after_autofocus;
             take_photo_after_autofocus = false;

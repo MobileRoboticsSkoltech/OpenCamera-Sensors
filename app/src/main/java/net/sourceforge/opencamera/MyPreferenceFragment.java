@@ -1287,7 +1287,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nCan disable shutter sound?: ");
                         about_string.append(getString(can_disable_shutter_sound ? R.string.about_available : R.string.about_not_available));
 
-                        about_string.append("\nCamera view angle: " + camera_view_angle_x + " , " + camera_view_angle_y);
+                        about_string.append("\nCamera view angle: ").append(camera_view_angle_x).append(" , ").append(camera_view_angle_y);
 
                         about_string.append("\nFlash modes: ");
                         String [] flash_values = bundle.getStringArray("flash_values");

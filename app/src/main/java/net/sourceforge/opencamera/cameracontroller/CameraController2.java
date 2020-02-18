@@ -7680,10 +7680,10 @@ public class CameraController2 extends CameraController {
                     Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
                 return;
             }
-            long debug_time = 0;
+            /*long debug_time = 0;
             if( MyDebug.LOG ) {
                 debug_time = System.currentTimeMillis();
-            }
+            }*/
             last_process_frame_number = result.getFrameNumber();
 
             updateCachedAECaptureStatus(result);

@@ -11721,7 +11721,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             total += histogram[i];
         }
         Log.d(TAG, "total: " + total);
-        boolean started = false, ended = false;
+        boolean started = false;
         int min_value = -1, median_value = -1, max_value = -1;
         int count = 0;
         int middle = total/2;
@@ -11729,12 +11729,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             int value = histogram[i];
             if( !started ) {
                 started = value != 0;
-            }
-            else {
-                ended = value == 0;
-                if( ended ) {
-                    assertTrue(value == 0);
-                }
             }
             if( value != 0 ) {
                 if( min_value == -1 )

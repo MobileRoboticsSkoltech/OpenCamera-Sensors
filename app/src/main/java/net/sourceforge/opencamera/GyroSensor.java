@@ -486,10 +486,7 @@ public class GyroSensor implements SensorEventListener {
 
             if( !has_original_rotation_matrix ) {
                 System.arraycopy(tempMatrix, 0, originalRotationMatrix, 0, 9);
-                has_original_rotation_matrix = true;
-                if( event.values[3] == 1.0 ) {
-                    has_original_rotation_matrix = false;
-                }
+                has_original_rotation_matrix = event.values[3] != 1.0;
             }
 
             // current = originalT.new

@@ -341,7 +341,7 @@ public class BluetoothLeService extends Service {
             return false;
         }
 
-        if( device_address != null && address.equals(device_address) && bluetoothGatt != null ) {
+        if( address.equals(device_address) && bluetoothGatt != null ) {
             bluetoothGatt.disconnect();
             bluetoothGatt.close();
             bluetoothGatt = null;

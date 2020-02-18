@@ -1617,10 +1617,10 @@ public class DrawPreview {
      *            should be the maximum value of all histogram channels.
      */
     private void drawHistogramChannel(Canvas canvas, int [] histogram_channel, int max) {
-        long debug_time = 0;
+        /*long debug_time = 0;
         if( MyDebug.LOG ) {
             debug_time = System.currentTimeMillis();
-        }
+        }*/
 
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "drawHistogramChannel, time before creating path: " + (System.currentTimeMillis() - debug_time));*/

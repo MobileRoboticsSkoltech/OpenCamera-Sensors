@@ -3267,7 +3267,6 @@ public class ImageSaver extends Thread {
                 catch(IOException e) {
                     e.printStackTrace();
                 }
-                inputStream = null;
             }
         }
         return bitmap;

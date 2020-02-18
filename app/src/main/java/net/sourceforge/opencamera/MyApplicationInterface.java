@@ -3009,7 +3009,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             success = true; // still treat as success
         }
         else if( photo_mode == PhotoMode.NoiseReduction || photo_mode == PhotoMode.Panorama ) {
-            boolean first_image = false;
+            boolean first_image;
             if( photo_mode == PhotoMode.Panorama ) {
                 panorama_pic_accepted = true;
                 first_image = n_panorama_pics == 0;
