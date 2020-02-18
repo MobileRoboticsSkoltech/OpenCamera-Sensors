@@ -4946,7 +4946,7 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
+    public void setPreviewDisplay(SurfaceHolder holder) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "setPreviewDisplay");
             Log.e(TAG, "SurfaceHolder not supported for CameraController2!");
@@ -4956,7 +4956,7 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public void setPreviewTexture(TextureView texture) throws CameraControllerException {
+    public void setPreviewTexture(TextureView texture) {
         if( MyDebug.LOG )
             Log.d(TAG, "setPreviewTexture");
         if( this.texture != null ) {

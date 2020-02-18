@@ -938,7 +938,7 @@ public class HDRProcessor {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, DROTonemappingAlgorithm dro_tonemapping_algorithm) throws HDRProcessorException {
+    private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles, boolean ce_preserve_blacks, DROTonemappingAlgorithm dro_tonemapping_algorithm) {
         if( MyDebug.LOG )
             Log.d(TAG, "processSingleImage");
 
@@ -1263,10 +1263,9 @@ public class HDRProcessor {
      * @param bitmap_avg_align Should be supplied if allocation_avg_align is non-null, and stores
      *                         the bitmap corresponding to the allocation_avg_align.
      * @param time_s         Time, for debugging.
-     * @throws HDRProcessorException
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, float zoom_factor, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
+    private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, float zoom_factor, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "processAvgCore");
             Log.d(TAG, "iso: " + iso);

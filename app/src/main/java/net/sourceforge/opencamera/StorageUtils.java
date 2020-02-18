@@ -750,8 +750,6 @@ public class StorageUtils {
                 }
                 break;
             case MEDIA_TYPE_PREFS:
-                mimeType = "text/xml";
-                break;
             case MEDIA_TYPE_GYRO_INFO:
                 mimeType = "text/xml";
                 break;

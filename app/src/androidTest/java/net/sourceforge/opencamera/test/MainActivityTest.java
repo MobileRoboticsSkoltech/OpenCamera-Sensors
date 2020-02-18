@@ -5777,7 +5777,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /**
      * @return The number of resultant video files
-     * @throws InterruptedException
      */
     private int subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
         assertTrue(mPreview.isPreviewStarted());
@@ -11852,8 +11851,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     final private String panorama_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/panoramasamples/";
 
     /** Tests HDR algorithm on test samples "saintpaul".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR1() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR1");
@@ -11880,8 +11877,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "saintpaul", but with 5 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR1_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR1_exp5");
@@ -11907,8 +11902,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "stlouis".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR2() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR2");
@@ -11930,8 +11923,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR3".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR3() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR3");
@@ -11956,8 +11947,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR4".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR4() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR4");
@@ -11978,8 +11967,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR5".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR5");
@@ -12004,8 +11991,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR6".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR6() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR6");
@@ -12026,8 +12011,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR7".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR7() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR7");
@@ -12048,8 +12031,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR8".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR8() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR8");
@@ -12070,8 +12051,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR9".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR9() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR9");
@@ -12092,8 +12071,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR10".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR10() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR10");
@@ -12114,8 +12091,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR11".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR11() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR11");
@@ -12140,8 +12115,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR12".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR12() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR12");
@@ -12162,8 +12135,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR13".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR13() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR13");
@@ -12184,8 +12155,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR14".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR14() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR14");
@@ -12206,8 +12175,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR15".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR15() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR15");
@@ -12228,8 +12195,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR16".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR16() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR16");
@@ -12250,8 +12215,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR17".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR17() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR17");
@@ -12276,8 +12239,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR18".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR18() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR18");
@@ -12303,8 +12264,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR19".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR19() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR19");
@@ -12325,8 +12284,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR20".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR20() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR20");
@@ -12347,8 +12304,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR21".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR21() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR21");
@@ -12370,8 +12325,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR22".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR22() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR22");
@@ -12396,8 +12349,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 2 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp2() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp2");
@@ -12420,8 +12371,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 2 images, and greater exposure gap.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp2b() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp2b");
@@ -12441,8 +12390,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR23() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23");
@@ -12467,8 +12414,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 4 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp4() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp4");
@@ -12493,8 +12438,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 5 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp5");
@@ -12520,8 +12463,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 6 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp6() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp6");
@@ -12548,8 +12489,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 7 images.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR23_exp7() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR23_exp7");
@@ -12577,8 +12516,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR24".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR24() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR24");
@@ -12599,8 +12536,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR25".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR25() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR25");
@@ -12621,8 +12556,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR26".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR26() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR26");
@@ -12646,8 +12579,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR27".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR27() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR27");
@@ -12668,8 +12599,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR28".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR28() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR28");
@@ -12690,8 +12619,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR29".
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDR29() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR29");
@@ -12712,8 +12639,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR30".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR30() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR30");
@@ -12738,8 +12663,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR31".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR31() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR31");
@@ -12764,8 +12687,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR32".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR32() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR32");
@@ -12790,8 +12711,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR33".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR33() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR33");
@@ -12812,8 +12731,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR34".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR34() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR34");
@@ -12834,8 +12751,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR35".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR35() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR35");
@@ -12856,8 +12771,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR36".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR36() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR36");
@@ -12878,8 +12791,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR37".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR37() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR37");
@@ -12901,8 +12812,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Tests HDR algorithm on test samples "testHDR38".
      *  Tests with Filmic tonemapping.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR38Filmic() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR38Filmic");
@@ -12926,8 +12835,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR39".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR39() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR39");
@@ -12950,8 +12857,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR40".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR40() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR40");
@@ -12974,8 +12879,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR40" with Exponential tonemapping.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR40Exponential() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR40Exponential");
@@ -12998,8 +12901,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR40" with Filmic tonemapping.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR40Filmic() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR40Filmic");
@@ -13022,8 +12923,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR41".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR41() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR41");
@@ -13040,8 +12939,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR42".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR42() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR42");
@@ -13058,8 +12955,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR43".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR43() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR43");
@@ -13076,8 +12971,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR44".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR44() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR44");
@@ -13094,8 +12987,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR45".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR45() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR45");
@@ -13117,8 +13008,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR45".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR45_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR45_exp5");
@@ -13139,8 +13028,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR45".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR45_exp7() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR45_exp7");
@@ -13161,8 +13048,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR46".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR46() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR46");
@@ -13183,8 +13068,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR46".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR46_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR46_exp5");
@@ -13204,8 +13087,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR47".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR47_exp2() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR47_exp2");
@@ -13222,8 +13103,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR47".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR47() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR47");
@@ -13247,8 +13126,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR47".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR47_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR47_exp5");
@@ -13272,8 +13149,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR47".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR47_exp7() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR47_exp7");
@@ -13297,8 +13172,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR48".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR48() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR48");
@@ -13319,8 +13192,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR48".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR48_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR48_exp5");
@@ -13342,8 +13213,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR49".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR49_exp2() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR49_exp2");
@@ -13361,8 +13230,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR49".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR49() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR49");
@@ -13382,8 +13249,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR49".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR49_exp4() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR49_exp4");
@@ -13403,8 +13268,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR49".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR49_exp5() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR49_exp5");
@@ -13425,8 +13288,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR50".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR50() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR50");
@@ -13445,8 +13306,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR51".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR51() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR51");
@@ -13465,8 +13324,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR52".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR52() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR52");
@@ -13485,8 +13342,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR53".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR53() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR53");
@@ -13505,8 +13360,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR54".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR54() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR54");
@@ -13525,8 +13378,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR55".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR55() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR55");
@@ -13545,8 +13396,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR56".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR56() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR56");
@@ -13565,8 +13414,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDR57".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testHDR57() throws IOException, InterruptedException {
         Log.d(TAG, "testHDR57");
@@ -13587,8 +13434,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     /** Tests HDR algorithm on test samples "testHDRtemp".
      *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
-     * @throws IOException
-     * @throws InterruptedException 
      */
     public void testHDRtemp() throws IOException, InterruptedException {
         Log.d(TAG, "testHDRtemp");
@@ -13807,8 +13652,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg1".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg1() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg1");
@@ -13862,8 +13705,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg2".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg2() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg2");
@@ -13915,8 +13756,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg3".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg3() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg3");
@@ -14008,8 +13847,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg4".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg4() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg4");
@@ -14075,8 +13912,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg5".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg5() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg5");
@@ -14144,8 +13979,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg6".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg6() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg6");
@@ -14229,8 +14062,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg7".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg7() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg7");
@@ -14279,8 +14110,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg8".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg8() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg8");
@@ -14320,8 +14149,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg9".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg9() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg9");
@@ -14371,8 +14198,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg10".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg10() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg10");
@@ -14420,8 +14245,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg11".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg11() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg11");
@@ -14535,8 +14358,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg12".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg12() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg12");
@@ -14565,8 +14386,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg13".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg13() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg13");
@@ -14592,8 +14411,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg14".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg14() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg14");
@@ -14637,8 +14454,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg15".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg15() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg15");
@@ -14664,8 +14479,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg16".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg16() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg16");
@@ -14691,8 +14504,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg17".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg17() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg17");
@@ -14739,8 +14550,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg18".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg18() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg18");
@@ -14766,8 +14575,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg19".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg19() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg19");
@@ -14798,8 +14605,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg20".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg20() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg20");
@@ -14826,8 +14631,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg21".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg21() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg21");
@@ -14854,8 +14657,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg22".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg22() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg22");
@@ -14882,8 +14683,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg23".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg23() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg23");
@@ -14953,8 +14752,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg24".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg24() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg24");
@@ -14982,8 +14779,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg25".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg25() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg25");
@@ -15008,8 +14803,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg26".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg26() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg26");
@@ -15056,8 +14849,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg27".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg27() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg27");
@@ -15080,8 +14871,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg28".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg28() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg28");
@@ -15115,8 +14904,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg29".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg29() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg29");
@@ -15150,8 +14937,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg30".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg30() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg30");
@@ -15198,8 +14983,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg31".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg31() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg31");
@@ -15234,8 +15017,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg32".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg32() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg32");
@@ -15268,8 +15049,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg33".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg33() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg33");
@@ -15304,8 +15083,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg34".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg34() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg34");
@@ -15332,8 +15109,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg35".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg35() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg35");
@@ -15358,8 +15133,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg36".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg36() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg36");
@@ -15399,8 +15172,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg37".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg37() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg37");
@@ -15430,8 +15201,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg38".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg38() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg38");
@@ -15459,8 +15228,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg39".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg39() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg39");
@@ -15495,8 +15262,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg40".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg40() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg40");
@@ -15531,8 +15296,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg41".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg41() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg41");
@@ -15567,8 +15330,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg42".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg42() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg42");
@@ -15593,8 +15354,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg43".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg43() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg43");
@@ -15618,8 +15377,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg44".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg44() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg44");
@@ -15643,8 +15400,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg45".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg45() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg45");
@@ -15668,8 +15423,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg46".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg46() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg46");
@@ -15698,8 +15451,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg47".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg47() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg47");
@@ -15724,8 +15475,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg48".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg48() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg48");
@@ -15754,8 +15503,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg49".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg49() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg49");
@@ -15784,8 +15531,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg50".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg50() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg50");
@@ -15810,8 +15555,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg51".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg51() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg51");
@@ -15851,8 +15594,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests Avg algorithm on test samples "testAvg52".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvg52() throws IOException, InterruptedException {
         Log.d(TAG, "testAvg52");
@@ -15878,8 +15619,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     /** Tests Avg algorithm on test samples "testAvgtemp".
      *  Used for one-off testing, or to recreate NR images from the base exposures to test an updated alorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testAvgtemp/ .
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testAvgtemp() throws IOException, InterruptedException {
         Log.d(TAG, "testAvgtemp");
@@ -15994,8 +15733,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg1".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile1() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile1");
@@ -16015,8 +15752,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg20".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile2() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile2");
@@ -16036,8 +15771,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testLogProfile3".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile3() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile3");
@@ -16057,8 +15790,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg1".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile1_extra_strong() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile1_extra_strong");
@@ -16078,8 +15809,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg20".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile2_extra_strong() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile2_extra_strong");
@@ -16099,8 +15828,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests video log profile algorithm on test samples in "testLogProfile3".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testLogProfile3_extra_strong() throws IOException, InterruptedException {
         Log.d(TAG, "testLogProfile3_extra_strong");
@@ -16272,8 +15999,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Tests panorama algorithm on test samples "testPanoramaWhite".
      *  This tests that auto-alignment fails gracefully if we can't find any matches.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanoramaWhite() throws IOException, InterruptedException {
         Log.d(TAG, "testPanoramaWhite");
@@ -16294,8 +16019,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama1".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama1() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama1");
@@ -16320,8 +16043,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama2".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama2() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama2");
@@ -16358,8 +16079,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama3".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama3() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama3");
@@ -16392,8 +16111,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /** Tests panorama algorithm on test samples "testPanorama3", with panorama_pics_per_screen set
      *  to 4.0.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama3_picsperscreen2() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama3_picsperscreen2");
@@ -16425,8 +16142,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama4".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama4() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama4");
@@ -16456,8 +16171,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama5".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama5() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama5");
@@ -16487,8 +16200,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama6".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama6() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama6");
@@ -16518,8 +16229,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama7".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama7() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama7");
@@ -16550,8 +16259,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama8".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama8() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama8");
@@ -16577,8 +16284,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama9".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama9() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama9");
@@ -16609,8 +16314,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama10".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama10() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama10");
@@ -16646,8 +16349,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama11".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama11() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama11");
@@ -16676,8 +16377,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama12".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama12() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama12");
@@ -16709,8 +16408,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama13".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama13() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama13");
@@ -16740,8 +16437,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama14".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama14() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama14");
@@ -16772,8 +16467,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama15".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama15() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama15");
@@ -16804,8 +16497,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama16".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama16() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama16");
@@ -16836,8 +16527,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama17".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama17() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama17");
@@ -16868,8 +16557,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama18".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama18() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama18");
@@ -16900,8 +16587,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama19".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama19() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama19");
@@ -16932,8 +16617,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama20".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama20() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama20");
@@ -16964,8 +16647,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama21".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama21() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama21");
@@ -16996,8 +16677,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama22".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama22() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama22");
@@ -17025,8 +16704,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama23".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama23() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama23");
@@ -17051,8 +16728,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama24".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama24() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama24");
@@ -17083,8 +16758,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama25".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama25() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama25");
@@ -17113,8 +16786,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama26".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama26() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama26");
@@ -17142,8 +16813,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama27".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama27() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama27");
@@ -17171,8 +16840,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama28".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama28() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama28");
@@ -17218,8 +16885,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      *  input images. Instead of converting the original JPEGs to PNG on Nokia 8, this was done on
      *  the Samsung Galaxy S10e, which gives small differences, but enough to show up potential
      *  stability issues.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama28_galaxys10e() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama28_galaxys10e");
@@ -17262,8 +16927,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama29".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama29() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama29");
@@ -17295,8 +16958,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama30".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama30() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama30");
@@ -17342,8 +17003,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      *  input images. Instead of converting the original JPEGs to PNG on Nokia 8, this was done on
      *  the Samsung Galaxy S10e, which gives small differences, but enough to show up potential
      *  stability issues.
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama30_galaxys10e() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama30_galaxys10e");
@@ -17386,8 +17045,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama31".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama31() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama31");
@@ -17415,8 +17072,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama3".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama32() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama32");
@@ -17446,8 +17101,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama33".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama33() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama33");
@@ -17474,8 +17127,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama34".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama34() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama34");
@@ -17507,8 +17158,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama35".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama35() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama35");
@@ -17539,8 +17188,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama36".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama36() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama36");
@@ -17569,8 +17216,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama37".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama37() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama37");
@@ -17601,8 +17246,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests panorama algorithm on test samples "testPanorama38".
-     * @throws IOException
-     * @throws InterruptedException
      */
     public void testPanorama38() throws IOException, InterruptedException {
         Log.d(TAG, "testPanorama38");

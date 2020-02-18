@@ -1470,7 +1470,6 @@ public class MainUI {
         if (mExposureLine == 0) {
             iso_buttons_container.setBackgroundColor(highlightColor);
             //iso_buttons_container.setAlpha(0.5f);
-            return;
         } else if (mExposureLine == 1) {
             iso_seekbar.setBackgroundColor(highlightColor);
             //iso_seekbar.setAlpha(0.5f);
@@ -2117,7 +2116,6 @@ public class MainUI {
 
     /**
      * Higlights the next LinearLayout view
-     * @param highlight
      */
     private void highlightPopupLine(boolean highlight, boolean goUp) {
         if( MyDebug.LOG ) {
@@ -2165,8 +2163,6 @@ public class MainUI {
      * Highlights an icon on a horizontal line, such as flash mode,
      * focus mode, etc. Checks that the popup is open in case it is
      * wrongly called, so that it doesn't crash the app.
-     * @param highlight
-     * @param goLeft
      */
     private void highlightPopupIcon(boolean highlight, boolean goLeft) {
         if( MyDebug.LOG ) {

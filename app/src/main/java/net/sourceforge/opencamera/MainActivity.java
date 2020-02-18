@@ -1761,7 +1761,6 @@ public class MainActivity extends Activity {
 
     /**
      * Toggles Photo/Video mode
-     * @param view
      */
     public void clickedSwitchVideo(View view) {
         if( MyDebug.LOG )

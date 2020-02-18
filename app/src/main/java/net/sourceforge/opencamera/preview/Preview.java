@@ -20,7 +20,6 @@ import net.sourceforge.opencamera.preview.camerasurface.MySurfaceView;
 import net.sourceforge.opencamera.preview.camerasurface.MyTextureView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 //import java.io.FileOutputStream;
 import java.io.IOException;
 //import java.io.OutputStream;
@@ -69,7 +68,6 @@ import android.os.Bundle;
 //import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
