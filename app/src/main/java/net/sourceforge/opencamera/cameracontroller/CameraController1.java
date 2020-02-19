@@ -1308,6 +1308,9 @@ public class CameraController1 extends CameraController {
     }
 
     public void setLocationInfo(Location location) {
+        // don't log location, in case of privacy!
+        if( MyDebug.LOG )
+            Log.d(TAG, "setLocationInfo");
         Camera.Parameters parameters = this.getParameters();
         parameters.removeGpsData();
         parameters.setGpsTimestamp(System.currentTimeMillis() / 1000); // initialise to a value (from Android camera source)

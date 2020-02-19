@@ -2088,8 +2088,7 @@ public class ImageSaver extends Thread {
                     ypos -= diff_y;
                     String gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, request.preference_units_distance, request.store_location, request.location, request.store_geo_direction, request.geo_direction);
                     if( gps_stamp.length() > 0 ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "stamp with location_string: " + gps_stamp);
+                        // don't log gps_stamp, in case of privacy!
 
                         Address address = null;
                         if( request.store_location && !request.preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
@@ -2103,8 +2102,8 @@ public class ImageSaver extends Thread {
                                     List<Address> addresses = geocoder.getFromLocation(request.location.getLatitude(), request.location.getLongitude(), 1);
                                     if( addresses != null && addresses.size() > 0 ) {
                                         address = addresses.get(0);
+                                        // don't log address, in case of privacy!
                                         if( MyDebug.LOG ) {
-                                            Log.d(TAG, "address: " + address);
                                             Log.d(TAG, "max line index: " + address.getMaxAddressLineIndex());
                                         }
                                     }
@@ -2134,8 +2133,7 @@ public class ImageSaver extends Thread {
                             // we are displaying an address instead of GPS coords, but we still need to display the geo direction
                             gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, request.preference_units_distance, false, null, request.store_geo_direction, request.geo_direction);
                             if( gps_stamp.length() > 0 ) {
-                                if( MyDebug.LOG )
-                                    Log.d(TAG, "gps_stamp is now: " + gps_stamp);
+                                // don't log gps_stamp, in case of privacy!
                                 applicationInterface.drawTextWithBackground(canvas, p, gps_stamp, color, Color.BLACK, width - offset_x, ypos, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, draw_shadowed);
                                 ypos -= diff_y;
                             }
@@ -3104,13 +3102,6 @@ public class ImageSaver extends Thread {
             output = null;
             success = true;
 
-    		/*Location location = null;
-    		if( main_activity.getApplicationInterface().getGeotaggingPref() ) {
-    			location = main_activity.getApplicationInterface().getLocation();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "location: " + location);
-    		}*/
-
             // set last image for share/trash options for pause preview
             // Must be done before broadcastFile() (because on Android 7+ with non-SAF, we update
             // the LastImage's uri from the MediaScannerConnection.scanFile() callback from
@@ -3127,8 +3118,6 @@ public class ImageSaver extends Thread {
             }
 
             if( saveUri == null ) {
-                //Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
-                //storageUtils.announceUri(media_uri, true, false);
                 storageUtils.broadcastFile(picFile, true, false, false);
             }
             else {

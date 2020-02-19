@@ -5356,9 +5356,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             boolean store_location = applicationInterface.getGeotaggingPref();
             if( store_location && applicationInterface.getLocation() != null ) {
                 Location location = applicationInterface.getLocation();
-                if( MyDebug.LOG ) {
-                    Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
-                }
+                // don't log location, in case of privacy!
                 local_video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
             }
 
@@ -7515,7 +7513,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Location location = applicationInterface.getLocation();
                 if( MyDebug.LOG ) {
                     Log.d(TAG, "updating parameters from location...");
-                    Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy() + " timestamp " + location.getTime());
+                    // don't log location, in case of privacy!
                 }
                 camera_controller.setLocationInfo(location);
             }

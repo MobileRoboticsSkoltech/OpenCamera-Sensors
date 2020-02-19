@@ -1952,7 +1952,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "date_stamp: " + date_stamp);
                         Log.d(TAG, "time_stamp: " + time_stamp);
-                        Log.d(TAG, "gps_stamp: " + gps_stamp);
+                        // don't log gps_stamp, in case of privacy!
                     }
 
                     String datetime_stamp = "";
@@ -1981,8 +1981,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                     List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                                     if( addresses != null && addresses.size() > 0 ) {
                                         address = addresses.get(0);
+                                        // don't log address, in case of privacy!
                                         if( MyDebug.LOG ) {
-                                            Log.d(TAG, "address: " + address);
                                             Log.d(TAG, "max line index: " + address.getMaxAddressLineIndex());
                                         }
                                     }
@@ -2016,8 +2016,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                 Log.d(TAG, "not displaying gps coords, but need to display geo direction");
                             gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, preference_units_distance, false, null, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
                             if( gps_stamp.length() > 0 ) {
-                                if( MyDebug.LOG )
-                                    Log.d(TAG, "gps_stamp is now: " + gps_stamp);
+                                // don't log gps_stamp, in case of privacy!
                                 subtitles.append(gps_stamp).append("\n");
                             }
                         }

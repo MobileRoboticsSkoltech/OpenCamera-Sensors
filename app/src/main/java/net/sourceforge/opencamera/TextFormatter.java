@@ -108,8 +108,7 @@ public class TextFormatter {
                 gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
             }
         }
-        if( MyDebug.LOG )
-            Log.d(TAG, "gps_stamp: " + gps_stamp);
+        // don't log gps_stamp, in case of privacy!
         return gps_stamp;
     }
 

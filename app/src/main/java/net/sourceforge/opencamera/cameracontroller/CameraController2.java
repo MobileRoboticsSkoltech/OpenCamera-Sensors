@@ -4674,8 +4674,9 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setLocationInfo(Location location) {
+        // don't log location, in case of privacy!
         if( MyDebug.LOG )
-            Log.d(TAG, "setLocationInfo: " + location.getLongitude() + " , " + location.getLatitude());
+            Log.d(TAG, "setLocationInfo");
         this.camera_settings.location = location;
     }
 
