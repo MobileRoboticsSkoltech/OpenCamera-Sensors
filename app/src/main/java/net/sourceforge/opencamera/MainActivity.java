@@ -94,6 +94,8 @@ public class MainActivity extends Activity {
 
     private static int activity_count = 0;
 
+    private boolean app_is_paused = true;
+
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
 
@@ -1174,6 +1176,7 @@ public class MainActivity extends Activity {
             debug_time = System.currentTimeMillis();
         }
         super.onResume();
+        this.app_is_paused = false;
 
         cancelImageSavingNotification();
 
@@ -1261,6 +1264,8 @@ public class MainActivity extends Activity {
             debug_time = System.currentTimeMillis();
         }
         super.onPause(); // docs say to call this before freeing other things
+        this.app_is_paused = true;
+
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
         magneticSensor.unregisterMagneticListener(mSensorManager);
@@ -4852,7 +4857,11 @@ public class MainActivity extends Activity {
     void initLocation() {
         if( MyDebug.LOG )
             Log.d(TAG, "initLocation");
-        if( !applicationInterface.getLocationSupplier().setupLocationListener() ) {
+        if( app_is_paused ) {
+            Log.e(TAG, "initLocation: app is paused!");
+            // we shouldn't need this (as we only call initLocation() when active), but just in case we end up here after onPause...
+        }
+        else if( !applicationInterface.getLocationSupplier().setupLocationListener() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "location permission not available, so request permission");
             permissionHandler.requestLocationPermission();
