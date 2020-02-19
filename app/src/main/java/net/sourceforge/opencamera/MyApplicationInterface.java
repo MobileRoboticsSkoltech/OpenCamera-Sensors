@@ -252,6 +252,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return false;
     }
 
+    /** If adding extra calls to this, consider whether explicit user permission is required, and whether
+     *  privacy policy needs updating.
+     *  Returns null if location not available.
+     */
     @Override
     public Location getLocation() {
         return locationSupplier.getLocation();

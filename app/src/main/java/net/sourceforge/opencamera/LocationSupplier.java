@@ -29,8 +29,11 @@ public class LocationSupplier {
         locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    /** If adding extra calls to this, consider whether explicit user permission is required, and whether
+     *  privacy policy needs updating.
+     *  Returns null if location not available.
+     */
     public Location getLocation() {
-        // returns null if not available
         if( locationListeners == null )
             return null;
         if( test_force_no_location )
@@ -98,13 +101,15 @@ public class LocationSupplier {
         }
     }
 
-    // returns false if location permission not available for either coarse or fine
+    /* Best to only call this from MainActivity.initLocation().
+     * Returns false if location permission not available for either coarse or fine.
+     */
     boolean setupLocationListener() {
         if( MyDebug.LOG )
             Log.d(TAG, "setupLocationListener");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         // Define a listener that responds to location updates
-        // we only set it up if store_location is true, to avoid unnecessarily wasting battery
+        // we only set it up if store_location is true, important for privacy and unnecessary battery use
         boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
         if( store_location && locationListeners == null ) {
             // Note, ContextCompat.checkSelfPermission is meant to handle being called on any Android version, i.e., pre
