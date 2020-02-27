@@ -17,7 +17,9 @@ public class VideoProfile {
     public int audioSource;
     public int audioCodec;
     public int audioChannels;
+    @SuppressWarnings("WeakerAccess")
     public int audioBitRate;
+    @SuppressWarnings("WeakerAccess")
     public int audioSampleRate;
     public int fileFormat;
     public String fileExtension = "mp4";

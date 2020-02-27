@@ -865,6 +865,7 @@
                 android:title="@string/preference_category_exif_tags"
                 >
 
+                <!--suppress AndroidDomInspection --> <!-- stop lint complaining about empty defaultValue -->
                 <EditTextPreference
                     android:key="preference_exif_artist"
                     android:title="@string/preference_exif_artist"
@@ -875,6 +876,7 @@
                     android:defaultValue=""
                     />
 
+                <!--suppress AndroidDomInspection --> <!-- stop lint complaining about empty defaultValue -->
                 <EditTextPreference
                     android:key="preference_exif_copyright"
                     android:title="@string/preference_exif_copyright"
@@ -947,6 +949,7 @@
                     android:defaultValue="preference_units_distance_m"
                     />
 
+                <!--suppress AndroidDomInspection --> <!-- stop lint complaining about empty defaultValue -->
                 <EditTextPreference
                     android:key="preference_textstamp"
                     android:title="@string/preference_textstamp"

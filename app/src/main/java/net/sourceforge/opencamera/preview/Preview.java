@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -556,6 +557,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return areas;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public boolean touchEvent(MotionEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "touch event at : " + event.getX() + " , " + event.getY() + " at time " + event.getEventTime());
@@ -685,6 +687,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    @SuppressWarnings("SameReturnValue")
     public boolean onDoubleTap() {
         if( MyDebug.LOG )
             Log.d(TAG, "onDoubleTap()");
@@ -791,6 +794,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( camera_controller == null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "camera not opened!");
+            //noinspection UnnecessaryReturnStatement
             return;
         }
     }
@@ -2189,6 +2193,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                                             break;
                                         case 90: {
                                             float temp = avg_x;
+                                            //noinspection SuspiciousNameCombination
                                             avg_x = avg_y;
                                             avg_y = 1.0f-temp;
                                             break;
@@ -3506,6 +3511,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             // display size is returned in portrait format! (To reproduce, enable "Maximise preview size"; or if that's
             // already enabled, change the setting off and on.)
             if( display_size.x < display_size.y ) {
+                //noinspection SuspiciousNameCombination
                 display_size.set(display_size.y, display_size.x);
             }
             if( MyDebug.LOG )
@@ -7236,6 +7242,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.offset_y = offset_y;
         }
 
+        @SuppressLint("CanvasSize")
         @Override
         protected void onDraw(Canvas canvas) {
             final float scale = Preview.this.getResources().getDisplayMetrics().density;
@@ -7355,6 +7362,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         showToast(clear_toast, message, false);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void showToast(final String message, final boolean use_fake_toast) {
         showToast(null, message, use_fake_toast);
     }
@@ -7614,6 +7622,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             int rotation = getDisplayRotationDegrees();
             if( rotation == 90 || rotation == 270 ) {
                 int dummy = bitmap_width;
+                //noinspection SuspiciousNameCombination
                 bitmap_width = bitmap_height;
                 bitmap_height = dummy;
             }

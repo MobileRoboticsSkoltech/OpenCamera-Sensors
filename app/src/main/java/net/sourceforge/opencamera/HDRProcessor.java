@@ -49,6 +49,7 @@ public class HDRProcessor {
     // public for access by testing
     public int [] offsets_x = null;
     public int [] offsets_y = null;
+    @SuppressWarnings("CanBeFinal")
     public int sharp_index = 0;
 
     private enum HDRAlgorithm {
@@ -301,6 +302,7 @@ public class HDRProcessor {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public interface SortCallback {
         /** This is called when the sort order for the input bitmaps is known, from darkest to brightest.
          * @param sort_order A list of length equal to the supplied bitmaps.size(). sort_order.get(i)
@@ -1398,10 +1400,12 @@ public class HDRProcessor {
 
             if( bitmap_new_align != null ) {
                 bitmap_new_align.recycle();
+                //noinspection UnusedAssignment
                 bitmap_new_align = null;
             }
             if( allocation_new_align != null ) {
                 allocation_new_align.destroy();
+                //noinspection UnusedAssignment
                 allocation_new_align = null;
             }
 
@@ -1538,12 +1542,14 @@ public class HDRProcessor {
             if( MyDebug.LOG )
                 Log.d(TAG, "release bitmap_avg");
             bitmap_avg.recycle();
+            //noinspection UnusedAssignment
             bitmap_avg = null;
         }
         if( bitmap_new != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "release bitmap_new");
             bitmap_new.recycle();
+            //noinspection UnusedAssignment
             bitmap_new = null;
         }
 
@@ -3025,6 +3031,7 @@ public class HDRProcessor {
      * @param allocation_in The input allocation.
      * @param width         The width of the allocation.
      */
+    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private float computeSharpness(Allocation allocation_in, int width, long time_s) {
         if( MyDebug.LOG )

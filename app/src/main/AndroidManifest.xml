@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="net.sourceforge.opencamera"
     android:versionCode="74"
     android:versionName="1.48wip"
     android:installLocation="auto"
-    >
+    tools:ignore="GoogleAppIndexingWarning">
+    <!-- ignore GoogleAppIndexingWarning as we don't want to implement that -->
 
     <supports-screens android:xlargeScreens="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true" android:anyDensity="true"/>
 

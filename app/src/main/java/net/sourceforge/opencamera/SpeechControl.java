@@ -93,6 +93,7 @@ class SpeechControl {
                         if( !speechRecognizerIsStarted ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "...but speech recognition already stopped");
+                            //noinspection UnnecessaryReturnStatement
                             return;
                         }
                     }
@@ -104,6 +105,7 @@ class SpeechControl {
                         if( !speechRecognizerIsStarted ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "...but speech recognition already stopped");
+                            //noinspection UnnecessaryReturnStatement
                             return;
                         }
                     }
@@ -161,6 +163,7 @@ class SpeechControl {
                         if( !speechRecognizerIsStarted ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "...but speech recognition already stopped");
+                            //noinspection UnnecessaryReturnStatement
                             return;
                         }
                     }
@@ -172,6 +175,7 @@ class SpeechControl {
                         if( !speechRecognizerIsStarted ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "...but speech recognition already stopped");
+                            //noinspection UnnecessaryReturnStatement
                             return;
                         }
                     }
@@ -183,6 +187,7 @@ class SpeechControl {
                         if( !speechRecognizerIsStarted ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "...but speech recognition already stopped");
+                            //noinspection UnnecessaryReturnStatement
                             return;
                         }
                     }

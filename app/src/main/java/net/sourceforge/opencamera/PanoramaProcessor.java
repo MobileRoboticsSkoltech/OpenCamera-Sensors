@@ -218,7 +218,7 @@ public class PanoramaProcessor {
      *  RGBA_8888.
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script,Bitmap bitmap, int n_levels, String name) {
+    private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels, @SuppressWarnings("unused") String name) {
         if( MyDebug.LOG )
             Log.d(TAG, "createLaplacianPyramid");
         long time_s = 0;
@@ -1044,14 +1044,17 @@ public class PanoramaProcessor {
 			}*/
 
             ix_allocation.destroy();
+            //noinspection UnusedAssignment
             ix_allocation = null;
             iy_allocation.destroy();
+            //noinspection UnusedAssignment
             iy_allocation = null;
 
             if( MyDebug.LOG )
                 Log.d(TAG, "find local maxima for image: " + i);
             // reuse gs_allocation (since it's on the same U8 type that we want)
             Allocation local_max_features_allocation = gs_allocation;
+            //noinspection UnusedAssignment
             gs_allocation = null;
 
 			/*featureDetectorScript.set_corner_threshold(100000000.0f);
@@ -1190,9 +1193,11 @@ public class PanoramaProcessor {
                 Log.d(TAG, "### image: " + i + " has " + points_arrays[i].length + " points");
 
             strength_allocation.destroy();
+            //noinspection UnusedAssignment
             strength_allocation = null;
 
             local_max_features_allocation.destroy();
+            //noinspection UnusedAssignment
             local_max_features_allocation = null;
         }
         if( MyDebug.LOG )
@@ -1218,6 +1223,7 @@ public class PanoramaProcessor {
         }
 
         // generate candidate matches
+        //noinspection UnnecessaryLocalVariable
         final int max_match_dist_x = width;
         final int max_match_dist_y = height/16;
         final int max_match_dist2 = max_match_dist_x*max_match_dist_x + max_match_dist_y*max_match_dist_y;
@@ -1972,6 +1978,7 @@ public class PanoramaProcessor {
         return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation, y_scale);
     }
 
+    @SuppressWarnings("unused")
     private Bitmap blend_panorama_alpha(Bitmap lhs, Bitmap rhs) {
         int width = lhs.getWidth();
         int height = lhs.getHeight();
@@ -2478,6 +2485,7 @@ public class PanoramaProcessor {
         return ratio_brightnesses;
     }
 
+    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void adjustExposures(List<Bitmap> bitmaps, long time_s) {
         List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
@@ -2821,6 +2829,7 @@ public class PanoramaProcessor {
             int align_y = 0;
             int dst_offset_x = dst_offset_x_values.get(i);
 
+            //noinspection UnusedAssignment
             boolean free_bitmap = false;
             int shift_stop_x = align_x;
             int centre_shift_x;

@@ -2963,10 +2963,12 @@ public class MainActivity extends Activity {
                             }
                             // align dimensions
                             if( display_size.x < display_size.y ) {
+                                //noinspection SuspiciousNameCombination
                                 display_size.set(display_size.y, display_size.x);
                             }
                             if( bitmap_width < bitmap_height ) {
                                 int dummy = bitmap_width;
+                                //noinspection SuspiciousNameCombination
                                 bitmap_width = bitmap_height;
                                 bitmap_height = dummy;
                             }
@@ -3591,6 +3593,7 @@ public class MainActivity extends Activity {
         final int clear_index = index;
         items[index++] = getResources().getString(R.string.clear_folder_history);
         final int new_index = index;
+        //noinspection UnusedAssignment
         items[index++] = getResources().getString(R.string.choose_another_folder);
         alertDialog.setItems(items, new DialogInterface.OnClickListener() {
             @Override

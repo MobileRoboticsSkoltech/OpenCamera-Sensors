@@ -176,6 +176,7 @@ public class BluetoothLeService extends Service {
         if (gattServices == null) return;
         List<UUID> mCharacteristicsWanted;
 
+        //noinspection SwitchStatementWithTooFewBranches
         switch( remote_device_type ) {
             case "preference_remote_type_kraken":
                 mCharacteristicsWanted = KrakenGattAttributes.getDesiredCharacteristics();

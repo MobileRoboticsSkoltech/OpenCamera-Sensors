@@ -218,6 +218,7 @@ public interface ApplicationInterface {
     void setVideoQualityPref(String video_quality);
     void setZoomPref(int zoom);
     void requestCameraPermission(); // for Android 6+: called when trying to open camera, but CAMERA permission not available
+    @SuppressWarnings("SameReturnValue")
     boolean needsStoragePermission(); // return true if the preview should call requestStoragePermission() if WRITE_EXTERNAL_STORAGE not available (i.e., if the application needs storage permission, e.g., to save photos)
     void requestStoragePermission(); // for Android 6+: called when trying to open camera, but WRITE_EXTERNAL_STORAGE permission not available
     void requestRecordAudioPermission(); // for Android 6+: called when switching to (or starting up in) video mode, but RECORD_AUDIO permission not available

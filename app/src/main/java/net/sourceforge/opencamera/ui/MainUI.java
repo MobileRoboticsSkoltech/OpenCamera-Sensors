@@ -241,9 +241,13 @@ public class MainUI {
             iconpanel_right_of = RelativeLayout.ABOVE;
             iconpanel_above = RelativeLayout.LEFT_OF;
             iconpanel_below = RelativeLayout.RIGHT_OF;
+            //noinspection SuspiciousNameCombination
             iconpanel_align_parent_left = RelativeLayout.ALIGN_PARENT_BOTTOM;
+            //noinspection SuspiciousNameCombination
             iconpanel_align_parent_right = RelativeLayout.ALIGN_PARENT_TOP;
+            //noinspection SuspiciousNameCombination
             iconpanel_align_parent_top = RelativeLayout.ALIGN_PARENT_LEFT;
+            //noinspection SuspiciousNameCombination
             iconpanel_align_parent_bottom = RelativeLayout.ALIGN_PARENT_RIGHT;
         }
 
@@ -776,8 +780,10 @@ public class MainUI {
         else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
             view.setPivotX(0.0f);
             view.setPivotY(0.0f);
-            if( ui_rotation == 90 )
+            if( ui_rotation == 90 ) {
+                //noinspection SuspiciousNameCombination
                 view.setTranslationX(popup_height);
+            }
             else if( ui_rotation == 270 ) {
                 view.setTranslationY(display_height);
             }
@@ -786,8 +792,10 @@ public class MainUI {
             view.setPivotX(popup_width);
             view.setPivotY(ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : popup_height);
             if( ui_placement == UIPlacement.UIPLACEMENT_RIGHT ) {
-                if( ui_rotation == 90 )
+                if( ui_rotation == 90 ) {
+                    //noinspection SuspiciousNameCombination
                     view.setTranslationY( popup_width );
+                }
                 else if( ui_rotation == 270 )
                     view.setTranslationX( - popup_height );
             }

@@ -601,6 +601,7 @@ public class UnitTest {
     /** Duplicates the code in avg_brighter.rs for median filter, to test this.
      *  Finds median of the supplied values, sorting by the alpha component.
      */
+    @SuppressWarnings("UnusedAssignment")
     private float4 findMedian(float4 p0, float4 p1, float4 p2, float4 p3, float4 p4) {
         if( p0.a > p1.a ) {
             float4 temp_p = p0;

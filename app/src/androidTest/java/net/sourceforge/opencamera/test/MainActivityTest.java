@@ -3257,6 +3257,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
         }
         String new_focus_value_ui = mPreview.getCurrentFocusValue();
+        //noinspection StringEquality
         assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
         if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo )
             assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch (unless single_tap_photo)
@@ -3278,6 +3279,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void checkFocusInitial(final String focus_value, final String focus_value_ui) {
         String new_focus_value_ui = mPreview.getCurrentFocusValue();
+        //noinspection StringEquality
         assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
         assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
     }
@@ -3287,6 +3289,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String new_focus_value_ui = mPreview.getCurrentFocusValue();
         Log.d(TAG, "focus_value_ui: " + focus_value_ui);
         Log.d(TAG, "new new_focus_value_ui: " + new_focus_value_ui);
+        //noinspection StringEquality
         assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
         String new_focus_value = mPreview.getCameraController().getFocusValue();
         Log.d(TAG, "focus_value: " + focus_value);
@@ -9773,11 +9776,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 if( children != null ) {
                     for(String child : children) {
                         File file = new File(folder, child);
+                        //noinspection ResultOfMethodCallIgnored
                         file.delete();
                         MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
                     }
                 }
             }
+            //noinspection ResultOfMethodCallIgnored
             folder.delete();
         }
         int n_old_files = 0;
@@ -9899,11 +9904,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 if( children != null ) {
                     for(String child : children) {
                         File file = new File(folder, child);
+                        //noinspection ResultOfMethodCallIgnored
                         file.delete();
                         MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
                     }
                 }
             }
+            //noinspection ResultOfMethodCallIgnored
             folder.delete();
         }
 
@@ -13624,6 +13631,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             time_s = System.currentTimeMillis();
             nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height, iso, exposure_time);
             avg_data.destroy();
+            //noinspection UnusedAssignment
             avg_data = null;
             times.add(System.currentTimeMillis() - time_s);
 
@@ -14792,6 +14800,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(avg_images_path + "testAvg25/input2.jpg");
         inputs.add(avg_images_path + "testAvg25/input3.jpg");
 
+        //noinspection unused
         HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, 1000000000L/20, 1.0f, new TestAvgCallback() {
             @Override
             public void doneProcessAvg(int index) {
@@ -15859,6 +15868,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
      * @param camera_angle_y The value of preview.getViewAngleY(for_preview=false) (in degrees) when taking the input photos (on the device used).
      */
+    @SuppressWarnings("unused")
     private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float camera_angle_x, float camera_angle_y, float gyro_tol_degrees) throws IOException, InterruptedException {
         Log.d(TAG, "subTestPanorama");
 

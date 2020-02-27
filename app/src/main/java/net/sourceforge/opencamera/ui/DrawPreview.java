@@ -2050,8 +2050,10 @@ public class DrawPreview {
             // but we also need to take the top_icon_shift into account, for widescreen aspect ratios and "icons along top" UI placement
             int focus_seekbars_margin_left_dp = 135;
             int new_focus_seekbars_margin_left = (int) (focus_seekbars_margin_left_dp * scale + 0.5f); // convert dps to pixels
-            if( top_icon_shift > 0 )
+            if( top_icon_shift > 0 ) {
+                //noinspection SuspiciousNameCombination
                 new_focus_seekbars_margin_left += top_icon_shift;
+            }
 
             if( focus_seekbars_margin_left == -1 || new_focus_seekbars_margin_left != focus_seekbars_margin_left ) {
                 // we check whether focus_seekbars_margin_left has changed, in case there is a performance cost for setting layoutparams
@@ -2734,7 +2736,7 @@ public class DrawPreview {
         }
     }
 
-    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp, boolean outline) {
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, @SuppressWarnings("unused") float dir_x, @SuppressWarnings("unused") float dir_y, int radius_dp, boolean outline) {
         if( outline ) {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(stroke_width);

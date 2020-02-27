@@ -70,6 +70,7 @@ public class PopupView extends LinearLayout {
     private int repeat_mode_index = -1;
     private int grid_index = -1;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
 
     public PopupView(Context context) {

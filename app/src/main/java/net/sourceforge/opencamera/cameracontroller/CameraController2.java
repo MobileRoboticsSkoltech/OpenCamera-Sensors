@@ -721,6 +721,7 @@ public class CameraController2 extends CameraController {
             return false;
         }
 
+        @SuppressWarnings("SameReturnValue")
         private boolean setAEMode(CaptureRequest.Builder builder, boolean is_still) {
             if( MyDebug.LOG )
                 Log.d(TAG, "setAEMode");
@@ -764,6 +765,7 @@ public class CameraController2 extends CameraController {
                 }
 
                 // prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
+                //noinspection DuplicateBranchesInSwitch
                 switch(flash_value) {
                     case "flash_off":
                         builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
@@ -2626,6 +2628,7 @@ public class CameraController2 extends CameraController {
             // would be good to not assume Open Camera runs in landscape mode (if we ever ran in portrait mode,
             // we'd still want display_size.x > display_size.y as preview resolutions also have width > height)
             if( display_size.x < display_size.y ) {
+                //noinspection SuspiciousNameCombination
                 display_size.set(display_size.y, display_size.x);
             }
             if( MyDebug.LOG )
@@ -5920,6 +5923,7 @@ public class CameraController2 extends CameraController {
                         Log.e(TAG, "message: " + e.getMessage());
                     }
                     e.printStackTrace();
+                    //noinspection UnusedAssignment
                     ok = false;
                     jpeg_todo = false;
                     raw_todo = false;
@@ -5930,6 +5934,7 @@ public class CameraController2 extends CameraController {
                     if( MyDebug.LOG )
                         Log.d(TAG, "captureSession already closed!");
                     e.printStackTrace();
+                    //noinspection UnusedAssignment
                     ok = false;
                     jpeg_todo = false;
                     raw_todo = false;
@@ -6324,6 +6329,7 @@ public class CameraController2 extends CameraController {
                         Log.e(TAG, "message: " + e.getMessage());
                     }
                     e.printStackTrace();
+                    //noinspection UnusedAssignment
                     ok = false;
                     jpeg_todo = false;
                     raw_todo = false;
@@ -6334,6 +6340,7 @@ public class CameraController2 extends CameraController {
                     if( MyDebug.LOG )
                         Log.d(TAG, "captureSession already closed!");
                     e.printStackTrace();
+                    //noinspection UnusedAssignment
                     ok = false;
                     jpeg_todo = false;
                     raw_todo = false;
@@ -6665,6 +6672,7 @@ public class CameraController2 extends CameraController {
                         Log.e(TAG, "message: " + e.getMessage());
                     }
                     e.printStackTrace();
+                    //noinspection UnusedAssignment
                     ok = false;
                     jpeg_todo = false;
                     raw_todo = false;

@@ -1434,6 +1434,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public NRModePref getNRModePref() {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "nr_mode: " + nr_mode);*/
+        //noinspection SwitchStatementWithTooFewBranches
         switch( nr_mode ) {
             case "preference_nr_mode_low_light":
                 return NRModePref.NRMODE_LOW_LIGHT;
@@ -1637,6 +1638,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      */
     boolean isRawOnly(PhotoMode photo_mode) {
         if( isRawAllowed(photo_mode) ) {
+            //noinspection SwitchStatementWithTooFewBranches
             switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
                 case "preference_raw_only":
                     return true;

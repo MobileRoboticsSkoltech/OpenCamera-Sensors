@@ -1161,7 +1161,9 @@ public class ImageSaver extends Thread {
         xmlSerializer.flush();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class GyroDebugInfo {
+        @SuppressWarnings("unused")
         public static class GyroImageDebugInfo {
             public float [] vectorRight; // X axis
             public float [] vectorUp; // Y axis
@@ -1234,6 +1236,7 @@ public class ImageSaver extends Thread {
                             Log.d(TAG, "end tag, name: " + name);
                         }
 
+                        //noinspection SwitchStatementWithTooFewBranches
                         switch( name ) {
                             case gyro_info_image_tag:
                                 image_info = null;
@@ -1435,6 +1438,7 @@ public class ImageSaver extends Thread {
                         Log.d(TAG, "*** time for brighten: " + (System.currentTimeMillis() - this_time_s));
                     }
                     avg_data.destroy();
+                    //noinspection UnusedAssignment
                     avg_data = null;
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "*** total time for saving NR image: " + (System.currentTimeMillis() - time_s));
@@ -2153,6 +2157,7 @@ public class ImageSaver extends Thread {
                     if( MyDebug.LOG )
                         Log.d(TAG, "stamp text");
                     applicationInterface.drawTextWithBackground(canvas, p, request.preference_textstamp, color, Color.BLACK, width - offset_x, ypos, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, draw_shadowed);
+                    //noinspection UnusedAssignment
                     ypos -= diff_y;
                 }
             }

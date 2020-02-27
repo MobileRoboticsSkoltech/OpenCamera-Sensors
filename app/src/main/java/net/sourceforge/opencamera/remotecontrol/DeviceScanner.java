@@ -176,6 +176,7 @@ public class DeviceScanner extends ListActivity {
                                            @NonNull int[] grantResults) {
         if( MyDebug.LOG )
             Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
+        //noinspection SwitchStatementWithTooFewBranches
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
