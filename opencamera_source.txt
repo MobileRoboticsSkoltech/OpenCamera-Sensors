@@ -19,6 +19,26 @@ Preview: At a higher level, you might want to take the classes in Preview/ as we
 
 Application: You might prefer to use Open Camera in its entirety, as an Activity within your application (or possibly converting the MainActivity to a fragment). Consider whether Open Camera's Settings should be unified with the settings in your application. Accesses to SharedPreferences use the PreferencesKeys class to find the keys.
 
+Android inspection warnings/errors
+==================================
+
+The file .idea/inspectionProfiles/Project_Default.xml contains settings for Android inpsections (see Editor/Inspections). The following have been disabled:
+
+* AndroidLintUnusedResources - seems to give false information on res/ images, as well as complaining about renderscript files in build folders.
+* BooleanMethodIsAlwaysInverted - Generates too many useless warnings.
+* ConstantConditions - Unfortunately this seems broken when calling an Android SDK function where only a stub source is available, such that the inspection incorrectly things an exception is thrown. E.g., see calls to TouchUtils.clickView() in MainActivityTest, this inspection thinks that e.g. "i<8" in for loops is always true.
+* EmptyMethod - Sometimes can be useful to explicitly have a subclassed empty method, to show I've intentionally left it empty rather than forgotten to consider it.
+* EmptyStatementBody - These may be intentional.
+* PointlessBooleanExpression - This complains too much about controlling codepaths with final boolean flags (e.g., "if( debug_switch && blah )").
+* SameParameterValue - A parameter may have been provided for future proofing even if callers currently only use one value.
+* TrivialIf - This suggests replacing clear if statements with shorter but more convoluted boolean expressions.
+* UnusedReturnValue - In some cases a function may return something even if not currently used, either for future proofing, or we used it in the past (and might use again in the future). Whilst a caller not checking the return can be an error, this check wouldn't pick that up so long as at least one caller checked the return.
+
+The following are enabled, but with modifications:
+
+* UnnecessaryLocalVariable - m_ignoreImmediatelyReturnedVariables is true.
+* unused - parameter="protected", REPORT_PARAMETER_FOR_PUBLIC_METHODS is false (otherwise this complaints about parameters in overriden methods being unused);  method="protected" (in some cases public unused methods may be added for future proofing).
+
 Licence
 =======
 
@@ -30,4 +50,4 @@ Homepage: http://opencamera.org.uk/
 
 Google Play download: https://play.google.com/store/apps/details?id=net.sourceforge.opencamera
 
-Mark Harman 9 September 2018
+Mark Harman 27 February 2020

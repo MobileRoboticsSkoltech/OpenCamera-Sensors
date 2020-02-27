@@ -8,7 +8,10 @@ _other/
 _saved/
 
 .gradle/
-.idea/
+
+.idea/*
+!.idea/inspectionProfiles
+
 build/
 app/release/
 gfx/

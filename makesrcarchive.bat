@@ -23,6 +23,13 @@ copy %src%\app\build.gradle %dst%\app\
 mkdir %dst%\gradle
 xcopy %src%\gradle %dst%\gradle /E /Y
 
+REM We copy the inspectionProfiles as this stores which Android inspection warnings/errors we've disabled; although
+REM note this isn't part of the Git repository, due lots of other files in .idea/ that we don't want to be part of the
+REM project.
+mkdir %dst%\.idea
+mkdir %dst%\.idea\inspectionProfiles
+xcopy %src%\.idea\inspectionProfiles %dst%\.idea\inspectionProfiles /E /Y
+
 mkdir %dst%\_docs
 REM xcopy %src%\_docs %dst%\_docs /E /Y
 copy %src%\_docs\credits.html %dst%\_docs
