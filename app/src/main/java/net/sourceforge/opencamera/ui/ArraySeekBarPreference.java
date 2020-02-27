@@ -16,7 +16,7 @@ import net.sourceforge.opencamera.R;
 /** This contains a custom preference to display a seekbar in place of a ListPreference.
  */
 public class ArraySeekBarPreference extends DialogPreference {
-    private static final String TAG = "ArraySeekBarPreference";
+    //private static final String TAG = "ArraySeekBarPreference";
 
     private SeekBar seekbar;
     private TextView textView;

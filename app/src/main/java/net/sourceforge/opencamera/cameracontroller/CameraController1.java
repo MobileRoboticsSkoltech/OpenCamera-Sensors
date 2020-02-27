@@ -1139,6 +1139,8 @@ public class CameraController1 extends CameraController {
         String flash_mode = "";
         switch(flash_value) {
             case "flash_off":
+            case "flash_frontscreen_on":
+            case "flash_frontscreen_torch":
                 flash_mode = Camera.Parameters.FLASH_MODE_OFF;
                 break;
             case "flash_auto":
@@ -1152,10 +1154,6 @@ public class CameraController1 extends CameraController {
                 break;
             case "flash_red_eye":
                 flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
-                break;
-            case "flash_frontscreen_on":
-            case "flash_frontscreen_torch":
-                flash_mode = Camera.Parameters.FLASH_MODE_OFF;
                 break;
         }
         return flash_mode;

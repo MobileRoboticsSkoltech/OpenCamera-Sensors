@@ -45,9 +45,9 @@ public class BluetoothLeService extends Service {
     private double currentTemp = -1;
     private double currentDepth = -1;
 
-    private static final int STATE_DISCONNECTED = 0;
+    /*private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
+    private static final int STATE_CONNECTED = 2;*/
 
     public final static String ACTION_GATT_CONNECTED =
             "net.sourceforge.opencamera.Remotecontrol.ACTION_GATT_CONNECTED";

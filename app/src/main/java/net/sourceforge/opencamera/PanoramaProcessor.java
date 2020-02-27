@@ -543,13 +543,13 @@ public class PanoramaProcessor {
         bitmap.recycle();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void savePyramid(String name, List<Allocation> pyramid) {
         for(int i=0;i<pyramid.size();i++) {
             Allocation allocation = pyramid.get(i);
             saveAllocation(name + "_" + i + ".jpg", allocation);
         }
-    }
+    }*/
 
     private final static int blend_n_levels = 4; // number of levels used for pyramid blending
 
@@ -2015,12 +2015,12 @@ public class PanoramaProcessor {
         return blended_bitmap;
     }
 
-    private static int nextPowerOf2(int value) {
+    /*private static int nextPowerOf2(int value) {
         int power = 1;
         while( value > power )
             power *= 2;
         return power;
-    }
+    }*/
 
     private static int nextMultiple(int value, int multiple) {
         int remainder = value % multiple;
