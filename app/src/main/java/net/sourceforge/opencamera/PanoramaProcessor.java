@@ -497,6 +497,7 @@ public class PanoramaProcessor {
         }
     }
 
+    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void saveAllocation(String name, Allocation allocation) {
         Bitmap bitmap;
@@ -779,7 +780,7 @@ public class PanoramaProcessor {
         }
     }
 
-    private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
+    private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, @SuppressWarnings("unused") List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
         final int wid = 2*feature_descriptor_radius+1;
         final int wid2 = wid*wid;
         for(int indx=st_indx;indx<nd_indx;indx++) {
