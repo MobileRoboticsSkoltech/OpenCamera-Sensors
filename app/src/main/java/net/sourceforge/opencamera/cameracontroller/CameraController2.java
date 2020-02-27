@@ -340,8 +340,8 @@ public class CameraController2 extends CameraController {
     
     private enum RequestTagType {
         CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
-        CAPTURE_BURST_IN_PROGRESS, // request is for a burst capture, but isn't the last of the burst capture sequence
-        NONE // should be treated the same as if no tag had been set on the request - but allows the request tag type to be changed later
+        CAPTURE_BURST_IN_PROGRESS // request is for a burst capture, but isn't the last of the burst capture sequence
+        //NONE // should be treated the same as if no tag had been set on the request - but allows the request tag type to be changed later
     }
 
     /* The class that we use for setTag() and getTag() for capture requests.
