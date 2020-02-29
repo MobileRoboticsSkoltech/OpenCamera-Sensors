@@ -981,7 +981,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     if( pref.getKey().equals("preference_using_saf") ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked saf");
-                        if( sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false) ) {
+                        if( sharedPreferences.getBoolean(PreferenceKeys.UsingSAFPreferenceKey, false) ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "saf is now enabled");
                             // seems better to alway re-show the dialog when the user selects, to make it clear where files will be saved (as the SAF location in general will be different to the non-SAF one)
@@ -1379,11 +1379,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(magnetic_accuracy);
 
                         about_string.append("\nUsing SAF?: ");
-                        about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
-                        String save_location = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
+                        about_string.append(sharedPreferences.getBoolean(PreferenceKeys.UsingSAFPreferenceKey, false));
+                        String save_location = sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
                         about_string.append("\nSave Location: ");
                         about_string.append(save_location);
-                        String save_location_saf = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+                        String save_location_saf = sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
                         about_string.append("\nSave Location SAF: ");
                         about_string.append(save_location_saf);
 

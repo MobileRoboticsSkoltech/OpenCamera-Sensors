@@ -5,8 +5,6 @@ package net.sourceforge.opencamera;
 public class PreferenceKeys {
     // must be static, to safely call from other Activities
 
-    // arguably the static methods here that don't receive an argument could just be static final strings? Though we may want to change some of them to be cameraId-specific in future
-
     /** If this preference is set, no longer show the intro dialog.
      */
     public static final String FirstTimePreferenceKey = "done_first_time";
@@ -190,49 +188,29 @@ public class PreferenceKeys {
 
     public static final String DimWhenDisconnectedPreferenceKey = "preference_remote_disconnect_screen_dim";
 
-    public static String getShowWhenLockedPreferenceKey() {
-        return "preference_show_when_locked";
-    }
+    public static final String ShowWhenLockedPreferenceKey = "preference_show_when_locked";
 
     public static final String AllowLongPressPreferenceKey = "preference_allow_long_press";
 
-    public static String getStartupFocusPreferenceKey() {
-        return "preference_startup_focus";
-    }
+    public static final String StartupFocusPreferenceKey = "preference_startup_focus";
 
     public static final String MultiCamButtonPreferenceKey = "preference_multi_cam_button";
 
-    public static String getKeepDisplayOnPreferenceKey() {
-        return "preference_keep_display_on";
-    }
+    public static final String KeepDisplayOnPreferenceKey = "preference_keep_display_on";
 
-    public static String getMaxBrightnessPreferenceKey() {
-        return "preference_max_brightness";
-    }
+    public static final String MaxBrightnessPreferenceKey = "preference_max_brightness";
 
-    public static String getUsingSAFPreferenceKey() {
-        return "preference_using_saf";
-    }
+    public static final String UsingSAFPreferenceKey = "preference_using_saf";
 
-    public static String getSaveLocationPreferenceKey() {
-        return "preference_save_location";
-    }
+    public static final String SaveLocationPreferenceKey = "preference_save_location";
 
-    public static String getSaveLocationSAFPreferenceKey() {
-        return "preference_save_location_saf";
-    }
+    public static final String SaveLocationSAFPreferenceKey = "preference_save_location_saf";
 
-    public static String getSavePhotoPrefixPreferenceKey() {
-        return "preference_save_photo_prefix";
-    }
+    public static final String SavePhotoPrefixPreferenceKey = "preference_save_photo_prefix";
 
-    public static String getSaveVideoPrefixPreferenceKey() {
-        return "preference_save_video_prefix";
-    }
+    public static final String SaveVideoPrefixPreferenceKey = "preference_save_video_prefix";
 
-    public static String getSaveZuluTimePreferenceKey() {
-        return "preference_save_zulu_time";
-    }
+    public static final String SaveZuluTimePreferenceKey = "preference_save_zulu_time";
 
     public static final String ShowZoomControlsPreferenceKey = "preference_show_zoom_controls";
 
@@ -310,19 +288,13 @@ public class PreferenceKeys {
 
     public static final String GhostImageAlphaPreferenceKey = "ghost_image_alpha";
 
-    public static String getVideoStabilizationPreferenceKey() {
-        return "preference_video_stabilization";
-    }
+    public static final String VideoStabilizationPreferenceKey = "preference_video_stabilization";
 
-    public static String getForceVideo4KPreferenceKey() {
-        return "preference_force_video_4k";
-    }
+    public static final String ForceVideo4KPreferenceKey = "preference_force_video_4k";
 
     public static final String VideoFormatPreferenceKey = "preference_video_output_format";
 
-    public static String getVideoBitratePreferenceKey() {
-        return "preference_video_bitrate";
-    }
+    public static final String VideoBitratePreferenceKey = "preference_video_bitrate";
 
     public static String getVideoFPSPreferenceKey(int cameraId) {
         // for cameraId==0, we return preference_video_fps instead of preference_video_fps_0, for
@@ -338,83 +310,47 @@ public class PreferenceKeys {
 
     public static final String VideoProfileGammaPreferenceKey = "preference_video_profile_gamma";
 
-    public static String getVideoMaxDurationPreferenceKey() {
-        return "preference_video_max_duration";
-    }
+    public static final String VideoMaxDurationPreferenceKey = "preference_video_max_duration";
 
-    public static String getVideoRestartPreferenceKey() {
-        return "preference_video_restart";
-    }
+    public static final String VideoRestartPreferenceKey = "preference_video_restart";
 
-    public static String getVideoMaxFileSizePreferenceKey() {
-        return "preference_video_max_filesize";
-    }
+    public static final String VideoMaxFileSizePreferenceKey = "preference_video_max_filesize";
 
-    public static String getVideoRestartMaxFileSizePreferenceKey() {
-        return "preference_video_restart_max_filesize";
-    }
+    public static final String VideoRestartMaxFileSizePreferenceKey = "preference_video_restart_max_filesize";
 
-    public static String getVideoFlashPreferenceKey() {
-        return "preference_video_flash";
-    }
+    public static final String VideoFlashPreferenceKey = "preference_video_flash";
 
-    public static String getVideoLowPowerCheckPreferenceKey() {
-        return "preference_video_low_power_check";
-    }
+    public static final String VideoLowPowerCheckPreferenceKey = "preference_video_low_power_check";
 
-    public static String getLockVideoPreferenceKey() {
-        return "preference_lock_video";
-    }
+    public static final String LockVideoPreferenceKey = "preference_lock_video";
 
-    public static String getRecordAudioPreferenceKey() {
-        return "preference_record_audio";
-    }
+    public static final String RecordAudioPreferenceKey = "preference_record_audio";
 
-    public static String getRecordAudioChannelsPreferenceKey() {
-        return "preference_record_audio_channels";
-    }
+    public static final String RecordAudioChannelsPreferenceKey = "preference_record_audio_channels";
 
-    public static String getRecordAudioSourcePreferenceKey() {
-        return "preference_record_audio_src";
-    }
+    public static final String RecordAudioSourcePreferenceKey = "preference_record_audio_src";
 
     public static final String PreviewSizePreferenceKey = "preference_preview_size";
 
-    public static String getRotatePreviewPreferenceKey() {
-        return "preference_rotate_preview";
-    }
+    public static final String RotatePreviewPreferenceKey = "preference_rotate_preview";
 
-    public static String getLockOrientationPreferenceKey() {
-        return "preference_lock_orientation";
-    }
+    public static final String LockOrientationPreferenceKey = "preference_lock_orientation";
 
-    public static String getTimerPreferenceKey() {
-        return "preference_timer";
-    }
+    public static final String TimerPreferenceKey = "preference_timer";
 
-    public static String getTimerBeepPreferenceKey() {
-        return "preference_timer_beep";
-    }
+    public static final String TimerBeepPreferenceKey = "preference_timer_beep";
 
-    public static String getTimerSpeakPreferenceKey() {
-        return "preference_timer_speak";
-    }
+    public static final String TimerSpeakPreferenceKey = "preference_timer_speak";
 
-    public static String getRepeatModePreferenceKey() {
-        // note for historical reasons the preference refers to burst; the feature was renamed to
-        // "repeat" in v1.43, but we still need to use the old string to avoid changing user settings
-        // when people upgrade
-        return "preference_burst_mode";
-    }
+    // note for historical reasons the preference refers to burst; the feature was renamed to
+    // "repeat" in v1.43, but we still need to use the old string to avoid changing user settings
+    // when people upgrade
+    public static final String RepeatModePreferenceKey = "preference_burst_mode";
 
-    public static String getRepeatIntervalPreferenceKey() {
-        // see note about "repeat" vs "burst" under getRepeatModePreferenceKey()
-        return "preference_burst_interval";
-    }
+    // see note about "repeat" vs "burst" under RepeatModePreferenceKey
+    public static final String RepeatIntervalPreferenceKey = "preference_burst_interval";
 
-    public static String getShutterSoundPreferenceKey() {
-        return "preference_shutter_sound";
-    }
+    public static final String ShutterSoundPreferenceKey = "preference_shutter_sound";
 
     public static final String ImmersiveModePreferenceKey = "preference_immersive_mode";
 }

@@ -2678,7 +2678,7 @@ public class MainActivity extends Activity {
         // done here rather than onCreate, so that changing it in preferences takes effect without restarting app
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final WindowManager.LayoutParams layout = getWindow().getAttributes();
-        if( force_max || sharedPreferences.getBoolean(PreferenceKeys.getMaxBrightnessPreferenceKey(), true) ) {
+        if( force_max || sharedPreferences.getBoolean(PreferenceKeys.MaxBrightnessPreferenceKey, true) ) {
             layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
         }
         else {
@@ -2757,7 +2757,7 @@ public class MainActivity extends Activity {
 
 
         // keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
-        if( sharedPreferences.getBoolean(PreferenceKeys.getKeepDisplayOnPreferenceKey(), true) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.KeepDisplayOnPreferenceKey, true) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "do keep screen on");
             this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -2767,7 +2767,7 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "don't keep screen on");
             this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
-        if( sharedPreferences.getBoolean(PreferenceKeys.getShowWhenLockedPreferenceKey(), true) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.ShowWhenLockedPreferenceKey, true) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "do show when locked");
             // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
@@ -3346,7 +3346,7 @@ public class MainActivity extends Activity {
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
+                        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, treeUri.toString());
                         editor.apply();
 
                         if( MyDebug.LOG )
@@ -3364,12 +3364,12 @@ public class MainActivity extends Activity {
                         preview.showToast(null, R.string.saf_permission_failed);
                         // failed - if the user had yet to set a save location, make sure we switch SAF back off
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                        String uri = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+                        String uri = sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
                         if( uri.length() == 0 ) {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "no SAF save location was set");
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false);
+                            editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, false);
                             editor.apply();
                         }
                     }
@@ -3379,12 +3379,12 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "SAF dialog cancelled");
                     // cancelled - if the user had yet to set a save location, make sure we switch SAF back off
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                    String uri = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+                    String uri = sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
                     if( uri.length() == 0 ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "no SAF save location was set");
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false);
+                        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, false);
                         editor.apply();
                         preview.showToast(null, R.string.saf_cancelled);
                     }
@@ -3498,7 +3498,7 @@ public class MainActivity extends Activity {
                 if( MyDebug.LOG )
                     Log.d(TAG, "changed save_folder to: " + this.applicationInterface.getStorageUtils().getSaveLocation());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
+                editor.putString(PreferenceKeys.SaveLocationPreferenceKey, new_save_location);
                 editor.apply();
 
                 this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), true);
@@ -3667,9 +3667,9 @@ public class MainActivity extends Activity {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         if( applicationInterface.getStorageUtils().isUsingSAF() )
-                            editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), save_folder);
+                            editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, save_folder);
                         else
-                            editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
+                            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, save_folder);
                         editor.apply();
                         history.updateFolderHistory(save_folder, true); // to move new selection to most recent
                     }
@@ -4600,7 +4600,7 @@ public class MainActivity extends Activity {
                 toast_string += "\n" + getResources().getString(R.string.audio_disabled);
                 simple = false;
             }
-            String max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
+            String max_duration_value = sharedPreferences.getString(PreferenceKeys.VideoMaxDurationPreferenceKey, "0");
             if( max_duration_value.length() > 0 && !max_duration_value.equals("0") ) {
                 String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
                 String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
@@ -4720,7 +4720,7 @@ public class MainActivity extends Activity {
                 simple = false;
             }
         }
-        String timer = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
+        String timer = sharedPreferences.getString(PreferenceKeys.TimerPreferenceKey, "0");
         if( !timer.equals("0") && photo_mode != MyApplicationInterface.PhotoMode.Panorama ) {
             String [] entries_array = getResources().getStringArray(R.array.preference_timer_entries);
             String [] values_array = getResources().getStringArray(R.array.preference_timer_values);

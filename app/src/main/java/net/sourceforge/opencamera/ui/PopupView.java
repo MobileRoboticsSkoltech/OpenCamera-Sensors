@@ -847,7 +847,7 @@ public class PopupView extends LinearLayout {
 
                 final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
                 String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
-                String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
+                String timer_value = sharedPreferences.getString(PreferenceKeys.TimerPreferenceKey, "0");
                 timer_index = Arrays.asList(timer_values).indexOf(timer_value);
                 if( timer_index == -1 ) {
                     if( MyDebug.LOG )
@@ -862,7 +862,7 @@ public class PopupView extends LinearLayout {
                         String new_timer_value = timer_values[timer_index];
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
+                        editor.putString(PreferenceKeys.TimerPreferenceKey, new_timer_value);
                         editor.apply();
                     }
                     @Override
@@ -893,7 +893,7 @@ public class PopupView extends LinearLayout {
 
                 final String [] repeat_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
                 String [] repeat_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
-                String repeat_mode_value = sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
+                String repeat_mode_value = sharedPreferences.getString(PreferenceKeys.RepeatModePreferenceKey, "1");
                 repeat_mode_index = Arrays.asList(repeat_mode_values).indexOf(repeat_mode_value);
                 if( repeat_mode_index == -1 ) {
                     if( MyDebug.LOG )
@@ -909,7 +909,7 @@ public class PopupView extends LinearLayout {
                         String new_repeat_mode_value = repeat_mode_values[repeat_mode_index];
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), new_repeat_mode_value);
+                        editor.putString(PreferenceKeys.RepeatModePreferenceKey, new_repeat_mode_value);
                         editor.apply();
                     }
                     @Override

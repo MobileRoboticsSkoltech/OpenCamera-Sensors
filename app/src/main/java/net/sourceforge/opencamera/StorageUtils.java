@@ -292,7 +292,7 @@ public class StorageUtils {
         // check Android version just to be safe
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if( sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false) ) {
+            if( sharedPreferences.getBoolean(PreferenceKeys.UsingSAFPreferenceKey, false) ) {
                 return true;
             }
         }
@@ -302,13 +302,13 @@ public class StorageUtils {
     // only valid if !isUsingSAF()
     String getSaveLocation() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
+        return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
     }
 
     // only valid if isUsingSAF()
     String getSaveLocationSAF() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+        return sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
     }
 
     // only valid if isUsingSAF()
@@ -567,7 +567,7 @@ public class StorageUtils {
             index = "_" + count; // try to find a unique filename
         }
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.getSaveZuluTimePreferenceKey(), "local").equals("zulu");
+        boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.SaveZuluTimePreferenceKey, "local").equals("zulu");
         String timeStamp;
         if( useZuluTime ) {
             SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd_HHmmss'Z'", Locale.US);
@@ -581,12 +581,12 @@ public class StorageUtils {
         switch (type) {
             case MEDIA_TYPE_GYRO_INFO: // gyro info files have same name as the photo (but different extension)
             case MEDIA_TYPE_IMAGE: {
-                String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
+                String prefix = sharedPreferences.getString(PreferenceKeys.SavePhotoPrefixPreferenceKey, "IMG_");
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
                 break;
             }
             case MEDIA_TYPE_VIDEO: {
-                String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
+                String prefix = sharedPreferences.getString(PreferenceKeys.SaveVideoPrefixPreferenceKey, "VID_");
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
                 break;
             }

@@ -615,12 +615,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getVideoStabilizationPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), false);
+        return sharedPreferences.getBoolean(PreferenceKeys.VideoStabilizationPreferenceKey, false);
     }
 
     @Override
     public boolean getForce4KPref() {
-        return cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K();
+        return cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.ForceVideo4KPreferenceKey, false) && main_activity.supportsForceVideo4K();
     }
 
     @Override
@@ -630,7 +630,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getVideoBitratePref() {
-        return sharedPreferences.getString(PreferenceKeys.getVideoBitratePreferenceKey(), "default");
+        return sharedPreferences.getString(PreferenceKeys.VideoBitratePreferenceKey, "default");
     }
 
     @Override
@@ -857,7 +857,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
         }
 
-        String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
+        String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.VideoMaxDurationPreferenceKey, "0");
         long video_max_duration;
         try {
             video_max_duration = (long)Integer.parseInt(video_max_duration_value) * 1000;
@@ -873,7 +873,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public int getVideoRestartTimesPref() {
-        String restart_value = sharedPreferences.getString(PreferenceKeys.getVideoRestartPreferenceKey(), "0");
+        String restart_value = sharedPreferences.getString(PreferenceKeys.VideoRestartPreferenceKey, "0");
         int remaining_restart_video;
         try {
             remaining_restart_video = Integer.parseInt(restart_value);
@@ -903,7 +903,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
         }
 
-        String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
+        String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "0");
         long video_max_filesize;
         try {
             video_max_filesize = Long.parseLong(video_max_filesize_value);
@@ -930,7 +930,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
         }
 
-        return sharedPreferences.getBoolean(PreferenceKeys.getVideoRestartMaxFileSizePreferenceKey(), true);
+        return sharedPreferences.getBoolean(PreferenceKeys.VideoRestartMaxFileSizePreferenceKey, true);
     }
 
     @Override
@@ -1017,12 +1017,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getVideoFlashPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false);
+        return sharedPreferences.getBoolean(PreferenceKeys.VideoFlashPreferenceKey, false);
     }
 
     @Override
     public boolean getVideoLowPowerCheckPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.getVideoLowPowerCheckPreferenceKey(), true);
+        return sharedPreferences.getBoolean(PreferenceKeys.VideoLowPowerCheckPreferenceKey, true);
     }
 
     @Override
@@ -1032,14 +1032,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getPreviewRotationPref() {
-        return sharedPreferences.getString(PreferenceKeys.getRotatePreviewPreferenceKey(), "0");
+        return sharedPreferences.getString(PreferenceKeys.RotatePreviewPreferenceKey, "0");
     }
 
     @Override
     public String getLockOrientationPref() {
         if( getPhotoMode() == PhotoMode.Panorama )
             return "portrait"; // for now panorama only supports portrait
-        return sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
+        return sharedPreferences.getString(PreferenceKeys.LockOrientationPreferenceKey, "none");
     }
 
     @Override
@@ -1087,19 +1087,19 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public boolean getShutterSoundPref() {
         if( getPhotoMode() == PhotoMode.Panorama )
             return false;
-        return sharedPreferences.getBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), true);
+        return sharedPreferences.getBoolean(PreferenceKeys.ShutterSoundPreferenceKey, true);
     }
 
     @Override
     public boolean getStartupFocusPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.getStartupFocusPreferenceKey(), true);
+        return sharedPreferences.getBoolean(PreferenceKeys.StartupFocusPreferenceKey, true);
     }
 
     @Override
     public long getTimerPref() {
         if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
             return 0; // don't support timer with panorama
-        String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
+        String timer_value = sharedPreferences.getString(PreferenceKeys.TimerPreferenceKey, "0");
         long timer_delay;
         try {
             timer_delay = (long)Integer.parseInt(timer_value) * 1000;
@@ -1117,12 +1117,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public String getRepeatPref() {
         if( getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama )
             return "1"; // don't support repeat with panorama
-        return sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
+        return sharedPreferences.getString(PreferenceKeys.RepeatModePreferenceKey, "1");
     }
 
     @Override
     public long getRepeatIntervalPref() {
-        String timer_value = sharedPreferences.getString(PreferenceKeys.getRepeatIntervalPreferenceKey(), "0");
+        String timer_value = sharedPreferences.getString(PreferenceKeys.RepeatIntervalPreferenceKey, "0");
         long timer_delay;
         try {
             float timer_delay_s = Float.parseFloat(timer_value);
@@ -1155,17 +1155,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getRecordAudioPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
+        return sharedPreferences.getBoolean(PreferenceKeys.RecordAudioPreferenceKey, true);
     }
 
     @Override
     public String getRecordAudioChannelsPref() {
-        return sharedPreferences.getString(PreferenceKeys.getRecordAudioChannelsPreferenceKey(), "audio_default");
+        return sharedPreferences.getString(PreferenceKeys.RecordAudioChannelsPreferenceKey, "audio_default");
     }
 
     @Override
     public String getRecordAudioSourcePref() {
-        return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
+        return sharedPreferences.getString(PreferenceKeys.RecordAudioSourcePreferenceKey, "audio_src_camcorder");
     }
 
     public boolean getAutoStabilisePref() {
@@ -1862,7 +1862,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void startingVideo() {
-        if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.LockVideoPreferenceKey, false) ) {
             main_activity.lockScreen();
         }
         main_activity.stopAudioListeners(); // important otherwise MediaRecorder will fail to start() if we have an audiolistener! Also don't want to have the speech recognizer going off
@@ -2516,13 +2516,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "timerBeep()");
             Log.d(TAG, "remaining_time: " + remaining_time);
         }
-        if( sharedPreferences.getBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), true) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.TimerBeepPreferenceKey, true) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "play beep!");
             boolean is_last = remaining_time <= 1000;
             main_activity.getSoundPoolManager().playSound(is_last ? R.raw.mybeep_hi : R.raw.mybeep);
         }
-        if( sharedPreferences.getBoolean(PreferenceKeys.getTimerSpeakPreferenceKey(), false) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.TimerSpeakPreferenceKey, false) ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "speak countdown!");
             int remaining_time_s = (int)(remaining_time/1000);

@@ -2070,7 +2070,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "3");
+            editor.putString(PreferenceKeys.RepeatModePreferenceKey, "3");
             editor.apply();
         }
         switchToFocusValue("focus_mode_continuous_picture");
@@ -3833,7 +3833,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
-        editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "" + n_repeat);
+        editor.putString(PreferenceKeys.RepeatModePreferenceKey, "" + n_repeat);
         editor.apply();
         updateForSettings();
 
@@ -4600,7 +4600,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getLockOrientationPreferenceKey(), "landscape");
+        editor.putString(PreferenceKeys.LockOrientationPreferenceKey, "landscape");
         editor.apply();
         updateForSettings();
         subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -4611,7 +4611,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getLockOrientationPreferenceKey(), "portrait");
+        editor.putString(PreferenceKeys.LockOrientationPreferenceKey, "portrait");
         editor.apply();
         updateForSettings();
         subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -4629,8 +4629,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -5164,8 +5164,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -5316,8 +5316,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -5520,7 +5520,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, false);
-        editor.putBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), false);
+        editor.putBoolean(PreferenceKeys.ShutterSoundPreferenceKey, false);
         editor.apply();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -6061,8 +6061,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -6420,8 +6420,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
-        editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+        editor.putString(PreferenceKeys.TimerPreferenceKey, "5");
+        editor.putBoolean(PreferenceKeys.TimerBeepPreferenceKey, false);
         editor.apply();
 
         subTestTakeVideoSnapshot();
@@ -6571,13 +6571,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         if( is_nokia || is_samsung ) {
             // Nokia 8 has much smaller video sizes, at least when recording with phone face down, so we also set 4K
             editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-            //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "2000000"); // approx 3s on Nokia 8 at 4K
-            editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "10000000"); // approx 3s on Nokia 8 at 4K
+            //editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "2000000"); // approx 3s on Nokia 8 at 4K
+            editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "10000000"); // approx 3s on Nokia 8 at 4K
         }
         else {
             //editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-            //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 3-4s on Nexus 6 at 4K
-            editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "9437184"); // approx 3-4s on Nexus 6 at FullHD
+            //editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "15728640"); // approx 3-4s on Nexus 6 at 4K
+            editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "9437184"); // approx 3-4s on Nexus 6 at FullHD
         }
         editor.apply();
         updateForSettings();
@@ -6701,9 +6701,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6 or OnePlus 3T)
-        //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "23592960"); // approx 4.5s on Nexus 6 at 4K
-        editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "35389440"); // approx 4.5s on OnePlus 3T at 4K
-        editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "5");
+        //editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "23592960"); // approx 4.5s on Nexus 6 at 4K
+        editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "35389440"); // approx 4.5s on OnePlus 3T at 4K
+        editor.putString(PreferenceKeys.VideoMaxDurationPreferenceKey, "5");
         editor.apply();
         updateForSettings();
 
@@ -6746,11 +6746,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-        //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on Nexus 6 at 4K
-        //editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 5s on Nexus 6 at 4K
-        editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on OnePlus 3T at 4K
-        editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "7");
-        editor.putString(PreferenceKeys.getVideoRestartPreferenceKey(), "1");
+        //editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "26214400"); // approx 5s on Nexus 6 at 4K
+        //editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "15728640"); // approx 5s on Nexus 6 at 4K
+        editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "26214400"); // approx 5s on OnePlus 3T at 4K
+        editor.putString(PreferenceKeys.VideoMaxDurationPreferenceKey, "7");
+        editor.putString(PreferenceKeys.VideoRestartPreferenceKey, "1");
         editor.apply();
         updateForSettings();
 
@@ -6786,7 +6786,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Galaxy S10e)
-        editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "30000000"); // about 19s on Galaxy S10e at 4K
+        editor.putString(PreferenceKeys.VideoMaxFileSizePreferenceKey, "30000000"); // about 19s on Galaxy S10e at 4K
         editor.apply();
         updateForSettings();
 
@@ -6848,8 +6848,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -6872,7 +6872,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), true);
+        editor.putBoolean(PreferenceKeys.VideoStabilizationPreferenceKey, true);
         editor.apply();
         updateForSettings();
 
@@ -6953,8 +6953,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -6986,7 +6986,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), true);
+        editor.putBoolean(PreferenceKeys.ForceVideo4KPreferenceKey, true);
         editor.apply();
         updateForSettings();
 
@@ -7333,7 +7333,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         for(String bitrate_value : bitrate_values) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getVideoBitratePreferenceKey(), bitrate_value);
+            editor.putString(PreferenceKeys.VideoBitratePreferenceKey, bitrate_value);
             editor.apply();
             updateForSettings();
 
@@ -7423,9 +7423,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "15");
+            editor.putString(PreferenceKeys.VideoMaxDurationPreferenceKey, "15");
             if( restart ) {
-                editor.putString(PreferenceKeys.getVideoRestartPreferenceKey(), "1");
+                editor.putString(PreferenceKeys.VideoRestartPreferenceKey, "1");
             }
             editor.apply();
         }
@@ -7741,7 +7741,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), true);
+        editor.putBoolean(PreferenceKeys.VideoFlashPreferenceKey, true);
         editor.apply();
         updateForSettings();
 
@@ -7806,8 +7806,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     private void subTestTimer(int type) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getTimerPreferenceKey(), "10");
-        editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+        editor.putString(PreferenceKeys.TimerPreferenceKey, "10");
+        editor.putBoolean(PreferenceKeys.TimerBeepPreferenceKey, false);
         editor.apply();
 
         assertTrue(!mPreview.isOnTimer());
@@ -7886,7 +7886,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(n_new_files == 1);
 
             // now set timer to 5s, and turn on pause_preview
-            editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
+            editor.putString(PreferenceKeys.TimerPreferenceKey, "5");
             editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
             editor.apply();
 
@@ -7985,8 +7985,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
-        editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+        editor.putString(PreferenceKeys.TimerPreferenceKey, "5");
+        editor.putBoolean(PreferenceKeys.TimerBeepPreferenceKey, false);
         editor.apply();
 
         assertTrue(!mPreview.isOnTimer());
@@ -8372,8 +8372,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
-        editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+        editor.putString(PreferenceKeys.TimerPreferenceKey, "5");
+        editor.putBoolean(PreferenceKeys.TimerBeepPreferenceKey, false);
         editor.apply();
 
         subTestVideoPopup(true);
@@ -8612,7 +8612,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "3");
+            editor.putString(PreferenceKeys.RepeatModePreferenceKey, "3");
             editor.apply();
         }
 
@@ -8691,9 +8691,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             {
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "2");
-                editor.putString(PreferenceKeys.getRepeatIntervalPreferenceKey(), "3");
-                editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+                editor.putString(PreferenceKeys.RepeatModePreferenceKey, "2");
+                editor.putString(PreferenceKeys.RepeatIntervalPreferenceKey, "3");
+                editor.putBoolean(PreferenceKeys.TimerBeepPreferenceKey, false);
                 editor.apply();
             }
             assertTrue(switchCameraButton.getVisibility() == (mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE));
@@ -8978,8 +8978,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -9111,8 +9111,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -9253,8 +9253,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-        editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
 
@@ -9748,11 +9748,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
             if( use_saf ) {
-                editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-                editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), save_folder);
+                editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+                editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, save_folder);
             }
             else {
-                editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
+                editor.putString(PreferenceKeys.SaveLocationPreferenceKey, save_folder);
             }
             editor.apply();
             updateForSettings();
@@ -9815,10 +9815,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
             if( use_saf ) {
-                editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+                editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
             }
             else {
-                editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
+                editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
             }
             editor.apply();
         }
@@ -9890,7 +9890,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCameraTest");
+            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCameraTest");
             editor.apply();
             updateForSettings();
         }
@@ -9934,7 +9934,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), "/OpenCameraTest");
+            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "/OpenCameraTest");
             editor.apply();
             updateForSettings();
         }
@@ -9968,7 +9968,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String current_folder;
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
-            current_folder = use_saf ? settings.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "") : settings.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
+            current_folder = use_saf ? settings.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "") : settings.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
             Log.d(TAG, "current_folder: " + current_folder);
             Log.d(TAG, "save_location_history entry: " + save_location_history.get(0));
             assertTrue(save_location_history.get(0).equals(current_folder));
@@ -9977,7 +9977,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(use_saf ? PreferenceKeys.getSaveLocationSAFPreferenceKey() : PreferenceKeys.getSaveLocationPreferenceKey(), "new_folder_history_entry");
+            editor.putString(use_saf ? PreferenceKeys.SaveLocationSAFPreferenceKey : PreferenceKeys.SaveLocationPreferenceKey, "new_folder_history_entry");
             editor.apply();
             updateForSettings();
             if( use_saf ) {
@@ -10009,7 +10009,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(use_saf ? PreferenceKeys.getSaveLocationSAFPreferenceKey() : PreferenceKeys.getSaveLocationPreferenceKey(), current_folder);
+            editor.putString(use_saf ? PreferenceKeys.SaveLocationSAFPreferenceKey : PreferenceKeys.SaveLocationPreferenceKey, current_folder);
             editor.apply();
             // now (for non-SAF) call testUsedFolderPicker() instead of updateForSettings(), to simulate using the recent folder picker
             // clearFolderHistory has code that must be run on UI thread
@@ -10069,8 +10069,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             String save_folder = "content://com.android.externalstorage.documents/tree/primary%3ADCIM/OpenCamera";
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), true);
-            editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), save_folder);
+            editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+            editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, save_folder);
             editor.apply();
             updateForSettings();
             // need to call this directly, as we don't call mActivity.onActivityResult
@@ -10090,7 +10090,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getRotatePreviewPreferenceKey(), "180");
+        editor.putString(PreferenceKeys.RotatePreviewPreferenceKey, "180");
         editor.apply();
         updateForSettings();
 
