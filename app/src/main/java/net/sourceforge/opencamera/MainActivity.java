@@ -1120,16 +1120,30 @@ public class MainActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyDown: " + keyCode);
-        boolean handled = mainUI.onKeyDown(keyCode, event);
-        if( handled )
-            return true;
+        if( camera_in_background ) {
+            // don't allow keys such as volume keys for taking photo when camera in background!
+            if( MyDebug.LOG )
+                Log.d(TAG, "camera is in background");
+        }
+        else {
+            boolean handled = mainUI.onKeyDown(keyCode, event);
+            if( handled )
+                return true;
+        }
         return super.onKeyDown(keyCode, event);
     }
 
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyUp: " + keyCode);
-        mainUI.onKeyUp(keyCode, event);
+        if( camera_in_background ) {
+            // don't allow keys such as volume keys for taking photo when camera in background!
+            if( MyDebug.LOG )
+                Log.d(TAG, "camera is in background");
+        }
+        else {
+            mainUI.onKeyUp(keyCode, event);
+        }
         return super.onKeyUp(keyCode, event);
     }
 
