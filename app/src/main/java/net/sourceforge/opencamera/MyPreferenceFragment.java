@@ -287,12 +287,15 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
-            final int n_ghost_image_alpha = 20;
+            final int max_ghost_image_alpha = 80; // limit max to 80% for privacy reasons, so it isn't possible to put in a state where camera is on, but no preview is shown
+            final int ghost_image_alpha_step = 5; // should be exact divisor of max_ghost_image_alpha
+            final int n_ghost_image_alpha = max_ghost_image_alpha/ghost_image_alpha_step;
             CharSequence [] entries = new CharSequence[n_ghost_image_alpha];
             CharSequence [] values = new CharSequence[n_ghost_image_alpha];
             for(int i=0;i<n_ghost_image_alpha;i++) {
-                entries[i] = "" + 5*(i+1) + "%";
-                values[i] = "" + 5*(i+1);
+                int alpha = ghost_image_alpha_step*(i+1);
+                entries[i] = "" + alpha + "%";
+                values[i] = "" + alpha;
             }
             ArraySeekBarPreference sp = (ArraySeekBarPreference)findPreference("ghost_image_alpha");
             sp.setEntries(entries);
