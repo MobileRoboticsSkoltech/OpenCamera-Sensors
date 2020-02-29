@@ -5918,6 +5918,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     if( pause_preview && success ) {
                         if( is_preview_started ) {
                             // need to manually stop preview on Android L Camera2
+                            // also note: even though we now draw the last image on top of the screen instead of relying on the
+                            // camera preview being paused, it's still good practice to pause the preview/camera for privacy reasons
                             if( camera_controller != null ) {
                                 camera_controller.stopPreview();
                             }
