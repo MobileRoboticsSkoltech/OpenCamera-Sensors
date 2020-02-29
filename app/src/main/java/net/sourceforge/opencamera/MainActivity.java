@@ -963,6 +963,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onStop");
+        super.onStop();
+
+        // we stop location listening in onPause, but done here again just to be certain!
+        applicationInterface.getLocationSupplier().freeLocationListeners();
+    }
+
+    @Override
     protected void onDestroy() {
         if( MyDebug.LOG ) {
             Log.d(TAG, "onDestroy");
@@ -1013,6 +1023,9 @@ public class MainActivity extends Activity {
             textToSpeech.shutdown();
             textToSpeech = null;
         }
+
+        // we stop location listening in onPause, but done here again just to be certain!
+        applicationInterface.getLocationSupplier().freeLocationListeners();
 
         super.onDestroy();
         if( MyDebug.LOG )
@@ -1291,6 +1304,9 @@ public class MainActivity extends Activity {
         if( applicationInterface.getImageSaver().getNImagesToSave() > 0) {
             createImageSavingNotification();
         }
+
+        // intentionally do this again, just in case something turned location on since - keep this right at the end:
+        applicationInterface.getLocationSupplier().freeLocationListeners();
 
         if( MyDebug.LOG ) {
             Log.d(TAG, "onPause: total time to pause: " + (System.currentTimeMillis() - debug_time));
