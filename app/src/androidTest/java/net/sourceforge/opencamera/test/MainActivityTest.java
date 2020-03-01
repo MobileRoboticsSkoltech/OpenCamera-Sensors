@@ -15802,7 +15802,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile1_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 1, 23, 253);
+        //checkHistogramDetails(hdrHistogramDetails, 1, 23, 253);
+        checkHistogramDetails(hdrHistogramDetails, 0, 7, 253);
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg20".
@@ -15821,7 +15822,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile2_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 0, 58, 243);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 58, 243);
+        checkHistogramDetails(hdrHistogramDetails, 0, 41, 241);
     }
 
     /** Tests video log profile algorithm on test samples in "testLogProfile3".
@@ -15840,7 +15842,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile3_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 0, 157, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 157, 255);
+        checkHistogramDetails(hdrHistogramDetails, 0, 143, 255);
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg1".
@@ -15859,7 +15862,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile1_extra_strong_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 2, 67, 254);
+        //checkHistogramDetails(hdrHistogramDetails, 2, 67, 254);
+        checkHistogramDetails(hdrHistogramDetails, 0, 13, 254);
     }
 
     /** Tests video log profile algorithm on test samples in "testAvg20".
@@ -15878,7 +15882,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile2_extra_strong_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 0, 126, 250);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 126, 250);
+        checkHistogramDetails(hdrHistogramDetails, 0, 66, 244);
     }
 
     /** Tests video log profile algorithm on test samples in "testLogProfile3".
@@ -15897,7 +15902,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile3_extra_strong_output.jpg");
 
-        checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
+        checkHistogramDetails(hdrHistogramDetails, 0, 170, 255);
     }
 
     private void saveBitmap(Bitmap bitmap, String name) throws IOException {
