@@ -853,8 +853,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
             Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
+            //Log.d(TAG, "surface texture is now: " + ((TextureView)cameraSurface).getSurfaceTexture());
+        }
         this.set_textureview_size = true;
         this.textureview_w = width;
         this.textureview_h = height;

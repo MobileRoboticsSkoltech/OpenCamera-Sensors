@@ -4866,8 +4866,10 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setPreviewTexture(TextureView texture) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "setPreviewTexture");
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "setPreviewTexture: " + texture);
+            Log.d(TAG, "surface: " + texture.getSurfaceTexture());
+        }
         if( this.texture != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "preview texture already set");
