@@ -5828,6 +5828,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     private int subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, int n_non_video_files) throws InterruptedException {
         assertTrue(mPreview.isPreviewStarted());
+        if( mPreview.usingCamera2API() ) {
+            assertEquals(mPreview.getCurrentPreviewSize().width, mPreview.getCameraController().test_texture_view_buffer_w);
+            assertEquals(mPreview.getCurrentPreviewSize().height, mPreview.getCameraController().test_texture_view_buffer_h);
+        }
 
         if( test_exposure_lock && !mPreview.supportsExposureLock() ) {
             return 0;
@@ -5860,6 +5864,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         assertTrue(mPreview.isVideo());
         assertTrue(mPreview.isPreviewStarted());
+        if( mPreview.usingCamera2API() ) {
+            assertEquals(mPreview.getCurrentPreviewSize().width, mPreview.getCameraController().test_texture_view_buffer_w);
+            assertEquals(mPreview.getCurrentPreviewSize().height, mPreview.getCameraController().test_texture_view_buffer_h);
+        }
         assertEquals((int) (Integer) takePhotoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_video_selector);
         assertEquals((int) (Integer) switchVideoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_photo);
         assertEquals(takePhotoButton.getContentDescription(), mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video));
@@ -5909,6 +5917,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "done clicking take video");
         this.getInstrumentation().waitForIdleSync();
         Log.d(TAG, "after idle sync");
+
+        if( mPreview.usingCamera2API() ) {
+            assertEquals(mPreview.getCurrentPreviewSize().width, mPreview.getCameraController().test_texture_view_buffer_w);
+            assertEquals(mPreview.getCurrentPreviewSize().height, mPreview.getCameraController().test_texture_view_buffer_h);
+        }
 
         if( mPreview.isOnTimer() ) {
             Log.d(TAG, "wait for timer");
@@ -6015,6 +6028,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else {
             Log.d(TAG, "didn't start video");
             assertTrue(allow_failure);
+        }
+
+        if( mPreview.usingCamera2API() ) {
+            assertEquals(mPreview.getCurrentPreviewSize().width, mPreview.getCameraController().test_texture_view_buffer_w);
+            assertEquals(mPreview.getCurrentPreviewSize().height, mPreview.getCameraController().test_texture_view_buffer_h);
         }
 
         assertTrue( folder.exists() );

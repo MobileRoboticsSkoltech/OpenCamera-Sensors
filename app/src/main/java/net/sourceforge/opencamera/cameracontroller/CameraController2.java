@@ -4017,11 +4017,6 @@ public class CameraController2 extends CameraController {
     public void setPreviewSize(int width, int height) {
         if( MyDebug.LOG )
             Log.d(TAG, "setPreviewSize: " + width + " , " + height);
-        /*if( texture != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "set size of preview texture");
-            texture.setDefaultBufferSize(width, height);
-        }*/
         preview_width = width;
         preview_height = height;
         /*if( previewImageReader != null ) {
@@ -4963,6 +4958,25 @@ public class CameraController2 extends CameraController {
         return surface_texture;
     }
 
+    @Override
+    public void updatePreviewTexture() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "updatePreviewTexture");
+        if( texture != null ) {
+            if( preview_width == 0 || preview_height == 0 ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview size not yet set");
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview size: " + preview_width + " x " + preview_height);
+                this.test_texture_view_buffer_w = preview_width;
+                this.test_texture_view_buffer_h = preview_height;
+                texture.setDefaultBufferSize(preview_width, preview_height);
+            }
+        }
+    }
+
     private void createCaptureSession(final MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "create capture session");
@@ -5010,7 +5024,7 @@ public class CameraController2 extends CameraController {
                         Log.e(TAG, "application needs to call setPreviewSize()");
                     throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
                 }
-                texture.setDefaultBufferSize(preview_width, preview_height);
+                updatePreviewTexture();
                 // also need to create a new surface for the texture, in case the size has changed - but make sure we remove the old one first!
                 synchronized( background_camera_lock ) {
                     if( surface_texture != null ) {
@@ -5187,6 +5201,7 @@ public class CameraController2 extends CameraController {
                 }
             }
             if( video_recorder != null && want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+            //if( want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
                 camera.createConstrainedHighSpeedCaptureSession(surfaces,
                     myStateCallback,
                     handler);

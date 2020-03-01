@@ -852,11 +852,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
+    public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
             //Log.d(TAG, "surface texture is now: " + ((TextureView)cameraSurface).getSurfaceTexture());
         }
+
+        if( camera_controller != null ) {
+            camera_controller.test_texture_view_buffer_w = width;
+            camera_controller.test_texture_view_buffer_h = height;
+
+            if( set_preview_size && (width != preview_w || height != preview_h) ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "updatePreviewTexture");
+                // Needed to fix problem if Open Camera is already running, and the aspect ratio changes (e.g.,
+                // change of resolution, or switching between photo and video mode). When starting up in a "default",
+                // aspect ratio, the camera is opened via onSurfaceTextureAvailable(), and although we then call setAspectRatio(),
+                // there are no calls to onSurfaceTextureSizeChanged(). But when already running, or if
+                // an aspect ratio change for the view is required, changing the aspect ratio causes a call to
+                // onSurfaceTextureSizeChanged(), which results in the texture view's surface texture's buffer size being reset!
+                // (This can be seen in the source code of TextureView: onSizeChanged() calls setDefaultBufferSize() before
+                // calling onSurfaceTextureSizeChanged()!) So we need to call setDefaultBufferSize() again to reset
+                // to the desired preview buffer size that we already chose!
+                camera_controller.updatePreviewTexture();
+            }
+        }
+
         this.set_textureview_size = true;
         this.textureview_w = width;
         this.textureview_h = height;

@@ -53,6 +53,8 @@ public abstract class CameraController {
     public volatile int test_fake_flash_photo; // for Camera2 API, records torch turning on for fake flash for photo capture
     public volatile int test_af_state_null_focus; // for Camera2 API, records af_state being null even when we've requested autofocus
     public volatile boolean test_used_tonemap_curve;
+    public volatile int test_texture_view_buffer_w; // for TextureView, keep track of buffer size
+    public volatile int test_texture_view_buffer_h;
 
     public static class CameraFeatures {
         public boolean is_zoom_supported;
@@ -522,6 +524,12 @@ public abstract class CameraController {
     public abstract void reconnect() throws CameraControllerException;
     public abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
     public abstract void setPreviewTexture(TextureView texture) throws CameraControllerException;
+    /** This should be called when using a TextureView, and the texture view has reported a change
+     *  in size via onSurfaceTextureSizeChanged.
+     */
+    public void updatePreviewTexture() {
+        // dummy implementation
+    }
     /** Starts the camera preview.
      *  @throws CameraControllerException if the camera preview fails to start.
      */
