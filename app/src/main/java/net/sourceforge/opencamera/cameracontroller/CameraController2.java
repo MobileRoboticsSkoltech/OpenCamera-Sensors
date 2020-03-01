@@ -5002,7 +5002,7 @@ public class CameraController2 extends CameraController {
             if( texture != null ) {
                 // need to set the texture size
                 if( MyDebug.LOG )
-                    Log.d(TAG, "set size of preview texture");
+                    Log.d(TAG, "set size of preview texture: " + preview_width + " x " + preview_height);
                 if( preview_width == 0 || preview_height == 0 ) {
                     if( MyDebug.LOG )
                         Log.e(TAG, "application needs to call setPreviewSize()");
@@ -5032,7 +5032,7 @@ public class CameraController2 extends CameraController {
             /*if( MyDebug.LOG )
             Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
             if( MyDebug.LOG )
-                Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
+                Log.d(TAG, "set preview size: " + this.preview_width + " x " + this.preview_height);
 
             synchronized( background_camera_lock ) {
                 if( video_recorder != null )
@@ -5064,9 +5064,16 @@ public class CameraController2 extends CameraController {
                     synchronized( background_camera_lock ) {
                         captureSession = session;
                         Surface surface = getPreviewSurface();
+                        if( MyDebug.LOG ) {
+                            Log.d(TAG, "add surface to previewBuilder: " + surface);
+                        }
                         previewBuilder.addTarget(surface);
-                        if( video_recorder != null )
+                        if( video_recorder != null ) {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "add video recorder surface to previewBuilder: " + video_recorder_surface);
+                            }
                             previewBuilder.addTarget(video_recorder_surface);
+                        }
                         try {
                             setRepeatingRequest();
                         }
