@@ -1796,9 +1796,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             camera_controller.setTonemapProfile(tonemap_profile, video_log_profile_strength, video_gamma);
         }
 
-        // in theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect
-        // in video mode; but don't set high speed mode in photo mode just to be safe
-        // Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview()
+        // Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview().
+        // In theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect
+        // when recording video; but don't set high speed mode in photo mode just to be safe.
         camera_controller.setVideoHighSpeed(is_video && video_high_speed);
 
         if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
