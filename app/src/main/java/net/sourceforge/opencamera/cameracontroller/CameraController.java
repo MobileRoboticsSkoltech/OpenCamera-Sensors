@@ -424,6 +424,10 @@ public abstract class CameraController {
      *                       caught by the callera).
      */
     public abstract void setRaw(boolean want_raw, int max_raw_images);
+
+    /** Request a capture session compatible with high speed frame rates.
+     *  This should be called only when the preview is paused or not yet started.
+     */
     public abstract void setVideoHighSpeed(boolean setVideoHighSpeed);
     /**
      * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or
