@@ -3185,6 +3185,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(audioControlButton.getVisibility(), View.GONE);
     }
 
+    /** Test for on-screen icon. Cycles through cameras and checks that the visibility of
+     *  the icons matches whether available for that camera - currently tests for flash and RAW.
+     *  For multi-camera devices, this tests the behaviour with
+     *  PreferenceKeys.MultiCamButtonPreferenceKey devices, so the switch camera icon still cycles
+     *  through all cameras.
+     */
+    public void testIconsAgainstCameras()  {
+        Log.d(TAG, "testIconsAgainstCameras");
+        setToDefault();
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.ShowCycleFlashPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.ShowCycleRawPreferenceKey, true);
+        if( mActivity.isMultiCamEnabled() ) {
+            editor.putBoolean(PreferenceKeys.MultiCamButtonPreferenceKey, false);
+        }
+        editor.apply();
+        updateForSettings();
+
+        for(int i=0;i<mPreview.getCameraControllerManager().getNumberOfCameras();i++) {
+            View cycleFlashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.cycle_flash);
+            View cycleRawButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.cycle_raw);
+
+            assertEquals(mPreview.supportsFlash() ? View.VISIBLE : View.GONE, cycleFlashButton.getVisibility());
+            assertEquals(mPreview.supportsRaw() ? View.VISIBLE : View.GONE, cycleRawButton.getVisibility());
+
+            View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+            clickView(switchCameraButton);
+            waitUntilCameraOpened();
+        }
+
+        // switch to video mode
+        View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+        clickView(switchVideoButton);
+        waitUntilCameraOpened();
+        assertTrue(mPreview.isVideo());
+        assertTrue(mPreview.isPreviewStarted());
+
+        // test flash and RAW icons now gone
+        View cycleFlashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.cycle_flash);
+        View cycleRawButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.cycle_raw);
+
+        assertEquals(View.GONE, cycleFlashButton.getVisibility());
+        assertEquals(View.GONE, cycleRawButton.getVisibility());
+    }
+
     private void waitForTakePhoto() {
         View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
         View switchMultiCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_multi_camera);

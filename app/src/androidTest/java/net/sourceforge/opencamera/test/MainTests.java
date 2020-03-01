@@ -79,6 +79,7 @@ public class MainTests {
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAudioControlIcon"));
         }
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIconsAgainstCameras"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testOnError"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGPSString"));
