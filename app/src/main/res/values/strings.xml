@@ -918,12 +918,9 @@
     <string name="preference_video_rec709">REC709</string>
     <string name="preference_video_srgb">sRGB</string>
     <string name="preference_video_gamma">Gamma</string>
-    <string name="preference_video_jtlog">JTLog</string>
-    <string name="preference_video_jtlogv2">JTLogv2</string>
-    <string name="preference_video_jtlogv3">JTLogv3</string>
-    <string name="preference_video_jtlnp1">JTLNP1</string>
-    <string name="preference_video_jtlin1">JTLin1</string>
-    <string name="preference_video_jtlin2">JTLin2</string>
+    <string name="preference_video_jtvideo" translatable="false">JTVideo</string>
+    <string name="preference_video_jtlog" translatable="false">JTLog</string>
+    <string name="preference_video_jtlog2" translatable="false">JTLog2</string>
     <string name="preference_video_profile_gamma">Video gamma value</string>
     <string name="preference_video_profile_gamma_summary">Gamma value to use for video if video picture profile is set to Gamma\n%s</string>
     <string name="preference_video_profile_gamma_1.0">1.0</string>

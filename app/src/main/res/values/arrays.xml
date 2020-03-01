@@ -555,11 +555,9 @@
         <item>@string/preference_video_log_strong</item>
         <item>@string/preference_video_log_extra_strong</item>
         <item>@string/preference_video_gamma</item>
+        <item>@string/preference_video_jtvideo</item>
         <item>@string/preference_video_jtlog</item>
-        <item>@string/preference_video_jtlogv2</item>
-        <item>@string/preference_video_jtlogv3</item>
-        <item>@string/preference_video_jtlin1</item>
-        <item>@string/preference_video_jtlin2</item>
+        <item>@string/preference_video_jtlog2</item>
     </string-array>
     <string-array name="preference_video_log_values">
         <item>off</item>
@@ -571,11 +569,9 @@
         <item>strong</item>
         <item>extra_strong</item>
         <item>gamma</item>
+        <item>jtvideo</item>
         <item>jtlog</item>
-        <item>jtlogv2</item>
-        <item>jtlogv3</item>
-        <item>jtlin1</item>
-        <item>jtlin2</item>
+        <item>jtlog2</item>
     </string-array>
     <string-array name="preference_video_profile_gamma_entries">
         <item>@string/preference_video_profile_gamma_1.0</item>
