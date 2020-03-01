@@ -5152,6 +5152,11 @@ public class CameraController2 extends CameraController {
                     }
                     // n.b., raw not supported for photo snapshots while video recording
                 }
+                else if( want_video_high_speed ) {
+                    // future proofing - at the time of writing want_video_high_speed is only set when recording video,
+                    // but if ever this is changed, can only support the preview_surface as a target
+                    surfaces = Collections.singletonList(preview_surface);
+                }
                 else if( imageReaderRaw != null ) {
                     surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
                 }
