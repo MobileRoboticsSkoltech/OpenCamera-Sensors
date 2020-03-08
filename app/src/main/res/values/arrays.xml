@@ -713,6 +713,9 @@
         <item>@string/preference_burst_mode_30x</item>
         <item>@string/preference_burst_mode_40x</item>
         <item>@string/preference_burst_mode_50x</item>
+        <item>@string/preference_burst_mode_100x</item>
+        <item>@string/preference_burst_mode_200x</item>
+        <item>@string/preference_burst_mode_500x</item>
         <item>@string/preference_burst_mode_unlimited</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
@@ -726,6 +729,9 @@
         <item>30</item>
         <item>40</item>
         <item>50</item>
+        <item>100</item>
+        <item>200</item>
+        <item>500</item>
         <item>unlimited</item>
     </string-array>
     <!-- note, actually refers to the auto-repeat mode, not the newer fast burst mode -->

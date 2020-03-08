@@ -360,6 +360,13 @@
     <string name="preference_burst_mode_4x">4x</string>
     <string name="preference_burst_mode_5x">5x</string>
     <string name="preference_burst_mode_10x">10x</string>
+    <string name="preference_burst_mode_20x">20x</string>
+    <string name="preference_burst_mode_30x">30x</string>
+    <string name="preference_burst_mode_40x">40x</string>
+    <string name="preference_burst_mode_50x">50x</string>
+    <string name="preference_burst_mode_100x">100x</string>
+    <string name="preference_burst_mode_200x">200x</string>
+    <string name="preference_burst_mode_500x">500x</string>
     <string name="preference_burst_mode_unlimited">Ilimitado</string>
 
     <string name="preference_burst_interval_no_delay">Sem atraso</string>

@@ -645,6 +645,9 @@
     <string name="preference_burst_mode_30x">30x</string>
     <string name="preference_burst_mode_40x">40x</string>
     <string name="preference_burst_mode_50x">50x</string>
+    <string name="preference_burst_mode_100x">100x</string>
+    <string name="preference_burst_mode_200x">200x</string>
+    <string name="preference_burst_mode_500x">500x</string>
     <string name="preference_burst_mode_unlimited">Không giới hạn</string>
 
     <string name="preference_burst_interval_no_delay">Không</string>
