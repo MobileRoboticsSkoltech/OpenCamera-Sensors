@@ -31,7 +31,7 @@ public class LocationSupplier {
 
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
      *  privacy policy needs updating.
-     *  Returns null if location not available.
+     * @return Returns null if location not available.
      */
     public Location getLocation() {
         if( locationListeners == null )
@@ -102,7 +102,7 @@ public class LocationSupplier {
     }
 
     /* Best to only call this from MainActivity.initLocation().
-     * Returns false if location permission not available for either coarse or fine.
+     * @return Returns false if location permission not available for either coarse or fine.
      */
     boolean setupLocationListener() {
         if( MyDebug.LOG )
