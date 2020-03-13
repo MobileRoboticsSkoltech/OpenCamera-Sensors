@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.MyPreferenceFragment;
 import net.sourceforge.opencamera.PanoramaProcessorException;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
@@ -229,6 +230,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // updateForSettings has code that must run on UI thread
         mActivity.runOnUiThread(new Runnable() {
             public void run() {
+                mActivity.initLocation(); // initLocation now called via MainActivity.setWindowFlagsForCamera() rather than updateForSettings()
                 mActivity.getApplicationInterface().getDrawPreview().updateSettings();
                 mActivity.updateForSettings();
             }
@@ -9179,6 +9181,104 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         updateForSettings();
 
         subTestLocationOff(true);
+    }
+
+    /* Tests we disable location when going to settings, but re-enable it when returning to camera.
+     */
+    public void testLocationSettings() throws InterruptedException {
+        Log.d(TAG, "testLocationSettings");
+        setToDefault();
+
+        assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+        Log.d(TAG, "turn on location");
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
+            editor.apply();
+            Log.d(TAG, "update settings after turning on location");
+            updateForSettings();
+            Log.d(TAG, "location should now be on");
+        }
+
+        assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
+        Log.d(TAG, "wait until received location");
+
+        long start_t = System.currentTimeMillis();
+        while( !mActivity.getLocationSupplier().testHasReceivedLocation() ) {
+            this.getInstrumentation().waitForIdleSync();
+            if( System.currentTimeMillis() - start_t > 20000 ) {
+                // need to allow long time for testing devices without mobile network; will likely fail altogether if don't even have wifi
+                fail();
+            }
+        }
+        Log.d(TAG, "have received location");
+        this.getInstrumentation().waitForIdleSync();
+        assertNotNull(mActivity.getLocationSupplier().getLocation());
+        // check wasn't cached
+        LocationSupplier.LocationInfo locationInfo = new LocationSupplier.LocationInfo();
+        mActivity.getLocationSupplier().getLocation(locationInfo);
+        assertFalse(locationInfo.LocationWasCached());
+
+        // now go to settings
+        assertFalse(mActivity.isCameraInBackground());
+        View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+        Log.d(TAG, "about to click settings");
+        clickView(settingsButton);
+        Log.d(TAG, "done clicking settings");
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+        assertTrue(mActivity.isCameraInBackground());
+
+        // now check we're not listening for location
+        start_t = System.currentTimeMillis();
+        int count = 0;
+        while( System.currentTimeMillis() - start_t <= 15000 ) {
+            assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+            assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+            assertNull(mActivity.getLocationSupplier().getLocation());
+            Thread.sleep(10);
+            if( count++ == 5 ) {
+                pauseAndResume(); // check we still don't listen for location after pause and resume
+            }
+        }
+
+        // now go back
+        assertTrue(mActivity.isCameraInBackground());
+        Log.d(TAG, "go back");
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                mActivity.onBackPressed();
+            }
+        });
+        this.getInstrumentation().waitForIdleSync();
+        Log.d(TAG, "after idle sync");
+        assertFalse(mActivity.isCameraInBackground());
+
+        // check we start listening again
+        // first should have a cached location
+        assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNotNull(mActivity.getLocationSupplier().getLocation());
+        locationInfo = new LocationSupplier.LocationInfo();
+        mActivity.getLocationSupplier().getLocation(locationInfo);
+        assertTrue(locationInfo.LocationWasCached());
+
+        // check we get a non-cached location
+        while( !mActivity.getLocationSupplier().testHasReceivedLocation() ) {
+            this.getInstrumentation().waitForIdleSync();
+            if( System.currentTimeMillis() - start_t > 20000 ) {
+                // need to allow long time for testing devices without mobile network; will likely fail altogether if don't even have wifi
+                fail();
+            }
+        }
+        Log.d(TAG, "have received location");
+        this.getInstrumentation().waitForIdleSync();
+        assertNotNull(mActivity.getLocationSupplier().getLocation());
+        // check wasn't cached
+        locationInfo = new LocationSupplier.LocationInfo();
+        mActivity.getLocationSupplier().getLocation(locationInfo);
+        assertFalse(locationInfo.LocationWasCached());
     }
 
     private void subTestPhotoStamp() throws IOException {

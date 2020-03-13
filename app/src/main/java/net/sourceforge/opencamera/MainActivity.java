@@ -1203,7 +1203,7 @@ public class MainActivity extends Activity {
             debug_time = System.currentTimeMillis();
         }
         super.onResume();
-        this.app_is_paused = false;
+        this.app_is_paused = false; // must be set before initLocation() at least
 
         cancelImageSavingNotification();
 
@@ -2441,7 +2441,13 @@ public class MainActivity extends Activity {
         }
 
         speechControl.initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
-        initLocation(); // in case we've enabled or disabled GPS
+
+        // we no longer call initLocation() here (for having enabled or disabled geotagging), as that's
+        // done in setWindowFlagsForCamera() - important not to call it here as well, otherwise if
+        // permission wasn't granted, we'll ask for permission twice in a row (on Android 9 or earlier
+        // at least)
+        //initLocation(); // in case we've enabled or disabled GPS
+
         initGyroSensors(); // in case we've entered or left panorama
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: time after init speech and location: " + (System.currentTimeMillis() - debug_time));
@@ -2821,6 +2827,14 @@ public class MainActivity extends Activity {
         camera_in_background = false;
 
         magneticSensor.clearDialog(); // if the magnetic accuracy was opened, it must have been closed now
+        if( !app_is_paused ) {
+            // Needs to be called after camera_in_background is set to false.
+            // Note that the app_is_paused guard is in some sense unnecessary, as initLocation tests for that too,
+            // but useful for error tracking - ideally we want to make sure that initLocation is never called when
+            // app is paused. It can happen here because setWindowFlagsForCamera() is called from
+            // onCreate()
+            initLocation();
+        }
     }
 
     private void setWindowFlagsForSettings() {
@@ -2861,6 +2875,9 @@ public class MainActivity extends Activity {
 
         setImmersiveMode(false);
         camera_in_background = true;
+
+        // we disable location listening when showing settings or a dialog etc - saves battery life, also better for privacy
+        applicationInterface.getLocationSupplier().freeLocationListeners();
     }
 
     private void showWhenLocked(boolean show) {
@@ -4878,12 +4895,17 @@ public class MainActivity extends Activity {
         }
     }
 
-    void initLocation() {
+    public void initLocation() {
         if( MyDebug.LOG )
             Log.d(TAG, "initLocation");
         if( app_is_paused ) {
             Log.e(TAG, "initLocation: app is paused!");
             // we shouldn't need this (as we only call initLocation() when active), but just in case we end up here after onPause...
+        }
+        else if( camera_in_background ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "initLocation: camera in background!");
+            // we will end up here if app is pause/resumed when camera in background (settings, dialog, etc)
         }
         else if( !applicationInterface.getLocationSupplier().setupLocationListener() ) {
             if( MyDebug.LOG )

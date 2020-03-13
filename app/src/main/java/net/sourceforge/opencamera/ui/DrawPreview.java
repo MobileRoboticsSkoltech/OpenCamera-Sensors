@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.opencamera.GyroSensor;
+import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
@@ -38,6 +39,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -112,6 +114,7 @@ public class DrawPreview {
     private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
     private final String ybounds_text;
     private final int [] temp_histogram_channel = new int[256];
+    private final LocationSupplier.LocationInfo locationInfo = new LocationSupplier.LocationInfo();
     //private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
     // cached Rects for drawTextWithBackground() calls
     private Rect text_bounds_time;
@@ -1292,12 +1295,15 @@ public class DrawPreview {
                 canvas.drawRect(icon_dest, p);
                 p.setAlpha(255);
 
-                if( applicationInterface.getLocation() != null ) {
+                Location location = applicationInterface.getLocation(locationInfo);
+                if( location != null ) {
                     canvas.drawBitmap(location_bitmap, null, icon_dest, p);
                     int location_radius = icon_size / 10;
                     int indicator_x = location_x2 + icon_size - (int)(location_radius*1.5);
                     int indicator_y = location_y + (int)(location_radius*1.5);
-                    p.setColor(applicationInterface.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
+                    p.setColor(locationInfo.LocationWasCached() ? Color.rgb(127, 127, 127) :
+                            location.getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) :
+                                    Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
                     canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
                 }
                 else {

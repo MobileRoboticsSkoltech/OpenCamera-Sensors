@@ -14,6 +14,7 @@ public class MainTests {
         TestSuite suite = new TestSuite(MainTests.class.getName());
         // put these tests first as they require various permissions be allowed, that can only be set by user action
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationSettings"));
         // other tests:
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmediatelyQuit"));

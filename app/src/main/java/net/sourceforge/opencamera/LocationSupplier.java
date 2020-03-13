@@ -24,18 +24,61 @@ public class LocationSupplier {
     private MyLocationListener [] locationListeners;
     private volatile boolean test_force_no_location; // if true, always return null location; must be volatile for test project setting the state
 
+    private Location cached_location;
+    private long cached_location_ms;
+
     LocationSupplier(Context context) {
         this.context = context;
         locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    private Location getCachedLocation() {
+        if( cached_location != null ) {
+            long time_ms = System.currentTimeMillis();
+            if( time_ms <= cached_location_ms + 20000 ) {
+                return cached_location;
+            }
+            else {
+                cached_location = null;
+            }
+        }
+        return null;
+    }
+
+    private void cacheLocation() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "cacheLocation");
+        cached_location = new Location(getLocation());
+        cached_location_ms = System.currentTimeMillis();
+    }
+
+    public static class LocationInfo {
+        private boolean location_was_cached;
+
+        public boolean LocationWasCached() {
+            return location_was_cached;
+        }
+    }
+
+    public Location getLocation() {
+        return getLocation(null);
+    }
+
     /** If adding extra calls to this, consider whether explicit user permission is required, and whether
      *  privacy policy needs updating.
+     * @param locationInfo Optional class to return additional information about the location.
      * @return Returns null if location not available.
      */
-    public Location getLocation() {
-        if( locationListeners == null )
+    public Location getLocation(LocationInfo locationInfo) {
+        if( locationInfo != null )
+            locationInfo.location_was_cached = false; // init
+
+        if( locationListeners == null ) {
+            // if we have disabled location listening, then don't return a cached location anyway -
+            // in theory, callers should have already checked for user permission/setting before calling
+            // getLocation(), but just in case we didn't, don't want to return a cached location
             return null;
+        }
         if( test_force_no_location )
             return null;
         // location listeners should be stored in order best to worst
@@ -44,10 +87,13 @@ public class LocationSupplier {
             if( location != null )
                 return location;
         }
-        return null;
+        Location location = getCachedLocation();
+        if( location != null && locationInfo != null )
+            locationInfo.location_was_cached = true;
+        return location;
     }
 
-    private static class MyLocationListener implements LocationListener {
+    private class MyLocationListener implements LocationListener {
         private Location location;
         volatile boolean test_has_received_location; // must be volatile for test project reading the state
 
@@ -67,6 +113,7 @@ public class LocationSupplier {
                     Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
                 }
                 this.location = location;
+                cacheLocation();
             }
         }
 
@@ -83,6 +130,7 @@ public class LocationSupplier {
                     }
                     this.location = null;
                     this.test_has_received_location = false;
+                    cached_location = null;
                     break;
                 }
                 default:
@@ -98,6 +146,7 @@ public class LocationSupplier {
                 Log.d(TAG, "onProviderDisabled");
             this.location = null;
             this.test_has_received_location = false;
+            cached_location = null;
         }
     }
 

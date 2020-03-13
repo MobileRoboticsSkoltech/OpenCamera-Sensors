@@ -261,6 +261,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return locationSupplier.getLocation();
     }
 
+    /** If adding extra calls to this, consider whether explicit user permission is required, and whether
+     *  privacy policy needs updating.
+     *  Returns null if location not available.
+     */
+    public Location getLocation(LocationSupplier.LocationInfo locationInfo) {
+        return locationSupplier.getLocation(locationInfo);
+    }
+
     @Override
     public int createOutputVideoMethod() {
         String action = main_activity.getIntent().getAction();
