@@ -982,7 +982,7 @@
     <string name="preference_privacy_policy_text" translatable="false"> <!-- if changing this, remember to consider if the online privacy policy needs updating -->
         Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
         Microphone is also used for the optional \"Audio control\".
-        \nAccess to files is needed to save resultant photos and videos to your device.
+        \nAccess to files is needed to save resultant files such as photos and videos to your device.
         \nLocation permission is required for the optional geotagging/stamp/subtitles and Bluetooth features.
         \nSince Open Camera also uses operating system APIs, you should review relevant privacy policies
         such as for your device, manufacturer, operating system and/or Google accounts. For example:
