@@ -964,11 +964,15 @@ not work properly on all devices! Also note:</p><ul>
     <li>If using 3GPP, then restarting video when hitting maximum filesize will not be seamless (even on Android 8).</li>
 </ul>
 
-<p><b>Video flat (log) profile</b> - Enables a "flat" or "log" color profile for recording video. Only available if Camera2
-    API is used. This is intended to create videos for further editing in post production. Note that it may be necessary to
-    increase the video bitrate when shooting with a log profile. This feature is currently experimental,
-    please test if it fits your need before shooting your masterpiece!
-</p>
+<p><b>Video picture profiles</b> - Enables different color profiles for recording video. Only available if Camera2
+    API is used, and only supported on some devices. Additional notes:</p><ul>
+    <li>The various "log" profiles enable a "flat" color profile, and are intended to create videos
+        for further editing in post production.</li>
+    <li>Note that it may be necessary to increase the video bitrate when shooting with a "log" profile
+        or with high custom gamma.</li>
+    <li>When "Gamma" is selected, you can specify the gamma value used with the next option "Video gamma value".</li>
+    <li>This feature is somewhat experimental, please test if it fits your need before shooting your masterpiece!</li>
+</ul>
 
 <p><b>Max duration of video</b> - This option can be used to set a maximum duration of the video. If set, video recording
 will stop after the specified time (unless already stopped earlier).</p>
