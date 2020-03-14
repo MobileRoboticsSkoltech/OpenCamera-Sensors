@@ -7430,6 +7430,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
     }
 
+    /* Test recording video with a flat (jtlog) profile.
+     */
+    public void testVideoJTLogProfile() throws InterruptedException {
+        Log.d(TAG, "testVideoJTLogProfile");
+
+        setToDefault();
+
+        if( !mPreview.supportsTonemapCurve() ) {
+            Log.d(TAG, "test requires tonemap curve");
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.VideoLogPreferenceKey, "jtlog");
+        editor.apply();
+        updateForSettings();
+
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+
+        assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
+    }
+
+    /* Test recording video with custom gamma profile.
+     */
+    public void testVideoGammaProfile() throws InterruptedException {
+        Log.d(TAG, "testVideoGammaProfile");
+
+        setToDefault();
+
+        if( !mPreview.supportsTonemapCurve() ) {
+            Log.d(TAG, "test requires tonemap curve");
+            return;
+        }
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PreferenceKeys.VideoLogPreferenceKey, "gamma");
+        editor.putString(PreferenceKeys.VideoProfileGammaPreferenceKey, "3.0");
+        editor.apply();
+        updateForSettings();
+
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+
+        assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
+    }
+
     /* Test recording video with non-default edge and noise reduction modes.
      */
     public void testVideoEdgeModeNoiseReductionMode() throws InterruptedException {
