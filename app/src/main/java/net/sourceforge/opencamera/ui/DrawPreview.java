@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -111,7 +112,7 @@ public class DrawPreview {
     private final float scale;
     private final float stroke_width; // stroke_width used for various UI elements
     private Calendar calendar;
-    private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
+    private DateFormat dateFormatTimeInstance;
     private final String ybounds_text;
     private final int [] temp_histogram_channel = new int[256];
     private final LocationSupplier.LocationInfo locationInfo = new LocationSupplier.LocationInfo();
@@ -519,7 +520,14 @@ public class DrawPreview {
             Log.d(TAG, "photoMode: " + photoMode);
 
         show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
+        // reset in case user changes the preference:
+        dateFormatTimeInstance = DateFormat.getTimeInstance();
+        current_time_string = null;
+        last_current_time_time = 0;
+        text_bounds_time = null;
+
         show_camera_id_pref = main_activity.isMultiCam() && sharedPreferences.getBoolean(PreferenceKeys.ShowCameraIDPreferenceKey, true);
+        //show_camera_id_pref = true; // test
         show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
         show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowISOPreferenceKey, true);
         show_video_max_amp_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowVideoMaxAmpPreferenceKey, false);
@@ -1112,13 +1120,17 @@ public class DrawPreview {
             // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
             // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
             // http://code.google.com/p/android/issues/detail?id=42104
+            // update: now seems to be fixed
             // also possibly related https://code.google.com/p/android/issues/detail?id=181201
             //int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
             if( text_bounds_time == null ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "compute text_bounds_time");
                 text_bounds_time = new Rect();
-                String bounds_time_string = "00:00:00";
+                // better to not use a fixed string like "00:00:00" as don't want to make assumptions - e.g., in 12 hour format we'll have the appended am/pm to account for!
+                String bounds_time_string = dateFormatTimeInstance.format(new Date(100, 0, 1, 10, 59, 59));
+                if( MyDebug.LOG )
+                    Log.d(TAG, "bounds_time_string:" + bounds_time_string);
                 p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);
             }
             first_line_xshift += text_bounds_time.width() + gap_x;
