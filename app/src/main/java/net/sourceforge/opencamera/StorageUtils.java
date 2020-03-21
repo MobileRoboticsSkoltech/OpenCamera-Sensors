@@ -794,6 +794,11 @@ public class StorageUtils {
                 Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
             return null;
         }
+
+        File save_folder = getImageFolder(); // may be null if using SAF
+        if( MyDebug.LOG )
+            Log.d(TAG, "save_folder: " + save_folder);
+
         Media media = null;
         Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         final int column_id_c = 0;
@@ -818,7 +823,7 @@ public class StorageUtils {
                     Log.d(TAG, "found: " + cursor.getCount());
                 // now sorted in order of date - scan to most recent one in the Open Camera save folder
                 boolean found = false;
-                File save_folder = getImageFolder(); // may be null if using SAF
+                //File save_folder = getImageFolder(); // may be null if using SAF
                 String save_folder_string = save_folder == null ? null : save_folder.getAbsolutePath() + File.separator;
                 if( MyDebug.LOG )
                     Log.d(TAG, "save_folder_string: " + save_folder_string);
@@ -926,6 +931,10 @@ public class StorageUtils {
                 if( MyDebug.LOG )
                     Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
                 media = new Media(id, video, uri, date, orientation, filename);
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "mediastore returned no media");
             }
         }
         catch(Exception e) {
