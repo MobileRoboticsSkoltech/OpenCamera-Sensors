@@ -367,7 +367,7 @@ public class StorageUtils {
      *  See:
             http://stackoverflow.com/questions/21605493/storage-access-framework-does-not-update-mediascanner-mtp
             http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
-        Also note that this will always return null with Android Q's scoped storage: https://developer.android.com/preview/privacy/scoped-storage
+        Also note that this will return null for media store Uris with Android Q's scoped storage: https://developer.android.com/preview/privacy/scoped-storage
         "The DATA column is redacted for each file in the media store."
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
