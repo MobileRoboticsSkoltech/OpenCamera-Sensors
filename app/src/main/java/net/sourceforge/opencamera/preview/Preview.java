@@ -4375,25 +4375,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         String features = "";
         if( was_4k || was_bitrate || was_fps || was_slow_motion ) {
             if( was_4k ) {
-                features = "4K UHD";
+//                features = "4K UHD";
+                features = getContext().getResources().getString(R.string.error_features_4k);
             }
             if( was_bitrate ) {
                 if( features.length() == 0 )
-                    features = "Bitrate";
+//                    features = "Bitrate";
+                    features = getContext().getResources().getString(R.string.error_features_bitrate);
                 else
-                    features += "/Bitrate";
+//                    features += "/Bitrate";
+                    features += "/" + getContext().getResources().getString(R.string.error_features_bitrate);
             }
             if( was_fps ) {
                 if( features.length() == 0 )
-                    features = "Frame rate";
+//                    features = "Frame rate";
+                    features = getContext().getResources().getString(R.string.error_features_frame_rate);
                 else
-                    features += "/Frame rate";
+//                    features += "/Frame rate";
+                    features += "/" + getContext().getResources().getString(R.string.error_features_frame_rate);
             }
             if( was_slow_motion ) {
                 if( features.length() == 0 )
-                    features = "Slow motion";
+//                    features = "Slow motion";
+                    features = getContext().getResources().getString(R.string.error_features_slow_motion);
                 else
-                    features += "/Slow motion";
+//                    features += "/Slow motion";
+                    features += "/" + getContext().getResources().getString(R.string.error_features_slow_motion);
             }
         }
         return features;
