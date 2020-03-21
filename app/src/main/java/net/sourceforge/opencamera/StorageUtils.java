@@ -782,25 +782,9 @@ public class StorageUtils {
         }
     }
 
-    private Media getLatestMedia(boolean video) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
-            // needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
-            // see https://developer.android.com/training/permissions/requesting.html
-            // we now request storage permission before opening the camera, but keep this here just in case
-            // we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
-            if( MyDebug.LOG )
-                Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
-            return null;
-        }
-
-        File save_folder = getImageFolder(); // may be null if using SAF
-        if( MyDebug.LOG )
-            Log.d(TAG, "save_folder: " + save_folder);
-
+    private Media getLatestMediaCore(Uri baseUri, File save_folder, boolean video) {
         Media media = null;
-        Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
         final int column_id_c = 0;
         final int column_date_taken_c = 1;
         final int column_data_c = 2; // full path and filename, including extension
@@ -948,6 +932,30 @@ public class StorageUtils {
                 cursor.close();
             }
         }
+
+        return media;
+    }
+
+    private Media getLatestMedia(boolean video) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+            // needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
+            // see https://developer.android.com/training/permissions/requesting.html
+            // we now request storage permission before opening the camera, but keep this here just in case
+            // we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+            if( MyDebug.LOG )
+                Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
+            return null;
+        }
+
+        File save_folder = getImageFolder(); // may be null if using SAF
+        if( MyDebug.LOG )
+            Log.d(TAG, "save_folder: " + save_folder);
+
+        Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        Media media = getLatestMediaCore(baseUri, save_folder, video);
+
         return media;
     }
 
