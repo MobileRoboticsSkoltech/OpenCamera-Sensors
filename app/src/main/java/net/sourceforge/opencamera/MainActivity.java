@@ -3222,7 +3222,7 @@ public class MainActivity extends Activity {
             StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
             if( media != null ) {
                 uri = media.uri;
-                is_raw = media.path != null && media.path.toLowerCase(Locale.US).endsWith(".dng");
+                is_raw = media.filename != null && media.filename.toLowerCase(Locale.US).endsWith(".dng");
             }
         }
 

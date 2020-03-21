@@ -770,15 +770,15 @@ public class StorageUtils {
         final Uri uri;
         final long date;
         final int orientation;
-        final String path;
+        final String filename; // this should correspond to DISPLAY_NAME (so available with scoped storage) - so this includes file extension, but not full path
 
-        Media(long id, boolean video, Uri uri, long date, int orientation, String path) {
+        Media(long id, boolean video, Uri uri, long date, int orientation, String filename) {
             this.id = id;
             this.video = video;
             this.uri = uri;
             this.date = date;
             this.orientation = orientation;
-            this.path = path;
+            this.filename = filename;
         }
     }
 
@@ -799,8 +799,11 @@ public class StorageUtils {
         final int column_id_c = 0;
         final int column_date_taken_c = 1;
         final int column_data_c = 2; // full path and filename, including extension
-        final int column_orientation_c = 3; // for images only
-        String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.ORIENTATION};
+        final int column_name_c = 3; // filename (without path), including extension
+        final int column_orientation_c = 4; // for images only
+        String [] projection = video ?
+                new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA, VideoColumns.DISPLAY_NAME} :
+                new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.DISPLAY_NAME, ImageColumns.ORIENTATION};
         // for images, we need to search for JPEG/etc and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
         String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
                 ImageColumns.MIME_TYPE + "='image/webp' OR " +
@@ -842,50 +845,65 @@ public class StorageUtils {
                     }
                 }
                 while( cursor.moveToNext() );
-                if( found ) {
+
+                if( !found ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
+                    cursor.moveToFirst();
+                }
+
+                {
                     // make sure we prefer JPEG/etc (non RAW) if there's a JPEG/etc version of this image
                     // this is because we want to support RAW only and JPEG+RAW modes
-                    String path = cursor.getString(column_data_c);
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "path: " + path);
-                    // path may be null on Android 4.4, see above!
-                    if( path != null && path.toLowerCase(Locale.US).endsWith(".dng") ) {
+                    String filename = cursor.getString(column_name_c);
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "filename: " + filename);
+                    }
+                    // in theory now that we use DISPLAY_NAME instead of DATA (for path), this should always be non-null, but check just in case
+                    if( filename != null && filename.toLowerCase(Locale.US).endsWith(".dng") ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "try to find a non-RAW version of the DNG");
                         int dng_pos = cursor.getPosition();
                         boolean found_non_raw = false;
-                        String path_without_ext = path.toLowerCase(Locale.US);
-                        if( path_without_ext.indexOf(".") > 0 )
-                            path_without_ext = path_without_ext.substring(0, path_without_ext.lastIndexOf("."));
+                        String filename_without_ext = filename.toLowerCase(Locale.US);
+                        if( filename_without_ext.indexOf(".") > 0 )
+                            filename_without_ext = filename_without_ext.substring(0, filename_without_ext.lastIndexOf("."));
                         if( MyDebug.LOG )
-                            Log.d(TAG, "path_without_ext: " + path_without_ext);
+                            Log.d(TAG, "filename_without_ext: " + filename_without_ext);
                         while( cursor.moveToNext() ) {
-                            String next_path = cursor.getString(column_data_c);
+                            String next_filename = cursor.getString(column_name_c);
                             if( MyDebug.LOG )
-                                Log.d(TAG, "next_path: " + next_path);
-                            if( next_path == null )
+                                Log.d(TAG, "next_filename: " + next_filename);
+                            if( next_filename == null ) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "done scanning, couldn't find filename");
                                 break;
-                            String next_path_without_ext = next_path.toLowerCase(Locale.US);
-                            if( next_path_without_ext.indexOf(".") > 0 )
-                                next_path_without_ext = next_path_without_ext.substring(0, next_path_without_ext.lastIndexOf("."));
+                            }
+                            String next_filename_without_ext = next_filename.toLowerCase(Locale.US);
+                            if( next_filename_without_ext.indexOf(".") > 0 )
+                                next_filename_without_ext = next_filename_without_ext.substring(0, next_filename_without_ext.lastIndexOf("."));
                             if( MyDebug.LOG )
-                                Log.d(TAG, "next_path_without_ext: " + next_path_without_ext);
-                            if( !path_without_ext.equals(next_path_without_ext) )
+                                Log.d(TAG, "next_filename_without_ext: " + next_filename_without_ext);
+                            if( !filename_without_ext.equals(next_filename_without_ext) ) {
+                                // no point scanning any further as sorted by date - and we don't want to read through the entire set!
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "done scanning");
                                 break;
+                            }
                             // so we've found another file with matching filename - is it a JPEG/etc?
-                            if( next_path.toLowerCase(Locale.US).endsWith(".jpg") ) {
+                            if( next_filename.toLowerCase(Locale.US).endsWith(".jpg") ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "found equivalent jpeg");
                                 found_non_raw = true;
                                 break;
                             }
-                            else if( next_path.toLowerCase(Locale.US).endsWith(".webp") ) {
+                            else if( next_filename.toLowerCase(Locale.US).endsWith(".webp") ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "found equivalent webp");
                                 found_non_raw = true;
                                 break;
                             }
-                            else if( next_path.toLowerCase(Locale.US).endsWith(".png") ) {
+                            else if( next_filename.toLowerCase(Locale.US).endsWith(".png") ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "found equivalent png");
                                 found_non_raw = true;
@@ -899,19 +917,15 @@ public class StorageUtils {
                         }
                     }
                 }
-                if( !found ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
-                    cursor.moveToFirst();
-                }
+
                 long id = cursor.getLong(column_id_c);
                 long date = cursor.getLong(column_date_taken_c);
                 int orientation = video ? 0 : cursor.getInt(column_orientation_c);
                 Uri uri = ContentUris.withAppendedId(baseUri, id);
-                String path = cursor.getString(column_data_c);
+                String filename = cursor.getString(column_name_c);
                 if( MyDebug.LOG )
                     Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
-                media = new Media(id, video, uri, date, orientation, path);
+                media = new Media(id, video, uri, date, orientation, filename);
             }
         }
         catch(Exception e) {
