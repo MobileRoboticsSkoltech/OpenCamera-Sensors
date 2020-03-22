@@ -7424,12 +7424,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         if( MyDebug.LOG )
             Log.d(TAG, "showToast: " + message);
+
+        if( this.app_is_paused ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "don't show toast as application is paused: " + message);
+            // when targeting Android 11+, toasts with custom views won't be shown in background anyway - in theory we
+            // shouldn't be making toasts when in background, but check just in case
+            return;
+        }
+
         final Activity activity = (Activity)this.getContext();
         // We get a crash on emulator at least if Toast constructor isn't run on main thread (e.g., the toast for taking a photo when on timer).
         // Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
         // Also for the use_fake_toast code, running the creation code, and the postDelayed code (and the code in clearActiveFakeToast()), on the UI thread avoids threading issues
         activity.runOnUiThread(new Runnable() {
             public void run() {
+                if( Preview.this.app_is_paused ) {
+                    if( MyDebug.LOG )
+                        Log.e(TAG, "don't show toast as application is paused: " + message);
+                    // see note above
+                    return;
+                }
+
                 final float scale = Preview.this.getResources().getDisplayMetrics().density;
                 final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 
