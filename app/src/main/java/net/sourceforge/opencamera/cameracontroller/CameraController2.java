@@ -2111,14 +2111,14 @@ public class CameraController2 extends CameraController {
                     largest_dist = dist;
                 }
             }
-            if( MyDebug.LOG )
-                Log.d(TAG, "largest indx " + largest_indx + " dist: " + largest_dist);
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "largest indx " + largest_indx + " dist: " + largest_dist);*/
             Pair<Float, Float> p0 = points.get(largest_indx);
             Pair<Float, Float> p1 = points.get(largest_indx+1);
             float mid_x = 0.5f*(p0.first + p1.first);
             float mid_y = 0.5f*(p0.second + p1.second);
-            if( MyDebug.LOG )
-                Log.d(TAG, "    insert: " + mid_x + " , " + mid_y);
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "    insert: " + mid_x + " , " + mid_y);*/
             points.add(largest_indx+1, new Pair<>(mid_x, mid_y));
         }
 
@@ -2127,8 +2127,8 @@ public class CameraController2 extends CameraController {
             Pair<Float, Float> point = points.get(i);
             out_values[2*i] = point.first;
             out_values[2*i+1] = point.second;
-            if( MyDebug.LOG )
-                Log.d(TAG, "out point[" + i + "]: " + point.first + " , " + point.second);
+            /*if( MyDebug.LOG )
+                Log.d(TAG, "out point[" + i + "]: " + point.first + " , " + point.second);*/
         }
         return out_values;
     }
