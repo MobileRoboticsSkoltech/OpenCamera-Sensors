@@ -390,9 +390,9 @@ public class StorageUtils {
             if( MyDebug.LOG )
                 Log.d(TAG, "id: " + id);
             String [] split = id.split(":");
-            if( split.length >= 2 ) {
+            if( split.length >= 1 ) {
                 String type = split[0];
-                String path = split[1];
+                String path = split.length >= 2 ? split[1] : "";
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "type: " + type);
 					Log.d(TAG, "path: " + path);
@@ -782,29 +782,65 @@ public class StorageUtils {
         }
     }
 
-    private Media getLatestMediaCore(Uri baseUri, File save_folder, boolean video) {
+    private Media getLatestMediaCore(Uri baseUri, String bucket_id, boolean video) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "getLatestMediaCore");
+            Log.d(TAG, "baseUri: " + baseUri);
+            Log.d(TAG, "bucket_id: " + bucket_id);
+            Log.d(TAG, "video: " + video);
+        }
         Media media = null;
 
         final int column_id_c = 0;
         final int column_date_taken_c = 1;
-        final int column_data_c = 2; // full path and filename, including extension
+        /*final int column_data_c = 2; // full path and filename, including extension
         final int column_name_c = 3; // filename (without path), including extension
-        final int column_orientation_c = 4; // for images only
+        final int column_orientation_c = 4; // for images only*/
+        final int column_name_c = 2; // filename (without path), including extension
+        final int column_orientation_c = 3; // for images only
         String [] projection = video ?
-                new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA, VideoColumns.DISPLAY_NAME} :
-                new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.DISPLAY_NAME, ImageColumns.ORIENTATION};
+                new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DISPLAY_NAME} :
+                new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DISPLAY_NAME, ImageColumns.ORIENTATION};
         // for images, we need to search for JPEG/etc and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
-        String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
+        /*String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
                 ImageColumns.MIME_TYPE + "='image/webp' OR " +
                 ImageColumns.MIME_TYPE + "='image/png' OR " +
-                ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
+                ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";*/
+        String selection = "";
+        if( bucket_id != null )
+            selection = (video ? VideoColumns.BUCKET_ID : ImageColumns.BUCKET_ID) + " = " + bucket_id;
+        if( !video ) {
+            boolean and = selection.length() > 0;
+            if( and )
+                selection += " AND ( ";
+            selection += ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
+                    ImageColumns.MIME_TYPE + "='image/webp' OR " +
+                    ImageColumns.MIME_TYPE + "='image/png' OR " +
+                    ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
+            if( and )
+                selection += " )";
+        }
+        if( MyDebug.LOG )
+            Log.d(TAG, "selection: " + selection);
         String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
         Cursor cursor = null;
+
+        // we know we only want the most recent image - however we may need to scan forward if we find a RAW, to see if there's
+        // an equivalent non-RAW image
+        // request 3, just in case
+        Uri queryUri = baseUri.buildUpon().appendQueryParameter("limit", "3").build();
+        if( MyDebug.LOG )
+            Log.d(TAG, "queryUri: " + queryUri);
+
         try {
-            cursor = context.getContentResolver().query(baseUri, projection, selection, null, order);
+            cursor = context.getContentResolver().query(queryUri, projection, selection, null, order);
             if( cursor != null && cursor.moveToFirst() ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "found: " + cursor.getCount());
+
+                // now sorted in order of date - so just pick the most recent one
+
+                /*
                 // now sorted in order of date - scan to most recent one in the Open Camera save folder
                 boolean found = false;
                 //File save_folder = getImageFolder(); // may be null if using SAF
@@ -840,6 +876,7 @@ public class StorageUtils {
                         Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
                     cursor.moveToFirst();
                 }
+                */
 
                 {
                     // make sure we prefer JPEG/etc (non RAW) if there's a JPEG/etc version of this image
@@ -952,9 +989,20 @@ public class StorageUtils {
         File save_folder = getImageFolder(); // may be null if using SAF
         if( MyDebug.LOG )
             Log.d(TAG, "save_folder: " + save_folder);
+        String bucket_id = null;
+        if( save_folder != null ) {
+            bucket_id = String.valueOf(save_folder.getAbsolutePath().toLowerCase().hashCode());
+        }
+        if( MyDebug.LOG )
+            Log.d(TAG, "bucket_id: " + bucket_id);
 
         Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        Media media = getLatestMediaCore(baseUri, save_folder, video);
+        Media media = getLatestMediaCore(baseUri, bucket_id, video);
+        if( media == null && bucket_id != null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "fall back to checking any folder");
+            media = getLatestMediaCore(baseUri, null, video);
+        }
 
         return media;
     }
