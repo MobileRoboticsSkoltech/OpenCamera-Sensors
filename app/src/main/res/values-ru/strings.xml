@@ -158,7 +158,7 @@
     <string name="preference_crop_guide">Руководство по обрезке</string>
     <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете обрезать фото/видео. Требуется режим фотосъемки WYSIWYG или режим видео\n%s</string>
     <string name="preference_show_toasts">Всплывающие сообщения</string>
-    <string name="preference_show_toasts_summary">Показывать всплыващие уведомления при работе</string>
+    <string name="preference_show_toasts_summary">Показывать всплывающие уведомления при работе</string>
     <string name="preference_thumbnail_animation">Показать эскиз анимации</string>
     <string name="preference_thumbnail_animation_summary">Отображение перемещения эскиза анимации при съемке фотографии</string>
     <string name="preference_take_photo_border">Показывать рамку во время фотосъемки</string>
@@ -302,7 +302,7 @@
 
     <string name="no_permission">РАЗРЕШЕНИЯ НЕ ДОСТУПНЫ</string>
     <string name="permission_rationale_title">Требуется разрешение</string>
-    <string name="permission_rationale_camera">Требуется разрешение на доступ к камере для ее сключения</string>
+    <string name="permission_rationale_camera">Требуется разрешение на доступ к камере для ее включения</string>
     <string name="permission_rationale_storage">Требуется разрешение на чтение/запись для сохранения фото</string>
     <string name="permission_rationale_record_audio">Требуется разрешение на доступ к микрофону для записи видео со звуком</string>
     <string name="permission_rationale_location">Требуется разрешение на определение местоположения для геотеггинга (хранение информации о местоположении
@@ -705,7 +705,7 @@
     <string name="preference_audio_noise_control_sensitivity_m3">-3 (низкая чувствительность)</string>
 
     <string name="preference_hdr_contrast_enhancement">Улучшение контрастности HDR</string>
-    <string name="preference_hdr_contrast_enhancement_summary">Использовать алгоритм улучшения контрастности для HDR. Может улучшить качество при очень высоком динамическом диапазоне в кадре, в результате чего изображение станосится "похожим на HDR".\n%s</string>
+    <string name="preference_hdr_contrast_enhancement_summary">Использовать алгоритм улучшения контрастности для HDR. Может улучшить качество при очень высоком динамическом диапазоне в кадре, в результате чего изображение становится "похожим на HDR".\n%s</string>
     <string name="preference_hdr_contrast_enhancement_off">Выкл.</string>
     <string name="preference_hdr_contrast_enhancement_smart">Умный</string>
     <string name="preference_hdr_contrast_enhancement_always">Всегда</string>
@@ -851,10 +851,10 @@
     <string name="preference_show_cycle_flash_summary">Показывать на экране ярлык для задания цикла вспышки вместо отображения настроек вспышки во всплывающем меню</string>
 
     <string name="preference_raw_expo_bracketing">Разрешать RAW для брэкетинга экспозиции</string>
-    <string name="preference_raw_expo_bracketing_summary">Настройка также прездназначена для применения RAW для режима брэкетинга экспозиции фото (или для режима HDR, когда включена настройка \"Сохранять все изображения для режима HDR\"). Если данная настройка отключена, в данных режимах фото будут сохранены только в формате JPEG.</string>
+    <string name="preference_raw_expo_bracketing_summary">Настройка также предназначена для применения RAW для режима брэкетинга экспозиции фото (или для режима HDR, когда включена настройка \"Сохранять все изображения для режима HDR\"). Если данная настройка отключена, в данных режимах фото будут сохранены только в формате JPEG.</string>
 
     <string name="preference_raw_focus_bracketing">Разрешать RAW для фокус-брэкетинга</string>
-    <string name="preference_raw_focus_bracketing_summary">Настройка также прездназначена для применения RAW для режима фокус-брэкетинга фото. Если данная настройка отключена, в режиме фокус-брэкетинга фото будут сохранены только в формате JPEG.</string>
+    <string name="preference_raw_focus_bracketing_summary">Настройка также предназначена для применения RAW для режима фокус-брэкетинга фото. Если данная настройка отключена, в режиме фокус-брэкетинга фото будут сохранены только в формате JPEG.</string>
 
     <string name="cycle_raw">Переключать режимы RAW</string>
     <string name="preference_show_cycle_raw">Показывать ярлык RAW</string>
