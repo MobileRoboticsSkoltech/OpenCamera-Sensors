@@ -974,6 +974,11 @@
 
     <string name="aperture">Aperture</string>
 
+    <string name="error_features_4k">4K UHD</string>
+    <string name="error_features_bitrate">Bitrate</string>
+    <string name="error_features_frame_rate">Frame rate</string>
+    <string name="error_features_slow_motion">Slow motion</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy" translatable="false">Privacy policy</string>
@@ -1025,8 +1030,4 @@
             <li>Updated appearance of some icons.\n</li>
         </ul>
     </string>
-    <string name="error_features_4k">4K UHD</string>
-    <string name="error_features_bitrate">Bitrate</string>
-    <string name="error_features_frame_rate">Frame rate</string>
-    <string name="error_features_slow_motion">Slow motion</string>
 </resources>
