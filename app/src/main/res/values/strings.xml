@@ -926,16 +926,16 @@
     <string name="preference_video_jtlog2" translatable="false">JTLog2</string>
     <string name="preference_video_profile_gamma">Video gamma value</string>
     <string name="preference_video_profile_gamma_summary">Gamma value to use for video if video picture profile is set to Gamma\n%s</string>
-    <string name="preference_video_profile_gamma_1.6">1.6</string>
-    <string name="preference_video_profile_gamma_1.8">1.8</string>
-    <string name="preference_video_profile_gamma_1.9">1.9</string>
-    <string name="preference_video_profile_gamma_2.0">2.0</string>
-    <string name="preference_video_profile_gamma_2.1">2.1</string>
-    <string name="preference_video_profile_gamma_2.2">2.2</string>
-    <string name="preference_video_profile_gamma_2.3">2.3</string>
-    <string name="preference_video_profile_gamma_2.4">2.4</string>
-    <string name="preference_video_profile_gamma_2.6">2.6</string>
-    <string name="preference_video_profile_gamma_2.8">2.8</string>
+    <string name="preference_video_profile_gamma_1_6">1.6</string>
+    <string name="preference_video_profile_gamma_1_8">1.8</string>
+    <string name="preference_video_profile_gamma_1_9">1.9</string>
+    <string name="preference_video_profile_gamma_2_0">2.0</string>
+    <string name="preference_video_profile_gamma_2_1">2.1</string>
+    <string name="preference_video_profile_gamma_2_2">2.2</string>
+    <string name="preference_video_profile_gamma_2_3">2.3</string>
+    <string name="preference_video_profile_gamma_2_4">2.4</string>
+    <string name="preference_video_profile_gamma_2_6">2.6</string>
+    <string name="preference_video_profile_gamma_2_8">2.8</string>
 
     <string name="preference_immersive_mode_off">Off</string>
     <string name="preference_immersive_mode_low_profile">Only dim on-screen virtual navigation buttons</string>
