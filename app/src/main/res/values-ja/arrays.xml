@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="focus_mode_entries">
-        <item>自動</item>
+        <item>オートフォーカス</item>
         <item>無限遠</item>
         <item>マクロ</item>
+        <item>固定(タッチAF)</item>
+        <item>マニュアルフォーカス</item>
         <item>固定</item>
-        <item>マニュアル</item>
-        <item>Fixed</item>
         <item>EDOF</item>
-        <item>コンティニュアス</item>
-        <item>コンティニュアス</item>
+        <item>コンティニュアスAF</item>
+        <item>コンティニュアスAF</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -61,8 +61,8 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>最大サイズ</item>
-        <item>マッチしたサイズ (WYSIWYG)</item>
+        <item>ディスプレイに合わせる</item>
+        <item>撮影範囲に合わせる(WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
@@ -70,8 +70,8 @@
     </string-array>
     <string-array name="preference_touch_capture_entries">
         <item>なし</item>
-        <item>1回押し</item>
-        <item>2回押し</item>
+        <item>タッチ</item>
+        <item>ダブルタップ</item>
         </string-array>
     <string-array name="preference_touch_capture_values">
         <item>none</item>
@@ -81,9 +81,9 @@
     <string-array name="preference_volume_keys_entries">
         <item>写真を撮る (ビデオ録画の開始/終了)</item>
         <item>フォーカス</item>
-        <item>ズームの拡大/縮小</item>
+        <item>ズームイン/ズームアウト</item>
         <item>露出補正</item>
-        <item>自動手振れ防止のオン/オフ</item>
+        <item>傾き補正のオン/オフ</item>
         <item>音量の変更</item>
         <item>なし</item>
         </string-array>
@@ -242,4 +242,59 @@
         <item>audio_mono</item>
         <item>audio_stereo</item>
     </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>なし</item>
+        <item>音に反応</item>
+        <item>音声コマンド: \"チーズ\"</item> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>ローカルタイム</item>
+        <item>UTC協定世界時</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3枚</item>
+        <item>5枚</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>±1/2EV</item>
+        <item>±1EV</item>
+        <item>±2EV</item>
+        <item>±3EV</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_entries">
+        <item>反転しない</item>
+        <item>反転する</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_values">
+        <item>preference_front_camera_mirror_no</item>
+        <item>preference_front_camera_mirror_photo</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_entries">
+        <item>記録しない</item>
+        <item>記録する</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
+    </string-array>
+
 </resources>
