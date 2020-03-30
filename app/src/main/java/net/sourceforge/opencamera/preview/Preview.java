@@ -223,11 +223,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private int current_orientation; // orientation received by onOrientationChanged
     private int current_rotation; // orientation relative to camera's orientation (used for parameters.setRotation())
     private boolean has_level_angle;
-    private double natural_level_angle; // "level" angle of device, before applying any calibration and without accounting for screen orientation
-    private double level_angle; // "level" angle of device, including calibration
-    private double orig_level_angle; // "level" angle of device, including calibration, but without accounting for screen orientation
+    private double natural_level_angle; // "level" angle of device in degrees, before applying any calibration and without accounting for screen orientation
+    private double level_angle; // "level" angle of device in degrees, including calibration
+    private double orig_level_angle; // "level" angle of device in degrees, including calibration, but without accounting for screen orientation
     private boolean has_pitch_angle;
-    private double pitch_angle;
+    private double pitch_angle; // pitch angle of device in degrees
 
     // if applicationInterface.allowZoom() returns false, then has_zoom will be false, but camera_controller_supports_zoom
     // supports whether the camera controller supported zoom
@@ -342,7 +342,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private final float [] cameraRotation = new float[9];
     private final float [] deviceInclination = new float[9];
     private boolean has_geo_direction;
-    private final float [] geo_direction = new float[3];
+    private final float [] geo_direction = new float[3]; // geo direction in radians
     private final float [] new_geo_direction = new float[3];
 
     private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
@@ -6490,14 +6490,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.has_level_angle;
     }
 
+    /** Returns the uncalibrated level angle in degrees.
+     */
     public double getLevelAngleUncalibrated() {
         return this.natural_level_angle - this.current_orientation;
     }
 
+    /** Returns the level angle in degrees.
+     */
     public double getLevelAngle() {
         return this.level_angle;
     }
 
+    /** Returns the original level angle in degrees.
+     */
     public double getOrigLevelAngle() {
         return this.orig_level_angle;
     }
@@ -6506,6 +6512,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return this.has_pitch_angle;
     }
 
+    /** Returns the pitch angle in degrees.
+     */
     public double getPitchAngle() {
         return this.pitch_angle;
     }
@@ -6593,6 +6601,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return has_geo_direction;
     }
 
+    /** Returns the geo direction in radians.
+     */
     public double getGeoDirection() {
         return geo_direction[0];
     }

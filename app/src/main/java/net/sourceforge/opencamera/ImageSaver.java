@@ -138,7 +138,7 @@ public class ImageSaver extends Thread {
         ImageFormat image_format;
         int image_quality;
         boolean do_auto_stabilise;
-        final double level_angle;
+        final double level_angle; // in degrees
         final List<float []> gyro_rotation_matrix; // used for panorama (one 3x3 matrix per jpeg_images entry), otherwise can be null
         boolean panorama_dir_left_to_right; // used for panorama
         float camera_view_angle_x; // used for panorama
@@ -164,7 +164,7 @@ public class ImageSaver extends Thread {
         final boolean store_location;
         final Location location;
         final boolean store_geo_direction;
-        final double geo_direction;
+        final double geo_direction; // in radians
         final String custom_tag_artist;
         final String custom_tag_copyright;
         final int sample_factor; // sampling factor for thumbnail, higher means lower quality
