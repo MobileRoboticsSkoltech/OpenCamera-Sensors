@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
-    <string name="action_settings">設定</string>    
+    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <string name="action_settings">設定</string>
     <string name="action_popup">彈出設定</string>
     <string name="intro_ok">好 (此訊息將不再顯示)</string>
 
-    <string name="on">開啟</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
-    <string name="off">關閉</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
+    <string name="on">開啟</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
+    <string name="off">關閉</string> <!-- whether a setting is turned off, e.g., "Auto-level: Off" -->
     
-    <string name="choose_save_location">選擇儲存位置:</string>
+    <string name="choose_save_location">選擇儲存位置：</string>
     <string name="clear_folder_history">清除資料夾歷史</string>
     <string name="clear_folder_history_question">清除資料夾歷史？</string>
     <string name="choose_another_folder">選擇另一個資料夾</string>
     <string name="changed_save_location">已更改儲存位置到:</string>
     <string name="stopped_recording_video">已停止錄製影片</string>
-    <string name="repeats_to_go">repeats to go</string> <!--  intentionally starts lower case -->
-    <string name="failed_to_reconnect_camera">連結到相機失敗</string>
+    <string name="repeats_to_go">次剩餘重複次數</string> <!--  intentionally starts lower case -->
+    <string name="failed_to_reconnect_camera">重新連結到相機失敗</string>
     <string name="video_may_be_corrupted">錯誤，影片檔可能已經損壞</string>
     <string name="not_supported">在您的裝置上不支援</string> <!--  intentionally starts lower case -->
     <string name="video_error_unknown">未知錯誤，影片中斷</string>
@@ -41,7 +41,8 @@
     <string name="started_recording_video">已開始錄製影片</string>
     <string name="sorry">抱歉</string>
     <string name="failed_to_save_photo">儲存照片失敗</string>
-    <string name="failed_to_auto_stabilise">防手震失敗</string>
+    <string name="failed_to_save_photo_raw">儲存 RAW 照片失敗</string>
+    <string name="failed_to_auto_stabilise">自動水平失敗</string>
     <string name="failed_to_start_camera_preview">啟動相機預覽失敗</string>
     <string name="taking_photo">拍照</string>
     <string name="failed_to_take_picture">拍照失敗</string>
@@ -50,7 +51,7 @@
     <string name="no_gallery_app">沒有可用的相簿程式</string>
     <string name="screen_is_locked">螢幕被鎖定\n滑動螢幕來解鎖</string>
     <string name="unlocked">已解鎖</string>
-    <string name="auto_stabilise_not_supported">對不起，防手震在此裝置上\n不支援</string>
+    <string name="auto_stabilise_not_supported">對不起，自動水平在此裝置上\n不支援</string>
     <string name="audio_disabled">停用音訊</string>
     <string name="max_duration">最大持續時間</string>
     <string name="color_effect">顏色效果</string>
@@ -62,19 +63,20 @@
     <string name="failed_to_open_camera_1">打開相機失敗。</string>
     <string name="failed_to_open_camera_2">相機可能正被</string>
     <string name="failed_to_open_camera_3">其它程式使用？</string>
+    <string name="iso">ISO</string>
     <string name="zoom">縮放</string>
     <string name="free_memory">可用記憶體</string>
-    <string name="screen_lock_message_1">[鎖定:</string>
+    <string name="screen_lock_message_1">[已鎖定：</string>
     <string name="screen_lock_message_2">滑動以解鎖]</string>
     
     <string name="failed_to_stamp">在照片上標記失敗</string>
-    <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
+    <string name="metres_abbreviation">公尺</string> <!-- symbol short for metres -->
     
     <string name="preference_category_camera_effects">相機特效</string>
-    <string name="preference_auto_stabilise">防手震</string>
-    <string name="preference_auto_stabilise_summary">圖像將被旋轉，使它們自動對準(僅照片) (拍照更慢，且可能在記憶體過低的裝置上失敗)</string>
+    <string name="preference_auto_stabilise">自動水平</string>
+    <string name="preference_auto_stabilise_summary">圖片將被旋轉，使它們自動對準(僅照片) (拍照更慢，且可能在記憶體過低的裝置上失敗)</string>
     <string name="preference_color_effect">套用一個顏色效果</string>
-    <string name="preference_color_effect_summary">套用選定的顏色效果到照片</string>
+    <string name="preference_color_effect_summary">套用選取的顏色效果到照片</string>
     <string name="preference_scene_mode">套用一個場景模式</string>
     <string name="preference_scene_mode_summary">為各種場景優化照片</string>
     <string name="preference_white_balance">設定白平衡</string>
@@ -82,11 +84,11 @@
     <string name="preference_iso">設定 ISO</string>
     <string name="preference_iso_summary">越高的值意味著對光越敏感(在某些裝置上可能無法作用)</string>
     <string name="preference_exposure">設定曝光補償</string>
-    <string name="preference_exposure_summary">設為 0 使用預設曝光補償。</string>
+    <string name="preference_exposure_summary">設為 0 使用預設曝光補償</string>
     <string name="preference_lock_orientation">鎖定照片/影片方向</string>
-    <string name="preference_lock_orientation_summary">如果設定，裝置的方向將被忽略，且照片/影片的方向將相對於指定的方向。\n%s</string>
+    <string name="preference_lock_orientation_summary">如果設定，裝置的方向將被忽略，且照片/影片的方向將相對於指定的方向\n%s</string>
     <string name="preference_face_detection">臉部偵測</string>
-    <string name="preference_face_detection_summary">用臉部偵測代替對焦區。</string>
+    <string name="preference_face_detection_summary">用臉部偵測代替對焦區</string>
 
     <string name="preference_category_camera_controls">相機控制</string>
     <string name="preference_timer">定時器</string>
@@ -94,31 +96,38 @@
     <string name="preference_timer_beep_summary">當定時器倒數或連拍模式延遲時提示</string>
     <string name="preference_timer_speak">語音倒數計時</string>
     <string name="preference_timer_speak_summary">定時或連拍模式時使用語音倒數計時 (從 60 秒開始)</string>
-	<string name="preference_burst_mode">連拍模式</string>
+    <string name="preference_burst_mode">連拍模式</string> <!-- preference is called "burst" for historical reasons, but is more of a repeat mode; also used in popup menu, so shouldn't be too long a string -->
     <string name="preference_burst_interval">連拍模式間隔</string>
     <string name="preference_screen_camera_controls_more">更多相機控制…</string>
-	<string name="preference_touch_capture">快門設定</string>
+    <string name="preference_touch_capture">點擊拍照</string>
     <string name="preference_touch_capture_summary">在預覽畫面按一次或兩次來拍照</string>
     <string name="preference_pause_preview">拍照後暫停</string>
     <string name="preference_pause_preview_summary">拍照後暫停螢幕，顯示分享或刪除照片選項</string>
     <string name="preference_shutter_sound">快門聲音</string>
     <string name="preference_shutter_sound_summary">拍照時播放聲音</string>
     <string name="preference_volume_keys">音量鍵</string>
+    <string name="preference_audio_control">音訊控制選項</string>
+    <!-- preference_audio_control_summary defined below -->
+    <string name="preference_audio_noise_control_sensitivity">音訊控制敏感度</string>
+    <string name="preference_audio_noise_control_sensitivity_summary">音訊（大的聲音）選項的聲音等級敏感度</string>
     <string name="preference_save_location">儲存位置</string>
     <string name="preference_save_location_summary">用來儲存照片/影片檔的資料夾</string>
-	<string name="preference_using_saf">使用 Storage Access Framework</string>
-    <string name="preference_using_saf_summary">是否使用 Storage Access Framework 來儲存照片和影片</string>
+    <string name="preference_using_saf">使用 Storage Access Framework</string>
+    <string name="preference_using_saf_summary">是否使用 Storage Access Framework 來儲存照片和影片。這個選項應該被啟用來允許儲存到外部 SD 卡。</string>
     <string name="preference_save_photo_prefix">照片檔名前綴</string>
     <string name="preference_save_photo_prefix_summary">用於儲存照片檔名的前置字串</string>
     <string name="preference_save_video_prefix">影片檔名前綴</string>
     <string name="preference_save_video_prefix_summary">用於儲存影片檔名的前置字串</string>
+    <string name="preference_save_zulu_time">檔案名稱的時間格式</string>
     <string name="preference_show_when_locked">鎖定時顯示相機</string>
     <string name="preference_show_when_locked_summary">如果開啟，Open Camera 將在任何鎖定畫面上顯示 (您仍然必須解鎖來存取設定、相簿等)</string>
+    <string name="preference_startup_focus">啟動時自動對焦</string>
+    <string name="preference_startup_focus_summary">Open Camera 啟動時是否要自動對焦。如果您有啟動時閃光燈開啟的問題，請停用此選項</string>
     <string name="preference_lock_video">錄影時鎖定螢幕</string>
-    <string name="preference_lock_video_summary">當錄製影片時，圖形化使用者介面將被鎖定以防止意外的停止錄影。滑動螢幕以解鎖。注意，如果程式轉到背景或螢幕是空白，影片錄製會停止。</string>
+    <string name="preference_lock_video_summary">當錄製影片時，圖形化使用者介面將被鎖定以防止意外的停止錄影。滑動螢幕以解鎖。注意，如果程式進入背景或螢幕關閉，影片錄製會停止。</string>
     <string name="preference_rotate_preview">旋轉預覽</string>
     <string name="preference_rotate_preview_summary">旋轉預覽選項 (不會影響最終的照片/影片)\n%s</string>
-    <string name="preference_screen_gui">螢幕GUI…</string>
+    <string name="preference_screen_gui">螢幕 GUI…</string>
     <string name="preference_preview_size">預覽大小</string>
     <string name="preference_ui_placement">UI 佈局</string>
     <string name="preference_immersive_mode">全螢幕模式</string>
@@ -126,17 +135,17 @@
     <string name="preference_show_zoom_summary">在螢幕上顯示目前的相機縮放等級 (當放大時)</string>
     <string name="preference_show_zoom_controls">顯示縮放 -/+ 控制</string>
     <string name="preference_show_zoom_controls_summary">顯示縮放控制的 -/+ 按鈕</string>
-    <string name="preference_show_zoom_slider_controls">顯示縮放滑條控制</string>
-    <string name="preference_show_zoom_slider_controls_summary">顯示縮放控制的滑條</string>
-	<string name="preference_show_iso">顯示 ISO</string>
-    <string name="preference_show_iso_summary">顯示目前的 ISO 等級 (需要 Camera2 API)</string>
+    <string name="preference_show_zoom_slider_controls">顯示縮放滑桿控制</string>
+    <string name="preference_show_zoom_slider_controls_summary">顯示縮放控制的滑桿</string>
+    <string name="preference_show_iso">顯示 ISO</string>
+    <string name="preference_show_iso_summary">顯示目前的 ISO 等級。在自動閃光模式，閃光符號也會指示閃光燈何時閃光。（需要 Camera2 API。）</string>
     <string name="preference_free_memory">顯示可用記憶體</string>
     <string name="preference_free_memory_summary">在螢幕上顯示剩餘的裝置儲存空間</string>
     <string name="preference_show_angle">顯示角度</string>
     <string name="preference_show_angle_summary">在螢幕上顯示目前的裝置角度</string>
     <string name="preference_show_angle_line">顯示角度線</string>
     <string name="preference_show_angle_line_summary">顯示水平線</string>
-	<string name="preference_angle_highlight_color">角度標示顏色</string>
+    <string name="preference_angle_highlight_color">角度標示顏色</string>
     <string name="preference_angle_highlight_color_summary">相機接近水平時的標示顏色</string>
     <string name="preference_show_geo_direction">顯示羅盤方向</string>
     <string name="preference_show_geo_direction_summary">在螢幕上顯示裝置的羅盤方向</string>
@@ -145,15 +154,17 @@
     <string name="preference_show_battery">顯示電池</string>
     <string name="preference_show_battery_summary">在螢幕上顯示目前電池電量</string>
     <string name="preference_grid">顯示格線</string>
-    <string name="grid">格</string> <!-- short form of Show a grid -->
+    <string name="grid">格線</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">顯示裁切輔助</string>
-    <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的解析度很有用。需要所見即所得拍照模式，或處於錄影模式中。\n%s</string>
+    <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的長寬比很有用。需要所見即所得拍照模式，或處於錄影模式中。\n%s</string>
     <string name="preference_show_toasts">顯示拍照前提示訊息</string>
     <string name="preference_show_toasts_summary">是否要在拍照快門前顯示彈出訊息提示</string>
     <string name="preference_thumbnail_animation">顯示縮圖動畫</string>
     <string name="preference_thumbnail_animation_summary">當拍照時顯示移動縮圖動畫</string>
+    <string name="preference_take_photo_border">拍照時顯示邊緣</string>
+    <string name="preference_take_photo_border_summary">在螢幕上顯示邊緣來表示拍照</string>
     <string name="preference_keep_display_on">保持螢幕常亮</string>
-    <string name="preference_keep_display_on_summary">如果開啟，當 Open Camera 的主介面啟動時，螢幕將不會關閉。</string>
+    <string name="preference_keep_display_on_summary">如果開啟，當 Open Camera 的使用者介面啟動時，螢幕將不會關閉。</string>
     <string name="preference_max_brightness">強制最大亮度</string>
     <string name="preference_max_brightness_summary">強制螢幕以最大亮度顯示，而不是裝置預設值</string>
     
@@ -162,16 +173,17 @@
     <string name="preference_screen_video_settings">影片設定…</string>
     <string name="preference_screen_location_settings">位置設定…</string>
     <string name="preference_resolution">相機解析度</string>
-    <string name="preference_quality">圖像品質</string>
-    <string name="preference_quality_summary">設定儲存的照片圖像的圖像品質（建議值是90%%）\n%s</string>
+    <string name="preference_quality">圖片品質</string>
+    <string name="preference_quality_summary">設定儲存的 JPEG 或 WebP 照片的圖片品質（預設值是 90%%）。對於 PNG 圖片格式沒有作用。\n%s</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_raw">RAW</string>
     <string name="preference_location">儲存位置資料 (地理標記)</string>
-    <string name="preference_location_summary">在照片/影片中儲存 GPS 位置資料</string>
+    <string name="preference_location_summary">在照片/影片中儲存 GPS 位置資料（對於照片，位置資料只能儲存在 JPEG 和 DNG 格式）</string>
     <string name="preference_gps_direction">儲存羅盤方向</string>
-    <string name="preference_gps_direction_summary">在照片中儲存 GPS 羅盤方向</string>
+    <string name="preference_gps_direction_summary">在照片中儲存 GPS 羅盤方向（只有 JPEG 格式）</string>
     <string name="preference_require_location">需要位置資料</string>
     <string name="preference_require_location_summary">如果啟用位置資料，只拍照/錄影如果位置資料可用。</string>
     <string name="preference_stamp">標記照片</string>
-    <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料也標記 GPS 資訊\n%s</string>
+    <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料，也標記 GPS 資訊\n%s</string>
     <string name="preference_stamp_dateformat">日期標記格式</string>
     <string name="preference_stamp_timeformat">時間標記格式</string>
     <string name="preference_stamp_gpsformat">GPS 標記格式</string>
@@ -181,40 +193,47 @@
     <string name="preference_stamp_fontsize_summary">當在照片上標記文字時使用的字型大小</string>
     <string name="preference_stamp_font_color">字型顏色</string>
     <string name="preference_stamp_font_color_summary">當在照片上標記文字時使用的字型顏色</string>
-    <string name="preference_stamp_style">文字風格</string>
-    <string name="preference_stamp_style_summary">當在照片上標記文字時使用的字型風格\n%s</string>
+    <string name="preference_stamp_style">文字樣式</string>
+    <string name="preference_stamp_style_summary">當在照片上標記文字時使用的樣式\n%s</string>
+    <string name="preference_background_photo_saving">使用背景執行緒</string>
+    <string name="preference_background_photo_saving_summary">是否要在背景執行緒儲存照片（操作較快）</string>
     <string name="video_quality">影片解析度</string>
-    <string name="preference_force_video_4k">強制 4K UHD 影片 (實驗中)</string>
+    <string name="preference_force_video_4k">強制 4K UHD 影片（只能在某些裝置上運作）</string>
     <string name="preference_force_video_4k_summary">為後置相機錄影啟用 3840x2160 解析度 - 僅當您的裝置支援時才能作用，且如果不支援可能當機！</string>
-    <string name="preference_video_stabilization">啟用影片穩定</string>
-    <string name="preference_video_stabilization_summary">影片穩定減少在預覽和錄影中由於相機移動引起的晃動。</string>
+    <string name="preference_video_stabilization">啟用影片防震</string>
+    <string name="preference_video_stabilization_summary">影片防震減少在預覽和錄影中由於相機移動引起的晃動。</string>
     <string name="preference_video_bitrate">影片位元率 (大約)</string>
     <string name="preference_video_bitrate_summary">設定影片的大致位元率 (越高表示越好的品質，但佔用更多磁碟空間；如果位元率不支援可能造成錄影失敗)\n%s</string>
-    <string name="preference_video_fps">影片FPS (大約)</string>
-    <string name="preference_video_fps_summary">設定影片的 FPS(大約值，不能保證有用，且如果不支援可能造成錄影失敗)\n%s</string>
+    <string name="preference_video_fps">影片影格率 (大約)</string>
+    <string name="preference_video_fps_summary">設定影片的影格率 (FPS)（大約值，不能保證有用，且如果不支援可能造成錄影失敗）。注意這個設定在慢動作影片會被忽略。\n%s</string>
     <string name="preference_video_max_duration">影片最長持續時間</string>
-    <string name="preference_video_max_duration_summary">在指定的時間後錄影將停止。\n%s</string>
+    <string name="preference_video_max_duration_summary">在指定的時間後錄影將停止\n%s</string>
     <string name="preference_video_restart">在最大持續時間後重啟錄影</string>
-    <string name="preference_video_restart_summary">如果在達到最大持續時間(如果有設定)後影片停止，此選項將使錄影重啟，最多為指定的次數。\n%s</string>
+    <string name="preference_video_restart_summary">如果在達到最大持續時間(如果有設定)後影片停止，此選項將使錄影重新開始，最多為指定的次數\n%s</string>
+    <string name="preference_video_max_filesize">最大影片檔案大小</string>
+    <string name="preference_video_max_filesize_summary">當到達（大約）最大檔案大小，錄影會停止和/或重新開始（見下面選項）。注意許多 Android 裝置對影片有最大檔案大小（通常約為 2GB 或 4GB），但是這個選項允許設定特定值。注意這個選項無法用於增加裝置內建的最大大小。\n%s</string>
+    <string name="preference_video_restart_max_filesize">到達最大檔案大小時重新開始</string>
+    <string name="preference_video_restart_max_filesize_summary">當到達最大檔案大小時，是否要自動重新開始（無論是裝置預設最大檔案大小或使用者指定）</string>
     <string name="preference_record_audio">錄音</string>
     <string name="preference_record_audio_summary">錄影時錄音</string>
     <string name="preference_record_audio_src">音源</string>
-    <string name="preference_record_audio_src_summary">麥克風用於錄製音訊\n%s</string>
-	<string name="preference_record_audio_channels">音源頻道</string>
+    <string name="preference_record_audio_src_summary">用於錄製音訊的麥克風\n%s</string>
+    <string name="preference_record_audio_channels">音源頻道</string>
     <string name="preference_record_audio_channels_summary">指定使用單聲道或立體聲來錄音 (立體聲只支援某些裝置)</string>
     <string name="preference_video_flash">錄影時閃光</string>
-    <string name="preference_video_flash_summary">如果啟用，錄影時閃光將開啟/關閉 (在一段距離外可以用來判斷相機仍然在錄製)。</string>
+    <string name="preference_video_flash_summary">如果啟用，錄影時閃光將開啟/關閉 (在一段距離外可以用來判斷相機仍然在錄製)</string>
     
     <string name="preference_category_online">其他</string>
     <string name="preference_online_help">線上說明</string>
+    <string name="preference_online_help_summary">在瀏覽器中開啟 Open Camera 網站</string>
     <string name="preference_donate">捐贈以支援開發</string>
     <string name="preference_donate_summary">如果您喜歡這個程式，請考慮捐助。您可以透過購買我的“捐助 app”來進行捐助 - 點擊此選項將打開我的捐助 app 頁面。謝謝！</string>
     <string name="preference_use_camera2">使用 Camera2 API</string>
-    <string name="preference_use_camera2_summary">啟用 Camera2 API - 提供更多功能，但仍在實驗中 (會造成重新啟動)</string>
+    <string name="preference_use_camera2_summary">啟用額外的功能，例如手動曝光模式、對焦、白平衡和 RAW（如果裝置支援），但是無法在所有裝置上正確運作 (會造成重新啟動)</string>
     <string name="preference_about">關於</string>
     <string name="preference_about_summary">應用程式和除錯資訊</string>
-    <string name="preference_reset">復原設定</string>
-    <string name="preference_reset_summary">重設所有 Open Camera 設定為預設</string>
+    <string name="preference_reset">重設設定</string>
+    <string name="preference_reset_summary">重設所有 Open Camera 設定為預設值</string>
     <string name="preference_reset_question">您確定要重設所有 Open Camera 設定為預設值嗎？</string>
 
     <string name="about_available">可用</string>
@@ -227,8 +246,12 @@
     <string name="exposure_lock">曝光鎖定</string>
     <string name="focus_mode">對焦模式</string>
     <string name="flash_mode">閃光模式</string>
+    <string name="switch_to_front_camera">切換到前置相機</string>
+    <string name="switch_to_back_camera">切換到後置相機</string>
+    <string name="switch_to_video">切換到影片模式</string>
+    <string name="switch_to_photo">切換到照片模式</string>
     <string name="trash">刪除上一張照片</string>
-    <string name="share">共用照片</string>
+    <string name="share">分享照片</string>
     
     <string name="parent_folder">上層資料夾</string>
     <string name="new_folder">新資料夾</string>
@@ -240,6 +263,108 @@
 
     <string name="saf_select_save_location">選擇儲存位置</string>
     <string name="saf_cancelled">Storage Access Framework 已取消</string>
+    <string name="saf_permission_failed">無法儲存到這個資料夾</string>
+
+    <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
+    <string name="permission_record_audio_not_available">麥克風權限不可用</string>
+    <string name="permission_location_not_available">位置權限不可用</string>
+
+    <string name="start_video">開始錄製影片</string>
+    <string name="stop_video">停止錄製影片</string>
+
+    <string name="max_filesize">最大檔案大小</string>
+    <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+    <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
+
+    <string name="audio_control_start">開始音訊監聽</string>
+    <string name="audio_control_stop">停止音訊監聽</string>
+    <string name="speech_recognizer_started">說「cheese」</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    <string name="audio_listener_started">發出大的聲音</string>
+
+    <string name="auto_stabilise_info">自動水平會自動旋轉照片，使它們顯得水平。\n\n注意這意味著圖片解析度會較低（因為需要旋轉和裁切）。</string>
+    <string name="raw_info">DNG 檔案包含來自相機的全部未壓縮和未處理的資訊。\n\n注意有些圖庫無法識別 DNG 檔案。DNG 圖片可以使用專用編輯器（例如 Snapseed 和 Lightroom）處理。\n\n注意「標記照片」和「自動水平」等處理選項僅適用於非-DNG (JPEG/etc) 圖片 ，不適用於 DNG 圖片。 </string>
+    <string name="hdr_info">HDR 模式在亮度變化範圍大的環境中非常有用。它的工作原理是在不同曝光下拍攝多張照片，並將它們組合在一起以建立最終圖片。\n\n注意 HDR 不適合用於快速移動的場景，而且可能造成顏色較不精確。\n\nHDR 模式拍照比較慢。</string>
+
+    <string name="dont_show_again">不要再次顯示</string>
+
+    <string name="photo_mode">照片模式</string>
+    <string name="photo_mode_standard">標準</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">標準</string>
+    <string name="photo_mode_hdr">HDR</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_expo_bracketing_full">包圍曝光</string>
+    <string name="photo_mode_fast_burst">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
+    <string name="photo_mode_fast_burst_full">快速連拍</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_noise_reduction_full">雜訊抑制</string>
+    <string name="preference_category_stamp">照片標記</string>
+    <string name="preference_hdr_save_expo">HDR 模式儲存所有圖片</string>
+    <string name="preference_hdr_save_expo_summary">如果啟用，使用 HDR 模式拍照會儲存三個基本曝光圖片以及最終的 HDR 照片。注意這會使儲存速度變慢，尤其是啟用了「照片標記」或自動水平等選項時。</string>
+
+    <string name="no_permission">權限不可用</string>
+    <string name="permission_rationale_title">需要權限</string>
+    <string name="permission_rationale_camera">需要相機權限來啟用相機</string>
+    <string name="permission_rationale_storage">需要讀/寫儲存空間權限來儲存照片</string>
+    <string name="permission_rationale_record_audio">錄製具有音訊的影片和語音控制需要麥克風權限</string>
+    <string name="permission_rationale_location">地理標記需要位置權限（在照片和影片中儲存位置資訊）。
+        連線到藍牙低功耗遠端控制裝置也需要位置權限。</string>
+
+    <string name="preference_category_photo_debugging">除錯選項</string>
+    <string name="preference_category_video_debugging">除錯選項</string>
+    <string name="preference_camera2_fake_flash">使用替代閃光燈方法</string>
+    <string name="preference_camera2_fake_flash_summary">如果您的裝置使用 Camera2 API 時閃光燈有異常，請啟用此功能</string>
+
+    <string name="preference_expo_bracketing_n_images">包圍曝光</string>
+    <string name="preference_expo_bracketing_n_images_summary">包圍曝光的圖片數\n%s</string>
+    <string name="preference_expo_bracketing_stops">包圍曝光光圈 (Stops)</string>
+    <string name="preference_expo_bracketing_stops_summary">最暗/最亮圖片要減少/增加多少光圈 (Stops)\n%s</string>
+
+    <string name="preference_nr_save">雜訊抑制原圖</string>
+    <string name="preference_nr_save_summary">是否在雜訊抑制模式中儲存原圖。注意這會讓儲存照片慢很多。\n%s</string>
+
+    <string name="preference_nr_save_no">不儲存原圖</string>
+    <string name="preference_nr_save_single">儲存一張原圖</string>
+    <string name="preference_nr_save_all">儲存所有原圖（慢）</string>
+
+    <string name="seconds_abbreviation">秒</string> <!-- short for seconds -->
+
+    <string name="video_no_free_space">沒有足夠的儲存空間錄製影片了</string>
+    <string name="video_power_critical">停止錄影\n電量嚴重不足</string>
+    <string name="preference_video_low_power_check">電量不足檢查</string>
+    <string name="preference_video_low_power_check_summary">如果電池電量嚴重不足，則停止錄影。這會降低由於電力不足突然關機造成影片損壞的風險。</string>
+
+    <string name="dark">暗</string> <!-- exposure compensation dark -->
+    <string name="bright">亮</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">快門速度</string>
+
+    <string name="camera_error">相機發生了嚴重錯誤</string>
+
+    <string name="preference_camera2_fast_burst">啟用快速 HDR/expo 連拍</string>
+    <string name="preference_camera2_fast_burst_summary">允許更快地完成 HDR/expo 拍照。如果您的裝置在使用 HDR/expo 模式拍照時出現了問題，請停用此功能。</string>
+
+    <string name="camera">相機</string>
+    <string name="record_video">錄影</string>
+    <string name="selfie">自拍</string>
+
+    <string name="preference_front_camera_mirror">前置相機鏡像</string>
+    <string name="preference_front_camera_mirror_summary">是否在使用前置相機時反轉左右方向\n%s</string>
+
+    <string name="preference_calibrate_level">校正水平角度</string>
+    <string name="preference_calibrate_level_summary">此選項可以校正裝置的加速計，使自動水平和螢幕顯示的水平/角度正常運作</string>
+    <string name="preference_calibrate_level_dialog">請將您的裝置放在平坦的水平面上（直向或橫向），然後按下「校正」\n\n按下「重置」可以從裝置中刪除校正資料。\n\n按返回按鈕以取消。</string>
+    <string name="preference_calibrate_level_calibrate">校正</string>
+    <string name="preference_calibrate_level_reset">重置</string>
+    <string name="preference_calibrate_level_calibrated">水平校正</string>
+    <string name="preference_calibrate_level_calibration_reset">重置水平校正</string>
+
+    <string name="photo_mode_dro">DRO</string> <!-- keep short, as this shows in the popup menu -->
+
+    <string name="preference_show_pitch_lines">顯示傾斜線</string>
+    <string name="preference_show_pitch_lines_summary">顯示水平傾斜線</string>
+    <string name="preference_show_geo_direction_lines">顯示羅盤方向線</string>
+    <string name="preference_show_geo_direction_lines_summary">顯示羅盤方向線</string>
+    <string name="preference_video_subtitle">影片字幕</string>
+    <string name="preference_video_subtitle_summary">建立儲存日期和時間的字幕檔案 (.SRT)。如果啟用了位置/方向資料，也會記錄 GPS 資訊\n%s</string>
 
     <string name="duration_unlimited">無限</string>
     <string name="duration_3s">3 秒</string>
@@ -265,24 +390,171 @@
     <string name="duration_30m">30 分</string>
     <string name="duration_45m">45 分</string>
     <string name="duration_1h">1 小時</string>
+
+    <string name="preference_show_take_photo">顯示拍照按鈕</string>
+    <string name="preference_show_take_photo_summary">顯示拍照、錄影按鈕。如果您要使用其他方法拍照（例如硬體快門、使用音量鍵），請取消勾選。</string>
+
+    <string name="video_pause">已暫停錄影</string>
+    <string name="video_resume">已繼續錄影</string>
+    <string name="pause_video">暫停錄影</string>
+    <string name="resume_video">繼續錄影</string>
+
+    <string name="capturing">錄影中…</string>
+
+    <string name="audio_listener_failed">初始化音訊監聽失敗</string>
+    <string name="failed_to_process_hdr">HDR 照片建立失敗</string>
+
+    <string name="white_balance_auto">自動</string>
+    <string name="white_balance_cloudy">多雲</string>
+    <string name="white_balance_daylight">日光</string>
+    <string name="white_balance_fluorescent">螢光燈</string>
+    <string name="white_balance_incandescent">白熾燈</string>
+    <string name="white_balance_shade">陰翳</string>
+    <string name="white_balance_twilight">星光</string>
+    <string name="white_balance_warm">溫暖</string>
+    <string name="white_balance_manual">手動</string>
+
+    <string name="scene_mode_action">動作</string>
+    <string name="scene_mode_barcode">條碼</string>
+    <string name="scene_mode_beach">沙灘</string>
+    <string name="scene_mode_candlelight">燭光</string>
+    <string name="scene_mode_auto">自動</string>
+    <string name="scene_mode_fireworks">煙火</string>
+    <string name="scene_mode_landscape">橫向</string>
+    <string name="scene_mode_night">夜晚</string>
+    <string name="scene_mode_night_portrait">夜間人像</string>
+    <string name="scene_mode_party">聚會</string>
+    <string name="scene_mode_portrait">人像</string>
+    <string name="scene_mode_snow">雪景</string>
+    <string name="scene_mode_sports">運動</string>
+    <string name="scene_mode_steady_photo">穩定拍照</string>
+    <string name="scene_mode_sunset">日落</string>
+    <string name="scene_mode_theatre">劇院</string>
+
+    <string name="color_effect_aqua">湖藍</string>
+    <string name="color_effect_blackboard">黑板</string>
+    <string name="color_effect_mono">黑白</string>
+    <string name="color_effect_negative">負片</string>
+    <string name="color_effect_none">無</string>
+    <string name="color_effect_posterize">色調分離</string>
+    <string name="color_effect_sepia">棕褐色</string>
+    <string name="color_effect_solarize">過曝</string>
+    <string name="color_effect_whiteboard">白板</string>
+
+    <string name="whats_new">新功能：</string>
+    <string name="donate">捐贈</string>
+
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="face_detected">臉</string>
+    <string name="faces_detected">臉</string>
+    <string name="left_of_screen">在螢幕左側</string>
+    <string name="right_of_screen">在螢幕右側</string>
+    <string name="top_of_screen">在螢幕頂端</string>
+    <string name="bottom_of_screen">在螢幕底端</string>
+    <string name="centre_of_screen">在中央</string>
+
+    <string name="high_speed">高速</string> <!-- in the sense of high speed video frame rates -->
+
     <string name="preference_video_fps_default">預設</string>
 
+    <string name="preference_category_exif_tags">自訂 EXIF 標籤</string>
+    <string name="preference_exif_artist">藝術家</string>
+    <string name="preference_exif_artist_summary">儲存在圖片詮釋資料藝術家標籤的文字（只有 JPEG 格式）。（留空代表不儲存）</string>
+    <string name="preference_exif_copyright">版權</string>
+    <string name="preference_exif_copyright_summary">儲存在圖片詮釋資料版權標籤的文字（只有 JPEG 格式）。（留空代表不儲存）</string>
+
+    <string name="processing">處理中…</string>
+
+    <string name="preference_raw_no">無</string>
+    <string name="preference_raw_yes">標準和 DNG(RAW)</string>
+    <string name="preference_raw_only">僅 DNG(RAW)</string>
+
     <string name="preference_stamp_dateformat_default">預設</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">年-月-日</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">年-月-日 (ISO 8601)</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">日/月/年</string>
     <string name="preference_stamp_dateformat_mmddyyyy">月/日/年</string>
     <string name="preference_stamp_dateformat_none">無</string>
+
+    <string name="preference_fast_burst_n_images">照片數量</string>
+    <string name="preference_fast_burst_n_images_entries_2">2</string>
+    <string name="preference_fast_burst_n_images_entries_3">3</string>
+    <string name="preference_fast_burst_n_images_entries_4">4</string>
+    <string name="preference_fast_burst_n_images_entries_5">5</string>
+    <string name="preference_fast_burst_n_images_entries_6">6</string>
+    <string name="preference_fast_burst_n_images_entries_8">8</string>
+    <string name="preference_fast_burst_n_images_entries_10">10</string>
+    <string name="preference_fast_burst_n_images_entries_12">12</string>
+    <string name="preference_fast_burst_n_images_entries_15">15</string>
+    <string name="preference_fast_burst_n_images_entries_20">20</string>
+
+    <string name="preference_focus_bracketing_n_images">照片數量</string>
+    <string name="preference_focus_bracketing_n_images_entries_2">2</string>
+    <string name="preference_focus_bracketing_n_images_entries_3">3</string>
+    <string name="preference_focus_bracketing_n_images_entries_4">4</string>
+    <string name="preference_focus_bracketing_n_images_entries_5">5</string>
+    <string name="preference_focus_bracketing_n_images_entries_6">6</string>
+    <string name="preference_focus_bracketing_n_images_entries_8">8</string>
+    <string name="preference_focus_bracketing_n_images_entries_10">10</string>
+    <string name="preference_focus_bracketing_n_images_entries_12">12</string>
+    <string name="preference_focus_bracketing_n_images_entries_15">15</string>
+    <string name="preference_focus_bracketing_n_images_entries_20">20</string>
+    <string name="preference_focus_bracketing_n_images_entries_25">25</string>
+    <string name="preference_focus_bracketing_n_images_entries_30">30</string>
+    <string name="preference_focus_bracketing_n_images_entries_40">40</string>
+    <string name="preference_focus_bracketing_n_images_entries_50">50</string>
+    <string name="preference_focus_bracketing_n_images_entries_100">100</string>
+    <string name="preference_focus_bracketing_n_images_entries_150">150</string>
+    <string name="preference_focus_bracketing_n_images_entries_200">200</string>
+
+    <string name="preference_video_capture_rate">速度</string>
+    <string name="preference_video_capture_rate_normal">正常</string>
+    <string name="slow_motion_enabled">啟用慢動作</string>
+    <string name="slow_motion_disabled">關閉慢動作</string>
 
     <string name="flash_off">關閉閃光</string>
     <string name="flash_auto">自動閃光</string>
     <string name="flash_on">開啟閃光</string>
     <string name="flash_torch">手電筒</string>
     <string name="flash_red_eye">紅眼</string>
+    <string name="flash_frontscreen_auto">自動螢幕閃光</string>
+    <string name="flash_frontscreen_on">開啟螢幕閃光</string>
+    <string name="flash_frontscreen_torch">螢幕手電筒</string>
+
+    <string name="preference_antibanding">去除條紋</string>
+    <string name="preference_antibanding_summary">消除燈光閃爍造成的條紋使用的演算法。\n%s</string>
+    <string name="anti_banding_auto">自動</string>
+    <string name="anti_banding_50hz">50Hz</string>
+    <string name="anti_banding_60hz">60Hz</string>
+    <string name="anti_banding_off">關閉</string>
+
+    <string name="preference_ghost_image">輔助圖片</string>
+    <string name="preference_ghost_image_summary">在取景框內顯示一張半透明的圖片，輔助你對正鏡頭。\n%s</string>
+    <string name="preference_ghost_image_off">關閉</string>
+    <string name="preference_ghost_image_last">上次拍攝的照片</string>
+    <string name="preference_ghost_image_selected">選擇一張圖片</string>
+
+    <string name="open_files_saf_exception_ghost">在裝置上找不到檔案選擇器，所以不能使用輔助圖片功能</string>
+    <string name="saf_permission_failed_open_image">無法開啟圖片</string>
+
+    <string name="preference_camera2_photo_video_recording">允許在錄影時拍照</string>
+    <string name="preference_camera2_photo_video_recording_summary">允許在錄影時拍照。如果您啟用了 Camera2 API 後發現錄製影片有問題，請停用此功能。</string>
+
+    <string name="preference_video_log">影片 flat (log) profile</string>
+    <string name="preference_video_log_summary">影片模式啟用 flat (log) profile\n%s</string>
+    <string name="preference_video_log_off">關閉</string>
+    <string name="preference_video_log_fine">細微</string>
+    <string name="preference_video_log_low">低</string>
+    <string name="preference_video_log_medium">中</string>
+    <string name="preference_video_log_strong">強</string>
+    <string name="preference_video_log_extra_strong">超強</string>
+    <string name="video_log">Log profile</string>
 
     <string name="preference_record_audio_src_camcorder">攝影機</string>
     <string name="preference_record_audio_src_mic">外部麥克風（如果存在）</string>
     <string name="preference_record_audio_src_default">預設的音源</string>
     <string name="preference_record_audio_src_voice_communication">優化語音</string>
+    <string name="preference_record_audio_src_voice_recognition">針對語音辨識最佳化</string>
+    <string name="preference_record_audio_src_unprocessed">未處理</string>
 
     <string name="preference_video_bitrate_default">預設</string>
     <string name="preference_video_bitrate_100000">100kbps</string>
@@ -308,6 +580,63 @@
     <string name="preference_video_bitrate_80000000">80Mbps</string>
     <string name="preference_video_bitrate_90000000">90Mbps</string>
     <string name="preference_video_bitrate_100000000">100Mbps</string>
+    <string name="preference_video_bitrate_150000000">150Mbps</string>
+    <string name="preference_video_bitrate_200000000">200Mbps</string>
+
+    <string name="no_burst">沒有連拍</string> <!-- string for burst mode not being supported for a resolution -->
+
+    <string name="preference_show_video_max_amp">顯示音量計</string>
+    <string name="preference_show_video_max_amp_summary">錄影時是否在螢幕上顯示音量等級</string>
+
+    <string name="photo_mode_focus_bracketing">對焦 {}</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_focus_bracketing_full">包圍對焦</string>
+
+    <string name="focus_bracketing_source_distance">包圍對焦來源距離</string>
+    <string name="focus_bracketing_target_distance">包圍對焦目標距離</string>
+
+    <string name="focus_bracketing_add_infinity">加入無限遠距離</string>
+
+    <string name="magnetic_accuracy_title">羅盤方向</string>
+    <string name="magnetic_accuracy_info">您裝置的羅盤需要校正以提高準確度。這可以通過以8的形狀的動作移動手機來完成。\n\n目前準確度：</string>
+
+    <string name="accuracy_unreliable">不可靠</string>
+    <string name="accuracy_low">低</string>
+    <string name="accuracy_medium">中</string>
+    <string name="accuracy_high">高</string>
+    <string name="accuracy_unknown">未知</string>
+
+    <string name="preference_units_distance">距離單位</string>
+    <string name="preference_units_distance_summary">在照片標記和影片字幕中使用的 GPS 高度的單位\n%s</string>
+    <string name="preference_units_distance_m">公尺</string>
+    <string name="preference_units_distance_ft">英尺</string>
+    <string name="feet_abbreviation">英尺</string> <!-- symbol short for feet -->
+
+    <string name="preference_show_whats_new">顯示新功能對話框</string>
+    <string name="preference_show_whats_new_summary">是否在應用程式更新後顯示新功能和改進資訊</string>
+
+    <string name="preference_edge_mode">邊緣銳化演算法</string>
+    <string name="preference_edge_mode_summary">相機驅動程序套用邊緣銳化應該使用的演算法。邊緣銳化可以提高拍攝圖片的銳度和細節。（在 NR 拍照模式下這個設定會被忽略。）\n%s</string>
+
+    <string name="preference_screen_processing_settings">處理設定…</string>
+
+    <string name="preference_noise_reduction_mode">雜訊抑制演算法</string>
+    <string name="preference_noise_reduction_mode_summary">相機驅動程式套用雜訊抑制應該使用的演算法。雜訊抑制演算法會試圖去除相機拍攝的噪點（特別是在黑暗環境），改善圖片品質。（注意這與雜訊抑制照片模式無關，實際上在 NR 照片模式下此設定會被忽略。）\n%s</string>
+    <string name="noise_reduction_mode_default">預設</string>
+    <string name="noise_reduction_mode_off">關閉</string>
+    <string name="noise_reduction_mode_minimal">最小</string>
+    <string name="noise_reduction_mode_fast">快速</string>
+    <string name="noise_reduction_mode_high_quality">高品質</string>
+
+    <string name="preference_focus_assist">輔助對焦</string>
+    <string name="preference_focus_assist_summary">調整手動對焦距離時是否放大顯示\n%s</string>
+    <string name="preference_focus_assist_off">關閉</string>
+    <string name="preference_focus_assist_2x">2倍</string>
+    <string name="preference_focus_assist_4x">4倍</string>
+
+    <string name="exposure_compensation_zoom">增加或減少曝光補償</string>
+
+    <string name="previous">上一步</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) for "<" button on popup menu -->
+    <string name="next">下一步</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) for ">" button on popup menu -->
 
     <string name="preference_burst_mode_off">關閉</string>
     <string name="preference_burst_mode_2x">2x</string>
@@ -325,6 +654,7 @@
     <string name="preference_burst_mode_unlimited">無限</string>
 
     <string name="preference_burst_interval_no_delay">無延遲</string>
+    <string name="preference_burst_interval_0_5s">0.5秒</string>
     <string name="preference_burst_interval_1s">1秒</string>
     <string name="preference_burst_interval_2s">2秒</string>
     <string name="preference_burst_interval_3s">3秒</string>
@@ -342,6 +672,18 @@
     <string name="preference_burst_interval_1h">1小時</string>
     <string name="preference_burst_interval_2h">2小時</string>
 
+    <string name="preference_video_max_filesize_default">裝置預設值</string>
+    <string name="preference_video_max_filesize_100mb">100MB</string>
+    <string name="preference_video_max_filesize_200mb">200MB</string>
+    <string name="preference_video_max_filesize_300mb">300MB</string>
+    <string name="preference_video_max_filesize_500mb">500MB</string>
+    <string name="preference_video_max_filesize_1gb">1GB</string>
+    <string name="preference_video_max_filesize_2gb">2GB</string>
+    <string name="preference_video_max_filesize_5gb">5GB</string>
+    <string name="preference_video_max_filesize_9gb">9GB</string>
+
+    <string name="cancelled_focus_bracketing">取消包圍對焦</string>
+
     <string name="preference_crop_guide_none">無</string>
     <string name="preference_crop_guide_1">1 (1:1)</string>
     <string name="preference_crop_guide_1_25">1.25 (5:4)</string>
@@ -350,12 +692,225 @@
     <string name="preference_crop_guide_1_5">1.5 (3:2)</string>
     <string name="preference_crop_guide_1_78">1.78 (16:9)</string>
     <string name="preference_crop_guide_1_85">1.85 (37:20)</string>
+    <string name="preference_crop_guide_2">2 (2:1)</string>
     <string name="preference_crop_guide_2_33">2.33 (21:9)</string>
     <string name="preference_crop_guide_2_35">2.35 (47:20)</string>
     <string name="preference_crop_guide_2_4">2.4 (12:5)</string>
 
+    <string name="preference_audio_noise_control_sensitivity_3">+3 (高靈敏度)</string>
+    <string name="preference_audio_noise_control_sensitivity_2">+2</string>
+    <string name="preference_audio_noise_control_sensitivity_1">+1</string>
+    <string name="preference_audio_noise_control_sensitivity_0">0 (預設)</string>
+    <string name="preference_audio_noise_control_sensitivity_m1">-1</string>
+    <string name="preference_audio_noise_control_sensitivity_m2">-2</string>
+    <string name="preference_audio_noise_control_sensitivity_m3">-3 (低靈敏度)</string>
+
+    <string name="preference_hdr_contrast_enhancement">HDR 對比度增強</string>
+    <string name="preference_hdr_contrast_enhancement_summary">HDR 何時使用對比度增強演算法。在動態範圍非常大的場景中能夠提高成像品質。這也會讓照片多出一種 HDR 的味道。\n%s</string>
+    <string name="preference_hdr_contrast_enhancement_off">關閉</string>
+    <string name="preference_hdr_contrast_enhancement_smart">自動</string>
+    <string name="preference_hdr_contrast_enhancement_always">總是</string>
+
+    <string name="preference_video_output_format">影片格式</string>
+    <string name="preference_video_output_format_summary">影片和音訊檔案格式和編解碼器\n%s</string>
+
+    <string name="preference_video_output_format_default">預設</string>
+    <string name="preference_video_output_format_mpeg4_h264">MPEG4 H264</string>
+    <string name="preference_video_output_format_mpeg4_hevc">MPEG4 HEVC</string>
+    <string name="preference_video_output_format_3gpp">3GPP</string>
+    <string name="preference_video_output_format_webm">WebM（不支援音訊）</string>
+
+    <string name="preference_screen_settings_manager">設定管理員</string>
+
+    <string name="preference_save_settings">儲存設定</string>
+    <string name="preference_save_settings_summary">將所有 Open Camera 的設定儲存在一個檔案中</string>
+    <string name="preference_save_settings_filename">儲存的檔案名稱</string>
+
+    <string name="preference_restore_settings">還原設定</string>
+    <string name="preference_restore_settings_summary">還原之前儲存的設定。注意這會覆寫現在的所有設定值！</string>
+    <string name="preference_restore_settings_question">這個選項會讓你選擇一個之前儲存的設定檔案。需要注意選擇載入檔案後會覆寫現在所有的設定！</string>
+
+    <string name="saved_settings">儲存的設定</string>
+    <string name="save_settings_failed">儲存設定失敗</string>
+    <string name="restore_settings_failed">還原設定失敗</string>
+    <string name="open_files_saf_exception_generic">這個裝置沒有可用的檔案對話框，不支援這個選項</string>
+
+    <string name="preference_image_format">圖片格式</string>
+    <string name="preference_image_format_jpeg">JPEG</string>
+    <string name="preference_image_format_webp">WebP</string>
+    <string name="preference_image_format_png">PNG</string>
+
+    <string name="preference_nr_mode">雜訊抑制模式</string>
+    <string name="preference_nr_mode_normal">正常</string>
+    <string name="preference_nr_mode_low_light">低照度</string>
+
     <string name="preference_ui_placement_left">左手使用者介面</string>
     <string name="preference_ui_placement_right">右手使用者介面</string>
+    <string name="preference_ui_placement_top">圖示在頂部（直向）</string>
+
+    <string name="preference_show_face_detection">顯示臉部偵測圖示</string>
+    <string name="preference_show_face_detection_summary">是否在螢幕上顯示圖示來啟用或停用臉部偵測</string>
+    <string name="face_detection_enable">啟用臉部偵測</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_disable">停用臉部偵測</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="face_detection_enabled">臉部偵測已啟用</string>
+    <string name="face_detection_disabled">臉部偵測已停用</string>
+
+    <string name="preference_show_auto_level">顯示自動水平圖示</string>
+    <string name="preference_show_auto_level_summary">是否在螢幕上顯示圖示來啟用或停用自動水平。當自動水平啟用時，照片會被旋轉，對齊地平線。</string>
+    <string name="auto_level_enable">啟用自動水平</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="auto_level_disable">停用自動水平</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+
+    <string name="preference_show_stamp">顯示標記照片圖示</string>
+    <string name="preference_show_stamp_summary">是否在螢幕上顯示圖示來啟用或停用照片標記</string>
+    <string name="stamp_enable">啟用照片標記</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_disable">停用照片標記</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
+    <string name="stamp_enabled">已啟用照片標記</string>
+    <string name="stamp_disabled">已停用照片標記</string>
+
+    <string name="preference_show_textstamp">顯示自訂文字照片標記圖示</string>
+    <string name="preference_show_textstamp_summary">是否在螢幕上顯示圖示來指定照片標示的自訂文字</string>
+
+    <string name="preference_show_white_balance_lock">顯示自動白平衡鎖定圖示</string>
+    <string name="preference_show_white_balance_lock_summary">是否在螢幕上顯示圖示來啟用或停用自動白平衡</string>
+    <string name="white_balance_lock">鎖定白平衡</string>
+    <string name="white_balance_unlock">解鎖白平衡</string>
+    <string name="white_balance_locked">白平衡已鎖定</string>
+    <string name="white_balance_unlocked">白平衡已解鎖</string>
+
+    <string name="preference_show_exposure_lock">顯示自動曝光鎖定圖示</string>
+    <string name="preference_show_exposure_lock_summary">是否在螢幕上顯示圖示來鎖定或解鎖曝光</string>
+    <string name="exposure_unlock">解鎖曝光</string>
+
+    <string name="preference_nr_mode_low_light_message">低照度模式：請保持相機穩定</string>
+
+    <string name="photo_mode_panorama">全景</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_panorama_full">全景</string>
+
+    <string name="preference_screen_remote_control">藍牙低功耗遠端控制…</string>
+    <string name="preference_enable_remote">啟用藍牙低功耗遠端控制</string>
+    <string name="preference_enable_remote_summary">啟用藍牙低功耗 (BLE) 遠端控制</string>
+    <string name="preference_remote_type">遠端裝置類型</string>
+
+    <string name="ble_not_supported">不支援 BLE</string>
+    <string name="scan_ble">掃描 BLE 裝置</string>
+    <string name="bluetooth_not_supported">不支援藍牙。</string>
+    <string name="unknown_device">未知裝置</string>
+    <string name="preference_remote_disconnect_screen_dim">遠端中斷連線時螢幕變暗</string>
+    <string name="preference_remote_disconnect_screen_dim_summary">提示：啟動 Open Camera 前，請把預設亮度調到最低。</string>
+    <string name="preference_water_type">使用鹽水計算深度</string>
+    <string name="preference_water_type_summary">使用水下防水盒時，如果選擇正確的水的類型，可以提高拍攝的準確性。</string>
+    <string name="remote_connected">遠端已連線</string>
+
+    <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
+
+    <string name="preference_stamp_geo_address">使用地址</string>
+    <!-- preference_stamp_geo_address_summary defined below -->
+    <string name="preference_stamp_geo_address_both">可以的話，除了 GPS 座標之外也顯示地址</string>
+    <string name="preference_stamp_geo_address_prefer">地址優先於 GPS 座標</string>
+    <string name="preference_stamp_geo_address_no">不顯示地址</string>
+
+    <string name="preference_show_store_location">顯示儲存位置資訊圖示</string>
+    <string name="preference_show_store_location_summary">是否在螢幕上顯示圖示來啟用或停用位置資訊（地理標記）</string>
+    <string name="preference_location_enable">儲存位置資訊</string>
+    <string name="preference_location_disable">停止儲存位置資訊</string>
+
+    <string name="preference_histogram">顯示色階分佈圖</string>
+    <string name="preference_histogram_summary">是否要顯示色彩的色階分佈圖\n%s</string>
+    <string name="preference_histogram_off">關閉</string>
+    <string name="preference_histogram_rgb">RGB 色彩</string>
+    <string name="preference_histogram_luminance">亮度 (Luminance)</string>
+    <string name="preference_histogram_value">明度 (Value)（最大）</string>
+    <string name="preference_histogram_intensity">強度 (Intensity)（平均）</string>
+    <string name="preference_histogram_lightness">亮度 (Lightness)（最小-最大的平均）</string>
+
+    <string name="preference_zebra_stripes">顯示斑馬條紋</string>
+    <string name="preference_zebra_stripes_summary">如果啟用此選項，螢幕上會顯示斑馬條紋，顯示哪裡相機預覽曝光過度。\n%s</string>
+    <string name="preference_zebra_stripes_off">關閉</string>
+    <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_90pc">90%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_100pc">100%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+
+    <string name="preference_focus_peaking">峰值對焦</string>
+    <string name="preference_focus_peaking_summary">如果啟用此選項，會標明對焦的邊緣（輪廓）。這主要用於手動對焦，可用於幫助確定圖片的哪些區域處於焦點。\n%s</string>
+    <string name="preference_focus_peaking_off">關閉</string>
+    <string name="preference_focus_peaking_on">開啟</string>
+    <string name="preference_focus_peaking_color">峰值對焦顏色</string>
+    <string name="preference_focus_peaking_color_summary">標明對焦的邊緣要使用的顏色\n%s</string>
+
+    <string name="remaining">剩餘</string> <!-- images remaining for "processing" -->
+
+    <string name="preference_preview">相機預覽…</string>
+
+    <string name="cycle_flash">循環切換閃光燈</string>
+    <string name="preference_show_cycle_flash">顯示閃光燈圖示</string>
+    <string name="preference_show_cycle_flash_summary">是否在螢幕上顯示圖示來循環切換閃光燈選項，而不是在彈出式選單顯示閃光燈選項</string>
+
+    <string name="preference_raw_expo_bracketing">允許 RAW 包圍曝光</string>
+    <string name="preference_raw_expo_bracketing_summary">RAW 選項是否也要適用於包圍曝光照片模式（或啟用了「HDR 模式儲存所有圖片」的 HDR 模式）。如果停用此選項，在那些照片模式中只會儲存 JPEG。</string>
+
+    <string name="preference_raw_focus_bracketing">允許 RAW 包圍對焦</string>
+    <string name="preference_raw_focus_bracketing_summary">RAW 選項是否也要適用於包圍對焦照片模式。如果停用此選項，在包圍對焦照片模式中只會儲存 JPEG。</string>
+
+    <string name="cycle_raw">循環切換 RAW 模式</string>
+    <string name="preference_show_cycle_raw">顯示 RAW 圖示</string>
+    <string name="preference_show_cycle_raw_summary">是否在螢幕上顯示圖示來循環切換 RAW 模式</string>
+
+    <string name="bluetooth_current_remote">目前遠端：</string>
+    <string name="bluetooth_scan">掃描</string>
+
+    <string name="preference_stamp_style_shadowed">陰影文字</string>
+    <string name="preference_stamp_style_plain">普通文字</string>
+    <string name="preference_stamp_style_background">带背景色的文字</string>
+
+    <string name="image_saving_notification">正在儲存圖片…</string>
+
+    <string name="finish_panorama">完成全景</string>
+    <string name="cancel_panorama">取消全景</string>
+    <string name="panorama_cancelled">已取消全景</string>
+    <string name="failed_to_process_panorama">無法建立全景圖片</string>
+
+    <string name="preference_panorama_crop">自動裁剪全景照片</string>
+    <string name="preference_panorama_crop_summary">在全景模式，是否裁剪照片沒有對齊的邊緣</string>
+
+    <string name="panorama_info">拍攝全景照片時，請將裝置保持直向。點擊拍照按鈕後，向左或向右旋轉裝置，將居中的白色圓圈移到藍點上。拍攝新圖片後，繼續旋轉裝置以覆蓋依次顯示的每個新藍點。\n\n點擊打勾圖示來儲存全景照片，或者點擊打叉圖示取消全景照片。\n\n注意處理和儲存全景照片需要耗費一些時間。</string>
+
+    <string name="preference_panorama_save">全景照片原圖</string>
+    <string name="preference_panorama_save_summary">在全景模式是否儲存原圖。注意這會耗費更多的時間。也有選項可以儲存有助於回報全景問題的 XML 檔案。\n%s</string>
+
+    <string name="preference_panorama_save_no">不儲存原圖</string>
+    <string name="preference_panorama_save_all">儲存原圖</string>
+    <string name="preference_panorama_save_all_plus_debug">儲存原圖和除錯 XML</string>
+
+    <string name="camera_id">ID</string> <!-- ID as in camera ID -->
+
+    <string name="exposure_compensation_seekbar">變更曝光補償的搜尋欄</string>
+
+    <string name="preference_image_format_summary">選擇照片的檔案格式。這會影響「標準」（非 RAW）的照片。注意 PNG 格式不是真的無損，而是以 100%% 品質從 JPEG 轉換過來。</string>
+
+    <string name="preference_camera_api">Camera API</string>
+    <string name="preference_camera_api_summary">選擇 Camera2 API 來啟用額外的功能，例如手動曝光模式、對焦、白平衡和 RAW（如果裝置支援）。變更 API 會造成重新啟動\n%s</string>
+    <string name="preference_camera_api_old">原本的 camera API</string>
+    <string name="preference_camera_api_camera2">Camera2 API</string>
+
+    <string name="preference_audio_control_summary">當偵測到聲音或是或音訊指令時拍照/錄影。
+        當啟用時，使用螢幕上的麥克風按鈕來開始/停止監聽。
+        注意音訊指令選項會使用 Android 語音辨識服務：當使用這個選項時，
+音訊資料可能會可能會被傳送到遠端伺服器來進行語音辨識。
+        \n%s</string>
+
+    <string name="preference_stamp_geo_address_summary">可以的話，當標記 GPS 位置時使用地址。
+        這個選項需要網路連線。
+        注意如果啟用這個選項，您的裝置需要透過網路將位置資訊到第三方
+        以將 GPS 座標轉換為地址。請參閱 https://developer.android.com/reference/android/location/Geocoder .
+        \n%s</string>
+
+    <string name="intro_text">點擊以對焦，按下藍色相機按鈕來拍照。
+        \n\n要停用最大螢幕亮度，請到設定/螢幕 GUI/「強制最大亮度」。
+        要在 Android 5+ 儲存到 SD 卡，請到設定/更多相機控制/「使用 Storage Access Framework」。
+        請從設定點選「線上說明」取得更多說明。</string>
+
+    <string name="preference_select_remote">選擇遠端裝置</string>
 
     <string name="preference_immersive_mode_off">關閉</string>
     <string name="preference_immersive_mode_navigation">只隱藏螢幕上的虛擬按鈕</string>
