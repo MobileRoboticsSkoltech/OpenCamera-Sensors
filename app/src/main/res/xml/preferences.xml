@@ -1226,7 +1226,15 @@
                 android:summary="@string/preference_gps_direction_summary"
                 android:defaultValue="false"
                 />
-            
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <CheckBoxPreference
+                android:key="preference_comment_ypr"
+                android:title="@string/preference_comment_ypr"
+                android:summary="@string/preference_comment_ypr_summary"
+                android:defaultValue="false"
+                />
+
             <CheckBoxPreference
                 android:key="preference_require_location"
                 android:title="@string/preference_require_location"

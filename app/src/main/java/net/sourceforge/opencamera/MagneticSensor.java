@@ -198,6 +198,7 @@ class MagneticSensor {
      */
     private boolean needsMagneticSensor(SharedPreferences sharedPreferences) {
         if( main_activity.getApplicationInterface().getGeodirectionPref() ||
+                sharedPreferences.getBoolean(PreferenceKeys.AddYPRToComments, false) ||
                 sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false) ||
                 sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false) ) {
             return true;

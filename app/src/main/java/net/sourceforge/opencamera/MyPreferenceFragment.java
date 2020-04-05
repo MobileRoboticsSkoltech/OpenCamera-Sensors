@@ -646,6 +646,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             Preference pref = findPreference("preference_category_exif_tags");
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
             pg.removePreference(pref);
+
+            pref = findPreference("preference_comment_ypr");
+            pg = (PreferenceGroup)this.findPreference("preference_screen_location_settings");
+            pg.removePreference(pref);
         }
         else {
             setSummary("preference_exif_artist");

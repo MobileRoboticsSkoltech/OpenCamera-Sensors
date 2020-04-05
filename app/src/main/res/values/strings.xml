@@ -979,6 +979,9 @@
     <string name="error_features_frame_rate">Frame rate</string>
     <string name="error_features_slow_motion">Slow motion</string>
 
+    <string name="preference_comment_ypr">Store yaw, pitch and roll</string>
+    <string name="preference_comment_ypr_summary">Store the yaw, pitch and roll of the device in the photo\'s Exif user comment (JPEG format only)</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy" translatable="false">Privacy policy</string>

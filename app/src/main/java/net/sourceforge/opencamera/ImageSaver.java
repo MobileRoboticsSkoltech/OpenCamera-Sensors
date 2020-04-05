@@ -165,6 +165,8 @@ public class ImageSaver extends Thread {
         final Location location;
         final boolean store_geo_direction;
         final double geo_direction; // in radians
+        final boolean store_ypr; // whether to store geo_angle, pitch_angle, level_angle in USER_COMMENT if exif (for JPEGs)
+        final double pitch_angle; // the pitch that the phone is at, in degrees
         final String custom_tag_artist;
         final String custom_tag_copyright;
         final int sample_factor; // sampling factor for thumbnail, higher means lower quality
@@ -190,6 +192,7 @@ public class ImageSaver extends Thread {
                 String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
                 boolean panorama_crop,
                 boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+                double pitch_angle, boolean store_ypr,
                 String custom_tag_artist,
                 String custom_tag_copyright,
                 int sample_factor) {
@@ -230,6 +233,8 @@ public class ImageSaver extends Thread {
             this.location = location;
             this.store_geo_direction = store_geo_direction;
             this.geo_direction = geo_direction;
+            this.pitch_angle = pitch_angle;
+            this.store_ypr = store_ypr;
             this.custom_tag_artist = custom_tag_artist;
             this.custom_tag_copyright = custom_tag_copyright;
             this.sample_factor = sample_factor;
@@ -259,6 +264,7 @@ public class ImageSaver extends Thread {
                     this.zoom_factor,
                     this.preference_stamp, this.preference_textstamp, this.font_size, this.color, this.pref_style, this.preference_stamp_dateformat, this.preference_stamp_timeformat, this.preference_stamp_gpsformat, this.preference_stamp_geo_address, this.preference_units_distance,
                     this.panorama_crop, this.store_location, this.location, this.store_geo_direction, this.geo_direction,
+                    this.pitch_angle, this.store_ypr,
                     this.custom_tag_artist,
                     this.custom_tag_copyright,
                     this.sample_factor);
@@ -550,6 +556,7 @@ public class ImageSaver extends Thread {
                           String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
                           boolean panorama_crop,
                           boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+                          double pitch_angle, boolean store_ypr,
                           String custom_tag_artist,
                           String custom_tag_copyright,
                           int sample_factor) {
@@ -579,6 +586,7 @@ public class ImageSaver extends Thread {
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
+                pitch_angle, store_ypr,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -620,6 +628,7 @@ public class ImageSaver extends Thread {
                 1.0f,
                 null, null, 0, 0, null, null, null, null, null, null,
                 false, false, null, false, 0.0,
+                0.0, false,
                 null, null,
                 1);
     }
@@ -645,6 +654,7 @@ public class ImageSaver extends Thread {
                            String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
                            boolean panorama_crop,
                            boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+                           double pitch_angle, boolean store_ypr,
                            String custom_tag_artist,
                            String custom_tag_copyright,
                            int sample_factor) {
@@ -672,6 +682,7 @@ public class ImageSaver extends Thread {
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
+                pitch_angle, store_ypr,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -751,6 +762,7 @@ public class ImageSaver extends Thread {
                               String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat, String preference_stamp_geo_address, String preference_units_distance,
                               boolean panorama_crop,
                               boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+                              double pitch_angle, boolean store_ypr,
                               String custom_tag_artist,
                               String custom_tag_copyright,
                               int sample_factor) {
@@ -782,6 +794,7 @@ public class ImageSaver extends Thread {
                 zoom_factor,
                 preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
                 panorama_crop, store_location, location, store_geo_direction, geo_direction,
+                pitch_angle, store_ypr,
                 custom_tag_artist,
                 custom_tag_copyright,
                 sample_factor);
@@ -892,6 +905,7 @@ public class ImageSaver extends Thread {
                 1.0f,
                 null, null, 0, 0, null, null, null, null, null, null,
                 false, false, null, false, 0.0,
+                0.0, false,
                 null, null,
                 1);
         if( MyDebug.LOG )
@@ -3051,7 +3065,7 @@ public class ImageSaver extends Thread {
                 exif_new.setAttribute(ExifInterface.TAG_USER_COMMENT, exif_user_comment);
         }
 
-        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
+        modifyExif(exif_new, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
         setDateTimeExif(exif_new);
         exif_new.saveAttributes();
     }
@@ -3323,14 +3337,14 @@ public class ImageSaver extends Thread {
     private void updateExif(Request request, File picFile, Uri saveUri) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "updateExif: " + picFile);
-        if( request.store_geo_direction || hasCustomExif(request.custom_tag_artist, request.custom_tag_copyright) ) {
+        if( request.store_geo_direction || request.store_ypr || hasCustomExif(request.custom_tag_artist, request.custom_tag_copyright) ) {
             long time_s = System.currentTimeMillis();
             if( MyDebug.LOG )
                 Log.d(TAG, "add additional exif info");
             try {
                 ExifInterface exif = createExifInterface(picFile, saveUri);
                 if( exif != null ) {
-                    modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
+                    modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
                     exif.saveAttributes();
                 }
             }
@@ -3368,17 +3382,28 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the exif data, if necessary.
      */
-    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright) {
+    private void modifyExif(ExifInterface exif, boolean is_jpeg, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright, double level_angle, double pitch_angle, boolean store_ypr) {
         if( MyDebug.LOG )
             Log.d(TAG, "modifyExif");
-        setGPSDirectionExif(exif, store_geo_direction, geo_direction);
+        setGPSDirectionExif(exif, store_geo_direction, geo_direction, level_angle, pitch_angle, store_ypr);
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && store_ypr ){
+            float geo_angle = (float)Math.toDegrees(geo_direction);
+            if( geo_angle < 0.0f ) {
+                geo_angle += 360.0f;
+            }
+            String encoding = "ASCII\0\0\0";
+            //exif.setAttribute(ExifInterface.TAG_USER_COMMENT,"Yaw:" + geo_angle + ",Pitch:" + pitch_angle + ",Roll:" + level_angle);
+            exif.setAttribute(ExifInterface.TAG_USER_COMMENT,encoding + "Yaw:" + geo_angle + ",Pitch:" + pitch_angle + ",Roll:" + level_angle);
+            if( MyDebug.LOG )
+                Log.d(TAG, "UserComment: " + exif.getAttribute(ExifInterface.TAG_USER_COMMENT));
+        }
         setCustomExif(exif, custom_tag_artist, custom_tag_copyright);
         if( needGPSTimestampHack(is_jpeg, using_camera2, store_location) ) {
             fixGPSTimestamp(exif, current_date);
         }
     }
 
-    private void setGPSDirectionExif(ExifInterface exif, boolean store_geo_direction, double geo_direction) {
+    private void setGPSDirectionExif(ExifInterface exif, boolean store_geo_direction, double geo_direction, double level_angle, double pitch_angle, boolean store_ypr) {
         if( MyDebug.LOG )
             Log.d(TAG, "setGPSDirectionExif");
         if( store_geo_direction ) {

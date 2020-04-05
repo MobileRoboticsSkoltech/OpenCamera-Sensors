@@ -2927,11 +2927,22 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         boolean using_camera2 = main_activity.getPreview().usingCamera2API();
         ImageSaver.Request.ImageFormat image_format = getImageFormatPref();
+        boolean store_ypr = sharedPreferences.getBoolean(PreferenceKeys.AddYPRToComments, false) &&
+                main_activity.getPreview().hasLevelAngle() &&
+                main_activity.getPreview().hasPitchAngle() &&
+                main_activity.getPreview().hasGeoDirection();
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "store_ypr: " + store_ypr);
+            Log.d(TAG, "has level angle: " + main_activity.getPreview().hasLevelAngle());
+            Log.d(TAG, "has pitch angle: " + main_activity.getPreview().hasPitchAngle());
+            Log.d(TAG, "has geo direction: " + main_activity.getPreview().hasGeoDirection());
+        }
         int image_quality = getSaveImageQualityPref();
         if( MyDebug.LOG )
             Log.d(TAG, "image_quality: " + image_quality);
         boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngleStable();
-        double level_angle = do_auto_stabilise ? main_activity.getPreview().getLevelAngle() : 0.0;
+        double level_angle = (main_activity.getPreview().hasLevelAngle()) ? main_activity.getPreview().getLevelAngle() : 0.0;
+        double pitch_angle = (main_activity.getPreview().hasPitchAngle()) ? main_activity.getPreview().getPitchAngle() : 0.0;
         if( do_auto_stabilise && main_activity.test_have_angle )
             level_angle = main_activity.test_angle;
         if( do_auto_stabilise && main_activity.test_low_memory )
@@ -2953,7 +2964,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         boolean store_location = getGeotaggingPref() && getLocation() != null;
         Location location = store_location ? getLocation() : null;
         boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
-        double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
+        double geo_direction = main_activity.getPreview().hasGeoDirection() ? main_activity.getPreview().getGeoDirection() : 0.0;
         String custom_tag_artist = sharedPreferences.getString(PreferenceKeys.ExifArtistPreferenceKey, "");
         String custom_tag_copyright = sharedPreferences.getString(PreferenceKeys.ExifCopyrightPreferenceKey, "");
         String preference_hdr_contrast_enhancement = sharedPreferences.getString(PreferenceKeys.HDRContrastEnhancementPreferenceKey, "preference_hdr_contrast_enhancement_smart");
@@ -3061,6 +3072,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
                         panorama_crop,
                         store_location, location, store_geo_direction, geo_direction,
+                        pitch_angle, store_ypr,
                         custom_tag_artist, custom_tag_copyright,
                         sample_factor);
 
@@ -3103,6 +3115,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat, preference_stamp_geo_address, preference_units_distance,
                     false, // panorama doesn't use this codepath
                     store_location, location, store_geo_direction, geo_direction,
+                    pitch_angle, store_ypr,
                     custom_tag_artist, custom_tag_copyright,
                     sample_factor);
         }
