@@ -6444,6 +6444,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( this.natural_level_angle < -0.0 ) {
                 this.natural_level_angle += 360.0;
             }
+            //natural_level_angle = 0.0f; // test zero angle
 
             updateLevelAngles();
         }

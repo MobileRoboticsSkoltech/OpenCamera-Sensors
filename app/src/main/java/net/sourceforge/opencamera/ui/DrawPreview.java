@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 import net.sourceforge.opencamera.GyroSensor;
+import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
@@ -116,6 +117,7 @@ public class DrawPreview {
     private final String ybounds_text;
     private final int [] temp_histogram_channel = new int[256];
     private final LocationSupplier.LocationInfo locationInfo = new LocationSupplier.LocationInfo();
+    private final int [] auto_stabilise_crop = new int [2];
     //private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
     // cached Rects for drawTextWithBackground() calls
     private Rect text_bounds_time;
@@ -2155,7 +2157,10 @@ public class DrawPreview {
         }
         else
             actual_show_angle_line_pref = show_angle_line_pref;
-        if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( actual_show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
+
+        boolean allow_angle_lines = camera_controller != null && !preview.isPreviewPaused();
+
+        if( allow_angle_lines && has_level_angle && ( actual_show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
             int ui_rotation = preview.getUIRotation();
             double level_angle = preview.getLevelAngle();
             boolean has_pitch_angle = preview.hasPitchAngle();
@@ -2350,6 +2355,49 @@ public class DrawPreview {
             p.setStyle(Paint.Style.FILL); // reset
 
             canvas.restore();
+        }
+
+        if( allow_angle_lines && auto_stabilise_pref && preview.hasLevelAngleStable() && !preview.isVideo() ) {
+            // although auto-level is supported for photos taken in video mode, there's the risk that it's misleading to display
+            // the guide when in video mode!
+            double level_angle = preview.getLevelAngle();
+            double auto_stabilise_level_angle = level_angle;
+            //double auto_stabilise_level_angle = angle;
+            while( auto_stabilise_level_angle < -90 )
+                auto_stabilise_level_angle += 180;
+            while( auto_stabilise_level_angle > 90 )
+                auto_stabilise_level_angle -= 180;
+            double level_angle_rad_abs = Math.abs( Math.toRadians(auto_stabilise_level_angle) );
+
+            int w1 = canvas.getWidth();
+            int h1 = canvas.getHeight();
+            double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
+            double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
+
+            if( ImageSaver.autoStabiliseCrop(auto_stabilise_crop, level_angle_rad_abs, w0, h0, w1, h1, canvas.getWidth(), canvas.getHeight()) ) {
+                int w2 = auto_stabilise_crop[0];
+                int h2 = auto_stabilise_crop[1];
+                int cx = canvas.getWidth()/2;
+                int cy = canvas.getHeight()/2;
+
+                canvas.save();
+                canvas.rotate((float)-level_angle, cx, cy);
+
+                if( has_level_angle && Math.abs(level_angle) <= close_level_angle ) { // n.b., use level_angle, not angle or orig_level_angle
+                    p.setColor(angle_highlight_color_pref);
+                }
+                else {
+                    p.setColor(Color.WHITE);
+                }
+                p.setStyle(Paint.Style.STROKE);
+                p.setStrokeWidth(stroke_width);
+
+                canvas.drawRect((canvas.getWidth() - w2)/2, (canvas.getHeight() - h2)/2, (canvas.getWidth() + w2)/2, (canvas.getHeight() + h2)/2, p);
+
+                canvas.restore();
+
+                p.setStyle(Paint.Style.FILL); // reset
+            }
         }
     }
 

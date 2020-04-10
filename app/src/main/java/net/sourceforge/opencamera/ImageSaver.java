@@ -1815,6 +1815,67 @@ public class ImageSaver extends Thread {
         }
     }
 
+    /** Computes the width and height of a centred crop region after having rotated an image.
+     * @param result - Array of length 2 which will be filled with the returned width and height.
+     * @param level_angle_rad_abs - Absolute value of angle of rotation, in radians.
+     * @param w0 - Rotated width.
+     * @param h0 - Rotated height.
+     * @param w1 - Original width.
+     * @param h1 - Original height.
+     * @param max_width - Maximum width to return.
+     * @param max_height - Maximum height to return.
+     * @return - Whether a crop region could be successfully calculated.
+     */
+    public static boolean autoStabiliseCrop(int [] result, double level_angle_rad_abs, double w0, double h0, int w1, int h1, int max_width, int max_height) {
+        boolean ok = false;
+        result[0] = 0;
+        result[1] = 0;
+
+        double tan_theta = Math.tan(level_angle_rad_abs);
+        double sin_theta = Math.sin(level_angle_rad_abs);
+        double denom = ( h0/w0 + tan_theta );
+        double alt_denom = ( w0/h0 + tan_theta );
+        if( denom == 0.0 || denom < 1.0e-14 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "zero denominator?!");
+        }
+        else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "zero alt denominator?!");
+        }
+        else {
+            int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
+            int h2 = (int)(w2*h0/w0);
+            int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
+            int alt_w2 = (int)(alt_h2*w0/h0);
+            if( MyDebug.LOG ) {
+                //Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
+                Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
+                Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
+            }
+            if( alt_w2 < w2 ) {
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "chose alt!");
+                }
+                w2 = alt_w2;
+                h2 = alt_h2;
+            }
+            if( w2 <= 0 )
+                w2 = 1;
+            else if( w2 > max_width )
+                w2 = max_width;
+            if( h2 <= 0 )
+                h2 = 1;
+            else if( h2 > max_height )
+                h2 = max_height;
+
+            ok = true;
+            result[0] = w2;
+            result[1] = h2;
+        }
+        return ok;
+    }
+
     /** Performs the auto-stabilise algorithm on the image.
      * @param data The jpeg data.
      * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
@@ -1911,43 +1972,11 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
                 Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
             }
-            double tan_theta = Math.tan(level_angle_rad_abs);
-            double sin_theta = Math.sin(level_angle_rad_abs);
-            double denom = ( h0/w0 + tan_theta );
-            double alt_denom = ( w0/h0 + tan_theta );
-            if( denom == 0.0 || denom < 1.0e-14 ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "zero denominator?!");
-            }
-            else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "zero alt denominator?!");
-            }
-            else {
-                int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
-                int h2 = (int)(w2*h0/w0);
-                int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
-                int alt_w2 = (int)(alt_h2*w0/h0);
-                if( MyDebug.LOG ) {
-                    //Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
-                    Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
-                    Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
-                }
-                if( alt_w2 < w2 ) {
-                    if( MyDebug.LOG ) {
-                        Log.d(TAG, "chose alt!");
-                    }
-                    w2 = alt_w2;
-                    h2 = alt_h2;
-                }
-                if( w2 <= 0 )
-                    w2 = 1;
-                else if( w2 >= bitmap.getWidth() )
-                    w2 = bitmap.getWidth()-1;
-                if( h2 <= 0 )
-                    h2 = 1;
-                else if( h2 >= bitmap.getHeight() )
-                    h2 = bitmap.getHeight()-1;
+
+            int [] crop = new int [2];
+            if( autoStabiliseCrop(crop, level_angle_rad_abs, w0, h0, w1, h1, bitmap.getWidth(), bitmap.getHeight()) ) {
+                int w2 = crop[0];
+                int h2 = crop[1];
                 int x0 = (bitmap.getWidth()-w2)/2;
                 int y0 = (bitmap.getHeight()-h2)/2;
                 if( MyDebug.LOG ) {
