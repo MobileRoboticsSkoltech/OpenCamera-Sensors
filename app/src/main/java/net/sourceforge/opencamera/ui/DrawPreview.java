@@ -7,7 +7,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -1130,7 +1129,9 @@ public class DrawPreview {
                     Log.d(TAG, "compute text_bounds_time");
                 text_bounds_time = new Rect();
                 // better to not use a fixed string like "00:00:00" as don't want to make assumptions - e.g., in 12 hour format we'll have the appended am/pm to account for!
-                String bounds_time_string = dateFormatTimeInstance.format(new Date(100, 0, 1, 10, 59, 59));
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(100, 0, 1, 10, 59, 59);
+                String bounds_time_string = dateFormatTimeInstance.format(calendar.getTime());
                 if( MyDebug.LOG )
                     Log.d(TAG, "bounds_time_string:" + bounds_time_string);
                 p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);

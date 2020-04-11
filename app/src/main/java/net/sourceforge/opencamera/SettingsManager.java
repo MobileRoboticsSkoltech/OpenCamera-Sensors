@@ -109,10 +109,10 @@ public class SettingsManager {
 
                 switch( name ) {
                     case boolean_tag:
-                        editor.putBoolean(key, Boolean.valueOf(parser.getAttributeValue(null, "value")));
+                        editor.putBoolean(key, Boolean.parseBoolean(parser.getAttributeValue(null, "value")));
                         break;
                     case float_tag:
-                        editor.putFloat(key, Float.valueOf(parser.getAttributeValue(null, "value")));
+                        editor.putFloat(key, Float.parseFloat(parser.getAttributeValue(null, "value")));
                         break;
                     case int_tag:
                         editor.putInt(key, Integer.parseInt(parser.getAttributeValue(null, "value")));
