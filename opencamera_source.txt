@@ -25,6 +25,7 @@ Android inspection warnings/errors
 The file .idea/inspectionProfiles/Project_Default.xml contains settings for Android inpsections (see Editor/Inspections). The following have been disabled:
 
 * AndroidLintUnusedResources - seems to give false information on res/ images, as well as complaining about renderscript files in build folders.
+* AndroidLintLockedOrientationActivity, AndroidLintSourceLockedOrientationActivity - Although it is on my TODO to support portrait and landscape orientations, for now Open Camera handles the orientation of the UI itself for better performance (as is common with many camera applications). Also these errors are categorised under ChromeOS, which for now is unlikely to be a huge part of Open Camera's target market.
 * BooleanMethodIsAlwaysInverted - Generates too many useless warnings.
 * ConstantConditions - Unfortunately this seems broken when calling an Android SDK function where only a stub source is available, such that the inspection incorrectly things an exception is thrown. E.g., see calls to TouchUtils.clickView() in MainActivityTest, this inspection thinks that e.g. "i<8" in for loops is always true.
 * EmptyMethod - Sometimes can be useful to explicitly have a subclassed empty method, to show I've intentionally left it empty rather than forgotten to consider it.

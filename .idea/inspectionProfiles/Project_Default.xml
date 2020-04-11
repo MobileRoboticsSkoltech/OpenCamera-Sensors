@@ -1,6 +1,8 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="AndroidLintLockedOrientationActivity" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="AndroidLintSourceLockedOrientationActivity" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="AndroidLintUnusedResources" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConstantConditions" enabled="false" level="WARNING" enabled_by_default="false">
