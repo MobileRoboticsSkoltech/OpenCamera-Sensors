@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1634,7 +1633,8 @@ public class ImageSaver extends Thread {
                         outputStream = main_activity.getContentResolver().openOutputStream(saveUri);
                     try {
                         //outputStream.write(gyro_text.toString().getBytes());
-                        outputStream.write(writer.toString().getBytes(StandardCharsets.UTF_8));
+                        //noinspection CharsetObjectCanBeUsed
+                        outputStream.write(writer.toString().getBytes(Charset.forName("UTF-8")));
                     }
                     finally {
                         outputStream.close();
