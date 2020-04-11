@@ -293,7 +293,6 @@
     <string name="photo_mode_hdr">HDR</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing_full">包圍曝光</string>
-    <string name="photo_mode_fast_burst">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
     <string name="photo_mode_fast_burst_full">快速連拍</string>
     <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_noise_reduction_full">雜訊抑制</string>
@@ -871,7 +870,7 @@
     <string name="failed_to_process_panorama">無法建立全景圖片</string>
 
     <string name="preference_panorama_crop">自動裁剪全景照片</string>
-    <string name="preference_panorama_crop_summary">在全景模式，是否裁剪照片沒有對齊的邊緣</string>
+    <string name="preference_panorama_crop_summary">在全景模式，是否裁剪照片沒有對齊的邊緣\n%s</string>
 
     <string name="panorama_info">拍攝全景照片時，請將裝置保持直向。點擊拍照按鈕後，向左或向右旋轉裝置，將居中的白色圓圈移到藍點上。拍攝新圖片後，繼續旋轉裝置以覆蓋依次顯示的每個新藍點。\n\n點擊打勾圖示來儲存全景照片，或者點擊打叉圖示取消全景照片。\n\n注意處理和儲存全景照片需要耗費一些時間。</string>
 
@@ -886,7 +885,7 @@
 
     <string name="exposure_compensation_seekbar">變更曝光補償的搜尋欄</string>
 
-    <string name="preference_image_format_summary">選擇照片的檔案格式。這會影響「標準」（非 RAW）的照片。注意 PNG 格式不是真的無損，而是以 100%% 品質從 JPEG 轉換過來。</string>
+    <string name="preference_image_format_summary">選擇照片的檔案格式。這會影響「標準」（非 RAW）的照片。注意 PNG 格式不是真的無損，而是以 100%% 品質從 JPEG 轉換過來。\n%s</string>
 
     <string name="preference_camera_api">Camera API</string>
     <string name="preference_camera_api_summary">選擇 Camera2 API 來啟用額外的功能，例如手動曝光模式、對焦、白平衡和 RAW（如果裝置支援）。變更 API 會造成重新啟動\n%s</string>
