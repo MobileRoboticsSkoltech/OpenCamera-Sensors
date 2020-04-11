@@ -2392,7 +2392,7 @@ public class DrawPreview {
                 p.setStyle(Paint.Style.STROKE);
                 p.setStrokeWidth(stroke_width);
 
-                canvas.drawRect((canvas.getWidth() - w2)/2, (canvas.getHeight() - h2)/2, (canvas.getWidth() + w2)/2, (canvas.getHeight() + h2)/2, p);
+                canvas.drawRect((canvas.getWidth() - w2)/2.0f, (canvas.getHeight() - h2)/2.0f, (canvas.getWidth() + w2)/2.0f, (canvas.getHeight() + h2)/2.0f, p);
 
                 canvas.restore();
 

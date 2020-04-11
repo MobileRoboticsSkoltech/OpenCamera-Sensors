@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -45,6 +44,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -57,7 +57,7 @@ import android.view.TextureView;
 /** Provides support using Android 5's Camera 2 API
  *  android.hardware.camera2.*.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraController2 extends CameraController {
     private static final String TAG = "CameraController2";
 
@@ -1135,7 +1135,7 @@ public class CameraController2 extends CameraController {
         }
         else {
             red = temperature - 60;
-            red = (float)(329.698727446 * (Math.pow((double) red, -0.1332047592)));
+            red = (float)(329.698727446 * (Math.pow(red, -0.1332047592)));
             if( red < 0 )
                 red = 0;
             if( red > 255 )
@@ -1152,7 +1152,7 @@ public class CameraController2 extends CameraController {
         }
         else {
             green = temperature - 60;
-            green = (float)(288.1221695283 * (Math.pow((double) green, -0.0755148492)));
+            green = (float)(288.1221695283 * (Math.pow(green, -0.0755148492)));
             if (green < 0)
                 green = 0;
             if (green > 255)
@@ -2405,8 +2405,10 @@ public class CameraController2 extends CameraController {
                     // (and we don't want to set supports_burst to false for such a resolution).
                     boolean found = false;
                     for(android.util.Size sz : camera_picture_sizes) {
-                        if( sz.equals(camera_size) )
+                        if( sz.equals(camera_size) ) {
                             found = true;
+                            break;
+                        }
                     }
                     if( !found ) {
                         CameraController.Size size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight());
@@ -2598,6 +2600,7 @@ public class CameraController2 extends CameraController {
             for(int supported_optical_stabilization_mode : supported_optical_stabilization_modes) {
                 if( supported_optical_stabilization_mode == CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON ) {
                     camera_features.is_optical_stabilization_supported = true;
+                    break;
                 }
             }
         }
@@ -2611,6 +2614,7 @@ public class CameraController2 extends CameraController {
             for(int supported_video_stabilization_mode : supported_video_stabilization_modes) {
                 if( supported_video_stabilization_mode == CameraCharacteristics.CONTROL_VIDEO_STABILIZATION_MODE_ON ) {
                     camera_features.is_video_stabilization_supported = true;
+                    break;
                 }
             }
         }

@@ -2669,7 +2669,7 @@ public class HDRProcessor {
         int max_brightness = 0;
         for(int i = 0; i < histo.length; i++) {
             count += histo[i];
-            sum_brightness += (double)(histo[i] * i);
+            sum_brightness += (histo[i] * i);
             if( count >= middle && median_brightness == -1 ) {
                 median_brightness = i;
             }

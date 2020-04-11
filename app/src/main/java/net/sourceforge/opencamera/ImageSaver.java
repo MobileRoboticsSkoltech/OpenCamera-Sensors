@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1633,7 +1634,7 @@ public class ImageSaver extends Thread {
                         outputStream = main_activity.getContentResolver().openOutputStream(saveUri);
                     try {
                         //outputStream.write(gyro_text.toString().getBytes());
-                        outputStream.write(writer.toString().getBytes(Charset.forName("UTF-8")));
+                        outputStream.write(writer.toString().getBytes(StandardCharsets.UTF_8));
                     }
                     finally {
                         outputStream.close();
@@ -2083,7 +2084,7 @@ public class ImageSaver extends Thread {
                 p.setColor(Color.WHITE);
                 // we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution)
                 // instead we go by 1 pt == 1/72 inch height, and scale for an image height (or width if in portrait) of 4" (this means the font height is also independent of the photo resolution)
-                int smallest_size = (width<height) ? width : height;
+                int smallest_size = Math.min(width, height);
                 float scale = ((float)smallest_size) / (72.0f*4.0f);
                 int font_size_pixel = (int)(font_size * scale + 0.5f); // convert pt to pixels
                 if( MyDebug.LOG ) {

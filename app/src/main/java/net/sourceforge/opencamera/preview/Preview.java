@@ -1575,7 +1575,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     }
                 }
             };
-            if( using_android_l ) {
+            if( using_android_l && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+                // n.b., using_android_l should only be set if Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP,
+                // but Android inspection warnings aren't clever enough to figure that out, and would otherwise
+                // complain about use of CameraController2
                 CameraController.ErrorCallback previewErrorCallback = new CameraController.ErrorCallback() {
                     public void onError() {
                         if( MyDebug.LOG )
@@ -2125,9 +2128,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             if( this.using_face_detection ) {
                 class MyFaceDetectionListener implements CameraController.FaceDetectionListener {
-                    final Handler handler = new Handler();
-                    int last_n_faces = -1;
-                    FaceLocation last_face_location = FaceLocation.FACELOCATION_UNSET;
+                    private final Handler handler = new Handler();
+                    private int last_n_faces = -1;
+                    private FaceLocation last_face_location = FaceLocation.FACELOCATION_UNSET;
 
                     /** Note, at least for Camera2 API, onFaceDetection() isn't called on UI thread.
                      */
@@ -5018,7 +5021,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
         class BeepTimerTask extends TimerTask {
-            long remaining_time = timer_delay;
+            private long remaining_time = timer_delay;
             public void run() {
                 if( remaining_time > 0 ) { // check in case this isn't cancelled by time we take the photo
                     applicationInterface.timerBeep(remaining_time);

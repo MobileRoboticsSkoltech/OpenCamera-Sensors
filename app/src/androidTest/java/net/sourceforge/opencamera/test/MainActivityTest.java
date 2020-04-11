@@ -79,6 +79,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     //public static final boolean test_camera2 = true;
 
     public MainActivityTest() {
+        //noinspection deprecation
         super("net.sourceforge.opencamera", MainActivity.class);
     }
 
@@ -3447,6 +3448,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             for(int j=0;j<n_files && is_new;j++) {
                 if( file.equals( files[j] ) ) {
                     is_new = false;
+                    break;
                 }
             }
             if( is_new ) {
@@ -7326,7 +7328,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // check video profile
         VideoProfile profile = mPreview.getVideoProfile();
-        assertEquals(profile.videoCaptureRate, (double)fps, 1.0e-5);
+        assertEquals(profile.videoCaptureRate, fps, 1.0e-5);
         assertEquals((float)profile.videoFrameRate, (float)(profile.videoCaptureRate*capture_rate), 1.0e-5);
 
         boolean allow_failure = false;

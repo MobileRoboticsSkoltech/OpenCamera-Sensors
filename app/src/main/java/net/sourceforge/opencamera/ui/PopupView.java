@@ -1477,7 +1477,7 @@ public class PopupView extends LinearLayout {
         this.addView(text_view);
     }
 
-    private abstract class RadioOptionsListener {
+    private abstract static class RadioOptionsListener {
         /** Called when a radio option is selected.
          * @param selected_value The entry in the supplied supported_options_values list (received
          *                       by addRadioOptionsToPopup) that corresponds to the selected radio
@@ -1665,7 +1665,7 @@ public class PopupView extends LinearLayout {
             Log.d(TAG, "addRadioOptionsToGroup time total: " + (System.nanoTime() - debug_time));
     }
 
-    private abstract class ArrayOptionsPopupListener {
+    private abstract static class ArrayOptionsPopupListener {
         protected abstract int onClickPrev();
         protected abstract int onClickNext();
     }
