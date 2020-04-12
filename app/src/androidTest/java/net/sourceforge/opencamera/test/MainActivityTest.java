@@ -8546,6 +8546,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertFalse(mActivity.getMainUI().selectingIcons());
         assertEquals(0, mActivity.getMainUI().testGetPopupLine());
         assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
+        //Thread.sleep(3000); // test
 
         // arrow down again
         getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_NUMPAD_2);
@@ -8553,6 +8554,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mActivity.getMainUI().testGetRemoteControlMode());
         assertTrue(mActivity.getMainUI().selectingLines());
         assertFalse(mActivity.getMainUI().selectingIcons());
+        //Thread.sleep(3000); // test
         assertEquals(1, mActivity.getMainUI().testGetPopupLine());
         assertEquals(0, mActivity.getMainUI().testGetPopupIcon());
 

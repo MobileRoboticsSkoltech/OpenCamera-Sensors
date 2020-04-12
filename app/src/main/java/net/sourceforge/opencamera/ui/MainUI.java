@@ -34,6 +34,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -2147,6 +2148,11 @@ public class MainUI {
             // Ensure we stay within our bounds:
             mPopupLine = (mPopupLine + count ) % count;
             View v = inside.getChildAt(mPopupLine);
+            if( MyDebug.LOG )
+                Log.d(TAG, "line: " + mPopupLine + " view: " + v);
+            // to test example with HorizontalScrollView, see popup menu on Nokia 8 with Camera2 API, the flash icons row uses a HorizontalScrollView
+            if( v instanceof HorizontalScrollView && ((HorizontalScrollView) v).getChildCount() > 0 )
+                v = ((HorizontalScrollView) v).getChildAt(0);
             if (v.isShown() && v instanceof LinearLayout ) {
                 if (highlight) {
                     v.setBackgroundColor(highlightColor);
@@ -2159,6 +2165,8 @@ public class MainUI {
                     v.setAlpha(1f);
                 }
                 foundLine = true;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "found at line: " + foundLine);
             } else {
                 mPopupLine += goUp ? -1 : 1;
             }
@@ -2190,6 +2198,8 @@ public class MainUI {
             // (careful, modulo in Java will allow negative numbers, hence the line below:
             mPopupIcon= (mPopupIcon + count ) % count;
             View v = mHighlightedLine.getChildAt(mPopupIcon);
+            if( MyDebug.LOG )
+                Log.d(TAG, "row: " + mPopupIcon + " view: " + v);
             if (v instanceof ImageButton || v instanceof Button ) {
                 if (highlight) {
                     v.setBackgroundColor(highlightColor);
@@ -2199,6 +2209,8 @@ public class MainUI {
                 } else {
                     v.setBackgroundColor(Color.TRANSPARENT);
                 }
+                if( MyDebug.LOG )
+                    Log.d(TAG, "found icon at row: " + mPopupIcon);
                 foundIcon = true;
             } else {
                 mPopupIcon+= goLeft ? -1 : 1;
