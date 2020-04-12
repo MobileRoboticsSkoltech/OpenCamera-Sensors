@@ -6860,11 +6860,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             @Override
             public int doTest() {
                 assertTrue(mPreview.isVideoRecording());
+                assertFalse(mPreview.test_started_next_output_file);
 
                 while( !mPreview.test_called_next_output_file ) {
                     Log.d(TAG, "waiting for test_called_next_output_file");
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(100);
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();
@@ -6875,6 +6876,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Log.d(TAG, "test_called_next_output_file is now set");
                 assertTrue(mPreview.isVideoRecording());
 
+                // If this fails, it means we already started recording on the next output test, so
+                // can't test what we wanted to test (i.e., that we don't create a zero-length video
+                // file):
+                assertFalse(mPreview.test_started_next_output_file);
+
                 // wait a little bit longer... but needs to be before seamless restart actually occurs!
                 try {
                     Thread.sleep(100);
@@ -6883,6 +6889,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     e.printStackTrace();
                     fail();
                 }
+
+                // If this fails, it means we already started recording on the next output test, so
+                // can't test what we wanted to test (i.e., that we don't create a zero-length video
+                // file):
+                assertFalse(mPreview.test_started_next_output_file);
 
                 return 1;
             }

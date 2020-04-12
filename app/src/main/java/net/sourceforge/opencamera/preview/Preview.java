@@ -379,6 +379,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_video_failure;
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
     public volatile boolean test_called_next_output_file;
+    public volatile boolean test_started_next_output_file;
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
@@ -5148,6 +5149,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 applicationInterface.restartedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
                 videoFileInfo = nextVideoFileInfo;
                 nextVideoFileInfo = null;
+                test_started_next_output_file = true;
             }
         }
         else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
@@ -5322,6 +5324,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "startVideoRecording");
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
         test_called_next_output_file = false;
+        test_started_next_output_file = false;
         nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
