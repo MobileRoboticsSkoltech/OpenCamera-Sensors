@@ -3710,7 +3710,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else if( is_nr ) {
             suffix = "_NR";
             if( mActivity.getApplicationInterface().getNRModePref() == MyApplicationInterface.NRModePref.NRMODE_LOW_LIGHT )
-                max_time_s += 2; // takes longer to save low light photo
+                max_time_s += 4; // takes longer to save low light photo
         }
         else if( is_expo ) {
             suffix = "_" + (n_expo_images-1);
