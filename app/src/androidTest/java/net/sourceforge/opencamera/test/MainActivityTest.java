@@ -8995,7 +8995,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     private void subTestLocationOn(boolean gps_direction) throws IOException {
         Log.d(TAG, "subTestLocationOn");
 
-        assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
         Log.d(TAG, "turn on location");
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -9125,7 +9127,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             updateForSettings();
         }
         this.getInstrumentation().waitForIdleSync();
-        assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
         assertNull(mActivity.getLocationSupplier().getLocation());
         assertEquals(0, mPreview.count_cameraTakePicture);
 
@@ -9133,13 +9136,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.test_last_saved_image = null;
         clickView(takePhotoButton);
 
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
+
         Log.d(TAG, "wait until finished taking photo");
         waitForTakePhoto();
         this.getInstrumentation().waitForIdleSync();
         assertEquals(1, mPreview.count_cameraTakePicture);
+
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
+
         mActivity.waitUntilImageQueueEmpty();
         assertNotNull(mActivity.test_last_saved_image);
         testExif(mActivity.test_last_saved_image, false);
+
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
 
         // now test with auto-stabilise
         {
@@ -9152,13 +9168,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.test_last_saved_image = null;
         clickView(takePhotoButton);
 
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
+
         Log.d(TAG, "wait until finished taking photo");
         waitForTakePhoto();
         this.getInstrumentation().waitForIdleSync();
         assertEquals(2, mPreview.count_cameraTakePicture);
+
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
+
         mActivity.waitUntilImageQueueEmpty();
         assertNotNull(mActivity.test_last_saved_image);
         testExif(mActivity.test_last_saved_image, false);
+
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
 
         // switch to front camera
         if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
@@ -9167,10 +9196,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             clickView(switchCameraButton);
             waitUntilCameraOpened();
             this.getInstrumentation().waitForIdleSync();
+
+            assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+            assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
             assertNull(mActivity.getLocationSupplier().getLocation());
 
             // return to back camera
             switchToCamera(cameraId);
+            assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+            assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
             assertNull(mActivity.getLocationSupplier().getLocation());
         }
 
@@ -9251,7 +9285,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testLocationSettings");
         setToDefault();
 
-        assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+        assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+        assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+        assertNull(mActivity.getLocationSupplier().getLocation());
         Log.d(TAG, "turn on location");
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -9296,7 +9332,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         start_t = System.currentTimeMillis();
         int count = 0;
         while( System.currentTimeMillis() - start_t <= 15000 ) {
-            assertFalse(mActivity.getLocationSupplier().hasLocationListeners());
+            assertTrue(mActivity.getLocationSupplier().noLocationListeners());
             assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
             assertNull(mActivity.getLocationSupplier().getLocation());
             Thread.sleep(10);

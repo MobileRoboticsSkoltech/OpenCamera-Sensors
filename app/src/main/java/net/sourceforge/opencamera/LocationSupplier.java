@@ -262,6 +262,9 @@ public class LocationSupplier {
         this.test_force_no_location = test_force_no_location;
     }
 
+    /** Use this when we want to test (assert) that location listeners are turned on.
+     *  If we want to assert that they are turned off, then use noLocationListeners.
+     */
     public boolean hasLocationListeners() {
         if( this.locationListeners == null )
             return false;
@@ -272,6 +275,18 @@ public class LocationSupplier {
                 return false;
         }
         return true;
+    }
+
+    /** Use this when we want to test (assert) that location listeners are turned on. Note that this
+     *  is NOT an inverse of hasLocationListeners. For example this means that if
+     *  locationListeners.length==1, hasLocationListeners would return false (so we'd flag up that
+     *  we've not set them up correctly), but noLocationListeners would also return false (to flag
+     *  up that we did set some location listeners up).
+     */
+    public boolean noLocationListeners() {
+        if( this.locationListeners == null )
+            return true;
+        return false;
     }
 
     public static String locationToDMS(double coord) {
