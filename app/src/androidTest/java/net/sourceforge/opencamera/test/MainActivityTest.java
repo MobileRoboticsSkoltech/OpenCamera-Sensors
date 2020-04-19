@@ -9377,6 +9377,44 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         locationInfo = new LocationSupplier.LocationInfo();
         mActivity.getLocationSupplier().getLocation(locationInfo);
         assertFalse(locationInfo.LocationWasCached());
+
+        // now test repeatedly going to settings and back - guard against crash we had where onLocationChanged got called one more time after
+        // location listeners had been freed
+        for(int i=0;i<20;i++) {
+            assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
+            Thread.sleep((i % 5) * 100);
+
+            // go to settings
+            assertFalse(mActivity.isCameraInBackground());
+            Log.d(TAG, "about to click settings");
+            clickView(settingsButton);
+            Log.d(TAG, "done clicking settings");
+            this.getInstrumentation().waitForIdleSync();
+            Log.d(TAG, "after idle sync");
+            assertTrue(mActivity.isCameraInBackground());
+
+            Thread.sleep(100);
+            assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+            assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+            assertNull(mActivity.getLocationSupplier().getLocation());
+
+            Thread.sleep(200);
+            assertTrue(mActivity.getLocationSupplier().noLocationListeners());
+            assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
+            assertNull(mActivity.getLocationSupplier().getLocation());
+
+            // go back
+            assertTrue(mActivity.isCameraInBackground());
+            Log.d(TAG, "go back");
+            mActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    mActivity.onBackPressed();
+                }
+            });
+            this.getInstrumentation().waitForIdleSync();
+            Log.d(TAG, "after idle sync");
+            assertFalse(mActivity.isCameraInBackground());
+        }
     }
 
     private void subTestPhotoStamp() throws IOException {

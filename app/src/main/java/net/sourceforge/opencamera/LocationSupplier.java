@@ -45,11 +45,25 @@ public class LocationSupplier {
         return null;
     }
 
+    /** Cache the current best location. Note that we intentionally call getLocation() from this
+     *  method rather than passing it a location from onLocationChanged(), as we don't want a
+     *  coarse location overriding a better fine location.
+     */
     private void cacheLocation() {
         if( MyDebug.LOG )
             Log.d(TAG, "cacheLocation");
-        cached_location = new Location(getLocation());
-        cached_location_ms = System.currentTimeMillis();
+        Location location = getLocation();
+        if( location == null ) {
+            // this isn't an error as it can happen that we receive a call to onLocationChanged() after
+            // having freed the location listener (possibly because LocationManager had already queued
+            // a call to onLocationChanged?
+            // we should not set cached_location to null in such cases
+            Log.d(TAG, "### asked to cache location when location not available");
+        }
+        else {
+            cached_location = new Location(location);
+            cached_location_ms = System.currentTimeMillis();
+        }
     }
 
     public static class LocationInfo {
@@ -243,6 +257,8 @@ public class LocationSupplier {
                 locationListeners[i] = null;
             }
             locationListeners = null;
+            if( MyDebug.LOG )
+                Log.d(TAG, "location listeners now freed");
         }
     }
 
