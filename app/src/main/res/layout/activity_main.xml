@@ -630,6 +630,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/black"
         android:visibility="gone"
+        android:importantForAccessibility="no"
         />
     
 </RelativeLayout>

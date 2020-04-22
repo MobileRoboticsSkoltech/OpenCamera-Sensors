@@ -277,12 +277,6 @@ public class MainActivity extends Activity {
         // determine whether we support Camera2 API
         initCamera2Support();
 
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
-            // no point having talkback care about this - and (hopefully) avoid Google Play pre-launch accessibility warnings
-            View container = findViewById(R.id.hide_container);
-            container.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        }
-
         // set up window flags for normal operation
         setWindowFlagsForCamera();
         if( MyDebug.LOG )
