@@ -2699,11 +2699,12 @@ public class CameraController2 extends CameraController {
                 camera_features.tonemap_max_curve_points = tonemap_max_curve_points;
                 // for now we only expose supporting of custom tonemap curves if there are enough curve points for all the
                 // profiles we support
+                // remember to divide by 2 if we're comparing against the raw array length!
                 camera_features.supports_tonemap_curve =
                     tonemap_max_curve_points >= tonemap_log_max_curve_points_c &&
-                            tonemap_max_curve_points >= jtvideo_values.length &&
-                            tonemap_max_curve_points >= jtlog_values.length &&
-                            tonemap_max_curve_points >= jtlog2_values.length;
+                            tonemap_max_curve_points >= jtvideo_values.length/2 &&
+                            tonemap_max_curve_points >= jtlog_values.length/2 &&
+                            tonemap_max_curve_points >= jtlog2_values.length/2;
             }
             else {
                 if( MyDebug.LOG )
