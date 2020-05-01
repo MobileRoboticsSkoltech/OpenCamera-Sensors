@@ -694,6 +694,18 @@ public class MainActivity extends Activity {
         return is_multi_cam;
     }
 
+    /* Returns the camera Id in use by the preview - or the one we requested, if the camera failed
+     * to open.
+     * Needed as Preview.getCameraId() returns 0 if camera_controller==null, but if the camera
+     * fails to open, we want the switch camera icons to still work as expected!
+     */
+    private int getActualCameraId() {
+        if( preview.getCameraController() == null )
+            return applicationInterface.getCameraIdPref();
+        else
+            return preview.getCameraId();
+    }
+
     /** Whether the icon switch_multi_camera should be displayed. This is if the following are all
      *  true:
      *  - The device is a multi camera device (MainActivity.is_multi_cam==true).
@@ -704,7 +716,7 @@ public class MainActivity extends Activity {
      */
     public boolean showSwitchMultiCamIcon() {
         if( isMultiCamEnabled() ) {
-            int cameraId = preview.getCameraId();
+            int cameraId = getActualCameraId();
             switch( preview.getCameraControllerManager().getFacing(cameraId) ) {
                 case FACING_BACK:
                     if( back_camera_ids.size() > 0 )
@@ -1628,7 +1640,7 @@ public class MainActivity extends Activity {
     public int getNextCameraId() {
         if( MyDebug.LOG )
             Log.d(TAG, "getNextCameraId");
-        int cameraId = preview.getCameraId();
+        int cameraId = getActualCameraId();
         if( MyDebug.LOG )
             Log.d(TAG, "current cameraId: " + cameraId);
         if( this.preview.canSwitchCamera() ) {
@@ -1677,7 +1689,8 @@ public class MainActivity extends Activity {
         }
         List<Integer> camera_set;
         // don't use preview.getCameraController(), as it may be null if user quickly switches between cameras
-        switch( preview.getCameraControllerManager().getFacing(preview.getCameraId()) ) {
+        int currCameraId = getActualCameraId();
+        switch( preview.getCameraControllerManager().getFacing(currCameraId) ) {
             case FACING_BACK:
                 camera_set = back_camera_ids;
                 break;
@@ -1689,7 +1702,7 @@ public class MainActivity extends Activity {
                 break;
         }
         int cameraId;
-        int indx = camera_set.indexOf(preview.getCameraId());
+        int indx = camera_set.indexOf(currCameraId);
         if( indx == -1 ) {
             Log.e(TAG, "camera id not in current camera set");
             // this shouldn't happen, but if it does, revert to the first camera id in the set

@@ -7130,6 +7130,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return supported_focus_values;
     }
 
+    /** Returns the current camera ID, or 0 if the camera isn't opened.
+     */
     public int getCameraId() {
         if( camera_controller == null )
             return 0;

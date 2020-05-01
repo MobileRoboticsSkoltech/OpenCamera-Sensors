@@ -2411,6 +2411,8 @@ public class CameraController2 extends CameraController {
                         }
                     }
                     if( !found ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "high resolution [non-burst] picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
                         CameraController.Size size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight());
                         size.supports_burst = false;
                         camera_features.picture_sizes.add(size);
@@ -2418,10 +2420,17 @@ public class CameraController2 extends CameraController {
                 }
             }
         }
-        for(android.util.Size camera_size : camera_picture_sizes) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-            camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+        if( camera_picture_sizes == null ) {
+            // camera_picture_sizes is null on Samsung Galaxy Note 10+ and S20 for camera ID 4!
+            Log.e(TAG, "no picture sizes returned by getOutputSizes");
+            throw new CameraControllerException();
+        }
+        else {
+            for(android.util.Size camera_size : camera_picture_sizes) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+                camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+            }
         }
         // sizes are usually already sorted from high to low, but sort just in case
         // note some devices do have sizes in a not fully sorted order (e.g., Nokia 8)
@@ -2479,17 +2488,24 @@ public class CameraController2 extends CameraController {
         for(int[] r : this.ae_fps_ranges) {
             min_fps = Math.min(min_fps, r[0]);
         }
-        for(android.util.Size camera_size : camera_video_sizes) {
-            if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
-                continue; // Nexus 6 returns these, even though not supported?!
-            long mfd = configs.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
-            int  max_fps = (int)((1.0 / mfd) * 1000000000L);
-            ArrayList<int[]> fr = new ArrayList<>();
-            fr.add(new int[] {min_fps, max_fps});
-            CameraController.Size normal_video_size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight(), fr, false);
-            camera_features.video_sizes.add(normal_video_size);
-            if( MyDebug.LOG ) {
-                Log.d(TAG, "normal video size: " + normal_video_size);
+        if( camera_video_sizes == null ) {
+            // camera_video_sizes is null on Samsung Galaxy Note 10+ and S20 for camera ID 4!
+            Log.e(TAG, "no video sizes returned by getOutputSizes");
+            throw new CameraControllerException();
+        }
+        else {
+            for(android.util.Size camera_size : camera_video_sizes) {
+                if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
+                    continue; // Nexus 6 returns these, even though not supported?!
+                long mfd = configs.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
+                int  max_fps = (int)((1.0 / mfd) * 1000000000L);
+                ArrayList<int[]> fr = new ArrayList<>();
+                fr.add(new int[] {min_fps, max_fps});
+                CameraController.Size normal_video_size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight(), fr, false);
+                camera_features.video_sizes.add(normal_video_size);
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "normal video size: " + normal_video_size);
+                }
             }
         }
         Collections.sort(camera_features.video_sizes, new CameraController.SizeSorter());
@@ -2544,17 +2560,24 @@ public class CameraController2 extends CameraController {
             if( MyDebug.LOG )
                 Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         }
-        for(android.util.Size camera_size : camera_preview_sizes) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "preview size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-            if( camera_size.getWidth() > display_size.x || camera_size.getHeight() > display_size.y ) {
-                // Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
-                // Google Camera filters anything larger than height 1080, with a todo saying to use device's measurements
-                continue;
-            }
-            camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+        if( camera_preview_sizes == null ) {
+            // camera_preview_sizes is null on Samsung Galaxy Note 10+ and S20 for camera ID 4!
+            Log.e(TAG, "no preview sizes returned by getOutputSizes");
+            throw new CameraControllerException();
         }
-        
+        else {
+            for(android.util.Size camera_size : camera_preview_sizes) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "preview size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+                if( camera_size.getWidth() > display_size.x || camera_size.getHeight() > display_size.y ) {
+                    // Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
+                    // Google Camera filters anything larger than height 1080, with a todo saying to use device's measurements
+                    continue;
+                }
+                camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+            }
+        }
+
         if( characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
             camera_features.supported_flash_values = new ArrayList<>();
             camera_features.supported_flash_values.add("flash_off");

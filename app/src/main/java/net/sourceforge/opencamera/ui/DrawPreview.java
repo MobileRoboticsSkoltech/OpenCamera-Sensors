@@ -2019,6 +2019,8 @@ public class DrawPreview {
                     canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f, p);
                     canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + pixels_offset, p);
                     canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + 2 * pixels_offset, p);
+                    // n.b., use applicationInterface.getCameraIdPref(), as preview.getCameraId() returns 0 if camera_controller==null
+                    canvas.drawText(getContext().getResources().getString(R.string.camera_id) + ":" + applicationInterface.getCameraIdPref(), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + 3 * pixels_offset, p);
                 }
             }
             else {
