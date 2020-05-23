@@ -4730,6 +4730,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
         View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
         View takePhotoVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo_when_video_recording);
+        SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+        SeekBar targetSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_bracketing_target_seekbar);
+
         assertEquals(switchCameraButton.getVisibility(), (mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE));
         assertEquals(switchMultiCameraButton.getVisibility(), (mActivity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE));
         assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
@@ -4743,6 +4746,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         // now wait for immersive mode to kick in
         Thread.sleep(6000);
@@ -4759,6 +4764,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         subTestTakePhoto(false, true, true, true, false, false, false, false);
 
@@ -4776,6 +4783,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         // wait for immersive mode to kick in again
         Thread.sleep(6000);
@@ -4792,6 +4801,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         subTestTakePhotoPreviewPaused(true, false);
 
@@ -4809,6 +4820,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         // need to switch video before going back to immersive mode
         if( !mPreview.isVideo() ) {
@@ -4829,6 +4842,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         // wait for immersive mode to kick in again
         Thread.sleep(6000);
@@ -4845,6 +4860,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         subTestTakeVideo(false, false, false, true, null, 5000, false, 0);
 
@@ -4863,11 +4880,115 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
         assertEquals(pauseVideoButton.getVisibility(), View.GONE);
         assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+        assertEquals(seekBar.getVisibility(), View.GONE);
+        assertEquals(targetSeekBar.getVisibility(), View.GONE);
 
         // switch back to photo mode
         if( mPreview.isVideo() ) {
             clickView(switchVideoButton);
             waitUntilCameraOpened();
+        }
+
+        if( mPreview.usingCamera2API() && mPreview.getSupportedFocusValues().contains("focus_mode_manual2")  ) {
+            // now test manual focus seekbar disappears
+            assertEquals(seekBar.getVisibility(), View.GONE);
+            switchToFocusValue("focus_mode_manual2");
+            assertEquals(seekBar.getVisibility(), View.VISIBLE);
+
+            // wait for immersive mode to kick in again
+            Thread.sleep(6000);
+            assertEquals(switchCameraButton.getVisibility(), View.GONE);
+            assertEquals(switchMultiCameraButton.getVisibility(), View.GONE);
+            assertEquals(switchVideoButton.getVisibility(), View.GONE);
+            assertEquals(exposureButton.getVisibility(), View.GONE);
+            assertEquals(exposureLockButton.getVisibility(), View.GONE);
+            assertEquals(audioControlButton.getVisibility(), View.GONE);
+            assertEquals(popupButton.getVisibility(), View.GONE);
+            assertEquals(trashButton.getVisibility(), View.GONE);
+            assertEquals(shareButton.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+            assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
+            assertEquals(pauseVideoButton.getVisibility(), View.GONE);
+            assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+            assertEquals(seekBar.getVisibility(), View.GONE);
+            assertEquals(targetSeekBar.getVisibility(), View.GONE);
+
+            // test touch exits immersive mode
+            TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
+            assertEquals(switchCameraButton.getVisibility(), (mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE));
+            assertEquals(switchMultiCameraButton.getVisibility(), (mActivity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE));
+            assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
+            assertEquals(exposureButton.getVisibility(), exposureVisibility);
+            assertEquals(exposureLockButton.getVisibility(), exposureLockVisibility);
+            assertEquals(audioControlButton.getVisibility(), (has_audio_control_button ? View.VISIBLE : View.GONE));
+            assertEquals(popupButton.getVisibility(), View.VISIBLE);
+            assertEquals(trashButton.getVisibility(), View.GONE);
+            assertEquals(shareButton.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+            assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
+            assertEquals(pauseVideoButton.getVisibility(), View.GONE);
+            assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+            assertEquals(seekBar.getVisibility(), View.VISIBLE);
+            assertEquals(targetSeekBar.getVisibility(), View.GONE);
+
+            switchToFocusValue("focus_mode_continuous_picture");
+        }
+
+        if( mPreview.usingCamera2API() && mActivity.supportsFocusBracketing()  ) {
+            // now test focus bracketing seekbars disappear
+            assertEquals(seekBar.getVisibility(), View.GONE);
+            assertEquals(targetSeekBar.getVisibility(), View.GONE);
+
+            settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            editor = settings.edit();
+            editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_focus_bracketing");
+            editor.apply();
+            updateForSettings();
+
+            assertEquals(seekBar.getVisibility(), View.VISIBLE);
+            assertEquals(targetSeekBar.getVisibility(), View.VISIBLE);
+
+            // wait for immersive mode to kick in again
+            Thread.sleep(6000);
+            assertEquals(switchCameraButton.getVisibility(), View.GONE);
+            assertEquals(switchMultiCameraButton.getVisibility(), View.GONE);
+            assertEquals(switchVideoButton.getVisibility(), View.GONE);
+            assertEquals(exposureButton.getVisibility(), View.GONE);
+            assertEquals(exposureLockButton.getVisibility(), View.GONE);
+            assertEquals(audioControlButton.getVisibility(), View.GONE);
+            assertEquals(popupButton.getVisibility(), View.GONE);
+            assertEquals(trashButton.getVisibility(), View.GONE);
+            assertEquals(shareButton.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), View.GONE);
+            assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
+            assertEquals(pauseVideoButton.getVisibility(), View.GONE);
+            assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+            assertEquals(seekBar.getVisibility(), View.GONE);
+            assertEquals(targetSeekBar.getVisibility(), View.GONE);
+
+            // test touch exits immersive mode
+            TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
+            assertEquals(switchCameraButton.getVisibility(), (mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE));
+            assertEquals(switchMultiCameraButton.getVisibility(), (mActivity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE));
+            assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
+            assertEquals(exposureButton.getVisibility(), exposureVisibility);
+            assertEquals(exposureLockButton.getVisibility(), exposureLockVisibility);
+            assertEquals(audioControlButton.getVisibility(), (has_audio_control_button ? View.VISIBLE : View.GONE));
+            assertEquals(popupButton.getVisibility(), View.VISIBLE);
+            assertEquals(trashButton.getVisibility(), View.GONE);
+            assertEquals(shareButton.getVisibility(), View.GONE);
+            assertEquals(zoomSeekBar.getVisibility(), View.VISIBLE);
+            assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
+            assertEquals(pauseVideoButton.getVisibility(), View.GONE);
+            assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+            assertEquals(seekBar.getVisibility(), View.VISIBLE);
+            assertEquals(targetSeekBar.getVisibility(), View.VISIBLE);
+
+            settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            editor = settings.edit();
+            editor.putString(PreferenceKeys.PhotoModePreferenceKey, "photo_mode_std");
+            editor.apply();
+            updateForSettings();
         }
 
         if( mPreview.usingCamera2API() && mPreview.supportsISORange() ) {
@@ -4889,6 +5010,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(takePhotoButton.getVisibility(), View.VISIBLE);
             assertEquals(pauseVideoButton.getVisibility(), View.GONE);
             assertEquals(takePhotoVideoButton.getVisibility(), View.GONE);
+            assertEquals(seekBar.getVisibility(), View.GONE);
+            assertEquals(targetSeekBar.getVisibility(), View.GONE);
         }
     }
 
