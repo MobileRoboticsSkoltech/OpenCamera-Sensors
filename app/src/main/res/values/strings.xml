@@ -982,6 +982,8 @@
     <string name="preference_comment_ypr">Store yaw, pitch and roll</string>
     <string name="preference_comment_ypr_summary">Store the yaw, pitch and roll of the device in the photo\'s Exif user comment (JPEG format only)</string>
 
+    <string name="array_seekbar_preference_seekbar">Seekbar to change current preference value</string>
+
     <!-- The following strings should not be translated (and shouldn't be included in language-specific strings.xml), in case they need updating -->
 
     <string name="preference_privacy_policy" translatable="false">Privacy policy</string>
