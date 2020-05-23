@@ -207,7 +207,10 @@
                     android:dependency="preference_enable_remote"
                     >
 
-                    <intent android:action="net.sourceforge.opencamera.Remotecontrol.DeviceScanner"/>
+                    <intent
+                        android:targetPackage="net.sourceforge.opencamera"
+                        android:targetClass="net.sourceforge.opencamera.remotecontrol.DeviceScanner"
+                        />
 
                 </PreferenceScreen>
 
