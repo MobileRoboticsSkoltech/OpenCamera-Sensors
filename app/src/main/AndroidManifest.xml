@@ -85,6 +85,7 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:taskAffinity=""
             android:excludeFromRecents="true"
+            android:exported="false"
             >
         </activity>
         <!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
