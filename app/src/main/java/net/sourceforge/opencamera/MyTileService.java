@@ -3,7 +3,7 @@ package net.sourceforge.opencamera;
 import android.content.Intent;
 import android.os.Build;
 import android.service.quicksettings.TileService;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 
 /** Provides service for quick settings tile.
