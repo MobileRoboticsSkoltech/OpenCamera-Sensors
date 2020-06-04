@@ -51,7 +51,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.CamcorderProfile;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;

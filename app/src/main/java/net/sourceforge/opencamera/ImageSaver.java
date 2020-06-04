@@ -41,7 +41,7 @@ import android.graphics.Paint.Align;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -2819,7 +2819,7 @@ public class ImageSaver extends Thread {
 
         if( MyDebug.LOG )
             Log.d(TAG, "read back EXIF data");
-        String exif_aperture = exif.getAttribute(ExifInterface.TAG_APERTURE); // same as TAG_F_NUMBER
+        String exif_aperture = exif.getAttribute(ExifInterface.TAG_F_NUMBER); // previously TAG_APERTURE
         String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
         String exif_exposure_time = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME);
         String exif_flash = exif.getAttribute(ExifInterface.TAG_FLASH);
@@ -2834,7 +2834,8 @@ public class ImageSaver extends Thread {
         String exif_gps_processing_method = exif.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD);
         String exif_gps_timestamp = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP);
         // leave width/height, as this may have changed! similarly TAG_IMAGE_LENGTH?
-        String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO); // same as TAG_ISO_SPEED_RATINGS
+        //noinspection deprecation
+        String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS); // previously TAG_ISO
         String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
         String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
         // leave orientation - since we rotate bitmaps to account for orientation, we don't want to write it to the saved image!
@@ -2848,8 +2849,8 @@ public class ImageSaver extends Thread {
             // tags that are new in Android M - note we skip tags unlikely to be relevant for camera photos
             exif_datetime_digitized = exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
             exif_subsec_time = exif.getAttribute(ExifInterface.TAG_SUBSEC_TIME);
-            exif_subsec_time_dig = exif.getAttribute(ExifInterface.TAG_SUBSEC_TIME_DIG); // same as TAG_SUBSEC_TIME_DIGITIZED
-            exif_subsec_time_orig = exif.getAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIG); // same as TAG_SUBSEC_TIME_ORIGINAL
+            exif_subsec_time_dig = exif.getAttribute(ExifInterface.TAG_SUBSEC_TIME_DIGITIZED); // previously TAG_SUBSEC_TIME_DIG
+            exif_subsec_time_orig = exif.getAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL); // previously TAG_SUBSEC_TIME_ORIG
         }
 
         String exif_aperture_value = null;
@@ -2965,7 +2966,7 @@ public class ImageSaver extends Thread {
         if( MyDebug.LOG )
             Log.d(TAG, "now write new EXIF data");
         if( exif_aperture != null )
-            exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
+            exif_new.setAttribute(ExifInterface.TAG_F_NUMBER, exif_aperture);
         if( exif_datetime != null )
             exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
         if( exif_exposure_time != null )
@@ -2993,7 +2994,7 @@ public class ImageSaver extends Thread {
         if( exif_gps_timestamp != null )
             exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
         if( exif_iso != null )
-            exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
+            exif_new.setAttribute(ExifInterface.TAG_ISO_SPEED_RATINGS, exif_iso);
         if( exif_make != null )
             exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
         if( exif_model != null )
@@ -3007,9 +3008,9 @@ public class ImageSaver extends Thread {
             if( exif_subsec_time != null )
                 exif_new.setAttribute(ExifInterface.TAG_SUBSEC_TIME, exif_subsec_time);
             if( exif_subsec_time_dig != null )
-                exif_new.setAttribute(ExifInterface.TAG_SUBSEC_TIME_DIG, exif_subsec_time_dig);
+                exif_new.setAttribute(ExifInterface.TAG_SUBSEC_TIME_DIGITIZED, exif_subsec_time_dig);
             if( exif_subsec_time_orig != null )
-                exif_new.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIG, exif_subsec_time_orig);
+                exif_new.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL, exif_subsec_time_orig);
         }
 
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
