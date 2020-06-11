@@ -641,20 +641,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pg.removePreference(pref);
         }
 
-        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
-            // the required ExifInterface tags requires Android N or greater
-            Preference pref = findPreference("preference_category_exif_tags");
-            PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
-            pg.removePreference(pref);
-
-            pref = findPreference("preference_comment_ypr");
-            pg = (PreferenceGroup)this.findPreference("preference_screen_location_settings");
-            pg.removePreference(pref);
-        }
-        else {
-            setSummary("preference_exif_artist");
-            setSummary("preference_exif_copyright");
-        }
+        setSummary("preference_exif_artist");
+        setSummary("preference_exif_copyright");
 
         setSummary("preference_save_photo_prefix");
         setSummary("preference_save_video_prefix");

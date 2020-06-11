@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera.ui;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -44,7 +43,6 @@ import android.location.Location;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
@@ -593,8 +591,7 @@ public class DrawPreview {
                 }
                 Uri uri = Uri.parse(ghost_selected_image_pref);
                 try {
-                    File file = main_activity.getStorageUtils().getFileFromDocumentUriSAF(uri, false);
-                    ghost_selected_image_bitmap = loadBitmap(uri, file);
+                    ghost_selected_image_bitmap = loadBitmap(uri);
                 }
                 catch(IOException e) {
                     Log.e(TAG, "failed to load ghost_selected_image uri: " + uri);
@@ -682,11 +679,10 @@ public class DrawPreview {
         }
     }
 
-    /** Loads the bitmap from the uri. File is optional, and is used on pre-Android 7 devices to
-     *  read the exif orientation.
+    /** Loads the bitmap from the uri.
      *  The image will be downscaled if required to be comparable to the preview width.
      */
-    private Bitmap loadBitmap(Uri uri, File file) throws IOException {
+    private Bitmap loadBitmap(Uri uri) throws IOException {
         if( MyDebug.LOG )
             Log.d(TAG, "loadBitmap: " + uri);
         Bitmap bitmap;
@@ -755,18 +751,17 @@ public class DrawPreview {
 
         // now need to take exif orientation into account, as some devices or camera apps store the orientation in the exif tag,
         // which getBitmap() doesn't account for
-        ExifInterface exif = null;
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
-            // better to use the Uri from Android 7, so this works when images are shared to Vibrance
-            try( InputStream inputStream = main_activity.getContentResolver().openInputStream(uri) ) {
-                exif = new ExifInterface(inputStream);
-            }
+        ExifInterface exif;
+        InputStream inputStream = null;
+        try {
+            inputStream = main_activity.getContentResolver().openInputStream(uri);
+            exif = new ExifInterface(inputStream);
         }
-        else {
-            if( file != null ) {
-                exif = new ExifInterface(file.getAbsolutePath());
-            }
+        finally {
+            if( inputStream != null )
+                inputStream.close();
         }
+
         if( exif != null ) {
             int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
             boolean needs_tf = false;
