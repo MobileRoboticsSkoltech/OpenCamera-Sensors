@@ -1015,6 +1015,9 @@
     <string name="preference_screen_licences" translatable="false">Open Source licences</string>
     <string name="preference_licence_open_camera" translatable="false">Open Camera</string>
     <string name="preference_licence_open_camera_text" translatable="false">Open Camera is © 2013–2020 Mark Harman, released under the GPL v3 or later. Tap here for full licence text and terms of service.</string>
+    <string name="preference_licence_androidx" translatable="false">AndroidX libraries</string>
+    <string name="preference_licence_androidx_text" translatable="false">Open Camera uses the AndroidX/Jetpack libraries
+        under the Apache license version 2.0. Tap here for full licence text.</string>
     <string name="preference_licence_google_icons" translatable="false">Google\'s Material Design icons</string>
     <string name="preference_licence_google_icons_text" translatable="false">Open Camera uses icons from Google\'s Material Design icons
         (https://developer.android.com/design/downloads/index.html ,

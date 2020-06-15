@@ -865,6 +865,23 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
+            final Preference pref = findPreference("preference_licence_androidx");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_licence_androidx") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked androidx licence");
+                        // display the Apache licence 2.0 text
+                        displayTextDialog(R.string.preference_licence_androidx, "androidx_LICENSE-2.0.txt");
+                        return false;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        {
             final Preference pref = findPreference("preference_licence_google_icons");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
