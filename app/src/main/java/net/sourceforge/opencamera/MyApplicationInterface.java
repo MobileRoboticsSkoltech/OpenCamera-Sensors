@@ -1907,7 +1907,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             final boolean store_location = getGeotaggingPref();
             final boolean store_geo_direction = getGeodirectionPref();
             class SubtitleVideoTimerTask extends TimerTask {
-                OutputStreamWriter writer;
+                // need to keep a reference to pfd_saf for as long as writer, to avoid getting garbage collected - see https://sourceforge.net/p/opencamera/tickets/417/
+                @SuppressWarnings("FieldCanBeLocal")
+                private ParcelFileDescriptor pfd_saf;
+                private OutputStreamWriter writer;
                 private int count = 1;
                 private long min_video_time_from = 0;
 
@@ -2054,7 +2057,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                     String subtitle_filename = storageUtils.getFileName(last_video_file_saf);
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     Uri subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
-                                    ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");
+                                    pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");
                                     writer = new FileWriter(pfd_saf.getFileDescriptor());
                                 }
                             }
@@ -2174,6 +2177,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // create thumbnail
             long debug_time = System.currentTimeMillis();
             Bitmap thumbnail = null;
+            ParcelFileDescriptor pfd_saf; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 if( video_method == VIDEOMETHOD_FILE ) {
@@ -2181,7 +2185,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     retriever.setDataSource(file.getPath());
                 }
                 else {
-                    ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "r");
+                    pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "r");
                     retriever.setDataSource(pfd_saf.getFileDescriptor());
                 }
                 thumbnail = retriever.getFrameAtTime(-1);

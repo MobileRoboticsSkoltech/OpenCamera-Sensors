@@ -3195,12 +3195,36 @@ public class ImageSaver extends Thread {
         return bitmap;
     }
 
+    /* In some cases we may create an ExifInterface with a FileDescriptor obtained from a
+     * ParcelFileDescriptor (via getFileDescriptor()). It's important to keep a reference to the
+     * ParcelFileDescriptor object for as long as the exif interface, otherwise there's a risk of
+     * the ParcelFileDescriptor being garbage collected, invalidating the file descriptor still
+     * being used by the ExifInterace!
+     * This didn't cause any known bugs, but good practice to fix, similar to the issue reported in
+     * https://sourceforge.net/p/opencamera/tickets/417/ .
+     */
+    private static class ExifInterfaceHolder {
+        private final ParcelFileDescriptor pfd;
+        private final ExifInterface exif;
+
+        ExifInterfaceHolder(ParcelFileDescriptor pfd, ExifInterface exif) {
+            this.pfd = pfd;
+            this.exif = exif;
+        }
+
+        ExifInterface getExif() {
+            return this.exif;
+        }
+    }
+
     /** Creates a new exif interface for reading and writing.
      *  If picFile==null, then saveUri must be non-null, and will be used instead to write the exif
      *  tags too.
-     *  May return null if unable to create the exif interface.
+     *  The returned ExifInterfaceHolder will always be non-null, but the contained getExif() may
+     *  return null if this method was unable to create the exif interface.
      */
-    private ExifInterface createExifInterface(File picFile, Uri saveUri) throws IOException {
+    private ExifInterfaceHolder createExifInterface(File picFile, Uri saveUri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor = null;
         ExifInterface exif = null;
         if( picFile != null ) {
             if( MyDebug.LOG )
@@ -3210,7 +3234,7 @@ public class ImageSaver extends Thread {
         else {
             if( MyDebug.LOG )
                 Log.d(TAG, "write direct to saveUri: " + saveUri);
-            ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
+            parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
             if( parcelFileDescriptor != null ) {
                 FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
                 exif = new ExifInterface(fileDescriptor);
@@ -3219,7 +3243,7 @@ public class ImageSaver extends Thread {
                 Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
             }
         }
-        return exif;
+        return new ExifInterfaceHolder(parcelFileDescriptor, exif);
     }
 
     /** Makes various modifications to the saved image file, according to the preferences in request.
@@ -3235,7 +3259,8 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "add additional exif info");
             try {
-                ExifInterface exif = createExifInterface(picFile, saveUri);
+                ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
+                ExifInterface exif = exif_holder.getExif();
                 if( exif != null ) {
                     modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
                     exif.saveAttributes();
@@ -3254,7 +3279,8 @@ public class ImageSaver extends Thread {
             if( MyDebug.LOG )
                 Log.d(TAG, "remove GPS timestamp hack");
             try {
-                ExifInterface exif = createExifInterface(picFile, saveUri);
+                ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
+                ExifInterface exif = exif_holder.getExif();
                 if( exif != null ) {
                     fixGPSTimestamp(exif, request.current_date);
                     exif.saveAttributes();
