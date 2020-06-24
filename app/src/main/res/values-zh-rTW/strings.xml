@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <string name="app_name">Open Camera</string> <!-- shouldn't be translated, unless deemed appropriate e.g. alternative alphabets -->
     <string name="action_settings">設定</string>
     <string name="action_popup">彈出設定</string>
     <string name="intro_ok">好 (此訊息將不再顯示)</string>
@@ -60,7 +60,7 @@
     
     <string name="angle">角度</string>
     <string name="direction">方向</string>
-    <string name="failed_to_open_camera_1">打開相機失敗。</string>
+    <string name="failed_to_open_camera_1">開啟相機失敗。</string>
     <string name="failed_to_open_camera_2">相機可能正被</string>
     <string name="failed_to_open_camera_3">其它程式使用？</string>
     <string name="iso">ISO</string>
@@ -76,7 +76,7 @@
     <string name="preference_auto_stabilise">自動水平</string>
     <string name="preference_auto_stabilise_summary">圖片將被旋轉，使它們自動對準(僅照片) (拍照更慢，且可能在記憶體過低的裝置上失敗)</string>
     <string name="preference_color_effect">套用一個顏色效果</string>
-    <string name="preference_color_effect_summary">套用選取的顏色效果到照片</string>
+    <string name="preference_color_effect_summary">將選取的顏色效果套用到照片</string>
     <string name="preference_scene_mode">套用一個場景模式</string>
     <string name="preference_scene_mode_summary">為各種場景優化照片</string>
     <string name="preference_white_balance">設定白平衡</string>
@@ -157,8 +157,8 @@
     <string name="grid">格線</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">顯示裁切輔助</string>
     <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的長寬比很有用。需要所見即所得拍照模式，或處於錄影模式中。\n%s</string>
-    <string name="preference_show_toasts">顯示拍照前提示訊息</string>
-    <string name="preference_show_toasts_summary">是否要在拍照快門前顯示彈出訊息提示</string>
+    <string name="preference_show_toasts">在螢幕上顯示訊息</string>
+    <string name="preference_show_toasts_summary">是否要在螢幕上顯示暫時的資訊訊息</string>
     <string name="preference_thumbnail_animation">顯示縮圖動畫</string>
     <string name="preference_thumbnail_animation_summary">當拍照時顯示移動縮圖動畫</string>
     <string name="preference_take_photo_border">拍照時顯示邊緣</string>
@@ -179,9 +179,9 @@
     <string name="preference_location">儲存位置資料 (地理標記)</string>
     <string name="preference_location_summary">在照片/影片中儲存 GPS 位置資料（對於照片，位置資料只能儲存在 JPEG 和 DNG 格式）</string>
     <string name="preference_gps_direction">儲存羅盤方向</string>
-    <string name="preference_gps_direction_summary">在照片中儲存 GPS 羅盤方向（只有 JPEG 格式）</string>
+    <string name="preference_gps_direction_summary">在照片中儲存 GPS 羅盤方向（只有在 JPEG 格式）</string>
     <string name="preference_require_location">需要位置資料</string>
-    <string name="preference_require_location_summary">如果啟用位置資料，只拍照/錄影如果位置資料可用。</string>
+    <string name="preference_require_location_summary">如果啟用位置資料，只在位置資料可用時拍照/錄影</string>
     <string name="preference_stamp">標記照片</string>
     <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料，也標記 GPS 資訊\n%s</string>
     <string name="preference_stamp_dateformat">日期標記格式</string>
@@ -200,12 +200,12 @@
     <string name="video_quality">影片解析度</string>
     <string name="preference_force_video_4k">強制 4K UHD 影片（只能在某些裝置上運作）</string>
     <string name="preference_force_video_4k_summary">為後置相機錄影啟用 3840x2160 解析度 - 僅當您的裝置支援時才能作用，且如果不支援可能當機！</string>
-    <string name="preference_video_stabilization">啟用影片防震</string>
-    <string name="preference_video_stabilization_summary">影片防震減少在預覽和錄影中由於相機移動引起的晃動。</string>
+    <string name="preference_video_stabilization">啟用數位影片防手震</string>
+    <string name="preference_video_stabilization_summary">影片防手震減少在預覽和錄影中由於相機移動引起的晃動。如果您的裝置支援光學防手震 (OIS)，可能不需要這個選項。</string>
     <string name="preference_video_bitrate">影片位元率 (大約)</string>
     <string name="preference_video_bitrate_summary">設定影片的大致位元率 (越高表示越好的品質，但佔用更多磁碟空間；如果位元率不支援可能造成錄影失敗)\n%s</string>
     <string name="preference_video_fps">影片影格率 (大約)</string>
-    <string name="preference_video_fps_summary">設定影片的影格率 (FPS)（大約值，不能保證有用，且如果不支援可能造成錄影失敗）。注意這個設定在慢動作影片會被忽略。\n%s</string>
+    <string name="preference_video_fps_summary">設定影片的影格率 (FPS)（大約值，不能保證有用，且如果不支援可能造成錄影失敗）。請檢查產生的影片來找出真正使用的影格率。注意，這個設定在慢動作影片會被忽略。\n%s</string>
     <string name="preference_video_max_duration">影片最長持續時間</string>
     <string name="preference_video_max_duration_summary">在指定的時間後錄影將停止\n%s</string>
     <string name="preference_video_restart">在最大持續時間後重啟錄影</string>
@@ -217,7 +217,7 @@
     <string name="preference_record_audio">錄音</string>
     <string name="preference_record_audio_summary">錄影時錄音</string>
     <string name="preference_record_audio_src">音源</string>
-    <string name="preference_record_audio_src_summary">用於錄製音訊的麥克風\n%s</string>
+    <string name="preference_record_audio_src_summary">用於錄製音訊的麥克風。請注意，這個選項真正的行為取決於您的裝置如何實作這個選項。\n%s</string>
     <string name="preference_record_audio_channels">音源頻道</string>
     <string name="preference_record_audio_channels_summary">指定使用單聲道或立體聲來錄音 (立體聲只支援某些裝置)</string>
     <string name="preference_video_flash">錄影時閃光</string>
@@ -282,7 +282,7 @@
     <string name="audio_listener_started">發出大的聲音</string>
 
     <string name="auto_stabilise_info">自動水平會自動旋轉照片，使它們顯得水平。\n\n注意這意味著圖片解析度會較低（因為需要旋轉和裁切）。</string>
-    <string name="raw_info">DNG 檔案包含來自相機的全部未壓縮和未處理的資訊。\n\n注意有些圖庫無法識別 DNG 檔案。DNG 圖片可以使用專用編輯器（例如 Snapseed 和 Lightroom）處理。\n\n注意「標記照片」和「自動水平」等處理選項僅適用於非-DNG (JPEG/etc) 圖片 ，不適用於 DNG 圖片。 </string>
+    <string name="raw_info">DNG 檔案包含來自相機的全部未壓縮和未處理的資訊。\n\n注意有些相簿程式無法識別 DNG 檔案。DNG 圖片可以使用專用編輯器（例如 Snapseed 和 Lightroom）處理。\n\n注意「標記照片」和「自動水平」等處理選項僅適用於非 DNG (JPEG 等) 圖片 ，不適用於 DNG 圖片。 </string>
     <string name="hdr_info">HDR 模式在亮度變化範圍大的環境中非常有用。它的工作原理是在不同曝光下拍攝多張照片，並將它們組合在一起以建立最終圖片。\n\n注意 HDR 不適合用於快速移動的場景，而且可能造成顏色較不精確。\n\nHDR 模式拍照比較慢。</string>
 
     <string name="dont_show_again">不要再次顯示</string>
@@ -458,9 +458,9 @@
 
     <string name="preference_category_exif_tags">自訂 EXIF 標籤</string>
     <string name="preference_exif_artist">藝術家</string>
-    <string name="preference_exif_artist_summary">儲存在圖片詮釋資料藝術家標籤的文字（只有 JPEG 格式）。（留空代表不儲存）</string>
+    <string name="preference_exif_artist_summary">儲存在圖片詮釋資料藝術家標籤的文字（只有在 JPEG 格式）。（留空代表不儲存）</string>
     <string name="preference_exif_copyright">版權</string>
-    <string name="preference_exif_copyright_summary">儲存在圖片詮釋資料版權標籤的文字（只有 JPEG 格式）。（留空代表不儲存）</string>
+    <string name="preference_exif_copyright_summary">儲存在圖片詮釋資料版權標籤的文字（只有在 JPEG 格式）。（留空代表不儲存）</string>
 
     <string name="processing">處理中…</string>
 
@@ -538,14 +538,14 @@
     <string name="preference_camera2_photo_video_recording">允許在錄影時拍照</string>
     <string name="preference_camera2_photo_video_recording_summary">允許在錄影時拍照。如果您啟用了 Camera2 API 後發現錄製影片有問題，請停用此功能。</string>
 
-    <string name="preference_video_log">影片 flat (log) profile</string>
-    <string name="preference_video_log_summary">影片模式啟用 flat (log) profile\n%s</string>
-    <string name="preference_video_log_off">關閉</string>
-    <string name="preference_video_log_fine">細微</string>
-    <string name="preference_video_log_low">低</string>
-    <string name="preference_video_log_medium">中</string>
-    <string name="preference_video_log_strong">強</string>
-    <string name="preference_video_log_extra_strong">超強</string>
+    <string name="preference_video_log">影片影像設定檔 (picture profile)</string>
+    <string name="preference_video_log_summary">設定影片模式要使用標準或扁平 (flat) 影像設定檔 (picture profile)\n%s</string>
+    <string name="preference_video_log_off">預設</string>
+    <string name="preference_video_log_fine">Log (細微)</string>
+    <string name="preference_video_log_low">Log (低)</string>
+    <string name="preference_video_log_medium">Log (中)</string>
+    <string name="preference_video_log_strong">Log (強)</string>
+    <string name="preference_video_log_extra_strong">Log (超強)</string>
     <string name="video_log">Log profile</string>
 
     <string name="preference_record_audio_src_camcorder">攝影機</string>
@@ -828,6 +828,11 @@
     <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_90pc">90%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_93pc">93%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_95pc">95%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_97pc">97%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_98pc">98%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
+    <string name="preference_zebra_stripes_99pc">99%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_100pc">100%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
 
     <string name="preference_focus_peaking">峰值對焦</string>
@@ -901,7 +906,7 @@
     <string name="preference_stamp_geo_address_summary">可以的話，當標記 GPS 位置時使用地址。
         這個選項需要網路連線。
         注意如果啟用這個選項，您的裝置需要透過網路將位置資訊到第三方
-        以將 GPS 座標轉換為地址。請參閱 https://developer.android.com/reference/android/location/Geocoder .
+        以將 GPS 座標轉換為地址。請參閱 https://developer.android.com/reference/android/location/Geocoder。
         \n%s</string>
 
     <string name="intro_text">點擊以對焦，按下藍色相機按鈕來拍照。
@@ -911,8 +916,66 @@
 
     <string name="preference_select_remote">選擇遠端裝置</string>
 
+    <string name="preference_video_rec709">REC709</string>
+    <string name="preference_video_srgb">sRGB</string>
+    <string name="preference_video_gamma">Gamma</string>
+
+    <string name="preference_video_profile_gamma">影片 gamma 值</string>
+    <string name="preference_video_profile_gamma_summary">如果影片的影像設定檔 (picture profile) 設定為 Gamma，影片要使用的 gamma 值\n%s</string>
+    <string name="preference_video_profile_gamma_1_6">1.6</string>
+    <string name="preference_video_profile_gamma_1_8">1.8</string>
+    <string name="preference_video_profile_gamma_1_9">1.9</string>
+    <string name="preference_video_profile_gamma_2_0">2.0</string>
+    <string name="preference_video_profile_gamma_2_1">2.1</string>
+    <string name="preference_video_profile_gamma_2_2">2.2</string>
+    <string name="preference_video_profile_gamma_2_3">2.3</string>
+    <string name="preference_video_profile_gamma_2_4">2.4</string>
+    <string name="preference_video_profile_gamma_2_6">2.6</string>
+    <string name="preference_video_profile_gamma_2_8">2.8</string>
+
     <string name="preference_immersive_mode_off">關閉</string>
-    <string name="preference_immersive_mode_navigation">只隱藏螢幕上的虛擬按鈕</string>
+    <string name="preference_immersive_mode_low_profile">只讓螢幕上的虛擬導航鍵變暗</string>
+    <string name="preference_immersive_mode_navigation">隱藏螢幕上的虛擬導航鍵</string>
     <string name="preference_immersive_mode_gui">隱藏圖形化使用者介面</string>
     <string name="preference_immersive_mode_everything">隱藏全部</string>
+
+    <string name="preference_ghost_image_alpha">輔助圖片不透明度</string>
+    <string name="preference_ghost_image_alpha_summary">輔助圖片的 Alpha 值。較低的值代表較透明，較高的值代表較不透明。\n%s</string>
+
+    <string name="preference_zebra_stripes_foreground_color">斑馬條紋前景顏色</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">當顯示斑馬條紋時，前景條紋要使用的顏色。\n%s</string>
+    <string name="preference_zebra_stripes_background_color">斑馬條紋背景顏色</string>
+    <string name="preference_zebra_stripes_background_color_summary">當顯示斑馬條紋時，背景條紋要使用的顏色。\n%s</string>
+
+    <string name="preference_zebra_stripes_color_black">黑色</string>
+    <string name="preference_zebra_stripes_color_red">紅色</string>
+    <string name="preference_zebra_stripes_color_orange">橘色</string>
+    <string name="preference_zebra_stripes_color_transparent">透明</string>
+    <string name="preference_zebra_stripes_color_white">白色</string>
+
+    <string name="external_camera">外部相機</string>
+    <string name="ultrawide">超廣角</string>
+
+    <string name="switch_to_external_camera">切換到外部相機</string>
+    <string name="switch_to_unknown_camera">切換相機</string>
+    <string name="switch_multi_camera">在多個相機之間切換</string>
+    <string name="preference_multi_cam_button">多相機圖示</string>
+    <string name="preference_multi_cam_button_summary">如果啟用，使用不同的按鈕來切換前置相機/後置相機與在多個前置相機/後置相機之間切換。如果停用，切換相機圖示會在所有相機之間循環切換。</string>
+
+    <string name="preference_show_camera_id">顯示相機 ID</string>
+    <string name="preference_show_camera_id_summary">在螢幕上顯示目前的相機 ID</string>
+
+    <string name="preference_allow_long_press">允許長按動作</string>
+    <string name="preference_allow_long_press_summary">是否允許長按動作（例如在相簿上長按來變更儲存位置）。</string>
+
+    <string name="aperture">光圈</string>
+
+    <string name="error_features_4k">4K UHD</string>
+    <string name="error_features_bitrate">位元率</string>
+    <string name="error_features_frame_rate">影格率</string>
+    <string name="error_features_slow_motion">慢動作</string>
+
+    <string name="preference_comment_ypr">儲存偏擺 (yaw)、俯仰 (pitch) 及翻滾 (roll)</string>
+    <string name="preference_comment_ypr_summary">在照片的 Exif user comment 中儲存裝置的偏擺 (yaw)、俯仰 (pitch) 及翻滾 (roll)（只有在 JPEG 格式）</string>
+
 </resources>

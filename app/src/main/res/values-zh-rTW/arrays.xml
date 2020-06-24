@@ -2,10 +2,10 @@
 <resources>
     <string-array name="focus_mode_entries">
         <item>自動對焦</item>
-        <item>無限對焦</item>
-        <item>遠景對焦</item>
+        <item>無窮遠</item>
+        <item>微距對焦</item>
         <item>鎖定焦點</item>
-        <item>手工對焦</item>
+        <item>手動對焦</item>
         <item>固定對焦</item>
         <item>EDOF對焦</item>
         <item>持續對焦</item>
@@ -79,12 +79,12 @@
         <item>double</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
-        <item>對焦 (或開始/停止錄影)</item>
+        <item>拍照（或開始/停止錄影）</item>
         <item>對焦</item>
         <item>放大/縮小</item>
-        <item>更改曝光水準</item>
-        <item>切換防手震開/關</item>
-        <item>更改設備音量</item>
+        <item>變更曝光等級</item>
+        <item>切換自動水平開/關</item>
+        <item>變更裝置音量</item>
         <item>什麼都不做</item>
         </string-array>
     <string-array name="preference_volume_keys_values">
@@ -104,7 +104,7 @@
         <item>0</item>
         <item>180</item>
     </string-array>
-    <string-array name="preference_angle_highlight_color_entries">
+    <string-array name="preference_angle_highlight_color_entries"> <!-- n.b., also used for focus peaking colors -->
         <item>紅</item>
         <item>綠</item>
         <item>藍</item>
@@ -132,7 +132,7 @@
         <item>黃金比例 (4)</item>
         <item>三角形 (1)</item>
         <item>三角形 (2)</item>
-        <item>交錯線</item>
+        <item>對角線</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -158,8 +158,8 @@
     </string-array>
     <string-array name="preference_stamp_timeformat_entries">
         <item>預設</item>
-        <item>12 時制</item>
-        <item>24 時制</item>
+        <item>十二小時制</item>
+        <item>二十四小時制</item>
         <item>無</item>
     </string-array>
     <string-array name="preference_stamp_timeformat_values">
@@ -241,5 +241,59 @@
         <item>audio_default</item>
         <item>audio_mono</item>
         <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>無</item>
+        <item>大的聲音</item>
+        <item>音訊指令：「cheese」</item> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>本地時間</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_entries">
+        <item>不鏡像</item>
+        <item>照片鏡像</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_values">
+        <item>preference_front_camera_mirror_no</item>
+        <item>preference_front_camera_mirror_photo</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_entries">
+        <item>沒有字幕</item>
+        <item>錄製字幕</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
     </string-array>
 </resources>
