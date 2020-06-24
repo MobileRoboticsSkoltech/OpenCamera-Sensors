@@ -237,7 +237,7 @@
     <string name="preference_reset_question">Сбросить все настройки Open Camera на стандартные значения?</string>
 
     <string name="about_available">Доступно</string>
-    <string name="about_not_available">Не доступно</string>
+    <string name="about_not_available">Недоступно</string>
     <string name="about_copy_to_clipboard">Копировать в буфер</string>
     
     <string name="take_photo">Сделать фото</string>
@@ -300,7 +300,7 @@
     <string name="preference_hdr_save_expo">Сохранять все изображения в режиме HDR</string>
     <string name="preference_hdr_save_expo_summary">Если эта опция включена, то в режиме HDR вместе с окончательным фото HDR будут сохранены три основных фото экспозиции. Важно: сохранение фото будет медленнее, особенно при включенных опциях наподобие "Штамп на фото" или "Автоматическая стабилизация".</string>
 
-    <string name="no_permission">РАЗРЕШЕНИЯ НЕ ДОСТУПНЫ</string>
+    <string name="no_permission">РАЗРЕШЕНИЯ НЕДОСТУПНЫ</string>
     <string name="permission_rationale_title">Требуется разрешение</string>
     <string name="permission_rationale_camera">Требуется разрешение на доступ к камере для ее включения</string>
     <string name="permission_rationale_storage">Требуется разрешение на чтение/запись для сохранения фото</string>
@@ -917,8 +917,66 @@
 
     <string name="preference_select_remote">Выбрать удаленное устройство</string>
 
+    <string name="preference_video_rec709">REC709</string>
+    <string name="preference_video_srgb">sRGB</string>
+    <string name="preference_video_gamma">Гамма</string>
+
+    <string name="preference_video_profile_gamma">Значение гаммы видео</string>
+    <string name="preference_video_profile_gamma_summary">Значение гаммы для видео при заданном профиле \"Гамма\"\n%s</string>
+    <string name="preference_video_profile_gamma_1_6">1.6</string>
+    <string name="preference_video_profile_gamma_1_8">1.8</string>
+    <string name="preference_video_profile_gamma_1_9">1.9</string>
+    <string name="preference_video_profile_gamma_2_0">2.0</string>
+    <string name="preference_video_profile_gamma_2_1">2.1</string>
+    <string name="preference_video_profile_gamma_2_2">2.2</string>
+    <string name="preference_video_profile_gamma_2_3">2.3</string>
+    <string name="preference_video_profile_gamma_2_4">2.4</string>
+    <string name="preference_video_profile_gamma_2_6">2.6</string>
+    <string name="preference_video_profile_gamma_2_8">2.8</string>
+
     <string name="preference_immersive_mode_off">Выключить</string>
+    <string name="preference_immersive_mode_low_profile">Только приглушить кнопки навигации</string>
     <string name="preference_immersive_mode_navigation">Скрыть кнопки навигации</string>
     <string name="preference_immersive_mode_gui">Скрыть интерфейс</string>
     <string name="preference_immersive_mode_everything">Скрыть все</string>
+
+    <string name="preference_ghost_image_alpha">Непрозрачность призрачного изображения</string>
+    <string name="preference_ghost_image_alpha_summary">Значение альфа для призрачных изображений. Чем ниже значение, тем более прозрачным будет изображение, чем выше - тем более непрозрачным.\n%s</string>
+
+    <string name="preference_zebra_stripes_foreground_color">Цвет полос зебры на переднем плане</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">Цвет на переднем плане при отображении полос зебры.\n%s</string>
+    <string name="preference_zebra_stripes_background_color">Цвет полос зебры на заднем плане</string>
+    <string name="preference_zebra_stripes_background_color_summary">Цвет на заднем плане при отображении полос зебры.\n%s</string>
+
+    <string name="preference_zebra_stripes_color_black">Черный</string>
+    <string name="preference_zebra_stripes_color_red">Красный</string>
+    <string name="preference_zebra_stripes_color_orange">Оранжевый</string>
+    <string name="preference_zebra_stripes_color_transparent">Прозрачный</string>
+    <string name="preference_zebra_stripes_color_white">Белый</string>
+
+    <string name="external_camera">Внешняя камера</string>
+    <string name="ultrawide">Ультраширокая камера</string>
+
+    <string name="switch_to_external_camera">Переключиться на внешнюю камеру</string>
+    <string name="switch_to_unknown_camera">Переключить камеру</string>
+    <string name="switch_multi_camera">Переключаться между несколькими камерами</string>
+    <string name="preference_multi_cam_button">Значок нескольких камер</string>
+    <string name="preference_multi_cam_button_summary">Если включено, использовать отдельные кнопки для переключения между фронтальной/задней камерами и между несколькими фронтальными/задними камерами. Если отключено, значок \"Переключить камеру\" будет циклически переключать все камеры.</string>
+
+    <string name="preference_show_camera_id">Показать ID камеры</string>
+    <string name="preference_show_camera_id_summary">Показывать номер ID текущей камеры на экране</string>
+
+    <string name="preference_allow_long_press">Разрешать действия при долгом нажатии</string>
+    <string name="preference_allow_long_press_summary">При возможности разрешать действия при долгом нажатии (например, долгое нажатие на галерею для изменения пути сохранения).</string>
+
+    <string name="aperture">Апертура</string>
+
+    <string name="error_features_4k">4K UHD</string>
+    <string name="error_features_bitrate">Битрейт</string>
+    <string name="error_features_frame_rate">Частота кадров</string>
+    <string name="error_features_slow_motion">Замедление времени</string>
+
+    <string name="preference_comment_ypr">Сохранять связанную систему координат</string>
+    <string name="preference_comment_ypr_summary">Сохранять связанную систему координат устройства в EXIF фото в комментарии пользователя (только для формата JPEG)</string>
+
 </resources>
