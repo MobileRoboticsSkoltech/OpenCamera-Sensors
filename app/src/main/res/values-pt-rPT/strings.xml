@@ -279,7 +279,7 @@
     <string name="audio_listener_started">Faça um ruído alto</string>
 
     <string name="auto_stabilise_info">Auto-estabilizar irá rodar automaticamente as fotografias para que aparentem estar niveladas.\n\nNote que isto significa que as imagens sairão com uma resolução ligeramente menor (devido à rotação e ao recorte que é necessário).</string>
-    <string name="raw_info">Ficheiros DNG contêm a informação total descomprimida e não processada da sua câmara.\n\nA maioria das aplicações de galeria não reconhecem DNG, em vez disso as mesmas devem ser usadas com aplicações especializadas como Snapseed ou Lightroom.\n\nNote que várias opções de processamento como "Carimbar fotografias" e "Auto-estabilizar" serão aplicadas apenas às imagens JPEG, e não às imagens DNG.\n\nFicheiros DNG utilizam muito espaço; um explorador de ficheiros poderá ser útil para transferir ou eliminar os mesmos.</string>
+    <string name="raw_info">Ficheiros DNG contêm a informação total descomprimida e não processada da sua câmara.\n\nA maioria das aplicações de galeria não reconhecem DNG, em vez disso as mesmas devem ser usadas com aplicações especializadas.\n\nNote que várias opções de processamento como "Carimbar fotografias" e "Auto-estabilizar" serão aplicadas apenas às imagens JPEG, e não às imagens DNG.\n\nFicheiros DNG utilizam muito espaço; um explorador de ficheiros poderá ser útil para transferir ou eliminar os mesmos.</string>
 
     <string name="dont_show_again">Não mostrar novamente</string>
 

@@ -305,7 +305,7 @@
     <string name="preference_save_zulu_time">Format de l\'heure pour le nom de fichier</string>
     <string name="raw_info">Les fichiers DNG contiennent toutes les informations non compressées ni traitées de votre
         caméra.\n\nLa plupart des applications d\'affichage d\'image ne reconnaissent pas le DNG. Vous devrez utiliser une app
-        spécialisée comme Snapseed ou Lightroom\n\nNotez que certaines options comme «\u00A0Incrustation photo\u00A0» ou
+        spécialisée\n\nNotez que certaines options comme «\u00A0Incrustation photo\u00A0» ou
         «\u00A0Auto-stabilisateur\u00A0» ne s\'appliquent que pour des images JPEG et pas DNG.\n\nLes fichiers DNG
         utilisent beaucoup d\'espace disque, un explorateur de fichiers peut être utilise pour faire le ménage.\n\nLes
         fichiers DNG ne sont enregistrés que dans le mode photo standard.

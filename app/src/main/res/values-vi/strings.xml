@@ -281,7 +281,7 @@
     <string name="audio_listener_started">Tạo tiếng động lớn</string>
 
     <string name="auto_stabilise_info">Hình ảnh sẽ được điều chỉnh để đạt mức cân bằng.\n\nLưu ý ảnh sẽ có độ phân giải thấp hơn một chút (do phải xoay và cắt xén).</string>
-    <string name="raw_info">Tệp DNG chứa toàn bộ thông tin chưa được nén và xử lý bằng máy ảnh.\n\nLưu ý một số ứng dụng thư viện không hỗ trợ tệp DNG. Hình ảnh DNG có thể chỉnh sửa bằng các ứng dụng như Snapseed hoặc Lightroom.\n\nLưu ý các tùy chọn như Đóng dấu hình ảnh và Chống rung tự động chỉ áp dụng cho tệp JPEG chứ không áp dụng cho tệp DNG.\n\n\n\nTệp DNG chỉ được lưu trong chế độ ảnh Tiêu chuẩn hoặc DRO.</string>
+    <string name="raw_info">Tệp DNG chứa toàn bộ thông tin chưa được nén và xử lý bằng máy ảnh.\n\nLưu ý một số ứng dụng thư viện không hỗ trợ tệp DNG.\n\nLưu ý các tùy chọn như Đóng dấu hình ảnh và Chống rung tự động chỉ áp dụng cho tệp JPEG chứ không áp dụng cho tệp DNG.\n\n\n\nTệp DNG chỉ được lưu trong chế độ ảnh Tiêu chuẩn hoặc DRO.</string>
     <string name="hdr_info">Chế độ HDR rất hữu ích cho các bức ảnh ngược sáng. Nó hoạt động bằng cách chụp nhiều ảnh ở các mức phơi sáng khác nhau và kết hợp chúng để tạo ra bức ảnh cuối cùng.\n\nLưu ý chế độ HDR không phù hợp với các cảnh có chuyển động nhanh, có thể dẫn đến việc tái tạo màu kém chính xác.\n\nChụp ảnh ở chế độ HDR sẽ chậm hơn.</string>
 
     <string name="dont_show_again">Không hiển thị nữa</string>

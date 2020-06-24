@@ -282,7 +282,7 @@
     <string name="audio_listener_started">Mache ein lautes Geräusch</string>
 
     <string name="auto_stabilise_info">Autostabilisierung rotiert die Fotos so, dass sie waagerecht erscheinen.\n\nDies bedeutet aber auch eine geringere Auflösung aufgrund von Rotation und Beschneidung.</string>
-    <string name="raw_info">DNG-Dateien enthalten die volle, unkomprimierte Bildinformation der Kamera. Manche Galerie-Apps erkennen das DNG-Format nicht. DNG-Dateien können in  spezialisierten Foto-Editor-Apps wie Snapseed oder Lightroom verwendet werden. Verschiedene Bildbearbeitungsoptionen wie \"Fotostempel\" oder \"Autostabilisierung\" werden nur bei JPEG-Dateien angewandt und nicht bei DNG-Dateien.</string>
+    <string name="raw_info">DNG-Dateien enthalten die volle, unkomprimierte Bildinformation der Kamera. Manche Galerie-Apps erkennen das DNG-Format nicht. DNG-Dateien können in  spezialisierten Foto-Editor-Apps verwendet werden. Verschiedene Bildbearbeitungsoptionen wie \"Fotostempel\" oder \"Autostabilisierung\" werden nur bei JPEG-Dateien angewandt und nicht bei DNG-Dateien.</string>
     <string name="hdr_info">Der HDR-Modus ist nützlich für Motive mit starkem Kontrast. Dabei werden mehrere Bilder mit verschiedener Belichtung kombiniert.\n\nHDR ist nicht für bewegte Szenen geeignet, kann Farbänderungen bewirken und benötigt mehr Zeit.</string>
 
     <string name="dont_show_again">Nicht wieder zeigen</string>

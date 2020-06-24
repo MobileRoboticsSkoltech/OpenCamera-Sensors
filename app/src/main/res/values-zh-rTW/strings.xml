@@ -282,7 +282,7 @@
     <string name="audio_listener_started">發出大的聲音</string>
 
     <string name="auto_stabilise_info">自動水平會自動旋轉照片，使它們顯得水平。\n\n注意這意味著圖片解析度會較低（因為需要旋轉和裁切）。</string>
-    <string name="raw_info">DNG 檔案包含來自相機的全部未壓縮和未處理的資訊。\n\n注意有些相簿程式無法識別 DNG 檔案。DNG 圖片可以使用專用編輯器（例如 Snapseed 和 Lightroom）處理。\n\n注意「標記照片」和「自動水平」等處理選項僅適用於非 DNG (JPEG 等) 圖片 ，不適用於 DNG 圖片。 </string>
+    <string name="raw_info">DNG 檔案包含來自相機的全部未壓縮和未處理的資訊。\n\n注意有些相簿程式無法識別 DNG 檔案。DNG 圖片可以使用專用編輯器處理。\n\n注意「標記照片」和「自動水平」等處理選項僅適用於非 DNG (JPEG 等) 圖片 ，不適用於 DNG 圖片。 </string>
     <string name="hdr_info">HDR 模式在亮度變化範圍大的環境中非常有用。它的工作原理是在不同曝光下拍攝多張照片，並將它們組合在一起以建立最終圖片。\n\n注意 HDR 不適合用於快速移動的場景，而且可能造成顏色較不精確。\n\nHDR 模式拍照比較慢。</string>
 
     <string name="dont_show_again">不要再次顯示</string>

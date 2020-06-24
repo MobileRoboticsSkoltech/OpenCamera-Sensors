@@ -282,7 +282,7 @@
     <string name="audio_listener_started">Make a loud noise</string>
 
     <string name="auto_stabilise_info">Auto-level will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
-    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nNote that some gallery apps don\'t recognise DNG files. DNG images can be used with specialised image editors like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-level" will only apply to the non-DNG (JPEG/etc) images, and not the DNG images.</string>
+    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nNote that some gallery apps don\'t recognise DNG files. DNG images can be used with specialised image editors.\n\nNote that various processing options such as "Stamp photos" and "Auto-level" will only apply to the non-DNG (JPEG/etc) images, and not the DNG images.</string>
     <string name="hdr_info">HDR mode is useful for shots with a large variation in brightness. It works by taking multiple shots at different exposures, and combining them to create the final image.\n\nNote that HDR is not suitable for scenes with fast movement, and may result in less accurate color reproduction.\n\nTaking photos in HDR mode will be slower.</string>
 
     <string name="dont_show_again">Don\'t show again</string>

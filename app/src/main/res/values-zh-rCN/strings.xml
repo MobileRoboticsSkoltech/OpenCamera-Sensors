@@ -411,7 +411,7 @@
     <string name="preference_edge_mode_summary">相机驱动程序提供的锐化算法。可以提高捕获图像的清晰度和细节。（在NR拍照模式下忽略此设置）\n%s</string>
     <string name="preference_show_whats_new_summary">是否在应用程序更新后提示新功能和改进的信息</string>
     <string name="auto_stabilise_info">自动水平会自动旋转照片，使他们显示水平.\n\n注意这意味着图像分辨率会略低（因为需要旋转和裁切）。</string>
-    <string name="raw_info">DNG文件包含来自相机的全部未压缩和处理的信息。\n\n注意有些图库无法识别DNG文件。DNG图像可以使用专用编辑器（比如Snapseed和Lightroom）处理.\n\n注意“相片水印”和“自动水平”等处理选项仅适用于JPEG图像，不适用于DNG图像。\n\n\n\n只有标准拍照模式和DR0拍照模式可以保持DNG图像。</string>
+    <string name="raw_info">DNG文件包含来自相机的全部未压缩和处理的信息。\n\n注意有些图库无法识别DNG文件。DNG图像可以使用专用编辑器处理.\n\n注意“相片水印”和“自动水平”等处理选项仅适用于JPEG图像，不适用于DNG图像。\n\n\n\n只有标准拍照模式和DR0拍照模式可以保持DNG图像。</string>
     <string name="hdr_info">HDR模式在亮度变化范围大的环境中非常有用。它的工作原理是在不同曝光下拍摄多张照片，并将它们组合在一起以创建最终图像。\n\n注意HDR模式不使用于快速移动的场景，并且可能会导致色彩还原地不太准确。\n\n在HDR模式拍照速度会慢一些。</string>
     <string name="preference_ghost_image">辅助图像</string>
     <string name="preference_ghost_image_summary">在取景框内显示一张半透明的图片，辅助你对正镜头。\n%s</string>
