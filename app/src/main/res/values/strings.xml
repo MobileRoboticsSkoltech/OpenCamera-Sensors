@@ -849,7 +849,7 @@
 
     <string name="cycle_flash">Cycle flash</string>
     <string name="preference_show_cycle_flash">Show flash icon</string>
-    <string name="preference_show_cycle_flash_summary">Whether to show an on-screen icon for cycling through the flash options, instead of displaying flash options on the popup menu</string>
+    <string name="preference_show_cycle_flash_summary">Whether to show an on-screen icon for cycling through the flash options, instead of displaying flash options on the popup menu. Note that torch is not available if using this icon.</string>
 
     <string name="preference_raw_expo_bracketing">Allow RAW for expo bracketing</string>
     <string name="preference_raw_expo_bracketing_summary">Whether the RAW option should also apply for expo bracketing photo mode (or for HDR mode when \"Save all images for HDR mode\" is enabled). If this option is disabled, only JPEGs will be saved in those photo modes.</string>
