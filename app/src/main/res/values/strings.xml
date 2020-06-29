@@ -1033,23 +1033,11 @@
     <string name="whats_new_text" translatable="false">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
             Settings/On screen GUI/Show What\'s New dialog.]</small>
-        \n\n<b>v1.48:</b>\n
+        \n\n<b>v1.48.2:</b>\n
         <ul>
-            <li>New icon for multiple cameras. If your device has multiple front/back cameras, then
-            the existing icon to switch cameras will switch between front
-            and back camera; the new icon will instead cycle between the multiple front or back cameras.
-            If you prefer the old behaviour, disable
-            Settings/On screen GUI/\"Multiple cameras icon\". (Note, only supported for devices that expose
-            multiple cameras to third party applications.)\n</li>
-            <li>Auto-level feature now shows on-screen rectangle to show the frame of the resultant photo.\n</li>
-            <li>Aperture control, for devices that support this. (Camera2 API only.)\n</li>
-            <li>More custom video profiles.\n</li>
-            <li>New option for alpha value for ghost image option.\n</li>
-            <li>Options for zebra stripe colours.\n</li>
-            <li>Option for storing device\'s current yaw/pitch/roll in Exif user comment.\n</li>
-            <li>Option to disable long press actions.\n</li>
-            <li>Better use of full screen with wide aspect ratios on devices with on-screen navigation buttons.\n</li>
-            <li>Bug fixes and UI improvements.\n</li>
+            <li>Manual focus and focus bracketing seekbars weren\'t being hidden when in immersive mode.\n</li>
+            <li>Fixed problem with video subtitles and Storage Access Framework on some devices.\n</li>
+            <li>Artist, Copyright exif tags option now supported for devices running Android 6 or earlier.\n</li>
         </ul>
     </string>
 </resources>
