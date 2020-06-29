@@ -739,7 +739,7 @@
     <string name="preference_image_format_webp">WebP</string>
     <string name="preference_image_format_png">PNG</string>
 
-    <string name="preference_nr_mode">Режим снижения шума</string>
+    <string name="preference_nr_mode">Режим NR</string>
     <string name="preference_nr_mode_normal">Нормальный</string>
     <string name="preference_nr_mode_low_light">Низкий уровень освещенности</string>
 

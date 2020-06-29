@@ -740,6 +740,7 @@
     <string name="preference_image_format_webp">WebP</string>
     <string name="preference_image_format_png">PNG</string>
 
+    <!-- beware of these strings for preference_nr_mode* being too long, otherwise too wide for popup menu -->
     <string name="preference_nr_mode">NR Mode</string>
     <string name="preference_nr_mode_normal">Normal</string>
     <string name="preference_nr_mode_low_light">Low light</string>
