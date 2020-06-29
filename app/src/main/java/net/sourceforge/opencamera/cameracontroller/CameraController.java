@@ -136,7 +136,7 @@ public abstract class CameraController {
     }
 
     // Android docs and FindBugs recommend that Comparators also be Serializable
-    public static class RangeSorter implements Comparator<int[]>, Serializable {
+    static class RangeSorter implements Comparator<int[]>, Serializable {
         private static final long serialVersionUID = 5802214721073728212L;
         @Override
         public int compare(int[] o1, int[] o2) {
@@ -148,7 +148,7 @@ public abstract class CameraController {
     /* Sorts resolutions from highest to lowest, by area.
      * Android docs and FindBugs recommend that Comparators also be Serializable
      */
-    public static class SizeSorter implements Comparator<Size>, Serializable {
+    static class SizeSorter implements Comparator<Size>, Serializable {
         private static final long serialVersionUID = 5802214721073718212L;
 
         @Override

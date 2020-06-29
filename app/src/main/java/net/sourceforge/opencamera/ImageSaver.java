@@ -3204,6 +3204,8 @@ public class ImageSaver extends Thread {
      * https://sourceforge.net/p/opencamera/tickets/417/ .
      */
     private static class ExifInterfaceHolder {
+        // suppress warning - no it can't be local or removed, see documentation above about the garbage collector!
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final ParcelFileDescriptor pfd;
         private final ExifInterface exif;
 
