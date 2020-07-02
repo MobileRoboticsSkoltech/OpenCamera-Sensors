@@ -3257,7 +3257,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
             // also see note at end of setToDefault for Nokia 8, need to sleep briefly to avoid hanging here
             if( !is_focus_bracketing ) {
-                assertTrue(System.currentTimeMillis() - time_s < (is_panorama ? 40000 : 20000)); // need longer for panorama on Nexus 7 for testTakePhotoPanoramaMax
+                assertTrue(System.currentTimeMillis() - time_s < (is_panorama ? 50000 : 20000)); // need longer for panorama on Nexus 7 for testTakePhotoPanoramaMax
             }
             assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
             assertTrue(!mPreview.isTakingPhoto() || switchMultiCameraButton.getVisibility() == View.GONE);
