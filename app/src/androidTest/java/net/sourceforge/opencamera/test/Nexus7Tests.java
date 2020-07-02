@@ -9,6 +9,7 @@ public class Nexus7Tests {
         TestSuite suite = new TestSuite(MainTests.class.getName());
 
         // we run the following tests on the Nexus 7 as a device that supports SAF, but doesn't have Android 7+ (where we use alternative methods for read/writing Exif tags without needing File)
+        // update: we now (as of 1.48.2) use the same codepaths for exif tags for before and after Android 7, but might as well keep these tests here anyway
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoSAF"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStampSAF"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOnSAF"));
