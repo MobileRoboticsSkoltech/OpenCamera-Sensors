@@ -11225,7 +11225,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(initial_focus_distance, new_actual_focus_distance, 1.0e-5f);
     }
 
-    /** Tests taking a photo in focus bracketing mode, with auto-level and 50 images.
+    /** Tests taking a photo in focus bracketing mode, with auto-level and 20 images.
      */
     public void testTakePhotoFocusBracketingHeavy() throws InterruptedException {
         Log.d(TAG, "testTakePhotoFocusBracketingHeavy");
