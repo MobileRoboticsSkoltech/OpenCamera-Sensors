@@ -3723,7 +3723,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else if( is_fast_burst ) {
             suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
             //suffix = "_" + (n_fast_burst_images); // when burst numbering starts from _1
-            max_time_s = 3; // takes longer to save 20 images!
+            max_time_s = 4; // takes longer to save 20 images!
         }
 
         if( is_raw ) {
