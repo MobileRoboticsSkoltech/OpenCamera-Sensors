@@ -2148,10 +2148,15 @@ public class CameraController2 extends CameraController {
     }
 
     private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
             Log.d(TAG, "convertFocusModesToValues()");
-        if( supported_focus_modes_arr.length == 0 )
+            Log.d(TAG, "supported_focus_modes_arr: " + Arrays.toString(supported_focus_modes_arr));
+        }
+        if( supported_focus_modes_arr.length == 0 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "no supported focus modes");
             return null;
+        }
         List<Integer> supported_focus_modes = new ArrayList<>();
         for(Integer supported_focus_mode : supported_focus_modes_arr)
             supported_focus_modes.add(supported_focus_mode);
@@ -2176,6 +2181,9 @@ public class CameraController2 extends CameraController {
         }
         if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
             output_modes.add("focus_mode_infinity");
+            if( MyDebug.LOG ) {
+                Log.d(TAG, " supports focus_mode_infinity");
+            }
             if( minimum_focus_distance > 0.0f ) {
                 output_modes.add("focus_mode_manual2");
                 if( MyDebug.LOG ) {
@@ -5467,6 +5475,8 @@ public class CameraController2 extends CameraController {
                 return;
             }
             Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+            if( MyDebug.LOG )
+                Log.d(TAG, "focus mode: " + (focus_mode == null ? "null" : focus_mode));
             if( focus_mode == null ) {
                 // we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
                 // (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
