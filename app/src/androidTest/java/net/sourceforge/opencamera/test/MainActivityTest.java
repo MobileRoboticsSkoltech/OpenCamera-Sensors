@@ -1805,6 +1805,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
         assertFalse(mPreview.isVideo());
         String photo_focus_value = mPreview.getCameraController().getFocusValue();
+        Log.d(TAG, "picture photo_focus_value: "+ photo_focus_value);
 
         View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
         clickView(popupButton);
