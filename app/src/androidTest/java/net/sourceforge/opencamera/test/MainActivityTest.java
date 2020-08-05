@@ -83,6 +83,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         super("net.sourceforge.opencamera", MainActivity.class);
     }
 
+    private static boolean isEmulator() {
+        return Build.MODEL.contains("Android SDK built for x86");
+    }
+
     private Intent createDefaultIntent() {
         Intent intent = new Intent();
         intent.putExtra("test_project", true);
@@ -1875,11 +1879,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             waitUntilCameraOpened();
             int new_cameraId = mPreview.getCameraId();
             assertTrue(cameraId != new_cameraId);
-            focus_value = mPreview.getCameraController().getFocusValue();
-            Log.d(TAG, "front picture focus_value: "+ focus_value);
-            if( mPreview.supportsFocus() ) {
-                assertEquals(focus_value, photo_focus_value);
-            }
+            // n.b., front camera default photo focus value not necessarily same as back camera, if they have different focus modes
+            photo_focus_value = mPreview.getCameraController().getFocusValue();
+            Log.d(TAG, "front picture photo_focus_value: "+ photo_focus_value);
 
             // test popup buttons for photo mode:
             clickView(popupButton);
@@ -2705,6 +2707,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         long [] delays = {20, 50, 100, 1000};
         int [] n_iters = {50, 30, 30, 3};
+        if( isEmulator() ) {
+            // this takes much longer to run on emulator, due to taking ~15s for the first waitForIdleSync() in the loop
+            n_iters = new int[]{1, 1, 1, 1};
+        }
         assertEquals(delays.length, n_iters.length);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -2725,8 +2731,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                         mActivity.getApplicationInterface().getDrawPreview().updateSettings();
                     }
                 });
+                Log.d(TAG, "    wait for idle sync");
                 this.getInstrumentation().waitForIdleSync();
+                Log.d(TAG, "    about to sleep for: " + delays[i]);
                 Thread.sleep(delays[i]);
+                Log.d(TAG, "    done sleep");
                 if (delays[i] >= 1000) {
                     assertTrue(mPreview.isPreviewBitmapEnabled());
                 }
@@ -2738,8 +2747,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                         mActivity.getApplicationInterface().getDrawPreview().updateSettings();
                     }
                 });
+                Log.d(TAG, "    wait for idle sync again");
                 this.getInstrumentation().waitForIdleSync();
                 Thread.sleep(delays[i]);
+                Log.d(TAG, "    done wait for idle sync");
                 if (delays[i] >= 1000) {
                     assertFalse(mPreview.isPreviewBitmapEnabled());
                     assertFalse(mPreview.refreshPreviewBitmapTaskIsRunning());
@@ -2876,16 +2887,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             clickView(switchCameraButton);
             waitUntilCameraOpened();
 
-            assertEquals(exposureButton.getVisibility(), View.VISIBLE);
+            assertEquals(exposureButton.getVisibility(), (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
             assertEquals(exposureContainer.getVisibility(), View.GONE);
-            assertEquals(mPreview.getCurrentExposure(), -1);
-            assertEquals(mPreview.getCurrentExposure() - mPreview.getMinimumExposure(), seekBar.getProgress());
 
-            clickView(exposureButton);
-            assertEquals(exposureButton.getVisibility(), View.VISIBLE);
-            assertEquals(exposureContainer.getVisibility(), View.VISIBLE);
-            assertEquals(mPreview.getCurrentExposure(), -1);
-            assertEquals(mPreview.getCurrentExposure() - mPreview.getMinimumExposure(), seekBar.getProgress());
+            if( mPreview.supportsExposures() ) {
+                assertEquals(mPreview.getCurrentExposure(), -1);
+                assertEquals(mPreview.getCurrentExposure() - mPreview.getMinimumExposure(), seekBar.getProgress());
+
+                clickView(exposureButton);
+                assertEquals(exposureButton.getVisibility(), View.VISIBLE);
+                assertEquals(exposureContainer.getVisibility(), View.VISIBLE);
+                assertEquals(mPreview.getCurrentExposure(), -1);
+                assertEquals(mPreview.getCurrentExposure() - mPreview.getMinimumExposure(), seekBar.getProgress());
+            }
         }
     }
 
@@ -3308,8 +3322,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String new_focus_value_ui = mPreview.getCurrentFocusValue();
         //noinspection StringEquality
         assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
-        if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo )
-            assertEquals("focus_mode_auto", mPreview.getCameraController().getFocusValue()); // continuous focus mode switches to auto focus on touch (unless single_tap_photo)
+        if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo && mPreview.supportsFocus() && mPreview.getSupportedFocusValues().contains("focus_mode_auto") )
+            assertEquals("focus_mode_auto", mPreview.getCameraController().getFocusValue()); // continuous focus mode switches to auto focus on touch (unless single_tap_photo, or auto focus not supported)
         else
             assertEquals(mPreview.getCameraController().getFocusValue(), focus_value);
         if( double_tap_photo ) {
@@ -3684,6 +3698,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         checkFocusInitial(focus_value, focus_value_ui);
 
+        int saved_thumbnail_count = mActivity.getApplicationInterface().getDrawPreview().test_thumbnail_anim_count;
+        Log.d(TAG, "saved_thumbnail_count: " + saved_thumbnail_count);
+
         if( touch_to_focus ) {
             subTestTouchToFocus(wait_after_focus, single_tap_photo, double_tap_photo, manual_can_auto_focus, can_focus_area, focus_value, focus_value_ui);
         }
@@ -3701,7 +3718,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Date date = new Date();
         String suffix = "";
-        int max_time_s = 1;
+        int max_time_s = 2;
         if( is_dro ) {
             suffix = "_DRO";
         }
@@ -3740,16 +3757,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "after idle sync");
         Log.d(TAG, "take picture count: " + mPreview.count_cameraTakePicture);
         assertEquals(mPreview.count_cameraTakePicture, saved_count_cameraTakePicture + 1);
-        if( test_wait_capture_result ) {
+        /*if( test_wait_capture_result ) {
             // if test_wait_capture_result, then we'll have waited too long for thumbnail animation
         }
         else if( is_focus_bracketing ) {
             // thumbnail animation may have already occurred (e.g., see testTakePhotoFocusBracketingHeavy()
         }
-        else if( has_thumbnail_anim ) {
+        else*/ if( has_thumbnail_anim ) {
             long time_s = System.currentTimeMillis();
-            while( !mActivity.hasThumbnailAnimation() ) {
-                Log.d(TAG, "waiting for thumbnail animation");
+            //while( !mActivity.hasThumbnailAnimation() ) {
+            while( mActivity.getApplicationInterface().getDrawPreview().test_thumbnail_anim_count <= saved_thumbnail_count ) {
+                Log.d(TAG, "waiting for thumbnail animation: " + mActivity.getApplicationInterface().getDrawPreview().test_thumbnail_anim_count + " vs " + saved_thumbnail_count);
                 Thread.sleep(10);
                 int allowed_time_ms = 10000;
                 if( is_hdr || is_nr || is_expo ) {
@@ -3761,6 +3779,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
         else {
             assertFalse( mActivity.hasThumbnailAnimation() );
+            assertEquals(saved_thumbnail_count, mActivity.getApplicationInterface().getDrawPreview().test_thumbnail_anim_count);
         }
         mActivity.waitUntilImageQueueEmpty();
         Log.d(TAG, "mActivity.hasThumbnailAnimation()?: " + mActivity.hasThumbnailAnimation());
@@ -4608,6 +4627,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "test requires camera2 api");
             return;
         }
+        if( !mPreview.supportsFocus() ) {
+            // if no focus, then the photo will be taken on th UI thread
+            return;
+        }
 
         setToDefault();
         switchToFocusValue("focus_mode_auto");
@@ -4634,7 +4657,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testTakePhotoManualFocus");
         setToDefault();
 
-        if( !mPreview.getSupportedFocusValues().contains("focus_mode_manual2") ) {
+        if( !mPreview.supportsFocus() || !mPreview.getSupportedFocusValues().contains("focus_mode_manual2") ) {
             return;
         }
         SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
@@ -4890,7 +4913,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             waitUntilCameraOpened();
         }
 
-        if( mPreview.usingCamera2API() && mPreview.getSupportedFocusValues().contains("focus_mode_manual2")  ) {
+        if( mPreview.usingCamera2API() && mPreview.supportsFocus() && mPreview.getSupportedFocusValues().contains("focus_mode_manual2")  ) {
             // now test manual focus seekbar disappears
             assertEquals(seekBar.getVisibility(), View.GONE);
             switchToFocusValue("focus_mode_manual2");
@@ -5582,12 +5605,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int saved_count = mPreview.count_cameraAutoFocus;
         TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
         Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-        assertEquals(mPreview.count_cameraAutoFocus, saved_count + 1);
-        assertTrue(mPreview.hasFocusArea());
-        assertNotNull(mPreview.getCameraController().getFocusAreas());
-        assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
-        assertNotNull(mPreview.getCameraController().getMeteringAreas());
-        assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+
+        if( mPreview.supportsFocus() ) {
+            assertEquals(mPreview.count_cameraAutoFocus, saved_count + 1);
+            assertTrue(mPreview.hasFocusArea());
+            assertNotNull(mPreview.getCameraController().getFocusAreas());
+            assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
+            assertNotNull(mPreview.getCameraController().getMeteringAreas());
+            assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+        }
+        else {
+            assertEquals(mPreview.count_cameraAutoFocus, saved_count);
+        }
 
         // wait 3s for auto-focus to complete
         Thread.sleep(3000);
@@ -5606,18 +5635,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // taking photo shouldn't have done an auto-focus, and still have focus areas
         Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-        assertEquals(mPreview.count_cameraAutoFocus, saved_count + 1);
-        assertTrue(mPreview.hasFocusArea());
-        assertNotNull(mPreview.getCameraController().getFocusAreas());
-        assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
-        assertNotNull(mPreview.getCameraController().getMeteringAreas());
-        assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+        if( mPreview.supportsFocus() ) {
+            assertEquals(mPreview.count_cameraAutoFocus, saved_count + 1);
+            assertTrue(mPreview.hasFocusArea());
+            assertNotNull(mPreview.getCameraController().getFocusAreas());
+            assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
+            assertNotNull(mPreview.getCameraController().getMeteringAreas());
+            assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+        }
+        else {
+            assertEquals(mPreview.count_cameraAutoFocus, saved_count);
+        }
 
         mActivity.waitUntilImageQueueEmpty();
     }
 
     private void takePhotoRepeatFocus(boolean locked) throws InterruptedException {
         Log.d(TAG, "takePhotoRepeatFocus");
+
+        if( !mPreview.supportsFocus() ) {
+            return;
+        }
+
         setToDefault();
         if( locked ) {
             switchToFocusValue("focus_mode_locked");
@@ -6109,11 +6148,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                     Log.d(TAG, "touch to focus");
                     TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
                     Thread.sleep(1000); // wait for autofocus
-                    assertTrue(mPreview.hasFocusArea());
-                    assertNotNull(mPreview.getCameraController().getFocusAreas());
-                    assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
-                    assertNotNull(mPreview.getCameraController().getMeteringAreas());
-                    assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+                    if( mPreview.supportsFocus() ) {
+                        assertTrue(mPreview.hasFocusArea());
+                        assertNotNull(mPreview.getCameraController().getFocusAreas());
+                        assertEquals(1, mPreview.getCameraController().getFocusAreas().size());
+                        assertNotNull(mPreview.getCameraController().getMeteringAreas());
+                        assertEquals(1, mPreview.getCameraController().getMeteringAreas().size());
+                    }
                     Log.d(TAG, "done touch to focus");
 
                     // this time, don't wait
@@ -6970,6 +7011,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     private void subTestTakeVideoMaxFileSize4() throws InterruptedException {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.O ) {
             // as this tests Android 8+'s seamless restart
+            return;
+        }
+        if( isEmulator() ) {
+            // as test takes about 6.5 minutes on emulator (possibly due to unusual video file sizes), even though it does eventually pass
             return;
         }
 
@@ -8282,15 +8327,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         switchToFlashValue("flash_off");
         switchToFlashValue("flash_on");
 
-        if( mPreview.getSupportedFocusValues().contains("focus_mode_macro") ) {
-            switchToFocusValue("focus_mode_macro");
-        }
-        else if( mPreview.getSupportedFocusValues().contains("focus_mode_infinity") ) {
-            switchToFocusValue("focus_mode_infinity");
-        }
+        if( mPreview.supportsFocus() ) {
+            if( mPreview.getSupportedFocusValues().contains("focus_mode_macro") ) {
+                switchToFocusValue("focus_mode_macro");
+            }
+            else if( mPreview.getSupportedFocusValues().contains("focus_mode_infinity") ) {
+                switchToFocusValue("focus_mode_infinity");
+            }
 
-        if( mPreview.getSupportedFocusValues().contains("focus_mode_auto") ) {
-            switchToFocusValue("focus_mode_auto");
+            if( mPreview.getSupportedFocusValues().contains("focus_mode_auto") ) {
+                switchToFocusValue("focus_mode_auto");
+            }
         }
 
         // now open popup, pause and resume, then reopen popup
@@ -11681,7 +11728,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(switchMultiCameraButton.getVisibility(), (mActivity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE));
         assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
         assertEquals(exposureButton.getVisibility(), View.VISIBLE);
-        assertEquals(exposureLockButton.getVisibility(), View.VISIBLE);
+        assertEquals(exposureLockButton.getVisibility(), (mPreview.supportsExposureLock() ? View.VISIBLE : View.GONE));
         assertEquals(audioControlButton.getVisibility(), View.GONE);
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);
@@ -11765,7 +11812,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(switchMultiCameraButton.getVisibility(), (mActivity.showSwitchMultiCamIcon() ? View.VISIBLE : View.GONE));
         assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
         assertEquals(exposureButton.getVisibility(), View.VISIBLE);
-        assertEquals(exposureLockButton.getVisibility(), View.VISIBLE);
+        assertEquals(exposureLockButton.getVisibility(), (mPreview.supportsExposureLock() ? View.VISIBLE : View.GONE));
         assertEquals(audioControlButton.getVisibility(), View.GONE);
         assertEquals(popupButton.getVisibility(), View.VISIBLE);
         assertEquals(trashButton.getVisibility(), View.GONE);

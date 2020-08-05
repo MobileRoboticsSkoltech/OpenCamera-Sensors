@@ -185,6 +185,7 @@ public class DrawPreview {
     private Bitmap last_thumbnail; // thumbnail of last picture taken
     private volatile boolean thumbnail_anim; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
     private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
+    public volatile int test_thumbnail_anim_count;
     private final RectF thumbnail_anim_src_rect = new RectF();
     private final RectF thumbnail_anim_dst_rect = new RectF();
     private final Matrix thumbnail_anim_matrix = new Matrix();
@@ -406,6 +407,9 @@ public class DrawPreview {
                 Log.d(TAG, "thumbnail_anim started");
             thumbnail_anim = true;
             thumbnail_anim_start_ms = System.currentTimeMillis();
+            test_thumbnail_anim_count++;
+            if( MyDebug.LOG )
+                Log.d(TAG, "test_thumbnail_anim_count is now: " + test_thumbnail_anim_count);
         }
         Bitmap old_thumbnail = this.last_thumbnail;
         this.last_thumbnail = thumbnail;
