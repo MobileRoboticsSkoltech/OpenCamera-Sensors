@@ -4447,7 +4447,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.d(TAG, "found no existing focus_value");
             // here we set the default values for focus mode
             // note if updating default focus value for photo mode, also update MainActivityTest.setToDefault()
-            updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_continuous_picture", true, true, auto_focus);
+            if( !updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_continuous_picture", true, true, auto_focus) ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "continuous focus not supported, so fall back to first");
+                updateFocus(0, true, true, auto_focus);
+            }
         }
     }
 
