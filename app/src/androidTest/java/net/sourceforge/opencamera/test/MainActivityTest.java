@@ -2388,6 +2388,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Test for taking HDR photo then going to background, also tests notifications.
+     * Note test is unstable on Android emulator when testing for the notification, unclear why.
      */
     public void testPhotoBackgroundHDR() throws InterruptedException {
         Log.d(TAG, "testPhotoBackgroundHDR");
@@ -4577,7 +4578,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakePhotoMultiCameras(false, true);
     }
 
-    /* Tests taking a photo with front camera and screen flash.
+    /** Tests taking a photo with front camera and screen flash.
+     *  Note this test fails on Android emulator with old camera API, because on front camera when
+     *  we switch from continuous to auto focus from touch to focus, we're still in continuous focus
+     *  mode, despite both focus modes being supported for front camera - I confirmed that we do
+     *  switch to auto focus, and haven't reset to continuous! Could be a threading/synchronization
+     *  issue from trying to read the camera parameters from the test thread?
      */
     public void testTakePhotoFrontCameraScreenFlash() throws InterruptedException {
         Log.d(TAG, "testTakePhotoFrontCameraScreenFlash");
@@ -9412,6 +9418,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests we don't save location data; also tests that we save other exif data.
      * May fail on devices without mobile network, especially if we don't even have wifi.
+     * Fails on Android emulator with Camera2 API, due to photos having Exif TAG_GPS_LATITUDE tag
+     * set to "0/1000,0/1000,0/1000" instead of null.
      */
     public void testLocationOff() throws IOException {
         Log.d(TAG, "testLocationOff");
@@ -9451,6 +9459,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Tests we disable location when going to settings, but re-enable it when returning to camera.
+     * Fails on Android emulator because we immediately get location again after returning from settings.
      */
     public void testLocationSettings() throws InterruptedException {
         Log.d(TAG, "testLocationSettings");
@@ -9698,6 +9707,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests we can stamp date/time and location to photo.
      * May fail on devices without mobile network, especially if we don't even have wifi.
+     * Fails on Android emulator with Camera2 API, due to photos having Exif TAG_GPS_LATITUDE tag
+     * set to "0/1000,0/1000,0/1000" instead of null.
      */
     public void testPhotoStamp() throws IOException {
         Log.d(TAG, "testPhotoStamp");
@@ -10708,6 +10719,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(100, quality);
     }
 
+    /** Note this test fails on Android emulator with old camera API, because we get a
+     *  RuntimeException from setParameters when trying to set white balance (we catch the
+     *  exception, but the test fails because the white balance hasn't been changed to the expected
+     *  value).
+     */
     public void testCameraModes() {
         Log.d(TAG, "testCameraModes");
         subTestSceneMode();
@@ -11647,6 +11663,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests continuous burst.
+     *  Fails on Android emulator with Camera2 API, due to a serious camera error occurring for
+     *  fast burst with more than 5 images!
      */
     public void testTakePhotoContinuousBurst() throws InterruptedException {
         Log.d(TAG, "testTakePhotoContinuousBurst");
@@ -11666,6 +11684,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests continuous burst, but with flags set for slow saving and shorter queue.
+     *  Fails on Android emulator with Camera2 API, due to a serious camera error occurring for
+     *  fast burst with more than 5 images!
      */
     public void testTakePhotoContinuousBurstSlow() throws InterruptedException {
         Log.d(TAG, "testTakePhotoContinuousBurstSlow");
@@ -12066,6 +12086,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests launching with ACTION_VIDEO_CAPTURE intent, along with EXTRA_DURATION_LIMIT. The test
      * then tests we actually record video with the duration limit set.
+     * Fails on Android emulator with Camera2 API, for some reason EXTRA_DURATION_LIMIT makes the
+     * video stop due to hitting max duration immediately.
      */
     public void testIntentVideoDurationLimit() throws InterruptedException, ApplicationInterface.NoFreeStorageException {
         Log.d(TAG, "testIntentVideoDurationLimit");
