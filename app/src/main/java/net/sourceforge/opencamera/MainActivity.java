@@ -772,6 +772,7 @@ public class MainActivity extends Activity {
             // to work okay, testing on S7 on RTL, but still keeping the fake flash mode in place for these devices, until we're sure of good
             // behaviour
             // update for testing on Galaxy S10e: still needs fake flash
+            // has also been reported to me that OnePlus 8 and 8 Pro have problems with flash on Camera2 API unless fake flash enabled
             if( MyDebug.LOG )
                 Log.d(TAG, "set fake flash for camera2");
             SharedPreferences.Editor editor = sharedPreferences.edit();
