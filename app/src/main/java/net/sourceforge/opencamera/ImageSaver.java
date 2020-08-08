@@ -2474,9 +2474,6 @@ public class ImageSaver extends Thread {
                 }
 
                 if( saveUri != null ) {
-                    if( picFile != null ) {
-                        copyFileToUri(main_activity, saveUri, picFile);
-                    }
                     success = true;
                     broadcastSAFFile(saveUri, request.image_capture_intent);
                 }
@@ -2592,15 +2589,6 @@ public class ImageSaver extends Thread {
 
         if( bitmap != null ) {
             bitmap.recycle();
-        }
-
-        if( picFile != null && saveUri != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "delete temp picFile: " + picFile);
-            if( !picFile.delete() ) {
-                if( MyDebug.LOG )
-                    Log.e(TAG, "failed to delete temp picFile: " + picFile);
-            }
         }
 
         System.gc();
