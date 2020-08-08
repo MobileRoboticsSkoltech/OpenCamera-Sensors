@@ -488,7 +488,7 @@ public class StorageUtils {
     }
 
     private String getDataColumn(Uri uri, String selection, String [] selectionArgs) {
-        final String column = "_data";
+        final String column = MediaStore.Images.ImageColumns.DATA;
         final String[] projection = {
                 column
         };
