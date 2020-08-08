@@ -2303,9 +2303,8 @@ public class ImageSaver extends Thread {
 
         main_activity.savingImage(true);
 
-        // If saveUri is non-null, then:
-        //     Before Android 7, picFile is a temporary file which we use for saving exif tags too, and then we redirect the picFile to saveUri.
-        //     On Android 7+, picFile is null - we can write the exif tags direct to the saveUri.
+        // If using SAF or image_capture_intent is true, only saveUri is non-null
+        // Otherwise, only picFile is non-null
         File picFile = null;
         Uri saveUri = null;
         try {
