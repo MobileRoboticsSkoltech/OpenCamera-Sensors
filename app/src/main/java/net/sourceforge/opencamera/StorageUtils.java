@@ -714,27 +714,35 @@ public class StorageUtils {
         }
     }
 
+    /** Return the mime type corresponding to the supplied extension. Supports images only, not video.
+     */
+    String getImageMimeType(String extension) {
+        String mimeType;
+        switch (extension) {
+            case "dng":
+                mimeType = "image/dng";
+                //mimeType = "image/x-adobe-dng";
+                break;
+            case "webp":
+                mimeType = "image/webp";
+                break;
+            case "png":
+                mimeType = "image/png";
+                break;
+            default:
+                mimeType = "image/jpeg";
+                break;
+        }
+        return mimeType;
+    }
+
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
         String mimeType;
         switch (type) {
             case MEDIA_TYPE_IMAGE:
-                switch (extension) {
-                    case "dng":
-                        mimeType = "image/dng";
-                        //mimeType = "image/x-adobe-dng";
-                        break;
-                    case "webp":
-                        mimeType = "image/webp";
-                        break;
-                    case "png":
-                        mimeType = "image/png";
-                        break;
-                    default:
-                        mimeType = "image/jpeg";
-                        break;
-                }
+                mimeType = getImageMimeType(extension);
                 break;
             case MEDIA_TYPE_VIDEO:
                 switch( extension ) {
