@@ -1055,13 +1055,14 @@ public class StorageUtils {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private long freeMemorySAF() {
         Uri treeUri = applicationInterface.getStorageUtils().getTreeUriSAF();
+        ParcelFileDescriptor pfd = null;
         if( MyDebug.LOG )
             Log.d(TAG, "treeUri: " + treeUri);
         try {
             Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
             if( MyDebug.LOG )
                 Log.d(TAG, "docUri: " + docUri);
-            ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
+            pfd = context.getContentResolver().openFileDescriptor(docUri, "r");
             if( pfd == null ) { // just in case
                 Log.e(TAG, "pfd is null!");
                 throw new FileNotFoundException();
@@ -1086,6 +1087,15 @@ public class StorageUtils {
             // One solution might be to move this method to a separate class that's only created on Android 5+, but this is a quick fix for
             // now.
             e.printStackTrace();
+        }
+        finally {
+            try {
+                if( pfd != null )
+                    pfd.close();
+            }
+            catch(IOException e) {
+                e.printStackTrace();
+            }
         }
         return -1;
     }

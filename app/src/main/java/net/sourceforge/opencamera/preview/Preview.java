@@ -176,8 +176,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
     private boolean video_restart_on_max_filesize;
     private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
+    /** Stores the file (or similar) to record a video.
+     *  Important to call close() when the video recording is finished, to free up any resources
+     *  (e.g., supplied ParcelFileDescriptor).
+     */
     private static class VideoFileInfo {
-        // stores the file (or similar) to record a video
         private final int video_method;
         private final Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
         private final String video_filename; // for VIDEOMETHOD_FILE
@@ -194,6 +197,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.video_uri = video_uri;
             this.video_filename = video_filename;
             this.video_pfd_saf = video_pfd_saf;
+        }
+
+        void close() {
+            if( this.video_pfd_saf != null ) {
+                try {
+                    this.video_pfd_saf.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     private VideoFileInfo videoFileInfo = new VideoFileInfo();
@@ -963,9 +977,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
                 if( MyDebug.LOG )
                     Log.d(TAG, "runtime exception when stopping video");
+                videoFileInfo.close();
                 applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
 
                 videoFileInfo = new VideoFileInfo();
+                if( nextVideoFileInfo != null )
+                    nextVideoFileInfo.close();
                 nextVideoFileInfo = null;
                 // if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
                 if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
@@ -988,11 +1005,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder_is_paused = false;
         applicationInterface.cameraInOperation(false, true);
         reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+        videoFileInfo.close();
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
             // video file that will have been created
+            nextVideoFileInfo.close();
             applicationInterface.deleteUnusedVideo(nextVideoFileInfo.video_method, nextVideoFileInfo.video_uri, nextVideoFileInfo.video_filename);
         }
         videoFileInfo = new VideoFileInfo();
@@ -5136,6 +5155,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         catch(IOException e) {
                             Log.e(TAG, "failed to setNextOutputFile");
                             e.printStackTrace();
+                            info.close();
                         }
                     }
                 }
@@ -5150,6 +5170,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.e(TAG, "received MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED but nextVideoFileInfo is null");
             }
             else {
+                videoFileInfo.close();
                 applicationInterface.restartedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
                 videoFileInfo = nextVideoFileInfo;
                 nextVideoFileInfo = null;
@@ -5281,11 +5302,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private VideoFileInfo createVideoFile(String extension) {
         if( MyDebug.LOG )
             Log.d(TAG, "createVideoFile");
+        VideoFileInfo video_file_info = null;
+        ParcelFileDescriptor video_pfd_saf = null;
         try {
             int method = applicationInterface.createOutputVideoMethod();
             Uri video_uri = null;
             String video_filename = null;
-            ParcelFileDescriptor video_pfd_saf = null;
             if( MyDebug.LOG )
                 Log.d(TAG, "method? " + method);
             if( method == ApplicationInterface.VIDEOMETHOD_FILE ) {
@@ -5310,14 +5332,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_uri = uri;
             }
 
-            return new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
+            video_file_info = new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
         }
         catch(IOException e) {
             if( MyDebug.LOG )
                 Log.e(TAG, "Couldn't create media video file; check storage permissions?");
             e.printStackTrace();
         }
-        return null;
+        finally {
+            if( video_file_info == null && video_pfd_saf != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "failed, so clean up video_pfd_saf");
+                try {
+                    video_pfd_saf.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return video_file_info;
     }
 
     /** Start video recording.

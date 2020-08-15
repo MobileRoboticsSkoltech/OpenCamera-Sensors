@@ -2100,6 +2100,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             }
                             writer = null;
                         }
+                        if( pfd_saf != null ) {
+                            try {
+                                pfd_saf.close();
+                            }
+                            catch(IOException e) {
+                                e.printStackTrace();
+                            }
+                            pfd_saf = null;
+                        }
                     }
                     return super.cancel();
                 }
@@ -2177,7 +2186,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // create thumbnail
             long debug_time = System.currentTimeMillis();
             Bitmap thumbnail = null;
-            ParcelFileDescriptor pfd_saf; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
+            ParcelFileDescriptor pfd_saf = null; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 if( video_method == VIDEOMETHOD_FILE ) {
@@ -2201,6 +2210,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 }
                 catch(RuntimeException ex) {
                     // ignore
+                }
+                try {
+                    if( pfd_saf != null ) {
+                        pfd_saf.close();
+                    }
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
                 }
             }
             if( thumbnail != null ) {

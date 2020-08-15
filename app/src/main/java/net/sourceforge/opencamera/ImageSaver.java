@@ -2439,12 +2439,24 @@ public class ImageSaver extends Thread {
                         }
                         else {
                             ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
-                            if( parcelFileDescriptor != null ) {
-                                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                                setExifFromData(request, data, fileDescriptor);
+                            try {
+                                if( parcelFileDescriptor != null ) {
+                                    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                                    setExifFromData(request, data, fileDescriptor);
+                                }
+                                else {
+                                    Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                                }
                             }
-                            else {
-                                Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                            finally {
+                                if( parcelFileDescriptor != null ) {
+                                    try {
+                                        parcelFileDescriptor.close();
+                                    }
+                                    catch(IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
                         }
                     }
@@ -3189,6 +3201,8 @@ public class ImageSaver extends Thread {
      * being used by the ExifInterace!
      * This didn't cause any known bugs, but good practice to fix, similar to the issue reported in
      * https://sourceforge.net/p/opencamera/tickets/417/ .
+     * Also important to call the close() method when done with it, to close the
+     * ParcelFileDescriptor (if one was created).
      */
     private static class ExifInterfaceHolder {
         // suppress warning - no it can't be local or removed, see documentation above about the garbage collector!
@@ -3204,6 +3218,18 @@ public class ImageSaver extends Thread {
         ExifInterface getExif() {
             return this.exif;
         }
+
+        void close()  {
+            if( this.pfd != null ) {
+                try {
+                    this.pfd.close();
+                }
+                catch(IOException e) {
+                    Log.e(TAG, "failed to close parcelfiledescriptor");
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /** Creates a new exif interface for reading and writing.
@@ -3211,6 +3237,7 @@ public class ImageSaver extends Thread {
      *  tags too.
      *  The returned ExifInterfaceHolder will always be non-null, but the contained getExif() may
      *  return null if this method was unable to create the exif interface.
+     *  The caller should call close() on the returned ExifInterfaceHolder when no longer required.
      */
     private ExifInterfaceHolder createExifInterface(File picFile, Uri saveUri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor = null;
@@ -3249,10 +3276,15 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "add additional exif info");
             try {
                 ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
-                ExifInterface exif = exif_holder.getExif();
-                if( exif != null ) {
-                    modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
-                    exif.saveAttributes();
+                try {
+                    ExifInterface exif = exif_holder.getExif();
+                    if( exif != null ) {
+                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+                        exif.saveAttributes();
+                    }
+                }
+                finally {
+                    exif_holder.close();
                 }
             }
             catch(NoClassDefFoundError exception) {
@@ -3269,10 +3301,15 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "remove GPS timestamp hack");
             try {
                 ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
-                ExifInterface exif = exif_holder.getExif();
-                if( exif != null ) {
-                    fixGPSTimestamp(exif, request.current_date);
-                    exif.saveAttributes();
+                try {
+                    ExifInterface exif = exif_holder.getExif();
+                    if( exif != null ) {
+                        fixGPSTimestamp(exif, request.current_date);
+                        exif.saveAttributes();
+                    }
+                }
+                finally {
+                    exif_holder.close();
                 }
             }
             catch(NoClassDefFoundError exception) {
