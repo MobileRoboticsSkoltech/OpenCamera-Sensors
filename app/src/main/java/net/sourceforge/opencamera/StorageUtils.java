@@ -266,9 +266,20 @@ public class StorageUtils {
 
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
      */
-    public File broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
+    public File broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastUri: " + uri);
+        /* We still need to broadcastFile for SAF for two reasons:
+            1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
+               Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
+               won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
+               corresponding to the real file, if it exists.
+            2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
+               scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
+               scan.
+            Note this will no longer work on Android Q's scoped storage (getFileFromDocumentUriSAF will return null).
+            But NEW_PICTURE etc are no longer sent on Android 7+ anyway.
+        */
         File real_file = getFileFromDocumentUriSAF(uri, false);
         if( MyDebug.LOG )
             Log.d(TAG, "real_file: " + real_file);
@@ -280,9 +291,10 @@ public class StorageUtils {
             broadcastFile(real_file, is_new_picture, is_new_video, set_last_scanned);
             return real_file;
         }
-        else {
+        else if( !image_capture_intent ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "announce SAF uri");
+            // shouldn't do this for an image capture intent - e.g., causes crash when calling from Google Keep
             announceUri(uri, is_new_picture, is_new_video);
         }
         return null;

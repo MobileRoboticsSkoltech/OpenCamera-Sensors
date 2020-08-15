@@ -2637,33 +2637,10 @@ public class ImageSaver extends Thread {
     private void broadcastSAFFile(Uri saveUri, boolean image_capture_intent) {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastSAFFile");
-        /* We still need to broadcastFile for SAF for two reasons:
-            1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
-               Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
-               won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
-               corresponding to the real file, if it exists.
-            2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
-               scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
-               scan.
-            Note this will no longer work on Android Q's scoped storage (getFileFromDocumentUriSAF will return null).
-            But NEW_PICTURE etc are no longer sent on Android 7+ anyway.
-        */
         StorageUtils storageUtils = main_activity.getStorageUtils();
-        File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-        if( MyDebug.LOG )
-            Log.d(TAG, "real_file: " + real_file);
+        File real_file = storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
         if( real_file != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "broadcast file");
-            storageUtils.broadcastFile(real_file, true, false, true);
             main_activity.test_last_saved_image = real_file.getAbsolutePath();
-        }
-        else if( !image_capture_intent ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "announce SAF uri");
-            // announce the SAF Uri
-            // (shouldn't do this for a capture intent - e.g., causes crash when calling from Google Keep)
-            storageUtils.announceUri(saveUri, true, false);
         }
     }
 
@@ -3054,7 +3031,7 @@ public class ImageSaver extends Thread {
                 storageUtils.broadcastFile(picFile, true, false, false);
             }
             else {
-                storageUtils.broadcastUri(saveUri, true, false, false);
+                storageUtils.broadcastUri(saveUri, true, false, false, false);
             }
         }
         catch(FileNotFoundException e) {

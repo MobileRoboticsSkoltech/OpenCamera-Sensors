@@ -2280,7 +2280,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         else {
             if( uri != null ) {
                 // see note in onPictureTaken() for where we call broadcastFile for SAF photos
-                File real_file = storageUtils.broadcastUri(uri, false, true, true);
+                File real_file = storageUtils.broadcastUri(uri, false, true, true, false);
                 if( real_file != null ) {
                     main_activity.test_last_saved_image = real_file.getAbsolutePath();
                 }
