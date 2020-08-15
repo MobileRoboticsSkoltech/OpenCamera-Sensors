@@ -748,6 +748,24 @@ public class StorageUtils {
         return mimeType;
     }
 
+    /** Return the mime type corresponding to the supplied extension. Supports video only, not images.
+     */
+    String getVideoMimeType(String extension) {
+        String mimeType;
+        switch( extension ) {
+            case "3gp":
+                mimeType = "video/3gpp";
+                break;
+            case "webm":
+                mimeType = "video/webm";
+                break;
+            default:
+                mimeType = "video/mp4";
+                break;
+        }
+        return mimeType;
+    }
+
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
@@ -757,17 +775,7 @@ public class StorageUtils {
                 mimeType = getImageMimeType(extension);
                 break;
             case MEDIA_TYPE_VIDEO:
-                switch( extension ) {
-                    case "3gp":
-                        mimeType = "video/3gpp";
-                        break;
-                    case "webm":
-                        mimeType = "video/webm";
-                        break;
-                    default:
-                        mimeType = "video/mp4";
-                        break;
-                }
+                mimeType = getVideoMimeType(extension);
                 break;
             case MEDIA_TYPE_PREFS:
             case MEDIA_TYPE_GYRO_INFO:
