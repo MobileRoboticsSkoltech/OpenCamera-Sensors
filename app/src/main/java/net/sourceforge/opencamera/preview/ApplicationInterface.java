@@ -42,9 +42,9 @@ public interface ApplicationInterface {
     boolean useCamera2(); // should Android 5's Camera 2 API be used?
     Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
     VideoMethod createOutputVideoMethod(); // return a VideoMethod value to specify how to create a video file
-    File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE; extension is the recommended filename extension for the chosen video type
-    Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF; extension is the recommended filename extension for the chosen video type
-    Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
+    File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.FILE; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.SAF; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VideoMethod.URI
     // for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
     // if you just want a default or don't really care, see the comments for each method for a default or possible options
     // if Preview doesn't support the requested setting, it will check this, and choose its own

@@ -2046,7 +2046,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     try {
                         synchronized( this ) {
                             if( writer == null ) {
-                                if( video_method == ApplicationInterface.VideoMethod.FILE ) {
+                                if( video_method == VideoMethod.FILE ) {
                                     String subtitle_filename = last_video_file.getAbsolutePath();
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     writer = new FileWriter(subtitle_filename);
