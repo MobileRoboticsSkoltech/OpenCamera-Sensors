@@ -270,7 +270,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public int createOutputVideoMethod() {
+    public VideoMethod createOutputVideoMethod() {
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
             if( MyDebug.LOG )
@@ -281,17 +281,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 if( intent_uri != null ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "save to: " + intent_uri);
-                    return VIDEOMETHOD_URI;
+                    return VideoMethod.URI;
                 }
             }
             // if no EXTRA_OUTPUT, we should save to standard location, and will pass back the Uri of that location
             if( MyDebug.LOG )
                 Log.d(TAG, "intent uri not specified");
             // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
-            return VIDEOMETHOD_FILE;
+            return VideoMethod.FILE;
         }
         boolean using_saf = storageUtils.isUsingSAF();
-        return using_saf ? VIDEOMETHOD_SAF : VIDEOMETHOD_FILE;
+        return using_saf ? VideoMethod.SAF : VideoMethod.FILE;
     }
 
     @Override
@@ -1896,9 +1896,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // ability to switch between auto and manual
             main_activity.getMainUI().setupExposureUI();
         }
-        final int video_method = this.createOutputVideoMethod();
+        final VideoMethod video_method = this.createOutputVideoMethod();
         boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
-        if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+        if( dategeo_subtitles && video_method != ApplicationInterface.VideoMethod.URI ) {
             final String preference_stamp_dateformat = this.getStampDateFormatPref();
             final String preference_stamp_timeformat = this.getStampTimeFormatPref();
             final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
@@ -2046,7 +2046,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     try {
                         synchronized( this ) {
                             if( writer == null ) {
-                                if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                                if( video_method == ApplicationInterface.VideoMethod.FILE ) {
                                     String subtitle_filename = last_video_file.getAbsolutePath();
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     writer = new FileWriter(subtitle_filename);
@@ -2129,7 +2129,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public void stoppedVideo(final int video_method, final Uri uri, final String filename) {
+    public void stoppedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "stoppedVideo");
             Log.d(TAG, "video_method " + video_method);
@@ -2160,7 +2160,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-            if( done && video_method == VIDEOMETHOD_FILE ) {
+            if( done && video_method == VideoMethod.FILE ) {
                 // do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
             }
             else {
@@ -2169,9 +2169,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 Intent output = null;
                 if( done ) {
                     // may need to pass back the Uri we saved to, if the calling application didn't specify a Uri
-                    // set note above for VIDEOMETHOD_FILE
-                    // n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
-                    if( video_method == VIDEOMETHOD_SAF ) {
+                    // set note above for VideoMethod.FILE
+                    // n.b., currently this code is not used, as we always switch to VideoMethod.FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
+                    if( video_method == VideoMethod.SAF ) {
                         output = new Intent();
                         output.setData(uri);
                         if( MyDebug.LOG )
@@ -2189,7 +2189,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             ParcelFileDescriptor pfd_saf = null; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
-                if( video_method == VIDEOMETHOD_FILE ) {
+                if( video_method == VideoMethod.FILE ) {
                     File file = new File(filename);
                     retriever.setDataSource(file.getPath());
                 }
@@ -2252,7 +2252,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public void restartedVideo(final int video_method, final Uri uri, final String filename) {
+    public void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "restartedVideo");
             Log.d(TAG, "video_method " + video_method);
@@ -2262,7 +2262,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         broadcastVideo(video_method, uri, filename);
     }
 
-    private boolean broadcastVideo(final int video_method, final Uri uri, final String filename) {
+    private boolean broadcastVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "broadcastVideo");
             Log.d(TAG, "video_method " + video_method);
@@ -2270,7 +2270,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "filename " + filename);
         }
         boolean done = false;
-        if( video_method == VIDEOMETHOD_FILE ) {
+        if( video_method == VideoMethod.FILE ) {
             if( filename != null ) {
                 File file = new File(filename);
                 storageUtils.broadcastFile(file, false, true, true);
@@ -2296,18 +2296,18 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public void deleteUnusedVideo(final int video_method, final Uri uri, final String filename) {
+    public void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "deleteUnusedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
-        if( video_method == VIDEOMETHOD_FILE ) {
             trashImage(false, uri, filename, false);
+        if( video_method == VideoMethod.FILE ) {
         }
-        else if( video_method == VIDEOMETHOD_SAF ) {
             trashImage(true, uri, filename, false);
+        else if( video_method == VideoMethod.SAF ) {
         }
         // else can't delete Uri
     }

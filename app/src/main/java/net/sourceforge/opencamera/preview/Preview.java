@@ -181,18 +181,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      *  (e.g., supplied ParcelFileDescriptor).
      */
     private static class VideoFileInfo {
-        private final int video_method;
-        private final Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
-        private final String video_filename; // for VIDEOMETHOD_FILE
-        private final ParcelFileDescriptor video_pfd_saf; // for VIDEOMETHOD_SAF
+        private final ApplicationInterface.VideoMethod video_method;
+        private final Uri video_uri; // for VideoMethod.SAF or VideoMethod.URI
+        private final String video_filename; // for VideoMethod.FILE
+        private final ParcelFileDescriptor video_pfd_saf; // for VideoMethod.SAF
 
         VideoFileInfo() {
-            this.video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+            this.video_method = ApplicationInterface.VideoMethod.FILE;
             this.video_uri = null;
             this.video_filename = null;
             this.video_pfd_saf = null;
         }
-        VideoFileInfo(int video_method, Uri video_uri, String video_filename, ParcelFileDescriptor video_pfd_saf) {
+        VideoFileInfo(ApplicationInterface.VideoMethod video_method, Uri video_uri, String video_filename, ParcelFileDescriptor video_pfd_saf) {
             this.video_method = video_method;
             this.video_uri = video_uri;
             this.video_filename = video_filename;
@@ -5141,7 +5141,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         try {
                             //if( true )
                             //	throw new IOException(); // test
-                            if( info.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                            if( info.video_method == ApplicationInterface.VideoMethod.FILE ) {
                                 video_recorder.setNextOutputFile(new File(info.video_filename));
                             }
                             else {
@@ -5305,12 +5305,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         VideoFileInfo video_file_info = null;
         ParcelFileDescriptor video_pfd_saf = null;
         try {
-            int method = applicationInterface.createOutputVideoMethod();
+            ApplicationInterface.VideoMethod method = applicationInterface.createOutputVideoMethod();
             Uri video_uri = null;
             String video_filename = null;
             if( MyDebug.LOG )
                 Log.d(TAG, "method? " + method);
-            if( method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+            if( method == ApplicationInterface.VideoMethod.FILE ) {
     			/*if( true )
     				throw new IOException(); // test*/
                 File videoFile = applicationInterface.createOutputVideoFile(extension);
@@ -5320,7 +5320,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             else {
                 Uri uri;
-                if( method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+                if( method == ApplicationInterface.VideoMethod.SAF ) {
                     uri = applicationInterface.createOutputVideoSAF(extension);
                 }
                 else {
@@ -5480,7 +5480,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.d(TAG, "actual video_max_duration: " + video_max_duration);
                 local_video_recorder.setMaxDuration((int)video_max_duration);
 
-                if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                if( videoFileInfo.video_method == ApplicationInterface.VideoMethod.FILE ) {
                     local_video_recorder.setOutputFile(videoFileInfo.video_filename);
                 }
                 else {

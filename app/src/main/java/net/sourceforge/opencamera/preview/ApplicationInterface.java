@@ -31,15 +31,17 @@ public interface ApplicationInterface {
         public boolean auto_restart; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
     }
 
-    int VIDEOMETHOD_FILE = 0; // video will be saved to a file
-    int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
-    int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
+    enum VideoMethod {
+        FILE, // video will be saved to a file
+        SAF, // video will be saved using Android 5's Storage Access Framework
+        URI // video will be written to the supplied Uri
+    }
 
     // methods that request information
     Context getContext(); // get the application context
     boolean useCamera2(); // should Android 5's Camera 2 API be used?
     Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
-    int createOutputVideoMethod(); // return a VIDEOMETHOD_* value to specify how to create a video file
+    VideoMethod createOutputVideoMethod(); // return a VideoMethod value to specify how to create a video file
     File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE; extension is the recommended filename extension for the chosen video type
     Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF; extension is the recommended filename extension for the chosen video type
     Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
@@ -177,9 +179,9 @@ public interface ApplicationInterface {
     void startingVideo(); // called just before video recording starts
     void startedVideo(); // called just after video recording starts
     void stoppingVideo(); // called just before video recording stops; note that if startingVideo() is called but then video recording fails to start, this method will still be called, but startedVideo() and stoppedVideo() won't be called
-    void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
-    void restartedVideo(final int video_method, final Uri uri, final String filename); // called after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
-    void deleteUnusedVideo(final int video_method, final Uri uri, final String filename); // application should delete the requested video (which will correspond to a video file previously returned via the createOutputVideo*() methods), either because it is corrupt or unused
+    void stoppedVideo(final VideoMethod video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
+    void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename); // called after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
+    void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename); // application should delete the requested video (which will correspond to a video file previously returned via the createOutputVideo*() methods), either because it is corrupt or unused
     void onFailedStartPreview(); // called if failed to start camera preview
     void onCameraError(); // called if the camera closes due to serious error.
     void onPhotoError(); // callback for failing to take a photo
