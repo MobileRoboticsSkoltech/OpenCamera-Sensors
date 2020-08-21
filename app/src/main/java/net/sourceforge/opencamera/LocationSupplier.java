@@ -74,6 +74,10 @@ public class LocationSupplier {
         }
     }
 
+    /** If adding extra calls to this, consider whether explicit user permission is required, and whether
+     *  privacy policy needs updating.
+     * @return Returns null if location not available.
+     */
     public Location getLocation() {
         return getLocation(null);
     }
