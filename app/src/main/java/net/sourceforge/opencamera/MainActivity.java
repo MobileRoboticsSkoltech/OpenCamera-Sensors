@@ -2935,6 +2935,76 @@ public class MainActivity extends Activity {
         container.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
+    /** Loads a thumbnail from the supplied image uri (not videos). Note this loads from the bitmap
+     *  rather than reading from MediaStore. Therefore this works with SAF uris as well as
+     *  MediaStore uris, as well as allowing control over the resolution of the thumbnail.
+     *  If sample_factor is 1, this returns a bitmap scaled to match the display resolution. If
+     *  sample_factor is greater than 1, it will be scaled down to a lower resolution.
+     */
+    private Bitmap loadThumbnailFromUri(Uri uri, int sample_factor) {
+        Bitmap thumbnail = null;
+        try {
+            //thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
+            // only need to load a bitmap as large as the screen size
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            InputStream is = getContentResolver().openInputStream(uri);
+            // get dimensions
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(is, null, options);
+            int bitmap_width = options.outWidth;
+            int bitmap_height = options.outHeight;
+            Point display_size = new Point();
+            Display display = getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "bitmap_width: " + bitmap_width);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+                Log.d(TAG, "display width: " + display_size.x);
+                Log.d(TAG, "display height: " + display_size.y);
+            }
+            // align dimensions
+            if( display_size.x < display_size.y ) {
+                //noinspection SuspiciousNameCombination
+                display_size.set(display_size.y, display_size.x);
+            }
+            if( bitmap_width < bitmap_height ) {
+                int dummy = bitmap_width;
+                //noinspection SuspiciousNameCombination
+                bitmap_width = bitmap_height;
+                bitmap_height = dummy;
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "bitmap_width: " + bitmap_width);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+                Log.d(TAG, "display width: " + display_size.x);
+                Log.d(TAG, "display height: " + display_size.y);
+            }
+            // only care about height, to save worrying about different aspect ratios
+            options.inSampleSize = 1;
+            while( bitmap_height / (2*options.inSampleSize) >= display_size.y ) {
+                options.inSampleSize *= 2;
+            }
+            options.inSampleSize *= sample_factor;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "inSampleSize: " + options.inSampleSize);
+            }
+            options.inJustDecodeBounds = false;
+            // need a new inputstream, see https://stackoverflow.com/questions/2503628/bitmapfactory-decodestream-returning-null-when-options-are-set
+            is.close();
+            is = getContentResolver().openInputStream(uri);
+            thumbnail = BitmapFactory.decodeStream(is, null, options);
+            if( thumbnail == null ) {
+                Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
+            }
+            is.close();
+        }
+        catch(IOException e) {
+            Log.e(TAG, "failed to load bitmap for ghost image last");
+            e.printStackTrace();
+        }
+        return thumbnail;
+    }
+
     /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
      */
     private void updateGalleryIconToBlank() {
@@ -2997,64 +3067,7 @@ public class MainActivity extends Activity {
                     if( ghost_image_last && !media.video ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "load full size bitmap for ghost image last photo");
-                        try {
-                            //thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
-                            // only need to load a bitmap as large as the screen size
-                            BitmapFactory.Options options = new BitmapFactory.Options();
-                            InputStream is = getContentResolver().openInputStream(media.uri);
-                            // get dimensions
-                            options.inJustDecodeBounds = true;
-                            BitmapFactory.decodeStream(is, null, options);
-                            int bitmap_width = options.outWidth;
-                            int bitmap_height = options.outHeight;
-                            Point display_size = new Point();
-                            Display display = getWindowManager().getDefaultDisplay();
-                            display.getSize(display_size);
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "bitmap_width: " + bitmap_width);
-                                Log.d(TAG, "bitmap_height: " + bitmap_height);
-                                Log.d(TAG, "display width: " + display_size.x);
-                                Log.d(TAG, "display height: " + display_size.y);
-                            }
-                            // align dimensions
-                            if( display_size.x < display_size.y ) {
-                                //noinspection SuspiciousNameCombination
-                                display_size.set(display_size.y, display_size.x);
-                            }
-                            if( bitmap_width < bitmap_height ) {
-                                int dummy = bitmap_width;
-                                //noinspection SuspiciousNameCombination
-                                bitmap_width = bitmap_height;
-                                bitmap_height = dummy;
-                            }
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "bitmap_width: " + bitmap_width);
-                                Log.d(TAG, "bitmap_height: " + bitmap_height);
-                                Log.d(TAG, "display width: " + display_size.x);
-                                Log.d(TAG, "display height: " + display_size.y);
-                            }
-                            // only care about height, to save worrying about different aspect ratios
-                            options.inSampleSize = 1;
-                            while( bitmap_height / (2*options.inSampleSize) >= display_size.y ) {
-                                options.inSampleSize *= 2;
-                            }
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "inSampleSize: " + options.inSampleSize);
-                            }
-                            options.inJustDecodeBounds = false;
-                            // need a new inputstream, see https://stackoverflow.com/questions/2503628/bitmapfactory-decodestream-returning-null-when-options-are-set
-                            is.close();
-                            is = getContentResolver().openInputStream(media.uri);
-                            thumbnail = BitmapFactory.decodeStream(is, null, options);
-                            if( thumbnail == null ) {
-                                Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
-                            }
-                            is.close();
-                        }
-                        catch(IOException e) {
-                            Log.e(TAG, "failed to load bitmap for ghost image last");
-                            e.printStackTrace();
-                        }
+                        thumbnail = loadThumbnailFromUri(media.uri, 1);
                     }
                     if( thumbnail == null ) {
                         try {
