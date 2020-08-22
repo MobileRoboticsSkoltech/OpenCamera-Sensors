@@ -3064,6 +3064,9 @@ public class MainActivity extends Activity {
                     Log.d(TAG, "is_locked?: " + is_locked);
                 if( media != null && getContentResolver() != null && !is_locked ) {
                     // check for getContentResolver() != null, as have had reported Google Play crashes
+
+                    is_video = media.video;
+
                     if( ghost_image_last && !media.video ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "load full size bitmap for ghost image last photo");
@@ -3075,7 +3078,6 @@ public class MainActivity extends Activity {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "load thumbnail for video");
                                 thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
-                                is_video = true;
                             }
                             else {
                                 if( MyDebug.LOG )
