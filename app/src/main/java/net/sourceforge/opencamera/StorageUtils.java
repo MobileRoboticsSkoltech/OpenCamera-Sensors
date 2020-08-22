@@ -810,12 +810,17 @@ public class StorageUtils {
         }
     }
 
-    private Media getLatestMediaCore(Uri baseUri, String bucket_id, boolean video) {
+    private enum UriType {
+        MEDIASTORE_IMAGES,
+        MEDIASTORE_VIDEOS
+    };
+
+    private Media getLatestMediaCore(Uri baseUri, String bucket_id, UriType uri_type) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "getLatestMediaCore");
             Log.d(TAG, "baseUri: " + baseUri);
             Log.d(TAG, "bucket_id: " + bucket_id);
-            Log.d(TAG, "video: " + video);
+            Log.d(TAG, "uri_type: " + uri_type);
         }
         Media media = null;
 
@@ -826,31 +831,59 @@ public class StorageUtils {
         final int column_orientation_c = 4; // for images only*/
         final int column_name_c = 2; // filename (without path), including extension
         final int column_orientation_c = 3; // for images only
-        String [] projection = video ?
-                new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DISPLAY_NAME} :
-                new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DISPLAY_NAME, ImageColumns.ORIENTATION};
+        String [] projection;
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+                projection = new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DISPLAY_NAME, ImageColumns.ORIENTATION};
+                break;
+            case MEDIASTORE_VIDEOS:
+                projection = new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DISPLAY_NAME};
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
+        }
         // for images, we need to search for JPEG/etc and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
         /*String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
                 ImageColumns.MIME_TYPE + "='image/webp' OR " +
                 ImageColumns.MIME_TYPE + "='image/png' OR " +
                 ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";*/
         String selection = "";
-        if( bucket_id != null )
-            selection = (video ? VideoColumns.BUCKET_ID : ImageColumns.BUCKET_ID) + " = " + bucket_id;
-        if( !video ) {
-            boolean and = selection.length() > 0;
-            if( and )
-                selection += " AND ( ";
-            selection += ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
-                    ImageColumns.MIME_TYPE + "='image/webp' OR " +
-                    ImageColumns.MIME_TYPE + "='image/png' OR " +
-                    ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
-            if( and )
-                selection += " )";
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+            {
+                if( bucket_id != null )
+                    selection = ImageColumns.BUCKET_ID + " = " + bucket_id;
+                boolean and = selection.length() > 0;
+                if( and )
+                    selection += " AND ( ";
+                selection += ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
+                        ImageColumns.MIME_TYPE + "='image/webp' OR " +
+                        ImageColumns.MIME_TYPE + "='image/png' OR " +
+                        ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
+                if( and )
+                    selection += " )";
+                break;
+            }
+            case MEDIASTORE_VIDEOS:
+                if( bucket_id != null )
+                    selection = VideoColumns.BUCKET_ID + " = " + bucket_id;
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
         }
         if( MyDebug.LOG )
             Log.d(TAG, "selection: " + selection);
-        String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
+        String order;
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+                order = ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
+                break;
+            case MEDIASTORE_VIDEOS:
+                order = VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC";
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
+        }
         Cursor cursor = null;
 
         // we know we only want the most recent image - however we may need to scan forward if we find a RAW, to see if there's
@@ -974,11 +1007,26 @@ public class StorageUtils {
 
                 long id = cursor.getLong(column_id_c);
                 long date = cursor.getLong(column_date_taken_c);
-                int orientation = video ? 0 : cursor.getInt(column_orientation_c);
+                int orientation = (uri_type == UriType.MEDIASTORE_IMAGES) ? cursor.getInt(column_orientation_c) : 0;
                 Uri uri = ContentUris.withAppendedId(baseUri, id);
                 String filename = cursor.getString(column_name_c);
                 if( MyDebug.LOG )
-                    Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
+                    Log.d(TAG, "found most recent uri for " + uri_type + ": " + uri);
+
+                boolean video;
+                switch( uri_type ) {
+                    case MEDIASTORE_IMAGES:
+                        video = false;
+                        break;
+                    case MEDIASTORE_VIDEOS:
+                        video = true;
+                        break;
+                    default:
+                        throw new RuntimeException("unknown uri_type: " + uri_type);
+                }
+                if( MyDebug.LOG )
+                    Log.d(TAG, "video: " + video);
+
                 media = new Media(id, video, uri, date, orientation, filename);
             }
             else {
@@ -1001,10 +1049,10 @@ public class StorageUtils {
         return media;
     }
 
-    private Media getLatestMedia(boolean video) {
+    private Media getLatestMedia(UriType uri_type) {
         if( MyDebug.LOG )
-            Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+            Log.d(TAG, "getLatestMedia: " + uri_type);
             // needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
             // see https://developer.android.com/training/permissions/requesting.html
             // we now request storage permission before opening the camera, but keep this here just in case
@@ -1024,20 +1072,33 @@ public class StorageUtils {
         if( MyDebug.LOG )
             Log.d(TAG, "bucket_id: " + bucket_id);
 
-        Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        Media media = getLatestMediaCore(baseUri, bucket_id, video);
+        Uri baseUri;
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+                baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                break;
+            case MEDIASTORE_VIDEOS:
+                baseUri = Video.Media.EXTERNAL_CONTENT_URI;
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
+        }
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "baseUri: " + baseUri);
+        Media media = getLatestMediaCore(baseUri, bucket_id, uri_type);
         if( media == null && bucket_id != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "fall back to checking any folder");
-            media = getLatestMediaCore(baseUri, null, video);
+            media = getLatestMediaCore(baseUri, null, uri_type);
         }
 
         return media;
     }
 
     Media getLatestMedia() {
-        Media image_media = getLatestMedia(false);
-        Media video_media = getLatestMedia(true);
+        Media image_media = getLatestMedia(UriType.MEDIASTORE_IMAGES);
+        Media video_media = getLatestMedia(UriType.MEDIASTORE_VIDEOS);
         Media media = null;
         if( image_media != null && video_media == null ) {
             if( MyDebug.LOG )
