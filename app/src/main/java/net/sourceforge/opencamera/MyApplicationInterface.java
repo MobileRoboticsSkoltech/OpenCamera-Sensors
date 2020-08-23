@@ -86,7 +86,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
     private File last_video_file = null;
-    private Uri last_video_file_saf = null;
+    private Uri last_video_file_uri = null;
 
     private final Timer subtitleVideoTimer = new Timer();
     private TimerTask subtitleVideoTimerTask;
@@ -290,8 +290,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
             return VideoMethod.FILE;
         }
-        boolean using_saf = storageUtils.isUsingSAF();
-        return using_saf ? VideoMethod.SAF : VideoMethod.FILE;
+        else if( storageUtils.isUsingSAF() ) {
+            return VideoMethod.SAF;
+        }
+        else {
+            return VideoMethod.FILE;
+        }
     }
 
     @Override
@@ -302,8 +306,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public Uri createOutputVideoSAF(String extension) throws IOException {
-        last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
-        return last_video_file_saf;
+        last_video_file_uri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
+        return last_video_file_uri;
     }
 
     @Override
@@ -2053,8 +2057,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                 }
                                 else {
                                     if( MyDebug.LOG )
-                                        Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
-                                    String subtitle_filename = storageUtils.getFileName(last_video_file_saf);
+                                        Log.d(TAG, "last_video_file_uri: " + last_video_file_uri);
+                                    String subtitle_filename = storageUtils.getFileName(last_video_file_uri);
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     Uri subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
                                     pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");
