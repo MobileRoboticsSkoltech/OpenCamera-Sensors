@@ -810,6 +810,17 @@ public class StorageUtils {
         }
     }
 
+    private static boolean filenameIsRaw(String filename) {
+        return filename.toLowerCase(Locale.US).endsWith(".dng");
+    }
+
+    private static String filenameWithoutExtension(String filename) {
+        String filename_without_ext = filename.toLowerCase(Locale.US);
+        if( filename_without_ext.indexOf(".") > 0 )
+            filename_without_ext = filename_without_ext.substring(0, filename_without_ext.lastIndexOf("."));
+        return filename_without_ext;
+    }
+
     private enum UriType {
         MEDIASTORE_IMAGES,
         MEDIASTORE_VIDEOS
@@ -947,14 +958,12 @@ public class StorageUtils {
                         Log.d(TAG, "filename: " + filename);
                     }
                     // in theory now that we use DISPLAY_NAME instead of DATA (for path), this should always be non-null, but check just in case
-                    if( filename != null && filename.toLowerCase(Locale.US).endsWith(".dng") ) {
+                    if( filename != null && filenameIsRaw(filename) ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "try to find a non-RAW version of the DNG");
                         int dng_pos = cursor.getPosition();
                         boolean found_non_raw = false;
-                        String filename_without_ext = filename.toLowerCase(Locale.US);
-                        if( filename_without_ext.indexOf(".") > 0 )
-                            filename_without_ext = filename_without_ext.substring(0, filename_without_ext.lastIndexOf("."));
+                        String filename_without_ext = filenameWithoutExtension(filename);
                         if( MyDebug.LOG )
                             Log.d(TAG, "filename_without_ext: " + filename_without_ext);
                         while( cursor.moveToNext() ) {
@@ -966,9 +975,7 @@ public class StorageUtils {
                                     Log.d(TAG, "done scanning, couldn't find filename");
                                 break;
                             }
-                            String next_filename_without_ext = next_filename.toLowerCase(Locale.US);
-                            if( next_filename_without_ext.indexOf(".") > 0 )
-                                next_filename_without_ext = next_filename_without_ext.substring(0, next_filename_without_ext.lastIndexOf("."));
+                            String next_filename_without_ext = filenameWithoutExtension(next_filename);
                             if( MyDebug.LOG )
                                 Log.d(TAG, "next_filename_without_ext: " + next_filename_without_ext);
                             if( !filename_without_ext.equals(next_filename_without_ext) ) {
@@ -978,21 +985,16 @@ public class StorageUtils {
                                 break;
                             }
                             // so we've found another file with matching filename - is it a JPEG/etc?
-                            if( next_filename.toLowerCase(Locale.US).endsWith(".jpg") ) {
+                            // we've already restricted the query to the image types we're interested in, so
+                            // only need to check that it isn't another DNG (which would be strange, as it
+                            // would mean a duplicate filename, but check just in case!)
+                            if( filenameIsRaw(next_filename) ) {
                                 if( MyDebug.LOG )
-                                    Log.d(TAG, "found equivalent jpeg");
-                                found_non_raw = true;
-                                break;
+                                    Log.d(TAG, "found another dng!");
                             }
-                            else if( next_filename.toLowerCase(Locale.US).endsWith(".webp") ) {
+                            else {
                                 if( MyDebug.LOG )
-                                    Log.d(TAG, "found equivalent webp");
-                                found_non_raw = true;
-                                break;
-                            }
-                            else if( next_filename.toLowerCase(Locale.US).endsWith(".png") ) {
-                                if( MyDebug.LOG )
-                                    Log.d(TAG, "found equivalent png");
+                                    Log.d(TAG, "found equivalent non-dng");
                                 found_non_raw = true;
                                 break;
                             }
