@@ -333,8 +333,28 @@ public class StorageUtils {
         return new File(context.getExternalFilesDir(null), "backups");
     }
 
-    // valid if whether or not isUsingSAF()
-    // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
+    /** Only valid if isUsingSAF()
+     *  Returns the absolute path (in File format) of the SAF folder.
+     *  Only use this for needing e.g. human-readable strings for UI.
+     *  This should not be used to create a File - instead, use getFileFromDocumentUriSAF().
+     */
+    /** Valid if whether or not isUsingSAF().
+     *  Returns the absolute path (in File format) of the image save folder.
+     *  Only use this for needing e.g. human-readable strings for UI.
+     *  This should not be used to create a File - instead, use getImageFolder().
+     *  Note that if isUsingSAF(), this may return null - it can't be assumed that there is a
+     *  File corresponding to the SAF Uri.
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public String getImageFolderPath() {
+        File file = getImageFolder();
+        return file == null ? null : file.getAbsolutePath();
+    }
+
+    /** Valid if whether or not isUsingSAF().
+     *  But note that if isUsingSAF(), this may return null - it can't be assumed that there is a
+     *  File corresponding to the SAF Uri.
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     File getImageFolder() {
         File file;
@@ -370,6 +390,17 @@ public class StorageUtils {
             file = new File(getBaseFolder(), folder_name);
         }
         return file;
+    }
+
+    /** Only valid if isUsingSAF()
+     *  Returns the absolute path (in File format) of the SAF folder.
+     *  Only use this for needing e.g. human-readable strings for UI.
+     *  This should not be used to create a File - instead, use getFileFromDocumentUriSAF().
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public String getFilePathFromDocumentUriSAF(Uri uri, boolean is_folder) {
+        File file = getFileFromDocumentUriSAF(uri, is_folder);
+        return file == null ? null : file.getAbsolutePath();
     }
 
     /** Only valid if isUsingSAF()
@@ -1064,12 +1095,12 @@ public class StorageUtils {
             return null;
         }
 
-        File save_folder = getImageFolder(); // may be null if using SAF
+        String save_folder = getImageFolderPath(); // may be null if using SAF
         if( MyDebug.LOG )
             Log.d(TAG, "save_folder: " + save_folder);
         String bucket_id = null;
         if( save_folder != null ) {
-            bucket_id = String.valueOf(save_folder.getAbsolutePath().toLowerCase().hashCode());
+            bucket_id = String.valueOf(save_folder.toLowerCase().hashCode());
         }
         if( MyDebug.LOG )
             Log.d(TAG, "bucket_id: " + bucket_id);

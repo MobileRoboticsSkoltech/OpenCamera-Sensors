@@ -3486,9 +3486,9 @@ public class MainActivity extends Activity {
                             Log.d(TAG, "update folder history for saf");
                         updateFolderHistorySAF(treeUri.toString());
 
-                        File file = applicationInterface.getStorageUtils().getImageFolder();
+                        String file = applicationInterface.getStorageUtils().getImageFolderPath();
                         if( file != null ) {
-                            preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file.getAbsolutePath());
+                            preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file);
                         }
                     }
                     catch(SecurityException e) {
@@ -3716,9 +3716,9 @@ public class MainActivity extends Activity {
             String folder_name = history.get(history.size() - 1 - i);
             if( applicationInterface.getStorageUtils().isUsingSAF() ) {
                 // try to get human readable form if possible
-                File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(folder_name), true);
-                if( file != null ) {
-                    folder_name = file.getAbsolutePath();
+                String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(folder_name), true);
+                if( file_name != null ) {
+                    folder_name = file_name;
                 }
             }
             items[index++] = folder_name;
@@ -3791,9 +3791,9 @@ public class MainActivity extends Activity {
                         String save_folder_name = save_folder;
                         if( applicationInterface.getStorageUtils().isUsingSAF() ) {
                             // try to get human readable form if possible
-                            File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(save_folder), true);
-                            if( file != null ) {
-                                save_folder_name = file.getAbsolutePath();
+                            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
+                            if( file_name != null ) {
+                                save_folder_name = file_name;
                             }
                         }
                         preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
