@@ -67,6 +67,8 @@ import android.renderscript.RenderScript;
 import android.speech.tts.TextToSpeech;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
+
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -2933,6 +2935,67 @@ public class MainActivity extends Activity {
             Log.d(TAG, "showPreview: " + show);
         final ViewGroup container = findViewById(R.id.hide_container);
         container.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data. If no
+     *  rotation is required, the input bitmap is returned. If rotation is required, the input
+     *  bitmap is recycled.
+     * @param uri Uri containing the JPEG with Exif information to use.
+     */
+    public Bitmap rotateForExif(Bitmap bitmap, Uri uri) throws IOException {
+        ExifInterface exif;
+        InputStream inputStream = null;
+        try {
+            inputStream = this.getContentResolver().openInputStream(uri);
+            exif = new ExifInterface(inputStream);
+        }
+        finally {
+            if( inputStream != null )
+                inputStream.close();
+        }
+
+        if( exif != null ) {
+            int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            boolean needs_tf = false;
+            int exif_orientation = 0;
+            // see http://jpegclub.org/exif_orientation.html
+            // and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
+            if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
+                // leave unchanged
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
+                needs_tf = true;
+                exif_orientation = 180;
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
+                needs_tf = true;
+                exif_orientation = 90;
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
+                needs_tf = true;
+                exif_orientation = 270;
+            }
+            else {
+                // just leave unchanged for now
+                if( MyDebug.LOG )
+                    Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "    exif orientation: " + exif_orientation);
+
+            if( needs_tf ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "    need to rotate bitmap due to exif orientation tag");
+                Matrix m = new Matrix();
+                m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
+                Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
+                if( rotated_bitmap != bitmap ) {
+                    bitmap.recycle();
+                    bitmap = rotated_bitmap;
+                }
+            }
+        }
+        return bitmap;
     }
 
     /** Loads a thumbnail from the supplied image uri (not videos). Note this loads from the bitmap
