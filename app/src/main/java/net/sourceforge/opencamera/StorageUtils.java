@@ -277,8 +277,6 @@ public class StorageUtils {
             2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
                scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
                scan.
-            Note this will no longer work on Android Q's scoped storage (getFileFromDocumentUriSAF will return null).
-            But NEW_PICTURE etc are no longer sent on Android 7+ anyway.
         */
         File real_file = getFileFromDocumentUriSAF(uri, false);
         if( MyDebug.LOG )
