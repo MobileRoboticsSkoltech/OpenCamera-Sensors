@@ -3069,8 +3069,9 @@ public class ImageSaver extends Thread {
         return success;
     }
 
-    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data.. If no
-     *  rotation is required, the input bitmap is returned.
+    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data. If no
+     *  rotation is required, the input bitmap is returned. If rotation is required, the input
+     *  bitmap is recycled.
      * @param data Jpeg data containing the Exif information to use.
      */
     private Bitmap rotateForExif(Bitmap bitmap, byte [] data) {
