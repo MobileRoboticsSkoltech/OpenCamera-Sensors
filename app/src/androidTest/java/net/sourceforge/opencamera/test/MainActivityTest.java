@@ -6308,6 +6308,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(1, n_new_files);
     }
 
+    /** Tests video subtitles option.
+     */
     public void testTakeVideoSubtitles() throws InterruptedException {
         Log.d(TAG, "testTakeVideoSubtitles");
 
@@ -6316,6 +6318,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_yes");
+            editor.apply();
+            updateForSettings();
+        }
+
+        subTestTakeVideo(false, false, false, false, null, 5000, false, 1);
+    }
+
+    /** Tests video subtitles option, when using Storage Access Framework.
+     */
+    public void testTakeVideoSubtitlesSAF() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoSubtitlesSAF");
+
+        setToDefault();
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_yes");
+            editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+            editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
             editor.apply();
             updateForSettings();
         }

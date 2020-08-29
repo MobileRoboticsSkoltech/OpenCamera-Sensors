@@ -14,6 +14,7 @@ public class VideoTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSAF"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesSAF"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
         }
 
