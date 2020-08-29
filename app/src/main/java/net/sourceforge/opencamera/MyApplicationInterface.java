@@ -1916,7 +1916,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             final boolean store_geo_direction = getGeodirectionPref();
             class SubtitleVideoTimerTask extends TimerTask {
                 // need to keep a reference to pfd_saf for as long as writer, to avoid getting garbage collected - see https://sourceforge.net/p/opencamera/tickets/417/
-                @SuppressWarnings("FieldCanBeLocal")
                 private ParcelFileDescriptor pfd_saf;
                 private OutputStreamWriter writer;
                 private int count = 1;

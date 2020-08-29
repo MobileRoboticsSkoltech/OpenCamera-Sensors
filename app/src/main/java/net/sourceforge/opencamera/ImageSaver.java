@@ -3183,8 +3183,7 @@ public class ImageSaver extends Thread {
      * ParcelFileDescriptor (if one was created).
      */
     private static class ExifInterfaceHolder {
-        // suppress warning - no it can't be local or removed, see documentation above about the garbage collector!
-        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        // see documentation above about keeping hold of pdf due to the garbage collector!
         private final ParcelFileDescriptor pfd;
         private final ExifInterface exif;
 
