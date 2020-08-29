@@ -50,6 +50,8 @@
 <pre>
 Version 1.48.3 (Work in progress)
 
+FIXED   Possible crash for panorama if failing to crop due to poor transformations; now fails
+        gracefully.
 FIXED   Photos would sometimes fail to save on some devices with Storage Access Framework, when some
         options were enabled (options like DRO, HDR, auto-level, photostamp that require
         post-processing; custom Exif tags like artist or copyright; or when using geotagging with

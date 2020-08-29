@@ -1698,9 +1698,9 @@ public class ImageSaver extends Thread {
             catch(PanoramaProcessorException e) {
                 Log.e(TAG, "PanoramaProcessorException from panorama: " + e.getCode());
                 e.printStackTrace();
-                if( e.getCode() == PanoramaProcessorException.UNEQUAL_SIZES ) {
+                if( e.getCode() == PanoramaProcessorException.UNEQUAL_SIZES || e.getCode() == PanoramaProcessorException.FAILED_TO_CROP ) {
                     main_activity.getPreview().showToast(null, R.string.failed_to_process_panorama);
-                    Log.e(TAG, "UNEQUAL_SIZES");
+                    Log.e(TAG, "panorama failed: " + e.getCode());
                     bitmaps.clear();
                     System.gc();
                     main_activity.savingImage(false);

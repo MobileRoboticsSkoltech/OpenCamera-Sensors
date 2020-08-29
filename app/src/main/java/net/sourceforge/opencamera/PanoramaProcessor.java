@@ -3107,6 +3107,12 @@ public class PanoramaProcessor {
                 Log.d(TAG, "crop_y1: " + crop_y1);
                 Log.d(TAG, "panorama_height: " + panorama_height);
             }
+
+            if( panorama_height <= 0 ) {
+                // can happen if the transforms are such that we move off top or bottom of screen! Better to fail gracefully
+                Log.e(TAG, "crop caused panorama height to become -ve: " + panorama_height);
+                throw new PanoramaProcessorException(PanoramaProcessorException.FAILED_TO_CROP);
+            }
         }
 
         Bitmap panorama = Bitmap.createBitmap(panorama_width, panorama_height, Bitmap.Config.ARGB_8888);

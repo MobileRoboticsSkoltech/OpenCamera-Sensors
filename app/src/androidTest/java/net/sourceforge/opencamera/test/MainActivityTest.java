@@ -11737,6 +11737,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_panorama");
+        //editor.putString(PreferenceKeys.PanoramaSaveExpoPreferenceKey, "preference_panorama_save_all"); // test/debug
         editor.apply();
         updateForSettings();
 
@@ -11893,6 +11894,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Test for panorama photo mode.
+     * Can fail on Android emulator due to failing to create panorama image from identical set of
+     * images (since we don't actually move the camera).
      */
     public void testTakePhotoPanorama() throws InterruptedException {
         Log.d(TAG, "testTakePhotoPanorama");
@@ -11901,6 +11904,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Test for panorama photo mode, taking max number of panorama shots.
+     * Can fail on Android emulator due to failing to create panorama image from identical set of
+     * images (since we don't actually move the camera).
      */
     public void testTakePhotoPanoramaMax() throws InterruptedException {
         Log.d(TAG, "testTakePhotoPanoramaMax");
