@@ -335,12 +335,7 @@ public class StorageUtils {
         return new File(context.getExternalFilesDir(null), "backups");
     }
 
-    /** Only valid if isUsingSAF()
-     *  Returns the absolute path (in File format) of the SAF folder.
-     *  Only use this for needing e.g. human-readable strings for UI.
-     *  This should not be used to create a File - instead, use getFileFromDocumentUriSAF().
-     */
-    /** Valid if whether or not isUsingSAF().
+    /** Valid whether or not isUsingSAF().
      *  Returns the absolute path (in File format) of the image save folder.
      *  Only use this for needing e.g. human-readable strings for UI.
      *  This should not be used to create a File - instead, use getImageFolder().
@@ -353,7 +348,7 @@ public class StorageUtils {
         return file == null ? null : file.getAbsolutePath();
     }
 
-    /** Valid if whether or not isUsingSAF().
+    /** Valid whether or not isUsingSAF().
      *  But note that if isUsingSAF(), this may return null - it can't be assumed that there is a
      *  File corresponding to the SAF Uri.
      */
