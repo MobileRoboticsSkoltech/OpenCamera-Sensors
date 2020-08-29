@@ -918,6 +918,7 @@ public class StorageUtils {
                 order = ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
                 break;
             case MEDIASTORE_VIDEOS:
+                //noinspection DuplicateBranchesInSwitch
                 order = VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC";
                 break;
             default:
