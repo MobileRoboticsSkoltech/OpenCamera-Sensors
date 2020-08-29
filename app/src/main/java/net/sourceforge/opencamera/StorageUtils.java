@@ -73,6 +73,12 @@ public class StorageUtils {
         last_media_scanned = null;
     }
 
+    void setLastMediaScanned(Uri uri) {
+        last_media_scanned = uri;
+        if( MyDebug.LOG )
+            Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
+    }
+
     /** Sends the intents to announce the new file to other Android applications. E.g., cloud storage applications like
      *  OwnCloud use this to listen for new photos/videos to automatically upload.
      *  Note that on Android 7 onwards, these broadcasts are deprecated and won't have any effect - see:
@@ -239,9 +245,7 @@ public class StorageUtils {
                                 Log.d(TAG, "-> uri=" + uri);
                             }
                             if( set_last_scanned ) {
-                                last_media_scanned = uri;
-                                if( MyDebug.LOG )
-                                    Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
+                                setLastMediaScanned(uri);
                             }
                             announceUri(uri, is_new_picture, is_new_video);
                             applicationInterface.scannedFile(file, uri);
