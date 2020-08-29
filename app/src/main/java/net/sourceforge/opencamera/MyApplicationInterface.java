@@ -97,7 +97,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     // store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
     private final SharedPreferences sharedPreferences;
 
-    private boolean last_images_saf; // whether the last images array are using SAF or not
+    private enum LastImagesType {
+        FILE,
+        SAF
+    }
+    private LastImagesType last_images_type = LastImagesType.FILE; // whether the last images array are using File API, SAF
 
     /** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
      */
@@ -2307,11 +2311,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
-            trashImage(false, uri, filename, false);
         if( video_method == VideoMethod.FILE ) {
+            trashImage(LastImagesType.FILE, uri, filename, false);
         }
-            trashImage(true, uri, filename, false);
         else if( video_method == VideoMethod.SAF ) {
+            trashImage(LastImagesType.SAF, uri, filename, false);
         }
         // else can't delete Uri
     }
@@ -3261,7 +3265,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "addLastImage: " + file);
             Log.d(TAG, "share?: " + share);
         }
-        last_images_saf = false;
+        last_images_type = LastImagesType.FILE;
         LastImage last_image = new LastImage(file.getAbsolutePath(), share);
         last_images.add(last_image);
     }
@@ -3271,7 +3275,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "addLastImageSAF: " + uri);
             Log.d(TAG, "share?: " + share);
         }
-        last_images_saf = true;
+        last_images_type = LastImagesType.SAF;
         LastImage last_image = new LastImage(uri, share);
         last_images.add(last_image);
     }
@@ -3279,7 +3283,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     void clearLastImages() {
         if( MyDebug.LOG )
             Log.d(TAG, "clearLastImages");
-        last_images_saf = false;
+        last_images_type = LastImagesType.FILE;
         last_images.clear();
         drawPreview.clearLastImage();
     }
@@ -3322,13 +3326,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void trashImage(boolean image_saf, Uri image_uri, String image_name, boolean from_user) {
+    private void trashImage(LastImagesType image_type, Uri image_uri, String image_name, boolean from_user) {
         if( MyDebug.LOG )
             Log.d(TAG, "trashImage");
         Preview preview  = main_activity.getPreview();
-        if( image_saf && image_uri != null ) {
+        if( image_type == LastImagesType.SAF && image_uri != null ) {
             if( MyDebug.LOG )
-                Log.d(TAG, "Delete: " + image_uri);
+                Log.d(TAG, "Delete SAF: " + image_uri);
             File file = storageUtils.getFileFromDocumentUriSAF(image_uri, false); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
             try {
                 if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), image_uri) ) {
@@ -3374,12 +3378,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     void trashLastImage() {
         if( MyDebug.LOG )
-            Log.d(TAG, "trashImage");
+            Log.d(TAG, "trashLastImage");
         Preview preview  = main_activity.getPreview();
         if( preview.isPreviewPaused() ) {
             for(int i=0;i<last_images.size();i++) {
                 LastImage last_image = last_images.get(i);
-                trashImage(last_images_saf, last_image.uri, last_image.name, true);
+                trashImage(last_images_type, last_image.uri, last_image.name, true);
             }
             clearLastImages();
             drawPreview.clearGhostImage(); // doesn't make sense to show the last image as a ghost, if the user has trashed it!
