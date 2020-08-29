@@ -1934,6 +1934,7 @@ public class MainUI {
 
             if( main_activity.getPreview().supportsExposures() ) {
                 exposure_seek_bar.setVisibility(View.VISIBLE);
+                @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
                 ZoomControls seek_bar_zoom = main_activity.findViewById(R.id.exposure_seekbar_zoom);
                 seek_bar_zoom.setVisibility(View.VISIBLE);
             }

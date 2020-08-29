@@ -9822,6 +9822,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
 
+        @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
         final ZoomControls zoomControls = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
         assertEquals(zoomControls.getVisibility(), View.GONE);
 
