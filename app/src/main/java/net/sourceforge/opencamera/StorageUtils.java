@@ -852,7 +852,7 @@ public class StorageUtils {
     private enum UriType {
         MEDIASTORE_IMAGES,
         MEDIASTORE_VIDEOS
-    };
+    }
 
     private Media getLatestMediaCore(Uri baseUri, String bucket_id, UriType uri_type) {
         if( MyDebug.LOG ) {
