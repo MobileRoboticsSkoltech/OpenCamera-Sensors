@@ -160,6 +160,7 @@ public class MainActivity extends Activity {
     private final ToastBoxer white_balance_lock_toast = new ToastBoxer();
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
+    private final ToastBoxer store_location_toast = new ToastBoxer();
     private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     private String push_info_toast_text; // can be used to "push" extra text to the info text for showPhotoVideoToast()
 
@@ -1472,6 +1473,9 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the geotagging setting
         initLocation(); // required to enable or disable GPS, also requests permission if necessary
         this.closePopup();
+
+        String message = getResources().getString(R.string.preference_location) + ": " + getResources().getString(value ? R.string.on : R.string.off);
+        preview.showToast(store_location_toast, message);
     }
 
     public void clickedTextStamp(View view) {
