@@ -277,8 +277,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public VideoMethod createOutputVideoMethod() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
@@ -353,8 +352,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public Uri createOutputVideoUri() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
@@ -635,8 +633,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getVideoQualityPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
@@ -689,8 +686,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public String getVideoFPSPref() {
         // if check for EXTRA_VIDEO_QUALITY, if set, best to fall back to default FPS - see corresponding code in getVideoQualityPref
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
@@ -889,8 +885,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public long getVideoMaxDurationPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_DURATION_LIMIT) ) {
@@ -935,8 +930,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizeUserPref");
 
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
@@ -964,8 +958,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private boolean getVideoRestartMaxFileSizeUserPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
@@ -2249,8 +2242,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "done? " + done);
 
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( done && video_method == VideoMethod.FILE ) {
                 // do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
             }
@@ -3017,6 +3009,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             image_capture_intent = true;
         }
         return image_capture_intent;
+    }
+
+    boolean isVideoCaptureIntent() {
+        boolean video_capture_intent = false;
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            video_capture_intent = true;
+        }
+        return video_capture_intent;
     }
 
     /** Whether the photos will be part of a burst, even if we're receiving via the non-burst callbacks.
