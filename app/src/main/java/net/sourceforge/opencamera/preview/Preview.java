@@ -182,9 +182,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      */
     private static class VideoFileInfo {
         private final ApplicationInterface.VideoMethod video_method;
-        private final Uri video_uri; // for VideoMethod.SAF or VideoMethod.URI
+        private final Uri video_uri; // for VideoMethod.SAF, VideoMethod.URI or VideoMethod.MEDIASTORE
         private final String video_filename; // for VideoMethod.FILE
-        private final ParcelFileDescriptor video_pfd_saf; // for VideoMethod.SAF
+        private final ParcelFileDescriptor video_pfd_saf; // for VideoMethod.SAF, VideoMethod.URI or VideoMethod.MEDIASTORE
 
         VideoFileInfo() {
             this.video_method = ApplicationInterface.VideoMethod.FILE;
@@ -5322,6 +5322,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Uri uri;
                 if( method == ApplicationInterface.VideoMethod.SAF ) {
                     uri = applicationInterface.createOutputVideoSAF(extension);
+                }
+                else if( method == ApplicationInterface.VideoMethod.MEDIASTORE ) {
+                    uri = applicationInterface.createOutputVideoMediaStore(extension);
                 }
                 else {
                     uri = applicationInterface.createOutputVideoUri();

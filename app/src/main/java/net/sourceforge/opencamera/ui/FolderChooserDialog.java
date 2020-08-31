@@ -43,6 +43,7 @@ public class FolderChooserDialog extends DialogFragment {
 
     private File start_folder = new File("");
     private File current_folder;
+    private File max_parent; // if non-null, don't show the Parent option if viewing this folder (so the user can't go above that folder)
     private AlertDialog folder_dialog;
     private ListView list;
     private String chosen_folder;
@@ -199,6 +200,12 @@ public class FolderChooserDialog extends DialogFragment {
         this.start_folder = start_folder;
     }
 
+    public void setMaxParent(File max_parent) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setMaxParent: " + max_parent);
+        this.max_parent = max_parent;
+    }
+
     public void setShowNewFolderButton(boolean show_new_folder_button) {
         this.show_new_folder_button = show_new_folder_button;
     }
@@ -236,9 +243,19 @@ public class FolderChooserDialog extends DialogFragment {
         // n.b., files may be null if no files could be found in the folder (or we can't read) - but should still allow the user
         // to view this folder (so the user can go to parent folders which might be readable again)
         List<FileWrapper> listed_files = new ArrayList<>();
-        if( new_folder.getParentFile() != null )
-            listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
+        if( new_folder.getParentFile() != null ) {
+            if( max_parent != null && max_parent.equals(new_folder) ) {
+                // don't show parent option
+            }
+            else {
+                listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
+            }
+        }
         if( show_dcim_shortcut ) {
+            // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
+            // when using scoped storage, we should no longer be using this folder dialog with DCIM shortcut, but we are still
+            // using this for older Android versions.
+            @SuppressWarnings("deprecation")
             File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
                 listed_files.add(new FileWrapper(default_folder, null, 1));

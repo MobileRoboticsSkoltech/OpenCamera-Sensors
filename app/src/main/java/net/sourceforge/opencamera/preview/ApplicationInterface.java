@@ -34,6 +34,7 @@ public interface ApplicationInterface {
     enum VideoMethod {
         FILE, // video will be saved to a file
         SAF, // video will be saved using Android 5's Storage Access Framework
+        MEDIASTORE, // video will be saved to the supplied MediaStore Uri
         URI // video will be written to the supplied Uri
     }
 
@@ -44,6 +45,7 @@ public interface ApplicationInterface {
     VideoMethod createOutputVideoMethod(); // return a VideoMethod value to specify how to create a video file
     File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.FILE; extension is the recommended filename extension for the chosen video type
     Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.SAF; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoMediaStore(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.MEDIASTORE; extension is the recommended filename extension for the chosen video type
     Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VideoMethod.URI
     // for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
     // if you just want a default or don't really care, see the comments for each method for a default or possible options

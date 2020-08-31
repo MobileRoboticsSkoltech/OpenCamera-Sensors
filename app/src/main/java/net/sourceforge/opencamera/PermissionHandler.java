@@ -40,6 +40,11 @@ public class PermissionHandler {
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
             return;
         }
+        else if( MainActivity.useScopedStorage() ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "shouldn't be requesting permissions for scoped storage!");
+            return;
+        }
 
         boolean ok = true;
         String [] permissions = null;
@@ -122,6 +127,11 @@ public class PermissionHandler {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
             if( MyDebug.LOG )
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
+            return;
+        }
+        else if( MainActivity.useScopedStorage() ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "shouldn't be requesting permissions for scoped storage!");
             return;
         }
 

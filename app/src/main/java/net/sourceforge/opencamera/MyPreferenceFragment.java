@@ -1947,6 +1947,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     fragment.setModeFolder(false);
                     fragment.setExtension(".xml");
                     fragment.setStartFolder(main_activity.getStorageUtils().getSettingsFolder());
+                    if( MainActivity.useScopedStorage() ) {
+                        // since we use File API to load, don't allow going outside of the application's folder, as we won't be able to read those files!
+                        fragment.setMaxParent(main_activity.getExternalFilesDir(null));
+                    }
                     fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
                 }
             }

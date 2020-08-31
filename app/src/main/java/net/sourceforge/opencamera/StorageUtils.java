@@ -36,6 +36,7 @@ import android.provider.MediaStore.Video.VideoColumns;
 import android.provider.OpenableColumns;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
+
 import android.system.Os;
 import android.system.StructStatVfs;
 import android.util.Log;
@@ -55,7 +56,13 @@ public class StorageUtils {
     private final MyApplicationInterface applicationInterface;
     private Uri last_media_scanned;
 
-    private final static File base_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+    private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DCIM;
+    // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
+    // when using scoped storage, we should no longer be trying to read/write this codepath with File API, but we are still using
+    // this for older Android versions.
+    // Furthermore, sometimes we still use this with scoped storage for valid purposes, e.g., to pass to StatFs in freeMemory().
+    @SuppressWarnings("deprecation")
+    private final static File base_folder = Environment.getExternalStoragePublicDirectory(RELATIVE_FOLDER_BASE);
 
     // for testing:
     public volatile boolean failed_to_scan;
@@ -103,6 +110,7 @@ public class StorageUtils {
 
             if( MyDebug.LOG ) // this code only used for debugging/logging
             {
+                @SuppressWarnings("deprecation") // this is only debug code
                 String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED };
                 Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
                 if( c == null ) {
@@ -114,6 +122,7 @@ public class StorageUtils {
                         Log.e(TAG, "Couldn't resolve given uri [2]: " + uri);
                 }
                 else {
+                    @SuppressWarnings("deprecation") // this is only debug code
                     String file_path = c.getString(c.getColumnIndex(Images.Media.DATA));
                     String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME));
                     String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE));
@@ -368,6 +377,26 @@ public class StorageUtils {
         return file;
     }
 
+    // only valid if !isUsingSAF()
+    String getSaveRelativeFolder() {
+        String folder_name = getSaveLocation();
+        return getSaveRelativeFolder(folder_name);
+    }
+
+    // only valid if !isUsingSAF()
+    private static String getSaveRelativeFolder(String folder_name) {
+        if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
+            // ignore final '/' character
+            folder_name = folder_name.substring(0, folder_name.length()-1);
+        }
+        if( folder_name.startsWith("/") ) {
+            return folder_name;
+        }
+        else {
+            return RELATIVE_FOLDER_BASE + File.separator + folder_name;
+        }
+    }
+
     public static File getBaseFolder() {
         return base_folder;
     }
@@ -379,7 +408,6 @@ public class StorageUtils {
             // ignore final '/' character
             folder_name = folder_name.substring(0, folder_name.length()-1);
         }
-        //if( folder_name.contains("/") ) {
         if( folder_name.startsWith("/") ) {
             file = new File(folder_name);
         }
@@ -407,6 +435,8 @@ public class StorageUtils {
      *  See:
             http://stackoverflow.com/questions/21605493/storage-access-framework-does-not-update-mediascanner-mtp
             http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
+        Note that when using Android Q's scoped storage, the returned File will be inaccessible. However we still sometimes call this,
+        e.g., to scan with mediascanner or get a human readable string for the path.
         Also note that this will return null for media store Uris with Android Q's scoped storage: https://developer.android.com/preview/privacy/scoped-storage
         "The DATA column is redacted for each file in the media store."
      */
@@ -440,6 +470,10 @@ public class StorageUtils {
                 File [] storagePoints = new File("/storage").listFiles();
 
                 if( "primary".equalsIgnoreCase(type) ) {
+                    // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
+                    // when using scoped storage, as noted above we should no longer be trying to read/write this path with File API;
+                    // and otherwise we are still using this for older Android versions.
+                    @SuppressWarnings("deprecation")
                     final File externalStorage = Environment.getExternalStorageDirectory();
                     file = new File(externalStorage, path);
                 }
@@ -528,6 +562,9 @@ public class StorageUtils {
     }
 
     private String getDataColumn(Uri uri, String selection, String [] selectionArgs) {
+        // DATA is redacted with scoped storage, but that's fine - the callers of this method are documented that they may return
+        // no filename, and these callers have been reviewed for their use on Android 10+ with scoped storage
+        @SuppressWarnings("deprecation")
         final String column = MediaStore.Images.ImageColumns.DATA;
         final String[] projection = {
                 column
@@ -601,7 +638,7 @@ public class StorageUtils {
         return result;
     }
 
-    private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
+    String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
@@ -821,20 +858,40 @@ public class StorageUtils {
     }
 
     static class Media {
-        final long id;
+        final boolean mediastore; // whether uri is from mediastore
+        final long id; // for mediastore==true only
         final boolean video;
         final Uri uri;
         final long date;
-        final int orientation;
+        final int orientation; // for mediastore==true, video==false only
         final String filename; // this should correspond to DISPLAY_NAME (so available with scoped storage) - so this includes file extension, but not full path
 
-        Media(long id, boolean video, Uri uri, long date, int orientation, String filename) {
+        Media(boolean mediastore, long id, boolean video, Uri uri, long date, int orientation, String filename) {
+            this.mediastore = mediastore;
             this.id = id;
             this.video = video;
             this.uri = uri;
             this.date = date;
             this.orientation = orientation;
             this.filename = filename;
+        }
+
+        /** Returns a mediastore uri. If this Media object was not created by a mediastore uri, then
+         *  this will try to convert using MediaStore.getMediaUri(), but if this fails the function
+         *  will return null.
+         */
+        Uri getMediaStoreUri(Context context) {
+            if( this.mediastore )
+                return this.uri;
+            else {
+                try {
+                    return MediaStore.getMediaUri(context, this.uri);
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
         }
     }
 
@@ -869,7 +926,7 @@ public class StorageUtils {
         final int column_name_c = 3; // filename (without path), including extension
         final int column_orientation_c = 4; // for images only*/
         final int column_name_c = 2; // filename (without path), including extension
-        final int column_orientation_c = 3; // for images only
+        final int column_orientation_c = 3; // for mediastore images only
         String [] projection;
         switch( uri_type ) {
             case MEDIASTORE_IMAGES:
@@ -882,6 +939,7 @@ public class StorageUtils {
                 throw new RuntimeException("unknown uri_type: " + uri_type);
         }
         // for images, we need to search for JPEG/etc and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
+        // if updating this code for supported mime types, remember to also update getLatestMediaSAF()
         /*String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " +
                 ImageColumns.MIME_TYPE + "='image/webp' OR " +
                 ImageColumns.MIME_TYPE + "='image/png' OR " +
@@ -1058,7 +1116,21 @@ public class StorageUtils {
                 if( MyDebug.LOG )
                     Log.d(TAG, "video: " + video);
 
-                media = new Media(id, video, uri, date, orientation, filename);
+                media = new Media(true, id, video, uri, date, orientation, filename);
+
+                if( MyDebug.LOG ) {
+                    // debug
+                    if( cursor.moveToFirst() ) {
+                        do {
+                            long this_id = cursor.getLong(column_id_c);
+                            long this_date = cursor.getLong(column_date_taken_c);
+                            Uri this_uri = ContentUris.withAppendedId(baseUri, this_id);
+                            String this_filename = cursor.getString(column_name_c);
+                            Log.d(TAG, "Date: " + this_date + " ID: " + this_id + " Name: " + this_filename + " Uri: " + this_uri);
+                        }
+                        while( cursor.moveToNext() );
+                    }
+                }
             }
             else {
                 if( MyDebug.LOG )
@@ -1077,17 +1149,192 @@ public class StorageUtils {
             }
         }
 
+        if( MyDebug.LOG )
+            Log.d(TAG, "return latest media: " + media);
+        return media;
+    }
+
+    /** Used when using Storage Access Framework AND scoped storage.
+     *  This is because with scoped storage, we don't request READ_EXTERNAL_STORAGE (as
+     *  recommended). It's meant to be the case that applications should still be able to see files
+     *  that they own - but whilst this is true when images are saved using mediastore API, this is
+     *  NOT true when saving with Storage Access Framework - they don't show up in mediastore
+     *  queries (even though they've definitely been added to the mediastore). So instead we read
+     *  using the SAF uri, and if we need the media uri (e.g., to pass to Gallery application), use
+     *  Media.getMediaStoreUri(). What a mess!
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private Media getLatestMediaSAF(Uri treeUri) {
+        if (MyDebug.LOG)
+            Log.d(TAG, "getLatestMedia: " + treeUri);
+
+        Media media = null;
+
+        Uri baseUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+        if( MyDebug.LOG )
+            Log.d(TAG, "baseUri: " + baseUri);
+
+        final int column_id_c = 0;
+        final int column_date_c = 1;
+        final int column_name_c = 2; // filename (without path), including extension
+        final int column_mime_c = 3;
+        String [] projection = new String[] {DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_LAST_MODIFIED, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE};
+
+        // Note, it appears that when querying DocumentsContract, basic query functionality like selection, ordering, are ignored(!).
+        // See: https://stackoverflow.com/questions/52770188/how-to-filter-the-results-of-a-query-with-buildchilddocumentsuriusingtree
+        // https://stackoverflow.com/questions/56263620/contentresolver-query-on-documentcontract-lists-all-files-disregarding-selection
+        // So, we have to do it ourselves.
+
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(baseUri, projection, null, null, null);
+            if( cursor != null && cursor.moveToFirst() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "found: " + cursor.getCount());
+
+                Uri latest_uri = null;
+                long latest_date = 0;
+                String latest_filename = null;
+                boolean latest_is_video = false;
+
+                // as well as scanning for the most recent image, we also keep track of the most recent non-RAW image,
+                // in case we want to prefer that when the most recent
+                Uri nonraw_latest_uri = null;
+                long nonraw_latest_date = 0;
+                String nonraw_latest_filename = null;
+
+                do {
+                    long this_date = cursor.getLong(column_date_c);
+
+                    String doc_id = cursor.getString(column_id_c);
+                    Uri this_uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, doc_id);
+                    String this_mime_type = cursor.getString(column_mime_c);
+
+                    // if updating this code for allowed mime types, also update corresponding code in getLatestMediaCore()
+                    boolean is_allowed;
+                    boolean this_is_video;
+                    switch( this_mime_type ) {
+                        case "image/jpeg":
+                        case "image/webp":
+                        case "image/png":
+                        case "image/x-adobe-dng":
+                            is_allowed = true;
+                            this_is_video = false;
+                            break;
+                        case "video/3gpp":
+                        case "video/webm":
+                        case "video/mp4":
+                            // n.b., perhaps we should just allow video/*, but we should still disallow .SRT files!
+                            is_allowed = true;
+                            this_is_video = true;
+                            break;
+                        default:
+                            // skip unwanted file format
+                            is_allowed = false;
+                            this_is_video = false;
+                            break;
+                    }
+                    if( !is_allowed ) {
+                        continue;
+                    }
+
+                    String this_filename = cursor.getString(column_name_c);
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "Date: " + this_date + " doc_id: " + doc_id + " Name: " + this_filename + " Uri: " + this_uri);
+                    }
+
+                    if( latest_uri == null || this_date > latest_date ) {
+                        latest_uri = this_uri;
+                        latest_date = this_date;
+                        latest_filename = this_filename;
+                        latest_is_video = this_is_video;
+                    }
+                    if( !this_is_video && !filenameIsRaw(this_filename) ) {
+                        if( nonraw_latest_uri == null || this_date > nonraw_latest_date ) {
+                            nonraw_latest_uri = this_uri;
+                            nonraw_latest_date = this_date;
+                            nonraw_latest_filename = this_filename;
+                        }
+                    }
+                }
+                while( cursor.moveToNext() );
+
+                if( latest_uri == null ) {
+                    if( MyDebug.LOG )
+                        Log.e(TAG, "couldn't find latest uri");
+                }
+                else {
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "latest_uri: " + latest_uri);
+                        Log.d(TAG, "nonraw_latest_uri: " + nonraw_latest_uri);
+                    }
+
+                    if( !latest_is_video && filenameIsRaw(latest_filename) && nonraw_latest_uri != null ) {
+                        // prefer non-RAW to RAW? check filenames without extensions match
+                        String filename_without_ext = filenameWithoutExtension(latest_filename);
+                        String next_filename_without_ext = filenameWithoutExtension(nonraw_latest_filename);
+                        if( MyDebug.LOG ) {
+                            Log.d(TAG, "filename_without_ext: " + filename_without_ext);
+                            Log.d(TAG, "next_filename_without_ext: " + next_filename_without_ext);
+                        }
+                        if( filename_without_ext.equals(next_filename_without_ext) ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "prefer non-RAW to RAW");
+                            latest_uri = nonraw_latest_uri;
+                            latest_date = nonraw_latest_date;
+                            latest_filename = nonraw_latest_filename;
+                            // video is unchanged
+                        }
+                    }
+
+                    media = new Media(false,0, latest_is_video, latest_uri, latest_date, 0, latest_filename);
+                }
+
+                /*if( MyDebug.LOG ) {
+                    // debug
+                    if( cursor.moveToFirst() ) {
+                        do {
+                            long this_id = cursor.getLong(column_id_c);
+                            long this_date = cursor.getLong(column_date_taken_c);
+                            Uri this_uri = ContentUris.withAppendedId(baseUri, this_id);
+                            String this_filename = cursor.getString(column_name_c);
+                            Log.d(TAG, "Date: " + this_date + " ID: " + this_id + " Name: " + this_filename + " Uri: " + this_uri);
+                        }
+                        while( cursor.moveToNext() );
+                    }
+                }*/
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "mediastore returned no media");
+            }
+        }
+        catch(Exception e) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "Exception trying to find latest media");
+            e.printStackTrace();
+        }
+        finally {
+            if( cursor != null ) {
+                cursor.close();
+            }
+        }
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "return latest media: " + media);
         return media;
     }
 
     private Media getLatestMedia(UriType uri_type) {
         if( MyDebug.LOG )
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
             Log.d(TAG, "getLatestMedia: " + uri_type);
+        if( !MainActivity.useScopedStorage() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
             // needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
             // see https://developer.android.com/training/permissions/requesting.html
             // we now request storage permission before opening the camera, but keep this here just in case
             // we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+            // update for scoped storage: here we should no longer need READ_EXTERNAL_STORAGE (which we won't have), instead we'll only be able to see
+            // media created by Open Camera, which is fine
             if( MyDebug.LOG )
                 Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
             return null;
@@ -1128,6 +1375,11 @@ public class StorageUtils {
     }
 
     Media getLatestMedia() {
+        if( MainActivity.useScopedStorage() && this.isUsingSAF() ) {
+            Uri treeUri = this.getTreeUriSAF();
+            return getLatestMediaSAF(treeUri);
+        }
+
         Media image_media = getLatestMedia(UriType.MEDIASTORE_IMAGES);
         Media video_media = getLatestMedia(UriType.MEDIASTORE_VIDEOS);
         Media media = null;
@@ -1221,6 +1473,7 @@ public class StorageUtils {
             // if we fail for SAF, don't fall back to the methods below, as this may be incorrect (especially for external SD card)
             return freeMemorySAF();
         }
+        // n.b., StatFs still seems to work with Android 10's scoped storage... (and there doesn't seem to be an official non-File based equivalent)
         try {
             File folder = getImageFolder();
             if( folder == null ) {

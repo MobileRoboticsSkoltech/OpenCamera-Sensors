@@ -38,6 +38,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -676,6 +677,14 @@ public class MainActivity extends Activity {
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
+    }
+
+    /** Whether to use codepaths that are compatible with scoped storage.
+     */
+    public static boolean useScopedStorage() {
+        return false;
+        //return true;
+        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
@@ -3003,8 +3012,9 @@ public class MainActivity extends Activity {
      *  MediaStore uris, as well as allowing control over the resolution of the thumbnail.
      *  If sample_factor is 1, this returns a bitmap scaled to match the display resolution. If
      *  sample_factor is greater than 1, it will be scaled down to a lower resolution.
+     * @param mediastore Whether the uri is for a mediastore uri or not.
      */
-    private Bitmap loadThumbnailFromUri(Uri uri, int sample_factor) {
+    private Bitmap loadThumbnailFromUri(Uri uri, int sample_factor, boolean mediastore) {
         Bitmap thumbnail = null;
         try {
             //thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
@@ -3060,6 +3070,13 @@ public class MainActivity extends Activity {
                 Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
             }
             is.close();
+
+            if( !mediastore ) {
+                // When loading from a mediastore, the bitmap already seems to have the correct orientation.
+                // But when loading from a saf uri, we need to apply the rotation.
+                // E.g., test on Galaxy S10e with ghost image last image option, when using SAF, in portrait orientation, after pause/resume.
+                thumbnail = rotateForExif(thumbnail, uri);
+            }
         }
         catch(IOException e) {
             Log.e(TAG, "failed to load bitmap for ghost image last");
@@ -3133,11 +3150,49 @@ public class MainActivity extends Activity {
                     if( ghost_image_last && !media.video ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "load full size bitmap for ghost image last photo");
-                        thumbnail = loadThumbnailFromUri(media.uri, 1);
+                        thumbnail = loadThumbnailFromUri(media.uri, 1, media.mediastore);
                     }
                     if( thumbnail == null ) {
                         try {
-                            if( media.video ) {
+                            if( !media.mediastore ) {
+                                if( media.video ) {
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "load thumbnail for video from SAF uri");
+                                    ParcelFileDescriptor pfd_saf = null; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
+                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                    try {
+                                        pfd_saf = getContentResolver().openFileDescriptor(media.uri, "r");
+                                        retriever.setDataSource(pfd_saf.getFileDescriptor());
+                                        thumbnail = retriever.getFrameAtTime(-1);
+                                    }
+                                    catch(Exception e) {
+                                        Log.d(TAG, "failed to load video thumbnail");
+                                        e.printStackTrace();
+                                    }
+                                    finally {
+                                        try {
+                                            retriever.release();
+                                        }
+                                        catch(RuntimeException ex) {
+                                            // ignore
+                                        }
+                                        try {
+                                            if( pfd_saf != null ) {
+                                                pfd_saf.close();
+                                            }
+                                        }
+                                        catch(IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                else {
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "load thumbnail for photo from SAF uri");
+                                    thumbnail = loadThumbnailFromUri(media.uri, 4, media.mediastore);
+                                }
+                            }
+                            else if( media.video ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "load thumbnail for video");
                                 thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
@@ -3307,13 +3362,19 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "go to latest media");
             StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
             if( media != null ) {
-                uri = media.uri;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "latest uri:" + media.uri);
+                uri = media.getMediaStoreUri(this);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "media uri:" + uri);
                 is_raw = media.filename != null && media.filename.toLowerCase(Locale.US).endsWith(".dng");
             }
         }
 
-        if( uri != null ) {
+        if( uri != null && !MainActivity.useScopedStorage() ) {
             // check uri exists
+            // note, with scoped storage this isn't reliable when using SAF - since we don't actually have permission to access mediastore URIs that
+            // were created via Storage Access Framework, even though Open Camera was the application that saved them(!)
             if( MyDebug.LOG ) {
                 Log.d(TAG, "found most recent uri: " + uri);
                 Log.d(TAG, "is_raw: " + is_raw);

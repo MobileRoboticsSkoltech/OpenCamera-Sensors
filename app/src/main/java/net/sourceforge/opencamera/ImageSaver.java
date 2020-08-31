@@ -29,6 +29,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -45,6 +46,7 @@ import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.util.Log;
 import android.util.Xml;
@@ -1608,7 +1610,7 @@ public class ImageSaver extends Thread {
                     writeGyroDebugXml(writer, request);
 
                     StorageUtils storageUtils = main_activity.getStorageUtils();
-                    File saveFile = null;
+                    /*File saveFile = null;
 					Uri saveUri = null;
 					if( storageUtils.isUsingSAF() ) {
 						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
@@ -1617,7 +1619,16 @@ public class ImageSaver extends Thread {
                         saveFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
                         if( MyDebug.LOG )
                             Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
-                    }
+                    }*/
+					// We save to the application specific folder so this works on Android 10 with scoped storage, without having to
+                    // rewrite the non-SAF codepath to use MediaStore API (which would also have problems that the gyro debug files would
+                    // show up in the MediaStore, hence gallery applications!)
+                    // We use this for older Android versions for consistency, plus not a bad idea of to have debug files in the application
+                    // folder anyway.
+                    File saveFile = storageUtils.createOutputMediaFile(main_activity.getExternalFilesDir(null), StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
+                    Uri saveUri = null;
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
 
                     OutputStream outputStream;
                     if( saveFile != null )
@@ -2303,10 +2314,12 @@ public class ImageSaver extends Thread {
 
         main_activity.savingImage(true);
 
-        // If using SAF or image_capture_intent is true, only saveUri is non-null
+        // If using SAF or image_capture_intent is true, or using scoped storage, only saveUri is non-null
         // Otherwise, only picFile is non-null
         File picFile = null;
         Uri saveUri = null;
+        boolean use_media_store = false;
+        ContentValues contentValues = null; // used if using scoped storage
         try {
             if( !raw_only ) {
                 PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap, ignore_exif_orientation);
@@ -2377,6 +2390,37 @@ public class ImageSaver extends Thread {
             }
             else if( storageUtils.isUsingSAF() ) {
                 saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
+            }
+            else if( MainActivity.useScopedStorage() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "use media store");
+                use_media_store = true;
+                Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                contentValues = new ContentValues();
+                String picName = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, 0, "." + extension, request.current_date);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "picName: " + picName);
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, picName);
+                String mime_type = storageUtils.getImageMimeType(extension);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "mime_type: " + mime_type);
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, mime_type);
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    String relative_path = storageUtils.getSaveRelativeFolder();
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "relative_path: " + relative_path);
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, relative_path);
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
+                }
+
+                saveUri = main_activity.getContentResolver().insert(folder, contentValues);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "saveUri: " + saveUri);
+                if( saveUri == null ) {
+                    throw new IOException();
+                }
             }
             else {
                 picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
@@ -2487,7 +2531,29 @@ public class ImageSaver extends Thread {
 
                 if( saveUri != null ) {
                     success = true;
-                    broadcastSAFFile(saveUri, request.image_capture_intent);
+
+                    if( use_media_store ) {
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                            contentValues.clear();
+                            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0);
+                            main_activity.getContentResolver().update(saveUri, contentValues, null, null);
+                        }
+
+                        // no need to broadcast when using mediastore method
+                        if( !request.image_capture_intent ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "announce mediastore uri");
+                            // in theory this is pointless, as announceUri no longer does anything on Android 7+,
+                            // and mediastore method is only used on Android 10+, but keep this just in case
+                            // announceUri does something in future
+                            storageUtils.announceUri(saveUri, true, false);
+                            // we also want to save the uri - we can use the media uri directly, rather than having to scan it
+                            storageUtils.setLastMediaScanned(saveUri);
+                        }
+                    }
+                    else {
+                        broadcastSAFFile(saveUri, request.image_capture_intent);
+                    }
                 }
             }
         }
@@ -2519,6 +2585,9 @@ public class ImageSaver extends Thread {
         }
         else if( success && storageUtils.isUsingSAF() ){
             applicationInterface.addLastImageSAF(saveUri, share_image);
+        }
+        else if( success && use_media_store ){
+            applicationInterface.addLastImageMediaStore(saveUri, share_image);
         }
 
         // I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
@@ -2983,6 +3052,8 @@ public class ImageSaver extends Thread {
         try {
             File picFile = null;
             Uri saveUri = null;
+            boolean use_media_store = false;
+            ContentValues contentValues = null; // used if using scoped storage
 
             String suffix = "_";
             String filename_suffix = (request.force_suffix) ? suffix + (request.suffix_offset) : "";
@@ -2992,6 +3063,26 @@ public class ImageSaver extends Thread {
                     Log.d(TAG, "saveUri: " + saveUri);
                 // When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
                 // need a real file; secondly copying to a temp file is much slower for RAW.
+            }
+            else if( MainActivity.useScopedStorage() ) {
+                use_media_store = true;
+                Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                contentValues = new ContentValues();
+                String picName = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, 0, ".dng", request.current_date);
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, picName);
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/dng");
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, storageUtils.getSaveRelativeFolder());
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
+                }
+
+                saveUri = main_activity.getContentResolver().insert(folder, contentValues);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "saveUri: " + saveUri);
+                if( saveUri == null )
+                    throw new IOException();
             }
             else {
                 picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "dng", request.current_date);
@@ -3026,9 +3117,26 @@ public class ImageSaver extends Thread {
             else if( storageUtils.isUsingSAF() ){
                 applicationInterface.addLastImageSAF(saveUri, raw_only);
             }
+            else if( success && use_media_store ){
+                applicationInterface.addLastImageMediaStore(saveUri, raw_only);
+            }
 
             if( saveUri == null ) {
                 storageUtils.broadcastFile(picFile, true, false, false);
+            }
+            else if( use_media_store ) {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    contentValues.clear();
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 0);
+                    main_activity.getContentResolver().update(saveUri, contentValues, null, null);
+                }
+
+                // no need to broadcast when using mediastore method
+
+                // in theory this is pointless, as announceUri no longer does anything on Android 7+,
+                // and mediastore method is only used on Android 10+, but keep this just in case
+                // announceUri does something in future
+                storageUtils.announceUri(saveUri, true, false);
             }
             else {
                 storageUtils.broadcastUri(saveUri, true, false, false, false);

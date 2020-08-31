@@ -28,6 +28,7 @@
         android:name=".OpenCameraApplication"
         android:theme="@style/AppTheme"
         android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
         >
         <!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
