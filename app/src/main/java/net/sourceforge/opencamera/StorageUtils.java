@@ -885,7 +885,10 @@ public class StorageUtils {
                 return this.uri;
             else {
                 try {
-                    return MediaStore.getMediaUri(context, this.uri);
+                    // should only have allowed mediastore==null when using scoped storage
+                    if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                        return MediaStore.getMediaUri(context, this.uri);
+                    }
                 }
                 catch(Exception e) {
                     e.printStackTrace();
