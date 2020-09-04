@@ -2571,6 +2571,7 @@ public class ImageSaver extends Thread {
         }
         catch(SecurityException e) {
             // received security exception from copyFileToUri()->openOutputStream() from Google Play
+            // update: no longer have copyFileToUri() (as no longer use temporary files for SAF), but might as well keep this
             if( MyDebug.LOG )
                 Log.e(TAG, "security exception writing file: " + e.getMessage());
             e.printStackTrace();
@@ -3538,36 +3539,6 @@ public class ImageSaver extends Thread {
             return store_location;
         }
         return false;
-    }
-
-    /** Reads from picFile and writes the contents to saveUri.
-     */
-    private void copyFileToUri(Context context, Uri saveUri, File picFile) throws IOException {
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "copyFileToUri");
-            Log.d(TAG, "saveUri: " + saveUri);
-            Log.d(TAG, "picFile: " + saveUri);
-        }
-        InputStream inputStream = null;
-        OutputStream realOutputStream = null;
-        try {
-            inputStream = new FileInputStream(picFile);
-            realOutputStream = context.getContentResolver().openOutputStream(saveUri);
-            // Transfer bytes from in to out
-            byte [] buffer = new byte[1024];
-            int len;
-            while( (len = inputStream.read(buffer)) > 0 ) {
-                realOutputStream.write(buffer, 0, len);
-            }
-        }
-        finally {
-            if( inputStream != null ) {
-                inputStream.close();
-            }
-            if( realOutputStream != null ) {
-                realOutputStream.close();
-            }
-        }
     }
 
     // for testing:
