@@ -771,8 +771,8 @@ public class PopupView extends LinearLayout {
                             @Override
                             public void run() {
                                 if (MyDebug.LOG)
-                                    Log.d(TAG, "update settings due to resolution change");
                                 main_activity.updateForSettings("", true); // keep the popupview open
+                                    Log.d(TAG, "update settings due to video capture rate change");
                             }
                         };
 
@@ -812,7 +812,7 @@ public class PopupView extends LinearLayout {
                             old_video_capture_rate_index = video_capture_rate_index;
 
                             if( keep_popup ) {
-                                // make it easier to scroll through the list of resolutions without a pause each time
+                                // make it easier to scroll through the list of capture rates without a pause each time
                                 handler.removeCallbacks(update_runnable);
                                 handler.postDelayed(update_runnable, 400);
                             }
