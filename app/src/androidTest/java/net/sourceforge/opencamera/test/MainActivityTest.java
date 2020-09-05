@@ -202,7 +202,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void pauseAndResume() {
         Log.d(TAG, "pauseAndResume");
-        pauseAndResume(true);
+        boolean camera_is_open = mPreview.getCameraController() != null;
+        pauseAndResume(camera_is_open);
     }
 
     private void pauseAndResume(boolean wait_until_camera_opened) {
@@ -237,7 +238,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             public void run() {
                 mActivity.initLocation(); // initLocation now called via MainActivity.setWindowFlagsForCamera() rather than updateForSettings()
                 mActivity.getApplicationInterface().getDrawPreview().updateSettings();
-                mActivity.updateForSettings();
+                mActivity.updateForSettings(true);
             }
         });
         // need to wait for UI code to finish before leaving
@@ -9480,12 +9481,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /* Tests we disable location when going to settings, but re-enable it when returning to camera.
+     * Also tests camera is turned off when going to settings.
      * Fails on Android emulator because we immediately get location again after returning from settings.
      */
     public void testLocationSettings() throws InterruptedException {
         Log.d(TAG, "testLocationSettings");
         setToDefault();
 
+        assertTrue(mPreview.openCameraAttempted());
+        assertNotNull(mPreview.getCameraController());
         assertTrue(mActivity.getLocationSupplier().noLocationListeners());
         assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
         assertNull(mActivity.getLocationSupplier().getLocation());
@@ -9519,6 +9523,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.getLocationSupplier().getLocation(locationInfo);
         assertFalse(locationInfo.LocationWasCached());
 
+        assertTrue(mPreview.openCameraAttempted());
+        assertNotNull(mPreview.getCameraController());
+
         // now go to settings
         assertFalse(mActivity.isCameraInBackground());
         View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
@@ -9529,10 +9536,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "after idle sync");
         assertTrue(mActivity.isCameraInBackground());
 
-        // now check we're not listening for location
+        // now check we're not listening for location, or opening camera
         start_t = System.currentTimeMillis();
         int count = 0;
         while( System.currentTimeMillis() - start_t <= 15000 ) {
+            assertFalse(mPreview.isOpeningCamera());
+            assertFalse(mPreview.openCameraAttempted());
+            assertNull(mPreview.getCameraController());
+
             assertTrue(mActivity.getLocationSupplier().noLocationListeners());
             assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
             assertNull(mActivity.getLocationSupplier().getLocation());
@@ -9554,6 +9565,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "after idle sync");
         assertFalse(mActivity.isCameraInBackground());
 
+        // check camera is reopening
+        assertTrue(mPreview.isOpeningCamera() || mPreview.openCameraAttempted());
+
         // check we start listening again
         // first should have a cached location
         assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
@@ -9562,6 +9576,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         locationInfo = new LocationSupplier.LocationInfo();
         mActivity.getLocationSupplier().getLocation(locationInfo);
         assertTrue(locationInfo.LocationWasCached());
+
+        // check camera is opened after a pause
+        Thread.sleep(1000);
+        assertTrue(mPreview.openCameraAttempted());
+        assertNotNull(mPreview.getCameraController());
 
         // check we get a non-cached location
         while( !mActivity.getLocationSupplier().testHasReceivedLocation() ) {
@@ -9616,6 +9635,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "after idle sync");
             assertFalse(mActivity.isCameraInBackground());
         }
+
+        // check camera is opened after a pause
+        Thread.sleep(1000);
+        assertTrue(mPreview.openCameraAttempted());
+        assertNotNull(mPreview.getCameraController());
     }
 
     private void subTestPhotoStamp() throws IOException {

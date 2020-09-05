@@ -1831,7 +1831,7 @@ public class MainUI {
                         editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
                         editor.apply();
                         preview.showToast("ISO: " + toast_option, 0, true); // supply offset_y_dp to be consistent with preview.setExposure(), preview.setISO()
-                        main_activity.updateForSettings(""); // already showed the toast, so block from showing again
+                        main_activity.updateForSettings(true, ""); // already showed the toast, so block from showing again
                     }
                     else if( old_iso.equals(CameraController.ISO_DEFAULT) ) {
                         if( MyDebug.LOG )
@@ -1869,7 +1869,7 @@ public class MainUI {
 
                         editor.apply();
                         preview.showToast("ISO: " + toast_option, 0, true); // supply offset_y_dp to be consistent with preview.setExposure(), preview.setISO()
-                        main_activity.updateForSettings(""); // already showed the toast, so block from showing again
+                        main_activity.updateForSettings(true, ""); // already showed the toast, so block from showing again
                     }
                     else {
                         if( MyDebug.LOG )

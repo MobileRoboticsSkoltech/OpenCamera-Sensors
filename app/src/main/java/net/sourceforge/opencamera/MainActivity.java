@@ -1252,7 +1252,10 @@ public class MainActivity extends Activity {
 
         applicationInterface.reset(false); // should be called before opening the camera in preview.onResume()
 
-        preview.onResume();
+        if( !camera_in_background ) {
+            // don't restart camera if we're showing a dialog or settings
+            preview.onResume();
+        }
 
         {
             // show a toast for the camera if it's not the first for front of back facing (otherwise on multi-front/back camera
@@ -2343,7 +2346,7 @@ public class MainActivity extends Activity {
         preferencesListener.startListening();
 
         showPreview(false);
-        setWindowFlagsForSettings();
+        setWindowFlagsForSettings(); // important to do after passing camera info into bundle, since this will close the camera
         MyPreferenceFragment fragment = new MyPreferenceFragment();
         fragment.setArguments(bundle);
         // use commitAllowingStateLoss() instead of commit(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
@@ -2351,23 +2354,25 @@ public class MainActivity extends Activity {
         getFragmentManager().beginTransaction().add(android.R.id.content, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
     }
 
-    public void updateForSettings() {
-        updateForSettings(null, false);
+    public void updateForSettings(boolean update_camera) {
+        updateForSettings(update_camera, null, false);
     }
 
-    public void updateForSettings(String toast_message) {
-        updateForSettings(toast_message, false);
+    public void updateForSettings(boolean update_camera, String toast_message) {
+        updateForSettings(update_camera, toast_message, false);
     }
 
     /** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
      *  camera, and make any other necessary changes.
+     * @param update_camera Whether the camera needs to be updated. Can be set to false if we know changes
+     *                      haven't been made to the camera settings, or we already reopened it.
      * @param toast_message If non-null, display this toast instead of the usual camera "startup" toast
      *                      that's shown in showPhotoVideoToast(). If non-null but an empty string, then
      *                      this means no toast is shown at all.
      * @param keep_popup If false, the popup will be closed and destroyed. Set to true if you're sure
      *                   that the changed setting isn't one that requires the PopupView to be recreated
      */
-    public void updateForSettings(String toast_message, boolean keep_popup) {
+    public void updateForSettings(boolean update_camera, String toast_message, boolean keep_popup) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings()");
             if( toast_message != null ) {
@@ -2407,7 +2412,7 @@ public class MainActivity extends Activity {
         // doesn't happen if we allow using Camera2 API on Nexus 7, but reopen for consistency (and changing scene modes via
         // popup menu no longer should be calling updateForSettings() for Camera2, anyway)
         boolean need_reopen = false;
-        if( preview.getCameraController() != null ) {
+        if( update_camera && preview.getCameraController() != null ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String scene_mode = preview.getCameraController().getSceneMode();
             if( MyDebug.LOG )
@@ -2480,7 +2485,10 @@ public class MainActivity extends Activity {
         }
         if( toast_message != null )
             block_startup_toast = true;
-        if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
+        if( !update_camera ) {
+            // don't try to update camera
+        }
+        else if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
             preview.reopenCamera();
             if( MyDebug.LOG ) {
                 Log.d(TAG, "updateForSettings: time after reopen: " + (System.currentTimeMillis() - debug_time));
@@ -2613,7 +2621,8 @@ public class MainActivity extends Activity {
         }
 
         if( preferencesListener.anySignificantChange() ) {
-            updateForSettings();
+            // don't need to update camera, as we now pause/resume camera when going to settings
+            updateForSettings(false);
         }
         else {
             if( MyDebug.LOG )
@@ -2803,6 +2812,7 @@ public class MainActivity extends Activity {
         if( preview != null ) {
             // also need to call setCameraDisplayOrientation, as this handles if the user switched from portrait to reverse landscape whilst in settings/etc
             // as switching from reverse landscape back to landscape isn't detected in onConfigurationChanged
+            // update: now probably irrelevant now that we close/reopen the camera, but keep it here anyway
             preview.setCameraDisplayOrientation();
         }
         if( preview != null && mainUI != null ) {
@@ -2860,6 +2870,11 @@ public class MainActivity extends Activity {
             // app is paused. It can happen here because setWindowFlagsForCamera() is called from
             // onCreate()
             initLocation();
+
+            // Similarly only want to reopen the camera if no longer paused
+            if( preview != null ) {
+                preview.onResume();
+            }
         }
     }
 
@@ -2904,6 +2919,9 @@ public class MainActivity extends Activity {
 
         // we disable location listening when showing settings or a dialog etc - saves battery life, also better for privacy
         applicationInterface.getLocationSupplier().freeLocationListeners();
+
+        // similarly we close the camera
+        preview.onPause();
     }
 
     private void showWhenLocked(boolean show) {

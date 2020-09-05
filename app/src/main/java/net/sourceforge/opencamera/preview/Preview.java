@@ -1175,6 +1175,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    /** Closes the camera.
+     * @param async Whether to close the camera on a background thread.
+     * @param closeCameraCallback If async is true, closeCameraCallback.onClosed() will be called,
+     *                            from the UI thread, once the camera is closed. If async is false,
+     *                            this field is ignored.
+     */
     private void closeCamera(boolean async, final CloseCameraCallback closeCameraCallback) {
         long debug_time = 0;
         if( MyDebug.LOG ) {
@@ -1346,7 +1352,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "openCamera()");
             debug_time = System.currentTimeMillis();
         }
-        if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
+        if( applicationInterface.isPreviewInBackground() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "don't open camera as preview in background");
+            // note, even if the application never tries to reopen the camera in the background, we still need this check to avoid the camera
+            // opening from mySurfaceCreated()
+            return;
+        }
+        else if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "already opening camera in background thread");
             return;
