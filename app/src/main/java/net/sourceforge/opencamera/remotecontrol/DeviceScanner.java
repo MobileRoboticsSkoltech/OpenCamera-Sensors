@@ -103,7 +103,7 @@ public class DeviceScanner extends ListActivity {
         // In real life most of bluetooth LE devices associated with location, so without this
         // permission the sample shows nothing in most cases
         // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
-        int permissionCoarse = Build.VERSION.SDK_INT >= 23 ?
+        int permissionCoarse = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 ContextCompat
                         .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) :
                 PackageManager.PERMISSION_GRANTED;
