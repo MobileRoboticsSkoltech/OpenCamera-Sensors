@@ -2114,6 +2114,7 @@ public class MainActivity extends Activity {
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
         bundle.putString("camera_api", this.preview.getCameraAPI());
         bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
+        bundle.putInt("camera_orientation", this.preview.getCameraController().getCameraOrientation());
         bundle.putString("photo_mode_string", getPhotoModeString(applicationInterface.getPhotoMode(), true));
         bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
         bundle.putBoolean("supports_flash", this.preview.supportsFlash());

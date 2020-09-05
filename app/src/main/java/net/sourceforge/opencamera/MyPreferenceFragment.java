@@ -105,6 +105,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         if( MyDebug.LOG )
             Log.d(TAG, "using_android_l: " + using_android_l);
 
+        final int camera_orientation = bundle.getInt("camera_orientation");
+        if( MyDebug.LOG )
+            Log.d(TAG, "camera_orientation: " + camera_orientation);
+
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
         final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
@@ -1160,6 +1164,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(is_multi_cam);
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
+                        about_string.append("\nCamera orientation: ");
+                        about_string.append(camera_orientation);
                         about_string.append("\nPhoto mode: ");
                         about_string.append(photo_mode_string==null ? "UNKNOWN" : photo_mode_string);
                         {
