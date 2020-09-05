@@ -103,9 +103,11 @@ public class DeviceScanner extends ListActivity {
         // In real life most of bluetooth LE devices associated with location, so without this
         // permission the sample shows nothing in most cases
         // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
+        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
+        String permission_needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION;
         int permissionCoarse = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 ContextCompat
-                        .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) :
+                        .checkSelfPermission(this, permission_needed) :
                 PackageManager.PERMISSION_GRANTED;
 
         if( permissionCoarse == PackageManager.PERMISSION_GRANTED ) {
@@ -127,6 +129,7 @@ public class DeviceScanner extends ListActivity {
         // Also note that if we did want to only request ACCESS_COARSE_LOCATION here, we'd need to declare that permission
         // explicitly in the AndroidManifest.xml, otherwise the dialog to request permission is never shown (and the permission
         // is denied automatically).
+        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed anyway: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
         if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
                 ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
             // Show an explanation to the user *asynchronously* -- don't block
