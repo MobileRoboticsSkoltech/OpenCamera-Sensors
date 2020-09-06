@@ -210,12 +210,39 @@ public class DeviceScanner extends ListActivity {
     @Override
     protected void onPause() {
         if( MyDebug.LOG )
-            Log.d(TAG, "pause...");
+            Log.d(TAG, "onPause");
         super.onPause();
         if( is_scanning ) {
             scanLeDevice(false);
             leDeviceListAdapter.clear();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onStop");
+        super.onStop();
+
+        // we do this in onPause, but done here again just to be certain!
+        if( is_scanning ) {
+            scanLeDevice(false);
+            leDeviceListAdapter.clear();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onDestroy");
+
+        // we do this in onPause, but done here again just to be certain!
+        if( is_scanning ) {
+            scanLeDevice(false);
+            leDeviceListAdapter.clear();
+        }
+
+        super.onDestroy();
     }
 
     @Override
@@ -243,6 +270,8 @@ public class DeviceScanner extends ListActivity {
             bluetoothHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "stop scanning after delay");
                     is_scanning = false;
                     bluetoothAdapter.stopLeScan(mLeScanCallback);
                     invalidateOptionsMenu();

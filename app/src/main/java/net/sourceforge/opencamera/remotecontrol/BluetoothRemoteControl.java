@@ -47,6 +47,17 @@ public class BluetoothRemoteControl {
                 // BluetoothLeService requires Android 4.3+
                 return;
             }
+            if( main_activity.isAppPaused() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "but app is now paused");
+                // Unclear if this could happen - possibly if app pauses immediately after starting
+                // the service, but before we connect? In theory we should then unbind the service,
+                // but seems safer not to try to call initialize or connect.
+                // This will mean the BluetoothLeService still thinks it's unbound (is_bound will
+                // be left false), but find, that just means we'll enforce not trying to connect at
+                // a later stage).
+                return;
+            }
             bluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
             if( !bluetoothLeService.initialize() ) {
                 Log.e(TAG, "Unable to initialize Bluetooth");
@@ -243,7 +254,10 @@ public class BluetoothRemoteControl {
             return;
         }
         Intent gattServiceIntent = new Intent(main_activity, BluetoothLeService.class);
-        if( remoteEnabled()) {
+        // Check isAppPaused() just to be safe - in theory shouldn't be needed, but don't want to
+        // start up the service if we're in background! (And we might as well then try to stop the
+        // service instead.)
+        if( !main_activity.isAppPaused() && remoteEnabled() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "Remote enabled, starting service");
             main_activity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
@@ -298,6 +312,7 @@ public class BluetoothRemoteControl {
         boolean remote_enabled = sharedPreferences.getBoolean(PreferenceKeys.EnableRemote, false);
         remoteDeviceType = sharedPreferences.getString(PreferenceKeys.RemoteType, "undefined");
         remoteDeviceAddress = sharedPreferences.getString(PreferenceKeys.RemoteName, "undefined");
+        //return remote_enabled; // test - if using this, also need to enable test code in BluetoothLeService.connect()
         return remote_enabled && !remoteDeviceAddress.equals("undefined");
     }
 }

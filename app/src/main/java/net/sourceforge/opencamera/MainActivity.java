@@ -4628,6 +4628,10 @@ public class MainActivity extends Activity {
         return this.camera_in_background;
     }
 
+    public boolean isAppPaused() {
+        return this.app_is_paused;
+    }
+
     public BluetoothRemoteControl getBluetoothRemoteControl() {
         return bluetoothRemoteControl;
     }
