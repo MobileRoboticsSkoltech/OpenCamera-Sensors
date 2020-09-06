@@ -41,6 +41,8 @@ public class BluetoothRemoteControl {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "onServiceConnected");
             if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
                 // BluetoothLeService requires Android 4.3+
                 return;
@@ -54,8 +56,17 @@ public class BluetoothRemoteControl {
             bluetoothLeService.connect(remoteDeviceAddress);
         }
 
+        /** Called when a connection to the Service has been lost. This typically happens when the
+         * process hosting the service has crashed or been killed.
+         * So in particular, note this isn't the inverse to onServiceConnected() - whilst
+         * onServiceConnected is always called (after the service receives onBind()), upon normal
+         * disconnection (after we call unbindService()), the service receives onUnbind(), but
+         * onServiceDisconnected is not called under normal operation.
+         */
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "onServiceDisconnected");
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {

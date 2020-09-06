@@ -79,6 +79,8 @@ public class BluetoothLeService extends Service {
      * Android BLE stack and API (just knowing the MAC is not enough on
      * many phones).*/
     private void triggerScan() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "triggerScan");
         // Stops scanning after a pre-defined scan period.
         bluetoothHandler.postDelayed(new Runnable() {
             @Override
@@ -305,12 +307,16 @@ public class BluetoothLeService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onUnbind");
         close();
         return super.onUnbind(intent);
     }
 
 
     public boolean initialize() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "initialize");
         if( bluetoothManager == null ) {
             bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if( bluetoothManager == null ) {
