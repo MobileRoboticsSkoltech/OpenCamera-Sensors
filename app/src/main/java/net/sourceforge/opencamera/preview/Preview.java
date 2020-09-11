@@ -152,7 +152,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     //private boolean ui_placement_right = true;
 
-    private boolean app_is_paused = true;
+    private boolean app_is_paused = true; // whether Preview.onPause() is called - note this could include the application pausing the preview, even if the application isn't in background
     private boolean has_surface;
     private boolean has_aspect_ratio;
     private double aspect_ratio;
