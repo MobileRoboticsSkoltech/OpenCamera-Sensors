@@ -3706,6 +3706,8 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Update the save folder.
+     */
     void updateSaveFolder(String new_save_location) {
         if( MyDebug.LOG )
             Log.d(TAG, "updateSaveFolder: " + new_save_location);
