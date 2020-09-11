@@ -2577,6 +2577,13 @@ public class ImageSaver extends Thread {
             e.printStackTrace();
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
+        catch(IllegalArgumentException e) {
+            // can happen for mediastore method if invalid ContentResolver.insert() call
+            if( MyDebug.LOG )
+                Log.e(TAG, "IllegalArgumentException writing file: " + e.getMessage());
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
 
         if( raw_only ) {
             // no saved image to record
