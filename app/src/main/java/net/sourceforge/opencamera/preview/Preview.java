@@ -152,7 +152,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     //private boolean ui_placement_right = true;
 
-    private boolean app_is_paused = true; // whether Preview.onPause() is called - note this could include the application pausing the preview, even if the application isn't in background
+    private boolean app_is_paused = true; // whether activity is paused
+    private boolean is_paused = true; // whether Preview.onPause() is called - note this could include the application pausing the preview, even if app_is_paused==false
     private boolean has_surface;
     private boolean has_aspect_ratio;
     private double aspect_ratio;
@@ -1449,9 +1450,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             return;
         }
-        if( this.app_is_paused ) {
+        if( this.is_paused ) {
             if( MyDebug.LOG ) {
-                Log.d(TAG, "don't open camera as app is paused");
+                Log.d(TAG, "don't open camera as paused");
             }
             return;
         }
@@ -3856,9 +3857,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public void draw(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "draw()");*/
-        if( this.app_is_paused ) {
+        if( this.is_paused ) {
     		/*if( MyDebug.LOG )
-    			Log.d(TAG, "draw(): app is paused");*/
+    			Log.d(TAG, "draw(): paused");*/
             return;
         }
 		/*if( true ) // test
@@ -7198,11 +7199,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return camera_controller.getAPI();
     }
 
+    /** Call when activity is resumed.
+     */
     public void onResume() {
         if( MyDebug.LOG )
             Log.d(TAG, "onResume");
         recreatePreviewBitmap();
         this.app_is_paused = false;
+        this.is_paused = false;
         cameraSurface.onResume();
         if( canvasView != null )
             canvasView.onResume();
@@ -7224,10 +7228,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    /** Call when activity is paused.
+     */
     public void onPause() {
+        onPause(true);
+    }
+
+    /** Call when activity is paused, or the application wants to put the Preview into a paused
+     *  state (closing the camera etc).
+     * @param activity_is_pausing Set to true if this is called because the activity is being paused;
+     *                            set to false if the activity is not pausing.
+     */
+    public void onPause(boolean activity_is_pausing) {
         if( MyDebug.LOG )
             Log.d(TAG, "onPause");
-        this.app_is_paused = true;
+        this.is_paused = true;
+        if( activity_is_pausing )
+            this.app_is_paused = true; // note, if activity_is_paused==false, we don't change app_is_paused, in case app was paused indicated via a separate call to onPause
         if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "cancel open_camera_task");
@@ -8250,7 +8267,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 40 : refresh_histogram_rate_ms;
         long time_now = System.currentTimeMillis();
         if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                !app_is_paused && !applicationInterface.isPreviewInBackground() &&
+                !is_paused && !applicationInterface.isPreviewInBackground() &&
                 !refreshPreviewBitmapTaskIsRunning() && time_now > last_preview_bitmap_time_ms + refresh_time ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "refreshPreviewBitmap");

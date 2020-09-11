@@ -2921,7 +2921,7 @@ public class MainActivity extends Activity {
         applicationInterface.getLocationSupplier().freeLocationListeners();
 
         // similarly we close the camera
-        preview.onPause();
+        preview.onPause(false);
     }
 
     private void showWhenLocked(boolean show) {
