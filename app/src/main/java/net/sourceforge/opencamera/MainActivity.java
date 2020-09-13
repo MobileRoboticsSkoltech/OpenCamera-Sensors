@@ -286,11 +286,11 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
-        save_location_history = new SaveLocationHistory(this, "save_location_history", getStorageUtils().getSaveLocation());
+        save_location_history = new SaveLocationHistory(this, PreferenceKeys.SaveLocationHistoryBasePreferenceKey, getStorageUtils().getSaveLocation());
         if( applicationInterface.getStorageUtils().isUsingSAF() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new SaveLocationHistory for SAF");
-            save_location_history_saf = new SaveLocationHistory(this, "save_location_history_saf", getStorageUtils().getSaveLocationSAF());
+            save_location_history_saf = new SaveLocationHistory(this, PreferenceKeys.SaveLocationHistorySAFBasePreferenceKey, getStorageUtils().getSaveLocationSAF());
         }
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));

@@ -206,6 +206,10 @@ public class PreferenceKeys {
 
     public static final String SaveLocationSAFPreferenceKey = "preference_save_location_saf";
 
+    public static final String SaveLocationHistoryBasePreferenceKey = "save_location_history";
+
+    public static final String SaveLocationHistorySAFBasePreferenceKey = "save_location_history_saf";
+
     public static final String SavePhotoPrefixPreferenceKey = "preference_save_photo_prefix";
 
     public static final String SaveVideoPrefixPreferenceKey = "preference_save_video_prefix";
