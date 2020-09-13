@@ -2715,9 +2715,9 @@ public class ImageSaver extends Thread {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastSAFFile");
         StorageUtils storageUtils = main_activity.getStorageUtils();
-        File real_file = storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
-        if( real_file != null ) {
-            main_activity.test_last_saved_image = real_file.getAbsolutePath();
+        String real_file_path = storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
+        if( real_file_path != null ) {
+            main_activity.test_last_saved_image = real_file_path;
         }
     }
 

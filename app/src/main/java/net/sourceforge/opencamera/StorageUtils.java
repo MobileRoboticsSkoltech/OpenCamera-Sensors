@@ -278,8 +278,9 @@ public class StorageUtils {
     }
 
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
+     * @return If non-null, this contains the path of the file we found for the Uri.
      */
-    public File broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
+    public String broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastUri: " + uri);
         /* We still need to broadcastFile for SAF for two reasons:
@@ -300,7 +301,7 @@ public class StorageUtils {
             //Uri media_uri = broadcastFileRaw(real_file, current_date, location);
             //announceUri(media_uri, is_new_picture, is_new_video);
             broadcastFile(real_file, is_new_picture, is_new_video, set_last_scanned);
-            return real_file;
+            return (real_file==null ? null : real_file.getAbsolutePath());
         }
         else if( !image_capture_intent ) {
             if( MyDebug.LOG )
