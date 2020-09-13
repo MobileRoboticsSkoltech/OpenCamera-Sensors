@@ -398,6 +398,13 @@ public class StorageUtils {
         return base_folder;
     }
 
+    /** Whether the save photo/video location is in a form that represents a full path, or a
+     *  sub-folder in DCIM/.
+     */
+    static boolean saveFolderIsFull(String folder_name) {
+        return folder_name.startsWith("/");
+    }
+
     // only valid if !isUsingSAF()
     private static File getImageFolder(String folder_name) {
         File file;
@@ -405,7 +412,7 @@ public class StorageUtils {
             // ignore final '/' character
             folder_name = folder_name.substring(0, folder_name.length()-1);
         }
-        if( folder_name.startsWith("/") ) {
+        if( saveFolderIsFull(folder_name) ) {
             file = new File(folder_name);
         }
         else {
@@ -1501,7 +1508,7 @@ public class StorageUtils {
                 if( !isUsingSAF() ) {
                     // getSaveLocation() only valid if !isUsingSAF()
                     String folder_name = getSaveLocation();
-                    if( !folder_name.startsWith("/") ) {
+                    if( !saveFolderIsFull(folder_name) ) {
                         File folder = getBaseFolder();
                         StatFs statFs = new StatFs(folder.getAbsolutePath());
                         long blocks, size;
