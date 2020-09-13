@@ -259,17 +259,15 @@ public class StorageUtils {
                             announceUri(uri, is_new_picture, is_new_video);
                             applicationInterface.scannedFile(file, uri);
 
-                            // it seems caller apps seem to prefer the content:// Uri rather than one based on a File
+                            // If called from video intent, if not using scoped-storage, we'll have saved using File API (even if user preference is SAF), see
+                            // MyApplicationInterface.createOutputVideoMethod().
+                            // It seems caller apps seem to prefer the content:// Uri rather than one based on a File
                             // update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555
+                            // So we pass the uri back to the caller here.
                             Activity activity = (Activity)context;
                             String action = activity.getIntent().getAction();
-                            if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-                                if( MyDebug.LOG )
-                                    Log.d(TAG, "from video capture intent");
-                                Intent output = new Intent();
-                                output.setData(uri);
-                                activity.setResult(Activity.RESULT_OK, output);
-                                activity.finish();
+                            if( !MainActivity.useScopedStorage() && MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+                                applicationInterface.finishVideoIntent(uri);
                             }
                         }
                     }

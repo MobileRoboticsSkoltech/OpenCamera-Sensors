@@ -292,8 +292,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // if no EXTRA_OUTPUT, we should save to standard location, and will pass back the Uri of that location
             if( MyDebug.LOG )
                 Log.d(TAG, "intent uri not specified");
-            // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
-            return VideoMethod.FILE;
+            if( MainActivity.useScopedStorage() ) {
+                // can't use file method with scoped storage
+                return VideoMethod.MEDIASTORE;
+            }
+            else {
+                // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
+                return VideoMethod.FILE;
+            }
         }
         else if( storageUtils.isUsingSAF() ) {
             return VideoMethod.SAF;
@@ -2398,7 +2404,23 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "test_n_videos_scanned is now: " + test_n_videos_scanned);
         }
+
+        if( video_method == VideoMethod.MEDIASTORE && isVideoCaptureIntent() ) {
+            finishVideoIntent(uri);
+        }
         return done;
+    }
+
+    /** For use when called from a video capture intent. This returns the supplied uri to the
+     *  caller, and finishes the activity.
+     */
+    void finishVideoIntent(Uri uri) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "finishVideoIntent:" + uri);
+        Intent output = new Intent();
+        output.setData(uri);
+        main_activity.setResult(Activity.RESULT_OK, output);
+        main_activity.finish();
     }
 
     @Override
