@@ -952,6 +952,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             e.printStackTrace();
             video_max_filesize = 0;
         }
+        //video_max_filesize = 1024*1024; // test
         if( MyDebug.LOG )
             Log.d(TAG, "video_max_filesize: " + video_max_filesize);
         return video_max_filesize;
@@ -2230,14 +2231,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             subtitleVideoTimerTask = null;
         }
 
-        if( video_method == VideoMethod.MEDIASTORE ) {
-            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-                main_activity.getContentResolver().update(uri, contentValues, null, null);
-            }
-        }
-
+        completeVideo(video_method, uri);
         boolean done = broadcastVideo(video_method, uri, filename);
         if( MyDebug.LOG )
             Log.d(TAG, "done? " + done);
@@ -2342,7 +2336,21 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
+        completeVideo(video_method, uri);
         broadcastVideo(video_method, uri, filename);
+    }
+
+    /** Called when we've finished recording to a video file, to do any necessary cleanup for the
+     *  file.
+     */
+    private void completeVideo(final VideoMethod video_method, final Uri uri) {
+        if( video_method == VideoMethod.MEDIASTORE ) {
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+                main_activity.getContentResolver().update(uri, contentValues, null, null);
+            }
+        }
     }
 
     private boolean broadcastVideo(final VideoMethod video_method, final Uri uri, final String filename) {
