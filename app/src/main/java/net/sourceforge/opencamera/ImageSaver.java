@@ -3357,8 +3357,8 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the saved image file, according to the preferences in request.
      *  This method is used when saving directly from the JPEG data rather than a bitmap.
-     *  If picFile==null, then saveUri must be non-null (and the Android version must be Android 7
-     *  or later), and will be used instead to write the exif tags too.
+     *  If picFile==null, then saveUri must be non-null, and will be used instead to write the exif
+     *  tags too.
      */
     private void updateExif(Request request, File picFile, Uri saveUri) throws IOException {
         if( MyDebug.LOG )
