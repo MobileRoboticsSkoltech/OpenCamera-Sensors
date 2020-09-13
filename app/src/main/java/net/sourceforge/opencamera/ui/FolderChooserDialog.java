@@ -318,12 +318,14 @@ public class FolderChooserDialog extends DialogFragment {
         if( current_folder == null )
             return false;
         if( canWrite() ) {
-            File base_folder = StorageUtils.getBaseFolder();
             String new_save_location = current_folder.getAbsolutePath();
-            if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "parent folder is base folder");
-                new_save_location = current_folder.getName();
+            if( this.show_dcim_shortcut ) {
+                File base_folder = StorageUtils.getBaseFolder();
+                if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "parent folder is base folder");
+                    new_save_location = current_folder.getName();
+                }
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "new_save_location: " + new_save_location);
