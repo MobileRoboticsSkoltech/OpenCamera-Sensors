@@ -993,7 +993,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "saving to: " + folder_name);
             boolean is_internal = false;
-            if( !folder_name.startsWith("/") ) {
+            if( !StorageUtils.saveFolderIsFull(folder_name) ) {
                 is_internal = true;
             }
             else {
