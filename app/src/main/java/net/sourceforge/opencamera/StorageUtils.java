@@ -378,23 +378,20 @@ public class StorageUtils {
     }
 
     // only valid if !isUsingSAF()
+    // returns a form for use with RELATIVE_PATH (scoped storage)
     String getSaveRelativeFolder() {
         String folder_name = getSaveLocation();
         return getSaveRelativeFolder(folder_name);
     }
 
     // only valid if !isUsingSAF()
+    // returns a form for use with RELATIVE_PATH (scoped storage)
     private static String getSaveRelativeFolder(String folder_name) {
         if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
             // ignore final '/' character
             folder_name = folder_name.substring(0, folder_name.length()-1);
         }
-        if( folder_name.startsWith("/") ) {
-            return folder_name;
-        }
-        else {
-            return RELATIVE_FOLDER_BASE + File.separator + folder_name;
-        }
+        return RELATIVE_FOLDER_BASE + File.separator + folder_name;
     }
 
     public static File getBaseFolder() {
