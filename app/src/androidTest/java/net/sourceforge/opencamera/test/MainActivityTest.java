@@ -10297,6 +10297,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         File folder = mActivity.getImageFolder();
         if( folder.exists() && delete_folder ) {
+            // Note when using scoped storage, this won't actually work (although the test code won't fail)
+            // It's not possible to delete folders with scoped storage unless via SAF which would need permission to have been
+            // given to such folders.
             assertTrue(folder.isDirectory());
             // delete folder - need to delete contents first
             if( folder.isDirectory() ) {
@@ -10378,6 +10381,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     @SuppressLint("SdCardPath")
     public void testCreateSaveFolder4() {
         Log.d(TAG, "testCreateSaveFolder4");
+
+        if( MainActivity.useScopedStorage() ) {
+            // can't save outside DCIM when using scoped storage
+            return;
+        }
+
         subTestCreateSaveFolder(false, "/sdcard/Pictures/OpenCameraTest", true);
     }
 
@@ -10547,6 +10556,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     public void testFolderChooserNew() throws InterruptedException {
         Log.d(TAG, "testFolderChooserNew");
+
+        if( MainActivity.useScopedStorage() ) {
+            Log.d(TAG, "folder chooser not relevant for scoped storage");
+            return;
+        }
+
         setToDefault();
 
         {
@@ -10591,6 +10606,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     public void testFolderChooserInvalid() throws InterruptedException {
         Log.d(TAG, "testFolderChooserInvalid");
+
+        if( MainActivity.useScopedStorage() ) {
+            Log.d(TAG, "folder chooser not relevant for scoped storage");
+            return;
+        }
+
         setToDefault();
 
         {
