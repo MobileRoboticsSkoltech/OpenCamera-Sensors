@@ -1176,7 +1176,23 @@ public class StorageUtils {
 
         Media media = null;
 
-        Uri baseUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+        Uri baseUri = null;
+        try {
+            String parentDocUri = DocumentsContract.getTreeDocumentId(treeUri);
+            baseUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentDocUri);
+        }
+        catch(Exception e) {
+            // DocumentsContract.getTreeDocumentId throws IllegalArgumentException if the uri is
+            // invalid. Unclear if this can happen in practice - this happens in test
+            // testSaveFolderHistorySAF() but only because we test a dummy invalid SAF uri. But
+            // seems no harm catching it in case this can happen (e.g., especially if restoring
+            // backed up preferences from a different device?) Better to just show nothing in the
+            // thumbnail, rather than crashing!
+            // N.B., we catch Exception is otherwise compiler complains IllegalArgumentException
+            // isn't ever thrown - even though it is!?
+            Log.e(TAG, "Exception using treeUri: " + treeUri);
+            return media;
+        }
         if( MyDebug.LOG )
             Log.d(TAG, "baseUri: " + baseUri);
 
