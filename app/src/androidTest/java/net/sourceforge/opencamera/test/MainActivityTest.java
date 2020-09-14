@@ -4537,6 +4537,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * For multi-camera devices, this tests the behaviour with
      * PreferenceKeys.MultiCamButtonPreferenceKey devices, so the switch camera icon still cycles
      * through all cameras.
+     * Can be unstable on Android emulator if the time taken to focus means we've already switched
+     * back from auto to continuous focus (after touch to focus).
      */
     public void testTakePhotoFrontCameraAll() throws InterruptedException {
         Log.d(TAG, "testTakePhotoFrontCameraAll");
