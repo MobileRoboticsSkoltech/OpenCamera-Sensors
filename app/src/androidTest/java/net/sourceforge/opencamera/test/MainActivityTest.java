@@ -10409,6 +10409,140 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestCreateSaveFolder(true, "content://com.android.externalstorage.documents/tree/primary%3ADCIM", true);
     }
 
+    /** Tests code for checking existing non-SAF save locations, when updating to scoped storage.
+     *  Case where save location is invalid for scoped storage.
+     */
+    public void testScopedStorageChecks1() {
+        Log.d(TAG, "testScopedStorageChecks1");
+        setToDefault();
+
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "/storage/emulated/0/Pictures/Camera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", "OpenCamera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", "/storage/emulated/0/DCIM");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", "/storage/emulated/0/DCIM/OpenCameraéúíóá!£$%^&()/test");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_3", "Camera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_4", "/storage/sdcard/DCIM/OpenCamera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_5", "/storage/emulated/0/Pictures/Camera");
+            editor.putInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 6);
+            editor.apply();
+        }
+
+        restart();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        if( MainActivity.useScopedStorage() ) {
+            assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+            // because the save folder is reset to "OpenCamera", we've also removed it from the original position in the history
+            assertEquals("", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+            assertEquals("OpenCameraéúíóá!£$%^&()/test", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", null));
+            assertEquals("Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", null));
+            // invalid entry removed here
+            assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_3", null));
+            assertEquals(4, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+        }
+        else {
+            // should be unchanged
+            assertEquals("/storage/emulated/0/Pictures/Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+            assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+            assertEquals("/storage/emulated/0/DCIM", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", null));
+            assertEquals("/storage/emulated/0/DCIM/OpenCameraéúíóá!£$%^&()/test", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", null));
+            assertEquals("Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_3", null));
+            assertEquals("/storage/sdcard/DCIM/OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_4", null));
+            assertEquals("/storage/emulated/0/Pictures/Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_5", null));
+            assertEquals(6, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+        }
+    }
+
+    /** Tests code for checking existing non-SAF save locations, when updating to scoped storage.
+     *  This test a version where everything is valid and shouldn't change.
+     */
+    public void testScopedStorageChecks2() {
+        Log.d(TAG, "testScopedStorageChecks2");
+        setToDefault();
+
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "Camera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", "OpenCamera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", "test");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", "Camera");
+            editor.putInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 3);
+            editor.apply();
+        }
+
+        restart();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        assertEquals("Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+        assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+        assertEquals("test", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", null));
+        assertEquals("Camera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", null));
+        assertEquals(3, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+    }
+
+    /** Tests code for checking existing non-SAF save locations, when updating to scoped storage.
+     *  This tests a version with default settings, where nothing should change.
+     */
+    public void testScopedStorageChecks3() {
+        Log.d(TAG, "testScopedStorageChecks3");
+        setToDefault();
+
+        restart();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+        assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+        assertEquals(1, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+    }
+
+    /** Tests code for checking existing non-SAF save locations, when updating to scoped storage.
+     *  Case where save location contains sub-folder, so is valid but needs updating for scoped storage.
+     */
+    public void testScopedStorageChecks4() {
+        Log.d(TAG, "testScopedStorageChecks4");
+        setToDefault();
+
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(PreferenceKeys.SaveLocationPreferenceKey, "/storage/emulated/0/DCIM/OpenCamera/subfolder");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", "/storage/emulated/0/DCIM/OpenCamera/subfolder/subfolder");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", "/storage/emulated/0/Pictures");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", "/storage/emulated/0");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_3", "OpenCamera");
+            editor.putString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_4", "/storage/emulated/0/DCIM/OpenCamera/subfolder");
+            editor.putInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 5);
+            editor.apply();
+        }
+
+        restart();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        if( MainActivity.useScopedStorage() ) {
+            assertEquals("OpenCamera/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+            assertEquals("OpenCamera/subfolder/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+            // invalid entry removed here
+            // invalid entry removed here
+            assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", null));
+            assertEquals("OpenCamera/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", null));
+            assertEquals(3, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+        }
+        else {
+            // should be unchanged
+            assertEquals("/storage/emulated/0/DCIM/OpenCamera/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+            assertEquals("/storage/emulated/0/DCIM/OpenCamera/subfolder/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_0", null));
+            assertEquals("/storage/emulated/0/Pictures", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_1", null));
+            assertEquals("/storage/emulated/0", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_2", null));
+            assertEquals("OpenCamera", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_3", null));
+            assertEquals("/storage/emulated/0/DCIM/OpenCamera/subfolder", sharedPreferences.getString(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_4", null));
+            assertEquals(5, sharedPreferences.getInt(PreferenceKeys.SaveLocationHistoryBasePreferenceKey + "_size", 0));
+        }
+    }
+
     /** Tests launching the folder chooser on a new folder.
      */
     public void testFolderChooserNew() throws InterruptedException {

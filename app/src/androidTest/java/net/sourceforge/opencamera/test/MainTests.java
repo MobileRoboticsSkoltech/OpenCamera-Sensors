@@ -16,6 +16,12 @@ public class MainTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationSettings"));
         // other tests:
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testScopedStorageChecks1"));
+        if( !MainActivityTest.test_camera2 ) {
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testScopedStorageChecks2"));
+            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testScopedStorageChecks3"));
+        }
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testScopedStorageChecks4"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmediatelyQuit"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
