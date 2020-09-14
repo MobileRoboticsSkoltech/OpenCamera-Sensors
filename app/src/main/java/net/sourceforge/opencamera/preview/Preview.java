@@ -6325,6 +6325,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             String current_ui_focus_value = getCurrentFocusValue();
             if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
                 camera_controller.cancelAutoFocus();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "switch back to: " + current_ui_focus_value);
                 camera_controller.setFocusValue(current_ui_focus_value);
             }
             else {
