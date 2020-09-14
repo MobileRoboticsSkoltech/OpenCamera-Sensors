@@ -57,12 +57,6 @@ public class StorageUtils {
     private Uri last_media_scanned;
 
     private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DCIM;
-    // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-    // when using scoped storage, we should no longer be trying to read/write this codepath with File API, but we are still using
-    // this for older Android versions.
-    // Furthermore, sometimes we still use this with scoped storage for valid purposes, e.g., to pass to StatFs in freeMemory().
-    @SuppressWarnings("deprecation")
-    private final static File base_folder = Environment.getExternalStoragePublicDirectory(RELATIVE_FOLDER_BASE);
 
     // for testing:
     public volatile boolean failed_to_scan;
@@ -394,6 +388,12 @@ public class StorageUtils {
     }
 
     public static File getBaseFolder() {
+        // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
+        // when using scoped storage, we should no longer be trying to read/write this codepath with File API, but we are still using
+        // this for older Android versions.
+        // Furthermore, sometimes we still use this with scoped storage for valid purposes, e.g., to pass to StatFs in freeMemory().
+        @SuppressWarnings("deprecation")
+        final File base_folder = Environment.getExternalStoragePublicDirectory(RELATIVE_FOLDER_BASE);
         return base_folder;
     }
 
