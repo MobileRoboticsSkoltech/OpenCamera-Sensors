@@ -125,6 +125,21 @@ public class SaveLocationHistory {
         return save_location_history.get(index);
     }
 
+    /** Removes a save location entry.
+     * @param index The index to remove.
+     */
+    public void remove(int index) {
+        save_location_history.remove(index);
+    }
+
+    /** Sets a save location entry.
+     * @param index The index to set.
+     * @param element The new entry.
+     */
+    public void set(int index, String element) {
+        save_location_history.set(index, element);
+    }
+
     // for testing:
     /** Should be used for testing only.
      * @param value The value to search the location history for.

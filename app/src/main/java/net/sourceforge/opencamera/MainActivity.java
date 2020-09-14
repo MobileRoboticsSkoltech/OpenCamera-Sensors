@@ -70,6 +70,9 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -287,6 +290,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
         save_location_history = new SaveLocationHistory(this, PreferenceKeys.SaveLocationHistoryBasePreferenceKey, getStorageUtils().getSaveLocation());
+        checkSaveLocations();
         if( applicationInterface.getStorageUtils().isUsingSAF() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new SaveLocationHistory for SAF");
@@ -958,6 +962,153 @@ public class MainActivity extends Activity {
                 editor.remove("preference_use_camera2"); // remove the old key, just in case
                 editor.apply();
             }
+        }
+    }
+
+    /** Handles users updating to a version with scoped storage (this could be Android 10 users upgrading
+     *  to the version of Open Camera with scoped storage; or users who later upgrade to Android 10).
+     *  With scoped storage, we no longer support saving outside of DCIM/ when not using SAF.
+     *  This updates if necessary both the current save location, and the save folder history.
+     */
+    private void checkSaveLocations() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkSaveLocations");
+        if( useScopedStorage() ) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean any_changes = false;
+            String save_location = getStorageUtils().getSaveLocation();
+            CheckSaveLocationResult res = checkSaveLocation(save_location);
+            if( !res.res ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "save_location not valid with scoped storage: " + save_location);
+                String new_folder;
+                if( res.alt == null ) {
+                    // no alternative, fall back to default
+                    new_folder = "OpenCamera";
+                }
+                else {
+                    // replace with the alternative
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "alternative: " + res.alt);
+                    new_folder = res.alt;
+                }
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(PreferenceKeys.SaveLocationPreferenceKey, new_folder);
+                editor.apply();
+                any_changes = true;
+            }
+
+            // now check history
+            // go backwards so we can remove easily
+            for(int i=save_location_history.size()-1;i>=0;i--) {
+                String this_location = save_location_history.get(i);
+                res = checkSaveLocation(this_location);
+                if( !res.res ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save_location in history " + i + " not valid with scoped storage: " + this_location);
+                    if( res.alt == null ) {
+                        // no alternative, remove
+                        save_location_history.remove(i);
+                    }
+                    else {
+                        // replace with the alternative
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "alternative: " + res.alt);
+                        save_location_history.set(i, res.alt);
+                    }
+                    any_changes = true;
+                }
+            }
+
+            if( any_changes ) {
+                this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), false);
+            }
+        }
+    }
+
+    /** Result from checkSaveLocation. Ideally we'd just use android.util.Pair, but that's not mocked
+     *  for use in unit tests.
+     *  See checkSaveLocation() for documentation.
+     */
+    public static class CheckSaveLocationResult {
+        final boolean res;
+        final String alt;
+
+        public CheckSaveLocationResult(boolean res, String alt) {
+            this.res = res;
+            this.alt = alt;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if( !(o instanceof CheckSaveLocationResult) ) {
+                return false;
+            }
+            CheckSaveLocationResult that = (CheckSaveLocationResult)o;
+            // stop dumb inspection that suggests replacing warning with an error(!) (Objects class is not available on all API versions)
+            // and the other inspection suggests replacing with code that would cause a nullpointerexception
+            //noinspection EqualsReplaceableByObjectsCall,StringEquality
+            return that.res == this.res && ( (that.alt == this.alt) || (that.alt != null && that.alt.equals(this.alt) ) );
+            //return that.res == this.res && ( (that.alt == this.alt) || (that.alt != null && that.alt.equals(this.alt) ) );
+        }
+
+        @Override
+        public int hashCode() {
+            return (res ? 1249 : 1259) ^ (alt == null ? 0 : alt.hashCode());
+        }
+
+        @Override
+        public String toString() {
+            return "CheckSaveLocationResult{" + res + " , " + alt + "}";
+        }
+    }
+
+    public static CheckSaveLocationResult checkSaveLocation(final String folder) {
+        return checkSaveLocation(folder, null);
+    }
+
+    /** Checks to see if the supplied folder (in the format as used by our preferences) is supported
+     *  with scoped storage.
+     * @return The Boolean is always non-null, and returns whether the save location is valid.
+     *         If the return is false, then if the String is non-null, this stores an alternative
+     *         form that is valid. If null, there is no valid alternative.
+     * @param base_folder This should normally be null, but can be used to specify manually the
+     *                    folder instead of using StorageUtils.getBaseFolder() - needed for unit
+     *                    tests as Environment class (for Environment.getExternalStoragePublicDirectory())
+     *                    is not mocked.
+     */
+    public static CheckSaveLocationResult checkSaveLocation(final String folder, String base_folder) {
+        /*if( MyDebug.LOG )
+            Log.d(TAG, "DCIM path: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());*/
+        if( StorageUtils.saveFolderIsFull(folder) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "checkSaveLocation for full path: " + folder);
+            // But still check to see if the full path is part of DCIM. Since when using the
+            // file dialog method with non-scoped storage, if the user specifies multiple subfolders
+            // e.g. DCIM/blah_a/blah_b, we don't spot that in FolderChooserDialog.useFolder(), and
+            // instead still store that as the full path.
+
+            if( base_folder == null )
+                base_folder = StorageUtils.getBaseFolder().getAbsolutePath();
+            // strip '/' as last character - makes it easier to also spot cases where the folder is the
+            // DCIM folder, but doesn't have a '/' last character
+            if( base_folder.length() >= 1 && base_folder.charAt(base_folder.length()-1) == '/' )
+                base_folder = base_folder.substring(0, base_folder.length()-1);
+            if( MyDebug.LOG )
+                Log.d(TAG, "    compare to base_folder: " + base_folder);
+            String alt_folder = null;
+            if( folder.startsWith(base_folder) ) {
+                alt_folder = folder.substring(base_folder.length());
+                // also need to strip the first '/' if it exists
+                if( alt_folder.length() >= 1 && alt_folder.charAt(0) == '/' )
+                    alt_folder = alt_folder.substring(1);
+            }
+
+            return new CheckSaveLocationResult(false, alt_folder);
+        }
+        else {
+            // already in expected format (indicates a sub-folder of DCIM)
+            return new CheckSaveLocationResult(true, null);
         }
     }
 
@@ -3752,6 +3903,79 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Processes a user specified save folder. This should be used with the non-SAF scoped storage
+     *  method, where the user types a folder directly.
+     */
+    public static String processUserSaveLocation(String folder) {
+        // filter repeated '/', e.g., replace // with /:
+        String strip = "//";
+        while( folder.length() >= 1 && folder.contains(strip) ) {
+            folder = folder.replaceAll(strip, "/");
+        }
+
+        if( folder.length() >= 1 && folder.charAt(0) == '/' ) {
+            // strip '/' as first character - as absolute paths not allowed with scoped storage
+            // whilst we do block entering a '/' as first character in the InputFilter, users could
+            // get around this (e.g., put a '/' as second character, then delete the first character)
+            folder = folder.substring(1);
+        }
+
+        if( folder.length() >= 1 && folder.charAt(folder.length()-1) == '/' ) {
+            // strip '/' as last character - MediaStore will ignore it, but seems cleaner to strip it out anyway
+            // (we still need to allow '/' as last character in the InputFilter, otherwise users won't be able to type it whilst writing a subfolder)
+            folder = folder.substring(0, folder.length()-1);
+        }
+
+        return folder;
+    }
+
+    /** Creates a dialog builder for specifying a save folder dialog (used when not using SAF,
+     *  and on scoped storage, as an alternative to using FolderChooserDialog).
+     */
+    public AlertDialog.Builder createSaveFolderDialog() {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.preference_save_location);
+
+        final EditText editText = new EditText(this);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editText.setText(sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+        InputFilter filter = new InputFilter() {
+            // whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
+            String disallowed = "|\\?*<\":>";
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                for(int i=start;i<end;i++) {
+                    if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
+                        return "";
+                    }
+                }
+                // also check for '/', not allowed at start
+                if( dstart == 0 && start < source.length() && source.charAt(start) == '/' ) {
+                    return "";
+                }
+                return null;
+            }
+        };
+        editText.setFilters(new InputFilter[]{filter});
+
+        alertDialog.setView(editText);
+        alertDialog.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "save location clicked okay");
+
+                String folder = editText.getText().toString();
+                folder = processUserSaveLocation(folder);
+
+                updateSaveFolder(folder);
+            }
+        });
+        alertDialog.setNegativeButton(android.R.string.cancel, null);
+
+        return alertDialog;
+    }
+
     /** Opens Open Camera's own (non-Storage Access Framework) dialog to select a folder.
      */
     private void openFolderChooserDialog() {
@@ -3760,14 +3984,31 @@ public class MainActivity extends Activity {
         showPreview(false);
         setWindowFlagsForSettings();
 
-        File start_folder = getStorageUtils().getImageFolder();
+        if( MainActivity.useScopedStorage() ) {
+            AlertDialog.Builder alertDialog = createSaveFolderDialog();
+            final AlertDialog alert = alertDialog.create();
+            // AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+            alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface arg0) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save folder dialog dismissed");
+                    setWindowFlagsForCamera();
+                    showPreview(true);
+                }
+            });
+            alert.show();
+        }
+        else {
+            File start_folder = getStorageUtils().getImageFolder();
 
-        FolderChooserDialog fragment = new MyFolderChooserDialog();
-        fragment.setStartFolder(start_folder);
-        // use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
-        // see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
-        //fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
-        getFragmentManager().beginTransaction().add(fragment, "FOLDER_FRAGMENT").commitAllowingStateLoss();
+            FolderChooserDialog fragment = new MyFolderChooserDialog();
+            fragment.setStartFolder(start_folder);
+            // use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
+            // see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
+            //fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+            getFragmentManager().beginTransaction().add(fragment, "FOLDER_FRAGMENT").commitAllowingStateLoss();
+        }
     }
 
     /** User can long-click on gallery to select a recent save location from the history, of if not available,
