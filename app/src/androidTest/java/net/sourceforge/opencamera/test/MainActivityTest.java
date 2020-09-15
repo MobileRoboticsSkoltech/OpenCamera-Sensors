@@ -39,6 +39,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 //import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
@@ -53,10 +54,12 @@ import android.location.Location;
 import android.media.CamcorderProfile;
 import androidx.exifinterface.media.ExifInterface;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 //import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import androidx.annotation.RequiresApi;
@@ -2056,12 +2059,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         waitUntilCameraOpened();
     }
 
-    /** Return the number of files in the supplied folder. 0 will be returned if the folder doesn't
+    /** Return the number of files in the save folder. 0 will be returned if the folder doesn't
      *  exist.
      */
-    private int getNFiles(File folder) {
-        File [] files = folder.listFiles();
-        Log.d(TAG, "getNFiles: " + folder + " has: " + Arrays.toString(files));
+    private int getNFiles() {
+        //File folder = mActivity.getImageFolder();
+        //File [] files = folder.listFiles();
+        String [] files = filesInSaveFolder();
+        Log.d(TAG, "getNFiles: " + Arrays.toString(files));
         return files == null ? 0 : files.length;
     }
 
@@ -2081,8 +2086,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         switchToFocusValue("focus_mode_continuous_picture");
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         assertEquals(0, mPreview.count_cameraTakePicture);
@@ -2103,7 +2107,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.isPreviewStarted()); // check preview restarted
         Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
         assertEquals(3, mPreview.count_cameraTakePicture);
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(3, n_new_files);
     }
@@ -2147,8 +2151,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String focus_value_ui = "focus_mode_continuous_picture";
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         Thread.sleep(1000);
@@ -2190,8 +2193,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(1, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
     }
@@ -2214,8 +2216,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String focus_value_ui = "focus_mode_continuous_picture";
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         Thread.sleep(1000);
@@ -2269,8 +2270,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(mPreview.count_cameraAutoFocus, saved_count + 1);
         mActivity.waitUntilImageQueueEmpty();
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
     }
@@ -2410,8 +2410,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertSame(mActivity.getApplicationInterface().getPhotoMode(), MyApplicationInterface.PhotoMode.HDR);
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         Thread.sleep(1000);
@@ -2448,8 +2447,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         assertFalse(mActivity.testHasNotification());
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
     }
@@ -3446,7 +3444,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         return exp_n_new_files;
     }
 
-    private void checkFilenames(final boolean is_raw, final File [] files, final File [] files2) {
+    private void checkFilenames(final boolean is_raw, final String [] files, final String [] files2) {
         Log.d(TAG, "checkFilenames");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
         boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
@@ -3459,7 +3457,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         String filename_jpeg = null;
         String filename_dng = null;
         int n_files = files == null ? 0 : files.length;
-        for(File file : files2) {
+        for(String file : files2) {
             Log.d(TAG, "check file: " + file);
             boolean is_new = true;
             for(int j=0;j<n_files && is_new;j++) {
@@ -3470,7 +3468,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             }
             if( is_new ) {
                 Log.d(TAG, "file is new");
-                String filename = file.getName();
+                //String filename = file.getName();
+                //noinspection UnnecessaryLocalVariable
+                String filename = file;
                 assertTrue(filename.startsWith("IMG_"));
                 if( filename.endsWith(".jpg") ) {
                     assertTrue(hdr_save_expo || is_expo || is_focus_bracketing || is_fast_burst || filename_jpeg == null);
@@ -3535,11 +3535,111 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
-    private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final File [] files, final String suffix, final int max_time_s, final Date date) throws InterruptedException {
-        File folder = mActivity.getImageFolder();
+    private enum UriType {
+        MEDIASTORE_IMAGES,
+        MEDIASTORE_VIDEOS,
+        STORAGE_ACCESS_FRAMEWORK
+    }
+
+    /** Returns an array of filenames (not including full path)  of images or videos in the current
+     *  save folder, by querying the media store; or by using storage access framework on the
+     *  supplied uri.
+     */
+    private List<String> mediaFilesinSaveFolder(Uri baseUri, String bucket_id, UriType uri_type) {
+        List<String> files = new ArrayList<>();
+        final int column_name_c = 0; // filename (without path), including extension
+
+        String [] projection;
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+                projection = new String[] {MediaStore.Images.ImageColumns.DISPLAY_NAME};
+                break;
+            case MEDIASTORE_VIDEOS:
+                projection = new String[] {MediaStore.Video.VideoColumns.DISPLAY_NAME};
+                break;
+            case STORAGE_ACCESS_FRAMEWORK:
+                projection = new String[] {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
+        }
+
+        String selection = "";
+        switch( uri_type ) {
+            case MEDIASTORE_IMAGES:
+                selection = MediaStore.Images.ImageColumns.BUCKET_ID + " = " + bucket_id;
+                break;
+            case MEDIASTORE_VIDEOS:
+                selection = MediaStore.Video.VideoColumns.BUCKET_ID + " = " + bucket_id;
+                break;
+            case STORAGE_ACCESS_FRAMEWORK:
+                break;
+            default:
+                throw new RuntimeException("unknown uri_type: " + uri_type);
+        }
+        Log.d(TAG, "selection: " + selection);
+
+        Cursor cursor = mActivity.getContentResolver().query(baseUri, projection, selection, null, null);
+        if( cursor != null && cursor.moveToFirst() ) {
+            Log.d(TAG, "found: " + cursor.getCount());
+
+            do {
+                String name = cursor.getString(column_name_c);
+                files.add(name);
+            }
+            while( cursor.moveToNext() );
+        }
+
+        if( cursor != null ) {
+            cursor.close();
+        }
+
+        return files;
+    }
+
+    /** Returns an array of filenames (not including full path) in the current save folder.
+     */
+    private String [] filesInSaveFolder() {
+        Log.d(TAG, "filesInSaveFolder");
+        if( MainActivity.useScopedStorage() ) {
+            List<String> files = new ArrayList<>();
+            if( mActivity.getStorageUtils().isUsingSAF() ) {
+                // See documentation for StorageUtils.getLatestMediaSAF() - for some reason with scoped storage when not having READ_EXTERNAL_STORAGE,
+                // we can't query the mediastore for files saved via SAF!
+                Uri treeUri = mActivity.getStorageUtils().getTreeUriSAF();
+                Uri baseUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+                files.addAll( mediaFilesinSaveFolder(baseUri, null, UriType.STORAGE_ACCESS_FRAMEWORK) );
+            }
+            else {
+                String save_folder = mActivity.getStorageUtils().getImageFolderPath();
+                String bucket_id = String.valueOf(save_folder.toLowerCase().hashCode());
+                files.addAll( mediaFilesinSaveFolder(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, bucket_id, UriType.MEDIASTORE_IMAGES) );
+                files.addAll( mediaFilesinSaveFolder(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, bucket_id, UriType.MEDIASTORE_VIDEOS) );
+            }
+
+            if( files.size() == 0 ) {
+                return null;
+            }
+            else {
+                return files.toArray(new String[0]);
+            }
+        }
+        else {
+            File folder = mActivity.getImageFolder();
+            File [] files = folder.listFiles();
+            if( files == null )
+                return null;
+            String [] filenames = new String[files.length];
+            for(int i=0;i<files.length;i++) {
+                filenames[i] = files[i].getName();
+            }
+            return filenames;
+        }
+    }
+
+    private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final String [] files, final String suffix, final int max_time_s, final Date date) throws InterruptedException {
         int n_files = files == null ? 0 : files.length;
-        assertTrue( folder.exists() );
-        File [] files2 = folder.listFiles();
+        String [] files2 = filesInSaveFolder();
         int n_new_files = (files2 == null ? 0 : files2.length) - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         int exp_n_new_files = getExpNNewFiles(is_raw);
@@ -3555,9 +3655,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         if( !mActivity.getApplicationInterface().isRawOnly() ) {
-            assertNotNull(mActivity.test_last_saved_image);
-            File saved_image_file = new File(mActivity.test_last_saved_image);
-            Log.d(TAG, "saved name: " + saved_image_file.getName());
+            String saved_image_filename;
+            if( MainActivity.useScopedStorage() || mActivity.getStorageUtils().isUsingSAF() ) {
+                /*assertNotNull(mActivity.test_last_saved_imagename);
+                saved_image_filename = mActivity.test_last_saved_imagename;*/
+                assertNotNull(mActivity.test_last_saved_imageuri);
+                saved_image_filename = mActivity.getStorageUtils().getFileName(mActivity.test_last_saved_imageuri);
+            }
+            else {
+                assertNotNull(mActivity.test_last_saved_image);
+                File saved_image_file = new File(mActivity.test_last_saved_image);
+                saved_image_filename = saved_image_file.getName();
+            }
+            Log.d(TAG, "saved name: " + saved_image_filename);
             /*Log.d(TAG, "expected name: " + expected_filename);
             Log.d(TAG, "expected name1: " + expected_filename1);
             assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));*/
@@ -3568,7 +3678,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(test_date);
                 String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
                 Log.d(TAG, "expected name: " + expected_filename);
-                if( expected_filename.equals(saved_image_file.getName() ) )
+                if( expected_filename.equals(saved_image_filename) )
                     matched = true;
             }
             assertTrue(matched);
@@ -3645,9 +3755,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        Log.d(TAG, "folder: " + folder);
-        File [] files = folder.listFiles();
+        String [] files = filesInSaveFolder();
         int n_files = files == null ? 0 : files.length;
         Log.d(TAG, "n_files at start: " + n_files);
 
@@ -3863,8 +3971,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         updateForSettings();
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         int start_count = mPreview.count_cameraTakePicture;
@@ -3885,7 +3992,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         mActivity.waitUntilImageQueueEmpty();
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, 2 * n_photos); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
     }
@@ -3909,8 +4016,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         updateForSettings();
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -3939,7 +4045,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
         assertEquals(mPreview.count_cameraTakePicture, n_repeat);
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, 2 * n_repeat); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
     }
@@ -5229,8 +5335,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mPreview.count_cameraTakePicture = 0;
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -5281,7 +5386,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Bitmap thumbnail = mActivity.gallery_bitmap;
         assertNotNull(thumbnail);
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         int exp_n_new_files = is_raw ? 2 : 1;
         Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
@@ -5307,7 +5412,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "after idle sync 3");
 
         // check photo not deleted
-        n_new_files = getNFiles(folder) - n_files;
+        n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
         assertEquals(n_new_files, exp_n_new_files);
@@ -5384,8 +5489,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
     private void subTestTakePhotoPreviewPausedShareTrash(boolean is_raw, boolean share) throws InterruptedException {
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -5439,7 +5543,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Bitmap thumbnail = mActivity.gallery_bitmap;
         assertNotNull(thumbnail);
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         int exp_n_new_files = is_raw ? 2 : 1;
         Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
@@ -5465,7 +5569,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done click share");
 
             // check photo(s) not deleted
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(n_new_files, exp_n_new_files);
         }
@@ -5475,7 +5579,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done click trash");
 
             // check photo(s) deleted
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(0, n_new_files);
 
@@ -5750,8 +5854,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.isPreviewStarted());
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
@@ -5795,7 +5898,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         mActivity.waitUntilImageQueueEmpty();
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
 
@@ -5829,8 +5932,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     private void takePhotoLoop(int count) {
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         int start_count = mPreview.count_cameraTakePicture;
@@ -5850,7 +5952,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         mActivity.waitUntilImageQueueEmpty();
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, count);
     }
@@ -5912,8 +6014,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     private void takePhotoLoopAngles(int [] angles) {
         // count initial files in folder
         mActivity.test_have_angle = true;
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         int start_count = mPreview.count_cameraTakePicture;
@@ -5934,7 +6035,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         mActivity.waitUntilImageQueueEmpty();
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, angles.length); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved); note that in some cases, this test fails here because the activity onPause() after clicking take photo?!
 
@@ -6056,9 +6157,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity.getApplicationInterface().test_n_videos_scanned = 0;
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        Log.d(TAG, "folder: " + folder);
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -6213,8 +6312,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertEquals(mPreview.getCurrentPreviewSize().height, mPreview.getCameraController().test_texture_view_buffer_h);
         }
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         if( test_cb == null ) {
             if( time_ms <= 500 ) {
@@ -7764,8 +7862,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.isPreviewStarted());
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -7824,9 +7921,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check still taking video");
         assertTrue( mPreview.isVideoRecording() );
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
-        assertEquals(1, n_new_files);
+        // note, if using scoped storage without SAF (i.e., mediastore API), then the video file won't show up until after we've finished recording (IS_PENDING is set to 0)
+        assertEquals(MainActivity.useScopedStorage() && !mActivity.getStorageUtils().isUsingSAF() ? 0 : 1, n_new_files);
 
         if( restart ) {
             if( interrupt ) {
@@ -7841,10 +7939,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 Thread.sleep(10000);
                 Log.d(TAG, "check restarted video");
                 assertTrue( mPreview.isVideoRecording() );
-                assertTrue( folder.exists() );
-                n_new_files = getNFiles(folder) - n_files;
+                n_new_files = getNFiles() - n_files;
                 Log.d(TAG, "n_new_files: " + n_new_files);
-                assertEquals(2, n_new_files);
+                // as noted above, with mediastore API then the latest file won't be visible yet
+                assertEquals(MainActivity.useScopedStorage() && !mActivity.getStorageUtils().isUsingSAF() ? 1 : 2, n_new_files);
 
                 Thread.sleep(15000);
             }
@@ -7855,8 +7953,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check stopped taking video");
         assertFalse(mPreview.isVideoRecording());
 
-        assertTrue( folder.exists() );
-        n_new_files = getNFiles(folder) - n_files;
+        n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, (restart ? 2 : 1));
 
@@ -7916,8 +8013,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(mPreview.isPreviewStarted());
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
@@ -7935,9 +8031,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check still taking video");
         assertTrue( mPreview.isVideoRecording() );
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
-        assertEquals(1, n_new_files);
+        // note, if using scoped storage without SAF (i.e., mediastore API), then the video file won't show up until after we've finished recording (IS_PENDING is set to 0)
+        assertEquals(MainActivity.useScopedStorage() && !mActivity.getStorageUtils().isUsingSAF() ? 0 : 1, n_new_files);
 
         // now go to settings
         View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
@@ -7948,8 +8045,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "after idle sync");
         assertFalse(mPreview.isVideoRecording());
 
-        assertTrue( folder.exists() );
-        n_new_files = getNFiles(folder) - n_files;
+        n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
 
@@ -7973,10 +8069,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertTrue( mPreview.isVideoRecording() );
 
-        assertTrue( folder.exists() );
-        n_new_files = getNFiles(folder) - n_files;
+        n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
-        assertEquals(2, n_new_files);
+        // see note above about mediastore API
+        assertEquals(MainActivity.useScopedStorage() && !mActivity.getStorageUtils().isUsingSAF() ? 1 : 2, n_new_files);
 
     }
 
@@ -8028,8 +8124,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Thread.sleep(500);
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         assertEquals(switchVideoButton.getVisibility(), View.VISIBLE);
@@ -8047,7 +8142,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check still taking video");
         assertTrue( mPreview.isVideoRecording() );
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
 
@@ -8136,8 +8231,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertFalse(mPreview.isOnTimer());
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -8183,7 +8277,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // check timer cancelled, and not yet taken a photo
             assertFalse(mPreview.isOnTimer());
             assertEquals(0, mPreview.count_cameraTakePicture);
-            int n_new_files = getNFiles(folder) - n_files;
+            int n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(0, n_new_files);
 
@@ -8195,7 +8289,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done clicking take photo");
             assertTrue(mPreview.isOnTimer());
             assertEquals(0, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(0, n_new_files);
 
@@ -8204,7 +8298,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
             assertFalse(mPreview.isOnTimer());
             assertEquals(1, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(1, n_new_files);
 
@@ -8220,7 +8314,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done clicking take photo");
             assertTrue(mPreview.isOnTimer());
             assertEquals(1, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(1, n_new_files);
 
@@ -8229,7 +8323,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
             assertFalse(mPreview.isOnTimer());
             assertEquals(2, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(2, n_new_files);
 
@@ -8241,7 +8335,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done clicking take photo");
             assertTrue(mPreview.isOnTimer());
             assertEquals(2, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(2, n_new_files);
 
@@ -8254,7 +8348,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "done clicking take photo to cancel");
             assertFalse(mPreview.isOnTimer());
             assertEquals(2, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(2, n_new_files);
 
@@ -8263,7 +8357,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
             assertFalse(mPreview.isOnTimer());
             assertEquals(2, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(2, n_new_files);
         }
@@ -8315,8 +8409,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertFalse(mPreview.isOnTimer());
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -8944,8 +9037,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         assertEquals(0, mPreview.count_cameraTakePicture);
@@ -8971,7 +9063,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(mPreview.isPreviewStarted()); // check preview restarted
             Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
             assertEquals(3, mPreview.count_cameraTakePicture);
-            int n_new_files = getNFiles(folder) - n_files;
+            int n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(3, n_new_files);
 
@@ -8982,7 +9074,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             assertTrue(mPreview.isPreviewStarted()); // check preview restarted
             Log.d(TAG, "mPreview.count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
             assertEquals(3, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(3, n_new_files);
 
@@ -8996,14 +9088,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             clickView(takePhotoButton);
             Thread.sleep(7000);
             assertEquals(6, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(6, n_new_files);
             assertFalse(mPreview.isPreviewStarted()); // check preview paused
 
             TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
             this.getInstrumentation().waitForIdleSync();
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(6, n_new_files);
             assertTrue(mPreview.isPreviewStarted()); // check preview restarted
@@ -9038,14 +9130,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             this.getInstrumentation().waitForIdleSync();
             assertEquals(7, mPreview.count_cameraTakePicture);
             mActivity.waitUntilImageQueueEmpty();
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(7, n_new_files);
 
             // wait 2s, should still not have taken another photo
             Thread.sleep(2000);
             assertEquals(7, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(7, n_new_files);
             // check GUI has returned to correct state
@@ -9061,13 +9153,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // wait another 5s, should have taken another photo (need to allow time for the extra auto-focus)
             Thread.sleep(5000);
             assertEquals(8, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(8, n_new_files);
             // wait 4s, should not have taken any more photos
             Thread.sleep(4000);
             assertEquals(8, mPreview.count_cameraTakePicture);
-            n_new_files = getNFiles(folder) - n_files;
+            n_new_files = getNFiles() - n_files;
             Log.d(TAG, "n_new_files: " + n_new_files);
             assertEquals(8, n_new_files);
         }
@@ -9166,10 +9258,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(size, new_size);
     }
 
-    private void testExif(String file, boolean expect_gps) throws IOException {
+    /** Tests the Exif tags in the resultant file. If the file is null, the uri will be
+     *  used instead to read the Exif tags.
+     */
+    private void testExif(String file, Uri uri, boolean expect_gps) throws IOException {
         //final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
         //final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
-        ExifInterface exif = new ExifInterface(file);
+        InputStream inputStream = null;
+        ExifInterface exif;
+        if( file != null ) {
+            assertNull(uri); // should only supply one of file or uri
+            exif = new ExifInterface(file);
+        }
+        else {
+            assertNotNull(uri);
+            inputStream = getActivity().getContentResolver().openInputStream(uri);
+            exif = new ExifInterface(inputStream);
+        }
+
         assertNotNull(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
         assertNotNull(exif.getAttribute(ExifInterface.TAG_MAKE));
         assertNotNull(exif.getAttribute(ExifInterface.TAG_MODEL));
@@ -9190,6 +9296,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             // can't read custom tags, even though we can write them?!
             //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION) == null);
             //assertTrue(exif.getAttribute(TAG_GPS_IMG_DIRECTION_REF) == null);
+        }
+
+        if( inputStream != null ) {
+            inputStream.close();
         }
     }
 
@@ -9231,6 +9341,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
         mActivity.test_last_saved_image = null;
+        mActivity.test_last_saved_imageuri = null;
         clickView(takePhotoButton);
 
         Log.d(TAG, "wait until finished taking photo");
@@ -9238,8 +9349,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         assertEquals(1, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, true);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, true);
 
         // now test with auto-stabilise
         {
@@ -9250,6 +9360,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             updateForSettings();
         }
         mActivity.test_last_saved_image = null;
+        mActivity.test_last_saved_imageuri = null;
         clickView(takePhotoButton);
 
         Log.d(TAG, "wait until finished taking photo");
@@ -9257,8 +9368,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         this.getInstrumentation().waitForIdleSync();
         assertEquals(2, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, true);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, true);
 
         // switch to front camera
         if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
@@ -9335,6 +9445,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
         mActivity.test_last_saved_image = null;
+        mActivity.test_last_saved_imageuri = null;
         clickView(takePhotoButton);
 
         assertTrue(mActivity.getLocationSupplier().noLocationListeners());
@@ -9351,8 +9462,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertNull(mActivity.getLocationSupplier().getLocation());
 
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, false);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, false);
 
         assertTrue(mActivity.getLocationSupplier().noLocationListeners());
         assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
@@ -9367,6 +9477,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             updateForSettings();
         }
         mActivity.test_last_saved_image = null;
+        mActivity.test_last_saved_imageuri = null;
         clickView(takePhotoButton);
 
         assertTrue(mActivity.getLocationSupplier().noLocationListeners());
@@ -9383,8 +9494,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertNull(mActivity.getLocationSupplier().getLocation());
 
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, false);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, false);
 
         assertTrue(mActivity.getLocationSupplier().noLocationListeners());
         assertFalse(mActivity.getLocationSupplier().testHasReceivedLocation());
@@ -9666,8 +9776,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertEquals(1, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, false);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, false);
 
         // now again with location
         {
@@ -9698,8 +9807,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertEquals(2, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, true);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, true);
 
         // now again with custom text
         {
@@ -9724,8 +9832,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertEquals(3, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, true);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, true);
 
         // now test with auto-stabilise
         {
@@ -9746,8 +9853,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "photo count: " + mPreview.count_cameraTakePicture);
         assertEquals(4, mPreview.count_cameraTakePicture);
         mActivity.waitUntilImageQueueEmpty();
-        assertNotNull(mActivity.test_last_saved_image);
-        testExif(mActivity.test_last_saved_image, true);
+        testExif(mActivity.test_last_saved_image, mActivity.test_last_saved_imageuri, true);
 
         mActivity.waitUntilImageQueueEmpty();
     }
@@ -10316,10 +10422,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             //noinspection ResultOfMethodCallIgnored
             folder.delete();
         }
-        int n_old_files = 0;
-        if( folder.exists() ) {
-            n_old_files = getNFiles(folder);
-        }
+        int n_old_files = getNFiles();
         Log.d(TAG, "n_old_files: " + n_old_files);
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -10336,8 +10439,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         mActivity.waitUntilImageQueueEmpty();
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder);
+        int n_new_files = getNFiles();
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, n_old_files + 1);
 
@@ -11817,10 +11919,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "subTestTakePhotoContinuousBurst");
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        Log.d(TAG, "folder: " + folder);
-        File [] files = folder.listFiles();
-        int n_files = files == null ? 0 : files.length;
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         final View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -11850,8 +11949,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
 
-        File [] files2 = folder.listFiles();
-        int n_new_files = (files2 == null ? 0 : files2.length) - n_files;
+        int n_new_files = getNFiles();
         Log.d(TAG, "n_new_files: " + n_new_files);
         if( is_slow ) {
             // with limited queue, won't be able to save as many files
@@ -11925,8 +12023,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertSame(mActivity.getApplicationInterface().getPhotoMode(), MyApplicationInterface.PhotoMode.Panorama);
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         Thread.sleep(1000);
@@ -12068,8 +12165,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         mActivity.waitUntilImageQueueEmpty();
 
-        assertTrue( folder.exists() );
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(n_new_files, (cancel ? 0 : 1));
     }
@@ -12323,8 +12419,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals( max_filesize, mActivity.getApplicationInterface().getVideoMaxFileSizePref().max_filesize, 5*1048576 );
 
         // count initial files in folder
-        File folder = mActivity.getImageFolder();
-        int n_files = getNFiles(folder);
+        int n_files = getNFiles();
         Log.d(TAG, "n_files at start: " + n_files);
 
         View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -12340,17 +12435,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check still taking video");
         assertTrue( mPreview.isVideoRecording() );
 
-        int n_new_files = getNFiles(folder) - n_files;
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
-        assertEquals(1, n_new_files);
+        // note, if using scoped storage without SAF (i.e., mediastore API), then the video file won't show up until after we've finished recording (IS_PENDING is set to 0)
+        assertEquals(MainActivity.useScopedStorage() && !mActivity.getStorageUtils().isUsingSAF() ? 0 : 1, n_new_files);
 
         Thread.sleep(3000);
 
         Log.d(TAG, "check stopped taking video");
         assertFalse(mPreview.isVideoRecording());
 
-        assertTrue( folder.exists() );
-        n_new_files = getNFiles(folder) - n_files;
+        n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
 

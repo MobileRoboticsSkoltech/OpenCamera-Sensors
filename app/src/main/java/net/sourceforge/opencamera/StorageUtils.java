@@ -270,9 +270,8 @@ public class StorageUtils {
     }
 
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
-     * @return If non-null, this contains the path of the file we found for the Uri.
      */
-    public String broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
+    public void broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastUri: " + uri);
         /* We still need to broadcastFile for SAF for two reasons:
@@ -293,7 +292,6 @@ public class StorageUtils {
             //Uri media_uri = broadcastFileRaw(real_file, current_date, location);
             //announceUri(media_uri, is_new_picture, is_new_video);
             broadcastFile(real_file, is_new_picture, is_new_video, set_last_scanned);
-            return (real_file==null ? null : real_file.getAbsolutePath());
         }
         else if( !image_capture_intent ) {
             if( MyDebug.LOG )
@@ -301,10 +299,9 @@ public class StorageUtils {
             // shouldn't do this for an image capture intent - e.g., causes crash when calling from Google Keep
             announceUri(uri, is_new_picture, is_new_video);
         }
-        return null;
     }
 
-    boolean isUsingSAF() {
+    public boolean isUsingSAF() {
         // check Android version just to be safe
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -328,7 +325,7 @@ public class StorageUtils {
     }
 
     // only valid if isUsingSAF()
-    private Uri getTreeUriSAF() {
+    public Uri getTreeUriSAF() {
         String folder_name = getSaveLocationSAF();
         return Uri.parse(folder_name);
     }
@@ -600,7 +597,7 @@ public class StorageUtils {
      * See https://developer.android.com/guide/topics/providers/document-provider.html and
      * http://stackoverflow.com/questions/5568874/how-to-extract-the-file-name-from-uri-returned-from-intent-action-get-content .
      */
-    String getFileName(Uri uri) {
+    public String getFileName(Uri uri) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "getFileName: " + uri);
             Log.d(TAG, "uri has path: " + uri.getPath());

@@ -2554,6 +2554,8 @@ public class ImageSaver extends Thread {
                     else {
                         broadcastSAFFile(saveUri, request.image_capture_intent);
                     }
+
+                    main_activity.test_last_saved_imageuri = saveUri;
                 }
             }
         }
@@ -2715,10 +2717,7 @@ public class ImageSaver extends Thread {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastSAFFile");
         StorageUtils storageUtils = main_activity.getStorageUtils();
-        String real_file_path = storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
-        if( real_file_path != null ) {
-            main_activity.test_last_saved_image = real_file_path;
-        }
+        storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
     }
 
     /** As setExifFromFile, but can read the Exif tags directly from the jpeg data, and to a file descriptor, rather than a file.

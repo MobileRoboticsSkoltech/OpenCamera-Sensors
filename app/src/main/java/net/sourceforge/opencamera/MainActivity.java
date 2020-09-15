@@ -186,7 +186,8 @@ public class MainActivity extends Activity {
     public volatile boolean test_low_memory;
     public volatile boolean test_have_angle;
     public volatile float test_angle;
-    public volatile String test_last_saved_image;
+    public volatile Uri test_last_saved_imageuri; // uri of last image; set if using scoped storage OR using SAF
+    public volatile String test_last_saved_image; // filename (including full path) of last image; set if not using scoped storage nor using SAF (i.e., writing using File API)
     public static boolean test_force_supports_camera2; // okay to be static, as this is set for an entire test suite
     public volatile String test_save_settings_file;
 
