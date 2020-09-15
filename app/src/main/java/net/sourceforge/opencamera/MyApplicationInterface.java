@@ -2350,6 +2350,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  file.
      */
     private void completeVideo(final VideoMethod video_method, final Uri uri) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "completeVideo");
         if( video_method == VideoMethod.MEDIASTORE ) {
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
                 ContentValues contentValues = new ContentValues();
