@@ -2513,10 +2513,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             error_message = getContext().getResources().getString(R.string.failed_to_record_video);
         }
         main_activity.getPreview().showToast(null, error_message);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override
@@ -2539,11 +2535,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onFailedCreateVideoFileError() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onFailedCreateVideoFileError");
         main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override
