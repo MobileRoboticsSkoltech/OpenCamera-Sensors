@@ -34,6 +34,7 @@ android {
     // see https://developer.android.com/training/testing/set-up-project
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
+    buildToolsVersion '28.0.2'
     //useLibrary 'android.test.mock'
 }
 
