@@ -8,5 +8,8 @@ android:
     - build-tools-28.0.2
     - android-28
     - extra-android-m2repository
+  licenses:
+    - 'androidx_LICENSE-2.0'
+    - 'google_material_design_icons_LICENSE-2.0'
 
 script: ./gradlew build
