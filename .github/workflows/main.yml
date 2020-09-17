@@ -1,0 +1,10 @@
+- name: Android Emulator Runner
+  uses: ReactiveCircus/android-emulator-runner@v2.11.0
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
