@@ -9,8 +9,9 @@ android:
     - android-28
     - extra-android-m2repository
   licenses:
-    - 'androidx_LICENSE-2.0'
-    - 'google_material_design_icons_LICENSE-2.0'
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
 
 before_install:
   - yes | sdkmanager "platforms;android-28"
