@@ -31,6 +31,7 @@ public class RawSensorInfo extends GyroSensor {
         super(context);
     }
 
+    @Override
     public void onSensorChanged(SensorEvent event) {
         if (buffersInitialized) {
             // StringBuilder is important here because it does not suffer when threading
@@ -55,6 +56,7 @@ public class RawSensorInfo extends GyroSensor {
         }
     }
 
+    @Override
     void startRecording() {
         String timestamp = new SimpleDateFormat(
                 "yyyyMMdd_HHmmss", Locale.US).format(new Date()
@@ -87,6 +89,7 @@ public class RawSensorInfo extends GyroSensor {
 
     }
 
+    @Override
     void stopRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "Close all files");
