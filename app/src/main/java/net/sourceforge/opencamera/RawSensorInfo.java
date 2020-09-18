@@ -16,7 +16,8 @@ import java.util.Locale;
 
 public class RawSensorInfo extends GyroSensor {
     private static final String TAG = "RawSensorInfo";
-    private static final String sensorInfoPath = "/OpenCamera_sensor_info/";
+    private static final String SENSOR_INFO_PATH = "/OpenCamera_sensor_info/";
+    private static final String CSV_SEPARATOR = ",";
 
     private MyStringBuffer mGyroBuffer;
     private MyStringBuffer mAccelBuffer;
@@ -32,10 +33,9 @@ public class RawSensorInfo extends GyroSensor {
             // StringBuilder is important here because it does not suffer when threading
             StringBuilder sensorData = new StringBuilder();
 
-
             for(int j = 0; j < 3; j++) {
                 sensorData.append(event.values[j]);
-                sensorData.append(',');
+                sensorData.append(CSV_SEPARATOR);
             }
             sensorData.append(event.timestamp);
             sensorData.append('\n');
@@ -48,12 +48,12 @@ public class RawSensorInfo extends GyroSensor {
         }
     }
 
-    private void setUpSensorWriter() {
+    void startRecording() {
         String timestamp = new SimpleDateFormat(
                 "yyyyMMdd_HHmmss", Locale.US).format(new Date()
         );
         mCurrentDirPath = Environment.getExternalStorageDirectory().getPath()
-                + sensorInfoPath
+                + SENSOR_INFO_PATH
                 + timestamp + "/";
 
         boolean dirsOk = new File(mCurrentDirPath).mkdirs();
@@ -75,17 +75,10 @@ public class RawSensorInfo extends GyroSensor {
         }
 
         buffersInitialized = true;
+
     }
 
-    public void startRecording() {
-        setUpSensorWriter();
-    }
-
-    public void stopRecording() {
-        cleanUpSensorWriter();
-    }
-
-    private void cleanUpSensorWriter() {
+    void stopRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "Close all files");
         mGyroBuffer.close();
