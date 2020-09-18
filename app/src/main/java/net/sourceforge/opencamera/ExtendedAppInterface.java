@@ -6,11 +6,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyApplicationInterface;
-import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.RawSensorInfo;
-
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
     private final RawSensorInfo rawSensorInfo;

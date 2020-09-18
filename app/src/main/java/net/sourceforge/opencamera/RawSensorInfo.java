@@ -6,9 +6,11 @@ import android.hardware.SensorEvent;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -18,9 +20,10 @@ public class RawSensorInfo extends GyroSensor {
     private static final String TAG = "RawSensorInfo";
     private static final String SENSOR_INFO_PATH = "/OpenCamera_sensor_info/";
     private static final String CSV_SEPARATOR = ",";
+    private static final int BUFFER_SIZE = 262144;
 
-    private MyStringBuffer mGyroBuffer;
-    private MyStringBuffer mAccelBuffer;
+    private BufferedWriter gyroBufferedWriter;
+    private BufferedWriter accelBufferedWriter;
     private String mCurrentDirPath;
     boolean buffersInitialized = false;
 
@@ -40,10 +43,14 @@ public class RawSensorInfo extends GyroSensor {
             sensorData.append(event.timestamp);
             sensorData.append('\n');
 
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                mAccelBuffer.append(sensorData.toString());
-            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                mGyroBuffer.append(sensorData.toString());
+            try {
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                    accelBufferedWriter.write(sensorData.toString());
+                } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+                    gyroBufferedWriter.write(sensorData.toString());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -66,12 +73,14 @@ public class RawSensorInfo extends GyroSensor {
         String accelFile = mCurrentDirPath + timestamp + "acc" + ".csv";
 
         try {
-            PrintStream gyroWriter = new PrintStream(gyroFile);
-            PrintStream accelWriter = new PrintStream(accelFile);
-            mGyroBuffer = new MyStringBuffer(gyroWriter);
-            mAccelBuffer = new MyStringBuffer(accelWriter);
+            PrintWriter gyroWriter = new PrintWriter(gyroFile);
+            PrintWriter accelWriter = new PrintWriter(accelFile);
+
+            gyroBufferedWriter = new BufferedWriter(gyroWriter, BUFFER_SIZE);
+            accelBufferedWriter = new BufferedWriter(accelWriter, BUFFER_SIZE);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Log.e(TAG, "Failed to open csv files");
         }
 
         buffersInitialized = true;
@@ -81,8 +90,15 @@ public class RawSensorInfo extends GyroSensor {
     void stopRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "Close all files");
-        mGyroBuffer.close();
-        mAccelBuffer.close();
+        try {
+            if (gyroBufferedWriter != null)
+                gyroBufferedWriter.close();
+            if (accelBufferedWriter != null)
+                accelBufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "Failed to close csv files");
+        }
         buffersInitialized = false;
     }
 }
