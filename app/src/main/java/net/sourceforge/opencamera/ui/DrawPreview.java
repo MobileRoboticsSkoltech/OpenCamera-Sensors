@@ -2753,7 +2753,7 @@ public class DrawPreview {
         }
     }
 
-    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, @SuppressWarnings("unused") float dir_x, @SuppressWarnings("unused") float dir_y, int radius_dp, boolean outline) {
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp, boolean outline) {
         if( outline ) {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(stroke_width);

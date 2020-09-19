@@ -3031,7 +3031,6 @@ public class HDRProcessor {
      * @param allocation_in The input allocation.
      * @param width         The width of the allocation.
      */
-    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private float computeSharpness(Allocation allocation_in, int width, long time_s) {
         if( MyDebug.LOG )

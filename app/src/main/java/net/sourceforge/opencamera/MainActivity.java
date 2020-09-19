@@ -4425,26 +4425,20 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "set up zoom");
             if( MyDebug.LOG )
                 Log.d(TAG, "has_zoom? " + preview.supportsZoom());
-            @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
             ZoomControls zoomControls = findViewById(R.id.zoom);
             SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
 
             if( preview.supportsZoom() ) {
                 if( sharedPreferences.getBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, false) ) {
-                    //noinspection deprecation
                     zoomControls.setIsZoomInEnabled(true);
-                    //noinspection deprecation
                     zoomControls.setIsZoomOutEnabled(true);
-                    //noinspection deprecation
                     zoomControls.setZoomSpeed(20);
 
-                    //noinspection deprecation
                     zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
                         public void onClick(View v){
                             zoomIn();
                         }
                     });
-                    //noinspection deprecation
                     zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
                         public void onClick(View v){
                             zoomOut();
@@ -4614,15 +4608,12 @@ public class MainActivity extends Activity {
                     }
                 });
 
-                @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
                 ZoomControls seek_bar_zoom = findViewById(R.id.exposure_seekbar_zoom);
-                //noinspection deprecation
                 seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
                     public void onClick(View v){
                         changeExposure(1);
                     }
                 });
-                //noinspection deprecation
                 seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
                     public void onClick(View v){
                         changeExposure(-1);

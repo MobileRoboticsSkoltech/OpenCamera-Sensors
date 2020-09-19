@@ -5027,7 +5027,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "takePicturePressed exit");
     }
 
-    private void takePictureOnTimer(final long timer_delay, @SuppressWarnings("unused") boolean repeated) {
+    private void takePictureOnTimer(final long timer_delay, boolean repeated) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "takePictureOnTimer");
             Log.d(TAG, "timer_delay: " + timer_delay);

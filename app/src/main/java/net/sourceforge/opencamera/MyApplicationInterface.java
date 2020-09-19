@@ -1005,10 +1005,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
             else {
                 // If save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days).
-                // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-                // when using scoped storage, we should no longer hit this codepath, but we are still using this for older Android
-                // versions.
-                @SuppressWarnings("deprecation")
                 File storage = Environment.getExternalStorageDirectory();
                 if( MyDebug.LOG )
                     Log.d(TAG, "compare to: " + storage.getAbsolutePath());

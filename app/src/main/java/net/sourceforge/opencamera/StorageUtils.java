@@ -104,7 +104,7 @@ public class StorageUtils {
 
             if( MyDebug.LOG ) // this code only used for debugging/logging
             {
-                @SuppressWarnings("deprecation") // this is only debug code
+                @SuppressLint("InlinedApi") // complains this constant only available on API 29 (even though it was available on older versions, but looks like it was moved?)
                 String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED };
                 Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
                 if( c == null ) {
@@ -116,10 +116,10 @@ public class StorageUtils {
                         Log.e(TAG, "Couldn't resolve given uri [2]: " + uri);
                 }
                 else {
-                    @SuppressWarnings("deprecation") // this is only debug code
                     String file_path = c.getString(c.getColumnIndex(Images.Media.DATA));
                     String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME));
                     String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE));
+                    @SuppressLint("InlinedApi") // complains this constant only available on API 29 (even though it was available on older versions, but looks like it was moved?)
                     long date_taken = c.getLong(c.getColumnIndex(Images.Media.DATE_TAKEN));
                     long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED));
                     Log.d(TAG, "file_path: " + file_path);
@@ -385,11 +385,6 @@ public class StorageUtils {
     }
 
     public static File getBaseFolder() {
-        // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-        // when using scoped storage, we should no longer be trying to read/write this codepath with File API, but we are still using
-        // this for older Android versions.
-        // Furthermore, sometimes we still use this with scoped storage for valid purposes, e.g., to pass to StatFs in freeMemory().
-        @SuppressWarnings("deprecation")
         final File base_folder = Environment.getExternalStoragePublicDirectory(RELATIVE_FOLDER_BASE);
         return base_folder;
     }
@@ -470,10 +465,6 @@ public class StorageUtils {
                 File [] storagePoints = new File("/storage").listFiles();
 
                 if( "primary".equalsIgnoreCase(type) ) {
-                    // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-                    // when using scoped storage, as noted above we should no longer be trying to read/write this path with File API;
-                    // and otherwise we are still using this for older Android versions.
-                    @SuppressWarnings("deprecation")
                     final File externalStorage = Environment.getExternalStorageDirectory();
                     file = new File(externalStorage, path);
                 }
@@ -562,9 +553,6 @@ public class StorageUtils {
     }
 
     private String getDataColumn(Uri uri, String selection, String [] selectionArgs) {
-        // DATA is redacted with scoped storage, but that's fine - the callers of this method are documented that they may return
-        // no filename, and these callers have been reviewed for their use on Android 10+ with scoped storage
-        @SuppressWarnings("deprecation")
         final String column = MediaStore.Images.ImageColumns.DATA;
         final String[] projection = {
                 column
@@ -914,6 +902,7 @@ public class StorageUtils {
         MEDIASTORE_VIDEOS
     }
 
+    @SuppressLint("InlinedApi") // complains MediaColumns constants only available on API 29 (even though it was available on older versions, but looks like it was moved?); for some reason doesn't allow putting this at the actual comments?!
     private Media getLatestMediaCore(Uri baseUri, String bucket_id, UriType uri_type) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "getLatestMediaCore");

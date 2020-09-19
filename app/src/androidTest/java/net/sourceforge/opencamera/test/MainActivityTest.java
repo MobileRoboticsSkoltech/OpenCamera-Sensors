@@ -9998,7 +9998,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
 
-        @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
         final ZoomControls zoomControls = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
         assertEquals(zoomControls.getVisibility(), View.GONE);
 
@@ -15638,7 +15637,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(avg_images_path + "testAvg25/input2.jpg");
         inputs.add(avg_images_path + "testAvg25/input3.jpg");
 
-        //noinspection unused
         HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, 1000000000L/20, 1.0f, new TestAvgCallback() {
             @Override
             public void doneProcessAvg(int index) {
@@ -16712,7 +16710,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
      * @param camera_angle_y The value of preview.getViewAngleY(for_preview=false) (in degrees) when taking the input photos (on the device used).
      */
-    @SuppressWarnings("unused")
     private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float camera_angle_x, float camera_angle_y, float gyro_tol_degrees) throws IOException, InterruptedException {
         Log.d(TAG, "subTestPanorama");
 

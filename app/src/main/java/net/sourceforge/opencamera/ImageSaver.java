@@ -1172,7 +1172,6 @@ public class ImageSaver extends Thread {
 
     @SuppressWarnings("WeakerAccess")
     public static class GyroDebugInfo {
-        @SuppressWarnings("unused")
         public static class GyroImageDebugInfo {
             public float [] vectorRight; // X axis
             public float [] vectorUp; // Y axis
