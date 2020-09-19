@@ -1162,7 +1162,7 @@ public class StorageUtils {
 
         Media media = null;
 
-        Uri baseUri = null;
+        Uri baseUri;
         try {
             String parentDocUri = DocumentsContract.getTreeDocumentId(treeUri);
             baseUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentDocUri);

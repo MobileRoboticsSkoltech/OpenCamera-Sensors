@@ -40,7 +40,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.location.Location;
-import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;

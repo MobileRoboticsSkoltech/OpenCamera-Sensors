@@ -1058,6 +1058,7 @@ public class MainActivity extends Activity {
             return (res ? 1249 : 1259) ^ (alt == null ? 0 : alt.hashCode());
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "CheckSaveLocationResult{" + res + " , " + alt + "}";
@@ -1502,7 +1503,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if( MyDebug.LOG )
             Log.d(TAG, "onConfigurationChanged()");
         // configuration change can include screen orientation (landscape/portrait) when not locked (when settings is open)
@@ -3941,7 +3942,7 @@ public class MainActivity extends Activity {
         editText.setText(sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
         InputFilter filter = new InputFilter() {
             // whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-            String disallowed = "|\\?*<\":>";
+            final String disallowed = "|\\?*<\":>";
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 for(int i=start;i<end;i++) {
                     if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
@@ -4318,7 +4319,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle state) {
+    protected void onSaveInstanceState(@NonNull Bundle state) {
         if( MyDebug.LOG )
             Log.d(TAG, "onSaveInstanceState");
         super.onSaveInstanceState(state);

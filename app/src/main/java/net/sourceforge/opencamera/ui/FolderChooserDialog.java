@@ -60,6 +60,7 @@ public class FolderChooserDialog extends DialogFragment {
             this.sort_order = sort_order;
         }
 
+        @NonNull
         @Override
         public String toString() {
             if( override_name != null )
