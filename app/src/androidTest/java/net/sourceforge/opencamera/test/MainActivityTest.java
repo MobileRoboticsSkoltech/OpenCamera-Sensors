@@ -6207,6 +6207,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         int exp_n_new_files = 0;
+        boolean failed_to_start = false;
         if( mPreview.isVideoRecording() ) {
             assertEquals((int) (Integer) takePhotoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_video_recording);
             assertEquals((int) (Integer) switchVideoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_photo);
@@ -6305,6 +6306,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else {
             Log.d(TAG, "didn't start video");
             assertTrue(allow_failure);
+            failed_to_start = true;
         }
 
         if( mPreview.usingCamera2API() ) {
@@ -6318,6 +6320,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             if( time_ms <= 500 ) {
                 // if quick, should have deleted corrupt video - but may be device dependent, sometimes we manage to record a video anyway!
                 assertTrue(n_new_files == 0 || n_new_files == 1);
+            }
+            else if( failed_to_start ) {
+                // if video recording failed to start, we should have deleted any file created!
+                assertEquals(0, n_new_files);
             }
             else {
                 assertEquals(n_non_video_files+1, n_new_files);
@@ -7344,6 +7350,44 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         setToDefault();
 
         mActivity.getPreview().test_video_failure = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
+    public void testTakeVideoForceFailureSAF() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceFailureSAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+
+        mActivity.getPreview().test_video_failure = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
+    public void testTakeVideoForceIOException() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceIOException");
+
+        setToDefault();
+
+        mActivity.getPreview().test_video_ioexception = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
+    public void testTakeVideoForceCameraControllerException() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceCameraControllerException");
+
+        setToDefault();
+
+        mActivity.getPreview().test_video_cameracontrollerexception = true;
         subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
     }
 

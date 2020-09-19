@@ -392,6 +392,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile int count_cameraContinuousFocusMoving;
     public volatile boolean test_fail_open_camera;
     public volatile boolean test_video_failure;
+    public volatile boolean test_video_ioexception;
+    public volatile boolean test_video_cameracontrollerexception;
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
     public volatile boolean test_called_next_output_file;
     public volatile boolean test_started_next_output_file;
@@ -5515,14 +5517,33 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 local_video_recorder.setOrientationHint(getImageVideoRotation());
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to prepare video recorder");
+
                 local_video_recorder.prepare();
+                if( test_video_ioexception ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "test_video_ioexception is true");
+                    throw new IOException();
+                }
+
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
+
                 camera_controller.initVideoRecorderPostPrepare(local_video_recorder, want_photo_video_recording);
+                if( test_video_cameracontrollerexception ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "test_video_cameracontrollerexception is true");
+                    throw new CameraControllerException();
+                }
+
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to start video recorder");
 
                 try {
                     local_video_recorder.start();
+                    if( test_video_failure ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "test_video_failure is true");
+                        throw new RuntimeException();
+                    }
                     this.video_recorder = local_video_recorder;
                     videoRecordingStarted(max_filesize_restart);
                 }
@@ -5588,6 +5609,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_recorder.release();
                 video_recorder = null;
                 video_recorder_is_paused = false;
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+                videoFileInfo = new VideoFileInfo();
                 applicationInterface.cameraInOperation(false, true);
                 this.reconnectCamera(true);
             }
@@ -5613,6 +5636,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_recorder.release();
                 video_recorder = null;
                 video_recorder_is_paused = false;
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+                videoFileInfo = new VideoFileInfo();
                 applicationInterface.cameraInOperation(false, true);
                 this.reconnectCamera(true);
                 this.showToast(null, R.string.video_no_free_space);
@@ -5633,11 +5658,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             faces_detected = null;
         }
 
-        if( test_video_failure ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "test_video_failure is true");
-            throw new RuntimeException();
-        }
         video_start_time = System.currentTimeMillis();
         video_start_time_set = true;
         applicationInterface.startedVideo();
@@ -5734,6 +5754,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder.release();
         video_recorder = null;
         video_recorder_is_paused = false;
+        applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+        videoFileInfo = new VideoFileInfo();
         applicationInterface.cameraInOperation(false, true);
         this.reconnectCamera(true);
     }
