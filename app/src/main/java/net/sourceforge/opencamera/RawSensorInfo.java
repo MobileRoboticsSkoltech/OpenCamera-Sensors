@@ -34,8 +34,7 @@ public class RawSensorInfo extends GyroSensor {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (buffersInitialized) {
-            // StringBuilder is important here because it does not suffer when threading
-            StringBuilder sensorData = new StringBuilder();
+            StringBuffer sensorData = new StringBuffer();
 
             for(int j = 0; j < 3; j++) {
                 sensorData.append(event.values[j]);
