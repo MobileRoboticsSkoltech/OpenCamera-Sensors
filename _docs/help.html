@@ -918,8 +918,12 @@ formatting. Also used for Video settings/"Video subtitles".</p>
 
 <p><b>Use addresses</b> - If "Stamp photos" and "Store location data" is enabled, this allows the location
     to be displayed on the resultant photo in the form of an address, either as well as or instead of GPS
-    coordinates. Note that an Internet connection is required for this to succeed. Also used for
-    Video settings/"Video subtitles".</p>
+    coordinates. Similarly also used for Video settings/"Video subtitles".
+    An Internet connection is required for this to succeed.
+    Note that if enabled, this requires that your device transmits location data across the Internet to a third party
+    in order to convert GPS coordinates to an address (this uses the
+    <a href="https://developer.android.com/reference/android/location/Geocoder">Geocoder API</a>).
+</p>
 
 <p><b>Distance unit</b> - If "Stamp photos" is enabled, this controls whether to use metres (m) or
 feet (ft) when recording the GPS altitude. Also used for Video settings/"Video subtitles".</p>
