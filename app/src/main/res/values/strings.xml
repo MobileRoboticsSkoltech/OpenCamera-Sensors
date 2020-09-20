@@ -905,7 +905,7 @@
         be sent to remote servers to perform speech recognition.
         \n%s</string>
 
-    <string name="preference_stamp_geo_address_summary">If possible, use an address when stamping GPS locations.
+    <string name="preference_stamp_geo_address_summary">If possible, obtain an address from GPS locations (for photo stamp or video subtitles).
         This option requires an Internet connection.
         Note that if enabled, this requires that your device transmits location data across the Internet to a third party
         in order to convert GPS coordinates to an address. See https://developer.android.com/reference/android/location/Geocoder .
