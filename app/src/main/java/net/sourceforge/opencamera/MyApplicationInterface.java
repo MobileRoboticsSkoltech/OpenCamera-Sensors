@@ -2026,7 +2026,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         Address address = null;
                         if( store_location && !preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
                             // try to find an address
-                            if( Geocoder.isPresent() ) {
+                            if( main_activity.isAppPaused() ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // is paused - this shouldn't happen, since we stop video when paused, but just to be safe
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for video subtitles  as app is paused?!");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());

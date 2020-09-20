@@ -81,6 +81,11 @@ public class ImageSaver extends Thread {
     private final static int queue_cost_dng_c = 6;
     //private final static int queue_cost_dng_c = 1;
 
+    // Should be same as MainActivity.app_is_paused, but we keep our own copy to make threading easier (otherwise, all
+    // accesses of MainActivity.app_is_paused would need to be synchronized).
+    // Access to app_is_paused should always be synchronized to this (i.e., the ImageSaver class).
+    private boolean app_is_paused = true;
+
     // for testing; must be volatile for test project reading the state
     // n.b., avoid using static, as static variables are shared between different instances of an application,
     // and won't be reset in subsequent tests in a suite!
@@ -434,6 +439,22 @@ public class ImageSaver extends Thread {
      */
     public synchronized int getNRealImagesToSave() {
         return n_real_images_to_save;
+    }
+
+    /** Application has paused.
+     */
+    void onPause() {
+        synchronized(this) {
+            app_is_paused = true;
+        }
+    }
+
+    /** Application has resumed.
+     */
+    void onResume() {
+        synchronized(this) {
+            app_is_paused = false;
+        }
     }
 
     void onDestroy() {
@@ -2132,9 +2153,19 @@ public class ImageSaver extends Thread {
 
                         Address address = null;
                         if( request.store_location && !request.preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
+                            boolean block_geocoder;
+                            synchronized(this) {
+                                block_geocoder = app_is_paused;
+                            }
                             // try to find an address
                             // n.b., if we update the class being used, consider whether the info on Geocoder in preference_stamp_geo_address_summary needs updating
-                            if( Geocoder.isPresent() ) {
+                            if( block_geocoder ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // has paused and we're still saving images
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for photostamp as app is paused");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());

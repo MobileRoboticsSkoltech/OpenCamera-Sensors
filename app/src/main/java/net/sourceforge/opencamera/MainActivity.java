@@ -1395,6 +1395,7 @@ public class MainActivity extends Activity {
         speechControl.initSpeechRecognizer();
         initLocation();
         initGyroSensors();
+        applicationInterface.getImageSaver().onResume();
         soundPoolManager.initSound();
         soundPoolManager.loadSound(R.raw.mybeep);
         soundPoolManager.loadSound(R.raw.mybeep_hi);
@@ -1485,6 +1486,7 @@ public class MainActivity extends Activity {
         applicationInterface.getLocationSupplier().freeLocationListeners();
         applicationInterface.stopPanorama(true); // in practice not needed as we should stop panorama when camera is closed, but good to do it explicitly here, before disabling the gyro sensors
         applicationInterface.getGyroSensor().disableSensors();
+        applicationInterface.getImageSaver().onPause();
         soundPoolManager.releaseSound();
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
