@@ -19,19 +19,17 @@ import java.util.Locale;
 
 
 public class RawSensorInfo implements SensorEventListener {
-    final private SensorManager mSensorManager;
-    final private Sensor mSensor;
-    final private Sensor mSensorAccel;
-
     private static final String TAG = "RawSensorInfo";
     private static final String SENSOR_INFO_PATH = "/OpenCamera_sensor_info/";
     private static final String CSV_SEPARATOR = ",";
     private static final int BUFFER_SIZE = 262144;
 
-    private BufferedWriter gyroBufferedWriter;
-    private BufferedWriter accelBufferedWriter;
-    private String mCurrentDirPath;
-    private boolean isRecording;
+    final private SensorManager mSensorManager;
+    final private Sensor mSensor;
+    final private Sensor mSensorAccel;
+    private BufferedWriter mGyroBufferedWriter;
+    private BufferedWriter mAccelBufferedWriter;
+    private boolean mIsRecording;
 
     public RawSensorInfo(Context context) {
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
@@ -44,7 +42,7 @@ public class RawSensorInfo implements SensorEventListener {
         //mSensorAccel = null;
 
         if( MyDebug.LOG ) {
-            Log.d(TAG, "GyroSensor");
+            Log.d(TAG, "RawSensorInfo");
             if( mSensor == null )
                 Log.d(TAG, "gyroscope not available");
             else if( mSensorAccel == null )
@@ -58,7 +56,7 @@ public class RawSensorInfo implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (isRecording) {
+        if (mIsRecording) {
             StringBuffer sensorData = new StringBuffer();
 
             for(int j = 0; j < 3; j++) {
@@ -70,9 +68,9 @@ public class RawSensorInfo implements SensorEventListener {
 
             try {
                 if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                    accelBufferedWriter.write(sensorData.toString());
+                    mAccelBufferedWriter.write(sensorData.toString());
                 } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                    gyroBufferedWriter.write(sensorData.toString());
+                    mGyroBufferedWriter.write(sensorData.toString());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -84,7 +82,8 @@ public class RawSensorInfo implements SensorEventListener {
         String timestamp = new SimpleDateFormat(
                 "yyyyMMdd_HHmmss", Locale.US).format(new Date()
         );
-        mCurrentDirPath = Environment.getExternalStorageDirectory().getPath()
+
+        String mCurrentDirPath = Environment.getExternalStorageDirectory().getPath()
                 + SENSOR_INFO_PATH
                 + timestamp + "/";
 
@@ -101,14 +100,14 @@ public class RawSensorInfo implements SensorEventListener {
             PrintWriter gyroWriter = new PrintWriter(gyroFile);
             PrintWriter accelWriter = new PrintWriter(accelFile);
 
-            gyroBufferedWriter = new BufferedWriter(gyroWriter, BUFFER_SIZE);
-            accelBufferedWriter = new BufferedWriter(accelWriter, BUFFER_SIZE);
+            mGyroBufferedWriter = new BufferedWriter(gyroWriter, BUFFER_SIZE);
+            mAccelBufferedWriter = new BufferedWriter(accelWriter, BUFFER_SIZE);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Log.e(TAG, "Failed to open csv files");
         }
 
-        isRecording = true;
+        mIsRecording = true;
 
     }
 
@@ -116,20 +115,20 @@ public class RawSensorInfo implements SensorEventListener {
         if( MyDebug.LOG )
             Log.d(TAG, "Close all files");
         try {
-            if (gyroBufferedWriter != null)
-                gyroBufferedWriter.close();
-            if (accelBufferedWriter != null)
-                accelBufferedWriter.close();
+            if (mGyroBufferedWriter != null)
+                mGyroBufferedWriter.close();
+            if (mAccelBufferedWriter != null)
+                mAccelBufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "Failed to close csv files");
         }
 
-        isRecording = false;
+        mIsRecording = false;
     }
 
     boolean isRecording() {
-        return isRecording;
+        return mIsRecording;
     }
 
     void enableSensors() {
