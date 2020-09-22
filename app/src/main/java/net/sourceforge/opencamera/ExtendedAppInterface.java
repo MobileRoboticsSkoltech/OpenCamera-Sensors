@@ -29,15 +29,21 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     @Override
-    public void startedVideo() {
+    public void startingVideo() {
         if (MyDebug.LOG)
             Log.d(TAG, "started video");
         if (getIMURecordingPref()) {
             mRawSensorInfo.enableSensors();
             mRawSensorInfo.startRecording();
+        }
+        super.startedVideo();
+    }
 
+    @Override
+    public void startedVideo() {
+        if (mRawSensorInfo.isRecording()) {
             // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Started recording sensor info");
+            mMainActivity.getPreview().showToast(null, "Recording sensor info");
         }
         super.startedVideo();
     }
@@ -51,7 +57,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mRawSensorInfo.disableSensors();
 
             // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Stopped recording sensor info");
+            mMainActivity.getPreview().showToast(null, "Finished recording sensor info");
         }
         super.stoppedVideo(video_method, uri, filename);
     }
