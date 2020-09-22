@@ -3,6 +3,8 @@ package net.sourceforge.opencamera;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Environment;
 import android.util.Log;
 
@@ -16,7 +18,11 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class RawSensorInfo extends GyroSensor {
+public class RawSensorInfo implements SensorEventListener {
+    final private SensorManager mSensorManager;
+    final private Sensor mSensor;
+    final private Sensor mSensorAccel;
+
     private static final String TAG = "RawSensorInfo";
     private static final String SENSOR_INFO_PATH = "/OpenCamera_sensor_info/";
     private static final String CSV_SEPARATOR = ",";
@@ -25,15 +31,34 @@ public class RawSensorInfo extends GyroSensor {
     private BufferedWriter gyroBufferedWriter;
     private BufferedWriter accelBufferedWriter;
     private String mCurrentDirPath;
-    boolean buffersInitialized = false;
+    private boolean isRecording;
 
     public RawSensorInfo(Context context) {
-        super(context);
+        mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        //mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        //mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        //mSensorAccel = null;
+
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "GyroSensor");
+            if( mSensor == null )
+                Log.d(TAG, "gyroscope not available");
+            else if( mSensorAccel == null )
+                Log.d(TAG, "accelerometer not available");
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (buffersInitialized) {
+        if (isRecording) {
             StringBuffer sensorData = new StringBuffer();
 
             for(int j = 0; j < 3; j++) {
@@ -55,7 +80,6 @@ public class RawSensorInfo extends GyroSensor {
         }
     }
 
-    @Override
     void startRecording() {
         String timestamp = new SimpleDateFormat(
                 "yyyyMMdd_HHmmss", Locale.US).format(new Date()
@@ -84,11 +108,10 @@ public class RawSensorInfo extends GyroSensor {
             Log.e(TAG, "Failed to open csv files");
         }
 
-        buffersInitialized = true;
+        isRecording = true;
 
     }
 
-    @Override
     void stopRecording() {
         if( MyDebug.LOG )
             Log.d(TAG, "Close all files");
@@ -101,6 +124,28 @@ public class RawSensorInfo extends GyroSensor {
             e.printStackTrace();
             Log.e(TAG, "Failed to close csv files");
         }
-        buffersInitialized = false;
+
+        isRecording = false;
+    }
+
+    boolean isRecording() {
+        return isRecording;
+    }
+
+    void enableSensors() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "enableSensors");
+
+        // TODO: add customizable frequency in registerListener()
+        if( mSensor != null )
+            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
+        if( mSensorAccel != null )
+            mSensorManager.registerListener(this, mSensorAccel, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    void disableSensors() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "disableSensors");
+        mSensorManager.unregisterListener(this);
     }
 }

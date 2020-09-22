@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+/** Extended implementation of ApplicationInterface,
+ *  adds raw sensor recording layer to the interface
+ */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
     private final RawSensorInfo rawSensorInfo;
@@ -25,25 +28,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     @Override
-    public void stoppedVideo(int video_method, Uri uri, String filename) {
-        if (MyDebug.LOG)
-            Log.d(TAG, "stopped video");
-        if (getIMURecordingPref()) {
-            rawSensorInfo.stopRecording();
-            rawSensorInfo.disableSensors();
-
-            // TODO: add message to strings.xml
-            main_activity.getPreview().showToast(null, "Stopped recording sensor info");
-        }
-        super.stoppedVideo(video_method, uri, filename);
-    }
-
-    @Override
-    public void stoppingVideo() {
-        super.stoppingVideo();
-    }
-
-    @Override
     public void startedVideo() {
         if (MyDebug.LOG)
             Log.d(TAG, "started video");
@@ -58,7 +42,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     @Override
-    public void startingVideo() {
-        super.startingVideo();
+    public void stoppedVideo(int video_method, Uri uri, String filename) {
+        if (MyDebug.LOG)
+            Log.d(TAG, "stopped video");
+        if (rawSensorInfo.isRecording()) {
+            rawSensorInfo.stopRecording();
+            rawSensorInfo.disableSensors();
+
+            // TODO: add message to strings.xml
+            main_activity.getPreview().showToast(null, "Stopped recording sensor info");
+        }
+        super.stoppedVideo(video_method, uri, filename);
     }
 }
