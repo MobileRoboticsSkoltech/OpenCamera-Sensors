@@ -20,7 +20,7 @@ All videos recorded by the camera are located in OpenCamera folder on the disk (
 
 **Contribution**
 
-The project follows (AOSP Java Code Style)[https://source.android.com/setup/contribute/code-style], main principles:
+The project follows [AOSP Java Code Style](https://source.android.com/setup/contribute/code-style), main principles:
 
 - Non-public fields should start with ```m```, constants are ```ALL_CAPS_UNDERSCORES``` 
 - Standard brace style:
