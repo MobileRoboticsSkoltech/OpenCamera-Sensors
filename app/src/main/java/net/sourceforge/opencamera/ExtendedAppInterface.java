@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -57,7 +58,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG)
             Log.d(TAG, "started video");
         if (getIMURecordingPref()) {
-            mRawSensorInfo.enableSensors();
+            // Extracting sample rates from shared preferences
+            // TODO: additional String value format check
+            int accelSampleRate = Integer.valueOf(
+                    mSharedPreferences.getString(
+                        PreferenceKeys.AccelSampleRatePreferenceKey,
+                        String.valueOf(SensorManager.SENSOR_DELAY_FASTEST))
+            );
+            int gyroSampleRate = Integer.valueOf(
+                    mSharedPreferences.getString(
+                        PreferenceKeys.GyroSampleRatePreferenceKey,
+                        String.valueOf(SensorManager.SENSOR_DELAY_FASTEST)
+                    )
+            );
+            mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
             mRawSensorInfo.startRecording(mMainActivity, lastVideoDate);
             // TODO: add message to strings.xml
             mMainActivity.getPreview().showToast(null, "Recording sensor info");

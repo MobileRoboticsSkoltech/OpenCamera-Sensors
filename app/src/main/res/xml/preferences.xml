@@ -1303,6 +1303,20 @@
             android:summary="Write sensor data during video recording"
             />
 
+        <EditTextPreference
+            android:key="preference_accel_sample_rate"
+            android:inputType="number"
+            android:title="Accelerometer frequency"
+            android:summary="Accelerometer sampling rate in microseconds"
+            />
+
+        <EditTextPreference
+            android:key="preference_gyro_sample_rate"
+            android:inputType="number"
+            android:title="Gyroscope frequency"
+            android:summary="Gyroscope sampling rate in microseconds"
+            />
+
         <ListPreference
             android:key="preference_camera_api"
             android:title="@string/preference_camera_api"

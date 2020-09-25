@@ -147,15 +147,14 @@ public class RawSensorInfo implements SensorEventListener {
         return mIsRecording;
     }
 
-    void enableSensors() {
+    void enableSensors(int accelSampleRate, int gyroSampleRate) {
         if( MyDebug.LOG )
             Log.d(TAG, "enableSensors");
 
-        // TODO: add customizable frequency in registerListener()
         if( mSensor != null )
-            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(this, mSensor, accelSampleRate);
         if( mSensorAccel != null )
-            mSensorManager.registerListener(this, mSensorAccel, SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(this, mSensorAccel, gyroSampleRate);
     }
 
     void disableSensors() {
