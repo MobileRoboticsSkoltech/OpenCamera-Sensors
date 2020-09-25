@@ -3859,7 +3859,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Update the save folder.
+    /** Update the save folder (for non-SAF methods).
      */
     void updateSaveFolder(String new_save_location) {
         if( MyDebug.LOG )
@@ -3876,7 +3876,8 @@ public class MainActivity extends Activity {
                 editor.apply();
 
                 this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), true);
-                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + this.applicationInterface.getStorageUtils().getSaveLocation());
+                String save_folder_name = getHumanReadableSaveFolder(this.applicationInterface.getStorageUtils().getSaveLocation());
+                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
             }
         }
     }
@@ -4013,6 +4014,26 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Returns a human readable string for the save_folder (as stored in the preferences).
+     */
+    private String getHumanReadableSaveFolder(String save_folder) {
+        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
+            // try to get human readable form if possible
+            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
+            if( file_name != null ) {
+                save_folder = file_name;
+            }
+        }
+        else {
+            // The strings can either be a sub-folder of DCIM, or (pre-scoped-storage) a full path, so normally either can be displayed.
+            // But with scoped storage, an empty string is used to mean DCIM, so seems clearer to say that instead of displaying a blank line!
+            if( MainActivity.useScopedStorage() && save_folder.length() == 0 ) {
+                save_folder = "DCIM";
+            }
+        }
+        return save_folder;
+    }
+
     /** User can long-click on gallery to select a recent save location from the history, of if not available,
      *  go straight to the file dialog to pick a folder.
      */
@@ -4045,13 +4066,7 @@ public class MainActivity extends Activity {
         // history is stored in order most-recent-last
         for(int i=0;i<history.size();i++) {
             String folder_name = history.get(history.size() - 1 - i);
-            if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                // try to get human readable form if possible
-                String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(folder_name), true);
-                if( file_name != null ) {
-                    folder_name = file_name;
-                }
-            }
+            folder_name = getHumanReadableSaveFolder(folder_name);
             items[index++] = folder_name;
         }
         final int clear_index = index;
@@ -4119,14 +4134,7 @@ public class MainActivity extends Activity {
                         String save_folder = history.get(history.size() - 1 - which);
                         if( MyDebug.LOG )
                             Log.d(TAG, "changed save_folder from history to: " + save_folder);
-                        String save_folder_name = save_folder;
-                        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                            // try to get human readable form if possible
-                            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
-                            if( file_name != null ) {
-                                save_folder_name = file_name;
-                            }
-                        }
+                        String save_folder_name = getHumanReadableSaveFolder(save_folder);
                         preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
