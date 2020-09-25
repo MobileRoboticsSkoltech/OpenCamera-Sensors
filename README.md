@@ -12,7 +12,7 @@
 
 **How to enable sensor data recording?**
 
-Go to OpenCamera preferences and press the ```Enable IMU recording``` switch.
+Go to OpenCamera preferences and press the ```Enable IMU recording``` switch. Additionally, in preferences you can specify sensor sampling rate in microseconds, but this number is only a hint to the system according to the android documentation.
 
 **How to find recorded IMU data?**
 
