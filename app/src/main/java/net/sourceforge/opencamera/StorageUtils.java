@@ -50,6 +50,7 @@ public class StorageUtils {
     static final int MEDIA_TYPE_VIDEO = 2;
     static final int MEDIA_TYPE_PREFS = 3;
     static final int MEDIA_TYPE_GYRO_INFO = 4;
+    static final int MEDIA_TYPE_RAW_SENSOR_INFO = 5;
 
     private final Context context;
     private final MyApplicationInterface applicationInterface;
@@ -585,6 +586,7 @@ public class StorageUtils {
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
                 break;
             }
+            case MEDIA_TYPE_RAW_SENSOR_INFO: // raw sensor info files should have the same name as the video
             case MEDIA_TYPE_VIDEO: {
                 String prefix = sharedPreferences.getString(PreferenceKeys.SaveVideoPrefixPreferenceKey, "VID_");
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
@@ -752,6 +754,9 @@ public class StorageUtils {
             case MEDIA_TYPE_PREFS:
             case MEDIA_TYPE_GYRO_INFO:
                 mimeType = "text/xml";
+                break;
+            case MEDIA_TYPE_RAW_SENSOR_INFO:
+                mimeType = "text/csv";
                 break;
             default:
                 // throw exception as this is a programming error
