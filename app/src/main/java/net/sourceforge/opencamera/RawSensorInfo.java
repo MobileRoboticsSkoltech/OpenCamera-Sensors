@@ -71,9 +71,11 @@ public class RawSensorInfo implements SensorEventListener {
         // TODO: Add logs for when sensor accuracy decreased
     }
 
-    /** Handles sensor info file creation, uses StorageUtils to
-     *  work both with SAF and legacy file access
+    /**
+     *  Handles sensor info file creation, uses StorageUtils to
+     *  work both with SAF and legacy file access.
      */
+
     private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType, Date lastVideoDate) throws IOException {
         StorageUtils storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;

@@ -10,8 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-/** Extended implementation of ApplicationInterface,
- *  adds raw sensor recording layer to the interface
+/**
+ *  Extended implementation of ApplicationInterface,
+ *  adds raw sensor recording layer to the interface.
  */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";

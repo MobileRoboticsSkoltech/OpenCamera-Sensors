@@ -17,3 +17,18 @@ Go to OpenCamera preferences and press the ```Enable IMU recording``` switch.
 **How to find recorded IMU data?**
 
 All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional information is in the same folder as the recorded videos. Each sensor data CSV has the same name as the video + the suffix "gyro" or "accel".
+
+**Contribution**
+
+The project follows (AOSP Java Code Style)[https://source.android.com/setup/contribute/code-style], main principles:
+
+- Non-public fields should start with ```m```, constants are ```ALL_CAPS_UNDERSCORES``` 
+- Standard brace style:
+```java
+if () {
+    //...
+} else {
+    //...
+}
+```
+- Limit line length
