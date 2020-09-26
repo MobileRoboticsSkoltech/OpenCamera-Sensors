@@ -902,13 +902,13 @@
     <string name="aperture">光圈</string>
     <string name="preference_multi_cam_button">多相机图标</string>
     <string name="exposure_compensation_seekbar">改变曝光补偿的进度条</string>
-    <string name="preference_image_format_summary">选择保存照片的文件格式。这将影响“标准”(非 RAW)照片。注意 PNG 格式并非真正无损，它是从 JPEG 按 100% 质量转换而成的。%s</string>
+    <string name="preference_image_format_summary">选择保存照片的文件格式。这将影响“标准”(非 RAW)照片。注意 PNG 格式并非真正无损，它是从 JPEG 按 100% 质量转换而成的。\n%s</string>
     <string name="preference_camera_api">Camera API</string>
-    <string name="preference_camera_api_summary">选择 Camera2 API 来启用额外功能，比如手动曝光、对焦、白平衡及 RAW(如果设备支持)。改变 API 将重启应用。%s</string>
+    <string name="preference_camera_api_summary">选择 Camera2 API 来启用额外功能，比如手动曝光、对焦、白平衡及 RAW(如果设备支持)。改变 API 将重启应用。\n%s</string>
     <string name="preference_camera_api_old">原始 Camera API</string>
     <string name="preference_camera_api_camera2">Camera2 API</string>
     <string name="preference_video_profile_gamma">视频伽马值</string>
-    <string name="preference_video_profile_gamma_summary">如果视频图标预置文件被设定为伽马时的伽马值 %s</string>
+    <string name="preference_video_profile_gamma_summary">如果视频图标预置文件被设定为伽马时的伽马值\n%s</string>
     <string name="preference_video_profile_gamma_1_6">1.6</string>
     <string name="preference_video_profile_gamma_1_8">1.8</string>
     <string name="preference_video_profile_gamma_1_9">1.9</string>
@@ -920,7 +920,7 @@
     <string name="preference_video_profile_gamma_2_6">2.6</string>
     <string name="preference_video_profile_gamma_2_8">2.8</string>
     <string name="preference_ghost_image_alpha">辅助图片透明度</string>
-    <string name="preference_ghost_image_alpha_summary">用于辅助图片的透明度值。较低的值代表更透明，较高的值代表更不透明。%s</string>
+    <string name="preference_ghost_image_alpha_summary">用于辅助图片的透明度值。较低的值代表更透明，较高的值代表更不透明。\n%s</string>
     <string name="external_camera">外部相机</string>
     <string name="ultrawide">超广角</string>
     <string name="switch_to_external_camera">切换至外部相机</string>
@@ -928,9 +928,9 @@
     <string name="switch_multi_camera">在多个相机间切换</string>
     <string name="array_seekbar_preference_seekbar">改变当前首选项值的进度条</string>
     <string name="preference_zebra_stripes_foreground_color">斑马条纹前景颜色</string>
-    <string name="preference_zebra_stripes_foreground_color_summary">显示斑马条纹时前景使用的颜色。%s</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">显示斑马条纹时前景使用的颜色。\n%s</string>
     <string name="preference_zebra_stripes_background_color">斑马条纹背景颜色</string>
-    <string name="preference_zebra_stripes_background_color_summary">显示斑马条纹时背景使用的颜色。%s</string>
+    <string name="preference_zebra_stripes_background_color_summary">显示斑马条纹时背景使用的颜色。\n%s</string>
     <string name="preference_zebra_stripes_color_black">黑色</string>
     <string name="preference_zebra_stripes_color_red">红色</string>
     <string name="preference_zebra_stripes_color_orange">橙色</string>
