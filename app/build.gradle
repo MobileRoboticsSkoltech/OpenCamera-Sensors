@@ -5,7 +5,7 @@ android {
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
-        applicationId "net.sourceforge.opencamera"
+        applicationId "com.opencamera_extended.app"
         minSdkVersion 15
         targetSdkVersion 28
 
@@ -14,7 +14,7 @@ android {
         // need build tools at least 20 at least to support ScriptIntrinsicHistogram
         // also need build tools at least 21 to avoid Google Play 64-bit warning (required from 1 August 2019)
 
-        testApplicationId "net.sourceforge.opencamera.test"
+        testApplicationId "com.opencamera_extended.app.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
