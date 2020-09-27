@@ -42,7 +42,8 @@ public class RawSensorInfo implements SensorEventListener {
             Log.d(TAG, "RawSensorInfo");
             if (mSensor == null) {
                 Log.d(TAG, "gyroscope not available");
-            } else if (mSensorAccel == null) {
+            }
+            if (mSensorAccel == null) {
                 Log.d(TAG, "accelerometer not available");
             }
         }
