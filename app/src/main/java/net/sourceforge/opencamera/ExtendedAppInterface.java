@@ -17,6 +17,7 @@ import java.util.Date;
  */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
+    private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
     private final RawSensorInfo mRawSensorInfo;
     private final SharedPreferences mSharedPreferences;
@@ -52,6 +53,26 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return lastVideoFileSAF;
     }
 
+    /**
+     * Retrieves gyroscope and accelerometer sample rate preference and converts it to number
+     */
+    public int getSensorSampleRatePref(String prefKey) {
+        String sensorSampleRateString = mSharedPreferences.getString(
+                PreferenceKeys.ExpoBracketingStopsPreferenceKey,
+                String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
+        );
+        int sensorSampleRate;
+        try {
+            sensorSampleRate = Integer.parseInt(sensorSampleRateString);
+        }
+        catch(NumberFormatException exception) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "Sample rate invalid format: " + sensorSampleRateString);
+            sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
+        }
+        return sensorSampleRate;
+    }
+
     @Override
     public void startedVideo() {
 
@@ -60,22 +81,19 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
         if (getIMURecordingPref()) {
             // Extracting sample rates from shared preferences
-            // TODO: additional String value format check
-            int accelSampleRate = Integer.valueOf(
-                    mSharedPreferences.getString(
-                            PreferenceKeys.AccelSampleRatePreferenceKey,
-                            String.valueOf(SensorManager.SENSOR_DELAY_FASTEST))
-            );
-            int gyroSampleRate = Integer.valueOf(
-                    mSharedPreferences.getString(
-                            PreferenceKeys.GyroSampleRatePreferenceKey,
-                            String.valueOf(SensorManager.SENSOR_DELAY_FASTEST)
-                    )
-            );
-            mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
-            mRawSensorInfo.startRecording(mMainActivity, lastVideoDate);
-            // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Recording sensor info");
+            try {
+                int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
+                int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
+                mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
+                mRawSensorInfo.startRecording(mMainActivity, lastVideoDate);
+                // TODO: add message to strings.xml
+                mMainActivity.getPreview().showToast(null, "Recording sensor info");
+            } catch (NumberFormatException e) {
+                if (MyDebug.LOG) {
+                    Log.e(TAG, "Failed to retrieve the sample rate preference value");
+                    e.printStackTrace();
+                }
+            }
         }
 
         super.startedVideo();
