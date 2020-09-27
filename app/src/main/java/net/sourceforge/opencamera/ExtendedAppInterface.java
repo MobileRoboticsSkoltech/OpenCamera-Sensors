@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- *  Extended implementation of ApplicationInterface,
- *  adds raw sensor recording layer to the interface.
+ * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
+ * interface.
  */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
@@ -55,20 +55,21 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     @Override
     public void startedVideo() {
 
-        if (MyDebug.LOG)
+        if (MyDebug.LOG) {
             Log.d(TAG, "started video");
+        }
         if (getIMURecordingPref()) {
             // Extracting sample rates from shared preferences
             // TODO: additional String value format check
             int accelSampleRate = Integer.valueOf(
                     mSharedPreferences.getString(
-                        PreferenceKeys.AccelSampleRatePreferenceKey,
-                        String.valueOf(SensorManager.SENSOR_DELAY_FASTEST))
+                            PreferenceKeys.AccelSampleRatePreferenceKey,
+                            String.valueOf(SensorManager.SENSOR_DELAY_FASTEST))
             );
             int gyroSampleRate = Integer.valueOf(
                     mSharedPreferences.getString(
-                        PreferenceKeys.GyroSampleRatePreferenceKey,
-                        String.valueOf(SensorManager.SENSOR_DELAY_FASTEST)
+                            PreferenceKeys.GyroSampleRatePreferenceKey,
+                            String.valueOf(SensorManager.SENSOR_DELAY_FASTEST)
                     )
             );
             mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
@@ -82,8 +83,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     @Override
     public void stoppedVideo(int video_method, Uri uri, String filename) {
-        if (MyDebug.LOG)
+        if (MyDebug.LOG) {
             Log.d(TAG, "stopped video");
+        }
         if (mRawSensorInfo.isRecording()) {
             mRawSensorInfo.stopRecording();
             mRawSensorInfo.disableSensors();
