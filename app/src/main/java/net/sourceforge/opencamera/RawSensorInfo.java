@@ -166,10 +166,10 @@ public class RawSensorInfo implements SensorEventListener {
         }
 
         if (mSensor != null) {
-            mSensorManager.registerListener(this, mSensor, accelSampleRate);
+            mSensorManager.registerListener(this, mSensor, gyroSampleRate);
         }
         if (mSensorAccel != null) {
-            mSensorManager.registerListener(this, mSensorAccel, gyroSampleRate);
+            mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
         }
     }
 
