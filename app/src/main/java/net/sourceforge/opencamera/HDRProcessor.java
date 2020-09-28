@@ -24,6 +24,8 @@ import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicHistogram;
 //import android.renderscript.ScriptIntrinsicResize;
 import android.renderscript.Type;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
 
@@ -1818,10 +1820,18 @@ public class HDRProcessor {
                 BitmapInfo bitmapInfo = new BitmapInfo(luminanceInfos[i], bitmaps.get(i), allocations[i], i);
                 bitmapInfos.add(bitmapInfo);
             }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "before sorting:");
+                for(int i=0;i<allocations.length;i++) {
+                    Log.d(TAG, "    " + i + ": " + luminanceInfos[i]);
+                }
+            }
             Collections.sort(bitmapInfos, new Comparator<BitmapInfo>() {
                 @Override
                 public int compare(BitmapInfo o1, BitmapInfo o2) {
-                    return o1.luminanceInfo.median_value - o2.luminanceInfo.median_value;
+                    // important to use the code in LuminanceInfo.compareTo(), as that's also tested via the unit test
+                    // sortLuminanceInfo()
+                    return o1.luminanceInfo.compareTo(o2.luminanceInfo);
                 }
             });
             bitmaps.clear();
@@ -1831,8 +1841,9 @@ public class HDRProcessor {
                 allocations[i] = bitmapInfos.get(i).allocation;
             }
             if( MyDebug.LOG ) {
+                Log.d(TAG, "after sorting:");
                 for(int i=0;i<allocations.length;i++) {
-                    Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
+                    Log.d(TAG, "    " + i + ": " + luminanceInfos[i]);
                 }
             }
             if( sort_cb != null ) {
@@ -2160,13 +2171,31 @@ public class HDRProcessor {
         return new BrightnessDetails(median_brightness);
     }
 
-    private static class LuminanceInfo {
+    public static class LuminanceInfo implements Comparable<LuminanceInfo> {
+        final int min_value;
         final int median_value;
         final boolean noisy;
 
-        LuminanceInfo(int median_value, boolean noisy) {
+        public LuminanceInfo(int min_value, int median_value, boolean noisy) {
+            this.min_value = min_value;
             this.median_value = median_value;
             this.noisy = noisy;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "min: " + min_value + " , median: " + median_value + " , noisy: " + noisy;
+        }
+
+        @Override
+        public int compareTo(LuminanceInfo o) {
+            int value = this.median_value - o.median_value;
+            if( value == 0 ) {
+                // fall back to using min_value
+                value = this.min_value - o.min_value;
+            }
+            return value;
         }
     }
 
@@ -2214,8 +2243,14 @@ public class HDRProcessor {
         int middle = total/2;
         int count = 0;
         boolean noisy = false;
+        int min_value = -1;
         for(int i=0;i<256;i++) {
             count += histo[i];
+            if( min_value == -1 && histo[i] > 0 ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "min luminance " + i);
+                min_value = i;
+            }
             if( count >= middle ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "median luminance " + i);
@@ -2243,11 +2278,11 @@ public class HDRProcessor {
                         Log.d(TAG, "too dark/noisy");
                     noisy = true;
                 }
-                return new LuminanceInfo(i, noisy);
+                return new LuminanceInfo(min_value, i, noisy);
             }
         }
         Log.e(TAG, "computeMedianLuminance failed");
-        return new LuminanceInfo(127, true);
+        return new LuminanceInfo(min_value, 127, true);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
