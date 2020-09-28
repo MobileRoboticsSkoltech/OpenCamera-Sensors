@@ -797,8 +797,17 @@ public class HDRProcessor {
             final float tonemap_denom = ((float)median_target)/(float)median_brightness - (255.0f / max_possible_value);
             if( MyDebug.LOG )
                 Log.d(TAG, "tonemap_denom: " + tonemap_denom);
-            if( tonemap_denom != 0.0f ) // just in case
+            if( tonemap_denom != 0.0f ) { // just in case
                 tonemap_scale_c = (255.0f - median_target) / tonemap_denom;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "tonemap_scale_c (before setting min): " + tonemap_scale_c);
+                /*if( tonemap_scale_c < 0.5f*255.0f ) {
+                    throw new RuntimeException("tonemap_scale_c: " + tonemap_scale_c);
+                }*/
+                // important to set a min value, see testHDR58, testHDR59, testHDR60 - at least 0.25, but 0.5 works better:
+                //tonemap_scale_c = Math.max(tonemap_scale_c, 0.25f*255.0f);
+                tonemap_scale_c = Math.max(tonemap_scale_c, 0.5f*255.0f);
+            }
             //throw new RuntimeException(); // test
         }
         // Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
