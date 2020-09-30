@@ -1856,6 +1856,14 @@ public class HDRProcessor {
                 sort_cb.sortOrder(sort_order);
             }
         }
+        /*{
+            // test
+            for(int i = 0; i < luminanceInfos.length-1; i++) {
+                if( luminanceInfos[i].compareTo(luminanceInfos[i+1]) == 0 ) {
+                    throw new RuntimeException("this: " + luminanceInfos[i] + " , that: " + luminanceInfos[i+1]);
+                }
+            }
+        }*/
 
         int median_brightness = -1;
         if( use_mtb ) {
@@ -2174,18 +2182,20 @@ public class HDRProcessor {
     public static class LuminanceInfo implements Comparable<LuminanceInfo> {
         final int min_value;
         final int median_value;
+        final int hi_value;
         final boolean noisy;
 
-        public LuminanceInfo(int min_value, int median_value, boolean noisy) {
+        public LuminanceInfo(int min_value, int median_value, int hi_value, boolean noisy) {
             this.min_value = min_value;
             this.median_value = median_value;
+            this.hi_value = hi_value;
             this.noisy = noisy;
         }
 
         @Override
         @NonNull
         public String toString() {
-            return "min: " + min_value + " , median: " + median_value + " , noisy: " + noisy;
+            return "min: " + min_value + " , median: " + median_value + " , hi: " + hi_value + " , noisy: " + noisy;
         }
 
         @Override
@@ -2194,6 +2204,10 @@ public class HDRProcessor {
             if( value == 0 ) {
                 // fall back to using min_value
                 value = this.min_value - o.min_value;
+            }
+            if( value == 0 ) {
+                // fall back to using hi_value
+                value = this.hi_value - o.hi_value;
             }
             return value;
         }
@@ -2243,7 +2257,26 @@ public class HDRProcessor {
         int middle = total/2;
         int count = 0;
         boolean noisy = false;
-        int min_value = -1;
+        int min_value = -1, hi_value = -1;
+        // first count backwards to get hi_value
+        for(int i=255;i>=0;i--) {
+            /*if( histo[i] > 0 ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "max luminance " + i);
+                max_value = i;
+                break;
+            }*/
+            count += histo[i];
+            if( count >= total/10 ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "hi luminance " + i);
+                hi_value = i;
+                break;
+            }
+        }
+
+        // then count forwards to get min and median values
+        count = 0;
         for(int i=0;i<256;i++) {
             count += histo[i];
             if( min_value == -1 && histo[i] > 0 ) {
@@ -2278,11 +2311,11 @@ public class HDRProcessor {
                         Log.d(TAG, "too dark/noisy");
                     noisy = true;
                 }
-                return new LuminanceInfo(min_value, i, noisy);
+                return new LuminanceInfo(min_value, i, hi_value, noisy);
             }
         }
         Log.e(TAG, "computeMedianLuminance failed");
-        return new LuminanceInfo(min_value, 127, true);
+        return new LuminanceInfo(min_value, 127, hi_value, true);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

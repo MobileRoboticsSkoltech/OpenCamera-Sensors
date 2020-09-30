@@ -881,9 +881,9 @@ public class UnitTest {
         List<HDRProcessor.LuminanceInfo> luminanceInfosSorted;
 
         luminanceInfos.clear();
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
         luminanceInfosSorted = new ArrayList<>(luminanceInfos);
         Collections.sort(luminanceInfosSorted);
         assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
@@ -892,9 +892,9 @@ public class UnitTest {
         assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(2));
 
         luminanceInfos.clear();
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80,255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
         luminanceInfosSorted = new ArrayList<>(luminanceInfos);
         Collections.sort(luminanceInfosSorted);
         assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
@@ -903,9 +903,9 @@ public class UnitTest {
         assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(2));
 
         luminanceInfos.clear();
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, 255, false));
         luminanceInfosSorted = new ArrayList<>(luminanceInfos);
         Collections.sort(luminanceInfosSorted);
         assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
@@ -915,9 +915,9 @@ public class UnitTest {
 
         // case that requires using min value as well as median value
         luminanceInfos.clear();
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(93, 255, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(68, 255, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(17, 193, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(93, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(68, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(17, 193, 255, false));
         luminanceInfosSorted = new ArrayList<>(luminanceInfos);
         Collections.sort(luminanceInfosSorted);
         assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
@@ -927,14 +927,33 @@ public class UnitTest {
 
         // case that should never use min value
         luminanceInfos.clear();
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(60, 255, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(70, 240, false));
-        luminanceInfos.add(new HDRProcessor.LuminanceInfo(80, 95, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(60, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(70, 240, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(80, 95, 255, false));
         luminanceInfosSorted = new ArrayList<>(luminanceInfos);
         Collections.sort(luminanceInfosSorted);
         assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
         assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(0));
         assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(1));
         assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+
+        // case that requires using hi value as well as median and min values
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(17, 31, 100, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(34, 127, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(93, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(68, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 0, 90, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 0, 80, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(5), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(4), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(3));
+        assertEquals(luminanceInfos.get(3), luminanceInfosSorted.get(4));
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(5));
+
     }
 }
