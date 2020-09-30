@@ -22,7 +22,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final RawSensorInfo mRawSensorInfo;
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
-    private Date lastVideoDate; // need to save the last video date to create raw sensor files with matching names
 
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
@@ -34,23 +33,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     private boolean getIMURecordingPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
-    }
-
-    @Override
-    public File createOutputVideoFile(String extension) throws IOException {
-        lastVideoDate = new Date();
-        File lastVideoFile = mMainActivity.getStorageUtils()
-                .createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, lastVideoDate);
-        return lastVideoFile;
-    }
-
-    @Override
-    public Uri createOutputVideoSAF(String extension) throws IOException {
-        lastVideoDate = new Date();
-        Uri lastVideoFileSAF = mMainActivity.getStorageUtils()
-                .createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension,
-                        lastVideoDate);
-        return lastVideoFileSAF;
     }
 
     /**
@@ -85,7 +67,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
                 int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
                 mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
-                mRawSensorInfo.startRecording(mMainActivity, lastVideoDate);
+                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Recording sensor info");
             } catch (NumberFormatException e) {

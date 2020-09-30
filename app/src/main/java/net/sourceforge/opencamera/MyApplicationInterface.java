@@ -99,6 +99,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     private boolean last_images_saf; // whether the last images array are using SAF or not
 
+    protected Date mLastVideoDate = null;
+
     /** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
      */
     private static class LastImage {
@@ -296,13 +298,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public File createOutputVideoFile(String extension) throws IOException {
-        last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
+        mLastVideoDate = new Date();
+        last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
         return last_video_file;
     }
 
     @Override
     public Uri createOutputVideoSAF(String extension) throws IOException {
-        last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
+        mLastVideoDate = new Date();
+        last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
         return last_video_file_saf;
     }
 
