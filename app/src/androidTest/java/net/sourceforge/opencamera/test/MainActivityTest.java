@@ -7589,6 +7589,35 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
     }
 
+    /* Test recording video with raw IMU sensor info
+     */
+    public void testVideoImuInfo() throws InterruptedException {
+        Log.d(TAG, "testVideoImuInfo");
+
+        setToDefault();
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        Log.d(TAG, "folder: " + folder);
+
+
+        int nSensorFiles = 2;
+        int nFilesExpected = getNFiles(folder) + nSensorFiles + 1;
+        Log.d(TAG, "n files at start: " + nFilesExpected);
+        subTestTakeVideo(false, false, true, false, null, 5000, false, nSensorFiles);
+
+        int nFilesActual = getNFiles(folder);
+        Log.d(TAG, "n files after capture: " + nFilesActual);
+
+        assertEquals(nFilesExpected, nFilesActual);
+    }
+
     /* Test recording video with custom gamma profile.
      */
     public void testVideoGammaProfile() throws InterruptedException {
