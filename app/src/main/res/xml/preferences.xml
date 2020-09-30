@@ -1306,9 +1306,9 @@
         <ListPreference
             android:key="preference_accel_sample_rate"
             android:title="Accelerometer frequency"
-            android:summary="Accelerometer sampling rate in microseconds"
-            android:entries="@array/preference_sample_rates"
-            android:entryValues="@array/preference_focus_assist_values"
+            android:summary="Accelerometer sampling frequency in Hz"
+            android:entries="@array/preference_sample_rate_entries"
+            android:entryValues="@array/preference_sample_rate_values"
             android:defaultValue="0"
             />
 
@@ -1316,9 +1316,9 @@
             android:key="preference_gyro_sample_rate"
             android:title="Gyroscope frequency"
             android:defaultValue="0"
-            android:summary="Gyroscope sampling rate in microseconds"
-            android:entries="@array/preference_sample_rates"
-            android:entryValues="@array/preference_sample_rates"
+            android:summary="Gyroscope sampling frequency in Hz"
+            android:entries="@array/preference_sample_rate_entries"
+            android:entryValues="@array/preference_sample_rate_values"
             />
 
         <ListPreference
