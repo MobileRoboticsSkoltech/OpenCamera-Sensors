@@ -49,6 +49,20 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
+    public int getSensorMinDelay(int sensorType) {
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            return mSensorAccel.getMinDelay();
+        } else if (sensorType == Sensor.TYPE_GYROSCOPE) {
+            return mSensor.getMinDelay();
+        } else {
+            // Unsupported sensorType
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Unsupported sensor type was provided");
+            }
+            return 0;
+        }
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mIsRecording) {
