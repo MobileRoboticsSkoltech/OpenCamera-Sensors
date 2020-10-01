@@ -16,7 +16,10 @@ Go to OpenCamera preferences and press the ```Enable IMU recording``` switch. Ad
 
 **How to find recorded IMU data?**
 
-All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional information is in the same folder as the recorded videos. Each sensor data CSV has the same name as the video + the suffix "gyro" or "accel".
+All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional information is in the same folder as the recorded videos. Each sensor data CSV has the same name as the video + the suffix "gyro" or "accel":
+
+- ```<video_name>_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+- ```<video_name>_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
 
 **Contribution**
 
