@@ -3,7 +3,7 @@ name: Emulator test run
 on:
   push:
     branches: 
-      - sensor-info
+      - sensor_info
   workflow_dispatch:
 jobs:
   test:
