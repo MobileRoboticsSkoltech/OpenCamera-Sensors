@@ -70,6 +70,8 @@ public class StorageUtils {
         return last_media_scanned;
     }
 
+    Context getContext() { return context; }
+
     void clearLastMediaScanned() {
         last_media_scanned = null;
     }
@@ -313,10 +315,12 @@ public class StorageUtils {
     }
 
     // only valid if isUsingSAF()
-    private Uri getTreeUriSAF() {
+    protected Uri getTreeUriSAF() {
         String folder_name = getSaveLocationSAF();
         return Uri.parse(folder_name);
     }
+
+
 
     File getSettingsFolder() {
         return new File(context.getExternalFilesDir(null), "backups");
@@ -562,7 +566,7 @@ public class StorageUtils {
         return result;
     }
 
-    private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
+    protected String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename

@@ -94,11 +94,11 @@ public class RawSensorInfo implements SensorEventListener {
      */
     private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
             Date lastVideoDate) throws IOException {
-        StorageUtils storageUtils = mainActivity.getStorageUtils();
+        StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;
         try {
             if (storageUtils.isUsingSAF()) {
-                Uri saveUri = storageUtils.createOutputMediaFileSAF(
+                Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
                         StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
                 );
                 ParcelFileDescriptor rawSensorInfoPfd = mainActivity
@@ -109,7 +109,7 @@ public class RawSensorInfo implements SensorEventListener {
                 storageUtils.broadcastFile(saveFile, true, false, true);
 
             } else {
-                File saveFile = storageUtils.createOutputMediaFile(
+                File saveFile = storageUtils.createOutputCaptureInfoFile(
                         StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
                 );
                 fileWriter = new FileWriter(saveFile);

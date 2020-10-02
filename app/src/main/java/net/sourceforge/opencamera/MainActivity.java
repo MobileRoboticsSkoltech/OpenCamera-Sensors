@@ -4490,7 +4490,7 @@ public class MainActivity extends Activity {
         return this.applicationInterface.getLocationSupplier();
     }
 
-    public StorageUtils getStorageUtils() {
+    public StorageUtilsWrapper getStorageUtils() {
         return this.applicationInterface.getStorageUtils();
     }
 
