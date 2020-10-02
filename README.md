@@ -18,7 +18,7 @@ Go to OpenCamera preferences and press the ```Enable IMU recording``` switch. Ad
 
 All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional info can be found in subdirectories with video date as a name. 
 
-Data saved in subdirectory:
+Data saved in the subdirectory ```./<currentVideoDate>```:
 
 - ```<video_name>gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
 - ```<video_name>accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
