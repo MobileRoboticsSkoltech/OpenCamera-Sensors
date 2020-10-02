@@ -16,5 +16,4 @@ jobs:
         with:
           # API level of the platform and system image - e.g. 23 for Android Marshmallow, 29 for Android 10
           api-level: 28
-          cmake: ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
-          # custom script to run - e.g. `./gradlew connectedCheck`
+          script: ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
