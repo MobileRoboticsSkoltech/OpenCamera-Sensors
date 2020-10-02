@@ -7,6 +7,11 @@ public class VideoTests {
     // Tests related to video recording; note that tests to do with video mode that don't record are still part of MainTests
     public static Test suite() {
         TestSuite suite = new TestSuite(MainTests.class.getName());
+
+
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfo"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfoSAF"));
+
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAudioControl"));
@@ -16,8 +21,6 @@ public class VideoTests {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
         }
-
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideoDurationLimit"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveMode"));
