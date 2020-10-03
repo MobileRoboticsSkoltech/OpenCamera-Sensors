@@ -1,99 +1,30 @@
-language: bash
-# ignored on non-linux platforms, but bionic is required for nested virtualization
-dist: bionic
+language: android
+os: linux
+dist: xenial
 
-stages:
-  - install
-  - test
-
-env:
-  global:
-    - ABI=x86_64
-    - ADB_INSTALL_TIMEOUT=8
-    - ANDROID_HOME=${HOME}/android-sdk
-    - ANDROID_TOOLS_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
-    - EMU_FLAVOR=default # use google_apis flavor if no default flavor emulator
-    - LOCALE="NONE"
-    - GRAVIS_REPO="https://github.com/DanySK/Gravis-CI.git"
-    - GRAVIS="$HOME/gravis"
-    - JDK="1.8"
-    - TOOLS=${ANDROID_HOME}/tools
-    # PATH order is incredibly important. e.g. the 'emulator' script exists in more than one place!
-    - PATH=${ANDROID_HOME}:${ANDROID_HOME}/emulator:${TOOLS}:${TOOLS}/bin:${ANDROID_HOME}/platform-tools:${PATH}
-    - UNIT_TEST=FALSE # by default we don't run the unit tests, they are run only in specific builds
-    - LINT=FALSE # by default we don't lint, they are run only in specific builds
-    - FINALIZE_COVERAGE=FALSE # by default we don't finalize coverage, it is done in one specific build
-    - TERM=dumb
-  matrix:
-   - API=28
-   - API=29
-
-jobs:
-  fast_finish: true  # Report success without waiting for jobs that allowed to fail.
-  include:
-    # The "test" stage is implicit and gets the main matrix. This adds extra stages/jobs
-    - stage: unit_test
-      env: UNIT_TEST=TRUE API=NONE
-      install: skip
-      os: windows
-    - stage: unit_test
-      env: UNIT_TEST=TRUE API=NONE
-      install: skip
-      os: osx
-    - stage: unit_test
-      env: UNIT_TEST=TRUE API=NONE
-      install: skip
-      os: linux
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-28.0.3
+    - android-28
+    - sys-img-armeabi-v7a-android-28
+    - extra-android-m2repository
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
 
 before_install:
-  # This section may run on all platforms, and may run for unit tests or for coverage finalization
-  # It should not make assumptions about os platform or desired tool installation
+  - yes | sdkmanager "platforms;android-28"
 
-  # Set up JDK 8 for Android SDK - Java is universally needed: codacy, unit tests, emulators
-  - travis_retry git clone --depth 1 $GRAVIS_REPO $GRAVIS
-  - export TARGET_JDK="${JDK}"
-  - JDK="adopt@1.8"
-  - source $GRAVIS/install-jdk
-
-  # Set up Android SDK - this is needed everywhere but coverage finalization, so toggle on that
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then travis_retry wget -q "${ANDROID_TOOLS_URL}" -O android-sdk-tools.zip; fi
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}; fi
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then rm android-sdk-tools.zip; fi
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then mkdir ~/.android; fi # avoid harmless sdkmanager warning
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then echo 'count=0' > ~/.android/repositories.cfg; fi # avoid harmless sdkmanager warning
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then yes | travis_retry sdkmanager --licenses >/dev/null; fi # accept all sdkmanager warnings
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then echo y | travis_retry sdkmanager --no_https "platform-tools" >/dev/null; fi
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then echo y | travis_retry sdkmanager --no_https "tools" >/dev/null; fi # A second time per Travis docs, gets latest versions
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then echo y | travis_retry sdkmanager --no_https "build-tools;28.0.3" >/dev/null; fi # Implicit gradle dependency - gradle drives changes
-  - if [ "$FINALIZE_COVERAGE" = "FALSE" ]; then echo y | travis_retry sdkmanager --no_https "platforms;android-28" >/dev/null; fi # We need the API of the current compileSdkVersion from gradle.properties
-
-install:
-  # Download required emulator tools
-  - echo y | travis_retry sdkmanager --no_https "platforms;android-$API" >/dev/null # We need the API of the emulator we will run
-  - echo y | travis_retry sdkmanager --no_https "emulator" >/dev/null
-  - echo y | travis_retry sdkmanager --no_https "system-images;android-$API;$EMU_FLAVOR;$ABI" >/dev/null # install our emulator
-
-  # Set up KVM on linux for hardware acceleration. Manually here so it only happens for emulator tests, takes ~30s
-  - travis_retry sudo -E apt-get -yq --no-install-suggests --no-install-recommends install bridge-utils libpulse0 libvirt-bin qemu-kvm virtinst ubuntu-vm-builder
-  - sudo adduser $USER libvirt
-  - sudo adduser $USER kvm
-
-  # Create an Android emulator
-  - echo no | avdmanager create avd --force -n test -k "system-images;android-$API;$EMU_FLAVOR;$ABI" -c 10M
-  - |
-    EMU_PARAMS="-verbose -no-snapshot -no-window -camera-back none -camera-front none -selinux permissive -qemu -m 2048"
-    EMU_COMMAND="emulator"
-    # This double "sudo" monstrosity is used to have Travis execute the
-    # emulator with its new group permissions and help preserve the rule
-    # of least privilege.
-    sudo -E sudo -u $USER -E bash -c "${ANDROID_HOME}/emulator/${EMU_COMMAND} -avd test ${AUDIO} ${EMU_PARAMS} &"
-  # Wait for emulator to be ready
-  - ./tools/android-wait-for-emulator.sh
+before_script:
+# Launch emulator before the execution
+  - echo no | android create avd --force -n test -t android-28 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window -debug -logcat -camera-back emulated &
+  - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
-  # Switch back to our target JDK version to build and run tests
-  - JDK="adopt@${TARGET_JDK}"
-  - source $GRAVIS/install-jdk
 
-script:
-  - if [ "$UNIT_TEST" = "TRUE" ]; then ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
+script: ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
+
