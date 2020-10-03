@@ -4857,7 +4857,6 @@ public class CameraController2 extends CameraController {
         if( metering_rectangles == null )
             return null;
         Rect sensor_rect = getViewableRect();
-        camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
         if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
             // for compatibility with CameraController1
             return null;
