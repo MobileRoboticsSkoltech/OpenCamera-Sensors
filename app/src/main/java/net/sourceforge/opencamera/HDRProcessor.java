@@ -264,7 +264,7 @@ public class HDRProcessor {
 
             if( MyDebug.LOG ) {
                 // log samples to a CSV file
-                File file = new File(Environment.getExternalStorageDirectory().getPath() + "/net.sourceforge.opencamera.hdr_samples_" + id + ".csv");
+                File file = new File(context.getExternalFilesDir(null).getPath() + "/net.sourceforge.opencamera.hdr_samples_" + id + ".csv");
                 if( file.exists() ) {
                     if( !file.delete() ) {
                         // keep FindBugs happy by checking return argument
