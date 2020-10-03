@@ -48,6 +48,6 @@ jobs:
               disable-animations: true
               profile: Nexus 5X
               working-directory: ./
-              emulator-options: -no-snapshot -no-window -no-boot-anim -gpu swiftshader_indirect -camera-back emulated -camera-front emulated
+              emulator-options: -no-snapshot -no-window -no-boot-anim -no-audio -gpu swiftshader_indirect -camera-back emulated -camera-front emulated
               script: ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
               # custom script to run - e.g. `./gradlew connectedCheck`
