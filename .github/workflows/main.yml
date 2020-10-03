@@ -24,9 +24,10 @@ jobs:
         with:
           # API level of the platform and system image - e.g. 23 for Android Marshmallow, 29 for Android 10
           api-level: 28
+          arch: x86_64
           disable-animations: true
           profile: Nexus 5X
           working-directory: ./
-          emulator-options: -debug-all -logcat * -no-snapshot -no-window -no-boot-anim -gpu swiftshader_indirect -camera-back emulated -camera-front emulated
+          emulator-options: -no-snapshot -no-window -no-boot-anim -gpu swiftshader_indirect -camera-back emulated -camera-front emulated
           script: ./gradlew app:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=net.sourceforge.opencamera.test.VideoNoSafTests --info
           # custom script to run - e.g. `./gradlew connectedCheck`
