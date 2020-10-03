@@ -6,7 +6,27 @@ on:
       - emulator_tests
   workflow_dispatch:
 jobs:
-  test:
+    EMULATOR_TEST:
+    name: Emulator test
+    strategy:
+      fail-fast: false
+      matrix:
+        EMULATOR_API: [22, 23, 24, 25, 26, 27, 28]
+        include:
+          - EMULATOR_API: 28
+            EMULATOR_ARCH: x86_64
+          - EMULATOR_API: 27
+            EMULATOR_ARCH: x86_64
+          - EMULATOR_API: 26
+            EMULATOR_ARCH: x86_64
+          - EMULATOR_API: 25
+            EMULATOR_ARCH: x86
+          - EMULATOR_API: 24
+            EMULATOR_ARCH: x86
+          - EMULATOR_API: 23
+            EMULATOR_ARCH: x86
+          - EMULATOR_API: 22
+            EMULATOR_ARCH: x86
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,8 +43,8 @@ jobs:
         # uses: ReactiveCircus/android-emulator-runner@v2.11.0
         with:
           # API level of the platform and system image - e.g. 23 for Android Marshmallow, 29 for Android 10
-          api-level: 28
-          arch: x86_64
+          api-level: ${{ matrix.EMULATOR_API }}
+          arch: ${{ matrix.EMULATOR_ARCH }}
           disable-animations: true
           profile: Nexus 5X
           working-directory: ./
