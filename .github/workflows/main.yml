@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Android Emulator Runner
         # You may pin to the exact commit or the version.
