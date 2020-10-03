@@ -1,6 +1,5 @@
 language: android
-os: linux
-dist: xenial
+os: osx
 
 android:
   components:
