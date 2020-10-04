@@ -15,22 +15,14 @@ public class VideoNoSafTests {
         }
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideoDurationLimit"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoStabilization"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoExposureLock"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFocusArea"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoQuick"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSettings"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMacro"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPause"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPauseStop"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshot"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotTimer"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotPausePreview"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotMax"));
         if( !MainActivityTest.test_camera2 ) {
             suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFlashVideo"));
         }
