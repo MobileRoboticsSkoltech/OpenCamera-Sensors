@@ -4,10 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class VideoNoSafTests {
-    // Tests related to video recording; note that tests to do with video mode that don't record are still part of MainTests
     public static Test suite() {
         TestSuite suite = new TestSuite(MainTests.class.getName());
-
 
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfo"));
 
@@ -46,33 +44,6 @@ public class VideoNoSafTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoTimerInterrupt"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoPopup"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoTimerPopup"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAvailableMemory"));
-        if( !MainActivityTest.test_camera2 ) {
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAvailableMemory2"));
-        }
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize1"));
-        if( !MainActivityTest.test_camera2 ) {
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize2"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize4"));
-        }
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoTimeLapse"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));
-        if( MainActivityTest.test_camera2 ) {
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoLogProfile"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoJTLogProfile"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoGammaProfile"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoEdgeModeNoiseReductionMode"));
-        }
-        // put tests which change bitrate, fps or test 4K at end
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPS"));
-        if( MainActivityTest.test_camera2 ) {
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPSHighSpeedManual"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSlowMotion"));
-        }
-        // update: now deprecating these tests, as setting these settings can be dodgy on some devices
-        /*suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoBitrate"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo4K"));*/
 
         // tests for video log profile (but these don't actually record video)
         if( MainActivityTest.test_camera2 ) {
