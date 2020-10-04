@@ -19,17 +19,10 @@ public class VideoNoSafTests {
         }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testIntentVideoDurationLimit"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveMode"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveModeEverything"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoStabilization"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoExposureLock"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFocusArea"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoQuick"));
-        if( !MainActivityTest.test_camera2 ) {
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDuration"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestart"));
-            suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestartInterrupt"));
-        }
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSettings"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMacro"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPause"));
