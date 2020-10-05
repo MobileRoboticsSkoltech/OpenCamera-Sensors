@@ -393,13 +393,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         switchToFlashValue("flash_off");
         switchToFocusValue("focus_mode_continuous_picture");
 
-        // TODO: FIXME (Experimental! Higher fps seems to crash emulator camera)
-        int fps_value = 15;
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "" + fps_value);
-        editor.apply();
-        updateForSettings();
         // pause for safety - needed for Nokia 8 at least otherwise some tests like testContinuousPictureFocusRepeat,
         // testLocationOff result in hang whilst waiting for photo to be taken, and hit the timeout in waitForTakePhoto()
         try {

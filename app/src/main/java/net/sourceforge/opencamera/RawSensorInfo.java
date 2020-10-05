@@ -2,6 +2,7 @@ package net.sourceforge.opencamera;
 
 import android.content.Context;
 import android.hardware.Sensor;
+import android.hardware.SensorAdditionalInfo;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
