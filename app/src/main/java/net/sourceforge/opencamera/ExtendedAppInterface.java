@@ -40,12 +40,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public int getSensorSampleRatePref(String prefKey) {
         String sensorSampleRateString = mSharedPreferences.getString(
-                PreferenceKeys.ExpoBracketingStopsPreferenceKey,
+                prefKey,
                 String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
         );
         int sensorSampleRate;
         try {
             sensorSampleRate = Integer.parseInt(sensorSampleRateString);
+
         }
         catch(NumberFormatException exception) {
             if( MyDebug.LOG )
