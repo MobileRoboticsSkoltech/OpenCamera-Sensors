@@ -19,15 +19,14 @@ android {
     }
 
     signingConfigs {
+        release
         if (System.getenv("TRAVIS")) {
             release {
-                storeFile rootProject.file('release.keystore')
-                storePassword System.getenv("KEYSTORE_PASS")
-                keyAlias System.getenv("ALIAS_NAME")
-                keyPassword System.getenv("ALIAS_PASS")
+                storeFile rootProject.file("my-release-key.keystore")
+                storePassword System.getenv("keystore_password")
+                keyAlias System.getenv("keystore_alias")
+                keyPassword System.getenv("keystore_alias_password")
             }
-        } else {
-            release
         }
     }
 
