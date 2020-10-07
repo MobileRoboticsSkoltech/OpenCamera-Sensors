@@ -19,7 +19,16 @@ android {
     }
 
     signingConfigs {
-        release
+        if (System.getenv("TRAVIS")) {
+            release {
+                storeFile rootProject.file('release.keystore')
+                storePassword System.getenv("KEYSTORE_PASS")
+                keyAlias System.getenv("ALIAS_NAME")
+                keyPassword System.getenv("ALIAS_PASS")
+            }
+        } else {
+            release
+        }
     }
 
     buildTypes {
@@ -28,16 +37,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
         }
-    }
-
-    def isRunningOnTravis = System.getenv("TRAVIS") == "true"
-
-    if (isRunningOnTravis) {
-        // configure keystore
-        signingConfigs.release.storeFile = file("../my-release-key.keystore")
-        signingConfigs.release.storePassword = System.getenv("keystore_password")
-        signingConfigs.release.keyAlias = System.getenv("keystore_alias")
-        signingConfigs.release.keyPassword = System.getenv("keystore_alias_password")
     }
 
     lintOptions {
