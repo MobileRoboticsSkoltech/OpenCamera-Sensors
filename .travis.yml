@@ -21,10 +21,10 @@ before_install:
 script: ./gradlew assembleRelease
 
 deploy:
+  skip-cleanup: true
   provider: releases
   api-key: $GITHUB_API_KEY
-  file: $TRAVIS_BUILD_DIR/app/release/app-release.apk
-  cleanup: false
+  file: $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk
   name: dev-build-$TRAVIS_TAG
   body: Automatic build of $TRAVIS_BRANCH ($TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
   prerelease: true
