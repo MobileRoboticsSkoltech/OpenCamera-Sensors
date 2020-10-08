@@ -4,12 +4,12 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Настройки</string>
     <string name="action_popup">Настройки всплывающих окон</string>
-    <string name="intro_ok">Ок (Это сообщение больше не появится.)</string>
+    <string name="intro_ok">Ок (Это сообщение больше не появится)</string>
 
     <string name="on">Вкл</string>
     <string name="off">Выкл</string>
     
-    <string name="choose_save_location">Выберите папку сохранения:</string>
+    <string name="choose_save_location">Выберите папку для сохранения:</string>
     <string name="clear_folder_history">Очистить историю папки</string>
     <string name="clear_folder_history_question">Очистить историю папки?</string>
     <string name="choose_another_folder">Выбрать другую папку</string>
@@ -51,7 +51,7 @@
     <string name="no_gallery_app">Галерея недоступна</string>
     <string name="screen_is_locked">Экран заблокирован,\nпроведите пальцем по экрану чтобы разблокировать</string>
     <string name="unlocked">Разблокировано</string>
-    <string name="auto_stabilise_not_supported">К сожалению, автостабилизация не\nподдерживается на данном устройстве</string>
+    <string name="auto_stabilise_not_supported">К сожалению, автостабилизация\nне поддерживается на данном устройстве</string>
     <string name="audio_disabled">Аудио выключено</string>
     <string name="max_duration">Макс. продолжительность</string>
     <string name="color_effect">Цветовой эффект</string>
@@ -60,7 +60,7 @@
     
     <string name="angle">Угол</string>
     <string name="direction">Направление</string>
-    <string name="failed_to_open_camera_1">Не удалось открыть камеру.</string>
+    <string name="failed_to_open_camera_1">Не удалось открыть камеру</string>
     <string name="failed_to_open_camera_2">Камера может быть использована</string>
     <string name="failed_to_open_camera_3">другим приложением?</string>
     <string name="iso">ISO</string>
@@ -113,7 +113,7 @@
     <string name="preference_save_location">Папка сохранения</string>
     <string name="preference_save_location_summary">Имя папки для сохранения фото и видео (также может быть полный путь)</string>
     <string name="preference_using_saf">Использовать Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Использовать  Storage Access Framework для сохранения фото и видео</string>
+    <string name="preference_using_saf_summary">Использовать Storage Access Framework для сохранения фото и видео</string>
     <string name="preference_save_photo_prefix">Префикс для фото</string>
     <string name="preference_save_photo_prefix_summary">Префикс имен файлов для сохраняемых фото</string>
     <string name="preference_save_video_prefix">Префикс для видео</string>
@@ -159,8 +159,8 @@
     <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете обрезать фото/видео. Требуется режим фотосъемки WYSIWYG или режим видео\n%s</string>
     <string name="preference_show_toasts">Всплывающие сообщения</string>
     <string name="preference_show_toasts_summary">Показывать всплывающие уведомления при работе</string>
-    <string name="preference_thumbnail_animation">Показать эскиз анимации</string>
-    <string name="preference_thumbnail_animation_summary">Отображение перемещения эскиза анимации при съемке фотографии</string>
+    <string name="preference_thumbnail_animation">Показать анимацию эскиза</string>
+    <string name="preference_thumbnail_animation_summary">Отображение анимации перемещения эскиза при съемке фотографии</string>
     <string name="preference_take_photo_border">Показывать рамку во время фотосъемки</string>
     <string name="preference_take_photo_border_summary">Показывать рамку на экране для индикации фотосъемки</string>
     <string name="preference_keep_display_on">Не выключать дисплей</string>
@@ -192,9 +192,9 @@
     <string name="preference_stamp_fontsize">Размер шрифта</string>
     <string name="preference_stamp_fontsize_summary">Размер шрифта для добавляемого на фотографию текста</string>
     <string name="preference_stamp_font_color">Цвет</string>
-    <string name="preference_stamp_font_color_summary">Цвет для добавляемого на фотографию текста</string>
+    <string name="preference_stamp_font_color_summary">Цвет текста добавляемого на фотографию</string>
     <string name="preference_stamp_style">Стиль</string>
-    <string name="preference_stamp_style_summary">Стиль для добавляемого на фотографию текста\n%s</string>
+    <string name="preference_stamp_style_summary">Стиль текста добавляемого на фотографию\n%s</string>
     <string name="preference_background_photo_saving">Использовать фоновый поток</string>
     <string name="preference_background_photo_saving_summary">Сохранять фото в фоновом потоке (для ускорения работы)</string>
     <string name="video_quality">Разрешение видео</string>
@@ -225,7 +225,7 @@
     
     <string name="preference_category_online">Разное</string>
     <string name="preference_online_help">Помощь в Интернете</string>
-    <string name="preference_online_help_summary">Запустить веб-сайт Open Camera в вашем браузере</string>
+    <string name="preference_online_help_summary">Открыть веб-сайт Open Camera в вашем браузере</string>
     <string name="preference_donate">Пожертвовать</string>
     <string name="preference_donate_summary">Если вам нравится это приложение, киньте мне копейку. Вы можете сделать это, купив мое приложение. Спасибо!</string>
     <string name="preference_use_camera2">Использовать Camera2 API</string>
@@ -390,7 +390,7 @@
     <string name="duration_45m">45 минут</string>
     <string name="duration_1h">1 час</string>
 
-    <string name="preference_show_take_photo">Показать кнопку съемки</string>
+    <string name="preference_show_take_photo">Показать кнопку съёмки</string>
     <string name="preference_show_take_photo_summary">Отображение кнопки фото- и видеосъемки. Полезно, если на вашем устройстве уже есть аппаратная кнопка спуска затвора.</string>
 
     <string name="video_pause">Запись видео приостановлена</string>
@@ -405,7 +405,7 @@
 
     <string name="white_balance_auto">Автоматически</string>
     <string name="white_balance_cloudy">Облачно</string>
-    <string name="white_balance_daylight">Светлый деньDaylight</string>
+    <string name="white_balance_daylight">Светлый день</string>
     <string name="white_balance_fluorescent">Свечение</string>
     <string name="white_balance_incandescent">Яркое свечение</string>
     <string name="white_balance_shade">Тень</string>
@@ -711,7 +711,7 @@
     <string name="preference_hdr_contrast_enhancement_always">Всегда</string>
 
     <string name="preference_video_output_format">Формат видео</string>
-    <string name="preference_video_output_format_summary">Кодеки и формат видео-и аудиофайлов\n%s</string>
+    <string name="preference_video_output_format_summary">Кодеки и формат видео- и аудиофайлов\n%s</string>
 
     <string name="preference_video_output_format_default">По умолчанию</string>
     <string name="preference_video_output_format_mpeg4_h264">MPEG4 H264</string>
