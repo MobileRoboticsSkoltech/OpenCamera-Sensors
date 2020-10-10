@@ -285,9 +285,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 entries[i] = "" + (i+1) + "%";
                 values[i] = "" + (i+1);
             }
-            ListPreference lp = (ListPreference)findPreference("preference_quality");
-            lp.setEntries(entries);
-            lp.setEntryValues(values);
+            ArraySeekBarPreference sp = (ArraySeekBarPreference)findPreference("preference_quality");
+            sp.setEntries(entries);
+            sp.setEntryValues(values);
         }
 
         {
