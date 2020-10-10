@@ -14360,7 +14360,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     /** Tests HDR algorithm on test samples "testHDRtemp".
-     *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
+     *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated algorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
      */
     public void testHDRtemp() throws IOException, InterruptedException {
