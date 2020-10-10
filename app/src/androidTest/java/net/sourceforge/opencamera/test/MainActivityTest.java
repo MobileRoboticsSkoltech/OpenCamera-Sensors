@@ -13554,7 +13554,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         //checkHistogramDetails(hdrHistogramDetails, 3, 101, 251);
         //checkHistogramDetails(hdrHistogramDetails, 3, 109, 251);
-        checkHistogramDetails(hdrHistogramDetails, 6, 111, 252);
+        //checkHistogramDetails(hdrHistogramDetails, 6, 111, 252);
+        checkHistogramDetails(hdrHistogramDetails, 2, 111, 252);
     }
 
     /** Tests HDR algorithm on test samples "testHDR33".
@@ -14334,6 +14335,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR60_output.jpg", false, 491, 1000000000L/10, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_CLAMP);
 
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR61".
+     */
+    public void testHDR61() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR61");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR61_output.jpg", false, 50, 1000000000L/5025);
+
+        checkHistogramDetails(hdrHistogramDetails, 0, 86, 254);
+
+        int [] exp_offsets_x = {0, 0, 1};
+        int [] exp_offsets_y = {0, 0, -2};
+        checkHDROffsets(exp_offsets_x, exp_offsets_y);
     }
 
     /** Tests HDR algorithm on test samples "testHDRtemp".

@@ -1898,6 +1898,16 @@ public class HDRProcessor {
 
             mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
 
+            // avoid too low/high median_values, otherwise we'll detect dark or light pixels as "noisy" - needed for testHDR61
+            final int min_diff_c = 4; // should be same value as in create_mtb.rs/create_mtb()
+            /*if( median_value < min_diff_c+1 || median_value > 255-(min_diff_c+1) ) {
+                throw new RuntimeException("image " + i + " has median_value: " + median_value); // test
+            }*/
+            median_value = Math.max(median_value, min_diff_c+1);
+            median_value = Math.min(median_value, 255-(min_diff_c+1));
+            if( MyDebug.LOG )
+                Log.d(TAG, i + ": median_value is now: " + median_value);
+
             // set parameters
             if( use_mtb )
                 createMTBScript.set_median_value(median_value);

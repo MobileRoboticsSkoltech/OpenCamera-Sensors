@@ -77,6 +77,7 @@ public class HDRTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR58"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR59"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR60"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR61"));
         return suite;
     }
 }

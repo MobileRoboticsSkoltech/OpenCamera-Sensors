@@ -1107,7 +1107,7 @@ public class ImageSaver extends Thread {
                 default:
                     // Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
                     // a short exposure time, due to fixing problems where some regions are too dark.
-                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53.
+                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53, testHDR61.
                     // Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
                     // (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
                     // testHDR54, testHDR55, testHDR56.
