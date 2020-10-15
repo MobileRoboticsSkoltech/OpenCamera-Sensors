@@ -113,7 +113,7 @@
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Folder to save the photo/video files in</string>
     <string name="preference_using_saf">Use Storage Access Framework</string>
-    <string name="preference_using_saf_summary">Whether to use Storage Access Framework for saving photos and videos. This should be enabled to allow saving to external SD cards.</string>
+    <string name="preference_using_saf_summary">Whether to use Storage Access Framework for saving photos and videos. This should be enabled to allow saving to external SD cards. On Android 10+ this option must be enabled if you want to save in a folder outside of DCIM.</string>
     <string name="preference_save_photo_prefix">Save photo prefix</string>
     <string name="preference_save_photo_prefix_summary">The prefix to use for the save filenames for photos</string>
     <string name="preference_save_video_prefix">Save video prefix</string>
@@ -993,7 +993,7 @@
     <string name="preference_privacy_policy_text" translatable="false"> <!-- if changing this, remember to consider if the online privacy policy needs updating -->
         Open Camera accesses camera sensor and microphone data to fulfil its purpose as a camera.
         Microphone is also used for the optional \"Audio control\".
-        \nAccess to files is needed to save resultant files such as photos and videos to your device.
+        \nAccess to files is needed (at least for Android 9 and earlier) to save resultant files such as photos and videos to your device.
         \nLocation permission is required for the optional geotagging features (for photos and videos,
         including stamp and subtitles options).
         When relevant option(s) are enabled, your device location will be stored in photo/video/subtitle files.

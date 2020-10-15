@@ -65,8 +65,21 @@ FIXED   Possible problem taking photos on some devices with LIMITED Camera2 API 
 FIXED   Possible problem with default edge mode and noise reduction mode behaviours on some devices
         with LIMITED Camera2 API support.
 FIXED   UI would become sluggish if camera or storage permission denied with "Don't ask again".
+UPDATED Now supporting "scoped storage" on Android 10+. This means storage permission is no longer
+        required. However this means the following changes:
+          * Saving outside of DCIM/ is no longer possible unless using the Storage Access Framework.
+            If you had set up a custom save folder outside of DCIM/ and are on Android 10+, it will
+            be reset to the default DCIM/OpenCamera/ folder. If you want to continue saving outside
+            of DCIM/, you can enable Settings/More camera controls/"Use Storage Access Framework"
+            and choose a new folder.
+          * If using Video subtitles option, then the .SRT files will show up in gallery
+            applications, unless Settings/More camera controls/"Use Storage Access Framework" is
+            enabled.
+        Note that these changes are required due to changes being made in Android that applications
+        are required to support.
 UPDATED Use seekbar for more settings (audio control sensitivity, image quality, photo stamp font
         size).
+UPDATED Debug XML files for panorama now saved in Android/data/net.sourceforge.opencamera/files/.
 UPDATED Camera now closed when in settings or preview otherwise in background.
 
 Version 1.48.2 (2020/07/12)
