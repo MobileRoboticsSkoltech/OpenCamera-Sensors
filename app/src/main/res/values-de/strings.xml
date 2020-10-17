@@ -613,9 +613,6 @@
     <string name="preference_show_whats_new">Zeige den What\'s-New-Dialog</string>
     <string name="preference_show_whats_new_summary">Zeigt Info zu neuen Features und Verbesserungen wenn die App upgedatet wurde</string>
 
-    <string name="preference_edge_mode">Edge mode algorithm</string>
-    <string name="preference_edge_mode_summary">Algorithm that the camera driver should use for applying edge enhancement. Edge enhancement improves sharpness and details in the captured image. (This setting is ignored in NR photo mode.)\n%s</string>
-
     <string name="preference_screen_processing_settings">Verarbeitungseinstellungen…</string>
 
     <string name="preference_noise_reduction_mode">Algorithmus zur Rauschunterdrückung</string>
@@ -920,9 +917,6 @@
     <string name="preference_video_rec709">REC709</string>
     <string name="preference_video_srgb">sRGB</string>
     <string name="preference_video_gamma">Gamma</string>
-    <string name="preference_video_jtvideo" translatable="false">JTVideo</string>
-    <string name="preference_video_jtlog" translatable="false">JTLog</string>
-    <string name="preference_video_jtlog2" translatable="false">JTLog2</string>
     <string name="preference_video_profile_gamma">Video Gamma-Wert</string>
     <string name="preference_video_profile_gamma_summary">Gamma-Wert für Videos, wenn Video-Profil Gamma ausgewählt wurde\n%s</string>
     <string name="preference_video_profile_gamma_1_6">1,6</string>
