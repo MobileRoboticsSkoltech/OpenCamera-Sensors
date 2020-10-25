@@ -74,6 +74,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ZoomControls;
 
+// ignore warning about "Call to Thread.sleep in a loop", this is only test code
+@SuppressWarnings("BusyWait")
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private static final String TAG = "MainActivityTest";
     private MainActivity mActivity = null;

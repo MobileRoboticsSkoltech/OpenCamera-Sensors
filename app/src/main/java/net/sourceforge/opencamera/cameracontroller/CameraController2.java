@@ -63,7 +63,7 @@ public class CameraController2 extends CameraController {
 
     private final Context context;
     private CameraDevice camera;
-    private String cameraIdS;
+    private final String cameraIdS;
 
     private final boolean is_samsung;
     private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge

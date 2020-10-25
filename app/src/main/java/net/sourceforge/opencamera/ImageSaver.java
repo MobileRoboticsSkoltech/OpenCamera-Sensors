@@ -505,6 +505,8 @@ public class ImageSaver extends Thread {
                         break;
                 }
                 if( test_slow_saving ) {
+                    // ignore warning about "Call to Thread.sleep in a loop", this is only activated in test code
+                    //noinspection BusyWait
                     Thread.sleep(2000);
                 }
                 if( MyDebug.LOG ) {
