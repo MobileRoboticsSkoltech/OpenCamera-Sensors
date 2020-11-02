@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Nastavitve</string>
     <string name="action_popup">Nastavitve pojavnih oken</string>
     <string name="intro_ok">V redu (to sporočilo se ne bo več prikazovalo)</string>

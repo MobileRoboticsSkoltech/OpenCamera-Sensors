@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Налады</string>
     <string name="action_popup">Налады ўсплываючых</string>
     <string name="intro_ok">Добра (Гэта паведамленне не будзе паказана зноў)</string>

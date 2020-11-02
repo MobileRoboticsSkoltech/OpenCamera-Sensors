@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Nastavení</string>
     <string name="action_popup">Vyskakovací nastavení</string>
     <string name="intro_ok">OK (Tato zpráva se již znovu nezobrazí.)</string>

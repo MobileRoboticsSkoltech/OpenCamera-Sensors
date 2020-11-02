@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated, unless deemed appropriate e.g. alternative alphabets -->
+    <!-- shouldn't be translated, unless deemed appropriate e.g. alternative alphabets -->
     <string name="action_settings">設定</string>
     <string name="action_popup">彈出設定</string>
     <string name="intro_ok">好 (此訊息將不再顯示)</string>
