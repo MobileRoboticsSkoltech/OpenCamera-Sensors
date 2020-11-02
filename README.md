@@ -1,14 +1,10 @@
-# Open Camera Extensions
+# OpenCamera Sensors
 [![Build Status](https://travis-ci.org/azaat/opencamera-extensions.svg?branch=master)](https://travis-ci.org/azaat/opencamera-extensions)
 
 **This repository is created to extend OpenCamera application with the following capabilities:**
 
-- Support asynchronous IMU recording, provide settings for different IMU frequencies
-- Menu with some important smartphone properties
-  - preprocessing options (optical/digital video stabilization)
-  - whether or not IMU and camera be synchronized
-- Provide recording of smartphone model and build number
-- Support remote recording over the network (Open Camera Remote can be used as basis)
+- Support IMU sensor data recording, provide settings for different IMU frequencies
+- Support extended video recrding with frame timestamps (frame timestamps can be used together with sensor timestamps if your device has SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME in CameraMetadata)
 
 **How to enable sensor data recording?**
 
