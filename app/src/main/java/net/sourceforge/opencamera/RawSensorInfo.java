@@ -27,7 +27,7 @@ public class RawSensorInfo implements SensorEventListener {
     private static final String CSV_SEPARATOR = ",";
 
     final private SensorManager mSensorManager;
-    final private Sensor mSensor;
+    final private Sensor mSensorGyro;
     final private Sensor mSensorAccel;
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;
@@ -35,16 +35,16 @@ public class RawSensorInfo implements SensorEventListener {
 
     public RawSensorInfo(Context context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         if (MyDebug.LOG) {
             Log.d(TAG, "RawSensorInfo");
-            if (mSensor == null) {
-                Log.d(TAG, "gyroscope not available");
+            if (mSensorGyro == null) {
+                Log.d(TAG, "Gyroscope not available");
             }
             if (mSensorAccel == null) {
-                Log.d(TAG, "accelerometer not available");
+                Log.d(TAG, "Accelerometer not available");
             }
         }
     }
@@ -53,7 +53,7 @@ public class RawSensorInfo implements SensorEventListener {
         if (sensorType == Sensor.TYPE_ACCELEROMETER) {
             return mSensorAccel.getMinDelay();
         } else if (sensorType == Sensor.TYPE_GYROSCOPE) {
-            return mSensor.getMinDelay();
+            return mSensorGyro.getMinDelay();
         } else {
             // Unsupported sensorType
             if (MyDebug.LOG) {
@@ -66,14 +66,11 @@ public class RawSensorInfo implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mIsRecording) {
-            StringBuffer sensorData = new StringBuffer();
-
+            StringBuilder sensorData = new StringBuilder();
             for (int j = 0; j < 3; j++) {
-                sensorData.append(event.values[j]);
-                sensorData.append(CSV_SEPARATOR);
+                sensorData.append(event.values[j]).append(CSV_SEPARATOR);
             }
-            sensorData.append(event.timestamp);
-            sensorData.append('\n');
+            sensorData.append(event.timestamp).append("\n");
 
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 mAccelBufferedWriter.write(sensorData.toString());
@@ -180,8 +177,8 @@ public class RawSensorInfo implements SensorEventListener {
             Log.d(TAG, "enableSensors");
         }
 
-        if (mSensor != null) {
-            mSensorManager.registerListener(this, mSensor, gyroSampleRate);
+        if (mSensorGyro != null) {
+            mSensorManager.registerListener(this, mSensorGyro, gyroSampleRate);
         }
         if (mSensorAccel != null) {
             mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
