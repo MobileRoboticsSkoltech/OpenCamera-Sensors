@@ -1,5 +1,5 @@
 # OpenCamera Sensors
-[![Build Status](https://travis-ci.org/azaat/opencamera-extensions.svg?branch=master)](https://travis-ci.org/azaat/opencamera-extensions)
+[![Build Status](https://travis-ci.org/azaat/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/azaat/OpenCamera-Sensors)
 
 **This repository is created to extend OpenCamera application with the following capabilities:**
 
