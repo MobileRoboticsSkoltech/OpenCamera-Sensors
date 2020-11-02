@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Parametrlər</string>
     <string name="action_popup">Popup parametrləri</string>
     <string name="intro_ok">OK (Bu mesaj bir daha göstərilməyəcək)</string>

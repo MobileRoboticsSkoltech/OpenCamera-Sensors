@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">오픈 카메라</string>
     <string name="action_settings">설정</string>
     <string name="action_popup">팝업 설정</string>
     <string name="intro_ok">확인 (이 메세지는 더이상 표시되지 않습니다)</string>

@@ -266,7 +266,7 @@ public class MainActivity extends Activity {
         settingsManager = new SettingsManager(this);
         mainUI = new MainUI(this);
         manualSeekbars = new ManualSeekbars();
-        applicationInterface = new MyApplicationInterface(this, savedInstanceState);
+        applicationInterface = new ExtendedAppInterface(this, savedInstanceState);
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
         textFormatter = new TextFormatter(this);
@@ -4490,7 +4490,7 @@ public class MainActivity extends Activity {
         return this.applicationInterface.getLocationSupplier();
     }
 
-    public StorageUtils getStorageUtils() {
+    public StorageUtilsWrapper getStorageUtils() {
         return this.applicationInterface.getStorageUtils();
     }
 

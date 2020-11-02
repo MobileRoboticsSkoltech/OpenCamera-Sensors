@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Definições</string>
     <string name="action_popup">Definições rápidas</string>
     <string name="intro_ok">OK (Esta mensagem não será mostrada novamente)</string>

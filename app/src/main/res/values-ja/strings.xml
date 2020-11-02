@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <!-- shouldn't be translated -->
     <string name="action_settings">設定</string>
     <string name="action_popup">ポップアップ設定</string>
     <string name="intro_ok">了解しました (この内容を再度表示しない)</string>

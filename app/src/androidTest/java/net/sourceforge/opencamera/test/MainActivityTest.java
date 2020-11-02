@@ -7589,6 +7589,46 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue( mPreview.getCameraController().test_used_tonemap_curve );
     }
 
+    /* Test recording video with raw IMU sensor info
+     */
+    public void testVideoImuInfo() throws InterruptedException {
+        Log.d(TAG, "testVideoImuInfo");
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.apply();
+        updateForSettings();
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        Log.d(TAG, "folder: " + folder);
+        int expectedNFiles = 1;
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+
+        assertEquals(expectedNFiles + 1, nNewFiles);
+    }
+
+    /* Test recording video with raw IMU sensor info
+     */
+    public void testVideoImuInfoSAF() throws InterruptedException {
+        Log.d(TAG, "testVideoImuInfoSAF");
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+        int expectedNFiles = 1;
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+
+        assertEquals(expectedNFiles + 1, nNewFiles);
+    }
+
     /* Test recording video with custom gamma profile.
      */
     public void testVideoGammaProfile() throws InterruptedException {

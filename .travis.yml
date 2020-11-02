@@ -1,5 +1,6 @@
 language: android
-jdk: oraclejdk8
+os: linux
+dist: xenial
 
 android:
   components:
@@ -14,6 +15,20 @@ android:
     - 'google-gdk-license-.+'
 
 before_install:
+  - openssl aes-256-cbc -K $encrypted_cec398169802_key -iv $encrypted_cec398169802_iv -in my-release-key.keystore.enc -out ./my-release-key.keystore -d
   - yes | sdkmanager "platforms;android-28"
 
-script: ./gradlew build
+script: ./gradlew assembleRelease
+
+deploy:
+  skip-cleanup: true
+  provider: releases
+  api-key: $GITHUB_API_KEY
+  file: $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk
+  name: dev-build-$TRAVIS_TAG
+  body: Automatic build of $TRAVIS_BRANCH ($TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
+  prerelease: true
+  overwrite: true
+  target_commitish: $TRAVIS_COMMIT
+  on:
+    tags: true
