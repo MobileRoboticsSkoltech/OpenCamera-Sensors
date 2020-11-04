@@ -3944,8 +3944,8 @@ public class CameraController2 extends CameraController {
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
         // maxImages only needs to be 2, as we always read the JPEG data and close the image straight away in the imageReader
-        imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
-        //imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.YUV_420_888, 2);
+        //imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
+        imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.YUV_420_888, 2);
         if( MyDebug.LOG ) {
             Log.d(TAG, "created new imageReader: " + imageReader.toString());
             Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
