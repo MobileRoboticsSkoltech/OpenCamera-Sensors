@@ -82,7 +82,7 @@ public class RawSensorInfo implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // TODO: Add logs for when sensor accuracy decreased
+        // TODO: Add some action or notification for when sensor accuracy decreased
     }
 
     /**
@@ -94,27 +94,15 @@ public class RawSensorInfo implements SensorEventListener {
         StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;
         try {
-            if (storageUtils.isUsingSAF()) {
-                Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
-                );
-                ParcelFileDescriptor rawSensorInfoPfd = mainActivity
-                        .getContentResolver()
-                        .openFileDescriptor(saveUri, "w");
-                fileWriter = new FileWriter(rawSensorInfoPfd.getFileDescriptor());
-                File saveFile = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-                storageUtils.broadcastFile(saveFile, true, false, true);
-
-            } else {
-                File saveFile = storageUtils.createOutputCaptureInfoFile(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
-                );
-                fileWriter = new FileWriter(saveFile);
-                if (MyDebug.LOG) {
-                    Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
-                }
-                storageUtils.broadcastFile(saveFile, false, false, false);
-            }
+            fileWriter = new FileWriter(
+                storageUtils.createOutputCaptureInfo(
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,
+                        "csv",
+                        "_" + sensorType,
+                        lastVideoDate,
+                        mainActivity
+                )
+            );
             return fileWriter;
         } catch (IOException e) {
             e.printStackTrace();

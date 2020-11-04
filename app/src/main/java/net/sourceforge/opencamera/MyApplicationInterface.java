@@ -101,6 +101,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     protected Date mLastVideoDate = null;
 
+    public Date getLastVideoDate() { return mLastVideoDate; }
+
     /** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
      */
     private static class LastImage {

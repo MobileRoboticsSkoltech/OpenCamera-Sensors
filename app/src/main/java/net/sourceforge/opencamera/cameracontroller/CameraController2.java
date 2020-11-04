@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
+import net.sourceforge.opencamera.FrameInfo;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.nio.ByteBuffer;
@@ -64,6 +65,8 @@ public class CameraController2 extends CameraController {
     private final Context context;
     private CameraDevice camera;
     private String cameraIdS;
+    // TODO: encapsulation
+    public FrameInfo FrameInfoWriter;
 
     private final boolean is_samsung;
     private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
@@ -1249,6 +1252,21 @@ public class CameraController2 extends CameraController {
         public void onImageAvailable(ImageReader reader) {
             if( MyDebug.LOG )
                 Log.d(TAG, "new still image available");
+
+            if( video_recorder_surface != null ) {
+                //Log.d(TAG, "Frame during video recording");
+                Image image = reader.acquireNextImage();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
+                if( MyDebug.LOG )
+                    Log.d(TAG, "image format: " + image.getFormat());
+                if (frameInfoWriter != null) {
+                    frameInfoWriter.submitProcessFrame(image.getTimestamp());
+                }
+                image.close();
+                return;
+            }
+
             if( picture_cb == null || !jpeg_todo ) {
                 // in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
                 // or strange behaviour where an old image appears when the user next takes a photo
@@ -5117,6 +5135,11 @@ public class CameraController2 extends CameraController {
                                 Log.d(TAG, "add video recorder surface to previewBuilder: " + video_recorder_surface);
                             }
                             previewBuilder.addTarget(video_recorder_surface);
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "add image reader surface to" +
+                                        "previewBuilder: " + imageReader.getSurface());
+                            }
+                            previewBuilder.addTarget(imageReader.getSurface());
                         }
                         try {
                             setRepeatingRequest();

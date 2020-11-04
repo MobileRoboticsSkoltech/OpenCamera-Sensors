@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera.preview;
 
+import net.sourceforge.opencamera.FrameInfo;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 //import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -988,6 +990,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder_is_paused = false;
         applicationInterface.cameraInOperation(false, true);
         reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+
+        //TODO: move to appInterface
+        try {
+            if (camera_controller.frameInfoWriter != null) {
+                camera_controller.frameInfoWriter.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
@@ -5322,12 +5333,33 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private void startVideoRecording(final boolean max_filesize_restart) {
         if( MyDebug.LOG )
             Log.d(TAG, "startVideoRecording");
+
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
         test_called_next_output_file = false;
         test_started_next_output_file = false;
         nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
+
+        // TODO: Video file is created, so lastVideoDate is assigned in MyApplicationInterface. BUT we need to assure that some other way
+        // possibly move to application interface level
+        if (applicationInterface.useCamera2()) {
+            Toast.makeText(
+                    applicationInterface.getContext(),
+                    "Starting video with frame rec",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            Date videoDate = applicationInterface.getLastVideoDate();
+            try {
+                camera_controller.frameInfoWriter = new FrameInfo(
+                        videoDate, (MainActivity) applicationInterface.getContext()
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         if( info == null ) {
             videoFileInfo = new VideoFileInfo();
             applicationInterface.onFailedCreateVideoFileError();

@@ -4,11 +4,13 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,6 +43,26 @@ public class StorageUtilsWrapper extends StorageUtils {
                 filename,
                 mimeType
         );
+    }
+
+    public File createOutputCaptureInfo(int mediaType, String extension, String suffix, Date currentDate, MainActivity context) throws IOException {
+        if (isUsingSAF()) {
+            Uri saveUri = createOutputCaptureInfoFileSAF(
+                    mediaType, suffix, extension, currentDate
+            );
+            File saveFile = getFileFromDocumentUriSAF(saveUri, false);
+            broadcastFile(saveFile, false, false, true);
+            return saveFile;
+        } else {
+            File saveFile = createOutputCaptureInfoFile(
+                    mediaType, suffix, extension, currentDate
+            );
+            if (MyDebug.LOG) {
+                Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
+            }
+            broadcastFile(saveFile, false, false, false);
+            return saveFile;
+        }
     }
 
     File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {

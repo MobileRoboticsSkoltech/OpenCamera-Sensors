@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
+import net.sourceforge.opencamera.FrameInfo;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.io.Serializable;
@@ -41,6 +42,8 @@ public abstract class CameraController {
     public static final int ISO_FOR_DARK = 1100;
     public static final int N_IMAGES_NR_DARK = 8;
     public static final int N_IMAGES_NR_DARK_LOW_LIGHT = 15;
+
+    public FrameInfo frameInfoWriter;
 
     // for testing:
     volatile int count_camera_parameters_exception;
