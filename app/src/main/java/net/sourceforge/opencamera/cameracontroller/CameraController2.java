@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.FrameInfo;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.nio.ByteBuffer;
@@ -65,8 +64,7 @@ public class CameraController2 extends CameraController {
     private final Context context;
     private CameraDevice camera;
     private String cameraIdS;
-    // TODO: encapsulation
-    public FrameInfo FrameInfoWriter;
+    private VideoFrameInfoCallback mVideoFrameInfoCallback;
 
     private final boolean is_samsung;
     private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
@@ -1254,15 +1252,14 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "new still image available");
 
             if( video_recorder_surface != null ) {
-                //Log.d(TAG, "Frame during video recording");
+                Log.d(TAG, "Frame during video recording");
                 Image image = reader.acquireNextImage();
                 if( MyDebug.LOG )
                     Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
                 if( MyDebug.LOG )
                     Log.d(TAG, "image format: " + image.getFormat());
-                if (frameInfoWriter != null) {
-                    frameInfoWriter.submitProcessFrame(image.getTimestamp());
-                }
+
+                mVideoFrameInfoCallback.onVideoFrameAvailable(image.getTimestamp(), image.getPlanes());
                 image.close();
                 return;
             }
@@ -3945,7 +3942,7 @@ public class CameraController2 extends CameraController {
         }
         // maxImages only needs to be 2, as we always read the JPEG data and close the image straight away in the imageReader
         //imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
-        imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.YUV_420_888, 2);
+        imageReader = ImageReader.newInstance(1080, 1920, ImageFormat.JPEG, 2);
         if( MyDebug.LOG ) {
             Log.d(TAG, "created new imageReader: " + imageReader.toString());
             Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
@@ -7037,7 +7034,12 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
-    public void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException {
+    public void initVideoRecorderPostPrepare(
+            MediaRecorder video_recorder,
+            boolean want_photo_video_recording,
+            VideoFrameInfoCallback videoFrameInfoCallback
+    ) throws CameraControllerException {
+        mVideoFrameInfoCallback = videoFrameInfoCallback;
         if( MyDebug.LOG )
             Log.d(TAG, "initVideoRecorderPostPrepare");
         if( camera == null ) {

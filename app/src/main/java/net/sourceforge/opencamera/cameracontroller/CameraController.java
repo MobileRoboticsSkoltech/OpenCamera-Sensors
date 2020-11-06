@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.FrameInfo;
+import net.sourceforge.opencamera.VideoFrameInfo;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.io.Serializable;
@@ -11,6 +11,7 @@ import java.util.List;
 
 import android.graphics.Rect;
 import android.location.Location;
+import android.media.Image;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -42,8 +43,6 @@ public abstract class CameraController {
     public static final int ISO_FOR_DARK = 1100;
     public static final int N_IMAGES_NR_DARK = 8;
     public static final int N_IMAGES_NR_DARK_LOW_LIGHT = 15;
-
-    public FrameInfo frameInfoWriter;
 
     // for testing:
     volatile int count_camera_parameters_exception;
@@ -257,6 +256,12 @@ public abstract class CameraController {
          */
         boolean imageQueueWouldBlock(int n_raw, int n_jpegs);
         void onFrontScreenTurnOn();
+    }
+
+    /** Interface to define callbacks for video frames and their timestamps
+     */
+    public interface VideoFrameInfoCallback {
+        void onVideoFrameAvailable(long timestamp, Image.Plane[] planes); // called immediately after new video frame is available
     }
 
     /** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)
@@ -574,8 +579,9 @@ public abstract class CameraController {
     /** Call to initialise video recording, should call after MediaRecorder.prepare(), but before MediaRecorder.start().
      * @param video_recorder The media recorder object.
      * @param want_photo_video_recording Whether support for taking photos whilst video recording is required. If this feature isn't supported, the option has no effect.
+     * @param videoFrameInfoCallback Callback for video frames and their timestamps
      */
-    public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException;
+    public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording, VideoFrameInfoCallback videoFrameInfoCallback) throws CameraControllerException;
     public abstract String getParametersString();
     public boolean captureResultIsAEScanning() {
         return false;
