@@ -261,7 +261,7 @@ public abstract class CameraController {
     /** Interface to define callbacks for video frames and their timestamps
      */
     public interface VideoFrameInfoCallback {
-        void onVideoFrameAvailable(long timestamp, Image.Plane[] planes); // called immediately after new video frame is available
+        void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height); // called immediately after new video frame is available
     }
 
     /** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)

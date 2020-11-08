@@ -5498,9 +5498,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 camera_controller.initVideoRecorderPostPrepare(
                         local_video_recorder,
                         want_photo_video_recording,
-                        (timestamp, planes) -> {
+                        (timestamp, nv21, width, height) -> {
                             if (mVideoFrameInfoWriter != null) {
-                                mVideoFrameInfoWriter.submitProcessFrame(timestamp, planes);
+                                mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height);
                             } else {
                                 Log.e(TAG, "Video frame writer wasn't instantiated for video recording");
                             }

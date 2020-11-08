@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.YuvImage;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -158,6 +160,7 @@ public class CameraController2 extends CameraController {
     private final Object background_camera_lock = new Object(); // lock to synchronize between UI thread and the background "CameraBackground" thread/handler
 
     private ImageReader imageReader;
+    private ImageReader videoFrameImageReader;
 
     private BurstType burst_type = BurstType.BURSTTYPE_NONE;
     // for BURSTTYPE_EXPO:
@@ -1245,24 +1248,33 @@ public class CameraController2 extends CameraController {
         return temperature;
     }
 
+    private class OnVideoFrameImageAvailableListener implements ImageReader.OnImageAvailableListener {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Log.d(TAG, "Frame during video recording");
+            Image image = reader.acquireNextImage();
+            if( MyDebug.LOG )
+                Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
+            if( MyDebug.LOG )
+                Log.d(TAG, "image format: " + image.getFormat());
+            byte[] nv21 = ImageUtils.YUV420toNV21(image);
+            long timestamp = image.getTimestamp();
+
+            mVideoFrameInfoCallback.onVideoFrameAvailable(
+                timestamp,
+                nv21,
+                image.getWidth(),
+                image.getHeight()
+            );
+            image.close();
+        }
+    }
+
     private class OnImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if( MyDebug.LOG )
                 Log.d(TAG, "new still image available");
-
-            if( video_recorder_surface != null ) {
-                Log.d(TAG, "Frame during video recording");
-                Image image = reader.acquireNextImage();
-                if( MyDebug.LOG )
-                    Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
-                if( MyDebug.LOG )
-                    Log.d(TAG, "image format: " + image.getFormat());
-
-                mVideoFrameInfoCallback.onVideoFrameAvailable(image.getTimestamp(), image.getPlanes());
-                image.close();
-                return;
-            }
 
             if( picture_cb == null || !jpeg_todo ) {
                 // in theory this shouldn't happen - but if this happens, still free the image to avoid risk of memory leak,
@@ -2159,6 +2171,10 @@ public class CameraController2 extends CameraController {
             imageReaderRaw.close();
             imageReaderRaw = null;
             onRawImageAvailableListener = null;
+        }
+        if (videoFrameImageReader != null) {
+            videoFrameImageReader.close();
+            videoFrameImageReader = null;
         }
     }
 
@@ -3925,6 +3941,7 @@ public class CameraController2 extends CameraController {
         return this.use_fake_precapture;
     }
 
+
     private void createPictureImageReader() {
         if( MyDebug.LOG )
             Log.d(TAG, "createPictureImageReader");
@@ -3941,8 +3958,7 @@ public class CameraController2 extends CameraController {
             throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
         }
         // maxImages only needs to be 2, as we always read the JPEG data and close the image straight away in the imageReader
-        //imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
-        imageReader = ImageReader.newInstance(1080, 1920, ImageFormat.JPEG, 2);
+        imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
         if( MyDebug.LOG ) {
             Log.d(TAG, "created new imageReader: " + imageReader.toString());
             Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
@@ -3962,6 +3978,9 @@ public class CameraController2 extends CameraController {
             // see note above for imageReader.setOnImageAvailableListener for why we use a null handler
             imageReaderRaw.setOnImageAvailableListener(onRawImageAvailableListener = new OnRawImageAvailableListener(), null);
         }
+
+        videoFrameImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.YUV_420_888, 2);
+        videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
     
     private void clearPending() {
@@ -5134,9 +5153,9 @@ public class CameraController2 extends CameraController {
                             previewBuilder.addTarget(video_recorder_surface);
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add image reader surface to" +
-                                        "previewBuilder: " + imageReader.getSurface());
+                                        "previewBuilder: " + videoFrameImageReader.getSurface());
                             }
-                            previewBuilder.addTarget(imageReader.getSurface());
+                            previewBuilder.addTarget(videoFrameImageReader.getSurface());
                         }
                         try {
                             setRepeatingRequest();
@@ -5209,7 +5228,7 @@ public class CameraController2 extends CameraController {
                 Surface preview_surface = getPreviewSurface();
                 if( video_recorder != null ) {
                     if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
-                        surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface());
+                        surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface(), videoFrameImageReader.getSurface());
                     }
                     else {
                         surfaces = Arrays.asList(preview_surface, video_recorder_surface);
