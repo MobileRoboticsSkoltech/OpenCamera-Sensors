@@ -902,7 +902,7 @@
     <string name="aperture">光圈</string>
     <string name="preference_multi_cam_button">多相机图标</string>
     <string name="exposure_compensation_seekbar">改变曝光补偿的进度条</string>
-    <string name="preference_image_format_summary">选择保存照片的文件格式。这将影响“标准”(非 RAW)照片。注意 PNG 格式并非真正无损，它是从 JPEG 按 100% 质量转换而成的。\n%s</string>
+    <string name="preference_image_format_summary">选择保存照片的文件格式。这将影响“标准”(非 RAW)照片。注意 PNG 格式并非真正无损，它是从 JPEG 按 100%% 质量转换而成的。\n%s</string>
     <string name="preference_camera_api">Camera API</string>
     <string name="preference_camera_api_summary">选择 Camera2 API 来启用额外功能，比如手动曝光、对焦、白平衡及 RAW(如果设备支持)。改变 API 将重启应用。\n%s</string>
     <string name="preference_camera_api_old">原始 Camera API</string>
