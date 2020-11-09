@@ -1033,11 +1033,20 @@
     <string name="whats_new_text" translatable="false">
         <small>[This dialog is shown when Open Camera is updated. You can disable it under
             Settings/On screen GUI/Show What\'s New dialog.]</small>
-        \n\n<b>v1.48.2:</b>\n
+        \n\n<b>v1.48.3:</b>\n
         <ul>
-            <li>Manual focus and focus bracketing seekbars weren\'t being hidden when in immersive mode.\n</li>
-            <li>Fixed problem with video subtitles and Storage Access Framework on some devices.\n</li>
-            <li>Artist, Copyright exif tags option now supported for devices running Android 6 or earlier.\n</li>
+            <li>Now supporting \"scoped storage\" on Android 10+. This means the following changes for devices with Android 10+:\n</li>
+            <li>- Saving outside of DCIM/ is no longer possible unless using the Storage Access Framework
+            option. If you had set up a custom save folder outside of DCIM/ and are on Android 10+,
+            it will be reset to the default DCIM/OpenCamera/ folder. If you want to continue saving
+            outside of DCIM/, you can enable
+            Settings/More camera controls/\"Use Storage Access Framework\" and choose a new folder.\n</li>
+            <li>- If using Video subtitles option, then the .SRT files will show up in gallery
+            applications, unless Settings/More camera controls/\"Use Storage Access Framework\" is
+            enabled.\n</li>
+            <li>HDR improvements for some specific scenes.\n</li>
+            <li>Seekbar now used for more settings.\n</li>
+            <li>Bug fixes.\n</li>
         </ul>
     </string>
 </resources>
