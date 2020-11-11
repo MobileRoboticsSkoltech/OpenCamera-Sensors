@@ -1,6 +1,6 @@
 package net.sourceforge.opencamera.preview;
 
-import net.sourceforge.opencamera.VideoFrameInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 //import net.sourceforge.opencamera.MainActivity;
@@ -62,7 +62,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.CamcorderProfile;
-import android.media.Image;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -5490,7 +5489,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         			throw new IOException();*/
                 cameraSurface.setVideoRecorder(local_video_recorder);
 
-                local_video_recorder.setOrientationHint(getImageVideoRotation());
+                int rotation = getImageVideoRotation();
+                local_video_recorder.setOrientationHint(rotation);
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to prepare video recorder");
                 local_video_recorder.prepare();
@@ -5500,7 +5500,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         want_photo_video_recording,
                         (timestamp, nv21, width, height) -> {
                             if (mVideoFrameInfoWriter != null) {
-                                mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height);
+                                mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
                             } else {
                                 Log.e(TAG, "Video frame writer wasn't instantiated for video recording");
                             }

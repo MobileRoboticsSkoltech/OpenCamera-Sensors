@@ -65,12 +65,12 @@ public class StorageUtilsWrapper extends StorageUtils {
         }
     }
 
-    File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
+    public File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
         return createOutputMediaFile(
                 getRawSensorInfoFolder(currentDate),
-                StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,
+                type,
                 suffix,
-                "csv",
+                extension,
                 currentDate
         );
     }

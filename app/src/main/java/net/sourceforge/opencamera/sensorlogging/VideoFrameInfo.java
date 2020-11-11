@@ -1,6 +1,9 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.sensorlogging;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
@@ -11,6 +14,7 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.StorageUtils;
 import net.sourceforge.opencamera.StorageUtilsWrapper;
 import net.sourceforge.opencamera.cameracontroller.ImageUtils;
@@ -31,9 +35,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Handles frame images and timestamps saving during video recording,
+ * sequential Executor is used to queue saving tasks in the background thread.
+ * Images get saved every EVERY_N_FRAME-th time.
+ */
 public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
-    private final static String TIMESTAMP_FILE_SUFFIX = "_frameTimestamps";
+    private final static String TIMESTAMP_FILE_SUFFIX = "_timestamps";
     private final static int EVERY_N_FRAME = 20;
 
     //Sequential executor for frame and timestamps IO
@@ -55,38 +64,43 @@ public class VideoFrameInfo implements Closeable {
         );
     }
 
-    public void submitProcessFrame(long timestamp, byte[] nv21, int width, int height) {
+    public void submitProcessFrame(long timestamp, byte[] nv21, int width, int height, int orientation) {
         if (!frameProcessor.isShutdown()) {
             frameProcessor.execute(
-                    () -> {
-                        try {
-                            mFrameBufferedWriter
-                                    .append(Long.toString(timestamp))
-                                    .append("\n");
-                            if (mFrameNumber % EVERY_N_FRAME == 0) {
-                                if (MyDebug.LOG) {
-                                    Log.d(TAG, "Should save frame, timestamp: " + timestamp);
-                                }
-                                // TODO: refactor this mess
-                                String dateString = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(mVideoDate);
-                                File frame = new File(Environment.getExternalStorageDirectory().getPath() + "/DCIM/OpenCamera/" + dateString + "/");
-                                frame.mkdirs();
-                                try {
-                                    FileOutputStream fos = new FileOutputStream(new File(frame, timestamp + ".jpg").getPath());
-                                    byte[] jpegResult = ImageUtils.NV21toJPEG(nv21, width, height, 100);
-                                    fos.write(jpegResult);
-                                    fos.close();
-                                } catch (IOException e) {
-                                    Log.e(TAG, "Couldn't write jpeg frame");
-                                }
+                () -> {
+                    try {
+                        mFrameBufferedWriter
+                                .append(Long.toString(timestamp))
+                                .append("\n");
+                        if (mFrameNumber % EVERY_N_FRAME == 0) {
+                            if (MyDebug.LOG) {
+                                Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
-                            mFrameNumber++;
-                        } catch (IOException e) {
-                            // TODO: we don't want to skip that error (can result in an incomplete time series)
-                            Log.e(TAG, "Failed to write frame timestamp: " + timestamp);
-                            e.printStackTrace();
+                            File frameFile = mStorageUtils.createOutputCaptureInfoFile(
+                                StorageUtils.MEDIA_TYPE_VIDEO_FRAME, String.valueOf(timestamp),"jpg", mVideoDate
+                            );
+                            try {
+                                FileOutputStream fos = new FileOutputStream(frameFile);
+                                byte[] jpegResult = ImageUtils.NV21toJPEG(nv21, width, height, 100);
+
+                                // Apply rotation
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(jpegResult, 0, jpegResult.length);
+                                Matrix matrix = new Matrix();
+                                matrix.postRotate(orientation);
+                                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                                fos.close();
+                            } catch (IOException e) {
+                                Log.e(TAG, "Couldn't write jpeg frame");
+                            }
                         }
+                        mFrameNumber++;
+                    } catch (IOException e) {
+                        // TODO: we don't want to skip that error (can result in an incomplete time series)
+                        Log.e(TAG, "Failed to write frame timestamp: " + timestamp);
+                        e.printStackTrace();
                     }
+                }
             );
         } else {
             Log.e(TAG, "Received new frame after frameProcessor executor shutdown");

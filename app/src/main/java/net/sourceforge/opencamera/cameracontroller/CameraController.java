@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.VideoFrameInfo;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.io.Serializable;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import android.graphics.Rect;
 import android.location.Location;
-import android.media.Image;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;

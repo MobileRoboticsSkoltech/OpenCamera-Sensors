@@ -3979,6 +3979,7 @@ public class CameraController2 extends CameraController {
             imageReaderRaw.setOnImageAvailableListener(onRawImageAvailableListener = new OnRawImageAvailableListener(), null);
         }
 
+        // TODO: set dimensions to match current video size
         videoFrameImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
