@@ -260,6 +260,8 @@ public abstract class CameraController {
      */
     public interface VideoFrameInfoCallback {
         void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height); // called immediately after new video frame is available
+
+        void onFrameCaptureSessionClosed();
     }
 
     /** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)
@@ -580,6 +582,7 @@ public abstract class CameraController {
      * @param videoFrameInfoCallback Callback for video frames and their timestamps
      */
     public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording, VideoFrameInfoCallback videoFrameInfoCallback) throws CameraControllerException;
+    public abstract void closeVideoRecordingSession();
     public abstract String getParametersString();
     public boolean captureResultIsAEScanning() {
         return false;

@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
@@ -93,5 +94,21 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         super.stoppedVideo(video_method, uri, filename);
+    }
+
+    public void onRawSensorInfoRecordingFinished() {
+
+    }
+
+    public void onRawSensorInfoRecordingFailed() {
+
+    }
+
+    public void onFrameInfoRecordingFinished() {
+
+    }
+
+    public void onFrameInfoRecordingFailed() {
+
     }
 }

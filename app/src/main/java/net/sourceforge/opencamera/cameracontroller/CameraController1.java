@@ -1903,6 +1903,11 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public void closeVideoRecordingSession() {
+        // no further action necessary
+    }
+
+    @Override
     public void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording, VideoFrameInfoCallback videoFrameInfoCallback) {
         // no further actions necessary
     }

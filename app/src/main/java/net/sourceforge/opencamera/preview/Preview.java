@@ -927,29 +927,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         cameraSurface.setTransform(matrix);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void stopVideo(boolean from_restart) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "stopVideo()");
-        if( video_recorder == null ) {
-            // no need to do anything if not recording
-            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
-            if( MyDebug.LOG )
-                Log.d(TAG, "video wasn't recording anyway");
-            return;
-        }
+    private void stopVideoPostPrepare() {
         applicationInterface.stoppingVideo();
-        if( flashVideoTimerTask != null ) {
-            flashVideoTimerTask.cancel();
-            flashVideoTimerTask = null;
-        }
-        if( batteryCheckVideoTimerTask != null ) {
-            batteryCheckVideoTimerTask.cancel();
-            batteryCheckVideoTimerTask = null;
-        }
-        if( !from_restart ) {
-            remaining_restart_video = 0;
-        }
+        Log.d(TAG, "Stopping video post prepare");
         if( video_recorder != null ) { // check again, just to be safe
             if( MyDebug.LOG )
                 Log.d(TAG, "stop video recording");
@@ -984,6 +964,73 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void stopVideo(boolean from_restart) {
+        camera_controller.closeVideoRecordingSession();
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "stopVideo()");
+
+        applicationInterface.cameraInOperation(false, true);
+        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+
+
+        if( video_recorder == null ) {
+            // no need to do anything if not recording
+            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
+            if( MyDebug.LOG )
+                Log.d(TAG, "video wasn't recording anyway");
+            return;
+        }
+        if( flashVideoTimerTask != null ) {
+            flashVideoTimerTask.cancel();
+            flashVideoTimerTask = null;
+        }
+        if( batteryCheckVideoTimerTask != null ) {
+            batteryCheckVideoTimerTask.cancel();
+            batteryCheckVideoTimerTask = null;
+        }
+        if( !from_restart ) {
+            remaining_restart_video = 0;
+        }
+
+        /*
+        if( video_recorder != null ) { // check again, just to be safe
+            if( MyDebug.LOG )
+                Log.d(TAG, "stop video recording");
+            //this.phase = PHASE_NORMAL;
+            video_recorder.setOnErrorListener(null);
+            video_recorder.setOnInfoListener(null);
+
+            try {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "about to call video_recorder.stop()");
+                if( test_runtime_on_video_stop )
+                    throw new RuntimeException();
+                video_recorder.stop();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "done video_recorder.stop()");
+            }
+            catch(RuntimeException e) {
+                // stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
+                if( MyDebug.LOG )
+                    Log.d(TAG, "runtime exception when stopping video");
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+
+                videoFileInfo = new VideoFileInfo();
+                nextVideoFileInfo = null;
+                // if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
+                if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
+                    VideoProfile profile = getVideoProfile();
+                    applicationInterface.onVideoRecordStopError(profile);
+                }
+            }
+            videoRecordingStopped();
+        }
+         */
+
+    }
+
     private void videoRecordingStopped() {
         if( MyDebug.LOG )
             Log.d(TAG, "reset video_recorder");
@@ -993,18 +1040,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder.release();
         video_recorder = null;
         video_recorder_is_paused = false;
-        applicationInterface.cameraInOperation(false, true);
-        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-
-        try {
-            if (mVideoFrameInfoWriter != null) {
-                mVideoFrameInfoWriter.close();
-            }
-        } catch (IOException e) {
-            // TODO: autogenerated
-            e.printStackTrace();
-        }
-
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
@@ -5498,11 +5533,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 camera_controller.initVideoRecorderPostPrepare(
                         local_video_recorder,
                         want_photo_video_recording,
-                        (timestamp, nv21, width, height) -> {
-                            if (mVideoFrameInfoWriter != null) {
-                                mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
-                            } else {
-                                Log.e(TAG, "Video frame writer wasn't instantiated for video recording");
+                        new CameraController.VideoFrameInfoCallback() {
+                            @Override
+                            public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
+                                if (mVideoFrameInfoWriter != null) {
+                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
+                                } else {
+                                    Log.e(TAG, "Video frame writer wasn't instantiated for video recording");
+                                }
+                            }
+
+                            @Override
+                            public void onFrameCaptureSessionClosed() {
+                                stopVideoPostPrepare();
+                                if (mVideoFrameInfoWriter != null) {
+                                    mVideoFrameInfoWriter.close();
+                                }
                             }
                         }
                 );

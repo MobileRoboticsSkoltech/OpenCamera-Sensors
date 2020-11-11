@@ -1786,6 +1786,7 @@ public class CameraController2 extends CameraController {
         class MyStateCallback extends CameraDevice.StateCallback {
             boolean callback_done; // must sychronize on this and notifyAll when setting to true
             boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
+
             @Override
             public void onOpened(@NonNull CameraDevice cam) {
                 if( MyDebug.LOG )
@@ -1827,6 +1828,8 @@ public class CameraController2 extends CameraController {
                         }
 
                         CameraController2.this.camera = cam;
+                        createVideoFrameImageReader();
+
 
                         // note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
                         createPreviewRequest();
@@ -2172,10 +2175,20 @@ public class CameraController2 extends CameraController {
             imageReaderRaw = null;
             onRawImageAvailableListener = null;
         }
+    }
+
+    private void closeVideoFrameImageReader() {
         if (videoFrameImageReader != null) {
             videoFrameImageReader.close();
+            Log.i(TAG, "Closed video image reader");
             videoFrameImageReader = null;
         }
+    }
+
+    private void createVideoFrameImageReader() {
+        // TODO: set dimensions to match current video size
+        videoFrameImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.YUV_420_888, 2);
+        videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
 
     private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
@@ -3978,10 +3991,6 @@ public class CameraController2 extends CameraController {
             // see note above for imageReader.setOnImageAvailableListener for why we use a null handler
             imageReaderRaw.setOnImageAvailableListener(onRawImageAvailableListener = new OnRawImageAvailableListener(), null);
         }
-
-        // TODO: set dimensions to match current video size
-        videoFrameImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.YUV_420_888, 2);
-        videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
     
     private void clearPending() {
@@ -5040,6 +5049,18 @@ public class CameraController2 extends CameraController {
         }
     }
 
+    @Override
+    public void closeVideoRecordingSession() {
+        Log.d(TAG, "Closing video recording session");
+        // Closes captureSession asynchronously,
+        // mediaRecorder should be closed in
+        // onClosed() callback to ensure that
+        // mediaRecorder encodes all the frames
+        // from the capture session
+        captureSession.close();
+        captureSession = null;
+    }
+
     private void createCaptureSession(final MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "create capture session");
@@ -5124,6 +5145,20 @@ public class CameraController2 extends CameraController {
 
             class MyStateCallback extends CameraCaptureSession.StateCallback {
                 private boolean callback_done; // must sychronize on this and notifyAll when setting to true
+
+                @Override
+                public void onClosed(@NonNull CameraCaptureSession session) {
+                    Activity activity = (Activity)context;
+                    activity.runOnUiThread(
+                        () -> {
+                            if (video_recorder != null) {
+                                mVideoFrameInfoCallback.onFrameCaptureSessionClosed();
+                            }
+                        }
+                    );
+                    super.onClosed(session);
+                }
+
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     if( MyDebug.LOG ) {
@@ -5152,6 +5187,7 @@ public class CameraController2 extends CameraController {
                                 Log.d(TAG, "add video recorder surface to previewBuilder: " + video_recorder_surface);
                             }
                             previewBuilder.addTarget(video_recorder_surface);
+
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add image reader surface to" +
                                         "previewBuilder: " + videoFrameImageReader.getSurface());
