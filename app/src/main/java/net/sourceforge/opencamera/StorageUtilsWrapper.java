@@ -30,22 +30,7 @@ public class StorageUtilsWrapper extends StorageUtils {
     /**
      * Creates file with capture information -- sensor, frame timestamps, etc
      */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputCaptureInfoFileSAF(int type, String suffix, String extension, Date currentDate) throws IOException {
-        String mimeType = "text/csv";
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
-        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-        String filename = createMediaFilename(
-                MEDIA_TYPE_RAW_SENSOR_INFO, suffix, 0, "." + extension, currentDate
-        );
-        return createOutputFileSAF(
-                createDirIfNeededSAF(timeStamp),
-                filename,
-                mimeType
-        );
-    }
-
-    public File createOutputCaptureInfo(int mediaType, String extension, String suffix, Date currentDate, MainActivity context) throws IOException {
+    public File createOutputCaptureInfo(int mediaType, String extension, String suffix, Date currentDate) throws IOException {
         if (isUsingSAF()) {
             Uri saveUri = createOutputCaptureInfoFileSAF(
                     mediaType, suffix, extension, currentDate
@@ -65,7 +50,28 @@ public class StorageUtilsWrapper extends StorageUtils {
         }
     }
 
-    public File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
+    /**
+     * Creates output capture info file is using SAF
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    Uri createOutputCaptureInfoFileSAF(int type, String suffix, String extension, Date currentDate) throws IOException {
+        String mimeType = "text/csv";
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
+        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
+        String filename = createMediaFilename(
+                MEDIA_TYPE_RAW_SENSOR_INFO, suffix, 0, "." + extension, currentDate
+        );
+        return createOutputFileSAF(
+                createDirIfNeededSAF(timeStamp),
+                filename,
+                mimeType
+        );
+    }
+
+    /**
+     * Creates output capture info file if not using SAF
+     */
+    private File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
         return createOutputMediaFile(
                 getRawSensorInfoFolder(currentDate),
                 type,

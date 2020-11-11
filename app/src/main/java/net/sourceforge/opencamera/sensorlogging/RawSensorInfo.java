@@ -160,8 +160,7 @@ public class RawSensorInfo implements SensorEventListener {
                         StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,
                         "csv",
                         "_" + sensorType,
-                        lastVideoDate,
-                        mainActivity
+                        lastVideoDate
                 )
             );
             return fileWriter;

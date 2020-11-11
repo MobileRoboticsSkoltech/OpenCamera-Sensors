@@ -57,10 +57,10 @@ public class VideoFrameInfo implements Closeable {
         mVideoDate = videoDate;
         mStorageUtils = context.getStorageUtils();
         File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
-                StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, ".csv", TIMESTAMP_FILE_SUFFIX, mVideoDate, context
+            StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, ".csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
         );
         mFrameBufferedWriter = new BufferedWriter(
-                new PrintWriter(frameTimestampFile)
+            new PrintWriter(frameTimestampFile)
         );
     }
 
@@ -76,8 +76,8 @@ public class VideoFrameInfo implements Closeable {
                             if (MyDebug.LOG) {
                                 Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
-                            File frameFile = mStorageUtils.createOutputCaptureInfoFile(
-                                StorageUtils.MEDIA_TYPE_VIDEO_FRAME, String.valueOf(timestamp),"jpg", mVideoDate
+                            File frameFile = mStorageUtils.createOutputCaptureInfo(
+                                StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
                             );
                             try {
                                 FileOutputStream fos = new FileOutputStream(frameFile);
