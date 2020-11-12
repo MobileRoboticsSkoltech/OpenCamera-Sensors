@@ -11,7 +11,12 @@ import androidx.annotation.RequiresApi;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
-public class ImageUtils {
+/**
+ * Class for manipulations with YUV images.
+ * Methods taken from this answer:
+ * https://stackoverflow.com/questions/44022062/converting-yuv-420-888-to-jpeg-and-saving-file-results-distorted-image
+ */
+public class YuvImageUtils {
     public static byte[] NV21toJPEG(byte[] nv21, int width, int height, int quality) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         YuvImage yuv = new YuvImage(nv21, ImageFormat.NV21, width, height, null);

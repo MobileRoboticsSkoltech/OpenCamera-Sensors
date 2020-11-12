@@ -2,42 +2,25 @@ package net.sourceforge.opencamera.sensorlogging;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
-import android.media.Image;
-import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.StorageUtils;
 import net.sourceforge.opencamera.StorageUtilsWrapper;
-import net.sourceforge.opencamera.cameracontroller.ImageUtils;
+import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Queue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import kotlin.jvm.Throws;
 
 /**
  * Handles frame images and timestamps saving during video recording,
@@ -85,7 +68,7 @@ public class VideoFrameInfo implements Closeable {
                             if (MyDebug.LOG) {
                                 Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
-                            byte[] jpegResult = ImageUtils.NV21toJPEG(nv21, width, height, NV21_TO_JPEG_QUALITY);
+                            byte[] jpegResult = YuvImageUtils.NV21toJPEG(nv21, width, height, NV21_TO_JPEG_QUALITY);
                             File frameFile = mStorageUtils.createOutputCaptureInfo(
                                     StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
                             );

@@ -1255,7 +1255,7 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
             if( MyDebug.LOG )
                 Log.d(TAG, "image format: " + image.getFormat());
-            byte[] nv21 = ImageUtils.YUV420toNV21(image);
+            byte[] nv21 = YuvImageUtils.YUV420toNV21(image);
             long timestamp = image.getTimestamp();
 
             mVideoFrameInfoCallback.onVideoFrameAvailable(
