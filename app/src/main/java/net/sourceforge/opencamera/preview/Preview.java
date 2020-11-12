@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.preview;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
@@ -110,7 +111,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private final boolean using_android_l;
 
-    private final ApplicationInterface applicationInterface;
+    private final ExtendedAppInterface applicationInterface;
     private final CameraSurface cameraSurface;
     private CanvasView canvasView;
     private boolean set_preview_size;
@@ -390,7 +391,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
-    public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
+    public Preview(ExtendedAppInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "new Preview");
         }
@@ -995,40 +996,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         /*
-        if( video_recorder != null ) { // check again, just to be safe
-            if( MyDebug.LOG )
-                Log.d(TAG, "stop video recording");
-            //this.phase = PHASE_NORMAL;
-            video_recorder.setOnErrorListener(null);
-            video_recorder.setOnInfoListener(null);
-
-            try {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "about to call video_recorder.stop()");
-                if( test_runtime_on_video_stop )
-                    throw new RuntimeException();
-                video_recorder.stop();
-                if( MyDebug.LOG )
-                    Log.d(TAG, "done video_recorder.stop()");
-            }
-            catch(RuntimeException e) {
-                // stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
-                if( MyDebug.LOG )
-                    Log.d(TAG, "runtime exception when stopping video");
-                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
-
-                videoFileInfo = new VideoFileInfo();
-                nextVideoFileInfo = null;
-                // if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
-                if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
-                    VideoProfile profile = getVideoProfile();
-                    applicationInterface.onVideoRecordStopError(profile);
-                }
-            }
-            videoRecordingStopped();
-        }
+           If camera2api is not used, we should stop video immediately. Otherwise it is done in callback
+           after captureSession is closed
          */
-
+        if (!usingCamera2API()) {
+            stopVideoPostPrepare();
+        }
     }
 
     private void videoRecordingStopped() {
@@ -5381,11 +5354,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
+        boolean wantVideoImuRecording = applicationInterface.getIMURecordingPref();
 
         // TODO: Video file is created, so lastVideoDate is assigned in MyApplicationInterface. BUT we need to assure that some other way
         // possibly use VID filename from VideoFileInfo (but then this logic also needs to be changed for sensor recordings and in StorageUtilsWrapper)
-        if (applicationInterface.useCamera2()) {
-            showToast("Starting video with frame recording", false);
+        if (wantVideoImuRecording) {
             Date videoDate = applicationInterface.getLastVideoDate();
             try {
                 mVideoFrameInfoWriter = new VideoFrameInfo(
@@ -5530,9 +5503,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.d(TAG, "about to prepare video recorder");
                 local_video_recorder.prepare();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
+
                 camera_controller.initVideoRecorderPostPrepare(
                         local_video_recorder,
                         want_photo_video_recording,
+                        wantVideoImuRecording,
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {

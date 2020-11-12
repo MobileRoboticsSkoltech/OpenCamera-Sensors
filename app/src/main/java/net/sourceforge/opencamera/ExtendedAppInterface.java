@@ -29,7 +29,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
     }
 
-    private boolean getIMURecordingPref() {
+    public boolean getIMURecordingPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
     }
 

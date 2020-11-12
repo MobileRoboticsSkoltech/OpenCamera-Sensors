@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +17,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.graphics.YuvImage;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -2185,8 +2183,7 @@ public class CameraController2 extends CameraController {
     }
 
     private void createVideoFrameImageReader() {
-        // TODO: set dimensions to match current video size
-        videoFrameImageReader = ImageReader.newInstance(1080, 1920, ImageFormat.YUV_420_888, 2);
+        videoFrameImageReader = ImageReader.newInstance(preview_width, preview_height, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
 
@@ -5060,7 +5057,68 @@ public class CameraController2 extends CameraController {
         captureSession = null;
     }
 
-    private void createCaptureSession(final MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException {
+    private List<Surface> getCaptureSessionOutputSurfaces(
+        final MediaRecorder videoRecorder,
+        boolean wantPhotoVideoRecording,
+        boolean wantVideoImuRecording
+    ) {
+        List<Surface> surfaces;
+        synchronized( background_camera_lock ) {
+            Surface preview_surface = getPreviewSurface();
+            if( videoRecorder != null ) {
+                if(supports_photo_video_recording && wantVideoImuRecording) {
+                    // Requested synchronized video and IMU recording
+                    createVideoFrameImageReader();
+                    Log.d(TAG, "created video frame image reader for capture session");
+                }
+
+                if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording && wantVideoImuRecording ) {
+                    surfaces = Arrays.asList(
+                        preview_surface,
+                        video_recorder_surface,
+                        imageReader.getSurface(),
+                        videoFrameImageReader.getSurface()
+                    );
+                } else if (supports_photo_video_recording && !want_video_high_speed && wantVideoImuRecording) {
+                    surfaces = Arrays.asList(
+                        preview_surface,
+                        video_recorder_surface,
+                        videoFrameImageReader.getSurface()
+                    );
+                } else {
+                    surfaces = Arrays.asList(preview_surface, video_recorder_surface);
+                }
+                // n.b., raw not supported for photo snapshots while video recording
+            } else if( want_video_high_speed ) {
+                // future proofing - at the time of writing want_video_high_speed is only set when recording video,
+                // but if ever this is changed, can only support the preview_surface as a target
+                surfaces = Collections.singletonList(preview_surface);
+            } else if( imageReaderRaw != null ) {
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
+            } else {
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "texture: " + texture);
+                Log.d(TAG, "preview_surface: " + preview_surface);
+            }
+        }
+
+        return surfaces;
+    }
+
+    private void createCaptureSession(
+        final MediaRecorder videoRecorder,
+        boolean wantPhotoVideoRecording
+    ) throws CameraControllerException {
+        createCaptureSession(videoRecorder, wantPhotoVideoRecording, false);
+    }
+
+    private void createCaptureSession(
+            final MediaRecorder video_recorder,
+            boolean want_photo_video_recording,
+            boolean wantVideoImuRecording
+    ) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "create capture session");
         
@@ -5136,9 +5194,6 @@ public class CameraController2 extends CameraController {
             synchronized( background_camera_lock ) {
                 if( video_recorder != null ) {
                     video_recorder_surface = video_recorder.getSurface();
-
-                    createVideoFrameImageReader();
-                    Log.d("MROB", "created video frame image reader for capture session");
                 } else {
                     video_recorder_surface = null;
                 }
@@ -5186,17 +5241,19 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "add surface to previewBuilder: " + surface);
                         }
                         previewBuilder.addTarget(surface);
+
+                        if (video_recorder != null && wantVideoImuRecording && supports_photo_video_recording) {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "add videoFrameImageReader surface to " +
+                                        "previewBuilder: " + videoFrameImageReader.getSurface());
+                            }
+                            previewBuilder.addTarget(videoFrameImageReader.getSurface());
+                        }
                         if( video_recorder != null ) {
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add video recorder surface to previewBuilder: " + video_recorder_surface);
                             }
                             previewBuilder.addTarget(video_recorder_surface);
-
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "add videoFrameImageReader surface to" +
-                                        "previewBuilder: " + videoFrameImageReader.getSurface());
-                            }
-                            previewBuilder.addTarget(videoFrameImageReader.getSurface());
                         }
                         try {
                             setRepeatingRequest();
@@ -5264,38 +5321,8 @@ public class CameraController2 extends CameraController {
             }
             final MyStateCallback myStateCallback = new MyStateCallback();
 
-            List<Surface> surfaces;
-            synchronized( background_camera_lock ) {
-                Surface preview_surface = getPreviewSurface();
-                if( video_recorder != null ) {
-                    if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
-                        Log.d("MROB", "Creating list of output surfaces for video recording");
-                        Log.d("MROB", "video recorder surface was: " + video_recorder.getSurface());
-                        Log.d("MROB", "picture imageReader surface was: " + imageReader.getSurface());
-                        Log.d("MROB", "videoFrameImageReader surface was: " + videoFrameImageReader.getSurface());
-                        surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface(), videoFrameImageReader.getSurface());
-                    }
-                    else {
-                        surfaces = Arrays.asList(preview_surface, video_recorder_surface);
-                    }
-                    // n.b., raw not supported for photo snapshots while video recording
-                }
-                else if( want_video_high_speed ) {
-                    // future proofing - at the time of writing want_video_high_speed is only set when recording video,
-                    // but if ever this is changed, can only support the preview_surface as a target
-                    surfaces = Collections.singletonList(preview_surface);
-                }
-                else if( imageReaderRaw != null ) {
-                    surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
-                }
-                else {
-                    surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
-                }
-                if( MyDebug.LOG ) {
-                    Log.d(TAG, "texture: " + texture);
-                    Log.d(TAG, "preview_surface: " + preview_surface);
-                }
-            }
+            List<Surface> surfaces = getCaptureSessionOutputSurfaces(video_recorder, want_photo_video_recording, wantVideoImuRecording);
+
             if( MyDebug.LOG ) {
                 if( video_recorder == null ) {
                     if( imageReaderRaw != null ) {
@@ -7101,6 +7128,7 @@ public class CameraController2 extends CameraController {
     public void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
             boolean want_photo_video_recording,
+            boolean wantVideoImuRecording,
             VideoFrameInfoCallback videoFrameInfoCallback
     ) throws CameraControllerException {
         mVideoFrameInfoCallback = videoFrameInfoCallback;
@@ -7119,7 +7147,7 @@ public class CameraController2 extends CameraController {
             previewIsVideoMode = true;
             previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
             camera_settings.setupBuilder(previewBuilder, false);
-            createCaptureSession(video_recorder, want_photo_video_recording);
+            createCaptureSession(video_recorder, want_photo_video_recording, wantVideoImuRecording);
         }
         catch(CameraAccessException e) {
             if( MyDebug.LOG ) {

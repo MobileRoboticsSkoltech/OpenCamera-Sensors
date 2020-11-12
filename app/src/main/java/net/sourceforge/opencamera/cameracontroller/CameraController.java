@@ -581,7 +581,12 @@ public abstract class CameraController {
      * @param want_photo_video_recording Whether support for taking photos whilst video recording is required. If this feature isn't supported, the option has no effect.
      * @param videoFrameInfoCallback Callback for video frames and their timestamps
      */
-    public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording, VideoFrameInfoCallback videoFrameInfoCallback) throws CameraControllerException;
+    public abstract void initVideoRecorderPostPrepare(
+            MediaRecorder video_recorder,
+            boolean want_photo_video_recording,
+            boolean wantImuRecording,
+            VideoFrameInfoCallback videoFrameInfoCallback
+    ) throws CameraControllerException;
     public abstract void closeVideoRecordingSession();
     public abstract String getParametersString();
     public boolean captureResultIsAEScanning() {
