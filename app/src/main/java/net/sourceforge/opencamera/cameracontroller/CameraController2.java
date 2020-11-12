@@ -5138,7 +5138,7 @@ public class CameraController2 extends CameraController {
                     video_recorder_surface = video_recorder.getSurface();
 
                     createVideoFrameImageReader();
-                    Log.d("MROB", "videoFrameImageReader surface was: " + videoFrameImageReader.getSurface());
+                    Log.d("MROB", "created video frame image reader for capture session");
                 } else {
                     video_recorder_surface = null;
                 }
@@ -5269,6 +5269,10 @@ public class CameraController2 extends CameraController {
                 Surface preview_surface = getPreviewSurface();
                 if( video_recorder != null ) {
                     if( supports_photo_video_recording && !want_video_high_speed && want_photo_video_recording ) {
+                        Log.d("MROB", "Creating list of output surfaces for video recording");
+                        Log.d("MROB", "video recorder surface was: " + video_recorder.getSurface());
+                        Log.d("MROB", "picture imageReader surface was: " + imageReader.getSurface());
+                        Log.d("MROB", "videoFrameImageReader surface was: " + videoFrameImageReader.getSurface());
                         surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface(), videoFrameImageReader.getSurface());
                     }
                     else {
