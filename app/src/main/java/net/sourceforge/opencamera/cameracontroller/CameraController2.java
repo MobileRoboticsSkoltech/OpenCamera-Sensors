@@ -1828,7 +1828,6 @@ public class CameraController2 extends CameraController {
                         }
 
                         CameraController2.this.camera = cam;
-                        createVideoFrameImageReader();
 
 
                         // note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
@@ -5135,12 +5134,17 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "set preview size: " + this.preview_width + " x " + this.preview_height);
 
             synchronized( background_camera_lock ) {
-                if( video_recorder != null )
+                if( video_recorder != null ) {
                     video_recorder_surface = video_recorder.getSurface();
-                else
+
+                    createVideoFrameImageReader();
+                    Log.d("MROB", "videoFrameImageReader surface was: " + videoFrameImageReader.getSurface());
+                } else {
                     video_recorder_surface = null;
+                }
                 if( MyDebug.LOG )
-                    Log.d(TAG, "video_recorder_surface: " + video_recorder_surface);
+                    Log.d(TAG, "video recorder surface was: " + video_recorder_surface);
+
             }
 
             class MyStateCallback extends CameraCaptureSession.StateCallback {
@@ -5189,7 +5193,7 @@ public class CameraController2 extends CameraController {
                             previewBuilder.addTarget(video_recorder_surface);
 
                             if( MyDebug.LOG ) {
-                                Log.d(TAG, "add image reader surface to" +
+                                Log.d(TAG, "add videoFrameImageReader surface to" +
                                         "previewBuilder: " + videoFrameImageReader.getSurface());
                             }
                             previewBuilder.addTarget(videoFrameImageReader.getSurface());
