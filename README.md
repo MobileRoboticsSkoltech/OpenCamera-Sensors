@@ -1,4 +1,4 @@
-![OpenCamera Sensors logo](https://imgur.com/zVS2Vxl.jpg)
+![OpenCamera Sensors logo](https://imgur.com/NnS1NW5.png)
 
 [![Build Status](https://travis-ci.org/azaat/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/azaat/OpenCamera-Sensors)
 
@@ -11,7 +11,7 @@
 
 ## How to enable synchronized video and IMU recording?
 
-![screenshot settings](https://imgur.com/QSIAHGv.jpg)
+![screenshot settings](https://imgur.com/QU6qOSe.png)
 
 Firstly, make sure Camera2API is used for capture (this can be checked in application preferences).
 
