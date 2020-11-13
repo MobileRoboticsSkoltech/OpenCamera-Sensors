@@ -11,7 +11,7 @@
 
 ## How to enable synchronized video and IMU recording?
 
-![screenshot settings](https://imgur.com/QU6qOSe.png)
+![screenshot settings](https://imgur.com/BytzCvA.png)
 
 Firstly, make sure Camera2API is used for capture (this can be checked in application preferences).
 
