@@ -8019,6 +8019,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(shareButton.getVisibility(), View.GONE);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDuration() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDuration");
 
@@ -8027,6 +8031,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideoMaxDuration(false, false);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDurationRestart() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDurationRestart");
 
@@ -8035,6 +8043,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideoMaxDuration(true, false);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDurationRestartInterrupt() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDurationRestartInterrupt");
 
@@ -8157,7 +8169,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Thread.sleep(500);
 
-        assertEquals(mPreview.getCurrentFocusValue(), non_default_focus_mode);
+        // camera should be closed in settings
+        assertNull(mPreview.getCameraController());
 
         mActivity.runOnUiThread(new Runnable() {
             public void run() {
@@ -8168,6 +8181,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // need to wait for UI code to finish before leaving
         this.getInstrumentation().waitForIdleSync();
         Thread.sleep(500);
+
+        assertEquals(mPreview.getCurrentFocusValue(), non_default_focus_mode);
 
         // count initial files in folder
         int n_files = getNFiles();
@@ -12435,8 +12450,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests launching with ACTION_VIDEO_CAPTURE intent, along with EXTRA_DURATION_LIMIT. The test
      * then tests we actually record video with the duration limit set.
-     * Fails on Android emulator with Camera2 API, for some reason EXTRA_DURATION_LIMIT makes the
-     * video stop due to hitting max duration immediately.
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
      */
     public void testIntentVideoDurationLimit() throws InterruptedException, ApplicationInterface.NoFreeStorageException {
         Log.d(TAG, "testIntentVideoDurationLimit");
