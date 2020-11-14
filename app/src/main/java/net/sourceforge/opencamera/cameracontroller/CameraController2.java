@@ -2177,12 +2177,17 @@ public class CameraController2 extends CameraController {
     private void closeVideoFrameImageReader() {
         if (videoFrameImageReader != null) {
             videoFrameImageReader.close();
-            Log.i(TAG, "Closed video image reader");
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Closed video image reader");
+            }
             videoFrameImageReader = null;
         }
     }
 
     private void createVideoFrameImageReader() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Create video frame image reader for capture session");
+        }
         videoFrameImageReader = ImageReader.newInstance(preview_width, preview_height, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
@@ -5069,7 +5074,6 @@ public class CameraController2 extends CameraController {
                 if(supports_photo_video_recording && wantVideoImuRecording) {
                     // Requested synchronized video and IMU recording
                     createVideoFrameImageReader();
-                    Log.d(TAG, "created video frame image reader for capture session");
                 }
 
                 if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording && wantVideoImuRecording ) {
