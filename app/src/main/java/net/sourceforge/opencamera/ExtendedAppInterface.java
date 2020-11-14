@@ -10,6 +10,8 @@ import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 
+import java.io.IOException;
+
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
  * interface.
@@ -22,6 +24,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
 
+    public VideoFrameInfo setupFrameInfo() throws IOException {
+        return new VideoFrameInfo(
+                getLastVideoDate(), mMainActivity, getSaveFramesPref()
+        );
+    }
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
