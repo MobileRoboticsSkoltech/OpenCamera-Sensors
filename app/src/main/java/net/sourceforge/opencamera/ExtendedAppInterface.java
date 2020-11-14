@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 
@@ -54,10 +55,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return sensorSampleRate;
     }
 
+    public boolean getSaveFramesPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
+    }
+
     @Override
-    public void startedVideo() {
+    public void startingVideo() {
         if (MyDebug.LOG) {
-            Log.d(TAG, "started video");
+            Log.d(TAG, "starting video");
         }
         if (getIMURecordingPref() && useCamera2()) {
             // Extracting sample rates from shared preferences
@@ -75,16 +80,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 }
             }
         } else if (getIMURecordingPref()) {
-            mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record video with IMU");
+            mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
         }
 
-        super.startedVideo();
+        super.startingVideo();
     }
 
     @Override
-    public void stoppedVideo(int video_method, Uri uri, String filename) {
+    public void stoppingVideo() {
         if (MyDebug.LOG) {
-            Log.d(TAG, "stopped video");
+            Log.d(TAG, "stopping video");
         }
         if (mRawSensorInfo.isRecording()) {
             mRawSensorInfo.stopRecording();
@@ -94,7 +99,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mMainActivity.getPreview().showToast(null, "Finished video with IMU recording");
         }
 
-        super.stoppedVideo(video_method, uri, filename);
+        super.stoppingVideo();
     }
 
     public void onFrameInfoRecordingFailed() {

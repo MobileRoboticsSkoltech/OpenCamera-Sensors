@@ -298,6 +298,8 @@ public class PreferenceKeys {
 
     public static final String IMURecordingPreferenceKey = "preference_imu_recording";
 
+    public static final String saveFramesPreferenceKey = "preference_save_video_frames";
+
     public static final String AccelSampleRatePreferenceKey = "preference_accel_sample_rate";
 
     public static final String GyroSampleRatePreferenceKey = "preference_gyro_sample_rate";

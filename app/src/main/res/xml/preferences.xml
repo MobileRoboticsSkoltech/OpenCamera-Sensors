@@ -75,6 +75,12 @@
             android:summary="Enable synchronized IMU and video recording with timestamps"
             />
 
+        <SwitchPreference
+            android:key="preference_save_video_frames"
+            android:title="Save video frames during recording"
+            android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+            />
+
         <ListPreference
             android:key="preference_accel_sample_rate"
             android:title="Accelerometer frequency"

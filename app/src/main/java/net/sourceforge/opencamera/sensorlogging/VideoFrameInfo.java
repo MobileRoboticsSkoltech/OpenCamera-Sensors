@@ -31,8 +31,8 @@ public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
     private final static String TIMESTAMP_FILE_SUFFIX = "_timestamps";
     private final static int NV21_TO_JPEG_QUALITY = 100;
-    // TODO: move this value to preferences
-    private final static int EVERY_N_FRAME = 20;
+    // TODO: make sure this value is big enough not to cause frame rate drop / buffer allocation problems
+    private final static int EVERY_N_FRAME = 60;
 
     //Sequential executor for frame and timestamps saving queue
     private final ExecutorService frameProcessor = Executors.newSingleThreadExecutor();
@@ -40,13 +40,15 @@ public class VideoFrameInfo implements Closeable {
     private final StorageUtilsWrapper mStorageUtils;
     private final ExtendedAppInterface mAppInterface;
     private final BufferedWriter mFrameBufferedWriter;
+    private final boolean mShouldSaveFrames;
 
     private int mFrameNumber = 0;
 
-    public VideoFrameInfo(Date videoDate, MainActivity context) throws IOException {
+    public VideoFrameInfo(Date videoDate, MainActivity context, boolean shouldSaveFrames) throws IOException {
         mVideoDate = videoDate;
         mStorageUtils = context.getStorageUtils();
         mAppInterface = context.getApplicationInterface();
+        mShouldSaveFrames = shouldSaveFrames;
 
         File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
             StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, ".csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
@@ -64,7 +66,7 @@ public class VideoFrameInfo implements Closeable {
                         mFrameBufferedWriter
                                 .append(Long.toString(timestamp))
                                 .append("\n");
-                        if (mFrameNumber % EVERY_N_FRAME == 0) {
+                        if (mShouldSaveFrames && mFrameNumber % EVERY_N_FRAME == 0) {
                             if (MyDebug.LOG) {
                                 Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
@@ -107,7 +109,6 @@ public class VideoFrameInfo implements Closeable {
                 Log.d(TAG, "Attempting to shutdown frame processor");
             }
             // should let all assigned tasks finish execution
-            // TODO: this could make UI thread block, we may need to specify handler for this class
             frameProcessor.shutdown();
         }
         if (MyDebug.LOG) {
