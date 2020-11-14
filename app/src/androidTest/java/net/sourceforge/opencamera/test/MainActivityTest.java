@@ -12009,7 +12009,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
 
-        int n_new_files = getNFiles();
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         if( is_slow ) {
             // with limited queue, won't be able to save as many files
