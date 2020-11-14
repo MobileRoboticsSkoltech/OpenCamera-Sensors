@@ -5117,7 +5117,7 @@ public class CameraController2 extends CameraController {
     private void createCaptureSession(
             final MediaRecorder video_recorder,
             boolean want_photo_video_recording,
-            boolean wantVideoImuRecording
+            boolean want_video_imu_recording
     ) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "create capture session");
@@ -5242,7 +5242,7 @@ public class CameraController2 extends CameraController {
                         }
                         previewBuilder.addTarget(surface);
 
-                        if (video_recorder != null && wantVideoImuRecording && supports_photo_video_recording) {
+                        if (video_recorder != null && want_video_imu_recording && supports_photo_video_recording) {
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add videoFrameImageReader surface to " +
                                         "previewBuilder: " + videoFrameImageReader.getSurface());
@@ -5321,7 +5321,7 @@ public class CameraController2 extends CameraController {
             }
             final MyStateCallback myStateCallback = new MyStateCallback();
 
-            List<Surface> surfaces = getCaptureSessionOutputSurfaces(video_recorder, want_photo_video_recording, wantVideoImuRecording);
+            List<Surface> surfaces = getCaptureSessionOutputSurfaces(video_recorder, want_photo_video_recording, want_video_imu_recording);
 
             if( MyDebug.LOG ) {
                 if( video_recorder == null ) {
@@ -7128,7 +7128,7 @@ public class CameraController2 extends CameraController {
     public void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
             boolean want_photo_video_recording,
-            boolean wantVideoImuRecording,
+            boolean want_video_imu_recording,
             VideoFrameInfoCallback videoFrameInfoCallback
     ) throws CameraControllerException {
         mVideoFrameInfoCallback = videoFrameInfoCallback;
@@ -7147,7 +7147,7 @@ public class CameraController2 extends CameraController {
             previewIsVideoMode = true;
             previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
             camera_settings.setupBuilder(previewBuilder, false);
-            createCaptureSession(video_recorder, want_photo_video_recording, wantVideoImuRecording);
+            createCaptureSession(video_recorder, want_photo_video_recording, want_video_imu_recording);
         }
         catch(CameraAccessException e) {
             if( MyDebug.LOG ) {

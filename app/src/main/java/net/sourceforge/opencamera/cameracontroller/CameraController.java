@@ -584,7 +584,7 @@ public abstract class CameraController {
     public abstract void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
             boolean want_photo_video_recording,
-            boolean wantImuRecording,
+            boolean want_video_imu_recording,
             VideoFrameInfoCallback videoFrameInfoCallback
     ) throws CameraControllerException;
     public abstract void closeVideoRecordingSession();

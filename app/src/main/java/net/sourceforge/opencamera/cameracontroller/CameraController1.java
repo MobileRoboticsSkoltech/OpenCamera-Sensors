@@ -1911,7 +1911,7 @@ public class CameraController1 extends CameraController {
     public void initVideoRecorderPostPrepare(
         MediaRecorder video_recorder,
         boolean want_photo_video_recording,
-        boolean wantImuRecording,
+        boolean want_video_imu_recording,
         VideoFrameInfoCallback videoFrameInfoCallback
     ) {
         // no further actions necessary
