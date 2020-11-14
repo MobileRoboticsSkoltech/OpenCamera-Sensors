@@ -261,7 +261,7 @@ public abstract class CameraController {
     public interface VideoFrameInfoCallback {
         void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height); // called immediately after new video frame is available
 
-        void onFrameCaptureSessionClosed();
+        void onVideoCaptureSessionClosed();
     }
 
     /** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)

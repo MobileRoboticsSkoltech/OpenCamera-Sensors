@@ -5519,7 +5519,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             }
 
                             @Override
-                            public void onFrameCaptureSessionClosed() {
+                            public void onVideoCaptureSessionClosed() {
                                 stopVideoPostPrepare();
                                 if (mVideoFrameInfoWriter != null) {
                                     mVideoFrameInfoWriter.close();

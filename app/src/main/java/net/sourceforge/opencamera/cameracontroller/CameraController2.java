@@ -5211,7 +5211,7 @@ public class CameraController2 extends CameraController {
                     activity.runOnUiThread(
                         () -> {
                             if (video_recorder != null) {
-                                mVideoFrameInfoCallback.onFrameCaptureSessionClosed();
+                                mVideoFrameInfoCallback.onVideoCaptureSessionClosed();
                             }
                         }
                     );

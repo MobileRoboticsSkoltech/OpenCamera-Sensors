@@ -56,11 +56,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     @Override
     public void startedVideo() {
-
         if (MyDebug.LOG) {
             Log.d(TAG, "started video");
         }
-        if (getIMURecordingPref()) {
+        if (getIMURecordingPref() && useCamera2()) {
             // Extracting sample rates from shared preferences
             try {
                 int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
@@ -68,13 +67,15 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
                 mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
                 // TODO: add message to strings.xml
-                mMainActivity.getPreview().showToast(null, "Recording sensor info");
+                mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {
                 if (MyDebug.LOG) {
                     Log.e(TAG, "Failed to retrieve the sample rate preference value");
                     e.printStackTrace();
                 }
             }
+        } else if (getIMURecordingPref()) {
+            mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record video with IMU");
         }
 
         super.startedVideo();
@@ -90,25 +91,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mRawSensorInfo.disableSensors();
 
             // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Finished recording sensor info");
+            mMainActivity.getPreview().showToast(null, "Finished video with IMU recording");
         }
 
         super.stoppedVideo(video_method, uri, filename);
     }
 
-    public void onRawSensorInfoRecordingFinished() {
-
-    }
-
-    public void onRawSensorInfoRecordingFailed() {
-
-    }
-
-    public void onFrameInfoRecordingFinished() {
-
-    }
-
     public void onFrameInfoRecordingFailed() {
-
+        mMainActivity.getPreview().showToast(null, "Couldn't write frame timestamps");
     }
 }
