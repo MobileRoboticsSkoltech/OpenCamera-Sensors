@@ -5207,14 +5207,18 @@ public class CameraController2 extends CameraController {
 
                 @Override
                 public void onClosed(@NonNull CameraCaptureSession session) {
-                    Activity activity = (Activity)context;
-                    activity.runOnUiThread(
-                        () -> {
-                            if (video_recorder != null) {
-                                mVideoFrameInfoCallback.onVideoCaptureSessionClosed();
-                            }
+                    if (video_recorder != null) {
+                        if (MyDebug.LOG) {
+                            Log.d(TAG, "Video recording captureSession closed");
                         }
-                    );
+
+                        Activity activity = (Activity)context;
+                        activity.runOnUiThread(
+                            () -> {
+                                    mVideoFrameInfoCallback.onVideoCaptureSessionClosed();
+                            }
+                        );
+                    }
                     super.onClosed(session);
                 }
 
