@@ -65,6 +65,7 @@ public class CameraController2 extends CameraController {
     private CameraDevice camera;
     private String cameraIdS;
     private VideoFrameInfoCallback mVideoFrameInfoCallback;
+    private boolean mWantSaveFrames = false;
 
     private final boolean is_samsung;
     private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
@@ -1249,21 +1250,33 @@ public class CameraController2 extends CameraController {
     private class OnVideoFrameImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
-            Log.d(TAG, "Frame during video recording");
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Frame during video recording");
+            }
             Image image = reader.acquireNextImage();
-            if( MyDebug.LOG )
-                Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
-            if( MyDebug.LOG )
-                Log.d(TAG, "image format: " + image.getFormat());
-            byte[] nv21 = YuvImageUtils.YUV420toNV21(image);
-            long timestamp = image.getTimestamp();
 
-            mVideoFrameInfoCallback.onVideoFrameAvailable(
-                timestamp,
-                nv21,
-                image.getWidth(),
-                image.getHeight()
-            );
+            if (MyDebug.LOG)
+                Log.d(TAG, "video frame timestamp: " + image.getTimestamp());
+            if (MyDebug.LOG)
+                Log.d(TAG, "image format: " + image.getFormat());
+
+            long timestamp = image.getTimestamp();
+            if (mWantSaveFrames) {
+                byte[] nv21 = YuvImageUtils.YUV420toNV21(image);
+
+                mVideoFrameInfoCallback.onVideoFrameAvailable(
+                    timestamp,
+                    nv21,
+                    image.getWidth(),
+                    image.getHeight()
+                );
+            } else {
+                mVideoFrameInfoCallback.onVideoFrameTimestampAvailable(timestamp);
+            }
+
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Released frame during video recording");
+            }
             image.close();
         }
     }
@@ -2188,6 +2201,7 @@ public class CameraController2 extends CameraController {
         if (MyDebug.LOG) {
             Log.d(TAG, "Create video frame image reader for capture session");
         }
+        // We use YUV format for this to avoid FPS drops caused by jpeg compressing
         videoFrameImageReader = ImageReader.newInstance(preview_width, preview_height, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
@@ -7137,9 +7151,12 @@ public class CameraController2 extends CameraController {
             MediaRecorder video_recorder,
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
+            boolean want_save_frames,
             VideoFrameInfoCallback videoFrameInfoCallback
     ) throws CameraControllerException {
         mVideoFrameInfoCallback = videoFrameInfoCallback;
+        mWantSaveFrames = want_save_frames;
+
         if( MyDebug.LOG )
             Log.d(TAG, "initVideoRecorderPostPrepare");
         if( camera == null ) {

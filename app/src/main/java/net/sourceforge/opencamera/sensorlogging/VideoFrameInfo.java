@@ -58,19 +58,30 @@ public class VideoFrameInfo implements Closeable {
         );
     }
 
-    public void submitProcessFrame(long timestamp, byte[] nv21, int width, int height, int rotation) {
+    public void submitProcessFrame(long timestamp) {
+        if (!frameProcessor.isShutdown()) {
+            frameProcessor.execute(
+                    () ->  {
+                        writeFrameTimestamp(timestamp);
+                        mFrameNumber++;
+                    }
+            );
+        } else {
+            Log.e(TAG, "Received new frame after frameProcessor executor shutdown");
+        }
+    }
+
+    public void submitProcessFrame(long timestamp, byte[] imageData, int width, int height, int rotation) {
         if (!frameProcessor.isShutdown()) {
             frameProcessor.execute(
                 () -> {
+                    writeFrameTimestamp(timestamp);
                     try {
-                        mFrameBufferedWriter
-                                .append(Long.toString(timestamp))
-                                .append("\n");
                         if (mShouldSaveFrames && mFrameNumber % EVERY_N_FRAME == 0) {
                             if (MyDebug.LOG) {
                                 Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
-                            byte[] jpegResult = YuvImageUtils.NV21toJPEG(nv21, width, height, NV21_TO_JPEG_QUALITY);
+                            byte[] jpegResult = YuvImageUtils.NV21toJPEG(imageData, width, height, NV21_TO_JPEG_QUALITY);
                             File frameFile = mStorageUtils.createOutputCaptureInfo(
                                     StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
                             );
@@ -87,6 +98,19 @@ public class VideoFrameInfo implements Closeable {
             );
         } else {
             Log.e(TAG, "Received new frame after frameProcessor executor shutdown");
+        }
+    }
+
+    private void writeFrameTimestamp(long timestamp) {
+        try {
+            mFrameBufferedWriter
+                    .append(Long.toString(timestamp))
+                    .append("\n");
+        } catch (IOException e) {
+            mAppInterface.onFrameInfoRecordingFailed();
+            Log.e(TAG, "Failed to write frame info, timestamp: " + timestamp);
+            e.printStackTrace();
+            this.close();
         }
     }
 

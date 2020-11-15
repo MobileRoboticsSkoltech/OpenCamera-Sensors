@@ -5489,6 +5489,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 local_video_recorder.prepare();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
                 boolean want_video_imu_recording = applicationInterface.getIMURecordingPref();
+                boolean want_save_frames = applicationInterface.getSaveFramesPref();
+
 
                 if (want_video_imu_recording) {
                     try {
@@ -5512,11 +5514,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         local_video_recorder,
                         want_photo_video_recording,
                         want_video_imu_recording,
+                        want_save_frames,
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
                                 if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
+                                }
+                            }
+
+                            @Override
+                            public void onVideoFrameTimestampAvailable(long timestamp) {
+                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp);
                                 }
                             }
 

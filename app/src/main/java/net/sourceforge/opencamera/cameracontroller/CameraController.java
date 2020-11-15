@@ -261,6 +261,8 @@ public abstract class CameraController {
     public interface VideoFrameInfoCallback {
         void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height); // called immediately after new video frame is available
 
+        void onVideoFrameTimestampAvailable(long timestamp); // called immediately after new video frame timestamp is available
+
         void onVideoCaptureSessionClosed();
     }
 
@@ -585,6 +587,7 @@ public abstract class CameraController {
             MediaRecorder video_recorder,
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
+            boolean want_save_frames,
             VideoFrameInfoCallback videoFrameInfoCallback
     ) throws CameraControllerException;
     public abstract void closeVideoRecordingSession();
