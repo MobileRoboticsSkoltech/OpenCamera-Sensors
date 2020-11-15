@@ -592,10 +592,6 @@ public class StorageUtils {
                 break;
             }
             case MEDIA_TYPE_VIDEO_FRAME: {
-                //TODO: suffix is supposed to be timestamp.
-                // We should move most of our sensor logging logic from here to
-                // StorageUtilsWrapper and override this whole method there
-                // to make these modifications
                 mediaFilename = suffix + extension;
                 break;
             }
