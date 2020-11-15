@@ -51,7 +51,7 @@ public class VideoFrameInfo implements Closeable {
         mShouldSaveFrames = shouldSaveFrames;
 
         File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
-            StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, ".csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
+            StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
         );
         mFrameBufferedWriter = new BufferedWriter(
             new PrintWriter(frameTimestampFile)
