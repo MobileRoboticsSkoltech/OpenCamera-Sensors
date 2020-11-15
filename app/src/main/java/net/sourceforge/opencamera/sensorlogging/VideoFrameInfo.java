@@ -25,13 +25,16 @@ import java.util.concurrent.Executors;
 /**
  * Handles frame images and timestamps saving during video recording,
  * sequential Executor is used to queue saving tasks in the background thread.
- * Images get saved every EVERY_N_FRAME-th time.
+ * Images get saved every EVERY_N_FRAME-th time if shouldSaveFrame is true
  */
 public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
     private final static String TIMESTAMP_FILE_SUFFIX = "_timestamps";
     private final static int NV21_TO_JPEG_QUALITY = 100;
-    // TODO: make sure this value is big enough not to cause frame rate drop / buffer allocation problems
+    /*
+    Value used to save frames for debugging and matching frames with video
+    TODO: in future versions make sure this value is big enough not to cause frame rate drop / buffer allocation problems on devices other than already tested
+     */
     private final static int EVERY_N_FRAME = 60;
 
     //Sequential executor for frame and timestamps saving queue
