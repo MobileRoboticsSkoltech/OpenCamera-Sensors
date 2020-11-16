@@ -65,6 +65,42 @@
     <!-- </PreferenceCategory> -->
 
     <PreferenceCategory
+        android:key="preference_category_sensors"
+        android:title="OpenCamera Sensors">
+
+        <!-- TODO: add to strings.xml-->
+        <SwitchPreference
+            android:key="preference_imu_recording"
+            android:title="Enable video with IMU recording"
+            android:summary="Enable synchronized IMU and video recording with timestamps"
+            />
+
+        <SwitchPreference
+            android:key="preference_save_video_frames"
+            android:title="Save video frames during recording"
+            android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+            />
+
+        <ListPreference
+            android:key="preference_accel_sample_rate"
+            android:title="Accelerometer frequency"
+            android:summary="Accelerometer sampling frequency in Hz"
+            android:entries="@array/preference_sample_rate_entries"
+            android:entryValues="@array/preference_sample_rate_values"
+            android:defaultValue="0"
+            />
+
+        <ListPreference
+            android:key="preference_gyro_sample_rate"
+            android:title="Gyroscope frequency"
+            android:defaultValue="0"
+            android:summary="Gyroscope sampling frequency in Hz"
+            android:entries="@array/preference_sample_rate_entries"
+            android:entryValues="@array/preference_sample_rate_values"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="preference_category_camera_controls"
         android:title="@string/preference_category_camera_controls">
 
@@ -1295,31 +1331,6 @@
             />  
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
-
-        <!-- TODO: add to strings.xml-->
-        <SwitchPreference
-            android:key="preference_imu_recording"
-            android:title="Enable IMU recording"
-            android:summary="Write sensor data during video recording"
-            />
-
-        <ListPreference
-            android:key="preference_accel_sample_rate"
-            android:title="Accelerometer frequency"
-            android:summary="Accelerometer sampling frequency in Hz"
-            android:entries="@array/preference_sample_rate_entries"
-            android:entryValues="@array/preference_sample_rate_values"
-            android:defaultValue="0"
-            />
-
-        <ListPreference
-            android:key="preference_gyro_sample_rate"
-            android:title="Gyroscope frequency"
-            android:defaultValue="0"
-            android:summary="Gyroscope sampling frequency in Hz"
-            android:entries="@array/preference_sample_rate_entries"
-            android:entryValues="@array/preference_sample_rate_values"
-            />
 
         <ListPreference
             android:key="preference_camera_api"

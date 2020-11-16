@@ -105,7 +105,7 @@ public class MainActivity extends Activity {
     private SettingsManager settingsManager;
     private MainUI mainUI;
     private ManualSeekbars manualSeekbars;
-    private MyApplicationInterface applicationInterface;
+    private ExtendedAppInterface applicationInterface;
     private TextFormatter textFormatter;
     private SoundPoolManager soundPoolManager;
     private MagneticSensor magneticSensor;
@@ -4474,7 +4474,7 @@ public class MainActivity extends Activity {
         return this.manualSeekbars;
     }
 
-    public MyApplicationInterface getApplicationInterface() {
+    public ExtendedAppInterface getApplicationInterface() {
         return this.applicationInterface;
     }
 

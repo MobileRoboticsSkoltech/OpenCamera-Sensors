@@ -1,5 +1,8 @@
 package net.sourceforge.opencamera.preview;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
+import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 //import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -108,13 +111,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private final boolean using_android_l;
 
-    private final ApplicationInterface applicationInterface;
+    private final ExtendedAppInterface applicationInterface;
     private final CameraSurface cameraSurface;
     private CanvasView canvasView;
     private boolean set_preview_size;
     private int preview_w, preview_h;
     private boolean set_textureview_size;
     private int textureview_w, textureview_h;
+    /**
+     * Object taking care of video frame and timestamps recording.
+     * Should be instantiated per video.
+     */
+    private VideoFrameInfo mVideoFrameInfoWriter;
 
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
     private ScriptC_histogram_compute histogramScript; // lazily create for performance
@@ -383,7 +391,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
-    public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
+    public Preview(ExtendedAppInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "new Preview");
         }
@@ -920,29 +928,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         cameraSurface.setTransform(matrix);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void stopVideo(boolean from_restart) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "stopVideo()");
-        if( video_recorder == null ) {
-            // no need to do anything if not recording
-            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
-            if( MyDebug.LOG )
-                Log.d(TAG, "video wasn't recording anyway");
-            return;
-        }
+    private void stopVideoPostPrepare() {
         applicationInterface.stoppingVideo();
-        if( flashVideoTimerTask != null ) {
-            flashVideoTimerTask.cancel();
-            flashVideoTimerTask = null;
-        }
-        if( batteryCheckVideoTimerTask != null ) {
-            batteryCheckVideoTimerTask.cancel();
-            batteryCheckVideoTimerTask = null;
-        }
-        if( !from_restart ) {
-            remaining_restart_video = 0;
-        }
+        Log.d(TAG, "Stopping video post prepare");
         if( video_recorder != null ) { // check again, just to be safe
             if( MyDebug.LOG )
                 Log.d(TAG, "stop video recording");
@@ -977,6 +965,45 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void stopVideo(boolean from_restart) {
+        camera_controller.closeVideoRecordingSession();
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "stopVideo()");
+
+        applicationInterface.cameraInOperation(false, true);
+        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+
+
+        if( video_recorder == null ) {
+            // no need to do anything if not recording
+            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
+            if( MyDebug.LOG )
+                Log.d(TAG, "video wasn't recording anyway");
+            return;
+        }
+        if( flashVideoTimerTask != null ) {
+            flashVideoTimerTask.cancel();
+            flashVideoTimerTask = null;
+        }
+        if( batteryCheckVideoTimerTask != null ) {
+            batteryCheckVideoTimerTask.cancel();
+            batteryCheckVideoTimerTask = null;
+        }
+        if( !from_restart ) {
+            remaining_restart_video = 0;
+        }
+
+        /*
+           If camera2api is not used, we should stop video immediately. Otherwise it is done in callback
+           after captureSession is closed
+         */
+        if (!usingCamera2API()) {
+            stopVideoPostPrepare();
+        }
+    }
+
     private void videoRecordingStopped() {
         if( MyDebug.LOG )
             Log.d(TAG, "reset video_recorder");
@@ -986,8 +1013,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder.release();
         video_recorder = null;
         video_recorder_is_paused = false;
-        applicationInterface.cameraInOperation(false, true);
-        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
@@ -5322,12 +5347,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private void startVideoRecording(final boolean max_filesize_restart) {
         if( MyDebug.LOG )
             Log.d(TAG, "startVideoRecording");
+
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
         test_called_next_output_file = false;
         test_started_next_output_file = false;
         nextVideoFileInfo = null;
         final VideoProfile profile = getVideoProfile();
         VideoFileInfo info = createVideoFile(profile.fileExtension);
+
         if( info == null ) {
             videoFileInfo = new VideoFileInfo();
             applicationInterface.onFailedCreateVideoFileError();
@@ -5455,12 +5482,64 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         			throw new IOException();*/
                 cameraSurface.setVideoRecorder(local_video_recorder);
 
-                local_video_recorder.setOrientationHint(getImageVideoRotation());
+                int rotation = getImageVideoRotation();
+                local_video_recorder.setOrientationHint(rotation);
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to prepare video recorder");
                 local_video_recorder.prepare();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
-                camera_controller.initVideoRecorderPostPrepare(local_video_recorder, want_photo_video_recording);
+                boolean want_video_imu_recording = applicationInterface.getIMURecordingPref();
+                boolean want_save_frames = applicationInterface.getSaveFramesPref();
+
+
+                if (want_video_imu_recording) {
+                    try {
+                        mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Exception starting video frame info recorder");
+                        e.printStackTrace();
+                        applicationInterface.onFrameInfoRecordingFailed();
+                        applicationInterface.stoppingVideo();
+
+                        video_recorder.reset();
+                        video_recorder.release();
+                        video_recorder = null;
+                        video_recorder_is_paused = false;
+                        applicationInterface.cameraInOperation(false, true);
+                        this.reconnectCamera(true);
+                    }
+                }
+
+                camera_controller.initVideoRecorderPostPrepare(
+                        local_video_recorder,
+                        want_photo_video_recording,
+                        want_video_imu_recording,
+                        want_save_frames,
+                        new CameraController.VideoFrameInfoCallback() {
+                            @Override
+                            public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
+                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
+                                }
+                            }
+
+                            @Override
+                            public void onVideoFrameTimestampAvailable(long timestamp) {
+                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp);
+                                }
+                            }
+
+                            @Override
+                            public void onVideoCaptureSessionClosed() {
+                                stopVideoPostPrepare();
+                                if (mVideoFrameInfoWriter != null) {
+                                    mVideoFrameInfoWriter.close();
+                                    mVideoFrameInfoWriter = null;
+                                }
+                            }
+                        }
+                );
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to start video recorder");
 

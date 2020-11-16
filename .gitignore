@@ -24,3 +24,5 @@ testdata/
 
 local.properties
 uninstall.bat
+
+*.keystore

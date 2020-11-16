@@ -1,15 +1,16 @@
 package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.io.File;
+import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
+
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
@@ -23,6 +24,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
 
+    public VideoFrameInfo setupFrameInfo() throws IOException {
+        return new VideoFrameInfo(
+                getLastVideoDate(), mMainActivity, getSaveFramesPref()
+        );
+    }
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
@@ -31,7 +37,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
     }
 
-    private boolean getIMURecordingPref() {
+    public boolean getIMURecordingPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
     }
 
@@ -40,12 +46,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public int getSensorSampleRatePref(String prefKey) {
         String sensorSampleRateString = mSharedPreferences.getString(
-                PreferenceKeys.ExpoBracketingStopsPreferenceKey,
+                prefKey,
                 String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
         );
         int sensorSampleRate;
         try {
             sensorSampleRate = Integer.parseInt(sensorSampleRateString);
+
         }
         catch(NumberFormatException exception) {
             if( MyDebug.LOG )
@@ -55,13 +62,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return sensorSampleRate;
     }
 
-    @Override
-    public void startedVideo() {
+    public boolean getSaveFramesPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
+    }
 
+    @Override
+    public void startingVideo() {
         if (MyDebug.LOG) {
-            Log.d(TAG, "started video");
+            Log.d(TAG, "starting video");
         }
-        if (getIMURecordingPref()) {
+        if (getIMURecordingPref() && useCamera2()) {
             // Extracting sample rates from shared preferences
             try {
                 int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
@@ -69,31 +79,37 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
                 mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
                 // TODO: add message to strings.xml
-                mMainActivity.getPreview().showToast(null, "Recording sensor info");
+                mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {
                 if (MyDebug.LOG) {
                     Log.e(TAG, "Failed to retrieve the sample rate preference value");
                     e.printStackTrace();
                 }
             }
+        } else if (getIMURecordingPref()) {
+            mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
         }
 
-        super.startedVideo();
+        super.startingVideo();
     }
 
     @Override
-    public void stoppedVideo(int video_method, Uri uri, String filename) {
+    public void stoppingVideo() {
         if (MyDebug.LOG) {
-            Log.d(TAG, "stopped video");
+            Log.d(TAG, "stopping video");
         }
         if (mRawSensorInfo.isRecording()) {
             mRawSensorInfo.stopRecording();
             mRawSensorInfo.disableSensors();
 
             // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Finished recording sensor info");
+            mMainActivity.getPreview().showToast(null, "Finished video with IMU recording");
         }
 
-        super.stoppedVideo(video_method, uri, filename);
+        super.stoppingVideo();
+    }
+
+    public void onFrameInfoRecordingFailed() {
+        mMainActivity.getPreview().showToast(null, "Couldn't write frame timestamps");
     }
 }

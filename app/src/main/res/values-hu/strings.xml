@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Beállítások</string>
     <string name="action_popup">Felugró beállítások</string>
     <string name="intro_ok">OK (Ez az üzenet nem jelenik meg újra)</string>

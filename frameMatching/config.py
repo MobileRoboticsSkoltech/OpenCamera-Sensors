@@ -1,0 +1,4 @@
+# Values need to be updated for current video
+VID_FILENAME = "VID_FILENAME"
+VID_EXTENSION = "VID_EXTENSION"
+CAPTURE_INFO_PATH = "CAPTURE_INFO"

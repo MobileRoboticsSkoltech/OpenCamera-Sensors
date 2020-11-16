@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <!-- shouldn't be translated -->
     <string name="action_settings">Ρυθμίσεις</string>
     <string name="action_popup">Ρυθμίσεις Παραθύρου</string>
     <string name="intro_ok">OK (Καμμία εμφάνιση αυτού του μυνήματος ξανά)</string>
