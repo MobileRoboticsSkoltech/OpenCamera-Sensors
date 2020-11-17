@@ -81,6 +81,12 @@
             android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
             />
 
+        <Preference
+            android:key="preference_characteristics"
+            android:title="Important characteristics"
+            android:summary="API support, IMU + camera sync support"
+            />
+
         <ListPreference
             android:key="preference_accel_sample_rate"
             android:title="Accelerometer frequency"

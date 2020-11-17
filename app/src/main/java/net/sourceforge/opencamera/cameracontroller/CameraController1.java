@@ -1907,6 +1907,10 @@ public class CameraController1 extends CameraController {
         // no further action necessary
     }
 
+    public boolean supportsVideoImuSync() {
+        return false;
+    }
+
     @Override
     public void initVideoRecorderPostPrepare(
         MediaRecorder video_recorder,

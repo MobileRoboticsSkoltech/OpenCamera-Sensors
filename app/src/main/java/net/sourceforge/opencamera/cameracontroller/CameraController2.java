@@ -2202,6 +2202,7 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "Create video frame image reader for capture session");
         }
         // We use YUV format for this to avoid FPS drops caused by jpeg compressing
+        // TODO: change this to account for supported YUV sizes!
         videoFrameImageReader = ImageReader.newInstance(preview_width, preview_height, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
@@ -2787,6 +2788,11 @@ public class CameraController2 extends CameraController {
         camera_features.view_angle_y = view_angle.getHeight();
 
         return camera_features;
+    }
+
+    public boolean supportsVideoImuSync() {
+        Integer source = characteristics.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
+        return source != null && source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME;
     }
 
     public boolean shouldCoverPreview() {

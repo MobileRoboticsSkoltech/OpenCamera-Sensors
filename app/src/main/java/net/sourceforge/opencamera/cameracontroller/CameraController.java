@@ -317,6 +317,7 @@ public abstract class CameraController {
     public int getCameraId() {
         return cameraId;
     }
+    public abstract boolean supportsVideoImuSync();
 
     /** For CameraController2 only. Applications should cover the preview textureview if either camera_controller==null, or if this
      *  method returns true. Otherwise there is a risk when opening the camera that the textureview still shows an image from when

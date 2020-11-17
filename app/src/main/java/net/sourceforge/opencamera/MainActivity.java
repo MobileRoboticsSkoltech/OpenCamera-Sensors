@@ -2318,6 +2318,8 @@ public class MainActivity extends Activity {
             bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
         }
 
+        bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+
         putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
         putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
 
