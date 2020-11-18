@@ -77,8 +77,14 @@
 
         <SwitchPreference
             android:key="preference_save_video_frames"
-            android:title="Save video frames during recording"
+            android:title="Save video frames during video + IMU recording"
             android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+            />
+
+        <Preference
+            android:key="preference_characteristics"
+            android:title="Important characteristics"
+            android:summary="API support, IMU + camera sync support"
             />
 
         <ListPreference

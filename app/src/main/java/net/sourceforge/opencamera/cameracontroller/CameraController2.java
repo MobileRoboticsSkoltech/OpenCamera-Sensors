@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.preview.VideoProfile;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -2187,25 +2188,6 @@ public class CameraController2 extends CameraController {
         }
     }
 
-    private void closeVideoFrameImageReader() {
-        if (videoFrameImageReader != null) {
-            videoFrameImageReader.close();
-            if (MyDebug.LOG) {
-                Log.d(TAG, "Closed video image reader");
-            }
-            videoFrameImageReader = null;
-        }
-    }
-
-    private void createVideoFrameImageReader() {
-        if (MyDebug.LOG) {
-            Log.d(TAG, "Create video frame image reader for capture session");
-        }
-        // We use YUV format for this to avoid FPS drops caused by jpeg compressing
-        videoFrameImageReader = ImageReader.newInstance(preview_width, preview_height, ImageFormat.YUV_420_888, 2);
-        videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
-    }
-
     private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
         if( MyDebug.LOG )
             Log.d(TAG, "convertFocusModesToValues()");
@@ -2787,6 +2769,11 @@ public class CameraController2 extends CameraController {
         camera_features.view_angle_y = view_angle.getHeight();
 
         return camera_features;
+    }
+
+    public boolean supportsVideoImuSync() {
+        Integer source = characteristics.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
+        return source != null && source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME;
     }
 
     public boolean shouldCoverPreview() {
@@ -5080,14 +5067,14 @@ public class CameraController2 extends CameraController {
         final MediaRecorder videoRecorder,
         boolean wantPhotoVideoRecording,
         boolean wantVideoImuRecording
-    ) {
+    ) throws CameraControllerException {
         List<Surface> surfaces;
         synchronized( background_camera_lock ) {
             Surface preview_surface = getPreviewSurface();
             if( videoRecorder != null ) {
-                if(supports_photo_video_recording && wantVideoImuRecording) {
-                    // Requested synchronized video and IMU recording
-                    createVideoFrameImageReader();
+                if (wantVideoImuRecording && videoFrameImageReader == null) {
+                    Log.e(TAG, "Video frame image reader was null for video IMU recording");
+                    throw new CameraControllerException();
                 }
 
                 if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording && wantVideoImuRecording ) {
@@ -7146,9 +7133,77 @@ public class CameraController2 extends CameraController {
         playSound(MediaActionSound.START_VIDEO_RECORDING);
     }
 
+    private void closeVideoFrameImageReader() {
+        if (videoFrameImageReader != null) {
+            videoFrameImageReader.close();
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Closed video image reader");
+            }
+            videoFrameImageReader = null;
+        }
+    }
+
+    private void createVideoFrameImageReader(
+            int videoFrameWidth,
+            int videoFrameHeight
+    ) throws CameraControllerException {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Create video frame image reader for capture session");
+        }
+        android.util.Size size = getVideoFrameImageSize(videoFrameWidth, videoFrameHeight);
+        // We use YUV format for this to avoid FPS drops caused by jpeg compressing
+        videoFrameImageReader = ImageReader.newInstance(size.getWidth(), size.getHeight(), ImageFormat.YUV_420_888, 2);
+        videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
+    }
+
+    private android.util.Size getVideoFrameImageSize(
+            int videoFrameWidth,
+            int videoFrameHeight
+    ) throws CameraControllerException {
+        final double RATIO_TOLERANCE = 0.05;
+        float targetRatio = (float)videoFrameWidth / (float) videoFrameHeight;
+
+        android.util.Size[] yuvSizes = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
+        ).getOutputSizes(ImageFormat.YUV_420_888);
+        android.util.Size targetSize = null;
+        if (yuvSizes == null || yuvSizes.length == 0) {
+            throw new CameraControllerException();
+        }
+
+        for (android.util.Size size : yuvSizes) {
+            float ratio = (float)size.getWidth() / (float)size.getHeight();
+            if (
+                Math.abs(targetRatio - ratio) < RATIO_TOLERANCE &&
+                size.getHeight() <= videoFrameHeight &&
+                size.getWidth() <= videoFrameWidth
+            ) {
+                targetSize = size;
+            }
+        }
+
+        if (targetSize == null) {
+            Float lastRatio = null;
+            targetSize = yuvSizes[0];
+            // Couldn't find matching ratio, getting closest one
+            for (android.util.Size size : yuvSizes) {
+                float ratio = (float) size.getWidth() / (float) size.getHeight();
+                boolean isBetterMatching = Math.abs(targetRatio - ratio) < Math.abs(targetRatio - lastRatio) &&
+                        size.getHeight() <= videoFrameHeight &&
+                        size.getWidth() <= videoFrameWidth;
+                if (lastRatio == null || isBetterMatching) {
+                    lastRatio = ratio;
+                    targetSize = size;
+                }
+            }
+        }
+        return targetSize;
+    }
+
     @Override
     public void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
+            VideoProfile profile,
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
             boolean want_save_frames,
@@ -7172,6 +7227,10 @@ public class CameraController2 extends CameraController {
             previewIsVideoMode = true;
             previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
             camera_settings.setupBuilder(previewBuilder, false);
+            if(video_recorder != null && supports_photo_video_recording && want_video_imu_recording) {
+                // Requested synchronized video and IMU recording
+                createVideoFrameImageReader(profile.videoFrameWidth, profile.videoFrameHeight);
+            }
             createCaptureSession(video_recorder, want_photo_video_recording, want_video_imu_recording);
         }
         catch(CameraAccessException e) {
