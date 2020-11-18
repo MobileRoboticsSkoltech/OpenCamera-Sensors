@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.preview.VideoProfile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -586,6 +587,7 @@ public abstract class CameraController {
      */
     public abstract void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
+            VideoProfile profile,
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
             boolean want_save_frames,

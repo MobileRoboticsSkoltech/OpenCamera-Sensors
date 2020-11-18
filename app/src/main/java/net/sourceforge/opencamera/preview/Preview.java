@@ -5512,6 +5512,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
                 camera_controller.initVideoRecorderPostPrepare(
                         local_video_recorder,
+                        profile,
                         want_photo_video_recording,
                         want_video_imu_recording,
                         want_save_frames,
