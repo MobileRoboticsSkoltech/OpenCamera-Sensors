@@ -24,9 +24,11 @@ script:
   - ./gradlew assembleDebug
   - gcloud firebase test android run \
      --type instrumentation \
+     --app app/build/outputs/apk/debug/app-debug.apk \
      --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-     --test-targets "class net.sourceforge.opencamera.test.SubsetTests" \
-     --device model=Pixel4,version=29,locale=en,orientation=portrait
+     --device model=Pixel4,version=29,locale=en,orientation=portrait \
+     --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
+
 deploy:
   skip-cleanup: true
   provider: releases
