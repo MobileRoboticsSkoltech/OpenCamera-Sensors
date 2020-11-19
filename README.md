@@ -1,13 +1,16 @@
 ![OpenCamera Sensors logo](https://imgur.com/NnS1NW5.png)
 
-[![Build Status](https://travis-ci.org/azaat/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/azaat/OpenCamera-Sensors)
+[![Build Status](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors)
+
 
 [Open Camera](https://opencamera.org.uk/) is an opensource camera application with many advanced capture options. We modify it to support synchronized recording of video and IMU data, which can be useful in scientific applications (e.g. to record data for experiments).
 
 ## Our contributions to the app:
 
 - Support IMU sensor data recording, provide settings for different IMU frequencies
-- Support extended video recrding with frame timestamps (frame timestamps can be used together with sensor timestamps if your device has SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME in CameraMetadata)
+- Support extended video recording with frame timestamps (frame timestamps can be used together with sensor timestamps if your device has SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME in CameraMetadata).
+
+Currently video frame timestamping feature is in development in the [frame_timestamps](https://github.com/azaat/OpenCamera-Sensors/tree/frame_timestamps) branch and may be unstable.
 
 ## How to enable synchronized video and IMU recording?
 
