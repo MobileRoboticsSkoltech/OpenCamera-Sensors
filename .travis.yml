@@ -1,6 +1,13 @@
- language: android
+language: android
 os: linux
-dist: bionic
+dist: xenial
+
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - python3.6
 
 env:
   global:
