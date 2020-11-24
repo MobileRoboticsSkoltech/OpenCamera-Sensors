@@ -11,7 +11,7 @@ addons:
 
 env:
   global:
-    - CLOUD_PROJECT_ID=opencamera-extensions
+    - CLOUD_PROJECT_ID=opencamera-extended
     - APP_PATH="$TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk"
     - TEST_APP_PATH="$TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
     - TEST_TARGET="class net.sourceforge.opencamera.test.SubsetTests"
