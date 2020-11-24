@@ -24,6 +24,7 @@ android {
 
     signingConfigs {
         release
+        debug
         if (System.getenv("TRAVIS")) {
             release {
                 storeFile rootProject.file("my-release-key.keystore")
@@ -45,6 +46,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
         }
     }
 
