@@ -45,8 +45,9 @@ script:
   - gcloud firebase test android run --type instrumentation \
      --app "$TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk" \
      --test "$TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk" \
-     --device model=Nexus6,version=23,locale=en,orientation=portrait \
+     --device model=blueline,version=28,locale=en,orientation=portrait \
      --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
+
 
 deploy:
   skip-cleanup: true
