@@ -98,6 +98,7 @@ public class MainActivity extends Activity {
 
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
+    private RawSensorInfo mRawSensorInfo;
 
     // components: always non-null (after onCreate())
     private BluetoothRemoteControl bluetoothRemoteControl;
@@ -191,8 +192,31 @@ public class MainActivity extends Activity {
     private static final float WATER_DENSITY_SALTWATER = 1.03f;
     private float mWaterDensity = 1.0f;
 
+    /**
+     * Outer onCreate() for OpenCamera Sensors additional
+     * initial operations
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.mRawSensorInfo = new RawSensorInfo(this);
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Created RawSensorInfo object");
+        }
+
+        onCreateInner(savedInstanceState);
+        super.onCreate(savedInstanceState);
+    }
+
+    public RawSensorInfo getRawSensorInfoManager() {
+        return this.mRawSensorInfo;
+    }
+
+    /**
+     * Inner onCreate() from Open Camera code, should be called in outer
+     * @param savedInstanceState
+     */
+    private void onCreateInner(Bundle savedInstanceState) {
         long debug_time = 0;
         if( MyDebug.LOG ) {
             Log.d(TAG, "onCreate: " + this);
@@ -2094,6 +2118,9 @@ public class MainActivity extends Activity {
         stopAudioListeners();
 
         Bundle bundle = new Bundle();
+        bundle.putBoolean(PreferenceKeys.SupportsGyroKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE));
+        bundle.putBoolean(PreferenceKeys.SupportsAccelKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER));
+
         bundle.putInt("cameraId", this.preview.getCameraId());
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
         bundle.putString("camera_api", this.preview.getCameraAPI());

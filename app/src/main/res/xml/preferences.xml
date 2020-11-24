@@ -1303,6 +1303,18 @@
             android:summary="Write sensor data during video recording"
             />
 
+        <CheckBoxPreference
+            android:key="preference_accel"
+            android:title="ACCELEROMETER"
+            android:defaultValue="false"
+            />
+
+        <CheckBoxPreference
+            android:key="preference_gyro"
+            android:title="GYROSCOPE"
+            android:defaultValue="false"
+            />
+
         <ListPreference
             android:key="preference_accel_sample_rate"
             android:title="Accelerometer frequency"
