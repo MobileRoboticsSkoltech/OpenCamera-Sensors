@@ -43,15 +43,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 prefKey,
                 String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
         );
-        int sensorSampleRate;
+        int sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
         try {
-            sensorSampleRate = Integer.parseInt(sensorSampleRateString);
-
+            if (sensorSampleRateString != null) sensorSampleRate = Integer.parseInt(sensorSampleRateString);
         }
         catch(NumberFormatException exception) {
             if( MyDebug.LOG )
                 Log.e(TAG, "Sample rate invalid format: " + sensorSampleRateString);
-            sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
         }
         return sensorSampleRate;
     }

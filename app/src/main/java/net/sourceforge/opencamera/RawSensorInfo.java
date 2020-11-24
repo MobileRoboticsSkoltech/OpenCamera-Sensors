@@ -33,6 +33,20 @@ public class RawSensorInfo implements SensorEventListener {
     private PrintWriter mAccelBufferedWriter;
     private boolean mIsRecording;
 
+
+    public boolean isSensorAvailable(int sensorType) {
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            return mSensorAccel != null;
+        } else if (sensorType == Sensor.TYPE_GYROSCOPE) {
+            return mSensorGyro != null;
+        } else {
+            if (MyDebug.LOG) {
+                Log.e(TAG, "Requested unsupported sensor");
+            }
+            throw new IllegalArgumentException();
+        }
+    }
+
     public RawSensorInfo(Context context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -72,9 +86,9 @@ public class RawSensorInfo implements SensorEventListener {
             }
             sensorData.append(event.timestamp).append("\n");
 
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && mAccelBufferedWriter != null) {
                 mAccelBufferedWriter.write(sensorData.toString());
-            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && mGyroBufferedWriter != null) {
                 mGyroBufferedWriter.write(sensorData.toString());
             }
         }
@@ -137,13 +151,21 @@ public class RawSensorInfo implements SensorEventListener {
     }
 
     void startRecording(MainActivity mainActivity, Date currentVideoDate) {
+        startRecording(mainActivity, currentVideoDate, true, true);
+    }
+
+    void startRecording(MainActivity mainActivity, Date currentVideoDate, boolean wantGyroRecording, boolean wantAccelRecording) {
         try {
-            mGyroBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
-            );
-            mAccelBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
-            );
+            if (wantGyroRecording) {
+                mGyroBufferedWriter = setupRawSensorInfoWriter(
+                        mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
+                );
+            }
+            if (wantAccelRecording) {
+                mAccelBufferedWriter = setupRawSensorInfoWriter(
+                        mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
+                );
+            }
             mIsRecording = true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -176,12 +198,19 @@ public class RawSensorInfo implements SensorEventListener {
         if (MyDebug.LOG) {
             Log.d(TAG, "enableSensors");
         }
+        enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate);
+        enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate);
+    }
 
-        if (mSensorGyro != null) {
-            mSensorManager.registerListener(this, mSensorGyro, gyroSampleRate);
+    void enableSensor(int sampleRate, int sensorType) {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "enableSensor");
         }
-        if (mSensorAccel != null) {
-            mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
+
+        if (sensorType == Sensor.TYPE_ACCELEROMETER && mSensorAccel != null) {
+            mSensorManager.registerListener(this, mSensorAccel, sampleRate);
+        } else if (sensorType == Sensor.TYPE_GYROSCOPE && mSensorGyro != null) {
+            mSensorManager.registerListener(this, mSensorGyro, sampleRate);
         }
     }
 
