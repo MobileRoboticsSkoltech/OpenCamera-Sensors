@@ -1,6 +1,6 @@
  language: android
 os: linux
-dist: xenial
+dist: bionic
 
 env:
   global:
@@ -42,10 +42,9 @@ before_script:
 script: 
   - ./gradlew assembleRelease
   - ./gradlew assembleDebug
-  - gcloud firebase test android run \
-     --type instrumentation \
-     --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk \
-     --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+  - gcloud firebase test android run --type instrumentation \
+     --app "$TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk" \
+     --test "$TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk" \
      --device model=Nexus6,version=23,locale=en,orientation=portrait \
      --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
 
