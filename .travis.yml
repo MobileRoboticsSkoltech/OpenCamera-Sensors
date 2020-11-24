@@ -34,18 +34,18 @@ before_script:
   # Add gcloud to $PATH
   - source /home/travis/google-cloud-sdk/path.bash.inc
   - gcloud version
+  - echo $CLOUD_PROJECT_ID
+  - gcloud auth activate-service-account --key-file ./opencamera-extended-firebase-adminsdk-yv5yz-e33a8ce5c1.json
+  - gcloud config set project $CLOUD_PROJECT_ID
 
 script: 
   - ./gradlew assembleRelease
   - ./gradlew assembleDebug
-  - echo $CLOUD_PROJECT_ID
-  - gcloud config set project $CLOUD_PROJECT_ID
-  - gcloud auth activate-service-account --key-file ./opencamera-extended-firebase-adminsdk-yv5yz-e33a8ce5c1.json
   - gcloud firebase test android run \
      --type instrumentation \
-     --app app/build/outputs/apk/debug/app-debug.apk \
-     --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-     --device model=Nexus6,locale=en,orientation=portrait \
+     --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk \
+     --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+     --device model=Nexus6,version=23,locale=en,orientation=portrait \
      --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
 
 deploy:
