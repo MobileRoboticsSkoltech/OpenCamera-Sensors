@@ -38,7 +38,7 @@ script:
      --type instrumentation \
      --app app/build/outputs/apk/debug/app-debug.apk \
      --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-     --device model=Pixel4,version=29,locale=en,orientation=portrait \
+     --device model=Nexus6,locale=en,orientation=portrait \
      --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
 
 deploy:
