@@ -52,12 +52,11 @@ before_script:
 script: 
   - ./gradlew assembleRelease
   - ./gradlew assembleDebug
-  - gcloud firebase test android run 
-    --type instrumentation 
-    --app $APP_PATH 
-    --test $TEST_APP_PATH 
-    --device model=blueline,version=28,locale=en,orientation=portrait
-    --test-targets $TEST_TARGET
+  - gcloud firebase test android run --type instrumentation
+     --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk
+     --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+     --device model=blueline,version=28,locale=en,orientation=portrait
+     --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
 
 
 deploy:
