@@ -2,12 +2,27 @@ language: android
 os: linux
 dist: xenial
 
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - python3.6
+
+env:
+  global:
+    - CLOUD_PROJECT_ID=opencamera-extended
+    - APP_PATH="$TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk"
+    - TEST_APP_PATH="$TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+    - TEST_TARGET="class net.sourceforge.opencamera.test.SubsetTests"
+
 android:
   components:
     - platform-tools
     - tools
     - build-tools-28.0.3
-    - android-28
+    - android-22
+    - sys-img-armeabi-v7a-android-22
     - extra-android-m2repository
   licenses:
     - 'android-sdk-preview-license-52d11cd2'
@@ -19,9 +34,31 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_cec398169802_key -iv $encrypted_cec398169802_iv -in my-release-key.keystore.enc -out ./my-release-key.keystore -d
   - yes | sdkmanager "platforms;android-28"
 
+cache:
+  directories:
+    - "$HOME/google-cloud-sdk/"
+
+before_script:
+  - gcloud version || true
+  - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
+  # Add gcloud to $PATH
+  - source /home/travis/google-cloud-sdk/path.bash.inc
+  - gcloud components update
+  - gcloud version
+  - echo $CLOUD_PROJECT_ID
+  - gcloud auth activate-service-account --key-file ./opencamera-extended-firebase-adminsdk-yv5yz-e33a8ce5c1.json
+  - gcloud config set project $CLOUD_PROJECT_ID
+
 script: 
   - ./gradlew assembleRelease
   - ./gradlew assembleDebug
+  - ./gradlew assembleAndroidTest
+  - travis_wait gcloud firebase test android run --type instrumentation
+     --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/debug/app-debug.apk
+     --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+     --device model=blueline,version=28,locale=en,orientation=portrait
+     --test-targets "class net.sourceforge.opencamera.test.SubsetTests"
+
 
 deploy:
   skip-cleanup: true
