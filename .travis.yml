@@ -53,6 +53,7 @@ script:
   - ./gradlew assembleRelease
   - ./gradlew assembleDebug
   - ./gradlew assembleAndroidTest
+  - ./gradlew test
   - if [[ $TRAVIS_COMMIT_MESSAGE == *"[run instrumentation]"* ]]; then
       travis_wait gcloud firebase test android run --type instrumentation
        --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/debug/app-debug.apk

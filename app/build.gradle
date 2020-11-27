@@ -60,8 +60,15 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+        unitTests.all {
+            testLogging {
+                outputs.upToDateWhen {false}
+                exceptionFormat "full"
+                events "skipped", "passed", "failed"
+                showStandardStreams true
+            }
+        }
     }
-
     // needed to use android.test package (ActivityInstrumentationTestCase2 etc) when targetting sdk 28 (Android 9) -
     // see https://developer.android.com/training/testing/set-up-project
     useLibrary 'android.test.runner'
