@@ -58,6 +58,10 @@ android {
         checkReleaseBuilds false
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     // needed to use android.test package (ActivityInstrumentationTestCase2 etc) when targetting sdk 28 (Android 9) -
     // see https://developer.android.com/training/testing/set-up-project
     useLibrary 'android.test.runner'
@@ -67,8 +71,7 @@ android {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.12'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.2.0'
-    testImplementation 'junit:junit:4.12'
-    implementation "androidx.core:core-ktx:+"
 }

@@ -7,13 +7,16 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Camera;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -49,6 +52,7 @@ import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
+import android.util.Size;
 import android.util.SizeF;
 import android.view.Display;
 import android.view.Surface;
@@ -7150,47 +7154,55 @@ public class CameraController2 extends CameraController {
         if (MyDebug.LOG) {
             Log.d(TAG, "Create video frame image reader for capture session");
         }
-        android.util.Size size = getVideoFrameImageSize(videoFrameWidth, videoFrameHeight);
+        List<android.util.Size> yuvSizes = Arrays.asList(
+                characteristics.get(
+                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                        .getOutputSizes(ImageFormat.YUV_420_888)
+        );
+        List<CameraController.Size> controllerSizes = new LinkedList<>();
+        for (android.util.Size yuvSize : yuvSizes) {
+            controllerSizes.add(new CameraController.Size(yuvSize.getWidth(), yuvSize.getHeight()));
+        }
+        CameraController.Size size = getVideoFrameImageSize(controllerSizes, videoFrameWidth, videoFrameHeight);
         // We use YUV format for this to avoid FPS drops caused by jpeg compressing
-        videoFrameImageReader = ImageReader.newInstance(size.getWidth(), size.getHeight(), ImageFormat.YUV_420_888, 2);
+        videoFrameImageReader = ImageReader.newInstance(size.width, size.height, ImageFormat.YUV_420_888, 2);
         videoFrameImageReader.setOnImageAvailableListener(new OnVideoFrameImageAvailableListener(), null);
     }
 
-    private android.util.Size getVideoFrameImageSize(
+    public static CameraController.Size getVideoFrameImageSize(
+            List<CameraController.Size> controllerSizes,
             int videoFrameWidth,
             int videoFrameHeight
     ) throws CameraControllerException {
         final double RATIO_TOLERANCE = 0.05;
         float targetRatio = (float)videoFrameWidth / (float) videoFrameHeight;
-
-        android.util.Size[] yuvSizes = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
-        ).getOutputSizes(ImageFormat.YUV_420_888);
-        android.util.Size targetSize = null;
-        if (yuvSizes == null || yuvSizes.length == 0) {
+        CameraController.Size targetSize = null;
+        if (controllerSizes == null || controllerSizes.size() == 0) {
             throw new CameraControllerException();
         }
+        Collections.sort(controllerSizes, (new CameraController.SizeSorter()));
+        Collections.reverse(controllerSizes);
 
-        for (android.util.Size size : yuvSizes) {
-            float ratio = (float)size.getWidth() / (float)size.getHeight();
+        for (CameraController.Size size : controllerSizes) {
+            float ratio = (float)size.width / (float)size.height;
             if (
                 Math.abs(targetRatio - ratio) < RATIO_TOLERANCE &&
-                size.getHeight() <= videoFrameHeight &&
-                size.getWidth() <= videoFrameWidth
+                size.height <= videoFrameHeight &&
+                size.width <= videoFrameWidth
             ) {
                 targetSize = size;
             }
         }
 
         if (targetSize == null) {
-            Float lastRatio = null;
-            targetSize = yuvSizes[0];
+            targetSize = controllerSizes.get(0);
+            Float lastRatio = (float) targetSize.width / (float) targetSize.height;
             // Couldn't find matching ratio, getting closest one
-            for (android.util.Size size : yuvSizes) {
-                float ratio = (float) size.getWidth() / (float) size.getHeight();
-                boolean isBetterMatching = Math.abs(targetRatio - ratio) < Math.abs(targetRatio - lastRatio) &&
-                        size.getHeight() <= videoFrameHeight &&
-                        size.getWidth() <= videoFrameWidth;
+            for (CameraController.Size size : controllerSizes) {
+                float ratio = (float) size.width / (float) size.height;
+                boolean isBetterMatching = Math.abs(targetRatio - ratio) <= Math.abs(targetRatio - lastRatio) &&
+                        size.height <= videoFrameHeight &&
+                        size.width <= videoFrameWidth;
                 if (lastRatio == null || isBetterMatching) {
                     lastRatio = ratio;
                     targetSize = size;
