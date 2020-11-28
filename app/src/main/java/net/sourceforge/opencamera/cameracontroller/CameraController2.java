@@ -5094,6 +5094,12 @@ public class CameraController2 extends CameraController {
                         video_recorder_surface,
                         videoFrameImageReader.getSurface()
                     );
+                } else if (supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording) {
+                    surfaces = Arrays.asList(
+                        preview_surface,
+                        video_recorder_surface,
+                        imageReader.getSurface()
+                    );
                 } else {
                     surfaces = Arrays.asList(preview_surface, video_recorder_surface);
                 }
