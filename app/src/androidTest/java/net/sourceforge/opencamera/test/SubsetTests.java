@@ -12,8 +12,20 @@ public class SubsetTests {
         // Basic video tests
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfo"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo"));
+
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSettings"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMacro"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPause"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPauseStop"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshot"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotTimer"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotPausePreview"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotMax"));
         // Basic photo tests
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhoto"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuous"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuousNoTouch"));
+
         return suite;
     }
 }
