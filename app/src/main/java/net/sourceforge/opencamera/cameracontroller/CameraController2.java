@@ -54,6 +54,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
 
+import static android.os.SystemClock.elapsedRealtimeNanos;
+
 /** Provides support using Android 5's Camera 2 API
  *  android.hardware.camera2.*.
  */
@@ -1263,8 +1265,7 @@ public class CameraController2 extends CameraController {
             boolean call_takePhotoCompleted = false;
 
             Image image = reader.acquireNextImage();
-            if( MyDebug.LOG )
-                Log.d(TAG, "image timestamp: " + image.getTimestamp());
+            Log.d("EXP_CAPTURE_TIME", "image timestamp: " + image.getTimestamp());
             ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte [] bytes = new byte[buffer.remaining()];
             if( MyDebug.LOG )
@@ -5739,6 +5740,7 @@ public class CameraController2 extends CameraController {
         ErrorCallback push_take_picture_error_cb = null;
 
         synchronized( background_camera_lock ) {
+            Log.d("EXP_CAPTURE_TIME", "Entering background camera lock: " + elapsedRealtimeNanos());
             if( camera == null || captureSession == null ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "no camera or capture session");
@@ -5755,6 +5757,8 @@ public class CameraController2 extends CameraController {
                         Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
                     }
                 }
+
+                Log.d("EXP_CAPTURE_TIME", "Capture request time: " + elapsedRealtimeNanos());
                 stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
                 stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
                 stillBuilder.setTag(new RequestTagObject(RequestTagType.CAPTURE));

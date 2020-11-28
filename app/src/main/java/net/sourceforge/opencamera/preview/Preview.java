@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.preview;
 
+import net.sourceforge.opencamera.ConfigExpCaptureTime;
 import net.sourceforge.opencamera.cameracontroller.RawImage;
 //import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -94,6 +95,8 @@ import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import static net.sourceforge.opencamera.ConfigExpCaptureTime.*;
 
 /** This class was originally named due to encapsulating the camera preview,
  *  but in practice it's grown to more than this, and includes most of the
@@ -4946,7 +4949,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         // make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
 
-        if( photo_snapshot || continuous_fast_burst ) {
+        Log.d("EXP_CAPTURE_TIME", "Num photos: " + NUM_PHOTOS + ", delay between photos: " + TIMER_DELAY + " ms");
+        for (int delay = TIMER_DELAY; delay <= NUM_PHOTOS * TIMER_DELAY; delay += TIMER_DELAY) {
+            takePictureOnTimer(delay, false);
+        }
+
+        /*if( photo_snapshot || continuous_fast_burst ) {
             // go straight to taking a photo, ignore timer or repeat options
             takePicture(false, photo_snapshot, continuous_fast_burst);
             return;
@@ -4981,7 +4989,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         else {
             takePictureOnTimer(timer_delay, false);
-        }
+        }*/
         if( MyDebug.LOG )
             Log.d(TAG, "takePicturePressed exit");
     }
@@ -5721,7 +5729,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     /** Take photo. The caller should already have set the phase to PHASE_TAKING_PHOTO.
      */
     private void takePhoto(boolean skip_autofocus, final boolean continuous_fast_burst) {
-        if( MyDebug.LOG )
+        /*if( MyDebug.LOG )
             Log.d(TAG, "takePhoto");
         if( camera_controller == null ) {
             Log.e(TAG, "camera not opened in takePhoto!");
@@ -5786,9 +5794,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 else {
                     Log.d(TAG, "recently focused successfully, so no need to refocus");
                 }
-            }
-            takePhotoWhenFocused(continuous_fast_burst);
-        }
+            }*/
+        takePhotoWhenFocused(false);
+        /*}
         else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
             boolean wait_for_focus;
             // n.b., we check focus_value rather than camera_controller.supportsAutoFocus(), as we want to discount focus_mode_locked
@@ -5830,7 +5838,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         else {
             takePhotoWhenFocused(continuous_fast_burst);
-        }
+        }*/
     }
 
     /** Should be called when taking a photo immediately after an autofocus.

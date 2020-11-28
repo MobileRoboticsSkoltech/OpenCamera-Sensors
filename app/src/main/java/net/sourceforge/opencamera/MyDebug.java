@@ -4,5 +4,5 @@ package net.sourceforge.opencamera;
  *  released versions.
  */
 public class MyDebug {
-    public static final boolean LOG = false;
+    public static final boolean LOG = true;
 }
