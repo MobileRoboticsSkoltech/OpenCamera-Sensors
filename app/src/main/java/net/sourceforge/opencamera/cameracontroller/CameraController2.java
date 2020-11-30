@@ -7,16 +7,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Camera;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -52,7 +49,6 @@ import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
-import android.util.Size;
 import android.util.SizeF;
 import android.view.Display;
 import android.view.Surface;
@@ -1267,7 +1263,7 @@ public class CameraController2 extends CameraController {
 
             long timestamp = image.getTimestamp();
             if (mWantSaveFrames) {
-                byte[] nv21 = YuvImageUtils.YUV420toNV21(image);
+                byte[] nv21 = YuvImageUtils.Yuv420ImageToNv21(image);
 
                 mVideoFrameInfoCallback.onVideoFrameAvailable(
                     timestamp,
@@ -7225,9 +7221,9 @@ public class CameraController2 extends CameraController {
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
             boolean want_save_frames,
-            VideoFrameInfoCallback videoFrameInfoCallback
+            VideoFrameInfoCallback video_frame_info_callback
     ) throws CameraControllerException {
-        mVideoFrameInfoCallback = videoFrameInfoCallback;
+        mVideoFrameInfoCallback = video_frame_info_callback;
         mWantSaveFrames = want_save_frames;
 
         if( MyDebug.LOG )

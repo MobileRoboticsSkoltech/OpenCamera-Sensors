@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.sensorlogging;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -30,7 +31,6 @@ import java.util.concurrent.Executors;
 public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
     private final static String TIMESTAMP_FILE_SUFFIX = "_timestamps";
-    private final static int NV21_TO_JPEG_QUALITY = 100;
     /*
     Value used to save frames for debugging and matching frames with video
     TODO: in future versions make sure this value is big enough not to cause frame rate drop / buffer allocation problems on devices other than already tested
@@ -44,6 +44,8 @@ public class VideoFrameInfo implements Closeable {
     private final ExtendedAppInterface mAppInterface;
     private final BufferedWriter mFrameBufferedWriter;
     private final boolean mShouldSaveFrames;
+    private final Context mContext;
+    private final YuvImageUtils mYuvUtils;
 
     private int mFrameNumber = 0;
 
@@ -52,6 +54,8 @@ public class VideoFrameInfo implements Closeable {
         mStorageUtils = context.getStorageUtils();
         mAppInterface = context.getApplicationInterface();
         mShouldSaveFrames = shouldSaveFrames;
+        mContext = context;
+        mYuvUtils = mAppInterface.getYuvUtils();
 
         File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
             StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
@@ -81,14 +85,15 @@ public class VideoFrameInfo implements Closeable {
                     writeFrameTimestamp(timestamp);
                     try {
                         if (mShouldSaveFrames && mFrameNumber % EVERY_N_FRAME == 0) {
+                            Bitmap bitmap = mYuvUtils.yuv420ToBitmap(imageData, width, height, mContext);
+
                             if (MyDebug.LOG) {
                                 Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                             }
-                            byte[] jpegResult = YuvImageUtils.NV21toJPEG(imageData, width, height, NV21_TO_JPEG_QUALITY);
                             File frameFile = mStorageUtils.createOutputCaptureInfo(
                                     StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
                             );
-                            writeFrameJpeg(jpegResult, frameFile, rotation);
+                            writeFrameJpeg(bitmap, frameFile, rotation);
                         }
                         mFrameNumber++;
                     } catch (IOException e) {
@@ -117,11 +122,9 @@ public class VideoFrameInfo implements Closeable {
         }
     }
 
-    private void writeFrameJpeg(byte[] jpegResult, File frameFile, int rotation) throws IOException {
+    private void writeFrameJpeg(Bitmap bitmap, File frameFile, int rotation) throws IOException {
         FileOutputStream fos = new FileOutputStream(frameFile);
-
         // Apply rotation
-        Bitmap bitmap = BitmapFactory.decodeByteArray(jpegResult, 0, jpegResult.length);
         Matrix matrix = new Matrix();
         matrix.postRotate(rotation);
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -141,13 +144,13 @@ public class VideoFrameInfo implements Closeable {
         if (MyDebug.LOG) {
             Log.d(TAG, "Closing frame info, frame number: " + mFrameNumber);
         }
+
         try {
             if (mFrameBufferedWriter != null) {
-                mFrameBufferedWriter.flush();
                 mFrameBufferedWriter.close();
             }
         } catch (IOException e) {
-            Log.d(TAG, "Exception occured when attempting to close mFrameBufferedWriter");
+            Log.d(TAG, "Exception occurred when attempting to close mFrameBufferedWriter");
             e.printStackTrace();
         }
     }

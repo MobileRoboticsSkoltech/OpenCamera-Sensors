@@ -1,31 +1,58 @@
 package net.sourceforge.opencamera.cameracontroller;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.media.Image;
 import android.os.Build;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import java.io.ByteArrayOutputStream;
+import net.sourceforge.opencamera.MyDebug;
+
+import java.io.Closeable;
 import java.nio.ByteBuffer;
 
 /**
  * Class for manipulations with YUV images.
- * Methods taken from this answer:
- * https://stackoverflow.com/questions/44022062/converting-yuv-420-888-to-jpeg-and-saving-file-results-distorted-image
  */
-public class YuvImageUtils {
-    public static byte[] NV21toJPEG(byte[] nv21, int width, int height, int quality) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        YuvImage yuv = new YuvImage(nv21, ImageFormat.NV21, width, height, null);
-        yuv.compressToJpeg(new Rect(0, 0, width, height), quality, out);
-        return out.toByteArray();
+public class YuvImageUtils implements Closeable {
+    private final static String TAG = "YuvImageUtils";
+    private final RenderScript mRenderScript;
+    private final ScriptIntrinsicYuvToRGB mYuvToRgb;
+
+    public YuvImageUtils(Context context) {
+        mRenderScript = RenderScript.create(context);
+        mYuvToRgb = ScriptIntrinsicYuvToRGB.create(mRenderScript, Element.U8_4(mRenderScript));
     }
 
+    /**
+     * Converts byte array with NV21 data to Bitmap using yuvToRgb Renderscript intrinsic
+     */
+    public Bitmap yuv420ToBitmap(byte[] imageData, int width, int height, Context context) {
+        Allocation aIn = Allocation.createSized(mRenderScript, Element.U8(mRenderScript), imageData.length, Allocation.USAGE_SCRIPT);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Allocation aOut = Allocation.createFromBitmap(mRenderScript, bitmap);
+        aIn.copyFrom(imageData);
+        mYuvToRgb.setInput(aIn);
+        mYuvToRgb.forEach(aOut);
+        aOut.copyTo(bitmap);
+        aOut.destroy();
+        aIn.destroy();
+
+        return bitmap;
+    }
+
+    // Method taken from this answer:
+    // https://stackoverflow.com/questions/44022062/converting-yuv-420-888-to-jpeg-and-saving-file-results-distorted-image
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public static byte[] YUV420toNV21(Image image) {
+    public static byte[] Yuv420ImageToNv21(Image image) {
         Rect crop = image.getCropRect();
         int format = image.getFormat();
         int width = crop.width();
@@ -80,5 +107,15 @@ public class YuvImageUtils {
             }
         }
         return data;
+    }
+
+    @Override
+    public void close() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Closing YuvUtils");
+        }
+        if (mRenderScript != null) {
+            mRenderScript.destroy();
+        }
     }
 }

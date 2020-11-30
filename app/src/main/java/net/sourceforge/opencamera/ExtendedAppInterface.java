@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
 import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
@@ -23,6 +24,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final RawSensorInfo mRawSensorInfo;
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
+    private final YuvImageUtils mYuvUtils;
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
@@ -32,9 +34,19 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
-        this.mRawSensorInfo = new RawSensorInfo(mainActivity);
-        this.mMainActivity = mainActivity;
-        this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        mRawSensorInfo = new RawSensorInfo(mainActivity);
+        mMainActivity = mainActivity;
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        // We create it only once here (not during the video) as it is a costly operation
+        // (instantiates RenderScript object)
+        mYuvUtils = new YuvImageUtils(mainActivity);
+
+    }
+
+    @Override
+    void onDestroy() {
+        mYuvUtils.close();
+        super.onDestroy();
     }
 
     public boolean getIMURecordingPref() {
@@ -111,5 +123,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public void onFrameInfoRecordingFailed() {
         mMainActivity.getPreview().showToast(null, "Couldn't write frame timestamps");
+    }
+
+    public YuvImageUtils getYuvUtils() {
+        return mYuvUtils;
     }
 }
