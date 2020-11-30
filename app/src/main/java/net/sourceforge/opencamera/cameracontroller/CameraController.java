@@ -583,7 +583,7 @@ public abstract class CameraController {
     /** Call to initialise video recording, should call after MediaRecorder.prepare(), but before MediaRecorder.start().
      * @param video_recorder The media recorder object.
      * @param want_photo_video_recording Whether support for taking photos whilst video recording is required. If this feature isn't supported, the option has no effect.
-     * @param videoFrameInfoCallback Callback for video frames and their timestamps
+     * @param video_frame_info_callback Callback for video frames and their timestamps
      */
     public abstract void initVideoRecorderPostPrepare(
             MediaRecorder video_recorder,
@@ -591,7 +591,7 @@ public abstract class CameraController {
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
             boolean want_save_frames,
-            VideoFrameInfoCallback videoFrameInfoCallback
+            VideoFrameInfoCallback video_frame_info_callback
     ) throws CameraControllerException;
     public abstract void closeVideoRecordingSession();
     public abstract String getParametersString();

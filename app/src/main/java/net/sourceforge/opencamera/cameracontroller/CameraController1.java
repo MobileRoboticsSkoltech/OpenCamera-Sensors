@@ -1919,7 +1919,7 @@ public class CameraController1 extends CameraController {
         boolean want_photo_video_recording,
         boolean want_video_imu_recording,
         boolean want_save_frames,
-        VideoFrameInfoCallback videoFrameInfoCallback
+        VideoFrameInfoCallback video_frame_info_callback
     ) {
         // no further actions necessary
     }
