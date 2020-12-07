@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.sensorlogging;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -8,6 +8,11 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.StorageUtils;
+import net.sourceforge.opencamera.StorageUtilsWrapper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,6 +68,62 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
+    public void startRecording(MainActivity mainActivity, Date currentVideoDate) {
+        try {
+            mGyroBufferedWriter = setupRawSensorInfoWriter(
+                    mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
+            );
+            mAccelBufferedWriter = setupRawSensorInfoWriter(
+                    mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
+            );
+            mIsRecording = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            if (MyDebug.LOG) {
+                Log.e(TAG, "Unable to setup sensor info writer");
+            }
+        }
+    }
+
+    public void stopRecording() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Close all files");
+        }
+        if (mGyroBufferedWriter != null) {
+            mGyroBufferedWriter.flush();
+            mGyroBufferedWriter.close();
+        }
+        if (mAccelBufferedWriter != null) {
+            mAccelBufferedWriter.flush();
+            mAccelBufferedWriter.close();
+        }
+        mIsRecording = false;
+    }
+
+    public boolean isRecording() {
+        return mIsRecording;
+    }
+
+    public void enableSensors(int accelSampleRate, int gyroSampleRate) {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "enableSensors");
+        }
+
+        if (mSensorGyro != null) {
+            mSensorManager.registerListener(this, mSensorGyro, gyroSampleRate);
+        }
+        if (mSensorAccel != null) {
+            mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
+        }
+    }
+
+    public void disableSensors() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "disableSensors");
+        }
+        mSensorManager.unregisterListener(this);
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mIsRecording) {
@@ -82,7 +143,7 @@ public class RawSensorInfo implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // TODO: Add logs for when sensor accuracy decreased
+        // TODO: Add some action or notification for when sensor accuracy decreased
     }
 
     /**
@@ -94,27 +155,14 @@ public class RawSensorInfo implements SensorEventListener {
         StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;
         try {
-            if (storageUtils.isUsingSAF()) {
-                Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
-                );
-                ParcelFileDescriptor rawSensorInfoPfd = mainActivity
-                        .getContentResolver()
-                        .openFileDescriptor(saveUri, "w");
-                fileWriter = new FileWriter(rawSensorInfoPfd.getFileDescriptor());
-                File saveFile = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-                storageUtils.broadcastFile(saveFile, true, false, true);
-
-            } else {
-                File saveFile = storageUtils.createOutputCaptureInfoFile(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
-                );
-                fileWriter = new FileWriter(saveFile);
-                if (MyDebug.LOG) {
-                    Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
-                }
-                storageUtils.broadcastFile(saveFile, false, false, false);
-            }
+            fileWriter = new FileWriter(
+                storageUtils.createOutputCaptureInfo(
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,
+                        "csv",
+                        "_" + sensorType,
+                        lastVideoDate
+                )
+            );
             return fileWriter;
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,61 +182,5 @@ public class RawSensorInfo implements SensorEventListener {
                 new BufferedWriter(rawSensorInfoFileWriter)
         );
         return rawSensorInfoWriter;
-    }
-
-    void startRecording(MainActivity mainActivity, Date currentVideoDate) {
-        try {
-            mGyroBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
-            );
-            mAccelBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
-            );
-            mIsRecording = true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (MyDebug.LOG) {
-                Log.e(TAG, "Unable to setup sensor info writer");
-            }
-        }
-    }
-
-    void stopRecording() {
-        if (MyDebug.LOG) {
-            Log.d(TAG, "Close all files");
-        }
-        if (mGyroBufferedWriter != null) {
-            mGyroBufferedWriter.flush();
-            mGyroBufferedWriter.close();
-        }
-        if (mAccelBufferedWriter != null) {
-            mAccelBufferedWriter.flush();
-            mAccelBufferedWriter.close();
-        }
-        mIsRecording = false;
-    }
-
-    boolean isRecording() {
-        return mIsRecording;
-    }
-
-    void enableSensors(int accelSampleRate, int gyroSampleRate) {
-        if (MyDebug.LOG) {
-            Log.d(TAG, "enableSensors");
-        }
-
-        if (mSensorGyro != null) {
-            mSensorManager.registerListener(this, mSensorGyro, gyroSampleRate);
-        }
-        if (mSensorAccel != null) {
-            mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
-        }
-    }
-
-    void disableSensors() {
-        if (MyDebug.LOG) {
-            Log.d(TAG, "disableSensors");
-        }
-        mSensorManager.unregisterListener(this);
     }
 }

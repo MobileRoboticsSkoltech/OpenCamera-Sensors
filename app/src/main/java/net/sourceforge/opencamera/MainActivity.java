@@ -105,7 +105,7 @@ public class MainActivity extends Activity {
     private SettingsManager settingsManager;
     private MainUI mainUI;
     private ManualSeekbars manualSeekbars;
-    private MyApplicationInterface applicationInterface;
+    private ExtendedAppInterface applicationInterface;
     private TextFormatter textFormatter;
     private SoundPoolManager soundPoolManager;
     private MagneticSensor magneticSensor;
@@ -2318,6 +2318,8 @@ public class MainActivity extends Activity {
             bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
         }
 
+        bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+
         putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
         putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
 
@@ -4474,7 +4476,7 @@ public class MainActivity extends Activity {
         return this.manualSeekbars;
     }
 
-    public MyApplicationInterface getApplicationInterface() {
+    public ExtendedAppInterface getApplicationInterface() {
         return this.applicationInterface;
     }
 

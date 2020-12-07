@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.preview.VideoProfile;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1903,7 +1904,23 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
-    public void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) {
+    public void closeVideoRecordingSession() {
+        // no further action necessary
+    }
+
+    public boolean supportsVideoImuSync() {
+        return false;
+    }
+
+    @Override
+    public void initVideoRecorderPostPrepare(
+        MediaRecorder video_recorder,
+        VideoProfile profile,
+        boolean want_photo_video_recording,
+        boolean want_video_imu_recording,
+        boolean want_save_frames,
+        VideoFrameInfoCallback video_frame_info_callback
+    ) {
         // no further actions necessary
     }
 
