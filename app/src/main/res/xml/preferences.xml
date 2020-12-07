@@ -1161,11 +1161,12 @@
                 android:defaultValue="true"
                 />
 
+            <!-- Should be set to false by default for normal app usage, as MediaRecorder adds extra frames to the video when audio is on -->
             <SwitchPreference
                 android:key="preference_record_audio"
                 android:title="@string/preference_record_audio"
                 android:summary="@string/preference_record_audio_summary"
-                android:defaultValue="true"
+                android:defaultValue="false"
                 />
 
             <ListPreference 
