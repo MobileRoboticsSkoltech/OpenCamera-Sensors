@@ -5,28 +5,30 @@
 
 [Open Camera](https://opencamera.org.uk/) is an opensource camera application with many advanced capture options. We modify it to support synchronized recording of video and IMU data, which can be useful in scientific applications (e.g. to record data for experiments).
 
-## Our contributions to the app:
-
-- Support IMU sensor data recording, provide settings for different IMU frequencies
-- Support extended video recording with frame timestamps (frame timestamps can be used together with sensor timestamps if your device has SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME in CameraMetadata).
-
-## How to enable synchronized video and IMU recording?
+## Usage
 
 ![screenshot settings](https://imgur.com/BytzCvA.png)
 
-Firstly, make sure Camera2API is used for capture (this can be checked in application preferences).
+- Go to preferences, enable Camera2API and press the “Enable sync video IMU recording” switch
+- (Optional) **Disable video stabilization** in video preferences of OpenCamera Sensors to minimize preprocessing effects
+- (Optional) Enable **save frames** option if you want to verify recorded data correctness
+- **Switch to video**, setup ISO and exposure time
+- **Record video**
+- **Get data** from ```DCIM/OpenCamera```:
+    - Video file
+    - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
+        -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+        - ```{VIDEO_NAME}_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+        - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)```    
 
-After that, press the ```Enable IMU recording``` switch in preferences. Additionally, you can specify IMU frquency by choosing a Hz value from the list, but this number is only a hint to the system according to the android documentation.
+## Restrictions
 
-## How to find recorded IMU and video data?
+One important restriction is that our app requires full Camera2API support.
 
-All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional info can be found in subdirectories with video date as a name. 
+Another restriction of our application is that synchronized timestamping for camera and IMU data isn’t available on all the devices with Camera2API support.
 
-Data saved in the subdirectory ```./<currentVideoDate>```:
+You can check whether your device supports this feature in preferences
 
-- ```<video_name>_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
-- ```<video_name>_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
-- ```<video_name>_timestamps.csv```, data format: ```timestamp (ns)```
 
 ## Contribution
 
