@@ -2,8 +2,11 @@
 
 [![Build Status](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors)
 
+OpenCamera Sensors is an Android application for synchronized recording of video and IMU data. It records IMU data and video with frame timestamps synced to the same clock.
 
-[Open Camera](https://opencamera.org.uk/) is an opensource camera application with many advanced capture options. We modify it to support synchronized recording of video and IMU data, which can be useful in scientific applications (e.g. to record data for experiments).
+
+This project is based on [Open Camera](https://opencamera.org.uk/)  -- a popular open-source camera application with flexibility in camera parameters settings, actively supported by the community. By regular merging of Open Camera updates our app will adapt to new smartphones and APIs — this is an advantage over the other video + IMU recording applications built from scratch for Camera2API.
+
 
 ## Usage
 
