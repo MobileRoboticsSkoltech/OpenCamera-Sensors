@@ -69,7 +69,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "started video");
         }
-        if (getIMURecordingPref() && (getGyroPref() || getAccelPref())) {
+        if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref())) {
             // Extracting sample rates from shared preferences
             try {
                 if (getAccelPref()) {
