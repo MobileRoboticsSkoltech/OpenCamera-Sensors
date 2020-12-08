@@ -1306,13 +1306,13 @@
         <CheckBoxPreference
             android:key="preference_accel"
             android:title="ACCELEROMETER"
-            android:defaultValue="false"
+            android:defaultValue="true"
             />
 
         <CheckBoxPreference
             android:key="preference_gyro"
             android:title="GYROSCOPE"
-            android:defaultValue="false"
+            android:defaultValue="true"
             />
 
         <ListPreference

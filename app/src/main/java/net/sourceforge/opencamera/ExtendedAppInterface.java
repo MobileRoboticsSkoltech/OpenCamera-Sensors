@@ -37,11 +37,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     private boolean getAccelPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, false);
+        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
     }
 
     private boolean getGyroPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, false);
+        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
     }
 
     /**
