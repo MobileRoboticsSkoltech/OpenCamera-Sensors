@@ -71,7 +71,7 @@ public class StorageUtilsWrapper extends StorageUtils {
     /**
      * Creates output capture info file if not using SAF
      */
-    private File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
+    public File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
         return createOutputMediaFile(
                 getRawSensorInfoFolder(currentDate),
                 type,
