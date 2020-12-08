@@ -37,7 +37,12 @@ public class PreferenceKeys {
      */
     public static final String MagneticAccuracyPreferenceKey = "done_magnetic_accuracy";
 
-    public static final String CameraAPIPreferenceDefault = "preference_camera_api_old";
+    public static final String CameraAPIPreferenceDefault = "preference_camera_api_camera2";
+
+    public static final String CameraAPIPreferenceCamera2 = "preference_camera_api_camera2";
+
+    public static final String SupportsVideoImuSync = "supports_video_imu_sync";
+
     public static final String CameraAPIPreferenceKey = "preference_camera_api";
 
     public static String getFlashPreferenceKey(int cameraId) {
@@ -305,6 +310,8 @@ public class PreferenceKeys {
     public static final String SupportsAccelKey = "supports_accel";
 
     public static final String SupportsGyroKey = "supports_gyro";
+
+    public static final String saveFramesPreferenceKey = "preference_save_video_frames";
 
     public static final String AccelSampleRatePreferenceKey = "preference_accel_sample_rate";
 

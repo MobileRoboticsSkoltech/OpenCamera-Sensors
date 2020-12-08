@@ -51,6 +51,7 @@ public class StorageUtils {
     public static final int MEDIA_TYPE_PREFS = 3;
     public static final int MEDIA_TYPE_GYRO_INFO = 4;
     public static final int MEDIA_TYPE_RAW_SENSOR_INFO = 5;
+    public static final int MEDIA_TYPE_VIDEO_FRAME = 6;
 
     private final Context context;
     private final MyApplicationInterface applicationInterface;
@@ -588,6 +589,10 @@ public class StorageUtils {
             case MEDIA_TYPE_IMAGE: {
                 String prefix = sharedPreferences.getString(PreferenceKeys.SavePhotoPrefixPreferenceKey, "IMG_");
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
+                break;
+            }
+            case MEDIA_TYPE_VIDEO_FRAME: {
+                mediaFilename = suffix + extension;
                 break;
             }
             case MEDIA_TYPE_RAW_SENSOR_INFO: // raw sensor info files should have the same name as the video

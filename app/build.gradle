@@ -2,11 +2,15 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
         applicationId "com.opencamera_extended.app"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 28
 
         renderscriptTargetApi 21
@@ -20,8 +24,15 @@ android {
 
     signingConfigs {
         release
+        debug
         if (System.getenv("TRAVIS")) {
             release {
+                storeFile rootProject.file("my-release-key.keystore")
+                storePassword System.getenv("keystore_password")
+                keyAlias System.getenv("keystore_alias")
+                keyPassword System.getenv("keystore_alias_password")
+            }
+            debug {
                 storeFile rootProject.file("my-release-key.keystore")
                 storePassword System.getenv("keystore_password")
                 keyAlias System.getenv("keystore_alias")
@@ -36,6 +47,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
         }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
     }
 
     lintOptions {
@@ -43,6 +58,17 @@ android {
         checkReleaseBuilds false
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            testLogging {
+                outputs.upToDateWhen {false}
+                exceptionFormat "full"
+                events "skipped", "passed", "failed"
+                showStandardStreams true
+            }
+        }
+    }
     // needed to use android.test package (ActivityInstrumentationTestCase2 etc) when targetting sdk 28 (Android 9) -
     // see https://developer.android.com/training/testing/set-up-project
     useLibrary 'android.test.runner'
@@ -52,7 +78,7 @@ android {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.12'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.2.0'
-    testImplementation 'junit:junit:4.12'
 }

@@ -1,27 +1,39 @@
-# OpenCamera Sensors
-[![Build Status](https://travis-ci.org/azaat/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/azaat/OpenCamera-Sensors)
+![OpenCamera Sensors logo](https://imgur.com/NnS1NW5.png)
 
-**This repository is created to extend OpenCamera application with the following capabilities:**
+[![Build Status](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors)
 
-- Support IMU sensor data recording, provide settings for different IMU frequencies
-- Support extended video recording with frame timestamps (frame timestamps can be used together with sensor timestamps if your device has SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME in CameraMetadata).
+OpenCamera Sensors is an Android application for synchronized recording of video and IMU data. It records IMU data and video with frame timestamps synced to the same clock.
 
-Currently video frame timestamping feature is in development in the [frame_timestamps](https://github.com/azaat/OpenCamera-Sensors/tree/frame_timestamps) branch and may be unstable.
 
-**How to enable sensor data recording?**
+This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popular open-source camera application with flexibility in camera parameters settings, actively supported by the community. By regular merging of Open Camera updates our app will adapt to new smartphones and APIs — this is an advantage over the other video + IMU recording applications built from scratch for Camera2API.
 
-Go to OpenCamera preferences and press the ```Enable IMU recording``` switch. Additionally, in preferences you can specify sensor sampling rate in microseconds, but this number is only a hint to the system according to the android documentation.
 
-**How to find recorded IMU data?**
+## Usage
 
-All videos recorded by the camera are located in OpenCamera folder on the disk (usually in DCIM), additional info can be found in subdirectories with video date as a name. 
+![screenshot settings](https://imgur.com/BytzCvA.png)
 
-Data saved in the subdirectory ```./<currentVideoDate>```:
+- Go to preferences, enable Camera2API and press the “Enable sync video IMU recording” switch
+- (Optional) **Disable video stabilization** in video preferences of OpenCamera Sensors to minimize preprocessing effects
+- (Optional) Enable **save frames** option if you want to verify recorded data correctness
+- **Switch to video**, setup ISO and exposure time
+- **Record video**
+- **Get data** from ```DCIM/OpenCamera```:
+    - Video file
+    - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
+        -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+        - ```{VIDEO_NAME}_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+        - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)```    
 
-- ```<video_name>gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
-- ```<video_name>accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+## Restrictions
 
-**Contribution**
+One important restriction is that our app requires full Camera2API support.
+
+Another restriction of our application is that synchronized timestamping for camera and IMU data isn’t available on all the devices with Camera2API support.
+
+You can check whether your device supports this feature in preferences
+
+
+## Contribution
 
 The project follows [AOSP Java Code Style](https://source.android.com/setup/contribute/code-style), main principles:
 
