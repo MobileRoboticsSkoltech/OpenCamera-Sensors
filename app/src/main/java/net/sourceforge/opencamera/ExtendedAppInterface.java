@@ -116,10 +116,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     e.printStackTrace();
                 }
             }
-        } else if (getIMURecordingPref()) {
+        } else if (getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
+        } else if (getIMURecordingPref() && !(getGyroPref() || getAccelPref())) {
+            mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
         }
-
         super.startingVideo();
     }
 
