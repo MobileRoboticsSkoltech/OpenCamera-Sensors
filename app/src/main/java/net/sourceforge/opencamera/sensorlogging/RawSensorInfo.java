@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.sensorlogging;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -8,6 +8,11 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.StorageUtils;
+import net.sourceforge.opencamera.StorageUtilsWrapper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -104,7 +109,7 @@ public class RawSensorInfo implements SensorEventListener {
      * access.
      */
     private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
-            Date lastVideoDate) throws IOException {
+                                                  Date lastVideoDate) throws IOException {
         StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;
         try {
@@ -150,11 +155,11 @@ public class RawSensorInfo implements SensorEventListener {
         return rawSensorInfoWriter;
     }
 
-    void startRecording(MainActivity mainActivity, Date currentVideoDate) {
+    public void startRecording(MainActivity mainActivity, Date currentVideoDate) {
         startRecording(mainActivity, currentVideoDate, true, true);
     }
 
-    void startRecording(MainActivity mainActivity, Date currentVideoDate, boolean wantGyroRecording, boolean wantAccelRecording) {
+    public void startRecording(MainActivity mainActivity, Date currentVideoDate, boolean wantGyroRecording, boolean wantAccelRecording) {
         try {
             if (wantGyroRecording && mSensorGyro != null) {
                 mGyroBufferedWriter = setupRawSensorInfoWriter(
@@ -175,7 +180,7 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    void stopRecording() {
+    public void stopRecording() {
         if (MyDebug.LOG) {
             Log.d(TAG, "Close all files");
         }
@@ -190,11 +195,11 @@ public class RawSensorInfo implements SensorEventListener {
         mIsRecording = false;
     }
 
-    boolean isRecording() {
+    public boolean isRecording() {
         return mIsRecording;
     }
 
-    void enableSensors(int accelSampleRate, int gyroSampleRate) {
+    public void enableSensors(int accelSampleRate, int gyroSampleRate) {
         if (MyDebug.LOG) {
             Log.d(TAG, "enableSensors");
         }
@@ -209,7 +214,7 @@ public class RawSensorInfo implements SensorEventListener {
      * @param sensorType
      * @return Returns false if sensor isn't available
      */
-    boolean enableSensor(int sampleRate, int sensorType) {
+    public boolean enableSensor(int sampleRate, int sensorType) {
         if (MyDebug.LOG) {
             Log.d(TAG, "enableSensor");
         }
@@ -227,7 +232,7 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    void disableSensors() {
+    public void disableSensors() {
         if (MyDebug.LOG) {
             Log.d(TAG, "disableSensors");
         }

@@ -29,7 +29,7 @@ public class StorageUtilsWrapper extends StorageUtils {
      * Creates file with capture information -- sensor, frame timestamps, etc
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputCaptureInfoFileSAF(int type, String suffix, String extension, Date currentDate) throws IOException {
+    public Uri createOutputCaptureInfoFileSAF(int type, String suffix, String extension, Date currentDate) throws IOException {
         String mimeType = "text/csv";
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
         // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
@@ -43,7 +43,7 @@ public class StorageUtilsWrapper extends StorageUtils {
         );
     }
 
-    File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
+    public File createOutputCaptureInfoFile(int type, String suffix, String extension, Date currentDate)  throws IOException {
         return createOutputMediaFile(
                 getRawSensorInfoFolder(currentDate),
                 StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,

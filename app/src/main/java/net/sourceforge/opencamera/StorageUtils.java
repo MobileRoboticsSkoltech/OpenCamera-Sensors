@@ -46,11 +46,11 @@ import android.util.Log;
 public class StorageUtils {
     private static final String TAG = "StorageUtils";
 
-    static final int MEDIA_TYPE_IMAGE = 1;
-    static final int MEDIA_TYPE_VIDEO = 2;
-    static final int MEDIA_TYPE_PREFS = 3;
-    static final int MEDIA_TYPE_GYRO_INFO = 4;
-    static final int MEDIA_TYPE_RAW_SENSOR_INFO = 5;
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+    public static final int MEDIA_TYPE_PREFS = 3;
+    public static final int MEDIA_TYPE_GYRO_INFO = 4;
+    public static final int MEDIA_TYPE_RAW_SENSOR_INFO = 5;
 
     private final Context context;
     private final MyApplicationInterface applicationInterface;
@@ -291,7 +291,7 @@ public class StorageUtils {
         return null;
     }
 
-    boolean isUsingSAF() {
+    public boolean isUsingSAF() {
         // check Android version just to be safe
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

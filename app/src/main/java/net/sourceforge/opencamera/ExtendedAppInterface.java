@@ -2,15 +2,12 @@ package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
