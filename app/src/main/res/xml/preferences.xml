@@ -75,6 +75,18 @@
             android:summary="Enable synchronized IMU and video recording with timestamps"
             />
 
+        <CheckBoxPreference
+            android:key="preference_accel"
+            android:title="ACCELEROMETER"
+            android:defaultValue="true"
+            />
+
+        <CheckBoxPreference
+            android:key="preference_gyro"
+            android:title="GYROSCOPE"
+            android:defaultValue="true"
+            />
+
         <SwitchPreference
             android:key="preference_save_video_frames"
             android:title="Save video frames during video + IMU recording"
@@ -1338,7 +1350,6 @@
             />  
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
-
         <ListPreference
             android:key="preference_camera_api"
             android:title="@string/preference_camera_api"
