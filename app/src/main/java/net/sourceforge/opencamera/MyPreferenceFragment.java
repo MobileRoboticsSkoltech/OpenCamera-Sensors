@@ -25,6 +25,7 @@ import android.graphics.Point;
 //import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -91,6 +92,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         addPreferencesFromResource(R.xml.preferences);
 
         final Bundle bundle = getArguments();
+
         this.cameraId = bundle.getInt("cameraId");
         if( MyDebug.LOG )
             Log.d(TAG, "cameraId: " + cameraId);
@@ -108,6 +110,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
+        final boolean supports_accel = bundle.getBoolean(PreferenceKeys.SupportsAccelKey);
+        if (!supports_accel) {
+            CheckBoxPreference accelPref = (CheckBoxPreference)findPreference(PreferenceKeys.AccelPreferenceKey);
+            accelPref.setChecked(false);
+            accelPref.setEnabled(false);
+        }
+
+        final boolean supports_gyro = bundle.getBoolean(PreferenceKeys.SupportsGyroKey);
+        if (!supports_gyro) {
+            CheckBoxPreference gyroPref = (CheckBoxPreference)findPreference(PreferenceKeys.GyroPreferenceKey);
+            gyroPref.setChecked(false);
+            gyroPref.setEnabled(false);
+        }
         final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);

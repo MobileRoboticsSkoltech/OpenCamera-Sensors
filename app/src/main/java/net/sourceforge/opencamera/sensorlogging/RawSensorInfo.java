@@ -38,6 +38,20 @@ public class RawSensorInfo implements SensorEventListener {
     private PrintWriter mAccelBufferedWriter;
     private boolean mIsRecording;
 
+
+    public boolean isSensorAvailable(int sensorType) {
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            return mSensorAccel != null;
+        } else if (sensorType == Sensor.TYPE_GYROSCOPE) {
+            return mSensorGyro != null;
+        } else {
+            if (MyDebug.LOG) {
+                Log.e(TAG, "Requested unsupported sensor");
+            }
+            throw new IllegalArgumentException();
+        }
+    }
+
     public RawSensorInfo(Context context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -68,14 +82,95 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    public void startRecording(MainActivity mainActivity, Date currentVideoDate) {
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (mIsRecording) {
+            StringBuilder sensorData = new StringBuilder();
+            for (int j = 0; j < 3; j++) {
+                sensorData.append(event.values[j]).append(CSV_SEPARATOR);
+            }
+            sensorData.append(event.timestamp).append("\n");
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && mAccelBufferedWriter != null) {
+                mAccelBufferedWriter.write(sensorData.toString());
+            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && mGyroBufferedWriter != null) {
+                mGyroBufferedWriter.write(sensorData.toString());
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // TODO: Add logs for when sensor accuracy decreased
+    }
+
+    /**
+     * Handles sensor info file creation, uses StorageUtils to work both with SAF and standard file
+     * access.
+     */
+    private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
+                                                  Date lastVideoDate) throws IOException {
+        StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
+        FileWriter fileWriter;
         try {
-            mGyroBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
-            );
-            mAccelBufferedWriter = setupRawSensorInfoWriter(
-                    mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
-            );
+            if (storageUtils.isUsingSAF()) {
+                Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
+                );
+                ParcelFileDescriptor rawSensorInfoPfd = mainActivity
+                        .getContentResolver()
+                        .openFileDescriptor(saveUri, "w");
+                fileWriter = new FileWriter(rawSensorInfoPfd.getFileDescriptor());
+                File saveFile = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
+                storageUtils.broadcastFile(saveFile, true, false, true);
+
+            } else {
+                File saveFile = storageUtils.createOutputCaptureInfoFile(
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
+                );
+                fileWriter = new FileWriter(saveFile);
+                if (MyDebug.LOG) {
+                    Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
+                }
+                storageUtils.broadcastFile(saveFile, false, false, false);
+            }
+            return fileWriter;
+        } catch (IOException e) {
+            e.printStackTrace();
+            if (MyDebug.LOG) {
+                Log.e(TAG, "failed to open raw sensor info files");
+            }
+            throw new IOException(e);
+        }
+    }
+
+    private PrintWriter setupRawSensorInfoWriter(MainActivity mainActivity, String sensorType,
+            Date currentVideoDate) throws IOException {
+        FileWriter rawSensorInfoFileWriter = getRawSensorInfoFileWriter(
+                mainActivity, sensorType, currentVideoDate
+        );
+        PrintWriter rawSensorInfoWriter = new PrintWriter(
+                new BufferedWriter(rawSensorInfoFileWriter)
+        );
+        return rawSensorInfoWriter;
+    }
+
+    public void startRecording(MainActivity mainActivity, Date currentVideoDate) {
+        startRecording(mainActivity, currentVideoDate, true, true);
+    }
+
+    public void startRecording(MainActivity mainActivity, Date currentVideoDate, boolean wantGyroRecording, boolean wantAccelRecording) {
+        try {
+            if (wantGyroRecording && mSensorGyro != null) {
+                mGyroBufferedWriter = setupRawSensorInfoWriter(
+                        mainActivity, SENSOR_TYPE_GYRO, currentVideoDate
+                );
+            }
+            if (wantAccelRecording && mSensorAccel != null) {
+                mAccelBufferedWriter = setupRawSensorInfoWriter(
+                        mainActivity, SENSOR_TYPE_ACCEL, currentVideoDate
+                );
+            }
             mIsRecording = true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,12 +203,32 @@ public class RawSensorInfo implements SensorEventListener {
         if (MyDebug.LOG) {
             Log.d(TAG, "enableSensors");
         }
+        enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate);
+        enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate);
+    }
 
-        if (mSensorGyro != null) {
-            mSensorManager.registerListener(this, mSensorGyro, gyroSampleRate);
+
+    /**
+     * Enables sensor with specified frequency
+     * @param sampleRate
+     * @param sensorType
+     * @return Returns false if sensor isn't available
+     */
+    public boolean enableSensor(int sampleRate, int sensorType) {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "enableSensor");
         }
-        if (mSensorAccel != null) {
-            mSensorManager.registerListener(this, mSensorAccel, accelSampleRate);
+
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            if (mSensorAccel == null) return false;
+            mSensorManager.registerListener(this, mSensorAccel, sampleRate);
+            return true;
+        } else if (sensorType == Sensor.TYPE_GYROSCOPE) {
+            if (mSensorGyro == null) return false;
+            mSensorManager.registerListener(this, mSensorGyro, sampleRate);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -122,65 +237,5 @@ public class RawSensorInfo implements SensorEventListener {
             Log.d(TAG, "disableSensors");
         }
         mSensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (mIsRecording) {
-            StringBuilder sensorData = new StringBuilder();
-            for (int j = 0; j < 3; j++) {
-                sensorData.append(event.values[j]).append(CSV_SEPARATOR);
-            }
-            sensorData.append(event.timestamp).append("\n");
-
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                mAccelBufferedWriter.write(sensorData.toString());
-            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                mGyroBufferedWriter.write(sensorData.toString());
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // TODO: Add some action or notification for when sensor accuracy decreased
-    }
-
-    /**
-     * Handles sensor info file creation, uses StorageUtils to work both with SAF and standard file
-     * access.
-     */
-    private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
-            Date lastVideoDate) throws IOException {
-        StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
-        FileWriter fileWriter;
-        try {
-            fileWriter = new FileWriter(
-                storageUtils.createOutputCaptureInfo(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO,
-                        "csv",
-                        "_" + sensorType,
-                        lastVideoDate
-                )
-            );
-            return fileWriter;
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (MyDebug.LOG) {
-                Log.e(TAG, "failed to open raw sensor info files");
-            }
-            throw new IOException(e);
-        }
-    }
-
-    private PrintWriter setupRawSensorInfoWriter(MainActivity mainActivity, String sensorType,
-            Date currentVideoDate) throws IOException {
-        FileWriter rawSensorInfoFileWriter = getRawSensorInfoFileWriter(
-                mainActivity, sensorType, currentVideoDate
-        );
-        PrintWriter rawSensorInfoWriter = new PrintWriter(
-                new BufferedWriter(rawSensorInfoFileWriter)
-        );
-        return rawSensorInfoWriter;
     }
 }

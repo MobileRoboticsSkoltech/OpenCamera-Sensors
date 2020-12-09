@@ -292,7 +292,7 @@ public class StorageUtils {
         return null;
     }
 
-    boolean isUsingSAF() {
+    public boolean isUsingSAF() {
         // check Android version just to be safe
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

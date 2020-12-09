@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -53,6 +54,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
     }
 
+    private boolean getAccelPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
+    }
+
+    private boolean getGyroPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
+    }
+
     /**
      * Retrieves gyroscope and accelerometer sample rate preference and converts it to number
      */
@@ -61,15 +70,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 prefKey,
                 String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
         );
-        int sensorSampleRate;
+        int sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
         try {
-            sensorSampleRate = Integer.parseInt(sensorSampleRateString);
-
+            if (sensorSampleRateString != null) sensorSampleRate = Integer.parseInt(sensorSampleRateString);
         }
         catch(NumberFormatException exception) {
             if( MyDebug.LOG )
                 Log.e(TAG, "Sample rate invalid format: " + sensorSampleRateString);
-            sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
         }
         return sensorSampleRate;
     }
@@ -83,13 +90,24 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
         }
-        if (getIMURecordingPref() && useCamera2()) {
+        if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref())) {
             // Extracting sample rates from shared preferences
             try {
-                int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
-                int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
-                mRawSensorInfo.enableSensors(accelSampleRate, gyroSampleRate);
-                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
+                if (getAccelPref()) {
+                    int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
+                    if (!mRawSensorInfo.enableSensor(accelSampleRate, Sensor.TYPE_ACCELEROMETER)) {
+                        mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
+                    }
+                }
+                if (getGyroPref()) {
+                    int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
+                    if (!mRawSensorInfo.enableSensor(gyroSampleRate, Sensor.TYPE_GYROSCOPE)) {
+                        mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
+                        // TODO: abort recording?
+                    }
+                }
+
+                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, getGyroPref(), getAccelPref());
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {
@@ -98,10 +116,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     e.printStackTrace();
                 }
             }
-        } else if (getIMURecordingPref()) {
+        } else if (getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
+        } else if (getIMURecordingPref() && !(getGyroPref() || getAccelPref())) {
+            mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
         }
-
         super.startingVideo();
     }
 
