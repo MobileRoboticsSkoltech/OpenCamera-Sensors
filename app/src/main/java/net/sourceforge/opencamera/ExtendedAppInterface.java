@@ -95,13 +95,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             try {
                 if (getAccelPref()) {
                     int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
-                    if (!mRawSensorInfo.enableSensor(accelSampleRate, Sensor.TYPE_ACCELEROMETER)) {
+                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
                         mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
                     }
                 }
                 if (getGyroPref()) {
                     int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
-                    if (!mRawSensorInfo.enableSensor(gyroSampleRate, Sensor.TYPE_GYROSCOPE)) {
+                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
                         mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
                         // TODO: abort recording?
                     }

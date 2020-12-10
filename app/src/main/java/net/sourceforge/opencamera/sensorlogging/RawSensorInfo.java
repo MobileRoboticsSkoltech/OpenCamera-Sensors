@@ -210,11 +210,9 @@ public class RawSensorInfo implements SensorEventListener {
 
     /**
      * Enables sensor with specified frequency
-     * @param sampleRate
-     * @param sensorType
      * @return Returns false if sensor isn't available
      */
-    public boolean enableSensor(int sampleRate, int sensorType) {
+    public boolean enableSensor(int sensorType, int sampleRate) {
         if (MyDebug.LOG) {
             Log.d(TAG, "enableSensor");
         }
