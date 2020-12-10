@@ -3,11 +3,12 @@ package net.sourceforge.opencamera.sensorremote;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RequestHandler {
     private final RawSensorInfo mRawSensorInfo;
@@ -18,7 +19,7 @@ public class RequestHandler {
         mRawSensorInfo = context.getRawSensorInfoManager();
     }
 
-    File handleImuRequest(long durationMillis) throws FileNotFoundException {
+    File handleImuRequest(long durationMillis) {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
             mContext.runOnUiThread(
@@ -52,4 +53,28 @@ public class RequestHandler {
         }
     }
 
+    void handleVideoStartRequest() {
+        mContext.runOnUiThread(
+                () -> {
+                    Preview preview = mContext.getPreview();
+                    // Making sure video is switched on
+                    if (!preview.isVideo()) {
+                        preview.switchVideo(false, true);
+                    }
+                    // In video mode this means "start video"
+                    mContext.takePicture(false);
+                }
+        );
+    }
+
+    void handleVideoStopRequest() {
+        mContext.runOnUiThread(
+                () -> {
+                    Preview preview = mContext.getPreview();
+                    if (preview.isVideo() && preview.isVideoRecording()) {
+                        preview.stopVideo(false);
+                    }
+                }
+        );
+    }
 }

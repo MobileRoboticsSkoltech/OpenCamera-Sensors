@@ -21,8 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RemoteRpcServer extends Thread {
-    private static String TAG = "RemoteRpcServer";
-    private static final int SOCKET_WAIT_TIME_MS = 500;
+    private static final String TAG = "RemoteRpcServer";
+    private static final int SOCKET_WAIT_TIME_MS = 1000;
     private static final int RPC_PORT = 6969;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)";
     private static final String VIDEO_START_REQUEST = "video_start";
@@ -59,10 +59,10 @@ public class RemoteRpcServer extends Thread {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
             File imuFile = mRequestHandler.handleImuRequest(duration);
-            outputStream.print(imuFile.getName());
+            outputStream.println(imuFile.getName());
             try (BufferedReader br = new BufferedReader(new FileReader(imuFile))) {
                 for (String line; (line = br.readLine()) != null; ) {
-                    outputStream.print(line);
+                    outputStream.println(line);
                 }
             }
             if (MyDebug.LOG) {
@@ -73,7 +73,9 @@ public class RemoteRpcServer extends Thread {
 
         // Video remote control API
         if (msg.equals(VIDEO_START_REQUEST)) {
-
+            mRequestHandler.handleVideoStartRequest();
+        } else if (msg.equals(VIDEO_STOP_REQUEST)) {
+            mRequestHandler.handleVideoStopRequest();
         }
     }
 
@@ -94,7 +96,7 @@ public class RemoteRpcServer extends Thread {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine;
-                while ((inputLine = reader.readLine()) != null) {
+                while (!clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
                     // Received new request from the client
                     handleRequest(inputLine, outputStream);
                 }
@@ -105,7 +107,7 @@ public class RemoteRpcServer extends Thread {
                 outputStream.close();
             } catch (SocketTimeoutException e) {
                 if (MyDebug.LOG) {
-                    Log.d(TAG, "waiting for new connection to client");
+                    Log.d(TAG, "socket timed out, waiting for new connection to client");
                 }
             } catch (IOException e) {
                 e.printStackTrace();

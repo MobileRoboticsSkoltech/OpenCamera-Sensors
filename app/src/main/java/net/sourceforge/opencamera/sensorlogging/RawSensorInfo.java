@@ -95,11 +95,6 @@ public class RawSensorInfo implements SensorEventListener {
             }
             sensorData.append(event.timestamp).append("\n");
 
-
-            if (MyDebug.LOG) {
-                Log.d(TAG, "Accelerometer event");
-            }
-
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && mAccelBufferedWriter != null) {
                 mAccelBufferedWriter.write(sensorData.toString());
             } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && mGyroBufferedWriter != null) {
