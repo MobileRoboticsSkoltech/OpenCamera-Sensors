@@ -1160,7 +1160,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getRecordAudioPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.RecordAudioPreferenceKey, true);
+        // Default value should be set to false for normal app usage, as MediaRecorder adds extra frames to the video when audio is on
+        return sharedPreferences.getBoolean(PreferenceKeys.RecordAudioPreferenceKey, false);
     }
 
     @Override
