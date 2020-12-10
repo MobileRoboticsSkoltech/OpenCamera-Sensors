@@ -81,5 +81,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.2.0'
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
 }
