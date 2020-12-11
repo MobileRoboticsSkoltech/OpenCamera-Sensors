@@ -41,7 +41,6 @@ public class RawSensorInfo implements SensorEventListener {
     private boolean mIsRecording;
     private final MainActivity mContext;
 
-
     public boolean isSensorAvailable(int sensorType) {
         if (sensorType == Sensor.TYPE_ACCELEROMETER) {
             return mSensorAccel != null;
@@ -60,7 +59,7 @@ public class RawSensorInfo implements SensorEventListener {
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mContext = context;
-        
+
         if (MyDebug.LOG) {
             Log.d(TAG, "RawSensorInfo");
             if (mSensorGyro == null) {
@@ -195,7 +194,6 @@ public class RawSensorInfo implements SensorEventListener {
                 );
             }
             mIsRecording = true;
-
             Log.d(TAG, "thread " + Thread.currentThread().getName());
         } catch (IOException e) {
             e.printStackTrace();

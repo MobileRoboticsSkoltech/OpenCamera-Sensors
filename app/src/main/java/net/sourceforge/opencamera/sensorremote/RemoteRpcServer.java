@@ -31,6 +31,7 @@ public class RemoteRpcServer extends Thread {
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
     private static final String VIDEO_START_REQUEST = "video_start";
     private static final String VIDEO_STOP_REQUEST = "video_stop";
+    public static final String CHUNK_END_DELIMITER = "end";
 
     private final ServerSocket rpcSocket;
     private final RequestHandler mRequestHandler;
@@ -82,7 +83,9 @@ public class RemoteRpcServer extends Thread {
                     mRequestHandler.handleVideoStartRequest()
             );
         } else if (msg.equals(VIDEO_STOP_REQUEST)) {
-            mRequestHandler.handleVideoStopRequest();
+            outputStream.println(
+                    mRequestHandler.handleVideoStopRequest())
+            ;
         }
     }
 
@@ -107,11 +110,11 @@ public class RemoteRpcServer extends Thread {
                 while (!clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
                     // Received new request from the client
                     handleRequest(inputLine, outputStream);
+                    outputStream.flush();
                 }
                 if (MyDebug.LOG) {
                     Log.d(TAG, "closing connection to client");
                 }
-                outputStream.flush();
                 outputStream.close();
             } catch (SocketTimeoutException e) {
                /* if (MyDebug.LOG) {

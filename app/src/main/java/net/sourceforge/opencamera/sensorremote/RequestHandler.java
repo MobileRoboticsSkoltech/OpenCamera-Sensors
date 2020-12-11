@@ -14,11 +14,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 public class RequestHandler {
     public static final String TAG = "RequestHandler";
-    public static final String SENSOR_DATA_END_MARKER = "end";
+    public static final String SENSOR_DATA_END_MARKER = "sensor_end";
     public static final long MAX_IMU_DURATION_MS = 60_000;
     // Set to some adequate time which is likely more than phase report time
     // TODO: we could set it dynamically using current PHASE_CALC_N_FRAMES
@@ -33,63 +36,74 @@ public class RequestHandler {
 
     private String getSensorData(File imuFile) throws IOException {
         StringBuilder msg = new StringBuilder();
-        msg.append(imuFile.getName());
+        msg.append(imuFile.getName())
+                .append("\n");
         try (BufferedReader br = new BufferedReader(new FileReader(imuFile))) {
             for (String line; (line = br.readLine()) != null; ) {
                 msg.append(line)
                         .append("\n");
             }
-            return msg.toString();
         }
+        String res = msg.toString();
+        if (MyDebug.LOG) {
+            Log.d(TAG, "constructed sensor msg, length: " + res.length());
+        }
+        return res;
     }
 
     RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro) {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording() && durationMillis <= MAX_IMU_DURATION_MS) {
             // TODO: custom rates?
-            mContext.runOnUiThread(
-                    () -> {
-                        mRawSensorInfo.enableSensors(0, 0);
-                        Date currentDate = new Date();
-                        mRawSensorInfo.startRecording(mContext, currentDate);
-                    }
-            );
+            Callable<Void> recStartCallable = () -> {
+                mRawSensorInfo.enableSensors(0, 0);
+                Date currentDate = new Date();
+                mRawSensorInfo.startRecording(mContext, currentDate);
+                return null;
+            };
 
-            // Keep recording for requested duration
+            Callable<Void> recStopCallable = () -> {
+                mRawSensorInfo.stopRecording();
+                mRawSensorInfo.disableSensors();
+                return null;
+            };
+
             try {
-                Log.d("RemoteRpcServer", "thread " + Thread.currentThread().getName());
+                // Await recording start
+                FutureTask<Void> recStartTask = new FutureTask<>(recStartCallable);
+                mContext.runOnUiThread(recStartTask);
+                recStartTask.get();
+                // Record for requested duration
                 Thread.sleep(durationMillis);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            mContext.runOnUiThread(
-                    () -> {
-                        mRawSensorInfo.stopRecording();
-                        mRawSensorInfo.disableSensors();
+                // Await recording stop
+                FutureTask<Void> recStopTask = new FutureTask<>(recStopCallable);
+                mContext.runOnUiThread(recStopTask);
+                recStopTask.get();
+                StringBuilder msg = new StringBuilder();
+                try {
+                    if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
+                        File imuFile = new File(mRawSensorInfo.getLastAccelPath());
+                        if (imuFile != null) {
+                            msg.append(getSensorData(imuFile));
+                            msg.append(SENSOR_DATA_END_MARKER);
+                        }
                     }
-            );
-            StringBuilder msg = new StringBuilder();
-            try {
-                if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
-                    File imuFile = new File(mRawSensorInfo.getLastAccelPath());
-                    if (imuFile != null) {
-                        msg.append(getSensorData(imuFile));
-                        msg.append(SENSOR_DATA_END_MARKER);
+                    if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
+                        File imuFile = new File(mRawSensorInfo.getLastGyroPath());
+                        if (imuFile != null) {
+                            msg.append(getSensorData(imuFile));
+                            msg.append(SENSOR_DATA_END_MARKER);
+                        }
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return RemoteRpcResponse.error("Failed to open IMU file");
                 }
-                if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
-                    File imuFile = new File(mRawSensorInfo.getLastGyroPath());
-                    if (imuFile != null) {
-                        msg.append(getSensorData(imuFile));
-                        msg.append(SENSOR_DATA_END_MARKER);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return RemoteRpcResponse.error("Failed to open IMU file");
-            }
 
-            return RemoteRpcResponse.success(msg.toString());
+                return RemoteRpcResponse.success(msg.toString());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return RemoteRpcResponse.error("Error in IMU recording");
+            }
         } else {
             return RemoteRpcResponse.error("Error in IMU recording");
         }

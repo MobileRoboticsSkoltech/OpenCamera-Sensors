@@ -19,7 +19,9 @@ public class RemoteRpcResponse {
         RemoteRpcResponse result = new RemoteRpcResponse();
         result.message = ERROR +
                 "\n" +
-                message;
+                message +
+                "\n" +
+                RemoteRpcServer.CHUNK_END_DELIMITER;
         return result;
     }
 
@@ -27,7 +29,9 @@ public class RemoteRpcResponse {
         RemoteRpcResponse result = new RemoteRpcResponse();
         result.message = SUCCESS +
                 "\n" +
-                message;
+                message +
+                "\n" +
+                RemoteRpcServer.CHUNK_END_DELIMITER;
         return result;
     }
 
