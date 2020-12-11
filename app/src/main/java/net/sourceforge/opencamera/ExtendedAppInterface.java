@@ -2,17 +2,17 @@ package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
-import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
@@ -29,7 +29,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
-                getLastVideoDate(), mMainActivity, getSaveFramesPref()
+                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
         );
     }
 
@@ -48,6 +48,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     void onDestroy() {
         mYuvUtils.close();
         super.onDestroy();
+    }
+
+    public BlockingQueue<VideoPhaseInfo> getVideoPhaseInfoReporter() {
+        return mMainActivity.getPreview().getVideoPhaseInfoReporter();
     }
 
     public boolean getIMURecordingPref() {

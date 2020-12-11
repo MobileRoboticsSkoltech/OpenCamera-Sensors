@@ -3,14 +3,26 @@ package net.sourceforge.opencamera.sensorremote;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class RequestHandler {
+    public static final String TAG = "RequestHandler";
+    public static final String SENSOR_DATA_END_MARKER = "end";
+    public static final long MAX_IMU_DURATION_MS = 60_000;
+    // Set to some adequate time which is likely more than phase report time
+    // TODO: we could set it dynamically using current PHASE_CALC_N_FRAMES
+    public static final long PHASE_POLL_TIMEOUT_MS = 10_000;
     private final RawSensorInfo mRawSensorInfo;
     private final MainActivity mContext;
 
@@ -19,8 +31,20 @@ public class RequestHandler {
         mRawSensorInfo = context.getRawSensorInfoManager();
     }
 
-    File handleImuRequest(long durationMillis) {
-        if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
+    private String getSensorData(File imuFile) throws IOException {
+        StringBuilder msg = new StringBuilder();
+        msg.append(imuFile.getName());
+        try (BufferedReader br = new BufferedReader(new FileReader(imuFile))) {
+            for (String line; (line = br.readLine()) != null; ) {
+                msg.append(line)
+                        .append("\n");
+            }
+            return msg.toString();
+        }
+    }
+
+    RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro) {
+        if (mRawSensorInfo != null && !mRawSensorInfo.isRecording() && durationMillis <= MAX_IMU_DURATION_MS) {
             // TODO: custom rates?
             mContext.runOnUiThread(
                     () -> {
@@ -44,19 +68,39 @@ public class RequestHandler {
                         mRawSensorInfo.disableSensors();
                     }
             );
-            //TODO: sensor choice
-            File imuFile = new File(mRawSensorInfo.getLastAccelPath());
-            return imuFile;
+            StringBuilder msg = new StringBuilder();
+            try {
+                if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
+                    File imuFile = new File(mRawSensorInfo.getLastAccelPath());
+                    if (imuFile != null) {
+                        msg.append(getSensorData(imuFile));
+                        msg.append(SENSOR_DATA_END_MARKER);
+                    }
+                }
+                if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
+                    File imuFile = new File(mRawSensorInfo.getLastGyroPath());
+                    if (imuFile != null) {
+                        msg.append(getSensorData(imuFile));
+                        msg.append(SENSOR_DATA_END_MARKER);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return RemoteRpcResponse.error("Failed to open IMU file");
+            }
+
+            return RemoteRpcResponse.success(msg.toString());
         } else {
-            throw new RuntimeException();
-            // TODO: errors
+            return RemoteRpcResponse.error("Error in IMU recording");
         }
     }
 
-    void handleVideoStartRequest() {
+    RemoteRpcResponse handleVideoStartRequest() {
+        // Start video recording
+        Preview preview = mContext.getPreview();
+
         mContext.runOnUiThread(
                 () -> {
-                    Preview preview = mContext.getPreview();
                     // Making sure video is switched on
                     if (!preview.isVideo()) {
                         preview.switchVideo(false, true);
@@ -65,9 +109,32 @@ public class RequestHandler {
                     mContext.takePicture(false);
                 }
         );
+
+        // Await video phase event
+        BlockingQueue<VideoPhaseInfo> videoPhaseInfoReporter = preview.getVideoPhaseInfoReporter();
+        if (videoPhaseInfoReporter != null) {
+            VideoPhaseInfo phaseInfo;
+            try {
+                phaseInfo = videoPhaseInfoReporter
+                        .poll(PHASE_POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                if (phaseInfo != null) {
+                    return RemoteRpcResponse.success(phaseInfo.toString());
+                } else {
+                    return RemoteRpcResponse.error("Failed to retrieve phase info, reached poll limit");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return RemoteRpcResponse.error("Failed to retrieve phase info");
+            }
+        } else {
+            if (MyDebug.LOG) {
+                Log.d(TAG, "Video frame info wasn't initialized, failed to retrieve phase info");
+            }
+            return RemoteRpcResponse.error("Video frame info wasn't initialized, failed to retrieve phase info");
+        }
     }
 
-    void handleVideoStopRequest() {
+    RemoteRpcResponse handleVideoStopRequest() {
         mContext.runOnUiThread(
                 () -> {
                     Preview preview = mContext.getPreview();
@@ -76,5 +143,6 @@ public class RequestHandler {
                     }
                 }
         );
+        return RemoteRpcResponse.success("");
     }
 }

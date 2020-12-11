@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.sensorlogging;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.Log;
 
@@ -19,7 +18,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,6 +38,7 @@ public class VideoFrameInfo implements Closeable {
     TODO: in future versions make sure this value is big enough not to cause frame rate drop / buffer allocation problems on devices other than already tested
      */
     private final static int EVERY_N_FRAME = 60;
+    private final static int PHASE_CALC_N_FRAMES = 60;
 
     //Sequential executor for frame and timestamps saving queue
     private final ExecutorService frameProcessor = Executors.newSingleThreadExecutor();
@@ -46,29 +49,65 @@ public class VideoFrameInfo implements Closeable {
     private final boolean mShouldSaveFrames;
     private final Context mContext;
     private final YuvImageUtils mYuvUtils;
+    private final BlockingQueue<VideoPhaseInfo> mPhaseInfoReporter;
+    private final List<Long> durationsNs;
+    private long mLastTimestamp = 0;
 
     private int mFrameNumber = 0;
 
-    public VideoFrameInfo(Date videoDate, MainActivity context, boolean shouldSaveFrames) throws IOException {
+    public BlockingQueue<VideoPhaseInfo> getPhaseInfoReporter() {
+        return mPhaseInfoReporter;
+    }
+
+    public VideoFrameInfo(
+            Date videoDate,
+            MainActivity context,
+            boolean shouldSaveFrames,
+            BlockingQueue<VideoPhaseInfo> videoPhaseInfoReporter
+    ) throws IOException {
         mVideoDate = videoDate;
         mStorageUtils = context.getStorageUtils();
         mAppInterface = context.getApplicationInterface();
         mShouldSaveFrames = shouldSaveFrames;
         mContext = context;
         mYuvUtils = mAppInterface.getYuvUtils();
+        mPhaseInfoReporter = videoPhaseInfoReporter;
+        durationsNs = new ArrayList<>();
+
 
         File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
-            StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
+                StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
         );
         mFrameBufferedWriter = new BufferedWriter(
-            new PrintWriter(frameTimestampFile)
+                new PrintWriter(frameTimestampFile)
         );
     }
 
     public void submitProcessFrame(long timestamp) {
         if (!frameProcessor.isShutdown()) {
             frameProcessor.execute(
-                    () ->  {
+                    () -> {
+                        // TODO: here we assume that video has more frames than PHASE_CALC_N_FRAMES
+                        if (mFrameNumber < PHASE_CALC_N_FRAMES) {
+                            // Should calculate phase
+                            if (mLastTimestamp == 0) {
+                                // skip first frame
+                            } else {
+                                long duration = timestamp - mLastTimestamp;
+                                // add frame duration
+                                if (MyDebug.LOG) {
+                                    Log.d(TAG, "new frame duration, value: " + duration);
+                                }
+                                durationsNs.add(duration);
+                            }
+                            mLastTimestamp = timestamp;
+                        } else if (mFrameNumber == PHASE_CALC_N_FRAMES) {
+                            // Should report phase
+                            mPhaseInfoReporter.add(
+                                    new VideoPhaseInfo(timestamp, durationsNs)
+                            );
+                        }
+
                         writeFrameTimestamp(timestamp);
                         mFrameNumber++;
                     }
@@ -79,34 +118,36 @@ public class VideoFrameInfo implements Closeable {
     }
 
     public void submitProcessFrame(long timestamp, byte[] imageData, int width, int height, int rotation) {
+        // Submit image data (only if needed)
         if (!frameProcessor.isShutdown()) {
             frameProcessor.execute(
-                () -> {
-                    writeFrameTimestamp(timestamp);
-                    try {
-                        if (mShouldSaveFrames && mFrameNumber % EVERY_N_FRAME == 0) {
-                            Bitmap bitmap = mYuvUtils.yuv420ToBitmap(imageData, width, height, mContext);
+                    () -> {
+                        try {
+                            if (mShouldSaveFrames && mFrameNumber % EVERY_N_FRAME == 0) {
+                                Bitmap bitmap = mYuvUtils.yuv420ToBitmap(imageData, width, height, mContext);
 
-                            if (MyDebug.LOG) {
-                                Log.d(TAG, "Should save frame, timestamp: " + timestamp);
+                                if (MyDebug.LOG) {
+                                    Log.d(TAG, "Should save frame, timestamp: " + timestamp);
+                                }
+                                File frameFile = mStorageUtils.createOutputCaptureInfo(
+                                        StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
+                                );
+                                writeFrameJpeg(bitmap, frameFile, rotation);
                             }
-                            File frameFile = mStorageUtils.createOutputCaptureInfo(
-                                    StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
-                            );
-                            writeFrameJpeg(bitmap, frameFile, rotation);
+                        } catch (IOException e) {
+                            mAppInterface.onFrameInfoRecordingFailed();
+                            Log.e(TAG, "Failed to write frame info, timestamp: " + timestamp);
+                            e.printStackTrace();
+                            this.close();
                         }
-                        mFrameNumber++;
-                    } catch (IOException e) {
-                        mAppInterface.onFrameInfoRecordingFailed();
-                        Log.e(TAG, "Failed to write frame info, timestamp: " + timestamp);
-                        e.printStackTrace();
-                        this.close();
                     }
-                }
             );
         } else {
             Log.e(TAG, "Received new frame after frameProcessor executor shutdown");
         }
+
+        // Submit timestamp info (should be used for every frame)
+        submitProcessFrame(timestamp);
     }
 
     private void writeFrameTimestamp(long timestamp) {

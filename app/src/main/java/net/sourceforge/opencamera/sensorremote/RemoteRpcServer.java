@@ -7,15 +7,19 @@ import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +28,7 @@ public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
     private static final int RPC_PORT = 6969;
-    private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)";
+    private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
     private static final String VIDEO_START_REQUEST = "video_start";
     private static final String VIDEO_STOP_REQUEST = "video_stop";
 
@@ -38,6 +42,10 @@ public class RemoteRpcServer extends Thread {
         rpcSocket = new ServerSocket(RPC_PORT);
         rpcSocket.setReuseAddress(true);
         rpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
+
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Hostname " + getIPAddress());
+        }
     }
 
     public boolean isExecuting() {
@@ -48,23 +56,20 @@ public class RemoteRpcServer extends Thread {
         mIsExecuting.set(false);
     }
 
-    private void handleRequest(String msg, PrintWriter outputStream) throws IOException {
+    private void handleRequest(String msg, PrintWriter outputStream) {
         // IMU remote control API
         Pattern r = Pattern.compile(IMU_REQUEST_REGEX);
         Matcher imuRequestMatcher = r.matcher(msg);
         if (imuRequestMatcher.find()) {
             long duration = Long.parseLong(imuRequestMatcher.group(2));
+            boolean wantAccel = Integer.parseInt(imuRequestMatcher.group(4)) == 1;
+            boolean wantGyro = Integer.parseInt(imuRequestMatcher.group(6)) == 1;
 
             if (MyDebug.LOG) {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
-            File imuFile = mRequestHandler.handleImuRequest(duration);
-            outputStream.println(imuFile.getName());
-            try (BufferedReader br = new BufferedReader(new FileReader(imuFile))) {
-                for (String line; (line = br.readLine()) != null; ) {
-                    outputStream.println(line);
-                }
-            }
+            RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro);
+            outputStream.println(imuResponse.getMessage());
             if (MyDebug.LOG) {
                 Log.d(TAG, "IMU request file sent");
             }
@@ -73,7 +78,9 @@ public class RemoteRpcServer extends Thread {
 
         // Video remote control API
         if (msg.equals(VIDEO_START_REQUEST)) {
-            mRequestHandler.handleVideoStartRequest();
+            outputStream.println(
+                    mRequestHandler.handleVideoStartRequest()
+            );
         } else if (msg.equals(VIDEO_STOP_REQUEST)) {
             mRequestHandler.handleVideoStopRequest();
         }
@@ -88,6 +95,7 @@ public class RemoteRpcServer extends Thread {
         while (mIsExecuting.get()) {
             try {
                 Socket clientSocket = rpcSocket.accept();
+                clientSocket.setKeepAlive(true);
                 if (MyDebug.LOG) {
                     Log.d(TAG, "accepted connection from client");
                 }
@@ -106,9 +114,9 @@ public class RemoteRpcServer extends Thread {
                 outputStream.flush();
                 outputStream.close();
             } catch (SocketTimeoutException e) {
-                if (MyDebug.LOG) {
+               /* if (MyDebug.LOG) {
                     Log.d(TAG, "socket timed out, waiting for new connection to client");
-                }
+                }*/
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -120,5 +128,25 @@ public class RemoteRpcServer extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Finds this devices's IPv4 address that is not localhost and not on a dummy interface.
+     *
+     * @return the String IP address on success.
+     * @throws SocketException on failure to find a suitable IP address.
+     */
+    public static InetAddress getIPAddress() throws SocketException {
+        List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+        for (NetworkInterface intf : interfaces) {
+            for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
+                if (!addr.isLoopbackAddress()
+                        && !intf.getName().equals("dummy0")
+                        && addr instanceof Inet4Address) {
+                    return addr;
+                }
+            }
+        }
+        throw new SocketException("No viable IP Network addresses found.");
     }
 }
