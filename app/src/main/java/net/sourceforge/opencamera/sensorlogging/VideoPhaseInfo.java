@@ -10,19 +10,27 @@ public class VideoPhaseInfo {
     private final double avgDurationNs;
 
     // Accepts a sorted collection
-    public static double median(List<Long> m) {
-        int middle = m.size() / 2;
-        if (m.size() % 2 == 1) {
-            return m.get(middle);
+    public static double median(List<Long> numList) {
+        int middle = numList.size() / 2;
+        if (numList.size() % 2 == 1) {
+            return numList.get(middle);
         } else {
-            return (m.get(middle - 1) + m.get(middle)) / 2.0;
+            return (numList.get(middle - 1) + numList.get(middle)) / 2.0;
         }
+    }
+
+    public static double mean(List<Long> numList) {
+        double sum = 0;
+        for (Long num : numList) {
+            sum += num;
+        }
+        return sum / numList.size();
     }
 
     public VideoPhaseInfo(long videoPhaseNs, List<Long> frameDurations) {
         this.videoPhaseNs = videoPhaseNs;
-        Collections.sort(frameDurations);
-        this.avgDurationNs = median(frameDurations);
+        //Collections.sort(frameDurations);
+        this.avgDurationNs = mean(frameDurations);
     }
 
     public long getVideoPhaseNs() {
