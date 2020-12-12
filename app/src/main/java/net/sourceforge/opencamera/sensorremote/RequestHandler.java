@@ -82,17 +82,13 @@ public class RequestHandler {
                 try {
                     if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
                         File imuFile = new File(mRawSensorInfo.getLastAccelPath());
-                        if (imuFile != null) {
-                            msg.append(getSensorData(imuFile));
-                            msg.append(SENSOR_DATA_END_MARKER);
-                        }
+                        msg.append(getSensorData(imuFile));
+                        msg.append(SENSOR_DATA_END_MARKER);
                     }
                     if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
                         File imuFile = new File(mRawSensorInfo.getLastGyroPath());
-                        if (imuFile != null) {
-                            msg.append(getSensorData(imuFile));
-                            msg.append(SENSOR_DATA_END_MARKER);
-                        }
+                        msg.append(getSensorData(imuFile));
+                        msg.append(SENSOR_DATA_END_MARKER);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
