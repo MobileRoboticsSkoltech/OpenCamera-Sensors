@@ -1,6 +1,8 @@
 package net.sourceforge.opencamera.sensorremote;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -34,12 +36,13 @@ public class RemoteRpcServer extends Thread {
     public static final String CHUNK_END_DELIMITER = "end";
 
     private final ServerSocket rpcSocket;
+    private final MainActivity mContext;
     private final RequestHandler mRequestHandler;
     private final AtomicBoolean mIsExecuting = new AtomicBoolean();
 
     public RemoteRpcServer(MainActivity context) throws IOException {
         mRequestHandler = new RequestHandler(context);
-
+        mContext = context;
         rpcSocket = new ServerSocket(RPC_PORT);
         rpcSocket.setReuseAddress(true);
         rpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
@@ -47,6 +50,7 @@ public class RemoteRpcServer extends Thread {
         if (MyDebug.LOG) {
             Log.d(TAG, "Hostname " + getIPAddress());
         }
+
     }
 
     public boolean isExecuting() {
@@ -91,6 +95,25 @@ public class RemoteRpcServer extends Thread {
 
     @Override
     public void run() {
+
+        mContext.runOnUiThread(
+                () -> {
+                    try {
+                        new AlertDialog.Builder(mContext)
+                                .setTitle("Smartphone hostname")
+                                .setMessage("Hostname: " + getIPAddress())
+
+                                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+        );
+
         mIsExecuting.set(true);
         if (MyDebug.LOG) {
             Log.d(TAG, "waiting to accept connection from client...");
