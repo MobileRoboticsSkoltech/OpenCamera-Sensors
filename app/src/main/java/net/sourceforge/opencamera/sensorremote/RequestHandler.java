@@ -1,9 +1,12 @@
 package net.sourceforge.opencamera.sensorremote;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
@@ -55,6 +58,12 @@ public class RequestHandler {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording() && durationMillis <= MAX_IMU_DURATION_MS) {
             // TODO: custom rates?
             Callable<Void> recStartCallable = () -> {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+                prefEditor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
+                prefEditor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
+                prefEditor.apply();
+
                 mRawSensorInfo.enableSensors(0, 0);
                 Date currentDate = new Date();
                 mRawSensorInfo.startRecording(mContext, currentDate);
@@ -84,6 +93,7 @@ public class RequestHandler {
                         File imuFile = new File(mRawSensorInfo.getLastAccelPath());
                         msg.append(getSensorData(imuFile));
                         msg.append(SENSOR_DATA_END_MARKER);
+                        msg.append("\n");
                     }
                     if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
                         File imuFile = new File(mRawSensorInfo.getLastGyroPath());
