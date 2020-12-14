@@ -44,6 +44,6 @@ public class VideoPhaseInfo {
     @NonNull
     @Override
     public String toString() {
-        return videoPhaseNs + "\n" + avgDurationNs;
+        return videoPhaseNs + "\n" + avgDurationNs + "\n";
     }
 }

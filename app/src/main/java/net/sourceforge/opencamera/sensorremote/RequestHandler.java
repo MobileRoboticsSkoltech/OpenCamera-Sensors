@@ -99,6 +99,7 @@ public class RequestHandler {
                         File imuFile = new File(mRawSensorInfo.getLastGyroPath());
                         msg.append(getSensorData(imuFile));
                         msg.append(SENSOR_DATA_END_MARKER);
+                        msg.append("\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
