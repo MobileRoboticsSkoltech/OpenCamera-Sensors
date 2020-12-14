@@ -30,7 +30,6 @@ public class RemoteRpcResponse {
         result.message = SUCCESS +
                 "\n" +
                 message +
-                "\n" +
                 RemoteRpcServer.CHUNK_END_DELIMITER;
         return result;
     }
