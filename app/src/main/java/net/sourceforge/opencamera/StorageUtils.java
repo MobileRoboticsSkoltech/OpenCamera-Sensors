@@ -1,25 +1,15 @@
 package net.sourceforge.opencamera;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
-//import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-//import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -30,16 +20,27 @@ import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
-import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Images.ImageColumns;
+import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Video.VideoColumns;
 import android.provider.OpenableColumns;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
-
 import android.system.Os;
 import android.system.StructStatVfs;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+//import android.content.ContentValues;
+//import android.location.Location;
 
 /** Provides access to the filesystem. Supports both standard and Storage
  *  Access Framework.
@@ -330,7 +331,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
 
-    protected Uri getTreeUriSAF() {
+    Uri getTreeUriSAF() {
         String folder_name = getSaveLocationSAF();
         return Uri.parse(folder_name);
     }
@@ -887,7 +888,7 @@ public class StorageUtils {
             if( this.mediastore )
                 return this.uri;
             else {
-                try {
+                /*try {
                     // should only have allowed mediastore==null when using scoped storage
                     if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
                         return MediaStore.getMediaUri(context, this.uri);
@@ -895,11 +896,12 @@ public class StorageUtils {
                 }
                 catch(Exception e) {
                     e.printStackTrace();
-                }
+                }*/
                 return null;
             }
         }
     }
+
 
     private static boolean filenameIsRaw(String filename) {
         return filename.toLowerCase(Locale.US).endsWith(".dng");
@@ -1397,6 +1399,7 @@ public class StorageUtils {
         return media;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     Media getLatestMedia() {
         if( MainActivity.useScopedStorage() && this.isUsingSAF() ) {
             Uri treeUri = this.getTreeUriSAF();
