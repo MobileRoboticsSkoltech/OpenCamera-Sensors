@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.test;
 
+import android.graphics.Camera;
 import android.media.CamcorderProfile;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -9,6 +10,7 @@ import net.sourceforge.opencamera.cameracontroller.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoQualityHandler;
 import net.sourceforge.opencamera.TextFormatter;
@@ -20,7 +22,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -290,6 +294,52 @@ public class UnitTest {
         exp_video_quality.add("" + CamcorderProfile.QUALITY_720P + "_r1600x900");
         exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
         compareVideoQuality(video_quality, exp_video_quality);
+    }
+
+    /**
+     * Test for setting video frame image size
+     * when given list is unsorted
+     */
+    @Test
+    public void testVideoFrameImageSize() {
+        List<CameraController.Size> sizes = Arrays.asList(
+                new CameraController.Size(1280, 720),
+                new CameraController.Size(1280, 1280),
+                new CameraController.Size(640, 360),
+                new CameraController.Size(180, 180),
+                new CameraController.Size(256, 144)
+        );
+        try {
+            CameraController.Size size = CameraController2.getVideoFrameImageSize(sizes, 1280, 720);
+            assertEquals(1280, size.width);
+            assertEquals(720, size.height);
+        } catch (CameraControllerException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    /**
+     * Test for setting video frame image size
+     * when given list has no match
+     */
+    @Test
+    public void testVideoFrameImageSizeNoMatch() {
+        List<CameraController.Size> sizes = Arrays.asList(
+                new CameraController.Size(1280, 720),
+                new CameraController.Size(640, 360),
+                new CameraController.Size(500, 180),
+                new CameraController.Size(256, 144)
+        );
+        try {
+            CameraController.Size size = CameraController2.getVideoFrameImageSize(sizes, 720, 720);
+            assertEquals(640, size.width);
+            assertEquals(360, size.height);
+        } catch (CameraControllerException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /** Test for setting correct video resolutions and profiles.

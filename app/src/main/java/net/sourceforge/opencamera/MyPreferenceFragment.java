@@ -25,11 +25,13 @@ import android.graphics.Point;
 //import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
@@ -90,6 +92,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         addPreferencesFromResource(R.xml.preferences);
 
         final Bundle bundle = getArguments();
+
         this.cameraId = bundle.getInt("cameraId");
         if( MyDebug.LOG )
             Log.d(TAG, "cameraId: " + cameraId);
@@ -111,6 +114,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
+        final boolean supports_accel = bundle.getBoolean(PreferenceKeys.SupportsAccelKey);
+        if (!supports_accel) {
+            CheckBoxPreference accelPref = (CheckBoxPreference)findPreference(PreferenceKeys.AccelPreferenceKey);
+            accelPref.setChecked(false);
+            accelPref.setEnabled(false);
+        }
+
+        final boolean supports_gyro = bundle.getBoolean(PreferenceKeys.SupportsGyroKey);
+        if (!supports_gyro) {
+            CheckBoxPreference gyroPref = (CheckBoxPreference)findPreference(PreferenceKeys.GyroPreferenceKey);
+            gyroPref.setChecked(false);
+            gyroPref.setEnabled(false);
+        }
         final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
@@ -1110,6 +1126,54 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }*/
+
+        {
+            final Preference preference_characteristics = findPreference("preference_characteristics");
+            preference_characteristics.setOnPreferenceClickListener(
+                    (Preference arg0) -> {
+                        StringBuilder message = new StringBuilder();
+                        final boolean supportsCamera2 = bundle.getBoolean("supports_camera2");
+                        message.append("\nCamera2API: ");
+                        if (supportsCamera2) {
+                            message.append("supported");
+                        } else {
+                            message.append("not supported");
+                        }
+
+                        message.append("\nCurrent API: ");
+                        ListPreference cameraApiPref = (ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey);
+                        message.append(cameraApiPref.getEntry());
+
+                        String cameraApi = cameraApiPref.getValue();
+                        message.append("\nIMU and camera synchronization: ");
+                        if (cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2)) {
+                            final boolean supportsVideoImuSync = bundle.getBoolean(PreferenceKeys.SupportsVideoImuSync);
+                            if (supportsVideoImuSync) {
+                                message.append("supported");
+                            } else {
+                                message.append("not supported");
+                            }
+                        } else {
+                            message.append("old camera API is used, info unavailable");
+                        }
+
+                        new AlertDialog.Builder(MyPreferenceFragment.this.getActivity())
+                            .setTitle(preference_characteristics.getTitle())
+                            .setMessage(message)
+
+                            // Specifying a listener allows you to take an action before dismissing the dialog.
+                            // The dialog is automatically dismissed when a dialog button is clicked.
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Continue with delete operation
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .show();
+                        return true;
+                    }
+            );
+        }
 
         {
             final Preference pref = findPreference("preference_about");

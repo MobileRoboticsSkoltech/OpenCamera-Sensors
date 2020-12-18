@@ -47,10 +47,12 @@ import android.util.Log;
 public class StorageUtils {
     private static final String TAG = "StorageUtils";
 
-    static final int MEDIA_TYPE_IMAGE = 1;
-    static final int MEDIA_TYPE_VIDEO = 2;
-    static final int MEDIA_TYPE_PREFS = 3;
-    static final int MEDIA_TYPE_GYRO_INFO = 4;
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+    public static final int MEDIA_TYPE_PREFS = 3;
+    public static final int MEDIA_TYPE_GYRO_INFO = 4;
+    public static final int MEDIA_TYPE_RAW_SENSOR_INFO = 5;
+    public static final int MEDIA_TYPE_VIDEO_FRAME = 6;
 
     private final Context context;
     private final MyApplicationInterface applicationInterface;
@@ -69,6 +71,8 @@ public class StorageUtils {
     Uri getLastMediaScanned() {
         return last_media_scanned;
     }
+
+    Context getContext() { return context; }
 
     void clearLastMediaScanned() {
         last_media_scanned = null;
@@ -325,10 +329,13 @@ public class StorageUtils {
     }
 
     // only valid if isUsingSAF()
-    public Uri getTreeUriSAF() {
+
+    protected Uri getTreeUriSAF() {
         String folder_name = getSaveLocationSAF();
         return Uri.parse(folder_name);
     }
+
+
 
     File getSettingsFolder() {
         return new File(context.getExternalFilesDir(null), "backups");
@@ -626,7 +633,7 @@ public class StorageUtils {
         return result;
     }
 
-    String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
+    protected String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
@@ -650,6 +657,11 @@ public class StorageUtils {
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
                 break;
             }
+            case MEDIA_TYPE_VIDEO_FRAME: {
+                mediaFilename = suffix + extension;
+                break;
+            }
+            case MEDIA_TYPE_RAW_SENSOR_INFO: // raw sensor info files should have the same name as the video
             case MEDIA_TYPE_VIDEO: {
                 String prefix = sharedPreferences.getString(PreferenceKeys.SaveVideoPrefixPreferenceKey, "VID_");
                 mediaFilename = prefix + timeStamp + suffix + index + extension;
@@ -833,6 +845,9 @@ public class StorageUtils {
             case MEDIA_TYPE_PREFS:
             case MEDIA_TYPE_GYRO_INFO:
                 mimeType = "text/xml";
+                break;
+            case MEDIA_TYPE_RAW_SENSOR_INFO:
+                mimeType = "text/csv";
                 break;
             default:
                 // throw exception as this is a programming error

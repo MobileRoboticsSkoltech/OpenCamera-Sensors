@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Настройки</string>
     <string name="action_popup">Настройки всплывающих окон</string>
     <string name="intro_ok">Ок (Это сообщение больше не появится)</string>

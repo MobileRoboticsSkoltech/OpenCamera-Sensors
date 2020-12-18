@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Ajustes</string>
     <string name="action_popup">Ajustes de ventana emergente</string>
     <string name="intro_ok">OK (Este mensaje no se mostrará de nuevo)</string>

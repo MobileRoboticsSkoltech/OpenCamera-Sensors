@@ -39,6 +39,7 @@ public interface ApplicationInterface {
     }
 
     // methods that request information
+    Date getLastVideoDate();
     Context getContext(); // get the application context
     boolean useCamera2(); // should Android 5's Camera 2 API be used?
     Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
@@ -240,4 +241,5 @@ public interface ApplicationInterface {
     void onCaptureStarted(); // called immediately before we start capturing the picture
     void onPictureCompleted(); // called after all picture callbacks have been called and returned
     void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
+
 }

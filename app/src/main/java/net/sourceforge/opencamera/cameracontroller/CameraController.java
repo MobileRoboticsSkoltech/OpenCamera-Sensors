@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.preview.VideoProfile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -259,6 +260,16 @@ public abstract class CameraController {
         void onFrontScreenTurnOn();
     }
 
+    /** Interface to define callbacks for video frames and their timestamps
+     */
+    public interface VideoFrameInfoCallback {
+        void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height); // called immediately after new video frame is available
+
+        void onVideoFrameTimestampAvailable(long timestamp); // called immediately after new video frame timestamp is available
+
+        void onVideoCaptureSessionClosed();
+    }
+
     /** Interface to define callback for autofocus completing. This callback may be called on the UI thread (CameraController1)
      *  or a background thread (CameraController2).
      */
@@ -310,6 +321,7 @@ public abstract class CameraController {
     public int getCameraId() {
         return cameraId;
     }
+    public abstract boolean supportsVideoImuSync();
 
     /** For CameraController2 only. Applications should cover the preview textureview if either camera_controller==null, or if this
      *  method returns true. Otherwise there is a risk when opening the camera that the textureview still shows an image from when
@@ -574,8 +586,17 @@ public abstract class CameraController {
     /** Call to initialise video recording, should call after MediaRecorder.prepare(), but before MediaRecorder.start().
      * @param video_recorder The media recorder object.
      * @param want_photo_video_recording Whether support for taking photos whilst video recording is required. If this feature isn't supported, the option has no effect.
+     * @param video_frame_info_callback Callback for video frames and their timestamps
      */
-    public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException;
+    public abstract void initVideoRecorderPostPrepare(
+            MediaRecorder video_recorder,
+            VideoProfile profile,
+            boolean want_photo_video_recording,
+            boolean want_video_imu_recording,
+            boolean want_save_frames,
+            VideoFrameInfoCallback video_frame_info_callback
+    ) throws CameraControllerException;
+    public abstract void closeVideoRecordingSession();
     public abstract String getParametersString();
     public boolean captureResultIsAEScanning() {
         return false;

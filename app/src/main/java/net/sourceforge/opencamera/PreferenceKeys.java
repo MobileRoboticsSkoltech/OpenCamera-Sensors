@@ -37,7 +37,12 @@ public class PreferenceKeys {
      */
     public static final String MagneticAccuracyPreferenceKey = "done_magnetic_accuracy";
 
-    public static final String CameraAPIPreferenceDefault = "preference_camera_api_old";
+    public static final String CameraAPIPreferenceDefault = "preference_camera_api_camera2";
+
+    public static final String CameraAPIPreferenceCamera2 = "preference_camera_api_camera2";
+
+    public static final String SupportsVideoImuSync = "supports_video_imu_sync";
+
     public static final String CameraAPIPreferenceKey = "preference_camera_api";
 
     public static String getFlashPreferenceKey(int cameraId) {
@@ -299,6 +304,22 @@ public class PreferenceKeys {
     public static final String VideoFormatPreferenceKey = "preference_video_output_format";
 
     public static final String VideoBitratePreferenceKey = "preference_video_bitrate";
+
+    public static final String IMURecordingPreferenceKey = "preference_imu_recording";
+
+    public static final String AccelPreferenceKey = "preference_accel";
+
+    public static final String GyroPreferenceKey = "preference_gyro";
+
+    public static final String SupportsAccelKey = "supports_accel";
+
+    public static final String SupportsGyroKey = "supports_gyro";
+
+    public static final String saveFramesPreferenceKey = "preference_save_video_frames";
+
+    public static final String AccelSampleRatePreferenceKey = "preference_accel_sample_rate";
+
+    public static final String GyroSampleRatePreferenceKey = "preference_gyro_sample_rate";
 
     public static String getVideoFPSPreferenceKey(int cameraId) {
         // for cameraId==0, we return preference_video_fps instead of preference_video_fps_0, for

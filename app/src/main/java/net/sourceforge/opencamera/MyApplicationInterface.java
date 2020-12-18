@@ -74,7 +74,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private final MainActivity main_activity;
     private final LocationSupplier locationSupplier;
     private final GyroSensor gyroSensor;
-    private final StorageUtils storageUtils;
+    private final StorageUtilsWrapper storageUtils;
     private final DrawPreview drawPreview;
     private final ImageSaver imageSaver;
 
@@ -104,6 +104,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         MEDIASTORE
     }
     private LastImagesType last_images_type = LastImagesType.FILE; // whether the last images array are using File API, SAF or MediaStore
+
+    protected Date mLastVideoDate = null;
+
+    public Date getLastVideoDate() { return mLastVideoDate; }
 
     /** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
      */
@@ -164,7 +168,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
         this.gyroSensor = new GyroSensor(main_activity);
-        this.storageUtils = new StorageUtils(main_activity, this);
+        this.storageUtils = new StorageUtilsWrapper(main_activity, this);
         if( MyDebug.LOG )
             Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
         this.drawPreview = new DrawPreview(main_activity, this);
@@ -230,7 +234,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return gyroSensor;
     }
 
-    StorageUtils getStorageUtils() {
+    StorageUtilsWrapper getStorageUtils() {
         return storageUtils;
     }
 
@@ -314,14 +318,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public File createOutputVideoFile(String extension) throws IOException {
-        last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
+        mLastVideoDate = new Date();
+        last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
         return last_video_file;
     }
 
     @Override
     public Uri createOutputVideoSAF(String extension) throws IOException {
-        last_video_file_uri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, new Date());
-        return last_video_file_uri;
+        mLastVideoDate = new Date();
+        last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
+        return last_video_file_saf;
     }
 
     @Override
@@ -1199,7 +1205,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public boolean getRecordAudioPref() {
-        return sharedPreferences.getBoolean(PreferenceKeys.RecordAudioPreferenceKey, true);
+        // Default value should be set to false for normal app usage, as MediaRecorder adds extra frames to the video when audio is on
+        return sharedPreferences.getBoolean(PreferenceKeys.RecordAudioPreferenceKey, false);
     }
 
     @Override

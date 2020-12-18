@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string>
     <string name="action_settings">Paramètres</string>
     <string name="action_popup">Fenêtre de paramètres</string>
     <string name="intro_ok">OK (ce message ne s\'affichera plus)</string>

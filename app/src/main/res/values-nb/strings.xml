@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Open Camera</string> <!-- shouldn't be translated -->
+    <!-- shouldn't be translated -->
     <string name="action_settings">Innstillinger</string>
     <string name="action_popup">Oppsprettsinnstillinger</string>
     <string name="intro_ok">OK (Denne meldingen vil ikke bli vist igjen)</string>

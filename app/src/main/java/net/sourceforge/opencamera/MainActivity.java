@@ -6,6 +6,7 @@ import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 import net.sourceforge.opencamera.ui.MainUI;
 import net.sourceforge.opencamera.ui.ManualSeekbars;
@@ -104,6 +105,7 @@ public class MainActivity extends Activity {
 
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
+    private RawSensorInfo mRawSensorInfo;
 
     // components: always non-null (after onCreate())
     private BluetoothRemoteControl bluetoothRemoteControl;
@@ -111,7 +113,7 @@ public class MainActivity extends Activity {
     private SettingsManager settingsManager;
     private MainUI mainUI;
     private ManualSeekbars manualSeekbars;
-    private MyApplicationInterface applicationInterface;
+    private ExtendedAppInterface applicationInterface;
     private TextFormatter textFormatter;
     private SoundPoolManager soundPoolManager;
     private MagneticSensor magneticSensor;
@@ -199,8 +201,31 @@ public class MainActivity extends Activity {
     private static final float WATER_DENSITY_SALTWATER = 1.03f;
     private float mWaterDensity = 1.0f;
 
+    /**
+     * Outer onCreate() for OpenCamera Sensors additional
+     * initial operations
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.mRawSensorInfo = new RawSensorInfo(this);
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Created RawSensorInfo object");
+        }
+
+        onCreateInner(savedInstanceState);
+        super.onCreate(savedInstanceState);
+    }
+
+    public RawSensorInfo getRawSensorInfoManager() {
+        return this.mRawSensorInfo;
+    }
+
+    /**
+     * Inner onCreate() from Open Camera code, should be called in outer
+     * @param savedInstanceState
+     */
+    private void onCreateInner(Bundle savedInstanceState) {
         long debug_time = 0;
         if( MyDebug.LOG ) {
             Log.d(TAG, "onCreate: " + this);
@@ -274,7 +299,7 @@ public class MainActivity extends Activity {
         settingsManager = new SettingsManager(this);
         mainUI = new MainUI(this);
         manualSeekbars = new ManualSeekbars();
-        applicationInterface = new MyApplicationInterface(this, savedInstanceState);
+        applicationInterface = new ExtendedAppInterface(this, savedInstanceState);
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
         textFormatter = new TextFormatter(this);
@@ -2266,6 +2291,9 @@ public class MainActivity extends Activity {
         stopAudioListeners();
 
         Bundle bundle = new Bundle();
+        bundle.putBoolean(PreferenceKeys.SupportsGyroKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE));
+        bundle.putBoolean(PreferenceKeys.SupportsAccelKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER));
+
         bundle.putInt("cameraId", this.preview.getCameraId());
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
         bundle.putString("camera_api", this.preview.getCameraAPI());
@@ -2492,6 +2520,8 @@ public class MainActivity extends Activity {
             }
             bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
         }
+
+        bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
 
         putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
         putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
@@ -4896,7 +4926,7 @@ public class MainActivity extends Activity {
         return this.manualSeekbars;
     }
 
-    public MyApplicationInterface getApplicationInterface() {
+    public ExtendedAppInterface getApplicationInterface() {
         return this.applicationInterface;
     }
 
@@ -4912,7 +4942,7 @@ public class MainActivity extends Activity {
         return this.applicationInterface.getLocationSupplier();
     }
 
-    public StorageUtils getStorageUtils() {
+    public StorageUtilsWrapper getStorageUtils() {
         return this.applicationInterface.getStorageUtils();
     }
 
