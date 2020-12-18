@@ -4,6 +4,8 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import net.sourceforge.opencamera.MyDebug;
 
 /** This is essentially similar to CamcorderProfile in that it encapsulates a set of video settings
@@ -54,6 +56,7 @@ public class VideoProfile {
         this.videoFrameWidth = camcorderProfile.videoFrameWidth;
     }
 
+    @NonNull
     public String toString() {
         return ("\nAudioSource:        " + this.audioSource +
                 "\nVideoSource:        " + this.videoSource +

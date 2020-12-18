@@ -18,7 +18,7 @@
     <string name="repeats_to_go">重复做</string> <!--  intentionally starts lower case -->
     <string name="failed_to_reconnect_camera">连接到相机失败</string>
     <string name="video_may_be_corrupted">错误，视频文件可能已经损坏</string>
-    <string name="not_supported">在你的设备上不被支持</string> <!--  intentionally starts lower case -->
+    <string name="not_supported">不支持您的设备</string> <!--  intentionally starts lower case -->
     <string name="video_error_unknown">未知错误，视频挂起</string>
     <string name="video_error_server_died">服务器死亡，视频挂起</string>
     <string name="video_max_duration">视频达到最大时长</string>
@@ -72,7 +72,7 @@
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
     
     <string name="preference_category_camera_effects">相机特效</string>
-    <string name="preference_auto_stabilise">自动稳定</string>
+    <string name="preference_auto_stabilise">自动水平</string>
     <string name="preference_auto_stabilise_summary">图像将被旋转，使它们自动水平(仅照片) (拍照更慢，并且在内存过低的设备上失败)</string>
     <string name="preference_color_effect">应用一个颜色效果</string>
     <string name="preference_color_effect_summary">应用选定的颜色效果到照片</string>
@@ -190,7 +190,7 @@
     <string name="preference_stamp_style">文本样式</string>
     <string name="preference_stamp_style_summary">水印文本的样式\n%s</string>
     <string name="video_quality">视频分辨率</string>
-    <string name="preference_force_video_4k">强制 4K UHD 视频 (实验)</string>
+    <string name="preference_force_video_4k">强制 4K UHD 视频 (仅在部分设备可用)</string>
     <string name="preference_force_video_4k_summary">为后置相机录像启用 3840x2160 分辨率 - 仅当你的设备支持时才能工作，并且如果不支持可能崩溃！</string>
     <string name="preference_video_stabilization">启用视频稳定</string>
     <string name="preference_video_stabilization_summary">视频稳定减少在预览和录像中由于相机移动引起的晃动。</string>
@@ -239,8 +239,8 @@
     <string name="flash_mode">闪光模式</string>
     <string name="trash">删除上一张照片</string>
     <string name="share">共享照片</string>
-    
-    <string name="parent_folder">../ (上层目录)</string>
+
+    <string name="parent_folder">父文件夹</string>
     <string name="new_folder">新建文件夹</string>
     <string name="cant_write_folder">不能写到这个文件夹</string>
     <string name="cant_access_folder">不能访问这个文件夹</string>
@@ -293,7 +293,7 @@
     <string name="preference_video_fps_default">默认</string>
 
     <string name="preference_stamp_dateformat_default">默认</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">yyyy-mm-dd</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">yyyy-mm-dd (ISO 8601)</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/yyyy</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">无</string>
@@ -302,12 +302,12 @@
     <string name="flash_auto">自动闪光灯</string>
     <string name="flash_on">开启闪光灯</string>
     <string name="flash_torch">闪光灯常亮</string>
-    <string name="flash_red_eye">红眼</string>
+    <string name="flash_red_eye">防红眼</string>
 
     <string name="preference_record_audio_src_camcorder">摄像机同侧</string>
     <string name="preference_record_audio_src_mic">外部麦克风（如果存在）</string>
     <string name="preference_record_audio_src_default">默认麦克风</string>
-    <string name="preference_record_audio_src_voice_communication">优化语音</string>
+    <string name="preference_record_audio_src_voice_communication">针对语音通话优化</string>
 
     <string name="preference_video_bitrate_default">默认</string>
     <string name="preference_video_bitrate_100000">100kbps</string>
@@ -375,19 +375,19 @@
     <string name="preference_calibrate_level_calibration_reset">重置水平校正</string>
     <string name="noise_reduction_mode_high_quality">高品质</string>
     <string name="noise_reduction_mode_fast">快速</string>
-    <string name="noise_reduction_mode_minimal">小尺寸</string>
+    <string name="noise_reduction_mode_minimal">低限度</string>
     <string name="noise_reduction_mode_default">默认</string>
     <string name="noise_reduction_mode_off">关闭</string>
     <string name="preference_screen_processing_settings">处理设置…</string>
     <string name="preference_noise_reduction_mode">降噪算法</string>
-    <string name="processing">处理…</string>
+    <string name="processing">处理中…</string>
     <string name="preference_raw_no">仅JPEG</string>
     <string name="preference_raw_yes">JPEG和DNG(RAW)</string>
     <string name="preference_raw_only">仅DNG(RAW)</string>
     <string name="preference_fast_burst_n_images">照片数量</string>
     <string name="preference_focus_bracketing_n_images">照片数量</string>
-    <string name="preference_video_capture_rate">速度</string>
-    <string name="preference_video_capture_rate_normal">普通</string>
+    <string name="preference_video_capture_rate">速度优先</string>
+    <string name="preference_video_capture_rate_normal">正常</string>
     <string name="slow_motion_disabled">关闭慢动作</string>
     <string name="slow_motion_enabled">启用慢动作</string>
 
@@ -398,7 +398,7 @@
     <string name="accuracy_low">低</string>
     <string name="accuracy_medium">中</string>
     <string name="accuracy_high">高</string>
-    <string name="accuracy_unknown">位置</string>
+    <string name="accuracy_unknown">未知</string>
     <string name="preference_units_distance">距离单位</string>
     <string name="preference_units_distance_ft">英制</string>
     <string name="preference_units_distance_m">公制</string>
@@ -407,7 +407,7 @@
     <string name="preference_noise_reduction_mode_summary">
         相机驱动程序提供的降噪算法。降噪算法会试图去除相机捕获的噪点（特别是黑暗环境），改善照片质量。
         注意这与降噪照片模式无关，实际上在NR照片模式下会忽略此设置。\n%s</string>
-    <string name="preference_edge_mode">锐化算法（Edge mode）</string>
+    <string name="preference_edge_mode">锐化算法</string>
     <string name="preference_edge_mode_summary">相机驱动程序提供的锐化算法。可以提高捕获图像的清晰度和细节。（在NR拍照模式下忽略此设置）\n%s</string>
     <string name="preference_show_whats_new_summary">是否在应用程序更新后提示新功能和改进的信息</string>
     <string name="auto_stabilise_info">自动水平会自动旋转照片，使他们显示水平.\n\n注意这意味着图像分辨率会略低（因为需要旋转和裁切）。</string>
@@ -417,7 +417,7 @@
     <string name="preference_ghost_image_summary">在取景框内显示一张半透明的图片，辅助你对正镜头。\n%s</string>
     <string name="preference_ghost_image_off">关闭</string>
     <string name="preference_ghost_image_last">上一张照片</string>
-    <string name="preference_ghost_image_selected">选一张图片</string>
+    <string name="preference_ghost_image_selected">选定的图片</string>
     <string name="preference_calibrate_level_calibrate">校正</string>
     <string name="preference_show_pitch_lines">显示等分线</string>
     <string name="preference_show_pitch_lines_summary">显示水平等分线</string>
@@ -425,7 +425,7 @@
     <string name="preference_show_geo_direction_lines_summary">显示罗盘方向线</string>
     <string name="video_pause">暂停录像</string>
     <string name="video_resume">继续录像</string>
-    <string name="preference_show_take_photo">拍照按钮</string>
+    <string name="preference_show_take_photo">显示“拍照按钮”</string>
     <string name="preference_show_take_photo_summary">显示拍照、录像按钮。除非你有其他方法（比如硬件快门、使用音量键），否则不应该取消勾选</string>
 
 
@@ -453,9 +453,9 @@
 
 
     <string name="preference_calibrate_level_summary">此选项可以校准设备的加速度计，从而使自动水平和屏幕显示的角度/水平度正常工作</string>
-    <string name="preference_calibrate_level_dialog">请将您的设备放在平坦的水平面上，然后按下“校准”按钮\n\n按下“重置”按钮可以从设备中删除校准数据。</string>
-    <string name="preference_camera2_fast_burst">快速HDR/expo曝光</string>
-    <string name="preference_camera2_fast_burst_summary">允许更快地完成HDR/expo拍照。如果您的设备在使用HDR/expo模式拍照时出现了问题，请禁用此功能。</string>
+    <string name="preference_calibrate_level_dialog">请将您的设备放在平坦的水平面上(横竖屏均可)，然后按下“校准”按钮\n\n按下“重置”按钮可以从设备中删除校准数据。\n\n按下“返回”按钮可取消。</string>
+    <string name="preference_camera2_fast_burst">快速HDR/包围曝光</string>
+    <string name="preference_camera2_fast_burst_summary">允许更快地完成HDR/包围拍照。如果您的设备在使用HDR/包围模式拍照时出现了问题，请禁用此功能。</string>
 
     <string name="open_files_saf_exception_ghost">在设备上没有找到文件选择器，所以不能使用辅助图像功能。</string>
     <string name="saf_permission_failed_open_image">无法打开文件</string>
@@ -465,19 +465,18 @@
 
 
     <string name="preference_video_subtitle">视频字幕</string>
-    <string name="preference_video_subtitle_summary">创建一个纯粹日期和时间的字幕文件(.SET格式)\n如果启用了定位/方向数据，同时也会记录GPS信息.\n%s</string>
+    <string name="preference_video_subtitle_summary">创建一个存储日期和时间的字幕文件(.SET格式)；如果启用了定位/方向数据，同时也会记录GPS信息.\n%s</string>
 
-    <string name="preference_record_audio_src_voice_recognition">针对语音识别进行优化</string>
+    <string name="preference_record_audio_src_voice_recognition">针对语音识别优化</string>
         <string name="camera_error">相机发生了严重错误</string>
 
-    <string name="preference_video_log">记录相机参数</string>
-    <string name="preference_video_log_summary">保存录像的参数到flat(log)\n%s</string>
-    <string name="preference_video_log_off">Off</string>
-    <string name="preference_video_log_low">Low</string>
-    <string name="preference_video_log_medium">Medium</string>
-    <string name="preference_video_log_strong">Strong</string>
-    <string name="preference_video_log_extra_strong">Extra strong</string>
-    <string name="video_log">Log profile</string>
+    <string name="preference_video_log">视频图片配置文件</string>
+    <string name="preference_video_log_summary">为视频模式设定标准或者平铺的图片配置文件\n%s</string>
+    <string name="preference_video_log_low">Log (低)</string>
+    <string name="preference_video_log_medium">Log (中等)</string>
+    <string name="preference_video_log_strong">Log (强)</string>
+    <string name="preference_video_log_extra_strong">Log (超强)</string>
+    <string name="video_log">Log 配置文件</string>
     <string name="left_of_screen">在屏幕左侧</string>
     <string name="right_of_screen">在屏幕右侧</string>
     <string name="top_of_screen">在屏幕顶端</string>
@@ -488,10 +487,10 @@
     <string name="high_speed">高速</string> <!-- in the sense of high speed video frame rates -->
 
 
-    <string name="preference_exif_artist">艺术家(Artist")</string>
-    <string name="preference_exif_artist_summary">存储在艺术家(Artist)标签内的文本（仅限JPEG格式）。默认留空。</string>
-    <string name="preference_exif_copyright">版权(Copyright)</string>
-    <string name="preference_exif_copyright_summary">存储在版权(Copyright)标签内的文本（仅限JPEG格式）。默认留空。</string>
+    <string name="preference_exif_artist">艺术家</string>
+    <string name="preference_exif_artist_summary">存储在艺术家标签内的文本（仅限JPEG格式）。留空代表不保存。</string>
+    <string name="preference_exif_copyright">版权</string>
+    <string name="preference_exif_copyright_summary">存储在版权标签内的文本（仅限JPEG格式）。留空代表不保存。</string>
 
 
     <string name="pause_video">暂停录像</string>
@@ -502,49 +501,49 @@
     <string name="audio_listener_failed">麦克风初始化失败</string>
     <string name="failed_to_process_hdr">HDR照片创建失败</string>
 
-    <string name="white_balance_auto">自动·Auto</string>
-    <string name="white_balance_cloudy">多云·Cloudy</string>
-    <string name="white_balance_daylight">日光·Daylight</string>
-    <string name="white_balance_fluorescent">荧光灯·Fluorescent</string>
-    <string name="white_balance_incandescent">白炽灯·Incandescent</string>
-    <string name="white_balance_shade">阴翳·Shade</string>
-    <string name="white_balance_twilight">星光·Twilight</string>
-    <string name="white_balance_warm">温暖·Warm</string>
-    <string name="white_balance_manual">手动·Manual</string>
+    <string name="white_balance_auto">自动</string>
+    <string name="white_balance_cloudy">阴天</string>
+    <string name="white_balance_daylight">日光</string>
+    <string name="white_balance_fluorescent">荧光灯</string>
+    <string name="white_balance_incandescent">白炽灯</string>
+    <string name="white_balance_shade">阴影</string>
+    <string name="white_balance_twilight">星光</string>
+    <string name="white_balance_warm">温暖</string>
+    <string name="white_balance_manual">手动</string>
 
-    <string name="scene_mode_action">动作·Action</string>
-    <string name="scene_mode_barcode">条码·Barcode</string>
-    <string name="scene_mode_beach">沙滩·Beach</string>
-    <string name="scene_mode_candlelight">烛光·Candlelight</string>
-    <string name="scene_mode_auto">自动·Auto</string>
-    <string name="scene_mode_fireworks">篝火·Fireworks</string>
-    <string name="scene_mode_landscape">横向·Landscape</string>
-    <string name="scene_mode_night">夜晚·Night</string>
-    <string name="scene_mode_night_portrait">夜间人像</string>
-    <string name="scene_mode_party">聚会·Party</string>
-    <string name="scene_mode_portrait">人像·Portrait</string>
-    <string name="scene_mode_snow">雪景·Snow</string>
-    <string name="scene_mode_sports">运动·Sports</string>
+    <string name="scene_mode_action">动作</string>
+    <string name="scene_mode_barcode">条码</string>
+    <string name="scene_mode_beach">沙滩</string>
+    <string name="scene_mode_candlelight">烛光</string>
+    <string name="scene_mode_auto">自动</string>
+    <string name="scene_mode_fireworks">烟火</string>
+    <string name="scene_mode_landscape">风景</string>
+    <string name="scene_mode_night">夜景</string>
+    <string name="scene_mode_night_portrait">夜景肖像</string>
+    <string name="scene_mode_party">聚会</string>
+    <string name="scene_mode_portrait">肖像</string>
+    <string name="scene_mode_snow">雪景</string>
+    <string name="scene_mode_sports">运动</string>
     <string name="scene_mode_steady_photo">稳定拍照</string>
-    <string name="scene_mode_sunset">黄昏·Sunset</string>
-    <string name="scene_mode_theatre">剧院·Theatre</string>
+    <string name="scene_mode_sunset">黄昏</string>
+    <string name="scene_mode_theatre">剧院</string>
 
-    <string name="color_effect_aqua">湖蓝·Aqua</string>
-    <string name="color_effect_blackboard">黑板·Blackboard</string>
-    <string name="color_effect_mono">黑白·Mono</string>
-    <string name="color_effect_negative">负片·Negative</string>
-    <string name="color_effect_none">无·None</string>
-    <string name="color_effect_posterize">反色·Posterize</string>
-    <string name="color_effect_sepia">棕·Sepia</string>
-    <string name="color_effect_solarize">过爆·Solarize</string>
-    <string name="color_effect_whiteboard">白板·Whiteboard</string>
+    <string name="color_effect_aqua">湖蓝</string>
+    <string name="color_effect_blackboard">黑板</string>
+    <string name="color_effect_mono">黑白</string>
+    <string name="color_effect_negative">负片</string>
+    <string name="color_effect_none">无</string>
+    <string name="color_effect_posterize">反色</string>
+    <string name="color_effect_sepia">棕褐色</string>
+    <string name="color_effect_solarize">过曝</string>
+    <string name="color_effect_whiteboard">白板</string>
 
     <string name="whats_new">新功能：</string>
     <string name="donate">捐赠</string>
 
     <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
-    <string name="face_detected">face</string>
-    <string name="faces_detected">faces</string>
+    <string name="face_detected">人脸</string>
+    <string name="faces_detected">人脸</string>
     <string name="preference_record_audio_src_unprocessed">未处理</string>
 
 
@@ -638,26 +637,26 @@
 
     <string name="flash_frontscreen_auto">自动开启屏幕补光</string>
     <string name="flash_frontscreen_on">打开屏幕补光</string>
-    <string name="flash_frontscreen_torch">屏幕高亮</string>
+    <string name="flash_frontscreen_torch">屏幕常亮</string>
 
-    <string name="preference_antibanding">去除条纹</string>
+    <string name="preference_antibanding">去除摩尔纹</string>
     <string name="preference_antibanding_summary">使用算法消除闪烁造成的摩尔纹\n%s</string>
 
-    <string name="anti_banding_auto">Auto</string>
+    <string name="anti_banding_auto">自动</string>
     <string name="anti_banding_50hz">50Hz</string>
     <string name="anti_banding_60hz">60Hz</string>
-    <string name="anti_banding_off">Off</string>
+    <string name="anti_banding_off">关闭</string>
 
 
-    <string name="preference_screen_settings_manager">配置管理</string>
+    <string name="preference_screen_settings_manager">配置管理器</string>
 
-    <string name="preference_save_settings">导出配置</string>
-    <string name="preference_save_settings_summary">导出Open Camera所有选项的设定值一个文件中</string>
+    <string name="preference_save_settings">保存配置</string>
+    <string name="preference_save_settings_summary">保存Open Camera所有选项的至文件中</string>
     <string name="preference_save_settings_filename">保存的文件名</string>
 
     <string name="preference_restore_settings">恢复配置</string>
-    <string name="preference_restore_settings_summary">导入配置文件到Open Camera。注意这会覆盖现在的所有设定值！</string>
-    <string name="preference_restore_settings_question">这个选项允许你选择一个先前导出的配置文件并导入到Open Camera中。需要注意这个文件载入后会覆盖当前所有选项的设定值！</string>
+    <string name="preference_restore_settings_summary">恢复配置文件到Open Camera。注意这会覆盖现在的所有设定值！</string>
+    <string name="preference_restore_settings_question">这个选项允许你选择一个先前保存的配置文件并恢复到Open Camera中。需要注意这个文件载入后会覆盖当前所有选项的设定值！</string>
 
     <string name="preference_video_output_format">视频格式</string>
     <string name="preference_video_output_format_summary">录像的编码和格式\n%s</string>
@@ -668,9 +667,9 @@
     <string name="preference_video_output_format_3gpp">3GPP</string>
     <string name="preference_video_output_format_webm">WebM (不支持音频)</string>
 
-    <string name="saved_settings">导出的配置</string>
-    <string name="save_settings_failed">导出配置失败</string>
-    <string name="restore_settings_failed">导入配置失败</string>
+    <string name="saved_settings">保存的配置</string>
+    <string name="save_settings_failed">保存配置失败</string>
+    <string name="restore_settings_failed">恢复配置失败</string>
     <string name="open_files_saf_exception_generic">这个设备没有可用的文件选择器，不支持这个选项</string>
 
     <string name="preference_image_format">照片格式</string>
@@ -681,8 +680,8 @@
     <string name="preference_hdr_contrast_enhancement">HDR增强对比度</string>
     <string name="preference_hdr_contrast_enhancement_summary">HDR如何使用增强对比度的算法。在动态范围非常大的场景中能够提高成像品质。当然这也可以让照片多出一种HDR的味道。\n%s</string>
     <string name="preference_hdr_contrast_enhancement_off">关闭</string>
-    <string name="preference_hdr_contrast_enhancement_smart">自动</string>
-    <string name="preference_hdr_contrast_enhancement_always">打开</string>
+    <string name="preference_hdr_contrast_enhancement_smart">智能开启</string>
+    <string name="preference_hdr_contrast_enhancement_always">一直开启</string>
 
     <string name="preference_ui_placement_left">功能按钮在左侧</string>
     <string name="preference_ui_placement_right">功能按钮在右侧</string>
@@ -692,8 +691,8 @@
     <string name="preference_show_face_detection_summary">是否在屏幕上显示人脸识别的开关</string>
     <string name="face_detection_enable">打开人脸识别</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
     <string name="face_detection_disable">关闭人脸识别</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
-    <string name="face_detection_enabled">人脸识别已经打开</string>
-    <string name="face_detection_disabled">人脸识别已经关闭</string>
+    <string name="face_detection_enabled">人脸识别已启用</string>
+    <string name="face_detection_disabled">人脸识别已禁用</string>
 
     <string name="preference_show_auto_level">显示自动水平的按钮</string>
     <string name="preference_show_auto_level_summary">是否在屏幕上显示自动水平的开关。开启自动水平后，照片会根据水平面自动旋转裁切。</string>
@@ -704,8 +703,8 @@
     <string name="preference_show_stamp_summary">是否在屏幕上显示照片水印的开关</string>
     <string name="stamp_enable">使用水印</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
     <string name="stamp_disable">禁用水印</string> <!-- for "ContentDescription" (used for accessibility, e.g., Google Talkback) -->
-    <string name="stamp_enabled">水印已经启用</string>
-    <string name="stamp_disabled">水印已经禁用</string>
+    <string name="stamp_enabled">水印已启用</string>
+    <string name="stamp_disabled">水印已禁用</string>
 
 
     <string name="preference_show_textstamp">显示文本水印的按钮</string>
@@ -715,8 +714,8 @@
     <string name="preference_show_white_balance_lock_summary">是否在屏幕上显示白平衡锁定的开关</string>
     <string name="white_balance_lock">锁定白平衡</string>
     <string name="white_balance_unlock">解锁白平衡</string>
-    <string name="white_balance_locked">白平衡已经锁定</string>
-    <string name="white_balance_unlocked">白平衡已经解锁</string>
+    <string name="white_balance_locked">白平衡已锁定</string>
+    <string name="white_balance_unlocked">白平衡已解锁</string>
 
     <string name="preference_show_exposure_lock">显示曝光锁</string>
     <string name="preference_show_exposure_lock_summary">是否在屏幕上显示曝光锁定的开关</string>
@@ -737,7 +736,7 @@
     <string name="preference_stamp_style_background">带背景色的文字</string>
 
     <string name="photo_mode_panorama">全景</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
-    <string name="photo_mode_panorama_full">全景(Panorama)</string>
+    <string name="photo_mode_panorama_full">全景</string>
 
     <string name="preference_screen_remote_control">BLE蓝牙控制设备…</string>
     <string name="preference_enable_remote">启用BLE蓝牙控制</string>
@@ -749,9 +748,9 @@
     <string name="bluetooth_not_supported">不支持蓝牙</string>
     <string name="unknown_device">未知设备</string>
     <string name="preference_remote_disconnect_screen_dim">断开控制时熄屏</string>
-    <string name="preference_remote_disconnect_screen_dim_summary">提示：打开Open Camera前，请把默认亮度跳到最低</string>
+    <string name="preference_remote_disconnect_screen_dim_summary">提示：打开Open Camera前，请把默认亮度调到最低</string>
     <string name="preference_water_type">使用盐水计算深度</string>
-    <string name="preference_water_type_summary">设置正确的水的类型，可以提高水下拍摄的准确性</string>
+    <string name="preference_water_type_summary">设置正确的水下兔笼的类型，可以提高水下拍摄时深度计算的准确性</string>
     <string name="remote_connected">控制器已连接</string>
 
     <string name="preference_remote_type_kraken">Kraken智能家居</string>
@@ -770,13 +769,13 @@
     <string name="preference_histogram_summary">是否显示颜色直方图\n%s</string>
     <string name="preference_histogram_off">关闭</string>
     <string name="preference_histogram_rgb">RGB色彩</string>
-    <string name="preference_histogram_luminance">亮度(luminance)</string>
+    <string name="preference_histogram_luminance">亮度</string>
     <string name="preference_histogram_value">值(最大)</string>
-    <string name="preference_histogram_intensity">强度(平均)intensity</string>
-    <string name="preference_histogram_lightness">Lightness (Average of min-max)</string>
+    <string name="preference_histogram_intensity">强度(平均)</string>
+    <string name="preference_histogram_lightness">光亮度 (最小与最大之间的平均值)</string>
 
-    <string name="preference_zebra_stripes">Show zebra stripes</string>
-    <string name="preference_zebra_stripes_summary">If this option is enabled, zebra stripes will be drawn on-screen showing where the camera preview is over exposed.\n%s</string>
+    <string name="preference_zebra_stripes">显示斑马条纹</string>
+    <string name="preference_zebra_stripes_summary">如果启用该选项，将会在相机预览屏幕中在过曝区域绘制斑马条纹。\n%s</string>
     <string name="preference_zebra_stripes_off">关闭</string>
     <string name="preference_zebra_stripes_70pc">70%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
     <string name="preference_zebra_stripes_80pc">80%</string> <!-- shouldn't escape %, not needed when shown in ListPreference -->
@@ -795,7 +794,7 @@
     <string name="preference_focus_peaking_color">焦点峰值色彩</string>
     <string name="preference_focus_peaking_color_summary">高亮显示对焦的边缘时使用的颜色\n%s</string>
 
-    <string name="remaining">Remaining</string> <!-- images remaining for "processing" -->
+    <string name="remaining">剩余</string> <!-- images remaining for "processing" -->
 
     <string name="preference_preview">成像预览…</string>
 
@@ -807,8 +806,8 @@
     <!--Whether the RAW option should also apply for expo bracketing photo mode (or for HDR mode when \"Save all images for HDR mode\" is enabled). If this option is disabled, only JPEGs will be saved in those photo modes.-->
     <string name="preference_raw_expo_bracketing_summary">RAW模式也使用包围曝光模式。如果禁用，只有拍摄JPEG照片时使用包围曝光。</string>
 
-    <string name="preference_raw_focus_bracketing">允许RAW包围焦距</string>
-    <string name="preference_raw_focus_bracketing_summary">RAW模式也是用包围焦距模式。如果禁用，只有拍摄JPEF照片时使用包围焦距。</string>
+    <string name="preference_raw_focus_bracketing">允许RAW包围对焦</string>
+    <string name="preference_raw_focus_bracketing_summary">RAW模式也是用包围对焦模式。如果禁用，只有拍摄JPEF照片时使用包围对焦。</string>
 
     <string name="cycle_raw">循环RAW的模式</string>
     <string name="preference_show_cycle_raw">显示RAW按钮</string>
@@ -842,4 +841,105 @@
     <string name="preference_immersive_mode_navigation">只隐藏屏幕上的虚拟导航按钮</string>
     <string name="preference_immersive_mode_gui">隐藏图形用户界面</string>
     <string name="preference_immersive_mode_everything">隐藏一切</string>
+    <string name="preference_video_bitrate_150000000">150Mbps</string>
+    <string name="preference_video_bitrate_200000000">200Mbps</string>
+    <string name="preference_focus_bracketing_n_images_entries_2">2</string>
+    <string name="preference_focus_bracketing_n_images_entries_3">3</string>
+    <string name="preference_focus_bracketing_n_images_entries_4">4</string>
+    <string name="preference_focus_bracketing_n_images_entries_5">5</string>
+    <string name="preference_focus_bracketing_n_images_entries_6">6</string>
+    <string name="preference_focus_bracketing_n_images_entries_8">8</string>
+    <string name="preference_focus_bracketing_n_images_entries_10">10</string>
+    <string name="preference_focus_bracketing_n_images_entries_12">12</string>
+    <string name="preference_focus_bracketing_n_images_entries_15">15</string>
+    <string name="preference_focus_bracketing_n_images_entries_20">20</string>
+    <string name="preference_focus_bracketing_n_images_entries_25">25</string>
+    <string name="preference_focus_bracketing_n_images_entries_30">30</string>
+    <string name="preference_focus_bracketing_n_images_entries_40">40</string>
+    <string name="preference_focus_bracketing_n_images_entries_50">50</string>
+    <string name="preference_focus_bracketing_n_images_entries_100">100</string>
+    <string name="preference_focus_bracketing_n_images_entries_150">150</string>
+    <string name="preference_focus_bracketing_n_images_entries_200">200</string>
+    <string name="preference_fast_burst_n_images_entries_2">2</string>
+    <string name="preference_fast_burst_n_images_entries_3">3</string>
+    <string name="preference_fast_burst_n_images_entries_4">4</string>
+    <string name="preference_fast_burst_n_images_entries_5">5</string>
+    <string name="preference_fast_burst_n_images_entries_6">6</string>
+    <string name="preference_fast_burst_n_images_entries_8">8</string>
+    <string name="preference_fast_burst_n_images_entries_10">10</string>
+    <string name="preference_fast_burst_n_images_entries_12">12</string>
+    <string name="preference_fast_burst_n_images_entries_15">15</string>
+    <string name="preference_fast_burst_n_images_entries_20">20</string>
+    <string name="seconds_abbreviation">s</string>
+    <string name="photo_mode_dro">DRO</string>
+    <string name="preference_video_log_off">默认</string>
+    <string name="preference_nr_mode">降噪模式</string>
+    <string name="preference_nr_mode_normal">普通</string>
+    <string name="preference_nr_mode_low_light">低照度</string>
+    <string name="preference_crop_guide_2">2 (2:1)</string>
+    <string name="preference_video_max_filesize_2gb">2GB</string>
+    <string name="preference_video_max_filesize_5gb">5GB</string>
+    <string name="preference_video_max_filesize_9gb">9GB</string>
+    <string name="cancelled_focus_bracketing">包围对焦已取消</string>
+    <string name="preference_burst_interval_0_5s">0.5秒</string>
+    <string name="previous">上一个</string>
+    <string name="next">下一个</string>
+    <string name="feet_abbreviation">ft</string>
+    <string name="preference_video_log_fine">Log (精细)</string>
+    <string name="preference_video_gamma">伽马</string>
+    <string name="preference_video_srgb">sRGB</string>
+    <string name="preference_video_rec709">REC709</string>
+    <string name="preference_select_remote">选择遥控设备</string>
+    <string name="preference_immersive_mode_low_profile">仅暗淡屏幕上的导航按钮</string>
+    <string name="error_features_4k">4K UHD</string>
+    <string name="error_features_bitrate">比特率</string>
+    <string name="error_features_frame_rate">帧率</string>
+    <string name="error_features_slow_motion">慢动作</string>
+    <string name="preference_allow_long_press">允许长按动作</string>
+    <string name="preference_allow_long_press_summary">是否允许长按动作(例如长按图库来改变存储位置)。</string>
+    <string name="preference_show_camera_id">显示相机 ID</string>
+    <string name="preference_show_camera_id_summary">在屏幕上显示当前相机的 ID</string>
+    <string name="aperture">光圈</string>
+    <string name="preference_multi_cam_button">多相机图标</string>
+    <string name="exposure_compensation_seekbar">改变曝光补偿的进度条</string>
+    <string name="preference_image_format_summary">选择保存照片的文件格式。这将影响“标准”(非 RAW)照片。注意 PNG 格式并非真正无损，它是从 JPEG 按 100%% 质量转换而成的。\n%s</string>
+    <string name="preference_camera_api">Camera API</string>
+    <string name="preference_camera_api_summary">选择 Camera2 API 来启用额外功能，比如手动曝光、对焦、白平衡及 RAW(如果设备支持)。改变 API 将重启应用。\n%s</string>
+    <string name="preference_camera_api_old">原始 Camera API</string>
+    <string name="preference_camera_api_camera2">Camera2 API</string>
+    <string name="preference_video_profile_gamma">视频伽马值</string>
+    <string name="preference_video_profile_gamma_summary">如果视频图标预置文件被设定为伽马时的伽马值\n%s</string>
+    <string name="preference_video_profile_gamma_1_6">1.6</string>
+    <string name="preference_video_profile_gamma_1_8">1.8</string>
+    <string name="preference_video_profile_gamma_1_9">1.9</string>
+    <string name="preference_video_profile_gamma_2_0">2.0</string>
+    <string name="preference_video_profile_gamma_2_1">2.1</string>
+    <string name="preference_video_profile_gamma_2_2">2.2</string>
+    <string name="preference_video_profile_gamma_2_3">2.3</string>
+    <string name="preference_video_profile_gamma_2_4">2.4</string>
+    <string name="preference_video_profile_gamma_2_6">2.6</string>
+    <string name="preference_video_profile_gamma_2_8">2.8</string>
+    <string name="preference_ghost_image_alpha">辅助图片透明度</string>
+    <string name="preference_ghost_image_alpha_summary">用于辅助图片的透明度值。较低的值代表更透明，较高的值代表更不透明。\n%s</string>
+    <string name="external_camera">外部相机</string>
+    <string name="ultrawide">超广角</string>
+    <string name="switch_to_external_camera">切换至外部相机</string>
+    <string name="switch_to_unknown_camera">切换相机</string>
+    <string name="switch_multi_camera">在多个相机间切换</string>
+    <string name="array_seekbar_preference_seekbar">改变当前首选项值的进度条</string>
+    <string name="preference_zebra_stripes_foreground_color">斑马条纹前景颜色</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">显示斑马条纹时前景使用的颜色。\n%s</string>
+    <string name="preference_zebra_stripes_background_color">斑马条纹背景颜色</string>
+    <string name="preference_zebra_stripes_background_color_summary">显示斑马条纹时背景使用的颜色。\n%s</string>
+    <string name="preference_zebra_stripes_color_black">黑色</string>
+    <string name="preference_zebra_stripes_color_red">红色</string>
+    <string name="preference_zebra_stripes_color_orange">橙色</string>
+    <string name="preference_zebra_stripes_color_transparent">半透明</string>
+    <string name="preference_zebra_stripes_color_white">白色</string>
+    <string name="preference_multi_cam_button_summary">如果启用，使用分开的按钮在前置/后置相机之间切换，且在多个前置/后置之间切换。如果禁用，切换相机按钮将在所有相机之间循环。</string>
+    <string name="preference_stamp_geo_address_summary">如果可行的话，在标注 GPS 位置时使用一个地址。该选项需要互联网连接。注意一旦启用，这将要求您的设备传输位置数据至互联网上的第三方来实现将 GPS 坐标转换为地址的操作。参阅 https://developer.android.com/reference/android/location/Geocoder 。 \n%s</string>
+    <string name="preference_comment_ypr">保存三轴运动信息</string>
+    <string name="preference_comment_ypr_summary">在照片的 Exit 用户备注字段保存设备的三轴运动信息(仅适用于JPEG格式)</string>
+    <string name="preference_audio_control_summary">根据噪音或者语音指令拍照。当启用后，使用屏幕上的麦克风按钮来启动监听。注意语音指令选项使用 Android 语音识别服务：当使用该选项的时候，语音数据将极有可能被发送至远程服务来实现指令识别。\n%s</string>
+    <string name="intro_text">点击来对焦，然后按下蓝色相机按钮以拍照。要禁用最大屏幕亮度，查阅设置/屏幕GUI/\"强制最大亮度\"选项。要在 Android 5 之后的设备上保存至 SD 卡，查阅设置/更多相机控制/\"使用存储访问架构\"。如需更多帮助，在设置中点击“在线帮助”。</string>
 </resources>

@@ -74,6 +74,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ZoomControls;
 
+// ignore warning about "Call to Thread.sleep in a loop", this is only test code
+@SuppressWarnings("BusyWait")
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private static final String TAG = "MainActivityTest";
     private MainActivity mActivity = null;
@@ -6207,6 +6209,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
 
         int exp_n_new_files = 0;
+        boolean failed_to_start = false;
         if( mPreview.isVideoRecording() ) {
             assertEquals((int) (Integer) takePhotoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_video_recording);
             assertEquals((int) (Integer) switchVideoButton.getTag(), net.sourceforge.opencamera.R.drawable.take_photo);
@@ -6305,6 +6308,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         else {
             Log.d(TAG, "didn't start video");
             assertTrue(allow_failure);
+            failed_to_start = true;
         }
 
         if( mPreview.usingCamera2API() ) {
@@ -6318,6 +6322,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             if( time_ms <= 500 ) {
                 // if quick, should have deleted corrupt video - but may be device dependent, sometimes we manage to record a video anyway!
                 assertTrue(n_new_files == 0 || n_new_files == 1);
+            }
+            else if( failed_to_start ) {
+                // if video recording failed to start, we should have deleted any file created!
+                assertEquals(0, n_new_files);
             }
             else {
                 assertEquals(n_non_video_files+1, n_new_files);
@@ -7347,6 +7355,44 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
     }
 
+    public void testTakeVideoForceFailureSAF() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceFailureSAF");
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+            Log.d(TAG, "SAF requires Android Lollipop or better");
+            return;
+        }
+
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.UsingSAFPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
+        editor.apply();
+        updateForSettings();
+
+        mActivity.getPreview().test_video_failure = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
+    public void testTakeVideoForceIOException() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceIOException");
+
+        setToDefault();
+
+        mActivity.getPreview().test_video_ioexception = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
+    public void testTakeVideoForceCameraControllerException() throws InterruptedException {
+        Log.d(TAG, "testTakeVideoForceCameraControllerException");
+
+        setToDefault();
+
+        mActivity.getPreview().test_video_cameracontrollerexception = true;
+        subTestTakeVideo(false, false, true, false, null, 5000, false, 0);
+    }
+
     /* Test can be reliable on some devices, test no longer run as part of test suites.
      */
     public void testTakeVideo4K() throws InterruptedException {
@@ -7973,6 +8019,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(shareButton.getVisibility(), View.GONE);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDuration() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDuration");
 
@@ -7981,6 +8031,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideoMaxDuration(false, false);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDurationRestart() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDurationRestart");
 
@@ -7989,6 +8043,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         subTestTakeVideoMaxDuration(true, false);
     }
 
+    /**
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
+     */
     public void testTakeVideoMaxDurationRestartInterrupt() throws InterruptedException {
         Log.d(TAG, "testTakeVideoMaxDurationRestartInterrupt");
 
@@ -8111,7 +8169,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         Thread.sleep(500);
 
-        assertEquals(mPreview.getCurrentFocusValue(), non_default_focus_mode);
+        // camera should be closed in settings
+        assertNull(mPreview.getCameraController());
 
         mActivity.runOnUiThread(new Runnable() {
             public void run() {
@@ -8122,6 +8181,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // need to wait for UI code to finish before leaving
         this.getInstrumentation().waitForIdleSync();
         Thread.sleep(500);
+
+        assertEquals(mPreview.getCurrentFocusValue(), non_default_focus_mode);
 
         // count initial files in folder
         int n_files = getNFiles();
@@ -9954,7 +10015,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
 
-        @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
         final ZoomControls zoomControls = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
         assertEquals(zoomControls.getVisibility(), View.GONE);
 
@@ -11949,7 +12009,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertFalse(mActivity.getApplicationInterface().getImageSaver().test_queue_blocked);
 
-        int n_new_files = getNFiles();
+        int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         if( is_slow ) {
             // with limited queue, won't be able to save as many files
@@ -12390,8 +12450,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     /* Tests launching with ACTION_VIDEO_CAPTURE intent, along with EXTRA_DURATION_LIMIT. The test
      * then tests we actually record video with the duration limit set.
-     * Fails on Android emulator with Camera2 API, for some reason EXTRA_DURATION_LIMIT makes the
-     * video stop due to hitting max duration immediately.
+     * Fails on Android emulator, for some reason EXTRA_DURATION_LIMIT makes the video stop due to
+     * hitting max duration immediately.
      */
     public void testIntentVideoDurationLimit() throws InterruptedException, ApplicationInterface.NoFreeStorageException {
         Log.d(TAG, "testIntentVideoDurationLimit");
@@ -13211,7 +13271,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
-        checkHistogramDetails(hdrHistogramDetails, 32, 74, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 32, 74, 255);
+        checkHistogramDetails(hdrHistogramDetails, 29, 68, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 4 images.
@@ -13260,7 +13321,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
-        checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
+        checkHistogramDetails(hdrHistogramDetails, 21, 74, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR23", but with 6 images.
@@ -13313,7 +13375,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
         //checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
-        checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
+        //checkHistogramDetails(hdrHistogramDetails, 28, 82, 255);
+        checkHistogramDetails(hdrHistogramDetails, 20, 72, 255);
     }
 
     /** Tests HDR algorithm on test samples "testHDR24".
@@ -13508,7 +13571,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         //checkHistogramDetails(hdrHistogramDetails, 3, 101, 251);
         //checkHistogramDetails(hdrHistogramDetails, 3, 109, 251);
-        checkHistogramDetails(hdrHistogramDetails, 6, 111, 252);
+        //checkHistogramDetails(hdrHistogramDetails, 6, 111, 252);
+        checkHistogramDetails(hdrHistogramDetails, 2, 111, 252);
     }
 
     /** Tests HDR algorithm on test samples "testHDR33".
@@ -14065,7 +14129,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR49_exp4_output.jpg", false, -1, -1);
 
-        checkHistogramDetails(hdrHistogramDetails, 0, 100, 245);
+        //checkHistogramDetails(hdrHistogramDetails, 0, 100, 245);
+        checkHistogramDetails(hdrHistogramDetails, 0, 94, 244);
     }
 
     /** Tests HDR algorithm on test samples "testHDR49".
@@ -14232,8 +14297,87 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
     }
 
+    /** Tests HDR algorithm on test samples "testHDR58".
+     */
+    public void testHDR58() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR58");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR58/IMG_20190911_210146_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR58/IMG_20190911_210146_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR58/IMG_20190911_210146_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR58_output.jpg", false, 1250, 1000000000L/10);
+        //HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR58_output.jpg", false, 1250, 1000000000L/10, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_CLAMP);
+
+        checkHistogramDetails(hdrHistogramDetails, 11, 119, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR59".
+     */
+    public void testHDR59() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR59");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR59/IMG_20190911_210154_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR59/IMG_20190911_210154_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR59/IMG_20190911_210154_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR59_output.jpg", false, 1250, 1000000000L/10);
+        //HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR59_output.jpg", false, 1250, 1000000000L/10, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_CLAMP);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR60".
+     */
+    public void testHDR60() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR60");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR60/IMG_20200507_020319_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR60/IMG_20200507_020319_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR60/IMG_20200507_020319_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR60_output.jpg", false, 491, 1000000000L/10);
+        //HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR60_output.jpg", false, 491, 1000000000L/10, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_CLAMP);
+
+        //checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+    }
+
+    /** Tests HDR algorithm on test samples "testHDR61".
+     */
+    public void testHDR61() throws IOException, InterruptedException {
+        Log.d(TAG, "testHDR61");
+
+        setToDefault();
+
+        // list assets
+        List<Bitmap> inputs = new ArrayList<>();
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_0.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_1.jpg") );
+        inputs.add( getBitmapFromFile(hdr_images_path + "testHDR61/IMG_20191111_145230_2.jpg") );
+
+        HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR61_output.jpg", false, 50, 1000000000L/5025);
+
+        checkHistogramDetails(hdrHistogramDetails, 0, 86, 254);
+
+        int [] exp_offsets_x = {0, 0, 1};
+        int [] exp_offsets_y = {0, 0, -2};
+        checkHDROffsets(exp_offsets_x, exp_offsets_y);
+    }
+
     /** Tests HDR algorithm on test samples "testHDRtemp".
-     *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
+     *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated algorithm.
      *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
      */
     public void testHDRtemp() throws IOException, InterruptedException {
@@ -15594,7 +15738,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         inputs.add(avg_images_path + "testAvg25/input2.jpg");
         inputs.add(avg_images_path + "testAvg25/input3.jpg");
 
-        //noinspection unused
         HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg25_output.jpg", 512, 1000000000L/20, 1.0f, new TestAvgCallback() {
             @Override
             public void doneProcessAvg(int index) {
@@ -16668,7 +16811,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      * @param camera_angle_x The value of preview.getViewAngleX(for_preview=false) (in degrees) when taking the input photos (on the device used).
      * @param camera_angle_y The value of preview.getViewAngleY(for_preview=false) (in degrees) when taking the input photos (on the device used).
      */
-    @SuppressWarnings("unused")
     private void subTestPanorama(List<String> inputs, String output_name, String gyro_debug_info_filename, float panorama_pics_per_screen, float camera_angle_x, float camera_angle_y, float gyro_tol_degrees) throws IOException, InterruptedException {
         Log.d(TAG, "subTestPanorama");
 

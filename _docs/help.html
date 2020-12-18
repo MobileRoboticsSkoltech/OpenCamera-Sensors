@@ -265,7 +265,7 @@ has a hardware menu button, pressing that should also open the settings.)</p>
 photo/video (by default saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
 a Gallery app.
 You can also "long press" on the Gallery icon - this will let you switch between the recent save locations, or take you straight to a
-file dialog to choose a save location if additional locations have yet been defined. See
+dialog to choose a save location if additional locations have yet been defined. See
 <a href="#save_location">Save location</a> under Settings/More camera controls for more details.</p>
 
 <p><b><img src="ic_pause_circle_outline_white_48dp.png" alt="Pause video icon" width="32" height="32">Pause video</b> - When recording
@@ -530,9 +530,10 @@ see the "Max duration of video" option.</p>
 <p><b>Audio control sensitivity</b> - This controls how sensitive Open Camera is to noises, if "Audio control" is set to "Loud noise".
 If you find it's taking photos too often unintentionally, or isn't responding to your sounds, try adjusting this option.</p>
 
-<p><b>Bluetooth LE remote control</b> - Open Camera supports connecting to the Kraken Smart Housing via the options in
-these settings. Once connected via Bluetooth, it should be possible to control Open Camera from the device. The on-screen
-display of Open Camera will also display information from the Kraken (temperature and depth).</p>
+<p><b>Bluetooth LE remote control</b> - Open Camera supports connecting to some specific "smart housing" cases via the
+    options in these settings. See "Remote device type" for supported types. At the time of writing, only one make/model
+    is supported. Once connected via Bluetooth, it should be possible to control Open Camera from the device.
+    The on-screen display of Open Camera will also display information from the housing (temperature and depth).</p>
 
 <p><b>Lock photo/video orientation</b> - Normally the orientation of the photo/video will be rotated by some multiple of
 90 degree such that the orientation looks right - e.g. if your device is held in portrait, the resultant image/video will
@@ -540,19 +541,27 @@ be in portrait. This option allows fixing the camera to either be in portrait or
 <a href="#auto_stabilise">auto-level</a> is also enabled, it will have the effect of aligning photos to the nearest
 90 degrees.</p>
 
-<p><a name="save_location"><b>Save location</b></a> - Select the folder to store the photos in. Click on a folder
-(or "Parent Folder") to navigate through the filesystem. Select "New Folder" to create a new folder in the currently
-displayed folder. Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some
-folders that cannot be written to - Open Camera will display a message if you try to use one of these folders. Once
-you have specified a new save location, you can long press on the Gallery icon to quickly switch between recent save
-locations. Note that if "Use Storage Access Framework" is selected, this option will instead show up the Android standard
-file chooser - navigate to the desired folder, and click "SELECT". If you want to save to an SD card, see "How can I
-save to my external SD card?" under the <a href="#faq">FAQ</a>.</p>
+<p><a name="save_location"><b>Save location</b></a> - Select the folder to store the photos in.</p>
+<ul>
+    <li><b>On Android 9 or earlier:</b> This opens a file dialog. Click on a folder (or "Parent Folder") to navigate through
+        the filesystem. Select "New Folder" to create a new folder in the currently displayed folder. Select "Use Folder"
+        to choose the currently displayed folder. Note that on Android, there are some folders that cannot be written
+        to - Open Camera will display a message if you try to use one of these folders.</li>
+    <li><b>On Android 10 or later:</b> This opens a dialog to type the name of the folder. This
+        will be a subfolder of DCIM on your internal storage. You can specify subfolders with the "/"
+        character. For example, specifying Camera/holiday will save inside DCIM/Camera/holiday/
+        on your internal storage.</li>
+    <li><b>If "Use Storage Access Framework" is enabled</b>: Then on any Android version, this option
+        will show up the Android standard file chooser - navigate to the desired folder, and click "SELECT" or
+        "ALLOW ACCESS" (wording varies depending on Android version).</li>
+</ul>
+<p>Once you have specified a new save location, you can long press on the Gallery icon to quickly switch between recent save
+    locations. If you want to save to an SD card, see "How can I save to my external SD card?" under the <a href="#faq">FAQ</a>.</p>
 
 <p><b>Use Storage Access Framework</b> - If selected, Open Camera will instead use the Android
 <a href="https://developer.android.com/guide/topics/providers/document-provider.html">Storage Access Framework</a>. This
-has some advantages, such as using the standard Android file picker, and being the only way to save to SD cards on Android 5
-- though it may be slightly slower to take photos. (Requires Android 5.0 or higher.)</p>
+has some advantages, such as using the standard Android file picker, and being the only way to save to SD cards on Android 5+.
+Furthermore on Android 10+, it is the only way to save outside of the DCIM/ folder. (Requires Android 5.0 or higher.)</p>
 
 <!--Enter the folder to store the photos in. This can be either a relative path (e.g.,
 OpenCamera or even something like MyPics/Camera) in which case the folder will be located inside the "DCIM"
@@ -891,8 +900,9 @@ Disabling this option will show the full extent of the panorama, but will leave 
 <p><b>Panorama original images</b> - Whether to save the original shots in <a href="#pano">Panorama</a> mode. This can be useful
 if you want to use a third party application to stitch the images together to create a panorama. Note that these original
 images are always saved in PNG format. This option can also be useful for debugging purposes, to send me example images when
-reporting problems with panorama - for this, it's best to select to include the debug XML file (note that you'll typically need
-a third party File Explorer application to see and delete XML files on Android).</p>
+reporting problems with panorama - for this, it's best to select to include the debug XML file. Note the XML files will be
+saved inside <small>Android/data/net.sourceforge.opencamera/files/</small>, and you'll typically need
+a third party File Explorer application to see and delete XML files.</p>
 
 <p><b>Front camera mirror</b> - Normally for front cameras, the preview will behave like a mirror, but resultant
 photos will still be as the camera (or other people) view the scene. This option can be used to mirror the
@@ -918,8 +928,12 @@ formatting. Also used for Video settings/"Video subtitles".</p>
 
 <p><b>Use addresses</b> - If "Stamp photos" and "Store location data" is enabled, this allows the location
     to be displayed on the resultant photo in the form of an address, either as well as or instead of GPS
-    coordinates. Note that an Internet connection is required for this to succeed. Also used for
-    Video settings/"Video subtitles".</p>
+    coordinates. Similarly also used for Video settings/"Video subtitles".
+    An Internet connection is required for this to succeed.
+    Note that if enabled, this requires that your device transmits location data across the Internet to a third party
+    in order to convert GPS coordinates to an address (this uses the
+    <a href="https://developer.android.com/reference/android/location/Geocoder">Geocoder API</a>).
+</p>
 
 <p><b>Distance unit</b> - If "Stamp photos" is enabled, this controls whether to use metres (m) or
 feet (ft) when recording the GPS altitude. Also used for Video settings/"Video subtitles".</p>
@@ -1030,7 +1044,9 @@ the video itself, it stores the text in a separate subtitles
 SRT files, and use them to display the information as subtitles. The subtitles will record the date and time. If "Store location data" is enabled (see
 "Location settings" below), then the current location latitude and longitude coordinates will also be recorded (if the location is
 known). Similarly for "Store compass direction". Note that you can control the formatting style for date, time and location using
-the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format, Distance unit).</p>
+the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format, Distance unit).
+Note that on Android 10+, using this option means the ".SRT" files will show in most gallery apps as separate unplayable video
+files. A workaround is to enable Settings/More camera controls/"Use Storage Access Framework".</p>
 
 <p><b>Video bitrate (approx)</b> - If set to a value other than "default", the default video bitrate is overridden. Higher values mean better
     quality video, but the files take up more disk space. Note that some values may be unsupported by your device, and may
@@ -1151,7 +1167,8 @@ this information to the clipboard.</p>
     is the risk that settings on some devices may be incompatible with other devices. Also if the
     saved settings file specified a save location, this may not be valid on the new device (or if
     using "Storage Access Framework", you may have to reselect the folder in Open Camera, to grant
-    write permission for the folder).</p>
+    write permission for the folder). Note that on Android 10+, the file dialog will only let you
+    select a file inside <small>Android/data/net.sourceforge.opencamera/files/</small>.</p>
 
 <p><b>Reset settings</b> - Resets all Open Camera settings to their default. Selecting this option will cause
 Open Camera to restart. Note that this will not delete any saved settings (see above options).</p>
@@ -1219,7 +1236,7 @@ if you use this method, and then uninstall!</li>
 <li><b>Android 5.0 onwards</b> - The restrictions on SD cards introduced in Android 4.4 still apply, however
 instead you can enable Settings/More camera controls/"Use Storage Access Framework", and this should allow you
 to save to external SD cards. If when choosing a folder, you only see "Recent", you may need to click on the
-three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage".</li>
+three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage").</li>
 <li><b>Android 6.0 onwards</b> - From Android 6, some devices support "Adoptable Storage" allowing you to
 select to use
 an SD card as internal storage. Note that not all devices support this, even if running Android 6 or later. If your device

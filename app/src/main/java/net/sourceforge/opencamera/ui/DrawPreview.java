@@ -40,7 +40,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.location.Location;
-import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
@@ -2753,7 +2752,7 @@ public class DrawPreview {
         }
     }
 
-    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, @SuppressWarnings("unused") float dir_x, @SuppressWarnings("unused") float dir_y, int radius_dp, boolean outline) {
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp, boolean outline) {
         if( outline ) {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(stroke_width);

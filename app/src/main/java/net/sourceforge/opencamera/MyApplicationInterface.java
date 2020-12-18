@@ -1005,10 +1005,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             }
             else {
                 // If save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days).
-                // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-                // when using scoped storage, we should no longer hit this codepath, but we are still using this for older Android
-                // versions.
-                @SuppressWarnings("deprecation")
                 File storage = Environment.getExternalStorageDirectory();
                 if( MyDebug.LOG )
                     Log.d(TAG, "compare to: " + storage.getAbsolutePath());
@@ -2030,7 +2026,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         Address address = null;
                         if( store_location && !preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
                             // try to find an address
-                            if( Geocoder.isPresent() ) {
+                            if( main_activity.isAppPaused() ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // is paused - this shouldn't happen, since we stop video when paused, but just to be safe
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for video subtitles  as app is paused?!");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());
@@ -2513,10 +2515,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             error_message = getContext().getResources().getString(R.string.failed_to_record_video);
         }
         main_activity.getPreview().showToast(null, error_message);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override
@@ -2539,11 +2537,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onFailedCreateVideoFileError() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onFailedCreateVideoFileError");
         main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override

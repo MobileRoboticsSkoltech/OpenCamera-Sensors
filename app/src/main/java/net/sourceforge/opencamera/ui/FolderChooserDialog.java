@@ -60,6 +60,7 @@ public class FolderChooserDialog extends DialogFragment {
             this.sort_order = sort_order;
         }
 
+        @NonNull
         @Override
         public String toString() {
             if( override_name != null )
@@ -257,10 +258,6 @@ public class FolderChooserDialog extends DialogFragment {
             }
         }
         if( show_dcim_shortcut ) {
-            // The reason given for deprecation is wrong - the path will only be inaccessible when also running on Android 10;
-            // when using scoped storage, we should no longer be using this folder dialog with DCIM shortcut, but we are still
-            // using this for older Android versions.
-            @SuppressWarnings("deprecation")
             File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
                 listed_files.add(new FileWrapper(default_folder, null, 1));

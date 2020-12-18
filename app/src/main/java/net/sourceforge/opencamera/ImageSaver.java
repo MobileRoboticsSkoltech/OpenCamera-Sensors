@@ -6,7 +6,6 @@ import net.sourceforge.opencamera.cameracontroller.RawImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -82,6 +80,11 @@ public class ImageSaver extends Thread {
     private final static int queue_cost_jpeg_c = 1; // also covers WEBP
     private final static int queue_cost_dng_c = 6;
     //private final static int queue_cost_dng_c = 1;
+
+    // Should be same as MainActivity.app_is_paused, but we keep our own copy to make threading easier (otherwise, all
+    // accesses of MainActivity.app_is_paused would need to be synchronized).
+    // Access to app_is_paused should always be synchronized to this (i.e., the ImageSaver class).
+    private boolean app_is_paused = true;
 
     // for testing; must be volatile for test project reading the state
     // n.b., avoid using static, as static variables are shared between different instances of an application,
@@ -438,6 +441,22 @@ public class ImageSaver extends Thread {
         return n_real_images_to_save;
     }
 
+    /** Application has paused.
+     */
+    void onPause() {
+        synchronized(this) {
+            app_is_paused = true;
+        }
+    }
+
+    /** Application has resumed.
+     */
+    void onResume() {
+        synchronized(this) {
+            app_is_paused = false;
+        }
+    }
+
     void onDestroy() {
         if( MyDebug.LOG )
             Log.d(TAG, "onDestroy");
@@ -486,6 +505,8 @@ public class ImageSaver extends Thread {
                         break;
                 }
                 if( test_slow_saving ) {
+                    // ignore warning about "Call to Thread.sleep in a loop", this is only activated in test code
+                    //noinspection BusyWait
                     Thread.sleep(2000);
                 }
                 if( MyDebug.LOG ) {
@@ -1088,7 +1109,7 @@ public class ImageSaver extends Thread {
                 default:
                     // Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
                     // a short exposure time, due to fixing problems where some regions are too dark.
-                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53.
+                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53, testHDR61.
                     // Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
                     // (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
                     // testHDR54, testHDR55, testHDR56.
@@ -1172,7 +1193,6 @@ public class ImageSaver extends Thread {
 
     @SuppressWarnings("WeakerAccess")
     public static class GyroDebugInfo {
-        @SuppressWarnings("unused")
         public static class GyroImageDebugInfo {
             public float [] vectorRight; // X axis
             public float [] vectorUp; // Y axis
@@ -2135,9 +2155,19 @@ public class ImageSaver extends Thread {
 
                         Address address = null;
                         if( request.store_location && !request.preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
+                            boolean block_geocoder;
+                            synchronized(this) {
+                                block_geocoder = app_is_paused;
+                            }
                             // try to find an address
                             // n.b., if we update the class being used, consider whether the info on Geocoder in preference_stamp_geo_address_summary needs updating
-                            if( Geocoder.isPresent() ) {
+                            if( block_geocoder ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // has paused and we're still saving images
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for photostamp as app is paused");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());

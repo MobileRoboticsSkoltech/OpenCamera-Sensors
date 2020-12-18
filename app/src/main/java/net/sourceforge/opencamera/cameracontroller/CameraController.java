@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
 
+import androidx.annotation.NonNull;
+
 /** CameraController is an abstract class that wraps up the access/control to
  *  the Android camera, so that the rest of the application doesn't have to
  *  deal directly with the Android camera API. It also allows us to support
@@ -203,6 +205,7 @@ public abstract class CameraController {
             return width*41 + height;
         }
 
+        @NonNull
         public String toString() {
             StringBuilder s = new StringBuilder();
             for (int[] f : this.fps_ranges) {

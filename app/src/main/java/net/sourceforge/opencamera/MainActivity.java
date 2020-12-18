@@ -598,7 +598,7 @@ public class MainActivity extends Activity {
                     // E.g., we have a "What's New" for 1.44 (64), but then push out a quick fix for 1.44.1 (65). We don't want to
                     // show the dialog again to people who already received 1.44 (64), but we still want to show the dialog to people
                     // upgrading from earlier versions.
-                    int whats_new_version = 78; // 1.48.2
+                    int whats_new_version = 80; // 1.48.3
                     whats_new_version = Math.min(whats_new_version, version_code); // whats_new_version should always be <= version_code, but just in case!
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "whats_new_version: " + whats_new_version);
@@ -688,9 +688,9 @@ public class MainActivity extends Activity {
     /** Whether to use codepaths that are compatible with scoped storage.
      */
     public static boolean useScopedStorage() {
-        return false;
+        //return false;
         //return true;
-        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
@@ -1058,6 +1058,7 @@ public class MainActivity extends Activity {
             return (res ? 1249 : 1259) ^ (alt == null ? 0 : alt.hashCode());
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "CheckSaveLocationResult{" + res + " , " + alt + "}";
@@ -1394,6 +1395,7 @@ public class MainActivity extends Activity {
         speechControl.initSpeechRecognizer();
         initLocation();
         initGyroSensors();
+        applicationInterface.getImageSaver().onResume();
         soundPoolManager.initSound();
         soundPoolManager.loadSound(R.raw.mybeep);
         soundPoolManager.loadSound(R.raw.mybeep_hi);
@@ -1484,6 +1486,7 @@ public class MainActivity extends Activity {
         applicationInterface.getLocationSupplier().freeLocationListeners();
         applicationInterface.stopPanorama(true); // in practice not needed as we should stop panorama when camera is closed, but good to do it explicitly here, before disabling the gyro sensors
         applicationInterface.getGyroSensor().disableSensors();
+        applicationInterface.getImageSaver().onPause();
         soundPoolManager.releaseSound();
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
@@ -1502,7 +1505,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if( MyDebug.LOG )
             Log.d(TAG, "onConfigurationChanged()");
         // configuration change can include screen orientation (landscape/portrait) when not locked (when settings is open)
@@ -1786,9 +1789,7 @@ public class MainActivity extends Activity {
                     }
                 }
                 if( has_audio_permission ) {
-                    String toast_string = this.getResources().getString(R.string.speech_recognizer_started) + "\n" +
-                            this.getResources().getString(R.string.speech_recognizer_extra_info);
-                    preview.showToast(audio_control_toast, toast_string);
+                    speechControl.showToast(true);
                     speechControl.startSpeechRecognizerIntent();
                     speechControl.speechRecognizerStarted();
                 }
@@ -3858,7 +3859,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Update the save folder.
+    /** Update the save folder (for non-SAF methods).
      */
     void updateSaveFolder(String new_save_location) {
         if( MyDebug.LOG )
@@ -3875,7 +3876,8 @@ public class MainActivity extends Activity {
                 editor.apply();
 
                 this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), true);
-                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + this.applicationInterface.getStorageUtils().getSaveLocation());
+                String save_folder_name = getHumanReadableSaveFolder(this.applicationInterface.getStorageUtils().getSaveLocation());
+                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
             }
         }
     }
@@ -3943,7 +3945,7 @@ public class MainActivity extends Activity {
         editText.setText(sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
         InputFilter filter = new InputFilter() {
             // whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-            String disallowed = "|\\?*<\":>";
+            final String disallowed = "|\\?*<\":>";
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 for(int i=start;i<end;i++) {
                     if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
@@ -4012,6 +4014,26 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Returns a human readable string for the save_folder (as stored in the preferences).
+     */
+    private String getHumanReadableSaveFolder(String save_folder) {
+        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
+            // try to get human readable form if possible
+            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
+            if( file_name != null ) {
+                save_folder = file_name;
+            }
+        }
+        else {
+            // The strings can either be a sub-folder of DCIM, or (pre-scoped-storage) a full path, so normally either can be displayed.
+            // But with scoped storage, an empty string is used to mean DCIM, so seems clearer to say that instead of displaying a blank line!
+            if( MainActivity.useScopedStorage() && save_folder.length() == 0 ) {
+                save_folder = "DCIM";
+            }
+        }
+        return save_folder;
+    }
+
     /** User can long-click on gallery to select a recent save location from the history, of if not available,
      *  go straight to the file dialog to pick a folder.
      */
@@ -4044,13 +4066,7 @@ public class MainActivity extends Activity {
         // history is stored in order most-recent-last
         for(int i=0;i<history.size();i++) {
             String folder_name = history.get(history.size() - 1 - i);
-            if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                // try to get human readable form if possible
-                String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(folder_name), true);
-                if( file_name != null ) {
-                    folder_name = file_name;
-                }
-            }
+            folder_name = getHumanReadableSaveFolder(folder_name);
             items[index++] = folder_name;
         }
         final int clear_index = index;
@@ -4118,14 +4134,7 @@ public class MainActivity extends Activity {
                         String save_folder = history.get(history.size() - 1 - which);
                         if( MyDebug.LOG )
                             Log.d(TAG, "changed save_folder from history to: " + save_folder);
-                        String save_folder_name = save_folder;
-                        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                            // try to get human readable form if possible
-                            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
-                            if( file_name != null ) {
-                                save_folder_name = file_name;
-                            }
-                        }
+                        String save_folder_name = getHumanReadableSaveFolder(save_folder);
                         preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -4320,7 +4329,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle state) {
+    protected void onSaveInstanceState(@NonNull Bundle state) {
         if( MyDebug.LOG )
             Log.d(TAG, "onSaveInstanceState");
         super.onSaveInstanceState(state);
@@ -4427,26 +4436,20 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "set up zoom");
             if( MyDebug.LOG )
                 Log.d(TAG, "has_zoom? " + preview.supportsZoom());
-            @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
             ZoomControls zoomControls = findViewById(R.id.zoom);
             SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
 
             if( preview.supportsZoom() ) {
                 if( sharedPreferences.getBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, false) ) {
-                    //noinspection deprecation
                     zoomControls.setIsZoomInEnabled(true);
-                    //noinspection deprecation
                     zoomControls.setIsZoomOutEnabled(true);
-                    //noinspection deprecation
                     zoomControls.setZoomSpeed(20);
 
-                    //noinspection deprecation
                     zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
                         public void onClick(View v){
                             zoomIn();
                         }
                     });
-                    //noinspection deprecation
                     zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
                         public void onClick(View v){
                             zoomOut();
@@ -4616,15 +4619,12 @@ public class MainActivity extends Activity {
                     }
                 });
 
-                @SuppressWarnings("deprecation") // "This functionality and UI is better handled with custom views and layouts" doesn't really work here - anyhow, we no longer use ZoomControl by default
                 ZoomControls seek_bar_zoom = findViewById(R.id.exposure_seekbar_zoom);
-                //noinspection deprecation
                 seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
                     public void onClick(View v){
                         changeExposure(1);
                     }
                 });
-                //noinspection deprecation
                 seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
                     public void onClick(View v){
                         changeExposure(-1);
