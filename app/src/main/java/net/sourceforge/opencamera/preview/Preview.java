@@ -128,7 +128,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      * Should be instantiated per video.
      */
     private VideoFrameInfo mVideoFrameInfoWriter;
-    private BlockingQueue<VideoPhaseInfo> mVideoPhaseInfoReporter;
+    private final BlockingQueue<VideoPhaseInfo> mVideoPhaseInfoReporter;
+    private final BlockingQueue<String> mVideoAvailableReporter;
 
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
     private ScriptC_histogram_compute histogramScript; // lazily create for performance
@@ -397,6 +398,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
+    public BlockingQueue<String> getVideoAvailableReporter() {
+        return mVideoAvailableReporter;
+    }
+
     public Preview(ExtendedAppInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "new Preview");
@@ -450,6 +455,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         mVideoPhaseInfoReporter = new ArrayBlockingQueue<>(1);
+        mVideoAvailableReporter = new ArrayBlockingQueue<>(1);
     }
 
     public BlockingQueue<VideoPhaseInfo> getVideoPhaseInfoReporter() {
@@ -1025,6 +1031,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder = null;
         video_recorder_is_paused = false;
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+        mVideoAvailableReporter.add(videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
@@ -5678,6 +5685,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_start_time = System.currentTimeMillis();
         video_start_time_set = true;
         applicationInterface.startedVideo();
+        mVideoAvailableReporter.clear();
         // Don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file.
         // Don't do any further calls after applicationInterface.startedVideo() that might throw an error - instead video error
         // should be handled by including a call to stopVideo() (since the video_recorder has started).

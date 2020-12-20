@@ -85,6 +85,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
+    public File getLastVideoFile() {
+        return last_video_file;
+    }
+
     private File last_video_file = null;
     private Uri last_video_file_saf = null;
 

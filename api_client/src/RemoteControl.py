@@ -91,9 +91,48 @@ class RemoteControl:
             # print(line)
             line = socket_file.readline()
 
+    def get_video(self):
+        """
+        Receives the last recorded video file, saves it in current directory
+        :return: Saved video's filename
+        """
+        # TODO: possibly need to increase buffer size and make some optional progress bar
+        #  (useful when loading large videos)
+
+        # open socket as a file with no buffering (to avoid losing part of the video bytes)
+        socket_file = self.socket.makefile('b', 0)
+        # send request message
+        status, socket_file = self._send_and_get_response_status_helper(b"get_video" + "\n", socket_file)
+        print(status)
+        # get video data length
+        line = socket_file.readline()
+        data_length = long(line.decode())
+        # get video filename
+        line = socket_file.readline()
+        filename = line.decode()
+        filename = filename.strip("\n")
+        # end marker
+        socket_file.readline()
+
+        # close socket file, start receiving video bytes until length
+        socket_file.close()
+        recv_len = 0
+        with open(filename, "w+") as video_file:
+            while recv_len < data_length:
+                more = self.socket.recv(1024)
+                if not more:
+                    raise EOFError()
+                recv_len += len(more)
+                video_file.write(more)
+                # print("got new chunk: " + str(recv_len) + " of " + str(data_length))
+        return filename
+
     def _send_and_get_response_status(self, msg):
         # open socket as a file
         socket_file = self.socket.makefile()
+        return self._send_and_get_response_status_helper(msg, socket_file)
+
+    def _send_and_get_response_status_helper(self, msg, socket_file):
         # send request message
         socket_file.write(
             msg + '\n'
@@ -104,6 +143,7 @@ class RemoteControl:
         if status.strip('\n') == ERROR:
             msg = socket_file.readline()
             socket_file.close()
+            self.socket.close()
             raise RuntimeError(msg)
 
         return status.strip('\n') == SUCCESS, socket_file

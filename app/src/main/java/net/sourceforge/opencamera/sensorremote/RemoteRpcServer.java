@@ -5,13 +5,23 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.util.Log;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.StorageUtilsWrapper;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -20,6 +30,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,9 +41,11 @@ public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
     private static final int RPC_PORT = 6969;
+    private static final int BUFFER_SIZE = 1024;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
     private static final String VIDEO_START_REQUEST = "video_start";
     private static final String VIDEO_STOP_REQUEST = "video_stop";
+    private static final String GET_VIDEO_REQUEST = "get_video";
     public static final String CHUNK_END_DELIMITER = "end";
 
     private final ServerSocket rpcSocket;
@@ -61,7 +74,7 @@ public class RemoteRpcServer extends Thread {
         mIsExecuting.set(false);
     }
 
-    private void handleRequest(String msg, PrintWriter outputStream) {
+    private void handleRequest(String msg, PrintStream outputStream, BufferedOutputStream outputByte) throws IOException {
         // IMU remote control API
         Pattern r = Pattern.compile(IMU_REQUEST_REGEX);
         Matcher imuRequestMatcher = r.matcher(msg);
@@ -74,7 +87,7 @@ public class RemoteRpcServer extends Thread {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
             RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro);
-            outputStream.println(imuResponse.getMessage());
+            outputStream.println(imuResponse.toString());
             if (MyDebug.LOG) {
                 Log.d(TAG, "IMU request file sent");
             }
@@ -82,14 +95,20 @@ public class RemoteRpcServer extends Thread {
         }
 
         // Video remote control API
-        if (msg.equals(VIDEO_START_REQUEST)) {
-            outputStream.println(
-                    mRequestHandler.handleVideoStartRequest()
-            );
-        } else if (msg.equals(VIDEO_STOP_REQUEST)) {
-            outputStream.println(
-                    mRequestHandler.handleVideoStopRequest())
-            ;
+        switch (msg) {
+            case VIDEO_START_REQUEST:
+                outputStream.println(
+                        mRequestHandler.handleVideoStartRequest()
+                );
+                break;
+            case VIDEO_STOP_REQUEST:
+                outputStream.println(
+                        mRequestHandler.handleVideoStopRequest())
+                ;
+                break;
+            case GET_VIDEO_REQUEST:
+                mRequestHandler.handleVideoGetRequest(outputStream);
+                break;
         }
     }
 
@@ -126,18 +145,20 @@ public class RemoteRpcServer extends Thread {
                     Log.d(TAG, "accepted connection from client");
                 }
                 InputStream inputStream = clientSocket.getInputStream();
-                PrintWriter outputStream = new PrintWriter(clientSocket.getOutputStream());
+                PrintStream outputStream = new PrintStream(clientSocket.getOutputStream());
+                BufferedOutputStream outputByte = new BufferedOutputStream(clientSocket.getOutputStream());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String inputLine;
                 while (!clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
                     // Received new request from the client
-                    handleRequest(inputLine, outputStream);
+                    handleRequest(inputLine, outputStream, outputByte);
                     outputStream.flush();
                 }
                 if (MyDebug.LOG) {
                     Log.d(TAG, "closing connection to client");
                 }
+                outputByte.close();
                 outputStream.close();
             } catch (SocketTimeoutException e) {
                /* if (MyDebug.LOG) {

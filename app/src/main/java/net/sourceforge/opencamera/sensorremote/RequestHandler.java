@@ -1,9 +1,11 @@
 package net.sourceforge.opencamera.sensorremote;
 
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
@@ -13,8 +15,12 @@ import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -26,6 +32,8 @@ public class RequestHandler {
     public static final String TAG = "RequestHandler";
     public static final String SENSOR_DATA_END_MARKER = "sensor_end";
     public static final long MAX_IMU_DURATION_MS = 60_000;
+    private static final int BUFFER_SIZE = 1024;
+
     // Set to some adequate time which is likely more than phase report time
     // TODO: we could set it dynamically using current PHASE_CALC_N_FRAMES
     public static final long PHASE_POLL_TIMEOUT_MS = 10_000;
@@ -76,7 +84,14 @@ public class RequestHandler {
                 return null;
             };
 
+            if (wantAccel && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER) ||
+                    wantGyro && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE)
+            ) {
+                return RemoteRpcResponse.error("Requested sensor wasn't supported");
+            }
+
             try {
+
                 // Await recording start
                 FutureTask<Void> recStartTask = new FutureTask<>(recStartCallable);
                 mContext.runOnUiThread(recStartTask);
@@ -165,5 +180,46 @@ public class RequestHandler {
                 }
         );
         return RemoteRpcResponse.success("");
+    }
+
+    void handleVideoGetRequest(PrintStream outputStream) {
+        Preview preview = mContext.getPreview();
+        BlockingQueue<String> videoReporter;
+        if (preview != null &&
+            (videoReporter = preview.getVideoAvailableReporter()) != null) {
+            try {
+                // await available video file
+                videoReporter.take();
+                // get file
+                ExtendedAppInterface appInterface = mContext.getApplicationInterface();
+                File videoFile;
+                if ((videoFile = appInterface.getLastVideoFile()) != null && videoFile.canRead()) {
+                    // Transfer file size in bytes and filename
+                    outputStream.println(RemoteRpcResponse.success(
+                            videoFile.length() + "\n" + videoFile.getName() + "\n")
+                    );
+                    outputStream.flush();
+                    // Transfer file bytes
+                    FileInputStream inputStream = new FileInputStream(videoFile);
+
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    int len;
+                    while ((len = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, len);
+                    }
+                    outputStream.flush();
+                    inputStream.close();
+                } else {
+                    outputStream.println(RemoteRpcResponse.error("Couldn't get video data"));
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                outputStream.println(RemoteRpcResponse.error("Error getting video file"));
+            }
+        } else {
+            outputStream.println(
+                    RemoteRpcResponse.error("Null reference")
+            );
+        }
     }
 }
