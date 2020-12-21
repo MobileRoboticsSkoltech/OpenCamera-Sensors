@@ -5,6 +5,7 @@ PORT = 6969  # The port used by the OpenCamera Sensors
 END_MARKER = 'end'
 SENSOR_END_MARKER = 'sensor_end'
 SUCCESS = 'SUCCESS'
+BUFFER_SIZE = 4096
 ERROR = 'ERROR'
 import sys
 
@@ -133,7 +134,7 @@ class RemoteControl:
         recv_len = 0
         with open(filename, "w+") as video_file:
             while recv_len < data_length:
-                more = self.socket.recv(1024)
+                more = self.socket.recv(BUFFER_SIZE)
                 if not more:
                     raise EOFError()
                 recv_len += len(more)
