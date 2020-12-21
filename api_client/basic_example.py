@@ -30,6 +30,9 @@ def main():
     # stops video
     remote.stop_video()
 
+    # receives last video (blocks until received)
+    filename = remote.get_video(want_progress_bar=True)
+    print("filename: %s" % filename)
     print('EXITED')
     remote.close()
 

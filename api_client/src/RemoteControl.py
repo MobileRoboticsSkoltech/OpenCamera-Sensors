@@ -1,11 +1,12 @@
 import socket
-import csv
+from progress.bar import Bar
 
 PORT = 6969  # The port used by the OpenCamera Sensors
 END_MARKER = 'end'
 SENSOR_END_MARKER = 'sensor_end'
 SUCCESS = 'SUCCESS'
 ERROR = 'ERROR'
+import sys
 
 
 class RemoteControl:
@@ -91,9 +92,10 @@ class RemoteControl:
             # print(line)
             line = socket_file.readline()
 
-    def get_video(self):
+    def get_video(self, want_progress_bar):
         """
         Receives the last recorded video file, saves it in current directory
+        :param want_progress_bar: (boolean) display progress bar during video loading
         :return: Saved video's filename
         """
         # TODO: possibly need to increase buffer size and make some optional progress bar
@@ -113,9 +115,21 @@ class RemoteControl:
         filename = filename.strip("\n")
         # end marker
         socket_file.readline()
-
         # close socket file, start receiving video bytes until length
         socket_file.close()
+        if want_progress_bar:
+            with Bar('Downloading video', max=data_length) as bar:
+                self._recv_video_file(filename, data_length, bar)
+        else:
+            self._recv_video_file(filename, data_length)
+        return filename
+
+    def _send_and_get_response_status(self, msg):
+        # open socket as a file
+        socket_file = self.socket.makefile()
+        return self._send_and_get_response_status_helper(msg, socket_file)
+
+    def _recv_video_file(self, filename, data_length, bar=None):
         recv_len = 0
         with open(filename, "w+") as video_file:
             while recv_len < data_length:
@@ -124,13 +138,11 @@ class RemoteControl:
                     raise EOFError()
                 recv_len += len(more)
                 video_file.write(more)
-                # print("got new chunk: " + str(recv_len) + " of " + str(data_length))
-        return filename
-
-    def _send_and_get_response_status(self, msg):
-        # open socket as a file
-        socket_file = self.socket.makefile()
-        return self._send_and_get_response_status_helper(msg, socket_file)
+                if bar is not None:
+                    bar.next(len(more))
+                    sys.stdout.flush()
+        if bar is not None:
+            bar.finish()
 
     def _send_and_get_response_status_helper(self, msg, socket_file):
         # send request message
