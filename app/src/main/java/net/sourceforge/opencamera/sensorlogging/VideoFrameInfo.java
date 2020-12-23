@@ -72,6 +72,7 @@ public class VideoFrameInfo implements Closeable {
         mContext = context;
         mYuvUtils = mAppInterface.getYuvUtils();
         mPhaseInfoReporter = videoPhaseInfoReporter;
+        mPhaseInfoReporter.clear();
         durationsNs = new ArrayList<>();
 
 
