@@ -1031,7 +1031,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder = null;
         video_recorder_is_paused = false;
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
-        mVideoAvailableReporter.add(videoFileInfo.video_filename);
+        if (videoFileInfo.video_filename != null) mVideoAvailableReporter.add(videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
