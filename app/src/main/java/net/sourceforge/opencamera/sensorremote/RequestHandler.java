@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.sensorremote;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -189,11 +190,13 @@ public class RequestHandler {
             (videoReporter = preview.getVideoAvailableReporter()) != null) {
             try {
                 // await available video file
-                videoReporter.take();
+                if (preview.isVideoRecording()) {
+                    videoReporter.take();
+                }
                 // get file
                 ExtendedAppInterface appInterface = mContext.getApplicationInterface();
-                File videoFile;
-                if ((videoFile = appInterface.getLastVideoFile()) != null && videoFile.canRead()) {
+                File videoFile = appInterface.getLastVideoFile();
+                if (videoFile != null && videoFile.canRead()) {
                     // Transfer file size in bytes and filename
                     outputStream.println(RemoteRpcResponse.success(
                             videoFile.length() + "\n" + videoFile.getName() + "\n")
@@ -210,7 +213,7 @@ public class RequestHandler {
                     outputStream.flush();
                     inputStream.close();
                 } else {
-                    outputStream.println(RemoteRpcResponse.error("Couldn't get video data"));
+                    outputStream.println(RemoteRpcResponse.error("Couldn't get last video file data"));
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
