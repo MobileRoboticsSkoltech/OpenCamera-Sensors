@@ -114,8 +114,8 @@ public class RemoteRpcServer extends Thread {
 
     @Override
     public void run() {
-
-        mContext.runOnUiThread(
+        // TODO: report hostname some other way
+        /*mContext.runOnUiThread(
                 () -> {
                     try {
                         new AlertDialog.Builder(mContext)
@@ -131,7 +131,7 @@ public class RemoteRpcServer extends Thread {
                     }
 
                 }
-        );
+        );*/
 
         mIsExecuting.set(true);
         if (MyDebug.LOG) {
