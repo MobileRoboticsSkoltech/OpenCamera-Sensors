@@ -22,7 +22,12 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
     - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
         -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
         - ```{VIDEO_NAME}_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
-        - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)```    
+        - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)``` 
+
+### Remote recording
+
+- **Connect** smartphone to the same network as PC
+- Use scripts provided in ```./api_client/``` directory to **send requests** for the application
 
 ## Restrictions
 
