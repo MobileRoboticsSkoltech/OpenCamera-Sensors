@@ -111,6 +111,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             //editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
             editor.putString(PreferenceKeys.CameraAPIPreferenceKey, "preference_camera_api_camera2");
         }
+        // By default IMU recording is enabled, but for Open Camera tests we need default behaviour without sensors
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
         editor.apply();
         Log.d(TAG, "setUp: 2");
 
