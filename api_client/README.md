@@ -1,10 +1,10 @@
 ## Remote control API client
 
-Provides **Python 2** interface for communication with the smartphone running OpenCamera Sensors.
+Provides **Python 3** and **Python 2**-compatible interface for communication with the smartphone running OpenCamera Sensors.
 
 ### Setup
 
-Install requirements
+Install requirements.
 
 ### Usage
 

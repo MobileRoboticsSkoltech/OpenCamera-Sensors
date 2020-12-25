@@ -11,7 +11,13 @@ def main():
     remote = RemoteControl(HOST)
     print("Connected")
     
-    remote.start_video()
+    accel_data, gyro_data = remote.get_imu(10000, True, False)
+    print("Accelerometer data length: %d" % len(accel_data))
+    with open("accel.csv", "w+") as accel:
+        accel.writelines(accel_data)
+    
+    phase, duration = remote.start_video()
+    print("%d %f" % (phase, duration))
     time.sleep(5)
     remote.stop_video()
     
