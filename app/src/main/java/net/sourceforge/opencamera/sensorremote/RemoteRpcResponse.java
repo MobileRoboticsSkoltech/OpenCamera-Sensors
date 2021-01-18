@@ -9,15 +9,15 @@ public class RemoteRpcResponse {
     private final static String SUCCESS = "SUCCESS";
     private final static String ERROR = "ERROR";
 
-    private String message;
+    private String mMessage;
 
     private RemoteRpcResponse() {
-        message = "";
+        mMessage = "";
     }
 
     public static RemoteRpcResponse error(String message) {
         RemoteRpcResponse result = new RemoteRpcResponse();
-        result.message = ERROR +
+        result.mMessage = ERROR +
                 "\n" +
                 message +
                 "\n" +
@@ -27,20 +27,20 @@ public class RemoteRpcResponse {
 
     public static RemoteRpcResponse success(String message) {
         RemoteRpcResponse result = new RemoteRpcResponse();
-        result.message = SUCCESS +
+        result.mMessage = SUCCESS +
                 "\n" +
                 message +
                 RemoteRpcServer.CHUNK_END_DELIMITER;
         return result;
     }
 
-    public String getMessage() {
-        return message;
+    public String getmMessage() {
+        return mMessage;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return message;
+        return mMessage;
     }
 }

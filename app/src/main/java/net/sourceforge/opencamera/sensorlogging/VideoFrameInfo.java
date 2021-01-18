@@ -91,9 +91,7 @@ public class VideoFrameInfo implements Closeable {
                         // TODO: here we assume that video has more frames than PHASE_CALC_N_FRAMES
                         if (mFrameNumber < PHASE_CALC_N_FRAMES) {
                             // Should calculate phase
-                            if (mLastTimestamp == 0) {
-                                // skip first frame
-                            } else {
+                            if (mLastTimestamp != 0) {
                                 long duration = timestamp - mLastTimestamp;
                                 // add frame duration
                                 if (MyDebug.LOG) {

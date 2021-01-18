@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.sensorremote;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -17,10 +16,8 @@ import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
@@ -29,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
-public class RequestHandler {
+public class RemoteRpcRequestHandler {
     public static final String TAG = "RequestHandler";
     public static final String SENSOR_DATA_END_MARKER = "sensor_end";
     public static final long MAX_IMU_DURATION_MS = 60_000;
@@ -41,7 +38,7 @@ public class RequestHandler {
     private final RawSensorInfo mRawSensorInfo;
     private final MainActivity mContext;
 
-    RequestHandler(MainActivity context) {
+    RemoteRpcRequestHandler(MainActivity context) {
         mContext = context;
         mRawSensorInfo = context.getRawSensorInfoManager();
     }

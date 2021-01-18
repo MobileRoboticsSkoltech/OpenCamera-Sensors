@@ -2,12 +2,11 @@ package net.sourceforge.opencamera.sensorlogging;
 
 import androidx.annotation.NonNull;
 
-import java.util.Collections;
 import java.util.List;
 
 public class VideoPhaseInfo {
-    private final long videoPhaseNs;
-    private final double avgDurationNs;
+    private final long mVideoPhaseNs;
+    private final double mAvgDurationNs;
 
     // Accepts a sorted collection
     public static double median(List<Long> numList) {
@@ -28,22 +27,22 @@ public class VideoPhaseInfo {
     }
 
     public VideoPhaseInfo(long videoPhaseNs, List<Long> frameDurations) {
-        this.videoPhaseNs = videoPhaseNs;
+        this.mVideoPhaseNs = videoPhaseNs;
         //Collections.sort(frameDurations);
-        this.avgDurationNs = mean(frameDurations);
+        this.mAvgDurationNs = mean(frameDurations);
     }
 
     public long getVideoPhaseNs() {
-        return videoPhaseNs;
+        return mVideoPhaseNs;
     }
 
     public double getAvgDurationNs() {
-        return avgDurationNs;
+        return mAvgDurationNs;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return videoPhaseNs + "\n" + avgDurationNs + "\n";
+        return mVideoPhaseNs + "\n" + mAvgDurationNs + "\n";
     }
 }

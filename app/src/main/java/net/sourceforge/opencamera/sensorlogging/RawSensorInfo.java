@@ -36,8 +36,8 @@ public class RawSensorInfo implements SensorEventListener {
     final private Sensor mSensorAccel;
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;
-    private String lastGyroPath;
-    private  String lastAccelPath;
+    private String mLastGyroPath;
+    private  String mLastAccelPath;
     private boolean mIsRecording;
     private final MainActivity mContext;
 
@@ -111,10 +111,10 @@ public class RawSensorInfo implements SensorEventListener {
         String path = sensorFile.getAbsolutePath();
         switch (sensorType) {
             case SENSOR_TYPE_ACCEL:
-                lastAccelPath = path;
+                mLastAccelPath = path;
                 break;
             case SENSOR_TYPE_GYRO:
-                lastGyroPath = path;
+                mLastGyroPath = path;
                 break;
         }
     }
@@ -261,10 +261,10 @@ public class RawSensorInfo implements SensorEventListener {
     }
 
     public String getLastGyroPath() {
-        return lastGyroPath;
+        return mLastGyroPath;
     }
 
     public String getLastAccelPath() {
-        return lastAccelPath;
+        return mLastAccelPath;
     }
 }

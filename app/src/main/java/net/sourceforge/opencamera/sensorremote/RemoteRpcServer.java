@@ -1,28 +1,17 @@
 package net.sourceforge.opencamera.sensorremote;
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.util.Log;
 
-import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.StorageUtilsWrapper;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -30,7 +19,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,17 +36,17 @@ public class RemoteRpcServer extends Thread {
     private static final String GET_VIDEO_REQUEST = "get_video";
     public static final String CHUNK_END_DELIMITER = "end";
 
-    private final ServerSocket rpcSocket;
+    private final ServerSocket mRpcSocket;
     private final MainActivity mContext;
-    private final RequestHandler mRequestHandler;
+    private final RemoteRpcRequestHandler mRequestHandler;
     private final AtomicBoolean mIsExecuting = new AtomicBoolean();
 
     public RemoteRpcServer(MainActivity context) throws IOException {
-        mRequestHandler = new RequestHandler(context);
+        mRequestHandler = new RemoteRpcRequestHandler(context);
         mContext = context;
-        rpcSocket = new ServerSocket(RPC_PORT);
-        rpcSocket.setReuseAddress(true);
-        rpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
+        mRpcSocket = new ServerSocket(RPC_PORT);
+        mRpcSocket.setReuseAddress(true);
+        mRpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
 
         if (MyDebug.LOG) {
             Log.d(TAG, "Hostname " + getIPAddress());
@@ -139,7 +127,7 @@ public class RemoteRpcServer extends Thread {
         }
         while (mIsExecuting.get()) {
             try {
-                Socket clientSocket = rpcSocket.accept();
+                Socket clientSocket = mRpcSocket.accept();
                 clientSocket.setKeepAlive(true);
                 if (MyDebug.LOG) {
                     Log.d(TAG, "accepted connection from client");
@@ -171,7 +159,7 @@ public class RemoteRpcServer extends Thread {
 
         // Stopped accepting requests, close the server socket
         try {
-            rpcSocket.close();
+            mRpcSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
