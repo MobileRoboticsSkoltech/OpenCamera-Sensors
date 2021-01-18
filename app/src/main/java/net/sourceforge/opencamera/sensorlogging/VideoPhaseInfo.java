@@ -9,7 +9,7 @@ public class VideoPhaseInfo {
     private final double mAvgDurationNs;
 
     // Accepts a sorted collection
-    public static double median(List<Long> numList) {
+    private static double median(List<Long> numList) {
         int middle = numList.size() / 2;
         if (numList.size() % 2 == 1) {
             return numList.get(middle);
@@ -18,7 +18,7 @@ public class VideoPhaseInfo {
         }
     }
 
-    public static double mean(List<Long> numList) {
+    private static double mean(List<Long> numList) {
         double sum = 0;
         for (Long num : numList) {
             sum += num;
