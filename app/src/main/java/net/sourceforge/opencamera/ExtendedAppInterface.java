@@ -58,6 +58,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
     }
 
+    public boolean getRemoteRecControlPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.RemoteRecControlPreferenceKey, false);
+    }
+
     private boolean getAccelPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
     }

@@ -75,6 +75,12 @@
             android:summary="Enable synchronized IMU and video recording with timestamps"
             />
 
+        <SwitchPreference
+            android:key="preference_remote_rec_control"
+            android:title="Enable remote recording control"
+            android:summary="Accept remote control messages over the network. Restart required"
+            />
+
         <CheckBoxPreference
             android:key="preference_accel"
             android:title="ACCELEROMETER"
@@ -117,7 +123,6 @@
             android:entryValues="@array/preference_sample_rate_values"
             />
     </PreferenceCategory>
-
     <PreferenceCategory
         android:key="preference_category_camera_controls"
         android:title="@string/preference_category_camera_controls">

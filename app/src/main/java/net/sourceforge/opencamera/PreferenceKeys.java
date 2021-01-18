@@ -303,6 +303,8 @@ public class PreferenceKeys {
 
     public static final String IMURecordingPreferenceKey = "preference_imu_recording";
 
+    public static final String RemoteRecControlPreferenceKey = "preference_remote_rec_control";
+
     public static final String AccelPreferenceKey = "preference_accel";
 
     public static final String GyroPreferenceKey = "preference_gyro";
