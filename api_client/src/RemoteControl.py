@@ -1,13 +1,16 @@
 import socket
+import sys
+
 from progress.bar import Bar
 
-PORT = 6969  # The port used by the OpenCamera Sensors
-END_MARKER = 'end'
+# PORT = 6969  # The port used by the OpenCamera Sensors
+# END_MARKER = 'end'
 SENSOR_END_MARKER = 'sensor_end'
 SUCCESS = 'SUCCESS'
 BUFFER_SIZE = 4096
 ERROR = 'ERROR'
-import sys
+
+PROPS_PATH = '../app/src/main/assets/server_config.properties'
 
 
 class RemoteControl:
@@ -22,8 +25,9 @@ class RemoteControl:
             hostname (str): Smartphones hostname (IP address) in the current network.
             Is displayed in the dialog when starting OpenCamera Sensors on the smartphone.
         """
+        self._load_properties(PROPS_PATH)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((hostname, PORT))
+        self.socket.connect((hostname, int(self.props['RPC_PORT'])))
 
     def get_imu(self, duration_ms, want_accel, want_gyro):
         """
@@ -46,7 +50,7 @@ class RemoteControl:
             # read filename or end marker
             line = socket_file.readline()
             msg = line.strip('\n')
-            if msg == END_MARKER:
+            if msg == self.props['CHUNK_END_DELIMITER']:
                 break
             data = ""
             # accept file contents
@@ -69,7 +73,9 @@ class RemoteControl:
         Starts video recording and receives phase and duration info
         :return: Tuple (phase, average duration) - all in nanoseconds
         """
-        status, socket_file = self._send_and_get_response_status("video_start")
+        status, socket_file = self._send_and_get_response_status(
+            self.props['VIDEO_START_REQUEST']
+        )
         # print(status)
 
         line = socket_file.readline()
@@ -85,11 +91,13 @@ class RemoteControl:
         """
 
         # receive response
-        status, socket_file = self._send_and_get_response_status("video_stop")
+        status, socket_file = self._send_and_get_response_status(
+            self.props['VIDEO_STOP_REQUEST']
+        )
         # print(status)
 
         line = socket_file.readline()
-        while line.strip('\n') != END_MARKER:
+        while line.strip('\n') != self.props['CHUNK_END_DELIMITER']:
             # print(line)
             line = socket_file.readline()
 
@@ -99,13 +107,13 @@ class RemoteControl:
         :param want_progress_bar: (boolean) display progress bar during video loading
         :return: Saved video's filename
         """
-        # TODO: possibly need to increase buffer size and make some optional progress bar
-        #  (useful when loading large videos)
 
         # open socket as a file with no buffering (to avoid losing part of the video bytes)
         socket_file = self.socket.makefile('rwb', 0)
         # send request message
-        status, socket_file = self._send_and_get_response_status_bytes(("get_video" + "\n").encode())
+        status, socket_file = self._send_and_get_response_status_bytes(
+            (self.props['GET_VIDEO_REQUEST'] + "\n").encode()
+        )
         print(status)
         # get video data length
         line = socket_file.readline()
@@ -159,7 +167,7 @@ class RemoteControl:
             bar.finish()
 
     def _send_and_get_response_status_bytes(self, msg):
-	# open socket as a file
+        # open socket as a file
         socket_file = self.socket.makefile("rwb", 0)
         # send request message
         socket_file.write(msg)
@@ -173,6 +181,20 @@ class RemoteControl:
             raise RuntimeError(msg)
 
         return status.decode().strip('\n') == SUCCESS, socket_file
+
+    def _load_properties(self, filepath, sep='=', comment_char='#'):
+        """
+        Read the file passed as parameter as a properties file.
+        """
+        self.props = {}
+        with open(filepath, "rt") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith(comment_char):
+                    key_value = line.split(sep)
+                    key = key_value[0].strip()
+                    value = sep.join(key_value[1:]).strip().strip('"')
+                    self.props[key] = value
 
     def close(self):
         self.socket.close()
