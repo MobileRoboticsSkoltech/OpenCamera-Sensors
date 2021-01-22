@@ -41,7 +41,7 @@ public class RemoteRpcServer extends Thread {
     public RemoteRpcServer(MainActivity context) throws IOException {
         mConfig = RemoteRpcConfig.getProperties(context);
         mRequestHandler = new RemoteRpcRequestHandler(context);
-        mRpcSocket = new ServerSocket(RPC_PORT);
+        mRpcSocket = new ServerSocket(Integer.parseInt(mConfig.getProperty("RPC_PORT")));
         mRpcSocket.setReuseAddress(true);
         mRpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
 
@@ -72,6 +72,7 @@ public class RemoteRpcServer extends Thread {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
             RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro);
+
             outputStream.println(imuResponse.toString());
             if (MyDebug.LOG) {
                 Log.d(TAG, "IMU request file sent");
