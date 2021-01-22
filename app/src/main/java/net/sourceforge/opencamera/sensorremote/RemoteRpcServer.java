@@ -29,8 +29,6 @@ import java.util.regex.Pattern;
 public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
-    private static final int RPC_PORT = 6969;
-    private static final int BUFFER_SIZE = 1024;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
 
     private final ServerSocket mRpcSocket;

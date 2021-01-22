@@ -10,9 +10,6 @@ import java.util.Properties;
  * Static builder class for RPC response messages
  */
 public class RemoteRpcResponse {
-    private final static String SUCCESS = "SUCCESS";
-    private final static String ERROR = "ERROR";
-
     private String mMessage;
 
     private RemoteRpcResponse() {
@@ -22,7 +19,7 @@ public class RemoteRpcResponse {
     public static RemoteRpcResponse error(String message, Context context) {
         Properties config = RemoteRpcConfig.getProperties(context);
         RemoteRpcResponse result = new RemoteRpcResponse();
-        result.mMessage = ERROR +
+        result.mMessage = config.getProperty("ERROR") +
                 "\n" +
                 message +
                 "\n" +
@@ -33,7 +30,7 @@ public class RemoteRpcResponse {
     public static RemoteRpcResponse success(String message, Context context) {
         Properties config = RemoteRpcConfig.getProperties(context);
         RemoteRpcResponse result = new RemoteRpcResponse();
-        result.mMessage = SUCCESS +
+        result.mMessage = config.getProperty("SUCCESS") +
                 "\n" +
                 message +
                 config.getProperty("CHUNK_END_DELIMITER");

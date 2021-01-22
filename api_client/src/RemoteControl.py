@@ -3,13 +3,7 @@ import sys
 
 from progress.bar import Bar
 
-# PORT = 6969  # The port used by the OpenCamera Sensors
-# END_MARKER = 'end'
-SENSOR_END_MARKER = 'sensor_end'
-SUCCESS = 'SUCCESS'
 BUFFER_SIZE = 4096
-ERROR = 'ERROR'
-
 PROPS_PATH = '../app/src/main/assets/server_config.properties'
 
 
@@ -55,7 +49,7 @@ class RemoteControl:
             data = ""
             # accept file contents
             line = socket_file.readline()
-            while line.strip("\n") != SENSOR_END_MARKER:
+            while line.strip("\n") != self.props['SENSOR_END_MARKER']:
                 # print('Received: %s' % (line.strip('\n')))
                 data += line
                 line = socket_file.readline()
@@ -143,13 +137,13 @@ class RemoteControl:
         socket_file.flush()
         # receive response
         status = socket_file.readline()
-        if status.strip('\n') == ERROR:
+        if status.strip('\n') == self.props['ERROR']:
             msg = socket_file.readline()
             socket_file.close()
             self.socket.close()
             raise RuntimeError(msg)
 
-        return status.strip('\n') == SUCCESS, socket_file
+        return status.strip('\n') == self.props['SUCCESS'], socket_file
 
     def _recv_video_file(self, filename, data_length, bar=None):
         recv_len = 0
@@ -174,13 +168,13 @@ class RemoteControl:
         socket_file.flush()
         # receive response
         status = socket_file.readline()
-        if status.decode().strip('\n') == ERROR:
+        if status.decode().strip('\n') == self.props['ERROR']:
             msg = socket_file.readline()
             socket_file.close()
             self.socket.close()
             raise RuntimeError(msg)
 
-        return status.decode().strip('\n') == SUCCESS, socket_file
+        return status.decode().strip('\n') == self.props['SUCCESS'], socket_file
 
     def _load_properties(self, filepath, sep='=', comment_char='#'):
         """
