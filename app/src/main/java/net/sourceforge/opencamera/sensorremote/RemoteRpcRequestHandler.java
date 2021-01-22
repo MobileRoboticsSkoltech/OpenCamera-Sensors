@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 public class RemoteRpcRequestHandler {
     public static final String TAG = "RequestHandler";
     public static final String SENSOR_DATA_END_MARKER = "sensor_end";
-    public static final long MAX_IMU_DURATION_MS = 60_000;
     private static final int BUFFER_SIZE = 1024;
 
     // Set to some adequate time which is likely more than phase report time
@@ -61,7 +60,7 @@ public class RemoteRpcRequestHandler {
     }
 
     RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro) {
-        if (mRawSensorInfo != null && !mRawSensorInfo.isRecording() && durationMillis <= MAX_IMU_DURATION_MS) {
+        if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
             Callable<Void> recStartCallable = () -> {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
