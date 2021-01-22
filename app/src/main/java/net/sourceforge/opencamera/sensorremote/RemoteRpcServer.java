@@ -21,6 +21,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,19 +32,15 @@ public class RemoteRpcServer extends Thread {
     private static final int RPC_PORT = 6969;
     private static final int BUFFER_SIZE = 1024;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
-    private static final String VIDEO_START_REQUEST = "video_start";
-    private static final String VIDEO_STOP_REQUEST = "video_stop";
-    private static final String GET_VIDEO_REQUEST = "get_video";
-    public static final String CHUNK_END_DELIMITER = "end";
 
     private final ServerSocket mRpcSocket;
-    private final MainActivity mContext;
+    private final Properties mConfig;
     private final RemoteRpcRequestHandler mRequestHandler;
     private final AtomicBoolean mIsExecuting = new AtomicBoolean();
 
     public RemoteRpcServer(MainActivity context) throws IOException {
+        mConfig = RemoteRpcConfig.getProperties(context);
         mRequestHandler = new RemoteRpcRequestHandler(context);
-        mContext = context;
         mRpcSocket = new ServerSocket(RPC_PORT);
         mRpcSocket.setReuseAddress(true);
         mRpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
@@ -83,20 +80,16 @@ public class RemoteRpcServer extends Thread {
         }
 
         // Video remote control API
-        switch (msg) {
-            case VIDEO_START_REQUEST:
-                outputStream.println(
-                        mRequestHandler.handleVideoStartRequest()
-                );
-                break;
-            case VIDEO_STOP_REQUEST:
-                outputStream.println(
-                        mRequestHandler.handleVideoStopRequest())
-                ;
-                break;
-            case GET_VIDEO_REQUEST:
-                mRequestHandler.handleVideoGetRequest(outputStream);
-                break;
+        if (msg.equals(mConfig.getProperty("VIDEO_START_REQUEST"))) {
+            outputStream.println(
+                    mRequestHandler.handleVideoStartRequest()
+            );
+        } else if (msg.equals(mConfig.getProperty("VIDEO_STOP_REQUEST"))) {
+            outputStream.println(
+                    mRequestHandler.handleVideoStopRequest()
+            );
+        } else if (msg.equals(mConfig.getProperty("GET_VIDEO_REQUEST"))) {
+            mRequestHandler.handleVideoGetRequest(outputStream);
         }
     }
 

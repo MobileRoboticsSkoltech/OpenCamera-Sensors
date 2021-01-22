@@ -1,6 +1,10 @@
 package net.sourceforge.opencamera.sensorremote;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
+
+import java.util.Properties;
 
 /**
  * Static builder class for RPC response messages
@@ -15,26 +19,28 @@ public class RemoteRpcResponse {
         mMessage = "";
     }
 
-    public static RemoteRpcResponse error(String message) {
+    public static RemoteRpcResponse error(String message, Context context) {
+        Properties config = RemoteRpcConfig.getProperties(context);
         RemoteRpcResponse result = new RemoteRpcResponse();
         result.mMessage = ERROR +
                 "\n" +
                 message +
                 "\n" +
-                RemoteRpcServer.CHUNK_END_DELIMITER;
+                config.getProperty("CHUNK_END_DELIMITER");
         return result;
     }
 
-    public static RemoteRpcResponse success(String message) {
+    public static RemoteRpcResponse success(String message, Context context) {
+        Properties config = RemoteRpcConfig.getProperties(context);
         RemoteRpcResponse result = new RemoteRpcResponse();
         result.mMessage = SUCCESS +
                 "\n" +
                 message +
-                RemoteRpcServer.CHUNK_END_DELIMITER;
+                config.getProperty("CHUNK_END_DELIMITER");
         return result;
     }
 
-    public String getmMessage() {
+    public String getMessage() {
         return mMessage;
     }
 

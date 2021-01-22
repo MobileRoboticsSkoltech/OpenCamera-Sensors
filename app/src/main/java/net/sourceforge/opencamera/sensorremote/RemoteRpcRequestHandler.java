@@ -84,7 +84,7 @@ public class RemoteRpcRequestHandler {
             if (wantAccel && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER) ||
                     wantGyro && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE)
             ) {
-                return RemoteRpcResponse.error("Requested sensor wasn't supported");
+                return RemoteRpcResponse.error("Requested sensor wasn't supported", mContext);
             }
 
             try {
@@ -115,16 +115,16 @@ public class RemoteRpcRequestHandler {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return RemoteRpcResponse.error("Failed to open IMU file");
+                    return RemoteRpcResponse.error("Failed to open IMU file", mContext);
                 }
 
-                return RemoteRpcResponse.success(msg.toString());
+                return RemoteRpcResponse.success(msg.toString(), mContext);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
-                return RemoteRpcResponse.error("Error in IMU recording");
+                return RemoteRpcResponse.error("Error in IMU recording", mContext);
             }
         } else {
-            return RemoteRpcResponse.error("Error in IMU recording");
+            return RemoteRpcResponse.error("Error in IMU recording", mContext);
         }
     }
 
@@ -151,19 +151,19 @@ public class RemoteRpcRequestHandler {
                 phaseInfo = videoPhaseInfoReporter
                         .poll(PHASE_POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
                 if (phaseInfo != null) {
-                    return RemoteRpcResponse.success(phaseInfo.toString());
+                    return RemoteRpcResponse.success(phaseInfo.toString(), mContext);
                 } else {
-                    return RemoteRpcResponse.error("Failed to retrieve phase info, reached poll limit");
+                    return RemoteRpcResponse.error("Failed to retrieve phase info, reached poll limit", mContext);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                return RemoteRpcResponse.error("Failed to retrieve phase info");
+                return RemoteRpcResponse.error("Failed to retrieve phase info", mContext);
             }
         } else {
             if (MyDebug.LOG) {
                 Log.d(TAG, "Video frame info wasn't initialized, failed to retrieve phase info");
             }
-            return RemoteRpcResponse.error("Video frame info wasn't initialized, failed to retrieve phase info");
+            return RemoteRpcResponse.error("Video frame info wasn't initialized, failed to retrieve phase info", mContext);
         }
     }
 
@@ -176,7 +176,7 @@ public class RemoteRpcRequestHandler {
                     }
                 }
         );
-        return RemoteRpcResponse.success("");
+        return RemoteRpcResponse.success("", mContext);
     }
 
     void handleVideoGetRequest(PrintStream outputStream) {
@@ -195,8 +195,9 @@ public class RemoteRpcRequestHandler {
                 if (videoFile != null && videoFile.canRead()) {
                     // Transfer file size in bytes and filename
                     outputStream.println(RemoteRpcResponse.success(
-                            videoFile.length() + "\n" + videoFile.getName() + "\n")
-                    );
+                            videoFile.length() + "\n" + videoFile.getName() + "\n",
+                            mContext
+                    ));
                     outputStream.flush();
                     // Transfer file bytes
                     FileInputStream inputStream = new FileInputStream(videoFile);
@@ -209,15 +210,15 @@ public class RemoteRpcRequestHandler {
                     outputStream.flush();
                     inputStream.close();
                 } else {
-                    outputStream.println(RemoteRpcResponse.error("Couldn't get last video file data"));
+                    outputStream.println(RemoteRpcResponse.error("Couldn't get last video file data", mContext));
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
-                outputStream.println(RemoteRpcResponse.error("Error getting video file"));
+                outputStream.println(RemoteRpcResponse.error("Error getting video file", mContext));
             }
         } else {
             outputStream.println(
-                    RemoteRpcResponse.error("Null reference")
+                    RemoteRpcResponse.error("Null reference", mContext)
             );
         }
     }
