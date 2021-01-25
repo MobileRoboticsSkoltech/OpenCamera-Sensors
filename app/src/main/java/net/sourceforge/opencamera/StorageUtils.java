@@ -331,7 +331,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
 
-    Uri getTreeUriSAF() {
+    public Uri getTreeUriSAF() {
         String folder_name = getSaveLocationSAF();
         return Uri.parse(folder_name);
     }
