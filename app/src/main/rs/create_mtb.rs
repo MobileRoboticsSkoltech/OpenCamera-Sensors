@@ -19,7 +19,7 @@ void __attribute__((kernel)) create_mtb(uchar4 in, uint32_t x, uint32_t y) {
         diff = value - median_value;
     else
         diff = median_value - value;
-    if( diff <= 4 )
+    if( diff <= 4 ) // should be same value as min_diff_c in HDRProcessor.autoAlignment()
         out = 127;
     else if( value <= median_value )
         out = 0;

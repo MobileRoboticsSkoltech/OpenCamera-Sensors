@@ -6,7 +6,6 @@ import net.sourceforge.opencamera.cameracontroller.RawImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +28,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,6 +44,7 @@ import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.util.Log;
 import android.util.Xml;
@@ -80,6 +80,11 @@ public class ImageSaver extends Thread {
     private final static int queue_cost_jpeg_c = 1; // also covers WEBP
     private final static int queue_cost_dng_c = 6;
     //private final static int queue_cost_dng_c = 1;
+
+    // Should be same as MainActivity.app_is_paused, but we keep our own copy to make threading easier (otherwise, all
+    // accesses of MainActivity.app_is_paused would need to be synchronized).
+    // Access to app_is_paused should always be synchronized to this (i.e., the ImageSaver class).
+    private boolean app_is_paused = true;
 
     // for testing; must be volatile for test project reading the state
     // n.b., avoid using static, as static variables are shared between different instances of an application,
@@ -436,6 +441,22 @@ public class ImageSaver extends Thread {
         return n_real_images_to_save;
     }
 
+    /** Application has paused.
+     */
+    void onPause() {
+        synchronized(this) {
+            app_is_paused = true;
+        }
+    }
+
+    /** Application has resumed.
+     */
+    void onResume() {
+        synchronized(this) {
+            app_is_paused = false;
+        }
+    }
+
     void onDestroy() {
         if( MyDebug.LOG )
             Log.d(TAG, "onDestroy");
@@ -484,6 +505,8 @@ public class ImageSaver extends Thread {
                         break;
                 }
                 if( test_slow_saving ) {
+                    // ignore warning about "Call to Thread.sleep in a loop", this is only activated in test code
+                    //noinspection BusyWait
                     Thread.sleep(2000);
                 }
                 if( MyDebug.LOG ) {
@@ -1086,7 +1109,7 @@ public class ImageSaver extends Thread {
                 default:
                     // Using local contrast enhancement helps scenes where the dynamic range is very large, which tends to be when we choose
                     // a short exposure time, due to fixing problems where some regions are too dark.
-                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53.
+                    // This helps: testHDR11, testHDR19, testHDR34, testHDR53, testHDR61.
                     // Using local contrast enhancement in all cases can increase noise in darker scenes. This problem would occur
                     // (if we used local contrast enhancement) is: testHDR2, testHDR12, testHDR17, testHDR43, testHDR50, testHDR51,
                     // testHDR54, testHDR55, testHDR56.
@@ -1170,7 +1193,6 @@ public class ImageSaver extends Thread {
 
     @SuppressWarnings("WeakerAccess")
     public static class GyroDebugInfo {
-        @SuppressWarnings("unused")
         public static class GyroImageDebugInfo {
             public float [] vectorRight; // X axis
             public float [] vectorUp; // Y axis
@@ -1608,7 +1630,7 @@ public class ImageSaver extends Thread {
                     writeGyroDebugXml(writer, request);
 
                     StorageUtils storageUtils = main_activity.getStorageUtils();
-                    File saveFile = null;
+                    /*File saveFile = null;
 					Uri saveUri = null;
 					if( storageUtils.isUsingSAF() ) {
 						saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
@@ -1617,7 +1639,16 @@ public class ImageSaver extends Thread {
                         saveFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
                         if( MyDebug.LOG )
                             Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
-                    }
+                    }*/
+					// We save to the application specific folder so this works on Android 10 with scoped storage, without having to
+                    // rewrite the non-SAF codepath to use MediaStore API (which would also have problems that the gyro debug files would
+                    // show up in the MediaStore, hence gallery applications!)
+                    // We use this for older Android versions for consistency, plus not a bad idea of to have debug files in the application
+                    // folder anyway.
+                    File saveFile = storageUtils.createOutputMediaFile(main_activity.getExternalFilesDir(null), StorageUtils.MEDIA_TYPE_GYRO_INFO, "", "xml", request.current_date);
+                    Uri saveUri = null;
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
 
                     OutputStream outputStream;
                     if( saveFile != null )
@@ -1698,9 +1729,9 @@ public class ImageSaver extends Thread {
             catch(PanoramaProcessorException e) {
                 Log.e(TAG, "PanoramaProcessorException from panorama: " + e.getCode());
                 e.printStackTrace();
-                if( e.getCode() == PanoramaProcessorException.UNEQUAL_SIZES ) {
+                if( e.getCode() == PanoramaProcessorException.UNEQUAL_SIZES || e.getCode() == PanoramaProcessorException.FAILED_TO_CROP ) {
                     main_activity.getPreview().showToast(null, R.string.failed_to_process_panorama);
-                    Log.e(TAG, "UNEQUAL_SIZES");
+                    Log.e(TAG, "panorama failed: " + e.getCode());
                     bitmaps.clear();
                     System.gc();
                     main_activity.savingImage(false);
@@ -2124,9 +2155,19 @@ public class ImageSaver extends Thread {
 
                         Address address = null;
                         if( request.store_location && !request.preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
+                            boolean block_geocoder;
+                            synchronized(this) {
+                                block_geocoder = app_is_paused;
+                            }
                             // try to find an address
                             // n.b., if we update the class being used, consider whether the info on Geocoder in preference_stamp_geo_address_summary needs updating
-                            if( Geocoder.isPresent() ) {
+                            if( block_geocoder ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // has paused and we're still saving images
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for photostamp as app is paused");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());
@@ -2303,11 +2344,12 @@ public class ImageSaver extends Thread {
 
         main_activity.savingImage(true);
 
-        // If saveUri is non-null, then:
-        //     Before Android 7, picFile is a temporary file which we use for saving exif tags too, and then we redirect the picFile to saveUri.
-        //     On Android 7+, picFile is null - we can write the exif tags direct to the saveUri.
+        // If using SAF or image_capture_intent is true, or using scoped storage, only saveUri is non-null
+        // Otherwise, only picFile is non-null
         File picFile = null;
         Uri saveUri = null;
+        boolean use_media_store = false;
+        ContentValues contentValues = null; // used if using scoped storage
         try {
             if( !raw_only ) {
                 PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap, ignore_exif_orientation);
@@ -2379,6 +2421,37 @@ public class ImageSaver extends Thread {
             else if( storageUtils.isUsingSAF() ) {
                 saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
             }
+            else if( MainActivity.useScopedStorage() ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "use media store");
+                use_media_store = true;
+                Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                contentValues = new ContentValues();
+                String picName = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, 0, "." + extension, request.current_date);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "picName: " + picName);
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, picName);
+                String mime_type = storageUtils.getImageMimeType(extension);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "mime_type: " + mime_type);
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, mime_type);
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    String relative_path = storageUtils.getSaveRelativeFolder();
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "relative_path: " + relative_path);
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, relative_path);
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
+                }
+
+                saveUri = main_activity.getContentResolver().insert(folder, contentValues);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "saveUri: " + saveUri);
+                if( saveUri == null ) {
+                    throw new IOException();
+                }
+            }
             else {
                 picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
                 if( MyDebug.LOG )
@@ -2440,12 +2513,24 @@ public class ImageSaver extends Thread {
                         }
                         else {
                             ParcelFileDescriptor parcelFileDescriptor = main_activity.getContentResolver().openFileDescriptor(saveUri, "rw");
-                            if( parcelFileDescriptor != null ) {
-                                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                                setExifFromData(request, data, fileDescriptor);
+                            try {
+                                if( parcelFileDescriptor != null ) {
+                                    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                                    setExifFromData(request, data, fileDescriptor);
+                                }
+                                else {
+                                    Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                                }
                             }
-                            else {
-                                Log.e(TAG, "failed to create ParcelFileDescriptor for saveUri: " + saveUri);
+                            finally {
+                                if( parcelFileDescriptor != null ) {
+                                    try {
+                                        parcelFileDescriptor.close();
+                                    }
+                                    catch(IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
                         }
                     }
@@ -2475,11 +2560,32 @@ public class ImageSaver extends Thread {
                 }
 
                 if( saveUri != null ) {
-                    if( picFile != null ) {
-                        copyFileToUri(main_activity, saveUri, picFile);
-                    }
                     success = true;
-                    broadcastSAFFile(saveUri, request.image_capture_intent);
+
+                    if( use_media_store ) {
+                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                            contentValues.clear();
+                            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0);
+                            main_activity.getContentResolver().update(saveUri, contentValues, null, null);
+                        }
+
+                        // no need to broadcast when using mediastore method
+                        if( !request.image_capture_intent ) {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "announce mediastore uri");
+                            // in theory this is pointless, as announceUri no longer does anything on Android 7+,
+                            // and mediastore method is only used on Android 10+, but keep this just in case
+                            // announceUri does something in future
+                            storageUtils.announceUri(saveUri, true, false);
+                            // we also want to save the uri - we can use the media uri directly, rather than having to scan it
+                            storageUtils.setLastMediaScanned(saveUri);
+                        }
+                    }
+                    else {
+                        broadcastSAFFile(saveUri, request.image_capture_intent);
+                    }
+
+                    main_activity.test_last_saved_imageuri = saveUri;
                 }
             }
         }
@@ -2497,8 +2603,16 @@ public class ImageSaver extends Thread {
         }
         catch(SecurityException e) {
             // received security exception from copyFileToUri()->openOutputStream() from Google Play
+            // update: no longer have copyFileToUri() (as no longer use temporary files for SAF), but might as well keep this
             if( MyDebug.LOG )
                 Log.e(TAG, "security exception writing file: " + e.getMessage());
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
+        catch(IllegalArgumentException e) {
+            // can happen for mediastore method if invalid ContentResolver.insert() call
+            if( MyDebug.LOG )
+                Log.e(TAG, "IllegalArgumentException writing file: " + e.getMessage());
             e.printStackTrace();
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
@@ -2511,6 +2625,9 @@ public class ImageSaver extends Thread {
         }
         else if( success && storageUtils.isUsingSAF() ){
             applicationInterface.addLastImageSAF(saveUri, share_image);
+        }
+        else if( success && use_media_store ){
+            applicationInterface.addLastImageMediaStore(saveUri, share_image);
         }
 
         // I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
@@ -2595,15 +2712,6 @@ public class ImageSaver extends Thread {
             bitmap.recycle();
         }
 
-        if( picFile != null && saveUri != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "delete temp picFile: " + picFile);
-            if( !picFile.delete() ) {
-                if( MyDebug.LOG )
-                    Log.e(TAG, "failed to delete temp picFile: " + picFile);
-            }
-        }
-
         System.gc();
 
         main_activity.savingImage(false);
@@ -2638,34 +2746,8 @@ public class ImageSaver extends Thread {
     private void broadcastSAFFile(Uri saveUri, boolean image_capture_intent) {
         if( MyDebug.LOG )
             Log.d(TAG, "broadcastSAFFile");
-        /* We still need to broadcastFile for SAF for two reasons:
-            1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
-               Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
-               won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
-               corresponding to the real file, if it exists.
-            2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
-               scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
-               scan.
-            Note this will no longer work on Android Q's scoped storage (getFileFromDocumentUriSAF will return null).
-            But NEW_PICTURE etc are no longer sent on Android 7+ anyway.
-        */
         StorageUtils storageUtils = main_activity.getStorageUtils();
-        File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
-        if( MyDebug.LOG )
-            Log.d(TAG, "real_file: " + real_file);
-        if( real_file != null ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "broadcast file");
-            storageUtils.broadcastFile(real_file, true, false, true);
-            main_activity.test_last_saved_image = real_file.getAbsolutePath();
-        }
-        else if( !image_capture_intent ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "announce SAF uri");
-            // announce the SAF Uri
-            // (shouldn't do this for a capture intent - e.g., causes crash when calling from Google Keep)
-            storageUtils.announceUri(saveUri, true, false);
-        }
+        storageUtils.broadcastUri(saveUri, true, false, true, image_capture_intent);
     }
 
     /** As setExifFromFile, but can read the Exif tags directly from the jpeg data, and to a file descriptor, rather than a file.
@@ -3007,6 +3089,8 @@ public class ImageSaver extends Thread {
         try {
             File picFile = null;
             Uri saveUri = null;
+            boolean use_media_store = false;
+            ContentValues contentValues = null; // used if using scoped storage
 
             String suffix = "_";
             String filename_suffix = (request.force_suffix) ? suffix + (request.suffix_offset) : "";
@@ -3016,6 +3100,26 @@ public class ImageSaver extends Thread {
                     Log.d(TAG, "saveUri: " + saveUri);
                 // When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
                 // need a real file; secondly copying to a temp file is much slower for RAW.
+            }
+            else if( MainActivity.useScopedStorage() ) {
+                use_media_store = true;
+                Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                contentValues = new ContentValues();
+                String picName = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, 0, ".dng", request.current_date);
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, picName);
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/dng");
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, storageUtils.getSaveRelativeFolder());
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
+                }
+
+                saveUri = main_activity.getContentResolver().insert(folder, contentValues);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "saveUri: " + saveUri);
+                if( saveUri == null )
+                    throw new IOException();
             }
             else {
                 picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "dng", request.current_date);
@@ -3050,12 +3154,29 @@ public class ImageSaver extends Thread {
             else if( storageUtils.isUsingSAF() ){
                 applicationInterface.addLastImageSAF(saveUri, raw_only);
             }
+            else if( success && use_media_store ){
+                applicationInterface.addLastImageMediaStore(saveUri, raw_only);
+            }
 
             if( saveUri == null ) {
                 storageUtils.broadcastFile(picFile, true, false, false);
             }
+            else if( use_media_store ) {
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    contentValues.clear();
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 0);
+                    main_activity.getContentResolver().update(saveUri, contentValues, null, null);
+                }
+
+                // no need to broadcast when using mediastore method
+
+                // in theory this is pointless, as announceUri no longer does anything on Android 7+,
+                // and mediastore method is only used on Android 10+, but keep this just in case
+                // announceUri does something in future
+                storageUtils.announceUri(saveUri, true, false);
+            }
             else {
-                storageUtils.broadcastUri(saveUri, true, false, false);
+                storageUtils.broadcastUri(saveUri, true, false, false, false);
             }
         }
         catch(FileNotFoundException e) {
@@ -3093,8 +3214,9 @@ public class ImageSaver extends Thread {
         return success;
     }
 
-    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data.. If no
-     *  rotation is required, the input bitmap is returned.
+    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data. If no
+     *  rotation is required, the input bitmap is returned. If rotation is required, the input
+     *  bitmap is recycled.
      * @param data Jpeg data containing the Exif information to use.
      */
     private Bitmap rotateForExif(Bitmap bitmap, byte [] data) {
@@ -3202,10 +3324,11 @@ public class ImageSaver extends Thread {
      * being used by the ExifInterace!
      * This didn't cause any known bugs, but good practice to fix, similar to the issue reported in
      * https://sourceforge.net/p/opencamera/tickets/417/ .
+     * Also important to call the close() method when done with it, to close the
+     * ParcelFileDescriptor (if one was created).
      */
     private static class ExifInterfaceHolder {
-        // suppress warning - no it can't be local or removed, see documentation above about the garbage collector!
-        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        // see documentation above about keeping hold of pdf due to the garbage collector!
         private final ParcelFileDescriptor pfd;
         private final ExifInterface exif;
 
@@ -3217,6 +3340,18 @@ public class ImageSaver extends Thread {
         ExifInterface getExif() {
             return this.exif;
         }
+
+        void close()  {
+            if( this.pfd != null ) {
+                try {
+                    this.pfd.close();
+                }
+                catch(IOException e) {
+                    Log.e(TAG, "failed to close parcelfiledescriptor");
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /** Creates a new exif interface for reading and writing.
@@ -3224,6 +3359,7 @@ public class ImageSaver extends Thread {
      *  tags too.
      *  The returned ExifInterfaceHolder will always be non-null, but the contained getExif() may
      *  return null if this method was unable to create the exif interface.
+     *  The caller should call close() on the returned ExifInterfaceHolder when no longer required.
      */
     private ExifInterfaceHolder createExifInterface(File picFile, Uri saveUri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor = null;
@@ -3250,8 +3386,8 @@ public class ImageSaver extends Thread {
 
     /** Makes various modifications to the saved image file, according to the preferences in request.
      *  This method is used when saving directly from the JPEG data rather than a bitmap.
-     *  If picFile==null, then saveUri must be non-null (and the Android version must be Android 7
-     *  or later), and will be used instead to write the exif tags too.
+     *  If picFile==null, then saveUri must be non-null, and will be used instead to write the exif
+     *  tags too.
      */
     private void updateExif(Request request, File picFile, Uri saveUri) throws IOException {
         if( MyDebug.LOG )
@@ -3262,10 +3398,15 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "add additional exif info");
             try {
                 ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
-                ExifInterface exif = exif_holder.getExif();
-                if( exif != null ) {
-                    modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
-                    exif.saveAttributes();
+                try {
+                    ExifInterface exif = exif_holder.getExif();
+                    if( exif != null ) {
+                        modifyExif(exif, request.type == Request.Type.JPEG, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright, request.level_angle, request.pitch_angle, request.store_ypr);
+                        exif.saveAttributes();
+                    }
+                }
+                finally {
+                    exif_holder.close();
                 }
             }
             catch(NoClassDefFoundError exception) {
@@ -3282,10 +3423,15 @@ public class ImageSaver extends Thread {
                 Log.d(TAG, "remove GPS timestamp hack");
             try {
                 ExifInterfaceHolder exif_holder = createExifInterface(picFile, saveUri);
-                ExifInterface exif = exif_holder.getExif();
-                if( exif != null ) {
-                    fixGPSTimestamp(exif, request.current_date);
-                    exif.saveAttributes();
+                try {
+                    ExifInterface exif = exif_holder.getExif();
+                    if( exif != null ) {
+                        fixGPSTimestamp(exif, request.current_date);
+                        exif.saveAttributes();
+                    }
+                }
+                finally {
+                    exif_holder.close();
                 }
             }
             catch(NoClassDefFoundError exception) {
@@ -3429,36 +3575,6 @@ public class ImageSaver extends Thread {
             return store_location;
         }
         return false;
-    }
-
-    /** Reads from picFile and writes the contents to saveUri.
-     */
-    private void copyFileToUri(Context context, Uri saveUri, File picFile) throws IOException {
-        if( MyDebug.LOG ) {
-            Log.d(TAG, "copyFileToUri");
-            Log.d(TAG, "saveUri: " + saveUri);
-            Log.d(TAG, "picFile: " + saveUri);
-        }
-        InputStream inputStream = null;
-        OutputStream realOutputStream = null;
-        try {
-            inputStream = new FileInputStream(picFile);
-            realOutputStream = context.getContentResolver().openOutputStream(saveUri);
-            // Transfer bytes from in to out
-            byte [] buffer = new byte[1024];
-            int len;
-            while( (len = inputStream.read(buffer)) > 0 ) {
-                realOutputStream.write(buffer, 0, len);
-            }
-        }
-        finally {
-            if( inputStream != null ) {
-                inputStream.close();
-            }
-            if( realOutputStream != null ) {
-                realOutputStream.close();
-            }
-        }
     }
 
     // for testing:

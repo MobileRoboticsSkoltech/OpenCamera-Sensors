@@ -160,7 +160,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     //private boolean ui_placement_right = true;
 
-    private boolean app_is_paused = true;
+    private boolean app_is_paused = true; // whether activity is paused
+    private boolean is_paused = true; // whether Preview.onPause() is called - note this could include the application pausing the preview, even if app_is_paused==false
     private boolean has_surface;
     private boolean has_aspect_ratio;
     private double aspect_ratio;
@@ -184,24 +185,38 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
     private boolean video_restart_on_max_filesize;
     private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
+    /** Stores the file (or similar) to record a video.
+     *  Important to call close() when the video recording is finished, to free up any resources
+     *  (e.g., supplied ParcelFileDescriptor).
+     */
     private static class VideoFileInfo {
-        // stores the file (or similar) to record a video
-        private final int video_method;
-        private final Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
-        private final String video_filename; // for VIDEOMETHOD_FILE
-        private final ParcelFileDescriptor video_pfd_saf; // for VIDEOMETHOD_SAF
+        private final ApplicationInterface.VideoMethod video_method;
+        private final Uri video_uri; // for VideoMethod.SAF, VideoMethod.URI or VideoMethod.MEDIASTORE
+        private final String video_filename; // for VideoMethod.FILE
+        private final ParcelFileDescriptor video_pfd_saf; // for VideoMethod.SAF, VideoMethod.URI or VideoMethod.MEDIASTORE
 
         VideoFileInfo() {
-            this.video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+            this.video_method = ApplicationInterface.VideoMethod.FILE;
             this.video_uri = null;
             this.video_filename = null;
             this.video_pfd_saf = null;
         }
-        VideoFileInfo(int video_method, Uri video_uri, String video_filename, ParcelFileDescriptor video_pfd_saf) {
+        VideoFileInfo(ApplicationInterface.VideoMethod video_method, Uri video_uri, String video_filename, ParcelFileDescriptor video_pfd_saf) {
             this.video_method = video_method;
             this.video_uri = video_uri;
             this.video_filename = video_filename;
             this.video_pfd_saf = video_pfd_saf;
+        }
+
+        void close() {
+            if( this.video_pfd_saf != null ) {
+                try {
+                    this.video_pfd_saf.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     private VideoFileInfo videoFileInfo = new VideoFileInfo();
@@ -385,6 +400,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile int count_cameraContinuousFocusMoving;
     public volatile boolean test_fail_open_camera;
     public volatile boolean test_video_failure;
+    public volatile boolean test_video_ioexception;
+    public volatile boolean test_video_cameracontrollerexception;
     public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
     public volatile boolean test_called_next_output_file;
     public volatile boolean test_started_next_output_file;
@@ -951,9 +968,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
                 if( MyDebug.LOG )
                     Log.d(TAG, "runtime exception when stopping video");
+                videoFileInfo.close();
                 applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
 
                 videoFileInfo = new VideoFileInfo();
+                if( nextVideoFileInfo != null )
+                    nextVideoFileInfo.close();
                 nextVideoFileInfo = null;
                 // if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
                 if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
@@ -1013,11 +1033,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder.release();
         video_recorder = null;
         video_recorder_is_paused = false;
+
+        applicationInterface.cameraInOperation(false, true);
+        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+        videoFileInfo.close();
+
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
             // video file that will have been created
+            if( MyDebug.LOG )
+                Log.d(TAG, "delete ununused next video file");
+            nextVideoFileInfo.close();
             applicationInterface.deleteUnusedVideo(nextVideoFileInfo.video_method, nextVideoFileInfo.video_uri, nextVideoFileInfo.video_filename);
         }
         videoFileInfo = new VideoFileInfo();
@@ -1181,6 +1209,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    /** Closes the camera.
+     * @param async Whether to close the camera on a background thread.
+     * @param closeCameraCallback If async is true, closeCameraCallback.onClosed() will be called,
+     *                            from the UI thread, once the camera is closed. If async is false,
+     *                            this field is ignored.
+     */
     private void closeCamera(boolean async, final CloseCameraCallback closeCameraCallback) {
         long debug_time = 0;
         if( MyDebug.LOG ) {
@@ -1352,7 +1386,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "openCamera()");
             debug_time = System.currentTimeMillis();
         }
-        if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
+        if( applicationInterface.isPreviewInBackground() ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "don't open camera as preview in background");
+            // note, even if the application never tries to reopen the camera in the background, we still need this check to avoid the camera
+            // opening from mySurfaceCreated()
+            return;
+        }
+        else if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "already opening camera in background thread");
             return;
@@ -1442,9 +1483,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             return;
         }
-        if( this.app_is_paused ) {
+        if( this.is_paused ) {
             if( MyDebug.LOG ) {
-                Log.d(TAG, "don't open camera as app is paused");
+                Log.d(TAG, "don't open camera as paused");
             }
             return;
         }
@@ -3849,9 +3890,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public void draw(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "draw()");*/
-        if( this.app_is_paused ) {
+        if( this.is_paused ) {
     		/*if( MyDebug.LOG )
-    			Log.d(TAG, "draw(): app is paused");*/
+    			Log.d(TAG, "draw(): paused");*/
             return;
         }
 		/*if( true ) // test
@@ -4472,7 +4513,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.d(TAG, "found no existing focus_value");
             // here we set the default values for focus mode
             // note if updating default focus value for photo mode, also update MainActivityTest.setToDefault()
-            updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_continuous_picture", true, true, auto_focus);
+            if( !updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_continuous_picture", true, true, auto_focus) ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "continuous focus not supported, so fall back to first");
+                updateFocus(0, true, true, auto_focus);
+            }
         }
     }
 
@@ -5011,7 +5056,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "takePicturePressed exit");
     }
 
-    private void takePictureOnTimer(final long timer_delay, @SuppressWarnings("unused") boolean repeated) {
+    private void takePictureOnTimer(final long timer_delay, boolean repeated) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "takePictureOnTimer");
             Log.d(TAG, "timer_delay: " + timer_delay);
@@ -5143,7 +5188,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         try {
                             //if( true )
                             //	throw new IOException(); // test
-                            if( info.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                            if( info.video_method == ApplicationInterface.VideoMethod.FILE ) {
                                 video_recorder.setNextOutputFile(new File(info.video_filename));
                             }
                             else {
@@ -5157,6 +5202,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         catch(IOException e) {
                             Log.e(TAG, "failed to setNextOutputFile");
                             e.printStackTrace();
+                            info.close();
                         }
                     }
                 }
@@ -5171,6 +5217,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Log.e(TAG, "received MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED but nextVideoFileInfo is null");
             }
             else {
+                videoFileInfo.close();
                 applicationInterface.restartedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
                 videoFileInfo = nextVideoFileInfo;
                 nextVideoFileInfo = null;
@@ -5302,14 +5349,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private VideoFileInfo createVideoFile(String extension) {
         if( MyDebug.LOG )
             Log.d(TAG, "createVideoFile");
+        VideoFileInfo video_file_info = null;
+        ParcelFileDescriptor video_pfd_saf = null;
         try {
-            int method = applicationInterface.createOutputVideoMethod();
+            ApplicationInterface.VideoMethod method = applicationInterface.createOutputVideoMethod();
             Uri video_uri = null;
             String video_filename = null;
-            ParcelFileDescriptor video_pfd_saf = null;
             if( MyDebug.LOG )
                 Log.d(TAG, "method? " + method);
-            if( method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+            if( method == ApplicationInterface.VideoMethod.FILE ) {
     			/*if( true )
     				throw new IOException(); // test*/
                 File videoFile = applicationInterface.createOutputVideoFile(extension);
@@ -5319,8 +5367,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             else {
                 Uri uri;
-                if( method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+                if( method == ApplicationInterface.VideoMethod.SAF ) {
                     uri = applicationInterface.createOutputVideoSAF(extension);
+                }
+                else if( method == ApplicationInterface.VideoMethod.MEDIASTORE ) {
+                    uri = applicationInterface.createOutputVideoMediaStore(extension);
                 }
                 else {
                     uri = applicationInterface.createOutputVideoUri();
@@ -5331,14 +5382,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_uri = uri;
             }
 
-            return new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
+            video_file_info = new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
         }
         catch(IOException e) {
             if( MyDebug.LOG )
                 Log.e(TAG, "Couldn't create media video file; check storage permissions?");
             e.printStackTrace();
         }
-        return null;
+        finally {
+            if( video_file_info == null && video_pfd_saf != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "failed, so clean up video_pfd_saf");
+                try {
+                    video_pfd_saf.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return video_file_info;
     }
 
     /** Start video recording.
@@ -5469,7 +5532,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.d(TAG, "actual video_max_duration: " + video_max_duration);
                 local_video_recorder.setMaxDuration((int)video_max_duration);
 
-                if( videoFileInfo.video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                if( videoFileInfo.video_method == ApplicationInterface.VideoMethod.FILE ) {
                     local_video_recorder.setOutputFile(videoFileInfo.video_filename);
                 }
                 else {
@@ -5486,8 +5549,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 local_video_recorder.setOrientationHint(rotation);
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to prepare video recorder");
+
                 local_video_recorder.prepare();
+                if( test_video_ioexception ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "test_video_ioexception is true");
+                    throw new IOException();
+                }
+
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
+
                 boolean want_video_imu_recording = applicationInterface.getIMURecordingPref();
                 boolean want_save_frames = applicationInterface.getSaveFramesPref();
 
@@ -5541,11 +5612,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             }
                         }
                 );
+              
+                if( test_video_cameracontrollerexception ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "test_video_cameracontrollerexception is true");
+                    throw new CameraControllerException();
+                }
+              
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to start video recorder");
 
                 try {
                     local_video_recorder.start();
+                    if( test_video_failure ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "test_video_failure is true");
+                        throw new RuntimeException();
+                    }
                     this.video_recorder = local_video_recorder;
                     videoRecordingStarted(max_filesize_restart);
                 }
@@ -5611,6 +5694,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_recorder.release();
                 video_recorder = null;
                 video_recorder_is_paused = false;
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+                videoFileInfo = new VideoFileInfo();
                 applicationInterface.cameraInOperation(false, true);
                 this.reconnectCamera(true);
             }
@@ -5636,6 +5721,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 video_recorder.release();
                 video_recorder = null;
                 video_recorder_is_paused = false;
+                applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+                videoFileInfo = new VideoFileInfo();
                 applicationInterface.cameraInOperation(false, true);
                 this.reconnectCamera(true);
                 this.showToast(null, R.string.video_no_free_space);
@@ -5656,11 +5743,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             faces_detected = null;
         }
 
-        if( test_video_failure ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "test_video_failure is true");
-            throw new RuntimeException();
-        }
         video_start_time = System.currentTimeMillis();
         video_start_time_set = true;
         applicationInterface.startedVideo();
@@ -5757,6 +5839,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_recorder.release();
         video_recorder = null;
         video_recorder_is_paused = false;
+        applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+        videoFileInfo = new VideoFileInfo();
         applicationInterface.cameraInOperation(false, true);
         this.reconnectCamera(true);
     }
@@ -6348,6 +6432,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             String current_ui_focus_value = getCurrentFocusValue();
             if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
                 camera_controller.cancelAutoFocus();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "switch back to: " + current_ui_focus_value);
                 camera_controller.setFocusValue(current_ui_focus_value);
             }
             else {
@@ -7224,11 +7310,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return camera_controller.getAPI();
     }
 
+    /** Call when activity is resumed.
+     */
     public void onResume() {
         if( MyDebug.LOG )
             Log.d(TAG, "onResume");
         recreatePreviewBitmap();
         this.app_is_paused = false;
+        this.is_paused = false;
         cameraSurface.onResume();
         if( canvasView != null )
             canvasView.onResume();
@@ -7250,10 +7339,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
 
+    /** Call when activity is paused.
+     */
     public void onPause() {
+        onPause(true);
+    }
+
+    /** Call when activity is paused, or the application wants to put the Preview into a paused
+     *  state (closing the camera etc).
+     * @param activity_is_pausing Set to true if this is called because the activity is being paused;
+     *                            set to false if the activity is not pausing.
+     */
+    public void onPause(boolean activity_is_pausing) {
         if( MyDebug.LOG )
             Log.d(TAG, "onPause");
-        this.app_is_paused = true;
+        this.is_paused = true;
+        if( activity_is_pausing )
+            this.app_is_paused = true; // note, if activity_is_paused==false, we don't change app_is_paused, in case app was paused indicated via a separate call to onPause
         if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "cancel open_camera_task");
@@ -8276,7 +8378,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         final long refresh_time = (want_zebra_stripes || want_focus_peaking) ? 40 : refresh_histogram_rate_ms;
         long time_now = System.currentTimeMillis();
         if( want_preview_bitmap && preview_bitmap != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                !app_is_paused && !applicationInterface.isPreviewInBackground() &&
+                !is_paused && !applicationInterface.isPreviewInBackground() &&
                 !refreshPreviewBitmapTaskIsRunning() && time_now > last_preview_bitmap_time_ms + refresh_time ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "refreshPreviewBitmap");

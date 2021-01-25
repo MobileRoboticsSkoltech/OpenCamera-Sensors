@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="net.sourceforge.opencamera"
-    android:versionCode="78"
-    android:versionName="1.48.2"
+    android:versionCode="80"
+    android:versionName="1.48.3"
     android:installLocation="auto"
     tools:ignore="GoogleAppIndexingWarning">
     <!-- ignore GoogleAppIndexingWarning as we don't want to implement that -->
@@ -12,7 +12,9 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

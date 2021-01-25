@@ -3,6 +3,7 @@ package net.sourceforge.opencamera.test;
 import android.graphics.Camera;
 import android.media.CamcorderProfile;
 
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -835,5 +837,173 @@ public class UnitTest {
         // log interpolation:
         assertEquals(1.0f/(0.369070f*(0.2f-0.1f) + 0.1f), focus_distances.get(1), 1.0e-5);
         assertEquals(1.0f/0.2f, focus_distances.get(0), 1.0e-5);
+    }
+
+    /** Tests MainActivity.processUserSaveLocation() (used for checking save locations when specifying user folders with non-SAF scoped storage).
+     */
+    @Test
+    public void testprocessUserSaveLocation() {
+        assertEquals("OpenCamera", MainActivity.processUserSaveLocation("OpenCamera"));
+
+        assertEquals("OpenCamera", MainActivity.processUserSaveLocation("OpenCamera/"));
+
+        assertEquals("", MainActivity.processUserSaveLocation(""));
+
+        assertEquals("", MainActivity.processUserSaveLocation("/"));
+
+        assertEquals("blah_a/blah_b", MainActivity.processUserSaveLocation("blah_a/blah_b"));
+
+        assertEquals("blah_a/blah_b", MainActivity.processUserSaveLocation("blah_a/blah_b/"));
+
+        assertEquals("blah_a/blah_b", MainActivity.processUserSaveLocation("blah_a//blah_b"));
+
+        assertEquals("blah_a/blah_b", MainActivity.processUserSaveLocation("blah_a///blah_b"));
+
+        assertEquals("blah_a/blah_b/blah_c", MainActivity.processUserSaveLocation("blah_a///blah_b/blah_c//"));
+
+        assertEquals("OpenCamera", MainActivity.processUserSaveLocation("/OpenCamera"));
+
+        assertEquals("OpenCamera", MainActivity.processUserSaveLocation("//OpenCamera"));
+
+        assertEquals("OpenCamera", MainActivity.processUserSaveLocation("///OpenCamera"));
+
+        assertEquals("blah_a/blah_b/blah_c", MainActivity.processUserSaveLocation("/blah_a///blah_b/blah_c//"));
+
+    }
+
+    /** Tests MainActivity.checkSaveLocation() (used for checking save locations when updating to scoped storage).
+     */
+    @Test
+    public void testCheckSaveLocation() {
+        Log.d(TAG, "testCheckSaveLocation");
+
+        // Should be same as Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
+        // - needed as Environment is not mocked.
+        final String dcim_path = "/storage/emulated/0/DCIM";
+
+        MainActivity.CheckSaveLocationResult res;
+
+        res = MainActivity.checkSaveLocation("");
+        assertEquals(new MainActivity.CheckSaveLocationResult(true, null), res);
+
+        res = MainActivity.checkSaveLocation("OpenCamera");
+        assertEquals(new MainActivity.CheckSaveLocationResult(true, null), res);
+
+        res = MainActivity.checkSaveLocation("blah_a/blah_b");
+        assertEquals(new MainActivity.CheckSaveLocationResult(true, null), res);
+
+        res = MainActivity.checkSaveLocation("OpenCamera/");
+        assertEquals(new MainActivity.CheckSaveLocationResult(true, null), res);
+
+        res = MainActivity.checkSaveLocation("blah_a/blah_b/");
+        assertEquals(new MainActivity.CheckSaveLocationResult(true, null), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM/OpenCamera/subfolder/", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, "OpenCamera/subfolder/"), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM/OpenCamera/subfolder", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, "OpenCamera/subfolder"), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM/OpenCamera/", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, "OpenCamera/"), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM/OpenCamera", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, "OpenCamera"), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM/", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, ""), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/DCIM", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, ""), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0/Pictures", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, null), res);
+
+        res = MainActivity.checkSaveLocation("/storage/emulated/0", dcim_path);
+        assertEquals(new MainActivity.CheckSaveLocationResult(false, null), res);
+    }
+
+    @Test
+    public void sortLuminanceInfo() {
+        Log.d(TAG, "sortLuminanceInfo");
+
+        List<HDRProcessor.LuminanceInfo> luminanceInfos = new ArrayList<>();
+        List<HDRProcessor.LuminanceInfo> luminanceInfosSorted;
+
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(2));
+
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80,255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(2));
+
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(33, 116, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 64, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(16, 80, 255, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+
+        // case that requires using min value as well as median value
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(93, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(68, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(17, 193, 255, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+
+        // case that should never use min value
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(60, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(70, 240, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(80, 95, 255, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+
+        // case that requires using hi value as well as median and min values
+        luminanceInfos.clear();
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(17, 31, 100, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(34, 127, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(93, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(68, 255, 255, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 0, 90, false));
+        luminanceInfos.add(new HDRProcessor.LuminanceInfo(0, 0, 80, false));
+        luminanceInfosSorted = new ArrayList<>(luminanceInfos);
+        Collections.sort(luminanceInfosSorted);
+        assertEquals(luminanceInfos.size(), luminanceInfosSorted.size());
+        assertEquals(luminanceInfos.get(5), luminanceInfosSorted.get(0));
+        assertEquals(luminanceInfos.get(4), luminanceInfosSorted.get(1));
+        assertEquals(luminanceInfos.get(0), luminanceInfosSorted.get(2));
+        assertEquals(luminanceInfos.get(1), luminanceInfosSorted.get(3));
+        assertEquals(luminanceInfos.get(3), luminanceInfosSorted.get(4));
+        assertEquals(luminanceInfos.get(2), luminanceInfosSorted.get(5));
+
     }
 }

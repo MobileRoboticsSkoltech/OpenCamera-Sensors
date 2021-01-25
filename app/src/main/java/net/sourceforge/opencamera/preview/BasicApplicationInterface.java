@@ -424,16 +424,16 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
-    public void stoppedVideo(int video_method, Uri uri, String filename) {
+    public void stoppedVideo(VideoMethod video_method, Uri uri, String filename) {
 
     }
 
     @Override
-    public void restartedVideo(final int video_method, final Uri uri, final String filename) {
+    public void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
     }
 
     @Override
-    public void deleteUnusedVideo(final int video_method, final Uri uri, final String filename) {
+    public void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
     }
 
     @Override

@@ -40,7 +40,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.location.Location;
-import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
@@ -185,6 +184,7 @@ public class DrawPreview {
     private Bitmap last_thumbnail; // thumbnail of last picture taken
     private volatile boolean thumbnail_anim; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
     private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
+    public volatile int test_thumbnail_anim_count;
     private final RectF thumbnail_anim_src_rect = new RectF();
     private final RectF thumbnail_anim_dst_rect = new RectF();
     private final Matrix thumbnail_anim_matrix = new Matrix();
@@ -406,6 +406,9 @@ public class DrawPreview {
                 Log.d(TAG, "thumbnail_anim started");
             thumbnail_anim = true;
             thumbnail_anim_start_ms = System.currentTimeMillis();
+            test_thumbnail_anim_count++;
+            if( MyDebug.LOG )
+                Log.d(TAG, "test_thumbnail_anim_count is now: " + test_thumbnail_anim_count);
         }
         Bitmap old_thumbnail = this.last_thumbnail;
         this.last_thumbnail = thumbnail;
@@ -751,58 +754,7 @@ public class DrawPreview {
 
         // now need to take exif orientation into account, as some devices or camera apps store the orientation in the exif tag,
         // which getBitmap() doesn't account for
-        ExifInterface exif;
-        InputStream inputStream = null;
-        try {
-            inputStream = main_activity.getContentResolver().openInputStream(uri);
-            exif = new ExifInterface(inputStream);
-        }
-        finally {
-            if( inputStream != null )
-                inputStream.close();
-        }
-
-        if( exif != null ) {
-            int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            boolean needs_tf = false;
-            int exif_orientation = 0;
-            // see http://jpegclub.org/exif_orientation.html
-            // and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
-            if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
-                // leave unchanged
-            }
-            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
-                needs_tf = true;
-                exif_orientation = 180;
-            }
-            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
-                needs_tf = true;
-                exif_orientation = 90;
-            }
-            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
-                needs_tf = true;
-                exif_orientation = 270;
-            }
-            else {
-                // just leave unchanged for now
-                if( MyDebug.LOG )
-                    Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
-            }
-            if( MyDebug.LOG )
-                Log.d(TAG, "    exif orientation: " + exif_orientation);
-
-            if( needs_tf ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "    need to rotate bitmap due to exif orientation tag");
-                Matrix m = new Matrix();
-                m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
-                Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
-                if( rotated_bitmap != bitmap ) {
-                    bitmap.recycle();
-                    bitmap = rotated_bitmap;
-                }
-            }
-        }
+        bitmap = main_activity.rotateForExif(bitmap, uri);
 
         return bitmap;
     }
@@ -2800,7 +2752,7 @@ public class DrawPreview {
         }
     }
 
-    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, @SuppressWarnings("unused") float dir_x, @SuppressWarnings("unused") float dir_y, int radius_dp, boolean outline) {
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y, float dir_x, float dir_y, int radius_dp, boolean outline) {
         if( outline ) {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(stroke_width);

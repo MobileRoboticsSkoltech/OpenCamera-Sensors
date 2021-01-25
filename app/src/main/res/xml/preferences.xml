@@ -222,7 +222,7 @@
                 android:defaultValue="none"
                 />
 
-            <ListPreference 
+            <net.sourceforge.opencamera.ui.ArraySeekBarPreference
                 android:key="preference_audio_noise_control_sensitivity"
                 android:title="@string/preference_audio_noise_control_sensitivity"
                 android:summary="@string/preference_audio_noise_control_sensitivity_summary"
@@ -795,8 +795,8 @@
                 android:summary="%s"
                 android:icon="@drawable/ic_photo_size_select_large_white_48dp"
                 />
-        
-            <ListPreference 
+
+            <net.sourceforge.opencamera.ui.ArraySeekBarPreference
                 android:key="preference_quality"
                 android:title="@string/preference_quality"
                 android:summary="@string/preference_quality_summary"
@@ -1016,8 +1016,8 @@
                     android:inputType="text"
                     android:defaultValue=""
                     />
-    
-                <ListPreference 
+
+                <net.sourceforge.opencamera.ui.ArraySeekBarPreference
                     android:key="preference_stamp_fontsize"
                     android:title="@string/preference_stamp_fontsize"
                     android:summary="@string/preference_stamp_fontsize_summary"

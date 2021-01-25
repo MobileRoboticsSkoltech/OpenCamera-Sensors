@@ -39,6 +39,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -68,6 +69,11 @@ import android.renderscript.RenderScript;
 import android.speech.tts.TextToSpeech;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
+
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -159,6 +165,7 @@ public class MainActivity extends Activity {
     private final ToastBoxer white_balance_lock_toast = new ToastBoxer();
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
+    private final ToastBoxer store_location_toast = new ToastBoxer();
     private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     private String push_info_toast_text; // can be used to "push" extra text to the info text for showPhotoVideoToast()
 
@@ -181,7 +188,8 @@ public class MainActivity extends Activity {
     public volatile boolean test_low_memory;
     public volatile boolean test_have_angle;
     public volatile float test_angle;
-    public volatile String test_last_saved_image;
+    public volatile Uri test_last_saved_imageuri; // uri of last image; set if using scoped storage OR using SAF
+    public volatile String test_last_saved_image; // filename (including full path) of last image; set if not using scoped storage nor using SAF (i.e., writing using File API)
     public static boolean test_force_supports_camera2; // okay to be static, as this is set for an entire test suite
     public volatile String test_save_settings_file;
 
@@ -307,11 +315,12 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
-        save_location_history = new SaveLocationHistory(this, "save_location_history", getStorageUtils().getSaveLocation());
+        save_location_history = new SaveLocationHistory(this, PreferenceKeys.SaveLocationHistoryBasePreferenceKey, getStorageUtils().getSaveLocation());
+        checkSaveLocations();
         if( applicationInterface.getStorageUtils().isUsingSAF() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new SaveLocationHistory for SAF");
-            save_location_history_saf = new SaveLocationHistory(this, "save_location_history_saf", getStorageUtils().getSaveLocationSAF());
+            save_location_history_saf = new SaveLocationHistory(this, PreferenceKeys.SaveLocationHistorySAFBasePreferenceKey, getStorageUtils().getSaveLocationSAF());
         }
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));
@@ -614,7 +623,7 @@ public class MainActivity extends Activity {
                     // E.g., we have a "What's New" for 1.44 (64), but then push out a quick fix for 1.44.1 (65). We don't want to
                     // show the dialog again to people who already received 1.44 (64), but we still want to show the dialog to people
                     // upgrading from earlier versions.
-                    int whats_new_version = 78; // 1.48.2
+                    int whats_new_version = 80; // 1.48.3
                     whats_new_version = Math.min(whats_new_version, version_code); // whats_new_version should always be <= version_code, but just in case!
                     if( MyDebug.LOG ) {
                         Log.d(TAG, "whats_new_version: " + whats_new_version);
@@ -699,6 +708,14 @@ public class MainActivity extends Activity {
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
+    }
+
+    /** Whether to use codepaths that are compatible with scoped storage.
+     */
+    public static boolean useScopedStorage() {
+        //return false;
+        //return true;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
@@ -797,6 +814,7 @@ public class MainActivity extends Activity {
             // to work okay, testing on S7 on RTL, but still keeping the fake flash mode in place for these devices, until we're sure of good
             // behaviour
             // update for testing on Galaxy S10e: still needs fake flash
+            // has also been reported to me that OnePlus 8 and 8 Pro have problems with flash on Camera2 API unless fake flash enabled
             if( MyDebug.LOG )
                 Log.d(TAG, "set fake flash for camera2");
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -970,6 +988,154 @@ public class MainActivity extends Activity {
                 editor.remove("preference_use_camera2"); // remove the old key, just in case
                 editor.apply();
             }
+        }
+    }
+
+    /** Handles users updating to a version with scoped storage (this could be Android 10 users upgrading
+     *  to the version of Open Camera with scoped storage; or users who later upgrade to Android 10).
+     *  With scoped storage, we no longer support saving outside of DCIM/ when not using SAF.
+     *  This updates if necessary both the current save location, and the save folder history.
+     */
+    private void checkSaveLocations() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "checkSaveLocations");
+        if( useScopedStorage() ) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean any_changes = false;
+            String save_location = getStorageUtils().getSaveLocation();
+            CheckSaveLocationResult res = checkSaveLocation(save_location);
+            if( !res.res ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "save_location not valid with scoped storage: " + save_location);
+                String new_folder;
+                if( res.alt == null ) {
+                    // no alternative, fall back to default
+                    new_folder = "OpenCamera";
+                }
+                else {
+                    // replace with the alternative
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "alternative: " + res.alt);
+                    new_folder = res.alt;
+                }
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(PreferenceKeys.SaveLocationPreferenceKey, new_folder);
+                editor.apply();
+                any_changes = true;
+            }
+
+            // now check history
+            // go backwards so we can remove easily
+            for(int i=save_location_history.size()-1;i>=0;i--) {
+                String this_location = save_location_history.get(i);
+                res = checkSaveLocation(this_location);
+                if( !res.res ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save_location in history " + i + " not valid with scoped storage: " + this_location);
+                    if( res.alt == null ) {
+                        // no alternative, remove
+                        save_location_history.remove(i);
+                    }
+                    else {
+                        // replace with the alternative
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "alternative: " + res.alt);
+                        save_location_history.set(i, res.alt);
+                    }
+                    any_changes = true;
+                }
+            }
+
+            if( any_changes ) {
+                this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), false);
+            }
+        }
+    }
+
+    /** Result from checkSaveLocation. Ideally we'd just use android.util.Pair, but that's not mocked
+     *  for use in unit tests.
+     *  See checkSaveLocation() for documentation.
+     */
+    public static class CheckSaveLocationResult {
+        final boolean res;
+        final String alt;
+
+        public CheckSaveLocationResult(boolean res, String alt) {
+            this.res = res;
+            this.alt = alt;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if( !(o instanceof CheckSaveLocationResult) ) {
+                return false;
+            }
+            CheckSaveLocationResult that = (CheckSaveLocationResult)o;
+            // stop dumb inspection that suggests replacing warning with an error(!) (Objects class is not available on all API versions)
+            // and the other inspection suggests replacing with code that would cause a nullpointerexception
+            //noinspection EqualsReplaceableByObjectsCall,StringEquality
+            return that.res == this.res && ( (that.alt == this.alt) || (that.alt != null && that.alt.equals(this.alt) ) );
+            //return that.res == this.res && ( (that.alt == this.alt) || (that.alt != null && that.alt.equals(this.alt) ) );
+        }
+
+        @Override
+        public int hashCode() {
+            return (res ? 1249 : 1259) ^ (alt == null ? 0 : alt.hashCode());
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "CheckSaveLocationResult{" + res + " , " + alt + "}";
+        }
+    }
+
+    public static CheckSaveLocationResult checkSaveLocation(final String folder) {
+        return checkSaveLocation(folder, null);
+    }
+
+    /** Checks to see if the supplied folder (in the format as used by our preferences) is supported
+     *  with scoped storage.
+     * @return The Boolean is always non-null, and returns whether the save location is valid.
+     *         If the return is false, then if the String is non-null, this stores an alternative
+     *         form that is valid. If null, there is no valid alternative.
+     * @param base_folder This should normally be null, but can be used to specify manually the
+     *                    folder instead of using StorageUtils.getBaseFolder() - needed for unit
+     *                    tests as Environment class (for Environment.getExternalStoragePublicDirectory())
+     *                    is not mocked.
+     */
+    public static CheckSaveLocationResult checkSaveLocation(final String folder, String base_folder) {
+        /*if( MyDebug.LOG )
+            Log.d(TAG, "DCIM path: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());*/
+        if( StorageUtils.saveFolderIsFull(folder) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "checkSaveLocation for full path: " + folder);
+            // But still check to see if the full path is part of DCIM. Since when using the
+            // file dialog method with non-scoped storage, if the user specifies multiple subfolders
+            // e.g. DCIM/blah_a/blah_b, we don't spot that in FolderChooserDialog.useFolder(), and
+            // instead still store that as the full path.
+
+            if( base_folder == null )
+                base_folder = StorageUtils.getBaseFolder().getAbsolutePath();
+            // strip '/' as last character - makes it easier to also spot cases where the folder is the
+            // DCIM folder, but doesn't have a '/' last character
+            if( base_folder.length() >= 1 && base_folder.charAt(base_folder.length()-1) == '/' )
+                base_folder = base_folder.substring(0, base_folder.length()-1);
+            if( MyDebug.LOG )
+                Log.d(TAG, "    compare to base_folder: " + base_folder);
+            String alt_folder = null;
+            if( folder.startsWith(base_folder) ) {
+                alt_folder = folder.substring(base_folder.length());
+                // also need to strip the first '/' if it exists
+                if( alt_folder.length() >= 1 && alt_folder.charAt(0) == '/' )
+                    alt_folder = alt_folder.substring(1);
+            }
+
+            return new CheckSaveLocationResult(false, alt_folder);
+        }
+        else {
+            // already in expected format (indicates a sub-folder of DCIM)
+            return new CheckSaveLocationResult(true, null);
         }
     }
 
@@ -1254,6 +1420,7 @@ public class MainActivity extends Activity {
         speechControl.initSpeechRecognizer();
         initLocation();
         initGyroSensors();
+        applicationInterface.getImageSaver().onResume();
         soundPoolManager.initSound();
         soundPoolManager.loadSound(R.raw.mybeep);
         soundPoolManager.loadSound(R.raw.mybeep_hi);
@@ -1264,7 +1431,10 @@ public class MainActivity extends Activity {
 
         applicationInterface.reset(false); // should be called before opening the camera in preview.onResume()
 
-        preview.onResume();
+        if( !camera_in_background ) {
+            // don't restart camera if we're showing a dialog or settings
+            preview.onResume();
+        }
 
         {
             // show a toast for the camera if it's not the first for front of back facing (otherwise on multi-front/back camera
@@ -1341,6 +1511,7 @@ public class MainActivity extends Activity {
         applicationInterface.getLocationSupplier().freeLocationListeners();
         applicationInterface.stopPanorama(true); // in practice not needed as we should stop panorama when camera is closed, but good to do it explicitly here, before disabling the gyro sensors
         applicationInterface.getGyroSensor().disableSensors();
+        applicationInterface.getImageSaver().onPause();
         soundPoolManager.releaseSound();
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
@@ -1359,7 +1530,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if( MyDebug.LOG )
             Log.d(TAG, "onConfigurationChanged()");
         // configuration change can include screen orientation (landscape/portrait) when not locked (when settings is open)
@@ -1485,6 +1656,9 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the geotagging setting
         initLocation(); // required to enable or disable GPS, also requests permission if necessary
         this.closePopup();
+
+        String message = getResources().getString(R.string.preference_location) + ": " + getResources().getString(value ? R.string.on : R.string.off);
+        preview.showToast(store_location_toast, message);
     }
 
     public void clickedTextStamp(View view) {
@@ -1640,9 +1814,7 @@ public class MainActivity extends Activity {
                     }
                 }
                 if( has_audio_permission ) {
-                    String toast_string = this.getResources().getString(R.string.speech_recognizer_started) + "\n" +
-                            this.getResources().getString(R.string.speech_recognizer_extra_info);
-                    preview.showToast(audio_control_toast, toast_string);
+                    speechControl.showToast(true);
                     speechControl.startSpeechRecognizerIntent();
                     speechControl.speechRecognizerStarted();
                 }
@@ -2126,6 +2298,9 @@ public class MainActivity extends Activity {
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
         bundle.putString("camera_api", this.preview.getCameraAPI());
         bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
+        if( this.preview.getCameraController() != null ) {
+            bundle.putInt("camera_orientation", this.preview.getCameraController().getCameraOrientation());
+        }
         bundle.putString("photo_mode_string", getPhotoModeString(applicationInterface.getPhotoMode(), true));
         bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
         bundle.putBoolean("supports_flash", this.preview.supportsFlash());
@@ -2354,7 +2529,7 @@ public class MainActivity extends Activity {
         preferencesListener.startListening();
 
         showPreview(false);
-        setWindowFlagsForSettings();
+        setWindowFlagsForSettings(); // important to do after passing camera info into bundle, since this will close the camera
         MyPreferenceFragment fragment = new MyPreferenceFragment();
         fragment.setArguments(bundle);
         // use commitAllowingStateLoss() instead of commit(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
@@ -2362,23 +2537,25 @@ public class MainActivity extends Activity {
         getFragmentManager().beginTransaction().add(android.R.id.content, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
     }
 
-    public void updateForSettings() {
-        updateForSettings(null, false);
+    public void updateForSettings(boolean update_camera) {
+        updateForSettings(update_camera, null, false);
     }
 
-    public void updateForSettings(String toast_message) {
-        updateForSettings(toast_message, false);
+    public void updateForSettings(boolean update_camera, String toast_message) {
+        updateForSettings(update_camera, toast_message, false);
     }
 
     /** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
      *  camera, and make any other necessary changes.
+     * @param update_camera Whether the camera needs to be updated. Can be set to false if we know changes
+     *                      haven't been made to the camera settings, or we already reopened it.
      * @param toast_message If non-null, display this toast instead of the usual camera "startup" toast
      *                      that's shown in showPhotoVideoToast(). If non-null but an empty string, then
      *                      this means no toast is shown at all.
      * @param keep_popup If false, the popup will be closed and destroyed. Set to true if you're sure
      *                   that the changed setting isn't one that requires the PopupView to be recreated
      */
-    public void updateForSettings(String toast_message, boolean keep_popup) {
+    public void updateForSettings(boolean update_camera, String toast_message, boolean keep_popup) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings()");
             if( toast_message != null ) {
@@ -2418,7 +2595,7 @@ public class MainActivity extends Activity {
         // doesn't happen if we allow using Camera2 API on Nexus 7, but reopen for consistency (and changing scene modes via
         // popup menu no longer should be calling updateForSettings() for Camera2, anyway)
         boolean need_reopen = false;
-        if( preview.getCameraController() != null ) {
+        if( update_camera && preview.getCameraController() != null ) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String scene_mode = preview.getCameraController().getSceneMode();
             if( MyDebug.LOG )
@@ -2491,7 +2668,10 @@ public class MainActivity extends Activity {
         }
         if( toast_message != null )
             block_startup_toast = true;
-        if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
+        if( !update_camera ) {
+            // don't try to update camera
+        }
+        else if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
             preview.reopenCamera();
             if( MyDebug.LOG ) {
                 Log.d(TAG, "updateForSettings: time after reopen: " + (System.currentTimeMillis() - debug_time));
@@ -2624,7 +2804,8 @@ public class MainActivity extends Activity {
         }
 
         if( preferencesListener.anySignificantChange() ) {
-            updateForSettings();
+            // don't need to update camera, as we now pause/resume camera when going to settings
+            updateForSettings(false);
         }
         else {
             if( MyDebug.LOG )
@@ -2814,6 +2995,7 @@ public class MainActivity extends Activity {
         if( preview != null ) {
             // also need to call setCameraDisplayOrientation, as this handles if the user switched from portrait to reverse landscape whilst in settings/etc
             // as switching from reverse landscape back to landscape isn't detected in onConfigurationChanged
+            // update: now probably irrelevant now that we close/reopen the camera, but keep it here anyway
             preview.setCameraDisplayOrientation();
         }
         if( preview != null && mainUI != null ) {
@@ -2871,6 +3053,11 @@ public class MainActivity extends Activity {
             // app is paused. It can happen here because setWindowFlagsForCamera() is called from
             // onCreate()
             initLocation();
+
+            // Similarly only want to reopen the camera if no longer paused
+            if( preview != null ) {
+                preview.onResume();
+            }
         }
     }
 
@@ -2915,6 +3102,9 @@ public class MainActivity extends Activity {
 
         // we disable location listening when showing settings or a dialog etc - saves battery life, also better for privacy
         applicationInterface.getLocationSupplier().freeLocationListeners();
+
+        // similarly we close the camera
+        preview.onPause(false);
     }
 
     private void showWhenLocked(boolean show) {
@@ -2962,6 +3152,145 @@ public class MainActivity extends Activity {
             Log.d(TAG, "showPreview: " + show);
         final ViewGroup container = findViewById(R.id.hide_container);
         container.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    /** Rotates the supplied bitmap according to the orientation tag stored in the exif data. If no
+     *  rotation is required, the input bitmap is returned. If rotation is required, the input
+     *  bitmap is recycled.
+     * @param uri Uri containing the JPEG with Exif information to use.
+     */
+    public Bitmap rotateForExif(Bitmap bitmap, Uri uri) throws IOException {
+        ExifInterface exif;
+        InputStream inputStream = null;
+        try {
+            inputStream = this.getContentResolver().openInputStream(uri);
+            exif = new ExifInterface(inputStream);
+        }
+        finally {
+            if( inputStream != null )
+                inputStream.close();
+        }
+
+        if( exif != null ) {
+            int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            boolean needs_tf = false;
+            int exif_orientation = 0;
+            // see http://jpegclub.org/exif_orientation.html
+            // and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
+            if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
+                // leave unchanged
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
+                needs_tf = true;
+                exif_orientation = 180;
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
+                needs_tf = true;
+                exif_orientation = 90;
+            }
+            else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
+                needs_tf = true;
+                exif_orientation = 270;
+            }
+            else {
+                // just leave unchanged for now
+                if( MyDebug.LOG )
+                    Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "    exif orientation: " + exif_orientation);
+
+            if( needs_tf ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "    need to rotate bitmap due to exif orientation tag");
+                Matrix m = new Matrix();
+                m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
+                Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
+                if( rotated_bitmap != bitmap ) {
+                    bitmap.recycle();
+                    bitmap = rotated_bitmap;
+                }
+            }
+        }
+        return bitmap;
+    }
+
+    /** Loads a thumbnail from the supplied image uri (not videos). Note this loads from the bitmap
+     *  rather than reading from MediaStore. Therefore this works with SAF uris as well as
+     *  MediaStore uris, as well as allowing control over the resolution of the thumbnail.
+     *  If sample_factor is 1, this returns a bitmap scaled to match the display resolution. If
+     *  sample_factor is greater than 1, it will be scaled down to a lower resolution.
+     * @param mediastore Whether the uri is for a mediastore uri or not.
+     */
+    private Bitmap loadThumbnailFromUri(Uri uri, int sample_factor, boolean mediastore) {
+        Bitmap thumbnail = null;
+        try {
+            //thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
+            // only need to load a bitmap as large as the screen size
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            InputStream is = getContentResolver().openInputStream(uri);
+            // get dimensions
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(is, null, options);
+            int bitmap_width = options.outWidth;
+            int bitmap_height = options.outHeight;
+            Point display_size = new Point();
+            Display display = getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "bitmap_width: " + bitmap_width);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+                Log.d(TAG, "display width: " + display_size.x);
+                Log.d(TAG, "display height: " + display_size.y);
+            }
+            // align dimensions
+            if( display_size.x < display_size.y ) {
+                //noinspection SuspiciousNameCombination
+                display_size.set(display_size.y, display_size.x);
+            }
+            if( bitmap_width < bitmap_height ) {
+                int dummy = bitmap_width;
+                //noinspection SuspiciousNameCombination
+                bitmap_width = bitmap_height;
+                bitmap_height = dummy;
+            }
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "bitmap_width: " + bitmap_width);
+                Log.d(TAG, "bitmap_height: " + bitmap_height);
+                Log.d(TAG, "display width: " + display_size.x);
+                Log.d(TAG, "display height: " + display_size.y);
+            }
+            // only care about height, to save worrying about different aspect ratios
+            options.inSampleSize = 1;
+            while( bitmap_height / (2*options.inSampleSize) >= display_size.y ) {
+                options.inSampleSize *= 2;
+            }
+            options.inSampleSize *= sample_factor;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "inSampleSize: " + options.inSampleSize);
+            }
+            options.inJustDecodeBounds = false;
+            // need a new inputstream, see https://stackoverflow.com/questions/2503628/bitmapfactory-decodestream-returning-null-when-options-are-set
+            is.close();
+            is = getContentResolver().openInputStream(uri);
+            thumbnail = BitmapFactory.decodeStream(is, null, options);
+            if( thumbnail == null ) {
+                Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
+            }
+            is.close();
+
+            if( !mediastore ) {
+                // When loading from a mediastore, the bitmap already seems to have the correct orientation.
+                // But when loading from a saf uri, we need to apply the rotation.
+                // E.g., test on Galaxy S10e with ghost image last image option, when using SAF, in portrait orientation, after pause/resume.
+                thumbnail = rotateForExif(thumbnail, uri);
+            }
+        }
+        catch(IOException e) {
+            Log.e(TAG, "failed to load bitmap for ghost image last");
+            e.printStackTrace();
+        }
+        return thumbnail;
     }
 
     /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
@@ -3023,75 +3352,58 @@ public class MainActivity extends Activity {
                     Log.d(TAG, "is_locked?: " + is_locked);
                 if( media != null && getContentResolver() != null && !is_locked ) {
                     // check for getContentResolver() != null, as have had reported Google Play crashes
+
+                    is_video = media.video;
+
                     if( ghost_image_last && !media.video ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "load full size bitmap for ghost image last photo");
-                        try {
-                            //thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
-                            // only need to load a bitmap as large as the screen size
-                            BitmapFactory.Options options = new BitmapFactory.Options();
-                            InputStream is = getContentResolver().openInputStream(media.uri);
-                            // get dimensions
-                            options.inJustDecodeBounds = true;
-                            BitmapFactory.decodeStream(is, null, options);
-                            int bitmap_width = options.outWidth;
-                            int bitmap_height = options.outHeight;
-                            Point display_size = new Point();
-                            Display display = getWindowManager().getDefaultDisplay();
-                            display.getSize(display_size);
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "bitmap_width: " + bitmap_width);
-                                Log.d(TAG, "bitmap_height: " + bitmap_height);
-                                Log.d(TAG, "display width: " + display_size.x);
-                                Log.d(TAG, "display height: " + display_size.y);
-                            }
-                            // align dimensions
-                            if( display_size.x < display_size.y ) {
-                                //noinspection SuspiciousNameCombination
-                                display_size.set(display_size.y, display_size.x);
-                            }
-                            if( bitmap_width < bitmap_height ) {
-                                int dummy = bitmap_width;
-                                //noinspection SuspiciousNameCombination
-                                bitmap_width = bitmap_height;
-                                bitmap_height = dummy;
-                            }
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "bitmap_width: " + bitmap_width);
-                                Log.d(TAG, "bitmap_height: " + bitmap_height);
-                                Log.d(TAG, "display width: " + display_size.x);
-                                Log.d(TAG, "display height: " + display_size.y);
-                            }
-                            // only care about height, to save worrying about different aspect ratios
-                            options.inSampleSize = 1;
-                            while( bitmap_height / (2*options.inSampleSize) >= display_size.y ) {
-                                options.inSampleSize *= 2;
-                            }
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "inSampleSize: " + options.inSampleSize);
-                            }
-                            options.inJustDecodeBounds = false;
-                            // need a new inputstream, see https://stackoverflow.com/questions/2503628/bitmapfactory-decodestream-returning-null-when-options-are-set
-                            is.close();
-                            is = getContentResolver().openInputStream(media.uri);
-                            thumbnail = BitmapFactory.decodeStream(is, null, options);
-                            if( thumbnail == null ) {
-                                Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
-                            }
-                            is.close();
-                        }
-                        catch(IOException e) {
-                            Log.e(TAG, "failed to load bitmap for ghost image last");
-                            e.printStackTrace();
-                        }
+                        thumbnail = loadThumbnailFromUri(media.uri, 1, media.mediastore);
                     }
                     if( thumbnail == null ) {
                         try {
-                            if( media.video ) {
+                            if( !media.mediastore ) {
+                                if( media.video ) {
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "load thumbnail for video from SAF uri");
+                                    ParcelFileDescriptor pfd_saf = null; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
+                                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                    try {
+                                        pfd_saf = getContentResolver().openFileDescriptor(media.uri, "r");
+                                        retriever.setDataSource(pfd_saf.getFileDescriptor());
+                                        thumbnail = retriever.getFrameAtTime(-1);
+                                    }
+                                    catch(Exception e) {
+                                        Log.d(TAG, "failed to load video thumbnail");
+                                        e.printStackTrace();
+                                    }
+                                    finally {
+                                        try {
+                                            retriever.release();
+                                        }
+                                        catch(RuntimeException ex) {
+                                            // ignore
+                                        }
+                                        try {
+                                            if( pfd_saf != null ) {
+                                                pfd_saf.close();
+                                            }
+                                        }
+                                        catch(IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                else {
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "load thumbnail for photo from SAF uri");
+                                    thumbnail = loadThumbnailFromUri(media.uri, 4, media.mediastore);
+                                }
+                            }
+                            else if( media.video ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "load thumbnail for video");
                                 thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
-                                is_video = true;
                             }
                             else {
                                 if( MyDebug.LOG )
@@ -3258,13 +3570,19 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "go to latest media");
             StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
             if( media != null ) {
-                uri = media.uri;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "latest uri:" + media.uri);
+                uri = media.getMediaStoreUri(this);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "media uri:" + uri);
                 is_raw = media.filename != null && media.filename.toLowerCase(Locale.US).endsWith(".dng");
             }
         }
 
-        if( uri != null ) {
+        if( uri != null && !MainActivity.useScopedStorage() ) {
             // check uri exists
+            // note, with scoped storage this isn't reliable when using SAF - since we don't actually have permission to access mediastore URIs that
+            // were created via Storage Access Framework, even though Open Camera was the application that saved them(!)
             if( MyDebug.LOG ) {
                 Log.d(TAG, "found most recent uri: " + uri);
                 Log.d(TAG, "is_raw: " + is_raw);
@@ -3437,9 +3755,9 @@ public class MainActivity extends Activity {
                             Log.d(TAG, "update folder history for saf");
                         updateFolderHistorySAF(treeUri.toString());
 
-                        File file = applicationInterface.getStorageUtils().getImageFolder();
+                        String file = applicationInterface.getStorageUtils().getImageFolderPath();
                         if( file != null ) {
-                            preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file.getAbsolutePath());
+                            preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file);
                         }
                     }
                     catch(SecurityException e) {
@@ -3571,6 +3889,8 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Update the save folder (for non-SAF methods).
+     */
     void updateSaveFolder(String new_save_location) {
         if( MyDebug.LOG )
             Log.d(TAG, "updateSaveFolder: " + new_save_location);
@@ -3586,7 +3906,8 @@ public class MainActivity extends Activity {
                 editor.apply();
 
                 this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), true);
-                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + this.applicationInterface.getStorageUtils().getSaveLocation());
+                String save_folder_name = getHumanReadableSaveFolder(this.applicationInterface.getStorageUtils().getSaveLocation());
+                this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
             }
         }
     }
@@ -3615,6 +3936,79 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Processes a user specified save folder. This should be used with the non-SAF scoped storage
+     *  method, where the user types a folder directly.
+     */
+    public static String processUserSaveLocation(String folder) {
+        // filter repeated '/', e.g., replace // with /:
+        String strip = "//";
+        while( folder.length() >= 1 && folder.contains(strip) ) {
+            folder = folder.replaceAll(strip, "/");
+        }
+
+        if( folder.length() >= 1 && folder.charAt(0) == '/' ) {
+            // strip '/' as first character - as absolute paths not allowed with scoped storage
+            // whilst we do block entering a '/' as first character in the InputFilter, users could
+            // get around this (e.g., put a '/' as second character, then delete the first character)
+            folder = folder.substring(1);
+        }
+
+        if( folder.length() >= 1 && folder.charAt(folder.length()-1) == '/' ) {
+            // strip '/' as last character - MediaStore will ignore it, but seems cleaner to strip it out anyway
+            // (we still need to allow '/' as last character in the InputFilter, otherwise users won't be able to type it whilst writing a subfolder)
+            folder = folder.substring(0, folder.length()-1);
+        }
+
+        return folder;
+    }
+
+    /** Creates a dialog builder for specifying a save folder dialog (used when not using SAF,
+     *  and on scoped storage, as an alternative to using FolderChooserDialog).
+     */
+    public AlertDialog.Builder createSaveFolderDialog() {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.preference_save_location);
+
+        final EditText editText = new EditText(this);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editText.setText(sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera"));
+        InputFilter filter = new InputFilter() {
+            // whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
+            final String disallowed = "|\\?*<\":>";
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                for(int i=start;i<end;i++) {
+                    if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
+                        return "";
+                    }
+                }
+                // also check for '/', not allowed at start
+                if( dstart == 0 && start < source.length() && source.charAt(start) == '/' ) {
+                    return "";
+                }
+                return null;
+            }
+        };
+        editText.setFilters(new InputFilter[]{filter});
+
+        alertDialog.setView(editText);
+        alertDialog.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "save location clicked okay");
+
+                String folder = editText.getText().toString();
+                folder = processUserSaveLocation(folder);
+
+                updateSaveFolder(folder);
+            }
+        });
+        alertDialog.setNegativeButton(android.R.string.cancel, null);
+
+        return alertDialog;
+    }
+
     /** Opens Open Camera's own (non-Storage Access Framework) dialog to select a folder.
      */
     private void openFolderChooserDialog() {
@@ -3623,14 +4017,51 @@ public class MainActivity extends Activity {
         showPreview(false);
         setWindowFlagsForSettings();
 
-        File start_folder = getStorageUtils().getImageFolder();
+        if( MainActivity.useScopedStorage() ) {
+            AlertDialog.Builder alertDialog = createSaveFolderDialog();
+            final AlertDialog alert = alertDialog.create();
+            // AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+            alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface arg0) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "save folder dialog dismissed");
+                    setWindowFlagsForCamera();
+                    showPreview(true);
+                }
+            });
+            alert.show();
+        }
+        else {
+            File start_folder = getStorageUtils().getImageFolder();
 
-        FolderChooserDialog fragment = new MyFolderChooserDialog();
-        fragment.setStartFolder(start_folder);
-        // use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
-        // see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
-        //fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
-        getFragmentManager().beginTransaction().add(fragment, "FOLDER_FRAGMENT").commitAllowingStateLoss();
+            FolderChooserDialog fragment = new MyFolderChooserDialog();
+            fragment.setStartFolder(start_folder);
+            // use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
+            // see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
+            //fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+            getFragmentManager().beginTransaction().add(fragment, "FOLDER_FRAGMENT").commitAllowingStateLoss();
+        }
+    }
+
+    /** Returns a human readable string for the save_folder (as stored in the preferences).
+     */
+    private String getHumanReadableSaveFolder(String save_folder) {
+        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
+            // try to get human readable form if possible
+            String file_name = applicationInterface.getStorageUtils().getFilePathFromDocumentUriSAF(Uri.parse(save_folder), true);
+            if( file_name != null ) {
+                save_folder = file_name;
+            }
+        }
+        else {
+            // The strings can either be a sub-folder of DCIM, or (pre-scoped-storage) a full path, so normally either can be displayed.
+            // But with scoped storage, an empty string is used to mean DCIM, so seems clearer to say that instead of displaying a blank line!
+            if( MainActivity.useScopedStorage() && save_folder.length() == 0 ) {
+                save_folder = "DCIM";
+            }
+        }
+        return save_folder;
     }
 
     /** User can long-click on gallery to select a recent save location from the history, of if not available,
@@ -3665,13 +4096,7 @@ public class MainActivity extends Activity {
         // history is stored in order most-recent-last
         for(int i=0;i<history.size();i++) {
             String folder_name = history.get(history.size() - 1 - i);
-            if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                // try to get human readable form if possible
-                File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(folder_name), true);
-                if( file != null ) {
-                    folder_name = file.getAbsolutePath();
-                }
-            }
+            folder_name = getHumanReadableSaveFolder(folder_name);
             items[index++] = folder_name;
         }
         final int clear_index = index;
@@ -3739,14 +4164,7 @@ public class MainActivity extends Activity {
                         String save_folder = history.get(history.size() - 1 - which);
                         if( MyDebug.LOG )
                             Log.d(TAG, "changed save_folder from history to: " + save_folder);
-                        String save_folder_name = save_folder;
-                        if( applicationInterface.getStorageUtils().isUsingSAF() ) {
-                            // try to get human readable form if possible
-                            File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(save_folder), true);
-                            if( file != null ) {
-                                save_folder_name = file.getAbsolutePath();
-                            }
-                        }
+                        String save_folder_name = getHumanReadableSaveFolder(save_folder);
                         preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -3941,7 +4359,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle state) {
+    protected void onSaveInstanceState(@NonNull Bundle state) {
         if( MyDebug.LOG )
             Log.d(TAG, "onSaveInstanceState");
         super.onSaveInstanceState(state);
@@ -4482,6 +4900,10 @@ public class MainActivity extends Activity {
 
     public boolean isCameraInBackground() {
         return this.camera_in_background;
+    }
+
+    public boolean isAppPaused() {
+        return this.app_is_paused;
     }
 
     public BluetoothRemoteControl getBluetoothRemoteControl() {

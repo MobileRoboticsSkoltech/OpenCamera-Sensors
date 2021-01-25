@@ -305,7 +305,8 @@
     <string name="permission_rationale_camera">Kamera Berechtigung wird benötigt um die Kamera zu aktivieren</string>
     <string name="permission_rationale_storage">Speicher-Berechtiung benötigt zum Speichern von Fotos</string>
     <string name="permission_rationale_record_audio">Mikrofon-Berechtigung benötigt um Audio mit dem Video aufzuzeichnen</string>
-    <string name="permission_rationale_location">Location-Berechtigung für das Geotagging benötigt</string>
+    <string name="permission_rationale_location">Location-Berechtigung für das Geotagging benötigt (Speicherung der Standortdaten in
+        Fotos und Videos). Location-Berechtigung wird auch benötigt, um eine Verbindung zu Bluetooth LE Fernbedienungen herzustellen.</string>
 
     <string name="preference_category_photo_debugging">Debug-Optionen</string>
     <string name="preference_category_video_debugging">Debug-Optionen</string>
@@ -462,7 +463,7 @@
     <string name="preference_exif_copyright_summary">Text für den "Copyright"-Eintrag in den Foto-Metadaten (nur JPEG-Format, freilassen, falls nicht verwendet.)</string>
 
     <string name="processing">Bearbeitung…</string>
-	
+
     <string name="preference_raw_no">Nur JPEG</string>
     <string name="preference_raw_yes">JPEG und DNG (RAW)</string>
     <string name="preference_raw_only">Nur DNG (RAW)</string>
@@ -474,13 +475,41 @@
     <string name="preference_stamp_dateformat_none">Kein Datum-Stempel</string>
 
     <string name="preference_fast_burst_n_images">Anzahl Fotos</string>
+    <string name="preference_fast_burst_n_images_entries_2">2</string>
+    <string name="preference_fast_burst_n_images_entries_3">3</string>
+    <string name="preference_fast_burst_n_images_entries_4">4</string>
+    <string name="preference_fast_burst_n_images_entries_5">5</string>
+    <string name="preference_fast_burst_n_images_entries_6">6</string>
+    <string name="preference_fast_burst_n_images_entries_8">8</string>
+    <string name="preference_fast_burst_n_images_entries_10">10</string>
+    <string name="preference_fast_burst_n_images_entries_12">12</string>
+    <string name="preference_fast_burst_n_images_entries_15">15</string>
+    <string name="preference_fast_burst_n_images_entries_20">20</string>
+
     <string name="preference_focus_bracketing_n_images">Anzahl Fotos</string>
+    <string name="preference_focus_bracketing_n_images_entries_2">2</string>
+    <string name="preference_focus_bracketing_n_images_entries_3">3</string>
+    <string name="preference_focus_bracketing_n_images_entries_4">4</string>
+    <string name="preference_focus_bracketing_n_images_entries_5">5</string>
+    <string name="preference_focus_bracketing_n_images_entries_6">6</string>
+    <string name="preference_focus_bracketing_n_images_entries_8">8</string>
+    <string name="preference_focus_bracketing_n_images_entries_10">10</string>
+    <string name="preference_focus_bracketing_n_images_entries_12">12</string>
+    <string name="preference_focus_bracketing_n_images_entries_15">15</string>
+    <string name="preference_focus_bracketing_n_images_entries_20">20</string>
+    <string name="preference_focus_bracketing_n_images_entries_25">25</string>
+    <string name="preference_focus_bracketing_n_images_entries_30">30</string>
+    <string name="preference_focus_bracketing_n_images_entries_40">40</string>
+    <string name="preference_focus_bracketing_n_images_entries_50">50</string>
+    <string name="preference_focus_bracketing_n_images_entries_100">100</string>
+    <string name="preference_focus_bracketing_n_images_entries_150">150</string>
+    <string name="preference_focus_bracketing_n_images_entries_200">200</string>
 
     <string name="preference_video_capture_rate">Geschwindigkeit</string>
     <string name="preference_video_capture_rate_normal">Normal</string>
     <string name="slow_motion_disabled">Zeitlupe aus</string>
     <string name="slow_motion_enabled">Zeitlupe ein</string>
-	
+
     <string name="flash_off">Ohne Blitz</string>
     <string name="flash_auto">Automatischer Blitz</string>
     <string name="flash_on">Mit Blitz</string>
@@ -512,6 +541,7 @@
     <string name="preference_video_log">Flaches (Log-) Video-Profil</string>
     <string name="preference_video_log_summary">Aktiviere ein flaches (Log-) Profil für den Video-Modus\n%s</string>
     <string name="preference_video_log_off">Aus</string>
+    <string name="preference_video_log_fine">Fein</string>
     <string name="preference_video_log_low">Schwach</string>
     <string name="preference_video_log_medium">Mittel</string>
     <string name="preference_video_log_strong">Stark</string>
@@ -575,14 +605,23 @@
     <string name="accuracy_unknown">Unbekannt</string>
 
     <string name="preference_units_distance">Entfernungseinheit</string>
-    <string name="preference_units_distance_ft">Fuß</string>
-    <string name="preference_units_distance_m">Meter</string>
     <string name="preference_units_distance_summary">Verwendet für GPS-Höhe, Fotostempel und Video-Untertitel\n%s</string>
+    <string name="preference_units_distance_m">Meter</string>
+    <string name="preference_units_distance_ft">Fuß</string>
+    <string name="feet_abbreviation">ft</string> <!-- symbol short for feet -->
 
     <string name="preference_show_whats_new">Zeige den What\'s-New-Dialog</string>
     <string name="preference_show_whats_new_summary">Zeigt Info zu neuen Features und Verbesserungen wenn die App upgedatet wurde</string>
 
-    <string name="preference_video_log_fine">Fein</string>
+    <string name="preference_screen_processing_settings">Verarbeitungseinstellungen…</string>
+
+    <string name="preference_noise_reduction_mode">Algorithmus zur Rauschunterdrückung</string>
+    <string name="preference_noise_reduction_mode_summary">Algorithmus, den der Kameratreiber zur Unterdrückung des Rauschens verwenden soll. Der Algorithmus zur Rauschunterdrückung versucht, die Bildqualität zu verbessern, indem er übermäßiges Rauschen das bei der Bildaufnahme entstanden ist (besonders be wenig einfallendem Licht) entfernt. (Beachte, dass diese Option im NR Aufnahme-Modus nicht verwendet wird.)\n%s</string>
+    <string name="noise_reduction_mode_default">Standard</string>
+    <string name="noise_reduction_mode_off">Aus</string>
+    <string name="noise_reduction_mode_minimal">Minimal</string>
+    <string name="noise_reduction_mode_fast">Schnell</string>
+    <string name="noise_reduction_mode_high_quality">Hohe Qualität</string>
 
     <string name="preference_focus_assist">Fokus-Assistenz</string>
     <string name="preference_focus_assist_summary">Zoomt näher bei manueller Fokussierung\n%s</string>
@@ -761,6 +800,7 @@
     <string name="preference_remote_type_kraken">Kraken Smart Housing</string>
 
     <string name="preference_stamp_geo_address">Verwende Adressen</string>
+    <!-- preference_stamp_geo_address_summary defined below -->
     <string name="preference_stamp_geo_address_both">Zeige zusätzlich zur GPS-Position die zugehörige Adresse an</string>
     <string name="preference_stamp_geo_address_prefer">Bevorzuge Adressdaten vor GPS-Koordinaten</string>
     <string name="preference_stamp_geo_address_no">Zeige keine Adressdaten an</string>
@@ -822,6 +862,28 @@
 
     <string name="preference_stamp_style_shadowed">Schattierter Text</string>
     <string name="preference_stamp_style_plain">Normaler Text</string>
+    <string name="preference_stamp_style_background">Text mit schatiertem Hintergrund</string>
+
+    <string name="image_saving_notification">Speichere Bilder…</string>
+
+    <string name="finish_panorama">Panorama fertigstellen</string>
+    <string name="cancel_panorama">Panorama abbrechen</string>
+    <string name="panorama_cancelled">Panorama abgebrochen</string>
+    <string name="failed_to_process_panorama">Panorama-Bild konnte nicht erstellt werden</string>
+
+    <string name="preference_panorama_crop">Panorama Auto-Crop</string>
+    <string name="preference_panorama_crop_summary">Im Panorama Modus wellige Bereiche entfernen\n%s</string>
+
+    <string name="panorama_info">Um ein Panoramabild aufzunehmen, halte das Gerät im Hochformat und klicke auf den Auslöser zum Start des Panoramas. Drehe dann das Gerät entweder nach links oder rechts, um den zentrierten weißen Kreis über den blauen Punkt zu bewegen. Nachdem jedes neue Bild aufgenommen wurde, drehe das Gerät weiter, um jeden neuen blauen Punkt, der nacheinander erscheint, abzudecken.\n\nKlicke auf das Häkchen-Symbol, um das Panorama zu speichern oder auf das Kreuz-Symbol, um abzubrechen.\n\nBeachte, dass die Verarbeitung und Speicherung von Panoramafotos Zeit in Anspruch nehmen kann.</string>
+
+    <string name="preference_panorama_save">Panorama Originalbilder</string>
+    <string name="preference_panorama_save_summary">Ob Originalbilder im Panorama-Modus gespeichert werden sollen. Die Speicherung der Panoramafotos wird dadurch langsamer. Ermöglicht auch die Option eine XML-Datei zu speichern, was bei der Meldung von Problemen mit Panoramafotos hilfreich sein kann.\n%s</string>
+
+    <string name="preference_panorama_save_no">Originalbilder nicht speichern</string>
+    <string name="preference_panorama_save_all">Originalbilder speichern</string>
+    <string name="preference_panorama_save_all_plus_debug">Originalbilder und Debug-XML speichern</string>
+
+    <string name="camera_id">ID</string> <!-- ID as in camera ID -->
 
     <string name="exposure_compensation_seekbar">Suchfeld zur Änderung der Belichtungskorrektur</string>
 
@@ -832,10 +894,85 @@
     <string name="preference_camera_api_old">Original Camera-API</string>
     <string name="preference_camera_api_camera2">Camera2-API</string>
 
+    <string name="preference_audio_control_summary">Foto/Video aufnehmen, wenn ein Geräusch oder Sprachbefehl erkannt wird.
+        Wenn aktiviert, nutze die Mikrofon-Taste auf dem Bildschirm, um die Erkennung zu starten/stoppen.
+        Beachte, dass die Option den Android Spracherkennungsdienst verwendet: Durch die Aktivierung ist es möglich, dass Audiodaten
+        an entfernte Server gesendet werden, um die Spracherkennung durchzuführen.
+        \n%s</string>
+
+    <string name="preference_stamp_geo_address_summary">Wenn möglich, nutze eine Adresse bei der Speicherung des GPS Standorts.
+        Diese Option benötigt eine Internetverbindung.
+        Beachte, dass durch die Aktivierung dein Gerät Standortdaten über das Internet an einen externen Dienst sendet,
+        um die GPS-Koordinaten in eine Adresse zu konvertieren. Siehe https://developer.android.com/reference/android/location/Geocoder .
+        \n%s</string>
+
+    <string name="intro_text">Zum Fokussieren berühren und blaue Kamerataste drücken, um Bilder aufzunehmen.
+        \n\nUm die maximale Bildschirmhelligkeit zu deaktivieren, siehe Einstellungen/Benutzeroberfläche/\"Maximale Helligkeit erzwingen\".
+        Zur Speicherung auf der SD-Karte auf Android 5+, siehe Einstellungen/Mehr Kamera-Einstellungen…/\"Benutze Storage Access Framework\".
+        Für weitere Hilfe, klicke auf  \"Online-Hilfe\" in den Einstellungen.
+    </string>
+
     <string name="preference_select_remote">Wähle eine Fernsteuerung</string>
 
+    <string name="preference_video_rec709">REC709</string>
+    <string name="preference_video_srgb">sRGB</string>
+    <string name="preference_video_gamma">Gamma</string>
+    <string name="preference_video_profile_gamma">Video Gamma-Wert</string>
+    <string name="preference_video_profile_gamma_summary">Gamma-Wert für Videos, wenn Video-Profil Gamma ausgewählt wurde\n%s</string>
+    <string name="preference_video_profile_gamma_1_6">1,6</string>
+    <string name="preference_video_profile_gamma_1_8">1,8</string>
+    <string name="preference_video_profile_gamma_1_9">1,9</string>
+    <string name="preference_video_profile_gamma_2_0">2,0</string>
+    <string name="preference_video_profile_gamma_2_1">2,1</string>
+    <string name="preference_video_profile_gamma_2_2">2,2</string>
+    <string name="preference_video_profile_gamma_2_3">2,3</string>
+    <string name="preference_video_profile_gamma_2_4">2,4</string>
+    <string name="preference_video_profile_gamma_2_6">2,6</string>
+    <string name="preference_video_profile_gamma_2_8">2,8</string>
+
     <string name="preference_immersive_mode_off">Nichts ausblenden</string>
+    <string name="preference_immersive_mode_low_profile">Nur Navigationstasten auf dem Bildschirm dimmen</string>
     <string name="preference_immersive_mode_navigation">Nur Navigationstasten ausblenden</string>
     <string name="preference_immersive_mode_gui">Alle Einstellelemente ausblenden</string>
     <string name="preference_immersive_mode_everything">Alles ausblenden</string>
+
+    <string name="preference_ghost_image_alpha">Geisterbild-Durchsichtigkeit</string>
+    <string name="preference_ghost_image_alpha_summary">Alpha-Wert für Geisterbilder. Umso niedriger der Wert, desto transparenter das Geisterbild.\n%s</string>
+
+    <string name="preference_zebra_stripes_foreground_color">Zebrastreifen-Vordergrundfarbe</string>
+    <string name="preference_zebra_stripes_foreground_color_summary">Zu verwendende Vorderundfarbe für Zebrastreifen.\n%s</string>
+    <string name="preference_zebra_stripes_background_color">Zebrastreifen-Hintergrundfarbe</string>
+    <string name="preference_zebra_stripes_background_color_summary">Zu verwendende Hintergrundfarbe für Zebrastreifen.\n%s</string>
+
+    <string name="preference_zebra_stripes_color_black">Schwarz</string>
+    <string name="preference_zebra_stripes_color_red">Rot</string>
+    <string name="preference_zebra_stripes_color_orange">Orange</string>
+    <string name="preference_zebra_stripes_color_transparent">Transparent</string>
+    <string name="preference_zebra_stripes_color_white">Weiß</string>
+
+    <string name="external_camera">Externe Kamera</string>
+    <string name="ultrawide">Ultraweit</string>
+
+    <string name="switch_to_external_camera">Zu externer Kamera wechseln</string>
+    <string name="switch_to_unknown_camera">Kamera wechseln</string>
+    <string name="switch_multi_camera">Zwischen mehreren Kameras wechseln</string>
+    <string name="preference_multi_cam_button">Tasten für mehrere Kameras</string>
+    <string name="preference_multi_cam_button_summary">Falls aktiviert, werden verschiedene Tasten verwendet, um zwischen (mehreren) Front- und Rück-Kameras zu wechseln. Falls deaktiviert, rotiert die Taste zum Wechsel der Kamera durch alle Kameras hindurch.</string>
+
+    <string name="preference_show_camera_id">Kamera-ID anzeigen</string>
+    <string name="preference_show_camera_id_summary">Aktuelle Kamera-ID auf dem Bildschirm anzeigen</string>
+
+    <string name="preference_allow_long_press">Aktionen über langen Tastendruck erlauben</string>
+    <string name="preference_allow_long_press_summary">Ob Aktionen durch langen Tastendruck aktiviert werden(z.B. Langer Druck auf Gallery-Symbol zur Änderung des Speicherortes).</string>
+
+    <string name="aperture">Blende</string>
+
+    <string name="error_features_4k">4K UHD</string>
+    <string name="error_features_bitrate">Bitrate</string>
+    <string name="error_features_frame_rate">Framerate</string>
+    <string name="error_features_slow_motion">Slow-Motion</string>
+
+    <string name="preference_comment_ypr">Eigentliche Eulerwinkel speichern</string>
+    <string name="preference_comment_ypr_summary">Speichern der drei Euler-Winkel (Drehlage des Geräts im EXIF Benutzerkommentar des Fotos (nur im JPEG-Format)</string>
+
 </resources>

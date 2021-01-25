@@ -383,7 +383,7 @@ public class PopupView extends LinearLayout {
                         public void run() {
                             if (MyDebug.LOG)
                                 Log.d(TAG, "update settings due to resolution change");
-                            main_activity.updateForSettings("", true); // keep the popupview open
+                            main_activity.updateForSettings(true, "", true); // keep the popupview open
                         }
                     };
 
@@ -464,7 +464,7 @@ public class PopupView extends LinearLayout {
                         public void run() {
                             if( MyDebug.LOG )
                                 Log.d(TAG, "update settings due to video resolution change");
-                            main_activity.updateForSettings("", true); // keep the popupview open
+                            main_activity.updateForSettings(true, "", true); // keep the popupview open
                         }
                     };
 
@@ -771,8 +771,8 @@ public class PopupView extends LinearLayout {
                             @Override
                             public void run() {
                                 if (MyDebug.LOG)
-                                    Log.d(TAG, "update settings due to resolution change");
-                                main_activity.updateForSettings("", true); // keep the popupview open
+                                    Log.d(TAG, "update settings due to video capture rate change");
+                                main_activity.updateForSettings(true, "", true); // keep the popupview open
                             }
                         };
 
@@ -812,12 +812,12 @@ public class PopupView extends LinearLayout {
                             old_video_capture_rate_index = video_capture_rate_index;
 
                             if( keep_popup ) {
-                                // make it easier to scroll through the list of resolutions without a pause each time
+                                // make it easier to scroll through the list of capture rates without a pause each time
                                 handler.removeCallbacks(update_runnable);
                                 handler.postDelayed(update_runnable, 400);
                             }
                             else {
-                                main_activity.updateForSettings(toast_message, keep_popup);
+                                main_activity.updateForSettings(true, toast_message, keep_popup);
                             }
                         }
                         @Override
@@ -1016,7 +1016,7 @@ public class PopupView extends LinearLayout {
                         if( preview.getCameraController() != null ) {
                             if( preview.getCameraController().sceneModeAffectsFunctionality() ) {
                                 // need to call updateForSettings() and close the popup, as changing scene mode can change available camera features
-                                main_activity.updateForSettings(getResources().getString(R.string.scene_mode) + ": " + main_activity.getMainUI().getEntryForSceneMode(selected_value));
+                                main_activity.updateForSettings(true, getResources().getString(R.string.scene_mode) + ": " + main_activity.getMainUI().getEntryForSceneMode(selected_value));
                                 main_activity.closePopup();
                             }
                             else {
@@ -1154,7 +1154,7 @@ public class PopupView extends LinearLayout {
             }
 
             main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the photomode
-            main_activity.updateForSettings(toast_message); // need to setup the camera again, as options may change (e.g., required burst mode, or whether RAW is allowed in this mode)
+            main_activity.updateForSettings(true, toast_message); // need to setup the camera again, as options may change (e.g., required burst mode, or whether RAW is allowed in this mode)
             main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
         }
     }
@@ -1650,7 +1650,7 @@ public class PopupView extends LinearLayout {
                         listener.onClick(supported_option_value);
                     }
                     else {
-                        main_activity.updateForSettings(title + ": " + supported_option_entry);
+                        main_activity.updateForSettings(true, title + ": " + supported_option_entry);
                         main_activity.closePopup();
                     }
                 }

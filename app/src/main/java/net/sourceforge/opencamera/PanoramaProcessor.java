@@ -218,7 +218,7 @@ public class PanoramaProcessor {
      *  RGBA_8888.
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels, @SuppressWarnings("unused") String name) {
+    private List<Allocation> createLaplacianPyramid(ScriptC_pyramid_blending script, Bitmap bitmap, int n_levels, String name) {
         if( MyDebug.LOG )
             Log.d(TAG, "createLaplacianPyramid");
         long time_s = 0;
@@ -497,7 +497,6 @@ public class PanoramaProcessor {
         }
     }
 
-    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void saveAllocation(String name, Allocation allocation) {
         Bitmap bitmap;
@@ -780,7 +779,7 @@ public class PanoramaProcessor {
         }
     }
 
-    private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, @SuppressWarnings("unused") List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
+    private static void computeDistancesBetweenMatches(List<FeatureMatch> matches, int st_indx, int nd_indx, int feature_descriptor_radius, List<Bitmap> bitmaps, int [] pixels0, int [] pixels1) {
         final int wid = 2*feature_descriptor_radius+1;
         final int wid2 = wid*wid;
         for(int indx=st_indx;indx<nd_indx;indx++) {
@@ -1979,7 +1978,6 @@ public class PanoramaProcessor {
         return new AutoAlignmentByFeatureResult(offset_x, offset_y, rotation, y_scale);
     }
 
-    @SuppressWarnings("unused")
     private Bitmap blend_panorama_alpha(Bitmap lhs, Bitmap rhs) {
         int width = lhs.getWidth();
         int height = lhs.getHeight();
@@ -2486,7 +2484,6 @@ public class PanoramaProcessor {
         return ratio_brightnesses;
     }
 
-    @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void adjustExposures(List<Bitmap> bitmaps, long time_s) {
         List<HDRProcessor.HistogramInfo> histogramInfos = new ArrayList<>();
@@ -3106,6 +3103,12 @@ public class PanoramaProcessor {
                 Log.d(TAG, "crop_y0: " + crop_y0);
                 Log.d(TAG, "crop_y1: " + crop_y1);
                 Log.d(TAG, "panorama_height: " + panorama_height);
+            }
+
+            if( panorama_height <= 0 ) {
+                // can happen if the transforms are such that we move off top or bottom of screen! Better to fail gracefully
+                Log.e(TAG, "crop caused panorama height to become -ve: " + panorama_height);
+                throw new PanoramaProcessorException(PanoramaProcessorException.FAILED_TO_CROP);
             }
         }
 

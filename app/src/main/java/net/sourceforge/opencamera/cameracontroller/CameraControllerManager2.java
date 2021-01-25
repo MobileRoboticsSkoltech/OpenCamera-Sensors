@@ -121,6 +121,15 @@ public class CameraControllerManager2 extends CameraControllerManager {
         SizeF physical_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
         android.util.Size pixel_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
         float [] focal_lengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+        if( active_size == null || physical_size == null || pixel_size == null || focal_lengths == null || focal_lengths.length == 0 ) {
+            // in theory this should never happen according to the documentation, but I've had a report of physical_size (SENSOR_INFO_PHYSICAL_SIZE)
+            // being null on an EXTERNAL Camera2 device, see https://sourceforge.net/p/opencamera/tickets/754/
+            if( MyDebug.LOG ) {
+                Log.e(TAG, "can't get camera view angles");
+            }
+            // fall back to a default
+            return new SizeF(55.0f, 43.0f);
+        }
         //camera_features.view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth(), (2.0 * focal_lengths[0])));
         //camera_features.view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight(), (2.0 * focal_lengths[0])));
         float frac_x = ((float)active_size.width())/(float)pixel_size.getWidth();

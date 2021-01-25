@@ -43,6 +43,7 @@ public class FolderChooserDialog extends DialogFragment {
 
     private File start_folder = new File("");
     private File current_folder;
+    private File max_parent; // if non-null, don't show the Parent option if viewing this folder (so the user can't go above that folder)
     private AlertDialog folder_dialog;
     private ListView list;
     private String chosen_folder;
@@ -59,6 +60,7 @@ public class FolderChooserDialog extends DialogFragment {
             this.sort_order = sort_order;
         }
 
+        @NonNull
         @Override
         public String toString() {
             if( override_name != null )
@@ -184,12 +186,17 @@ public class FolderChooserDialog extends DialogFragment {
             // see testFolderChooserInvalid()
             if( MyDebug.LOG )
                 Log.d(TAG, "failed to read folder");
-            // note that we reset to DCIM rather than DCIM/OpenCamera, just to increase likelihood of getting back to a valid state
-            refreshList(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
-            if( current_folder == null ) {
+
+            if( show_dcim_shortcut ) {
                 if( MyDebug.LOG )
-                    Log.d(TAG, "can't even read DCIM?!");
-                refreshList(new File("/"));
+                    Log.d(TAG, "fall back to DCIM");
+                // note that we reset to DCIM rather than DCIM/OpenCamera, just to increase likelihood of getting back to a valid state
+                refreshList(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
+                if( current_folder == null ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't even read DCIM?!");
+                    refreshList(new File("/"));
+                }
             }
         }
         return folder_dialog;
@@ -197,6 +204,12 @@ public class FolderChooserDialog extends DialogFragment {
 
     public void setStartFolder(File start_folder) {
         this.start_folder = start_folder;
+    }
+
+    public void setMaxParent(File max_parent) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setMaxParent: " + max_parent);
+        this.max_parent = max_parent;
     }
 
     public void setShowNewFolderButton(boolean show_new_folder_button) {
@@ -236,8 +249,14 @@ public class FolderChooserDialog extends DialogFragment {
         // n.b., files may be null if no files could be found in the folder (or we can't read) - but should still allow the user
         // to view this folder (so the user can go to parent folders which might be readable again)
         List<FileWrapper> listed_files = new ArrayList<>();
-        if( new_folder.getParentFile() != null )
-            listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
+        if( new_folder.getParentFile() != null ) {
+            if( max_parent != null && max_parent.equals(new_folder) ) {
+                // don't show parent option
+            }
+            else {
+                listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
+            }
+        }
         if( show_dcim_shortcut ) {
             File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
@@ -296,12 +315,14 @@ public class FolderChooserDialog extends DialogFragment {
         if( current_folder == null )
             return false;
         if( canWrite() ) {
-            File base_folder = StorageUtils.getBaseFolder();
             String new_save_location = current_folder.getAbsolutePath();
-            if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "parent folder is base folder");
-                new_save_location = current_folder.getName();
+            if( this.show_dcim_shortcut ) {
+                File base_folder = StorageUtils.getBaseFolder();
+                if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "parent folder is base folder");
+                    new_save_location = current_folder.getName();
+                }
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "new_save_location: " + new_save_location);
