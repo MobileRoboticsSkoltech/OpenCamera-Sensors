@@ -29,14 +29,19 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - **Connect** smartphone to the same network as PC
 - Use scripts provided in ```./api_client/``` directory to **send requests** for the application
 
+## Good practices for data recording
+
+- When recording video with audio recording enabled, MediaRecorder adds extra frames to the video to match the sound.
+Due to this problem, the **audio recording** feature **is disabled** in our app by default.
+
+- To minimize the amount of preprocessing done by the smartphone, we also disable **video stabilization** and **OIS** options.
+
 ## Restrictions
 
 One important restriction is that our app requires full Camera2API support.
 
 Another restriction of our application is that synchronized timestamping for camera and IMU data isn’t available on all the devices with Camera2API support.
-
-You can check whether your device supports this feature in preferences
-
+You can check whether your device supports this feature in preferences.
 
 ## Contribution
 

@@ -819,22 +819,18 @@ public class CameraController2 extends CameraController {
                 Log.d(TAG, "setStabilization: " + video_stabilization);
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             if( supports_optical_stabilization ) {
-                if( video_stabilization ) {
-                    // should also disable OIS
-                    if( default_optical_stabilization == null ) {
-                        // save the default optical_stabilization
-                        default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "default_optical_stabilization: " + default_optical_stabilization);
+                // should disable OIS by default
+                if( default_optical_stabilization == null ) {
+                    // save the default optical_stabilization
+                    default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+                    if( MyDebug.LOG ) {
+                        Log.d(TAG, "default_optical_stabilization: " + default_optical_stabilization);
                     }
-                    builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
                 }
-                else if( default_optical_stabilization != null ) {
-                    if( builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE) != null && !builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE).equals(default_optical_stabilization) ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "set optical stabilization back to: " + default_optical_stabilization);
-                        builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, default_optical_stabilization);
-                    }
+                builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
+
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "OIS disabled: " + default_optical_stabilization);
                 }
             }
         }
