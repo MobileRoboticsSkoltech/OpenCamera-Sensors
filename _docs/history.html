@@ -48,6 +48,40 @@
 <p>&lt; <small><a href="index.html">Main Page.</a></small></p>
 
 <pre>
+Version 1.48.3 (2020/11/20)
+
+FIXED   Possible crash for panorama if failing to crop due to poor transformations; now fails
+        gracefully.
+FIXED   Crash on EXTERNAL devices with Camera2 API that didn't support querying the view angles.
+FIXED   Photos would sometimes fail to save on some devices with Storage Access Framework, when some
+        options were enabled (options like DRO, HDR, auto-level, photostamp that require
+        post-processing; custom Exif tags like artist or copyright; or when using geotagging with
+        Camera2 API).
+FIXED   Fix for HDR scenes with both very bright and very dark regions, result would be over
+        exposed.
+FIXED   Fixed possible misalignment for HDR scenes with very bright or very dark images.
+FIXED   Corrupt videos could be left over if video failed to start.
+FIXED   Possible problem taking photos on some devices with LIMITED Camera2 API support.
+FIXED   Possible problem with default edge mode and noise reduction mode behaviours on some devices
+        with LIMITED Camera2 API support.
+FIXED   UI would become sluggish if camera or storage permission denied with "Don't ask again".
+UPDATED Now supporting "scoped storage" on Android 10+. This means storage permission is no longer
+        required on Android 10+. However this means the following changes:
+          * Saving outside of DCIM/ is no longer possible unless using the Storage Access Framework
+            option. If you had set up a custom save folder outside of DCIM/ and are on Android 10+,
+            it will be reset to the default DCIM/OpenCamera/ folder. If you want to continue saving
+            outside of DCIM/, you can enable
+            Settings/More camera controls/"Use Storage Access Framework" and choose a new folder.
+          * If using Video subtitles option, then the .SRT files will show up in gallery
+            applications, unless Settings/More camera controls/"Use Storage Access Framework" is
+            enabled.
+        Note that these changes are required due to changes being made in Android that applications
+        are required to support.
+UPDATED Use seekbar for more settings (audio control sensitivity, image quality, photo stamp font
+        size).
+UPDATED Debug XML files for panorama now saved in Android/data/net.sourceforge.opencamera/files/.
+UPDATED Camera now closed when in settings or preview otherwise in background.
+
 Version 1.48.2 (2020/07/12)
 
 FIXED   Manual focus and focus bracketing seekbars weren't being hidden when in immersive mode.

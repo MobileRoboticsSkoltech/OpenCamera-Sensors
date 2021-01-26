@@ -108,6 +108,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         if( MyDebug.LOG )
             Log.d(TAG, "using_android_l: " + using_android_l);
 
+        final int camera_orientation = bundle.getInt("camera_orientation");
+        if( MyDebug.LOG )
+            Log.d(TAG, "camera_orientation: " + camera_orientation);
+
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
         final boolean supports_accel = bundle.getBoolean(PreferenceKeys.SupportsAccelKey);
@@ -297,9 +301,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 entries[i] = "" + (i+1) + "%";
                 values[i] = "" + (i+1);
             }
-            ListPreference lp = (ListPreference)findPreference("preference_quality");
-            lp.setEntries(entries);
-            lp.setEntryValues(values);
+            ArraySeekBarPreference sp = (ArraySeekBarPreference)findPreference("preference_quality");
+            sp.setEntries(entries);
+            sp.setEntryValues(values);
         }
 
         {
@@ -984,6 +988,24 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         main_activity.openFolderChooserDialogSAF(true);
                         return true;
                     }
+                    else if( MainActivity.useScopedStorage() ) {
+                        // we can't use an EditTextPreference due to having to support non-scoped-storage, or when SAF is enabled...
+                        // anyhow, this means we can share code when called from gallery long-press anyway
+                        AlertDialog.Builder alertDialog = main_activity.createSaveFolderDialog();
+                        final AlertDialog alert = alertDialog.create();
+                        // AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+                        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface arg0) {
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "save folder dialog dismissed");
+                                dialogs.remove(alert);
+                            }
+                        });
+                        alert.show();
+                        dialogs.add(alert);
+                        return true;
+                    }
                     else {
                         File start_folder = main_activity.getStorageUtils().getImageFolder();
 
@@ -1224,6 +1246,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(is_multi_cam);
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
+                        about_string.append("\nCamera orientation: ");
+                        about_string.append(camera_orientation);
                         about_string.append("\nPhoto mode: ");
                         about_string.append(photo_mode_string==null ? "UNKNOWN" : photo_mode_string);
                         {
@@ -2011,6 +2035,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     fragment.setModeFolder(false);
                     fragment.setExtension(".xml");
                     fragment.setStartFolder(main_activity.getStorageUtils().getSettingsFolder());
+                    if( MainActivity.useScopedStorage() ) {
+                        // since we use File API to load, don't allow going outside of the application's folder, as we won't be able to read those files!
+                        fragment.setMaxParent(main_activity.getExternalFilesDir(null));
+                    }
                     fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
                 }
             }

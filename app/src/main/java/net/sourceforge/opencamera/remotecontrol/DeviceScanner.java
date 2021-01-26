@@ -103,9 +103,11 @@ public class DeviceScanner extends ListActivity {
         // In real life most of bluetooth LE devices associated with location, so without this
         // permission the sample shows nothing in most cases
         // Also see https://stackoverflow.com/questions/33045581/location-needs-to-be-enabled-for-bluetooth-low-energy-scanning-on-android-6-0
-        int permissionCoarse = Build.VERSION.SDK_INT >= 23 ?
+        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
+        String permission_needed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION;
+        int permissionCoarse = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 ContextCompat
-                        .checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) :
+                        .checkSelfPermission(this, permission_needed) :
                 PackageManager.PERMISSION_GRANTED;
 
         if( permissionCoarse == PackageManager.PERMISSION_GRANTED ) {
@@ -127,6 +129,7 @@ public class DeviceScanner extends ListActivity {
         // Also note that if we did want to only request ACCESS_COARSE_LOCATION here, we'd need to declare that permission
         // explicitly in the AndroidManifest.xml, otherwise the dialog to request permission is never shown (and the permission
         // is denied automatically).
+        // Update: on Android 10+, ACCESS_FINE_LOCATION is needed anyway: https://developer.android.com/about/versions/10/privacy/changes#location-telephony-bluetooth-wifi
         if( ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) ||
                 ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
             // Show an explanation to the user *asynchronously* -- don't block
@@ -207,12 +210,39 @@ public class DeviceScanner extends ListActivity {
     @Override
     protected void onPause() {
         if( MyDebug.LOG )
-            Log.d(TAG, "pause...");
+            Log.d(TAG, "onPause");
         super.onPause();
         if( is_scanning ) {
             scanLeDevice(false);
             leDeviceListAdapter.clear();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onStop");
+        super.onStop();
+
+        // we do this in onPause, but done here again just to be certain!
+        if( is_scanning ) {
+            scanLeDevice(false);
+            leDeviceListAdapter.clear();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onDestroy");
+
+        // we do this in onPause, but done here again just to be certain!
+        if( is_scanning ) {
+            scanLeDevice(false);
+            leDeviceListAdapter.clear();
+        }
+
+        super.onDestroy();
     }
 
     @Override
@@ -240,6 +270,8 @@ public class DeviceScanner extends ListActivity {
             bluetoothHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "stop scanning after delay");
                     is_scanning = false;
                     bluetoothAdapter.stopLeScan(mLeScanCallback);
                     invalidateOptionsMenu();

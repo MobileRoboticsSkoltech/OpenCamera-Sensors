@@ -24,6 +24,26 @@ public class PermissionHandler {
     final private static int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
     final private static int MY_PERMISSIONS_REQUEST_LOCATION = 3;
 
+    private boolean camera_denied; // whether the user requested to deny a camera permission
+    private long camera_denied_time_ms; // if denied, the time when this occurred
+    private boolean storage_denied; // whether the user requested to deny a camera permission
+    private long storage_denied_time_ms; // if denied, the time when this occurred
+    private boolean audio_denied; // whether the user requested to deny a camera permission
+    private long audio_denied_time_ms; // if denied, the time when this occurred
+    private boolean location_denied; // whether the user requested to deny a camera permission
+    private long location_denied_time_ms; // if denied, the time when this occurred
+    // In some cases there can be a problem if the user denies a permission, we then get an onResume()
+    // (since application goes into background when showing system UI to request permission) at which
+    // point we try to request permission again! This would happen for camera and storage permissions.
+    // Whilst that isn't necessarily wrong, there would also be a problem if the user says
+    // "Don't ask again", we get stuck in a loop repeatedly asking the OS for permission (and it
+    // repeatedly being automatically denied) causing the UI to become sluggish.
+    // So instead we only try asking again if not within deny_delay_ms of the user denying that
+    // permission.
+    // Time shouldn't be too long, as the user might restart and then not be asked again for camera
+    // or storage permission.
+    final private static long deny_delay_ms = 1000;
+
     PermissionHandler(MainActivity main_activity) {
         this.main_activity = main_activity;
     }
@@ -101,6 +121,11 @@ public class PermissionHandler {
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
             return;
         }
+        else if( camera_denied && System.currentTimeMillis() < camera_denied_time_ms + deny_delay_ms ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "too soon since user last denied permission");
+            return;
+        }
 
         if( ActivityCompat.shouldShowRequestPermissionRationale(main_activity, Manifest.permission.CAMERA) ) {
             // Show an explanation to the user *asynchronously* -- don't block
@@ -122,6 +147,16 @@ public class PermissionHandler {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
             if( MyDebug.LOG )
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
+            return;
+        }
+        else if( MainActivity.useScopedStorage() ) {
+            if( MyDebug.LOG )
+                Log.e(TAG, "shouldn't be requesting permissions for scoped storage!");
+            return;
+        }
+        else if( storage_denied && System.currentTimeMillis() < storage_denied_time_ms + deny_delay_ms ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "too soon since user last denied permission");
             return;
         }
 
@@ -147,6 +182,11 @@ public class PermissionHandler {
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
             return;
         }
+        else if( audio_denied && System.currentTimeMillis() < audio_denied_time_ms + deny_delay_ms ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "too soon since user last denied permission");
+            return;
+        }
 
         if( ActivityCompat.shouldShowRequestPermissionRationale(main_activity, Manifest.permission.RECORD_AUDIO) ) {
             // Show an explanation to the user *asynchronously* -- don't block
@@ -168,6 +208,11 @@ public class PermissionHandler {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
             if( MyDebug.LOG )
                 Log.e(TAG, "shouldn't be requesting permissions for pre-Android M!");
+            return;
+        }
+        else if( location_denied && System.currentTimeMillis() < location_denied_time_ms + deny_delay_ms ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "too soon since user last denied permission");
             return;
         }
 
@@ -210,6 +255,8 @@ public class PermissionHandler {
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "camera permission denied");
+                    camera_denied = true;
+                    camera_denied_time_ms = System.currentTimeMillis();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // Open Camera doesn't need to do anything: the camera will remain closed
@@ -230,6 +277,8 @@ public class PermissionHandler {
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "storage permission denied");
+                    storage_denied = true;
+                    storage_denied_time_ms = System.currentTimeMillis();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // Open Camera doesn't need to do anything: the camera will remain closed
@@ -250,6 +299,8 @@ public class PermissionHandler {
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "record audio permission denied");
+                    audio_denied = true;
+                    audio_denied_time_ms = System.currentTimeMillis();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // no need to do anything
@@ -271,6 +322,8 @@ public class PermissionHandler {
                 else {
                     if( MyDebug.LOG )
                         Log.d(TAG, "location permission denied");
+                    location_denied = true;
+                    location_denied_time_ms = System.currentTimeMillis();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     // for location, seems best to turn the option back off

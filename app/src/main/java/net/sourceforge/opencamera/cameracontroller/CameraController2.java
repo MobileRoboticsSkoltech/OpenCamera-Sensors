@@ -64,7 +64,7 @@ public class CameraController2 extends CameraController {
 
     private final Context context;
     private CameraDevice camera;
-    private String cameraIdS;
+    private final String cameraIdS;
     private VideoFrameInfoCallback mVideoFrameInfoCallback;
     private boolean mWantSaveFrames = false;
 
@@ -83,6 +83,7 @@ public class CameraController2 extends CameraController {
     private boolean supports_optical_stabilization;
     private boolean supports_photo_video_recording;
     private boolean supports_white_balance_temperature;
+    private String initial_focus_mode; // if non-null, focus mode to use if not set by Preview (rather than relying on the Builder template's default, which can be one that isn't supported, at least on Android emulator with its LIMITED camera!)
 
     private final static int tonemap_log_max_curve_points_c = 64;
     private final static float [] jtvideo_values_base = new float[] {
@@ -311,9 +312,11 @@ public class CameraController2 extends CameraController {
         private int antibanding = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO;
         private boolean has_edge_mode;
         private int edge_mode = CameraMetadata.EDGE_MODE_FAST;
+        private boolean has_default_edge_mode;
         private Integer default_edge_mode;
         private boolean has_noise_reduction_mode;
         private int noise_reduction_mode = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
+        private boolean has_default_noise_reduction_mode;
         private Integer default_noise_reduction_mode;
         private int white_balance_temperature = 5000; // used for white_balance == CONTROL_AWB_MODE_OFF
         private String flash_value = "flash_off";
@@ -559,12 +562,14 @@ public class CameraController2 extends CameraController {
         private boolean setEdgeMode(CaptureRequest.Builder builder) {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "setEdgeMode");
+                Log.d(TAG, "has_default_edge_mode: " + has_default_edge_mode);
                 Log.d(TAG, "default_edge_mode: " + default_edge_mode);
             }
             boolean changed = false;
             if( has_edge_mode ) {
-                if( default_edge_mode == null ) {
+                if( !has_default_edge_mode ) {
                     // save the default_edge_mode edge_mode
+                    has_default_edge_mode = true;
                     default_edge_mode = builder.get(CaptureRequest.EDGE_MODE);
                     if( MyDebug.LOG )
                         Log.d(TAG, "default_edge_mode: " + default_edge_mode);
@@ -588,7 +593,7 @@ public class CameraController2 extends CameraController {
                 // need EDGE_MODE_OFF to avoid a "glow" effect
                 builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
             }
-            else if( default_edge_mode != null ) {
+            else if( has_default_edge_mode ) {
                 if( builder.get(CaptureRequest.EDGE_MODE) != null && !builder.get(CaptureRequest.EDGE_MODE).equals(default_edge_mode) ) {
                     builder.set(CaptureRequest.EDGE_MODE, default_edge_mode);
                     changed = true;
@@ -600,12 +605,14 @@ public class CameraController2 extends CameraController {
         private boolean setNoiseReductionMode(CaptureRequest.Builder builder) {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "setNoiseReductionMode");
+                Log.d(TAG, "has_default_noise_reduction_mode: " + has_default_noise_reduction_mode);
                 Log.d(TAG, "default_noise_reduction_mode: " + default_noise_reduction_mode);
             }
             boolean changed = false;
             if( has_noise_reduction_mode ) {
-                if( default_noise_reduction_mode == null ) {
+                if( !has_default_noise_reduction_mode ) {
                     // save the default_noise_reduction_mode noise_reduction_mode
+                    has_default_noise_reduction_mode = true;
                     default_noise_reduction_mode = builder.get(CaptureRequest.NOISE_REDUCTION_MODE);
                     if( MyDebug.LOG )
                         Log.d(TAG, "default_noise_reduction_mode: " + default_noise_reduction_mode);
@@ -629,7 +636,7 @@ public class CameraController2 extends CameraController {
                 // need NOISE_REDUCTION_MODE_OFF to avoid excessive blurring
                 builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
             }
-            else if( default_noise_reduction_mode != null ) {
+            else if( has_default_noise_reduction_mode ) {
                 if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != null && !builder.get(CaptureRequest.NOISE_REDUCTION_MODE).equals(default_noise_reduction_mode)) {
                     builder.set(CaptureRequest.NOISE_REDUCTION_MODE, default_noise_reduction_mode);
                     changed = true;
@@ -770,6 +777,11 @@ public class CameraController2 extends CameraController {
                 if( MyDebug.LOG )
                     Log.d(TAG, "change af mode to " + af_mode);
                 builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
+            }
+            else {
+                if( MyDebug.LOG ) {
+                    Log.d(TAG, "af mode left at " + builder.get(CaptureRequest.CONTROL_AF_MODE));
+                }
             }
         }
         
@@ -2185,10 +2197,15 @@ public class CameraController2 extends CameraController {
     }
 
     private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
-        if( MyDebug.LOG )
+        if( MyDebug.LOG ) {
             Log.d(TAG, "convertFocusModesToValues()");
-        if( supported_focus_modes_arr.length == 0 )
+            Log.d(TAG, "supported_focus_modes_arr: " + Arrays.toString(supported_focus_modes_arr));
+        }
+        if( supported_focus_modes_arr.length == 0 ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "no supported focus modes");
             return null;
+        }
         List<Integer> supported_focus_modes = new ArrayList<>();
         for(Integer supported_focus_mode : supported_focus_modes_arr)
             supported_focus_modes.add(supported_focus_mode);
@@ -2213,6 +2230,9 @@ public class CameraController2 extends CameraController {
         }
         if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
             output_modes.add("focus_mode_infinity");
+            if( MyDebug.LOG ) {
+                Log.d(TAG, " supports focus_mode_infinity");
+            }
             if( minimum_focus_distance > 0.0f ) {
                 output_modes.add("focus_mode_manual2");
                 if( MyDebug.LOG ) {
@@ -2648,6 +2668,22 @@ public class CameraController2 extends CameraController {
         if( camera_features.supported_focus_values != null && camera_features.supported_focus_values.contains("focus_mode_manual2") ) {
             camera_features.supports_focus_bracketing = true;
         }
+        if( camera_features.supported_focus_values != null ) {
+            // prefer continuous focus mode
+            if( camera_features.supported_focus_values.contains("focus_mode_continuous_picture") ) {
+                initial_focus_mode = "focus_mode_continuous_picture";
+            }
+            else {
+                // just go with the first one
+                initial_focus_mode = camera_features.supported_focus_values.get(0);
+            }
+            if( MyDebug.LOG )
+                Log.d(TAG, "initial_focus_mode: " + initial_focus_mode);
+        }
+        else {
+            initial_focus_mode = null;
+        }
+
         camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 
         camera_features.is_exposure_lock_supported = true;
@@ -4757,6 +4793,8 @@ public class CameraController2 extends CameraController {
 
     @Override
     public boolean setFocusAndMeteringArea(List<Area> areas) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setFocusAndMeteringArea");
         Rect sensor_rect = getViewableRect();
         if( MyDebug.LOG )
             Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
@@ -4802,6 +4840,8 @@ public class CameraController2 extends CameraController {
     
     @Override
     public void clearFocusAndMetering() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clearFocusAndMetering");
         Rect sensor_rect = getViewableRect();
         boolean has_focus = false;
         boolean has_metering = false;
@@ -4841,17 +4881,24 @@ public class CameraController2 extends CameraController {
                 e.printStackTrace();
             } 
         }
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "af_regions: " + Arrays.toString(camera_settings.af_regions));
+            Log.d(TAG, "ae_regions: " + Arrays.toString(camera_settings.ae_regions));
+        }
     }
 
     @Override
     public List<Area> getFocusAreas() {
         if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) == 0 )
             return null;
+        if( camera_settings.af_regions == null ) {
+            // needed to fix failure on Android emulator in testTakePhotoContinuousNoTouch - can happen when CONTROL_MAX_REGIONS_AF > 0, but Camera only has 1 focus mode so Preview doesn't set focus areas
+            return null;
+        }
         MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
         if( metering_rectangles == null )
             return null;
         Rect sensor_rect = getViewableRect();
-        camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
         if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
             // for compatibility with CameraController1
             return null;
@@ -4867,6 +4914,10 @@ public class CameraController2 extends CameraController {
     public List<Area> getMeteringAreas() {
         if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) == 0 )
             return null;
+        if( camera_settings.ae_regions == null ) {
+            // needed to fix failure on Android emulator in testTakePhotoContinuousNoTouch - can happen when CONTROL_MAX_REGIONS_AF > 0, but Camera only has 1 focus mode so Preview doesn't set focus areas
+            return null;
+        }
         MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
         if( metering_rectangles == null )
             return null;
@@ -5429,6 +5480,20 @@ public class CameraController2 extends CameraController {
     public void startPreview() throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "startPreview");
+
+        if( !camera_settings.has_af_mode && initial_focus_mode != null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "user didn't specify focus, so set to: " + initial_focus_mode);
+            // If the caller hasn't set a focus mode, but focus modes are supported, it's still better to explicitly set one rather than leaving to the
+            // builder's default - e.g., problem on Android emulator with LIMITED camera where it only supported infinity focus (CONTROL_AF_MODE_OFF), but
+            // the preview builder defaults to CONTROL_AF_MODE_CONTINUOUS_PICTURE! This meant we froze when trying to take a photo, because we thought
+            // we were in continuous picture mode and so waited in state STATE_WAITING_AUTOFOCUS, but the focus never occurred.
+            // Ideally the caller to CameraController2 (Preview) should always explicitly set a focus mode if at least 1 focus mode is supported. At the
+            // time of writing, Preview only sets a focus if at least 2 focus modes are supported. But even if we fix that in future, still good to have
+            // well defined behaviour at the CameraController level.
+            setFocusValue(initial_focus_mode);
+        }
+
         synchronized( background_camera_lock ) {
             if( captureSession != null ) {
                 try {
@@ -5589,6 +5654,8 @@ public class CameraController2 extends CameraController {
                 return;
             }
             Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+            if( MyDebug.LOG )
+                Log.d(TAG, "focus mode: " + (focus_mode == null ? "null" : focus_mode));
             if( focus_mode == null ) {
                 // we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
                 // (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)

@@ -33,6 +33,7 @@ import java.util.UUID;
 public class BluetoothLeService extends Service {
     private final static String TAG = "BluetoothLeService";
 
+    private boolean is_bound; // whether service is bound
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
     private String device_address;
@@ -79,6 +80,18 @@ public class BluetoothLeService extends Service {
      * Android BLE stack and API (just knowing the MAC is not enough on
      * many phones).*/
     private void triggerScan() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "triggerScan");
+
+        if( !is_bound ) {
+            // Don't allow calls to startLeScan() (which requires location permission) when service
+            // not bound, as application may be in background!
+            // In theory this shouldn't be needed here, as we also check is_bound in connect(), but
+            // have it here too just to be safe.
+            Log.e(TAG, "triggerScan shouldn't be called when service not bound");
+            return;
+        }
+
         // Stops scanning after a pre-defined scan period.
         bluetoothHandler.postDelayed(new Runnable() {
             @Override
@@ -120,6 +133,13 @@ public class BluetoothLeService extends Service {
         }
 
         void attemptReconnect() {
+            if( !is_bound ) {
+                // We check is_bound in connect() itself, but seems pointless to even try if we
+                // know the service is unbound (and if it's later bound again, we'll try connecting
+                // again anyway without needing this).
+                Log.e(TAG, "don't attempt to reconnect when service not bound");
+            }
+
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 public void run() {
@@ -299,18 +319,30 @@ public class BluetoothLeService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         if( MyDebug.LOG )
-            Log.d(TAG, "Starting OpenCamera Bluetooth Service");
+            Log.d(TAG, "onBind");
         return mBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onUnbind");
+        this.is_bound = false;
         close();
         return super.onUnbind(intent);
     }
 
-
+    /** Only call this after service is bound (from ServiceConnection.onServiceConnected())!
+     */
     public boolean initialize() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "initialize");
+
+        // in theory we'd put this in onBind(), to be more symmetric with onUnbind() where we
+        // set to false - but unclear whether onBind() is always called before
+        // ServiceConnection.onServiceConnected().
+        this.is_bound = true;
+
         if( bluetoothManager == null ) {
             bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if( bluetoothManager == null ) {
@@ -341,6 +373,36 @@ public class BluetoothLeService extends Service {
                 Log.d(TAG, "address is null");
             return false;
         }
+        else if( !is_bound ) {
+            // Don't allow calls to startLeScan() via triggerScan() (which requires location
+            // permission) when service not bound, as application may be in background!
+            // And it doesn't seem sensible to even allow connecting if service not bound.
+            // Under normal operation this isn't needed, but there are calls to connect() that can
+            // happen from postDelayed() or TimerTask in this class, so a risk that they call
+            // connect() after the service is unbound!
+            Log.e(TAG, "connect shouldn't be called when service not bound");
+            return false;
+        }
+
+
+        // test code for infinite looping, seeing if this runs in background:
+        /*if( address.equals("undefined") ) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "trying connect again from postdelayed");
+                    connect(address);
+                }
+            }, 1000);
+        }
+
+        if( address.equals("undefined") ) {
+            // test - only needed if we've hacked BluetoothRemoteControl.remoteEnabled() to not check for being undefined
+            if( MyDebug.LOG )
+                Log.d(TAG, "address is undefined");
+            return false;
+        }*/
 
         if( address.equals(device_address) && bluetoothGatt != null ) {
             bluetoothGatt.disconnect();

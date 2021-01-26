@@ -1,28 +1,8 @@
 package net.sourceforge.opencamera;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.cameracontroller.RawImage;
-import net.sourceforge.opencamera.preview.ApplicationInterface;
-import net.sourceforge.opencamera.preview.BasicApplicationInterface;
-import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.preview.VideoProfile;
-import net.sourceforge.opencamera.ui.DrawPreview;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -52,6 +32,27 @@ import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.preview.ApplicationInterface;
+import net.sourceforge.opencamera.preview.BasicApplicationInterface;
+import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.ui.DrawPreview;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /** Our implementation of ApplicationInterface, see there for details.
  */
@@ -90,7 +91,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     private File last_video_file = null;
-    private Uri last_video_file_saf = null;
+    private Uri last_video_file_uri = null;
 
     private final Timer subtitleVideoTimer = new Timer();
     private TimerTask subtitleVideoTimerTask;
@@ -101,7 +102,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     // store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
     private final SharedPreferences sharedPreferences;
 
-    private boolean last_images_saf; // whether the last images array are using SAF or not
+    private enum LastImagesType {
+        FILE,
+        SAF,
+        MEDIASTORE
+    }
+    private LastImagesType last_images_type = LastImagesType.FILE; // whether the last images array are using File API, SAF or MediaStore
 
     protected Date mLastVideoDate = null;
 
@@ -278,9 +284,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public int createOutputVideoMethod() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+    public VideoMethod createOutputVideoMethod() {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
@@ -289,17 +294,30 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 if( intent_uri != null ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "save to: " + intent_uri);
-                    return VIDEOMETHOD_URI;
+                    return VideoMethod.URI;
                 }
             }
             // if no EXTRA_OUTPUT, we should save to standard location, and will pass back the Uri of that location
             if( MyDebug.LOG )
                 Log.d(TAG, "intent uri not specified");
-            // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
-            return VIDEOMETHOD_FILE;
+            if( MainActivity.useScopedStorage() ) {
+                // can't use file method with scoped storage
+                return VideoMethod.MEDIASTORE;
+            }
+            else {
+                // note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
+                return VideoMethod.FILE;
+            }
         }
-        boolean using_saf = storageUtils.isUsingSAF();
-        return using_saf ? VIDEOMETHOD_SAF : VIDEOMETHOD_FILE;
+        else if( storageUtils.isUsingSAF() ) {
+            return VideoMethod.SAF;
+        }
+        else if( MainActivity.useScopedStorage() ) {
+            return VideoMethod.MEDIASTORE;
+        }
+        else {
+            return VideoMethod.FILE;
+        }
     }
 
     @Override
@@ -312,14 +330,36 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public Uri createOutputVideoSAF(String extension) throws IOException {
         mLastVideoDate = new Date();
-        last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
-        return last_video_file_saf;
+        last_video_file_uri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", extension, mLastVideoDate);
+        return last_video_file_uri;
+    }
+
+    @Override
+    public Uri createOutputVideoMediaStore(String extension) throws IOException {
+        Uri folder = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        ContentValues contentValues = new ContentValues();
+        String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, new Date());
+        if( MyDebug.LOG )
+            Log.d(TAG, "filename: " + filename);
+        contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
+        String mime_type = storageUtils.getVideoMimeType(extension);
+        if( MyDebug.LOG )
+            Log.d(TAG, "mime_type: " + mime_type);
+        contentValues.put(MediaStore.Video.Media.MIME_TYPE, mime_type);
+
+        last_video_file_uri = main_activity.getContentResolver().insert(folder, contentValues);
+        if( MyDebug.LOG )
+            Log.d(TAG, "uri: " + last_video_file_uri);
+        if( last_video_file_uri == null ) {
+            throw new IOException();
+        }
+
+        return last_video_file_uri;
     }
 
     @Override
     public Uri createOutputVideoUri() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             Bundle myExtras = main_activity.getIntent().getExtras();
@@ -600,8 +640,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getVideoQualityPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
@@ -654,8 +693,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public String getVideoFPSPref() {
         // if check for EXTRA_VIDEO_QUALITY, if set, best to fall back to default FPS - see corresponding code in getVideoQualityPref
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_VIDEO_QUALITY) ) {
@@ -854,8 +892,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public long getVideoMaxDurationPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_DURATION_LIMIT) ) {
@@ -900,8 +937,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "getVideoMaxFileSizeUserPref");
 
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
@@ -923,14 +959,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             e.printStackTrace();
             video_max_filesize = 0;
         }
+        //video_max_filesize = 1024*1024; // test
         if( MyDebug.LOG )
             Log.d(TAG, "video_max_filesize: " + video_max_filesize);
         return video_max_filesize;
     }
 
     private boolean getVideoRestartMaxFileSizeUserPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+        if( isVideoCaptureIntent() ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "from video capture intent");
             if( main_activity.getIntent().hasExtra(MediaStore.EXTRA_SIZE_LIMIT) ) {
@@ -965,11 +1001,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "saving to: " + folder_name);
             boolean is_internal = false;
-            if( !folder_name.startsWith("/") ) {
+            if( !StorageUtils.saveFolderIsFull(folder_name) ) {
                 is_internal = true;
             }
             else {
-                // if save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days)
+                // If save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days).
                 File storage = Environment.getExternalStorageDirectory();
                 if( MyDebug.LOG )
                     Log.d(TAG, "compare to: " + storage.getAbsolutePath());
@@ -1907,9 +1943,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // ability to switch between auto and manual
             main_activity.getMainUI().setupExposureUI();
         }
-        final int video_method = this.createOutputVideoMethod();
+        final VideoMethod video_method = this.createOutputVideoMethod();
         boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
-        if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+        if( dategeo_subtitles && video_method != ApplicationInterface.VideoMethod.URI ) {
             final String preference_stamp_dateformat = this.getStampDateFormatPref();
             final String preference_stamp_timeformat = this.getStampTimeFormatPref();
             final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
@@ -1919,9 +1955,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             final boolean store_geo_direction = getGeodirectionPref();
             class SubtitleVideoTimerTask extends TimerTask {
                 // need to keep a reference to pfd_saf for as long as writer, to avoid getting garbage collected - see https://sourceforge.net/p/opencamera/tickets/417/
-                @SuppressWarnings("FieldCanBeLocal")
                 private ParcelFileDescriptor pfd_saf;
                 private OutputStreamWriter writer;
+                private Uri uri;
                 private int count = 1;
                 private long min_video_time_from = 0;
 
@@ -1992,7 +2028,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         Address address = null;
                         if( store_location && !preference_stamp_geo_address.equals("preference_stamp_geo_address_no") ) {
                             // try to find an address
-                            if( Geocoder.isPresent() ) {
+                            if( main_activity.isAppPaused() ) {
+                                // seems safer to not try to initiate potential network connections (via geocoder) if Open Camera
+                                // is paused - this shouldn't happen, since we stop video when paused, but just to be safe
+                                if( MyDebug.LOG )
+                                    Log.d(TAG, "don't call geocoder for video subtitles  as app is paused?!");
+                            }
+                            else if( Geocoder.isPresent() ) {
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "geocoder is present");
                                 Geocoder geocoder = new Geocoder(main_activity, Locale.getDefault());
@@ -2057,18 +2099,36 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                     try {
                         synchronized( this ) {
                             if( writer == null ) {
-                                if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+                                if( video_method == VideoMethod.FILE ) {
                                     String subtitle_filename = last_video_file.getAbsolutePath();
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
                                     writer = new FileWriter(subtitle_filename);
                                 }
-                                else {
+                                else if( video_method == VideoMethod.SAF || video_method == VideoMethod.MEDIASTORE ) {
                                     if( MyDebug.LOG )
-                                        Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
-                                    String subtitle_filename = storageUtils.getFileName(last_video_file_saf);
+                                        Log.d(TAG, "last_video_file_uri: " + last_video_file_uri);
+                                    String subtitle_filename = storageUtils.getFileName(last_video_file_uri);
                                     subtitle_filename = getSubtitleFilename(subtitle_filename);
-                                    Uri subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
-                                    pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");
+                                    if( video_method == VideoMethod.SAF ) {
+                                        uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
+                                    }
+                                    else {
+                                        Uri folder = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                                        ContentValues contentValues = new ContentValues();
+                                        contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, subtitle_filename);
+                                        // set mime type - it's unclear if .SRT files have an official mime type, but (a) we must set a mime type otherwise
+                                        // resultant files are named "*.srt.mp4", and (b) the mime type must be video/*, otherwise we get exception:
+                                        // "java.lang.IllegalArgumentException: MIME type text/plain cannot be inserted into content://media/external_primary/video/media; expected MIME type under video/*"
+                                        // and we need the file to be saved in the same folder (in DCIM/ ) as the video
+                                        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "video/x-srt");
+                                        uri = main_activity.getContentResolver().insert(folder, contentValues);
+                                        if( uri == null ) {
+                                            throw new IOException();
+                                        }
+                                    }
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "uri: " + uri);
+                                    pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "w");
                                     writer = new FileWriter(pfd_saf.getFileDescriptor());
                                 }
                             }
@@ -2111,6 +2171,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                             }
                             writer = null;
                         }
+                        if( pfd_saf != null ) {
+                            try {
+                                pfd_saf.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            pfd_saf = null;
+                        }/*
+                        if( video_method == VideoMethod.MEDIASTORE ) {
+                        }*/
                     }
                     return super.cancel();
                 }
@@ -2131,7 +2201,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public void stoppedVideo(final int video_method, final Uri uri, final String filename) {
+    public void stoppedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "stoppedVideo");
             Log.d(TAG, "video_method " + video_method);
@@ -2156,13 +2226,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             subtitleVideoTimerTask = null;
         }
 
+        completeVideo(video_method, uri);
         boolean done = broadcastVideo(video_method, uri, filename);
         if( MyDebug.LOG )
             Log.d(TAG, "done? " + done);
 
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-            if( done && video_method == VIDEOMETHOD_FILE ) {
+        if( isVideoCaptureIntent() ) {
+            if( done && video_method == VideoMethod.FILE ) {
                 // do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
             }
             else {
@@ -2171,9 +2241,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 Intent output = null;
                 if( done ) {
                     // may need to pass back the Uri we saved to, if the calling application didn't specify a Uri
-                    // set note above for VIDEOMETHOD_FILE
-                    // n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
-                    if( video_method == VIDEOMETHOD_SAF ) {
+                    // set note above for VideoMethod.FILE
+                    // n.b., currently this code is not used, as we always switch to VideoMethod.FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
+                    if( video_method == VideoMethod.SAF || video_method == VideoMethod.MEDIASTORE ) {
                         output = new Intent();
                         output.setData(uri);
                         if( MyDebug.LOG )
@@ -2188,10 +2258,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             // create thumbnail
             long debug_time = System.currentTimeMillis();
             Bitmap thumbnail = null;
-            ParcelFileDescriptor pfd_saf; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
+            ParcelFileDescriptor pfd_saf = null; // keep a reference to this as long as retriever, to avoid risk of pfd_saf being garbage collected
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
-                if( video_method == VIDEOMETHOD_FILE ) {
+                if( video_method == VideoMethod.FILE ) {
                     File file = new File(filename);
                     retriever.setDataSource(file.getPath());
                 }
@@ -2212,6 +2282,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 }
                 catch(RuntimeException ex) {
                     // ignore
+                }
+                try {
+                    if( pfd_saf != null ) {
+                        pfd_saf.close();
+                    }
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
                 }
             }
             if( thumbnail != null ) {
@@ -2246,17 +2324,28 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
-    public void restartedVideo(final int video_method, final Uri uri, final String filename) {
+    public void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "restartedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
+        completeVideo(video_method, uri);
         broadcastVideo(video_method, uri, filename);
     }
 
-    private boolean broadcastVideo(final int video_method, final Uri uri, final String filename) {
+    /** Called when we've finished recording to a video file, to do any necessary cleanup for the
+     *  file.
+     */
+    private void completeVideo(final VideoMethod video_method, final Uri uri) {
+        if (MyDebug.LOG)
+            Log.d(TAG, "completeVideo");
+        /*if( video_method == VideoMethod.MEDIASTORE ) {
+        }*/
+    }
+
+    private boolean broadcastVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "broadcastVideo");
             Log.d(TAG, "video_method " + video_method);
@@ -2264,7 +2353,22 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "filename " + filename);
         }
         boolean done = false;
-        if( video_method == VIDEOMETHOD_FILE ) {
+        if( video_method == VideoMethod.MEDIASTORE ) {
+            // no need to broadcast when using mediastore
+
+            if( uri != null ) {
+                // in theory this is pointless, as announceUri no longer does anything on Android 7+,
+                // and mediastore method is only used on Android 10+, but keep this just in case
+                // announceUri does something in future
+                storageUtils.announceUri(uri, false, true);
+
+                // we also want to save the uri - we can use the media uri directly, rather than having to scan it
+                storageUtils.setLastMediaScanned(uri);
+
+                done = true;
+            }
+        }
+        else if( video_method == VideoMethod.FILE ) {
             if( filename != null ) {
                 File file = new File(filename);
                 storageUtils.broadcastFile(file, false, true, true);
@@ -2274,10 +2378,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         else {
             if( uri != null ) {
                 // see note in onPictureTaken() for where we call broadcastFile for SAF photos
-                File real_file = storageUtils.broadcastUri(uri, false, true, true);
-                if( real_file != null ) {
-                    main_activity.test_last_saved_image = real_file.getAbsolutePath();
-                }
+                storageUtils.broadcastUri(uri, false, true, true, false);
                 done = true;
             }
         }
@@ -2286,22 +2387,41 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.d(TAG, "test_n_videos_scanned is now: " + test_n_videos_scanned);
         }
+
+        if( video_method == VideoMethod.MEDIASTORE && isVideoCaptureIntent() ) {
+            finishVideoIntent(uri);
+        }
         return done;
     }
 
+    /** For use when called from a video capture intent. This returns the supplied uri to the
+     *  caller, and finishes the activity.
+     */
+    void finishVideoIntent(Uri uri) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "finishVideoIntent:" + uri);
+        Intent output = new Intent();
+        output.setData(uri);
+        main_activity.setResult(Activity.RESULT_OK, output);
+        main_activity.finish();
+    }
+
     @Override
-    public void deleteUnusedVideo(final int video_method, final Uri uri, final String filename) {
+    public void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "deleteUnusedVideo");
             Log.d(TAG, "video_method " + video_method);
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
-        if( video_method == VIDEOMETHOD_FILE ) {
-            trashImage(false, uri, filename, false);
+        if( video_method == VideoMethod.FILE ) {
+            trashImage(LastImagesType.FILE, uri, filename, false);
         }
-        else if( video_method == VIDEOMETHOD_SAF ) {
-            trashImage(true, uri, filename, false);
+        else if( video_method == VideoMethod.SAF ) {
+            trashImage(LastImagesType.SAF, uri, filename, false);
+        }
+        else if( video_method == VideoMethod.MEDIASTORE ) {
+            trashImage(LastImagesType.MEDIASTORE, uri, filename, false);
         }
         // else can't delete Uri
     }
@@ -2377,10 +2497,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             error_message = getContext().getResources().getString(R.string.failed_to_record_video);
         }
         main_activity.getPreview().showToast(null, error_message);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override
@@ -2403,11 +2519,9 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void onFailedCreateVideoFileError() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "onFailedCreateVideoFileError");
         main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
     }
 
     @Override
@@ -2720,6 +2834,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public boolean needsStoragePermission() {
         if( MyDebug.LOG )
             Log.d(TAG, "needsStoragePermission");
+        if( MainActivity.useScopedStorage() )
+            return false; // no longer need storage permission with scoped storage - and shouldn't request it either
         return true;
     }
 
@@ -2900,6 +3016,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             image_capture_intent = true;
         }
         return image_capture_intent;
+    }
+
+    boolean isVideoCaptureIntent() {
+        boolean video_capture_intent = false;
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "from video capture intent");
+            video_capture_intent = true;
+        }
+        return video_capture_intent;
     }
 
     /** Whether the photos will be part of a burst, even if we're receiving via the non-burst callbacks.
@@ -3251,7 +3378,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "addLastImage: " + file);
             Log.d(TAG, "share?: " + share);
         }
-        last_images_saf = false;
+        last_images_type = LastImagesType.FILE;
         LastImage last_image = new LastImage(file.getAbsolutePath(), share);
         last_images.add(last_image);
     }
@@ -3261,7 +3388,17 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "addLastImageSAF: " + uri);
             Log.d(TAG, "share?: " + share);
         }
-        last_images_saf = true;
+        last_images_type = LastImagesType.SAF;
+        LastImage last_image = new LastImage(uri, share);
+        last_images.add(last_image);
+    }
+
+    void addLastImageMediaStore(Uri uri, boolean share) {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "addLastImageMediaStore: " + uri);
+            Log.d(TAG, "share?: " + share);
+        }
+        last_images_type = LastImagesType.MEDIASTORE;
         LastImage last_image = new LastImage(uri, share);
         last_images.add(last_image);
     }
@@ -3269,7 +3406,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     void clearLastImages() {
         if( MyDebug.LOG )
             Log.d(TAG, "clearLastImages");
-        last_images_saf = false;
+        last_images_type = LastImagesType.FILE;
         last_images.clear();
         drawPreview.clearLastImage();
     }
@@ -3312,13 +3449,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void trashImage(boolean image_saf, Uri image_uri, String image_name, boolean from_user) {
+    private void trashImage(LastImagesType image_type, Uri image_uri, String image_name, boolean from_user) {
         if( MyDebug.LOG )
             Log.d(TAG, "trashImage");
         Preview preview  = main_activity.getPreview();
-        if( image_saf && image_uri != null ) {
+        if( image_type == LastImagesType.SAF && image_uri != null ) {
             if( MyDebug.LOG )
-                Log.d(TAG, "Delete: " + image_uri);
+                Log.d(TAG, "Delete SAF: " + image_uri);
             File file = storageUtils.getFileFromDocumentUriSAF(image_uri, false); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
             try {
                 if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), image_uri) ) {
@@ -3344,6 +3481,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 e.printStackTrace();
             }
         }
+        else if( image_type == LastImagesType.MEDIASTORE && image_uri != null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "Delete MediaStore: " + image_uri);
+            main_activity.getContentResolver().delete(image_uri, null, null);
+        }
         else if( image_name != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "Delete: " + image_name);
@@ -3364,12 +3506,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     void trashLastImage() {
         if( MyDebug.LOG )
-            Log.d(TAG, "trashImage");
+            Log.d(TAG, "trashLastImage");
         Preview preview  = main_activity.getPreview();
         if( preview.isPreviewPaused() ) {
             for(int i=0;i<last_images.size();i++) {
                 LastImage last_image = last_images.get(i);
-                trashImage(last_images_saf, last_image.uri, last_image.name, true);
+                trashImage(last_images_type, last_image.uri, last_image.name, true);
             }
             clearLastImages();
             drawPreview.clearGhostImage(); // doesn't make sense to show the last image as a ghost, if the user has trashed it!

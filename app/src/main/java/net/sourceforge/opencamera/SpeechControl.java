@@ -24,6 +24,9 @@ class SpeechControl {
     private SpeechRecognizer speechRecognizer;
     private boolean speechRecognizerIsStarted;
 
+    private boolean shown_toast;
+    private long last_toast_time_ms;
+
     SpeechControl(final MainActivity main_activity) {
         this.main_activity = main_activity;
     }
@@ -32,9 +35,22 @@ class SpeechControl {
         if( MyDebug.LOG )
             Log.d(TAG, "startSpeechRecognizerIntent");
         if( speechRecognizer != null ) {
+            showToast(false);
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
             speechRecognizer.startListening(intent);
+        }
+    }
+
+    void showToast(boolean force) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "speechRecognizerStarted");
+        if( force || !shown_toast || System.currentTimeMillis() > last_toast_time_ms + 10000 ) {
+            shown_toast = true;
+            last_toast_time_ms = System.currentTimeMillis();
+            String toast_string = main_activity.getResources().getString(R.string.speech_recognizer_started) + "\n" +
+                    main_activity.getResources().getString(R.string.speech_recognizer_extra_info);
+            main_activity.getPreview().showToast(main_activity.getAudioControlToast(), toast_string);
         }
     }
 
@@ -50,6 +66,7 @@ class SpeechControl {
             Log.d(TAG, "speechRecognizerStopped");
         main_activity.getMainUI().audioControlStopped();
         speechRecognizerIsStarted = false;
+        shown_toast = false;
     }
 
     void initSpeechRecognizer() {

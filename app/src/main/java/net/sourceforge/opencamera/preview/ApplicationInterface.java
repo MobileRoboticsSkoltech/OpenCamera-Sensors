@@ -31,19 +31,23 @@ public interface ApplicationInterface {
         public boolean auto_restart; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
     }
 
-    int VIDEOMETHOD_FILE = 0; // video will be saved to a file
-    int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
-    int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
+    enum VideoMethod {
+        FILE, // video will be saved to a file
+        SAF, // video will be saved using Android 5's Storage Access Framework
+        MEDIASTORE, // video will be saved to the supplied MediaStore Uri
+        URI // video will be written to the supplied Uri
+    }
 
     // methods that request information
     Date getLastVideoDate();
     Context getContext(); // get the application context
     boolean useCamera2(); // should Android 5's Camera 2 API be used?
     Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
-    int createOutputVideoMethod(); // return a VIDEOMETHOD_* value to specify how to create a video file
-    File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE; extension is the recommended filename extension for the chosen video type
-    Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF; extension is the recommended filename extension for the chosen video type
-    Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
+    VideoMethod createOutputVideoMethod(); // return a VideoMethod value to specify how to create a video file
+    File createOutputVideoFile(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.FILE; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoSAF(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.SAF; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoMediaStore(String extension) throws IOException; // will be called if createOutputVideoUsingSAF() returns VideoMethod.MEDIASTORE; extension is the recommended filename extension for the chosen video type
+    Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VideoMethod.URI
     // for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
     // if you just want a default or don't really care, see the comments for each method for a default or possible options
     // if Preview doesn't support the requested setting, it will check this, and choose its own
@@ -166,7 +170,7 @@ public interface ApplicationInterface {
     boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
     boolean useCamera2FastBurst(); // whether to enable Camera2's captureBurst() for faster taking of expo-bracketing photos (generally should be true, but some devices have problems with captureBurst())
     boolean usePhotoVideoRecording(); // whether to enable support for taking photos when recording video (if not supported, this won't be called)
-    boolean isPreviewInBackground(); // if true, then Preview can disable real-time effects (e.g., computing histogram)
+    boolean isPreviewInBackground(); // if true, then Preview can disable real-time effects (e.g., computing histogram); also it won't try to open the camera when in the background
     boolean allowZoom(); // if false, don't allow zoom functionality even if the device supports it - Preview.supportsZoom() will also return false; if true, allow zoom if the device supports it
 
     // for testing purposes:
@@ -178,9 +182,9 @@ public interface ApplicationInterface {
     void startingVideo(); // called just before video recording starts
     void startedVideo(); // called just after video recording starts
     void stoppingVideo(); // called just before video recording stops; note that if startingVideo() is called but then video recording fails to start, this method will still be called, but startedVideo() and stoppedVideo() won't be called
-    void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
-    void restartedVideo(final int video_method, final Uri uri, final String filename); // called after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
-    void deleteUnusedVideo(final int video_method, final Uri uri, final String filename); // application should delete the requested video (which will correspond to a video file previously returned via the createOutputVideo*() methods), either because it is corrupt or unused
+    void stoppedVideo(final VideoMethod video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
+    void restartedVideo(final VideoMethod video_method, final Uri uri, final String filename); // called after a seamless restart (supported on Android 8+) has occurred - in this case stoppedVideo() is only called for the final video file; this method is instead called for all earlier video file segments
+    void deleteUnusedVideo(final VideoMethod video_method, final Uri uri, final String filename); // application should delete the requested video (which will correspond to a video file previously returned via the createOutputVideo*() methods), either because it is corrupt or unused
     void onFailedStartPreview(); // called if failed to start camera preview
     void onCameraError(); // called if the camera closes due to serious error.
     void onPhotoError(); // callback for failing to take a photo
