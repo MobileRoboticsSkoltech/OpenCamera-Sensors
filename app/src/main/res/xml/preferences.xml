@@ -73,12 +73,14 @@
             android:key="preference_imu_recording"
             android:title="Enable video with IMU recording"
             android:summary="Enable synchronized IMU and video recording with timestamps"
+            android:defaultValue="true"
             />
 
         <SwitchPreference
             android:key="preference_remote_rec_control"
             android:title="Enable remote recording control"
             android:summary="Accept remote control messages over the network. Restart required"
+            android:defaultValue="true"
             />
 
         <CheckBoxPreference

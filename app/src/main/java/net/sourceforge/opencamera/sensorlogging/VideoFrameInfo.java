@@ -174,6 +174,9 @@ public class VideoFrameInfo implements Closeable {
 
     @Override
     public void close() {
+        // Clear current phase info to avoid it being reported in the next recordings
+        mPhaseInfoReporter.clear();
+
         if (frameProcessor != null) {
             if (MyDebug.LOG) {
                 Log.d(TAG, "Attempting to shutdown frame processor");
@@ -181,6 +184,7 @@ public class VideoFrameInfo implements Closeable {
             // should let all assigned tasks finish execution
             frameProcessor.shutdown();
         }
+
         if (MyDebug.LOG) {
             Log.d(TAG, "Closing frame info, frame number: " + mFrameNumber);
         }
