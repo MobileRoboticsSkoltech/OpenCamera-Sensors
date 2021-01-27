@@ -311,6 +311,10 @@ public class PreferenceKeys {
 
     public static final String GyroPreferenceKey = "preference_gyro";
 
+    public static final String MagnetometerPrefKey = "preference_magnetometer";
+
+    public static final String SupportsMagnetometerKey = "preference_supports_magnetometer";
+
     public static final String SupportsAccelKey = "supports_accel";
 
     public static final String SupportsGyroKey = "supports_gyro";

@@ -98,6 +98,12 @@
                 android:defaultValue="true"
                 />
 
+            <CheckBoxPreference
+                android:key="preference_magnetometer"
+                android:title="MAGNETOMETER"
+                android:defaultValue="true"
+                />
+
             <Preference
                 android:key="preference_characteristics"
                 android:title="Important characteristics"

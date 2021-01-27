@@ -715,7 +715,7 @@ public class MainActivity extends Activity {
     public static boolean useScopedStorage() {
         //return false;
         //return true;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+        return false;
     }
 
     public int getNavigationGap() {
@@ -2293,6 +2293,7 @@ public class MainActivity extends Activity {
         Bundle bundle = new Bundle();
         bundle.putBoolean(PreferenceKeys.SupportsGyroKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE));
         bundle.putBoolean(PreferenceKeys.SupportsAccelKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER));
+        bundle.putBoolean(PreferenceKeys.SupportsMagnetometerKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_MAGNETIC_FIELD));
 
         bundle.putInt("cameraId", this.preview.getCameraId());
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
@@ -3344,7 +3345,10 @@ public class MainActivity extends Activity {
             protected Bitmap doInBackground(Void... params) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "doInBackground");
-                StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
+                StorageUtils.Media media = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    media = applicationInterface.getStorageUtils().getLatestMedia();
+                }
                 Bitmap thumbnail = null;
                 KeyguardManager keyguard_manager = (KeyguardManager)MainActivity.this.getSystemService(Context.KEYGUARD_SERVICE);
                 boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
@@ -3568,7 +3572,10 @@ public class MainActivity extends Activity {
         if( uri == null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "go to latest media");
-            StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
+            StorageUtils.Media media = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                media = applicationInterface.getStorageUtils().getLatestMedia();
+            }
             if( media != null ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "latest uri:" + media.uri);

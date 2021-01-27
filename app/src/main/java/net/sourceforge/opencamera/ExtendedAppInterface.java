@@ -107,7 +107,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     }
                 }
 
-                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, getGyroPref(), getAccelPref());
+                //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
+                // TODO: create map with magnetometer option
+                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {

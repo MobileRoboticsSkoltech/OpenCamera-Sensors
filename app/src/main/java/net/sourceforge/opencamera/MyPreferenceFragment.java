@@ -127,6 +127,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             gyroPref.setChecked(false);
             gyroPref.setEnabled(false);
         }
+
+        final boolean supports_magnetometer = bundle.getBoolean(PreferenceKeys.SupportsMagnetometerKey);
+        if (!supports_magnetometer) {
+            CheckBoxPreference magnetPref = (CheckBoxPreference)findPreference(PreferenceKeys.MagnetometerPrefKey);
+            magnetPref.setChecked(false);
+            magnetPref.setEnabled(false);
+        }
         final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
         if( MyDebug.LOG )
             Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
