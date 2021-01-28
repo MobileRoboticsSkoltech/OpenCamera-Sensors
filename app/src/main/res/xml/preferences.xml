@@ -99,6 +99,7 @@
             android:key="preference_save_video_frames"
             android:title="Save video frames during video + IMU recording"
             android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+            android:defaultValue="true"
             />
 
         <Preference
