@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors)
 
-OpenCamera Sensors is an Android application for synchronized recording of video and IMU data. It records IMU data and video with frame timestamps synced to the same clock.
+OpenCamera Sensors is an Android application for synchronized recording of video and IMU data. It records sensor data (accelerometer, gyroscope, magnetometer) and video with frame timestamps synced to the same clock.
 
 
 This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popular open-source camera application with flexibility in camera parameters settings, actively supported by the community. By regular merging of Open Camera updates our app will adapt to new smartphones and APIs — this is an advantage over the other video + IMU recording applications built from scratch for Camera2API.
@@ -19,9 +19,10 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - **Record video**
 - **Get data** from ```DCIM/OpenCamera```:
     - Video file
-    - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
+    - Sensor data and frame timestamps in the directory ```{VIDEO_DATE}```:
         -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
         - ```{VIDEO_NAME}_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
+        - ```{VIDEO_NAME}_magnetic.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
         - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)```    
 
 ## Good practices for data recording
