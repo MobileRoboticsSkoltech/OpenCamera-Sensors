@@ -13,6 +13,8 @@ import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
@@ -62,6 +64,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
     }
 
+    private boolean getMagneticPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
+    }
+
     /**
      * Retrieves gyroscope and accelerometer sample rate preference and converts it to number
      */
@@ -106,10 +112,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                         // TODO: abort recording?
                     }
                 }
+                if (getMagneticPref()) {
+                    int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
+                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
+                        mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
+                        // TODO: abort recording?
+                    }
+                }
 
                 //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
-                // TODO: create map with magnetometer option
-                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate);
+                Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
+                wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
+                wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
+                wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, wantSensorRecordingMap);
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {

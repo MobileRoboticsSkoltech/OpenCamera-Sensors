@@ -325,6 +325,8 @@ public class PreferenceKeys {
 
     public static final String GyroSampleRatePreferenceKey = "preference_gyro_sample_rate";
 
+    public static final String MagneticSampleRatePreferenceKey = "preference_magnetic_sample_rate";
+
     public static String getVideoFPSPreferenceKey(int cameraId) {
         // for cameraId==0, we return preference_video_fps instead of preference_video_fps_0, for
         // backwards compatibility for people upgrading
