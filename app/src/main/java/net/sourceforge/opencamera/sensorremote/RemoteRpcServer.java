@@ -1,6 +1,8 @@
 package net.sourceforge.opencamera.sensorremote;
 
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -35,8 +37,10 @@ public class RemoteRpcServer extends Thread {
     private final Properties mConfig;
     private final RemoteRpcRequestHandler mRequestHandler;
     private final AtomicBoolean mIsExecuting = new AtomicBoolean();
+    private final MainActivity mContext;
 
     public RemoteRpcServer(MainActivity context) throws IOException {
+        mContext = context;
         mConfig = RemoteRpcConfig.getProperties(context);
         mRequestHandler = new RemoteRpcRequestHandler(context);
         mRpcSocket = new ServerSocket(Integer.parseInt(mConfig.getProperty("RPC_PORT")));
@@ -57,7 +61,7 @@ public class RemoteRpcServer extends Thread {
         mIsExecuting.set(false);
     }
 
-    private void handleRequest(String msg, PrintStream outputStream, BufferedOutputStream outputByte) throws IOException {
+    private void handleRequest(String msg, PrintStream outputStream, BufferedOutputStream outputByte) {
         // IMU remote control API
         Pattern r = Pattern.compile(IMU_REQUEST_REGEX);
         Matcher imuRequestMatcher = r.matcher(msg);
@@ -95,7 +99,7 @@ public class RemoteRpcServer extends Thread {
     @Override
     public void run() {
         // TODO: report hostname some other way
-        /*mContext.runOnUiThread(
+        mContext.runOnUiThread(
                 () -> {
                     try {
                         new AlertDialog.Builder(mContext)
@@ -111,7 +115,7 @@ public class RemoteRpcServer extends Thread {
                     }
 
                 }
-        );*/
+        );
 
         mIsExecuting.set(true);
         if (MyDebug.LOG) {

@@ -402,6 +402,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             switchToCamera(0);
         }
 
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(PreferenceKeys.RemoteRecControlPreferenceKey, false);
+        editor.apply();
+        updateForSettings();
+
         switchToFlashValue("flash_off");
         switchToFocusValue("focus_mode_continuous_picture");
         // pause for safety - needed for Nokia 8 at least otherwise some tests like testContinuousPictureFocusRepeat,

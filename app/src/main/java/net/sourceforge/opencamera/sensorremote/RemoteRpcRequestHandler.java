@@ -132,16 +132,19 @@ public class RemoteRpcRequestHandler {
         // Start video recording
         Preview preview = mContext.getPreview();
 
-        mContext.runOnUiThread(
-                () -> {
-                    // Making sure video is switched on
-                    if (!preview.isVideo()) {
-                        preview.switchVideo(false, true);
-                    }
-                    // In video mode this means "start video"
-                    mContext.takePicture(false);
-                }
-        );
+        Callable<Void> recStartCallable = () -> {
+            // Making sure video is switched on
+            if (!preview.isVideo()) {
+                preview.switchVideo(false, true);
+            }
+            // In video mode this means "start video"
+            mContext.takePicture(false);
+            return null;
+        };
+
+        // Await recording start
+        FutureTask<Void> recStartTask = new FutureTask<>(recStartCallable);
+        mContext.runOnUiThread(recStartTask);
 
         // Await video phase event
         BlockingQueue<VideoPhaseInfo> videoPhaseInfoReporter = preview.getVideoPhaseInfoReporter();
@@ -192,6 +195,8 @@ public class RemoteRpcRequestHandler {
                 // get file
                 ExtendedAppInterface appInterface = mContext.getApplicationInterface();
                 File videoFile = appInterface.getLastVideoFile();
+                boolean canRead = videoFile.canRead();
+                Log.d(TAG, "yay " + canRead);
                 if (videoFile != null && videoFile.canRead()) {
                     // Transfer file size in bytes and filename
                     outputStream.println(RemoteRpcResponse.success(
