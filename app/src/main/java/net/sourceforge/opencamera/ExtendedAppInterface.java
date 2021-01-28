@@ -109,14 +109,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
                     if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
                         mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
-                        // TODO: abort recording?
                     }
                 }
                 if (getMagneticPref()) {
                     int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
                     if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
                         mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
-                        // TODO: abort recording?
                     }
                 }
 
