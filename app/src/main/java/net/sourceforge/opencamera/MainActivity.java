@@ -715,7 +715,7 @@ public class MainActivity extends Activity {
     public static boolean useScopedStorage() {
         //return false;
         //return true;
-        return false;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
