@@ -719,9 +719,10 @@ public class MainActivity extends Activity {
     /** Whether to use codepaths that are compatible with scoped storage.
      */
     public static boolean useScopedStorage() {
-        //return false;
+        // Disable this for our app until this part is integrated properly
+        return false;
         //return true;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {

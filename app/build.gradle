@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.opencamera_extended.app"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 29
 
         renderscriptTargetApi 21
         //renderscriptSupportModeEnabled true // don't use support library as it bloats the APK, and we don't need pre-4.4 support

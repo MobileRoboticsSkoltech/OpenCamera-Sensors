@@ -60,6 +60,7 @@ script:
        --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/debug/app-debug.apk
        --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
        --device model=blueline,version=28,locale=en,orientation=portrait
+       --device model=x1q,version=29,locale=en,orientation=portrait
        --test-targets "class net.sourceforge.opencamera.test.SubsetTests";
     fi
 
