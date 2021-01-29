@@ -55,6 +55,11 @@ public class RawSensorInfo implements SensorEventListener {
     private boolean mIsRecording;
     private final Map<Integer, Sensor> mUsedSensorMap;
     private final Map<Integer, PrintWriter> mSensorWriterMap;
+    private final Map<Integer, File> mLastSensorFilesMap;
+
+    public Map<Integer, File> getLastSensorFilesMap() {
+        return mLastSensorFilesMap;
+    }
 
     public boolean isSensorAvailable(int sensorType) {
         return mUsedSensorMap.get(sensorType) != null;
@@ -64,6 +69,7 @@ public class RawSensorInfo implements SensorEventListener {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mUsedSensorMap = new HashMap<>();
         mSensorWriterMap = new HashMap<>();
+        mLastSensorFilesMap = new HashMap<>();
 
         for (Integer sensorType : SENSOR_TYPES) {
             mUsedSensorMap.put(sensorType, mSensorManager.getDefaultSensor(sensorType));
@@ -133,14 +139,14 @@ public class RawSensorInfo implements SensorEventListener {
      * Handles sensor info file creation, uses StorageUtils to work both with SAF and standard file
      * access.
      */
-    private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
+    private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, Integer sensorType, String sensorName,
                                                   Date lastVideoDate) throws IOException {
         StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
         FileWriter fileWriter;
         try {
             if (storageUtils.isUsingSAF()) {
                 Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorName, "csv", lastVideoDate
                 );
                 ParcelFileDescriptor rawSensorInfoPfd = mainActivity
                         .getContentResolver()
@@ -149,17 +155,19 @@ public class RawSensorInfo implements SensorEventListener {
                     fileWriter = new FileWriter(rawSensorInfoPfd.getFileDescriptor());
                     File saveFile = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
                     storageUtils.broadcastFile(saveFile, true, false, true);
+                    mLastSensorFilesMap.put(sensorType, saveFile);
                 } else {
                     throw new IOException("File descriptor was null");
                 }
             } else {
                 File saveFile = storageUtils.createOutputCaptureInfoFile(
-                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", lastVideoDate
+                        StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorName, "csv", lastVideoDate
                 );
                 fileWriter = new FileWriter(saveFile);
                 if (MyDebug.LOG) {
                     Log.d(TAG, "save to: " + saveFile.getAbsolutePath());
                 }
+                mLastSensorFilesMap.put(sensorType, saveFile);
                 storageUtils.broadcastFile(saveFile, false, false, false);
             }
             return fileWriter;
@@ -172,10 +180,10 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    private PrintWriter setupRawSensorInfoWriter(MainActivity mainActivity, String sensorType,
+    private PrintWriter setupRawSensorInfoWriter(MainActivity mainActivity, Integer sensorType, String sensorName,
             Date currentVideoDate) throws IOException {
         FileWriter rawSensorInfoFileWriter = getRawSensorInfoFileWriter(
-                mainActivity, sensorType, currentVideoDate
+                mainActivity, sensorType, sensorName, currentVideoDate
         );
         PrintWriter rawSensorInfoWriter = new PrintWriter(
                 new BufferedWriter(rawSensorInfoFileWriter)
@@ -192,6 +200,7 @@ public class RawSensorInfo implements SensorEventListener {
     }
 
     public void startRecording(MainActivity mainActivity, Date currentVideoDate, Map<Integer, Boolean> wantSensorRecordingMap) {
+        mLastSensorFilesMap.clear();
         try {
 /*            if (wantGyroRecording && mSensorGyro != null) {
                 mGyroBufferedWriter = setupRawSensorInfoWriter(
@@ -211,7 +220,7 @@ public class RawSensorInfo implements SensorEventListener {
                 ) {
                     mSensorWriterMap.put(
                             sensorType,
-                            setupRawSensorInfoWriter(mainActivity, SENSOR_TYPE_NAMES.get(sensorType), currentVideoDate)
+                            setupRawSensorInfoWriter(mainActivity, sensorType, SENSOR_TYPE_NAMES.get(sensorType), currentVideoDate)
                     );
                 }
             }

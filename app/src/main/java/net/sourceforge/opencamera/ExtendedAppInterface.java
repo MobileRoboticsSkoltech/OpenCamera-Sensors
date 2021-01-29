@@ -37,7 +37,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
-        mRawSensorInfo = new RawSensorInfo(mainActivity);
+        mRawSensorInfo = mainActivity.getRawSensorInfoManager();
         mMainActivity = mainActivity;
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         // We create it only once here (not during the video) as it is a costly operation
