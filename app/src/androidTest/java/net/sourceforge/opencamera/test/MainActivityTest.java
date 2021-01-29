@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.opencamera.LocationSupplier;
@@ -47,6 +48,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.Sensor;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.TonemapCurve;
@@ -7828,6 +7830,57 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
 
         assertEquals(expectedNFiles + 1, nNewFiles);
+    }
+
+    /* Test recording video with all sensors enabled
+        Assumes all of the sensors are supported
+     */
+    public void testVideoAllSensors() throws InterruptedException {
+        Log.d(TAG, "testVideoAllSensors");
+        // check sensor files
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, true, true);
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_ACCELEROMETER).canRead());
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_GYROSCOPE).canRead());
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_MAGNETIC_FIELD).canRead());
+    }
+
+    public void testVideoMagnetometer() throws InterruptedException {
+        Log.d(TAG, "testVideoMagnetometer");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, false, false);
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_MAGNETIC_FIELD).canRead());
+    }
+
+    public void testVideoAccel() throws InterruptedException {
+        Log.d(TAG, "testVideoAccel");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, true, false);
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_ACCELEROMETER).canRead());
+    }
+
+    public void testVideoGyro() throws InterruptedException {
+        Log.d(TAG, "testVideoGyro");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, false, true);
+        assertTrue(sensorFilesMap.get(Sensor.TYPE_GYROSCOPE).canRead());
+    }
+
+    public Map<Integer, File> subTestVideoSensors(boolean wantMagnetic, boolean wantAccel, boolean wantGyro) throws InterruptedException {
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        // enable all of the sensors
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.MagnetometerPrefKey, wantMagnetic);
+        editor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
+        editor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
+        editor.apply();
+        updateForSettings();
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        Log.d(TAG, "folder: " + folder);
+        int expectedNFiles = 1;
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+        return mActivity.getRawSensorInfoManager()
+                .getLastSensorFilesMap();
     }
 
     /* Test recording video with raw IMU sensor info

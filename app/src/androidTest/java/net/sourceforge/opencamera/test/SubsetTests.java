@@ -11,6 +11,11 @@ public class SubsetTests {
         TestSuite suite = new TestSuite(MainTests.class.getName());
         // Basic video tests
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoImuInfo"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoAllSensors"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoGyro"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoAccel"));
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoMagnetometer"));
+
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo"));
 
         // TODO: update this test for new video rec stop logic, now it relies on synchronous recording stop
