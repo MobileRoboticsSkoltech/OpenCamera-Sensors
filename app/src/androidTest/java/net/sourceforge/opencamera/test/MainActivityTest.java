@@ -32,6 +32,7 @@ import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 import net.sourceforge.opencamera.ui.PopupView;
 
@@ -7839,27 +7840,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "testVideoAllSensors");
         // check sensor files
         Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, true, true);
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_ACCELEROMETER).canRead());
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_GYROSCOPE).canRead());
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_MAGNETIC_FIELD).canRead());
+        assertSensorRecFileExists(Sensor.TYPE_GYROSCOPE, sensorFilesMap);
+        assertSensorRecFileExists(Sensor.TYPE_MAGNETIC_FIELD, sensorFilesMap);
+        assertSensorRecFileExists(Sensor.TYPE_ACCELEROMETER, sensorFilesMap);
     }
 
     public void testVideoMagnetometer() throws InterruptedException {
         Log.d(TAG, "testVideoMagnetometer");
         Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, false, false);
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_MAGNETIC_FIELD).canRead());
+        assertSensorRecFileExists(Sensor.TYPE_MAGNETIC_FIELD, sensorFilesMap);
     }
 
     public void testVideoAccel() throws InterruptedException {
         Log.d(TAG, "testVideoAccel");
         Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, true, false);
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_ACCELEROMETER).canRead());
+        assertSensorRecFileExists(Sensor.TYPE_ACCELEROMETER, sensorFilesMap);
     }
 
     public void testVideoGyro() throws InterruptedException {
         Log.d(TAG, "testVideoGyro");
         Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, false, true);
-        assertTrue(sensorFilesMap.get(Sensor.TYPE_GYROSCOPE).canRead());
+        assertSensorRecFileExists(Sensor.TYPE_GYROSCOPE, sensorFilesMap);
+    }
+
+    private void assertSensorRecFileExists(Integer sensorType, Map<Integer, File> sensorFilesMap) {
+        assertTrue(
+                mActivity.getRawSensorInfoManager().isSensorAvailable(sensorType) &&
+                sensorFilesMap.get(sensorType).canRead()
+        );
     }
 
     public Map<Integer, File> subTestVideoSensors(boolean wantMagnetic, boolean wantAccel, boolean wantGyro) throws InterruptedException {
