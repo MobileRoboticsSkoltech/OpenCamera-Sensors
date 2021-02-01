@@ -96,7 +96,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
         }
-        if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref())) {
+        if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref() || getMagneticPref())) {
             // Extracting sample rates from shared preferences
             try {
                 if (getAccelPref()) {
@@ -134,7 +134,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             }
         } else if (getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
-        } else if (getIMURecordingPref() && !(getGyroPref() || getAccelPref())) {
+        } else if (getIMURecordingPref() && !(getGyroPref() ||  getMagneticPref() || getAccelPref())) {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
         }
         super.startingVideo();
