@@ -115,7 +115,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     }
                 }
 
-                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, getGyroPref(), getAccelPref());
+                mRawSensorInfo.startRecording(mLastVideoDate, getGyroPref(), getAccelPref());
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {

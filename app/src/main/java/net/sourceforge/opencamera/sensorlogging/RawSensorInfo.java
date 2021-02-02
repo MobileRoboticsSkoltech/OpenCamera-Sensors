@@ -161,10 +161,10 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    private PrintWriter setupRawSensorInfoWriter(MainActivity mainActivity, String sensorType,
+    private PrintWriter setupRawSensorInfoWriter(String sensorType,
             Date date) throws IOException {
         FileWriter rawSensorInfoFileWriter = getRawSensorInfoFileWriter(
-                mainActivity, sensorType, date
+                mContext, sensorType, date
         );
         PrintWriter rawSensorInfoWriter = new PrintWriter(
                 new BufferedWriter(rawSensorInfoFileWriter)
@@ -172,25 +172,20 @@ public class RawSensorInfo implements SensorEventListener {
         return rawSensorInfoWriter;
     }
 
-    // TODO: refactor (remove context parameter from other methods)
     public void startRecording(Date date) {
-        startRecording(mContext, date, true, true);
+        startRecording(date, true, true);
     }
 
-    public void startRecording(MainActivity mainActivity, Date date) {
-        startRecording(mainActivity, date, true, true);
-    }
-
-    public void startRecording(MainActivity mainActivity, Date date, boolean wantGyroRecording, boolean wantAccelRecording) {
+    public void startRecording(Date date, boolean wantGyroRecording, boolean wantAccelRecording) {
         try {
             if (wantGyroRecording && mSensorGyro != null) {
                 mGyroBufferedWriter = setupRawSensorInfoWriter(
-                        mainActivity, SENSOR_TYPE_GYRO, date
+                        SENSOR_TYPE_GYRO, date
                 );
             }
             if (wantAccelRecording && mSensorAccel != null) {
                 mAccelBufferedWriter = setupRawSensorInfoWriter(
-                        mainActivity, SENSOR_TYPE_ACCEL, date
+                        SENSOR_TYPE_ACCEL, date
                 );
             }
             mIsRecording = true;

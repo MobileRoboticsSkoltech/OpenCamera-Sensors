@@ -71,7 +71,7 @@ public class RemoteRpcRequestHandler {
 
                 mRawSensorInfo.enableSensors(0, 0);
                 Date currentDate = new Date();
-                mRawSensorInfo.startRecording(mContext, currentDate);
+                mRawSensorInfo.startRecording(currentDate);
                 return null;
             };
 
