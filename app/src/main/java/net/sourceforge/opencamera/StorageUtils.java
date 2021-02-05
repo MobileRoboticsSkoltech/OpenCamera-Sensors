@@ -31,6 +31,8 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import net.sourceforge.opencamera.preview.ApplicationInterface;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -272,6 +274,10 @@ public class StorageUtils {
                     }
             );
         }
+    }
+
+    public ApplicationInterface.VideoMethod createOutputVideoMethod() {
+        return applicationInterface.createOutputVideoMethod();
     }
 
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)

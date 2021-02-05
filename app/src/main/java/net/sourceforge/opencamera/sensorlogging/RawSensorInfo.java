@@ -36,6 +36,7 @@ public class RawSensorInfo implements SensorEventListener {
     final private Sensor mSensorAccel;
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;
+    // TODO: change this for MediaStore
     private String mLastGyroPath;
     private  String mLastAccelPath;
     private boolean mIsRecording;
@@ -108,6 +109,7 @@ public class RawSensorInfo implements SensorEventListener {
     }
 
     private void createLastSensorPath(File sensorFile, String sensorType) {
+        // TODO: change this for MediaStore
         String path = sensorFile.getAbsolutePath();
         switch (sensorType) {
             case SENSOR_TYPE_ACCEL:

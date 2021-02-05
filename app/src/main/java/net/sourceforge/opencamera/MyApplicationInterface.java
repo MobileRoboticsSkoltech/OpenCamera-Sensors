@@ -87,6 +87,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
     public File getLastVideoFile() {
+        // TODO: refactor for MediaStore
         if (storageUtils.isUsingSAF()) {
             return storageUtils.getFileFromDocumentUriSAF(last_video_file_uri, false);
         } else {
