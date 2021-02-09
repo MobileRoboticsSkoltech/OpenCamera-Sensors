@@ -1412,6 +1412,7 @@ public class MainActivity extends Activity {
         // Create Remote controller for OpenCamera Sensors
         if (applicationInterface.getRemoteRecControlPref()) {
             try {
+                if (mRpcServer != null) mRpcServer.stopExecuting();
                 mRpcServer = new RemoteRpcServer(this);
                 mRpcServer.start();
                 Log.d(TAG, "App rpc listener thread started");

@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.sensorremote;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -12,12 +13,15 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
+import net.sourceforge.opencamera.ui.FileInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
@@ -42,11 +46,11 @@ public class RemoteRpcRequestHandler {
         mRawSensorInfo = context.getRawSensorInfoManager();
     }
 
-    private String getSensorData(File imuFile) throws IOException {
+    private String getSensorData(InputStream imuFile, String filename) throws IOException {
         StringBuilder msg = new StringBuilder();
-        msg.append(imuFile.getName())
+        msg.append(filename)
                 .append("\n");
-        try (BufferedReader br = new BufferedReader(new FileReader(imuFile))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(imuFile))) {
             for (String line; (line = br.readLine()) != null; ) {
                 msg.append(line)
                         .append("\n");
@@ -100,22 +104,28 @@ public class RemoteRpcRequestHandler {
                 mContext.runOnUiThread(recStopTask);
                 recStopTask.get();
                 StringBuilder msg = new StringBuilder();
+
                 try {
-                    if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
-                        File imuFile = new File(mRawSensorInfo.getLastAccelPath());
-                        msg.append(getSensorData(imuFile));
+                    InputStream imuFile;
+                    if (wantAccel) {
+                        imuFile = mRawSensorInfo.getLastSensorFileInputStream(Sensor.TYPE_ACCELEROMETER);
+                        String imuFilename = mRawSensorInfo.getLastSensorInfoFileName(Sensor.TYPE_ACCELEROMETER);
+//                        File imuFile = new File(mRawSensorInfo.getLastAccelPath());
+                        msg.append(getSensorData(imuFile, imuFilename));
                         msg.append(SENSOR_DATA_END_MARKER);
                         msg.append("\n");
                     }
-                    if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
-                        File imuFile = new File(mRawSensorInfo.getLastGyroPath());
-                        msg.append(getSensorData(imuFile));
+                    if (wantGyro) {
+                        imuFile = mRawSensorInfo.getLastSensorFileInputStream(Sensor.TYPE_GYROSCOPE);
+                        String imuFilename = mRawSensorInfo.getLastSensorInfoFileName(Sensor.TYPE_GYROSCOPE);
+//                        File imuFile = new File(mRawSensorInfo.getLastGyroPath());
+                        msg.append(getSensorData(imuFile, imuFilename));
                         msg.append(SENSOR_DATA_END_MARKER);
                         msg.append("\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return RemoteRpcResponse.error("Failed to open IMU file", mContext);
+                    return RemoteRpcResponse.error("Failed to open requested IMU file", mContext);
                 }
 
                 return RemoteRpcResponse.success(msg.toString(), mContext);
@@ -184,9 +194,10 @@ public class RemoteRpcRequestHandler {
 
     void handleVideoGetRequest(PrintStream outputStream) {
         Preview preview = mContext.getPreview();
-        BlockingQueue<String> videoReporter;
-        if (preview != null &&
-            (videoReporter = preview.getVideoAvailableReporter()) != null) {
+        BlockingQueue<Preview.VideoFileInfo> videoReporter;
+        Log.d(TAG,preview.getVideoAvailableReporter() + "\n");
+
+        if ((videoReporter = preview.getVideoAvailableReporter()) != null) {
             try {
                 // await available video file
                 if (preview.isVideoRecording()) {
@@ -194,19 +205,17 @@ public class RemoteRpcRequestHandler {
                 }
                 // get file
                 ExtendedAppInterface appInterface = mContext.getApplicationInterface();
-                File videoFile = appInterface.getLastVideoFile();
-                boolean canRead = videoFile.canRead();
-                Log.d(TAG, "yay " + canRead);
-                if (videoFile != null && videoFile.canRead()) {
+                InputStream inputStream = appInterface.getLastVideoFileInputStream();
+                FileInfo videoFileInfo = appInterface.getLastVideoFileInfo();
+                Log.d(TAG,videoFileInfo.getSize() + "\n" + videoFileInfo.getName() + "\n");
+                if (inputStream != null) {
                     // Transfer file size in bytes and filename
                     outputStream.println(RemoteRpcResponse.success(
-                            videoFile.length() + "\n" + videoFile.getName() + "\n",
+                            videoFileInfo.getSize() + "\n" + videoFileInfo.getName() + "\n",
                             mContext
                     ));
                     outputStream.flush();
                     // Transfer file bytes
-                    FileInputStream inputStream = new FileInputStream(videoFile);
-
                     byte[] buffer = new byte[BUFFER_SIZE];
                     int len;
                     while ((len = inputStream.read(buffer)) != -1) {

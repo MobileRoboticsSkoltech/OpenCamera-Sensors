@@ -129,7 +129,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      */
     private VideoFrameInfo mVideoFrameInfoWriter;
     private final BlockingQueue<VideoPhaseInfo> mVideoPhaseInfoReporter;
-    private final BlockingQueue<String> mVideoAvailableReporter;
+    private final BlockingQueue<VideoFileInfo> mVideoAvailableReporter;
 
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
     private ScriptC_histogram_compute histogramScript; // lazily create for performance
@@ -196,7 +196,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      *  Important to call close() when the video recording is finished, to free up any resources
      *  (e.g., supplied ParcelFileDescriptor).
      */
-    private static class VideoFileInfo {
+    public static class VideoFileInfo {
         private final ApplicationInterface.VideoMethod video_method;
         private final Uri video_uri; // for VideoMethod.SAF, VideoMethod.URI or VideoMethod.MEDIASTORE
         private final String video_filename; // for VideoMethod.FILE
@@ -415,7 +415,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
-    public BlockingQueue<String> getVideoAvailableReporter() {
+    public BlockingQueue<VideoFileInfo> getVideoAvailableReporter() {
         return mVideoAvailableReporter;
     }
 
@@ -1056,13 +1056,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         videoFileInfo.close();
 
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
-        if (videoFileInfo.video_filename != null) mVideoAvailableReporter.add(videoFileInfo.video_filename);
+        if (videoFileInfo != null) mVideoAvailableReporter.add(videoFileInfo);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
             // video file that will have been created
             if( MyDebug.LOG )
-                Log.d(TAG, "delete ununused next video file");
+                Log.d(TAG, "delete unused next video file");
             nextVideoFileInfo.close();
             applicationInterface.deleteUnusedVideo(nextVideoFileInfo.video_method, nextVideoFileInfo.video_uri, nextVideoFileInfo.video_filename);
         }

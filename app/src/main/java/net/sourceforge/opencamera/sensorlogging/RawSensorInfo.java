@@ -6,20 +6,25 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.StorageUtils;
 import net.sourceforge.opencamera.StorageUtilsWrapper;
+import net.sourceforge.opencamera.preview.ApplicationInterface;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -27,8 +32,8 @@ import java.util.Date;
  */
 public class RawSensorInfo implements SensorEventListener {
     private static final String TAG = "RawSensorInfo";
-    private static final String SENSOR_TYPE_ACCEL = "accel";
-    private static final String SENSOR_TYPE_GYRO = "gyro";
+    public static final String SENSOR_TYPE_ACCEL = "accel";
+    public static final String SENSOR_TYPE_GYRO = "gyro";
     private static final String CSV_SEPARATOR = ",";
 
     final private SensorManager mSensorManager;
@@ -37,8 +42,9 @@ public class RawSensorInfo implements SensorEventListener {
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;
     // TODO: change this for MediaStore
-    private String mLastGyroPath;
-    private  String mLastAccelPath;
+    private final Map<Integer, Uri> mLastSensorFileUri;
+    private final Map<Integer, File> mLastSensorFile;
+
     private boolean mIsRecording;
     private final MainActivity mContext;
 
@@ -60,6 +66,8 @@ public class RawSensorInfo implements SensorEventListener {
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mContext = context;
+        mLastSensorFile = new HashMap<>();
+        mLastSensorFileUri = new HashMap<>();
 
         if (MyDebug.LOG) {
             Log.d(TAG, "RawSensorInfo");
@@ -108,28 +116,14 @@ public class RawSensorInfo implements SensorEventListener {
         // TODO: Add logs for when sensor accuracy decreased
     }
 
-    private void createLastSensorPath(File sensorFile, String sensorType) {
-        // TODO: change this for MediaStore
-        String path = sensorFile.getAbsolutePath();
-        switch (sensorType) {
-            case SENSOR_TYPE_ACCEL:
-                mLastAccelPath = path;
-                break;
-            case SENSOR_TYPE_GYRO:
-                mLastGyroPath = path;
-                break;
-        }
-    }
-
     /**
-     * Handles sensor info file creation, uses StorageUtils to work both with SAF and standard file
+     * Handles sensor info writer setup, uses StorageUtils to work with SAF, MediaStore and standard file
      * access.
      */
-    private FileWriter getRawSensorInfoFileWriter(MainActivity mainActivity, String sensorType,
-                                                  Date date) throws IOException {
-        StorageUtilsWrapper storageUtils = mainActivity.getStorageUtils();
-        FileWriter fileWriter;
-        try {
+    private PrintWriter setupRawSensorInfoWriter(String sensorType,
+            Date date) throws IOException {
+        StorageUtilsWrapper storageUtils = mContext.getStorageUtils();
+       /* try {
             if (storageUtils.isUsingSAF()) {
                 Uri saveUri = storageUtils.createOutputCaptureInfoFileSAF(
                         StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", date
@@ -152,8 +146,29 @@ public class RawSensorInfo implements SensorEventListener {
                 createLastSensorPath(saveFile, sensorType);
                 storageUtils.broadcastFile(saveFile, false, false, false);
             }
+*/      try {
+            ApplicationInterface.VideoMethod method = storageUtils.createOutputVideoMethod();
+            OutputStream sensorOutputStream;
+            if (method == ApplicationInterface.VideoMethod.FILE) {
+                File outputFile = storageUtils.createOutputCaptureInfoFile(StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, sensorType, "csv", date);
+                if (sensorType.equals(SENSOR_TYPE_ACCEL)) {
+                    mLastSensorFile.put(Sensor.TYPE_ACCELEROMETER, outputFile);
+                } else if (sensorType.equals(SENSOR_TYPE_GYRO)) {
+                    mLastSensorFile.put(Sensor.TYPE_GYROSCOPE, outputFile);
+                }
+                sensorOutputStream = new FileOutputStream(outputFile);
+            } else {
+                // TODO: does it work for SAF?
+                Uri outputUri = storageUtils.createOutputCaptureInfoUri(StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", sensorType, date);
+                if (sensorType.equals(SENSOR_TYPE_ACCEL)) {
+                    mLastSensorFileUri.put(Sensor.TYPE_ACCELEROMETER, outputUri);
+                } else if (sensorType.equals(SENSOR_TYPE_GYRO)) {
+                    mLastSensorFileUri.put(Sensor.TYPE_GYROSCOPE, outputUri);
+                }
+                sensorOutputStream = mContext.getContentResolver().openOutputStream(outputUri);
+            }
 
-            return fileWriter;
+            return new PrintWriter(sensorOutputStream);
         } catch (IOException e) {
             e.printStackTrace();
             if (MyDebug.LOG) {
@@ -161,17 +176,6 @@ public class RawSensorInfo implements SensorEventListener {
             }
             throw new IOException(e);
         }
-    }
-
-    private PrintWriter setupRawSensorInfoWriter(String sensorType,
-            Date date) throws IOException {
-        FileWriter rawSensorInfoFileWriter = getRawSensorInfoFileWriter(
-                mContext, sensorType, date
-        );
-        PrintWriter rawSensorInfoWriter = new PrintWriter(
-                new BufferedWriter(rawSensorInfoFileWriter)
-        );
-        return rawSensorInfoWriter;
     }
 
     public void startRecording(Date date) {
@@ -257,11 +261,27 @@ public class RawSensorInfo implements SensorEventListener {
         mSensorManager.unregisterListener(this);
     }
 
-    public String getLastGyroPath() {
-        return mLastGyroPath;
+    public InputStream getLastSensorFileInputStream(Integer sensorType) throws FileNotFoundException {
+        StorageUtilsWrapper storageUtils = mContext.getStorageUtils();
+        ApplicationInterface.VideoMethod method = storageUtils.createOutputVideoMethod();
+        if (method == ApplicationInterface.VideoMethod.FILE) {
+            return new FileInputStream(mLastSensorFile.get(sensorType));
+        } else {
+            return mContext.getContentResolver().openInputStream(
+                    mLastSensorFileUri.get(sensorType)
+            );
+        }
     }
 
-    public String getLastAccelPath() {
-        return mLastAccelPath;
+    public String getLastSensorInfoFileName(Integer sensorType) throws FileNotFoundException {
+        StorageUtilsWrapper storageUtils = mContext.getStorageUtils();
+        ApplicationInterface.VideoMethod method = storageUtils.createOutputVideoMethod();
+        if (method == ApplicationInterface.VideoMethod.FILE) {
+            return mLastSensorFile.get(sensorType).getName();
+        } else {
+            return mContext.getApplicationInterface().getFileInfoByUri(
+                    mLastSensorFileUri.get(sensorType)
+            ).getName();
+        }
     }
 }

@@ -1,9 +1,11 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,6 +22,7 @@ import net.sourceforge.opencamera.preview.BasicApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.ui.DrawPreview;
+import net.sourceforge.opencamera.ui.FileInfo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -27,6 +30,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -47,6 +51,7 @@ import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -86,13 +91,40 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
-    public File getLastVideoFile() {
-        // TODO: refactor for MediaStore
-        if (storageUtils.isUsingSAF()) {
-            return storageUtils.getFileFromDocumentUriSAF(last_video_file_uri, false);
+    public InputStream getLastVideoFileInputStream() throws FileNotFoundException {
+        VideoMethod videoMethod = createOutputVideoMethod();
+        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
+            return getContext().getContentResolver().openInputStream(last_video_file_uri);
         } else {
-            return last_video_file;
+            return new FileInputStream(last_video_file);
         }
+    }
+
+    public FileInfo getLastVideoFileInfo() {
+        VideoMethod videoMethod = createOutputVideoMethod();
+        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
+            return getFileInfoByUri(last_video_file_uri);
+        } else {
+            return new FileInfo(last_video_file.length(), last_video_file.getName());
+        }
+    }
+
+    public FileInfo getFileInfoByUri(Uri returnUri) {
+        Cursor returnCursor =
+                main_activity.getContentResolver().query(returnUri, null, null, null, null);
+        /*
+         * Get the column indexes of the data in the Cursor,
+         * move to the first row in the Cursor, get the data,
+         * and display it.
+         */
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+
+        Long size = returnCursor.getLong(sizeIndex);
+        String name = returnCursor.getString(nameIndex);
+        returnCursor.close();
+        return new FileInfo(size, name);
     }
 
     private File last_video_file = null;
