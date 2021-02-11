@@ -15,7 +15,10 @@ import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 import net.sourceforge.opencamera.ui.FileInfo;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -124,6 +127,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return new FileInfo(size, name);
     }
 
+    public InputStream getLastVideoFileInputStream() throws FileNotFoundException {
+        VideoMethod videoMethod = createOutputVideoMethod();
+        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
+            return getContext().getContentResolver().openInputStream(last_video_file_uri);
+        } else {
+            return new FileInputStream(last_video_file);
+        }
+    }
 
     @Override
     public void startingVideo() {

@@ -91,15 +91,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
-    public InputStream getLastVideoFileInputStream() throws FileNotFoundException {
-        VideoMethod videoMethod = createOutputVideoMethod();
-        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
-            return getContext().getContentResolver().openInputStream(last_video_file_uri);
-        } else {
-            return new FileInputStream(last_video_file);
-        }
-    }
-
     protected File last_video_file = null;
     protected Uri last_video_file_uri = null;
 
