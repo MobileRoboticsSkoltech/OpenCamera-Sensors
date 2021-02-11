@@ -41,7 +41,6 @@ public class StorageUtilsWrapper extends StorageUtils {
 
     public OutputStream createOutputCaptureInfo(int mediaType, String extension, String suffix, Date currentDate) throws IOException {
         ApplicationInterface.VideoMethod method = createOutputVideoMethod();
-        OutputStream outputStream;
         if (method == ApplicationInterface.VideoMethod.FILE) {
             return new FileOutputStream(createOutputCaptureInfoFile(mediaType, suffix, extension, currentDate));
         } else {
@@ -73,36 +72,7 @@ public class StorageUtilsWrapper extends StorageUtils {
     /**
      * Creates ouput capture info file if MediaStore is used
      */
-    public Uri createOutputCaptureInfoFileMediaStore(int mediaType, String extension, String suffix, Date currentDate) throws IOException {
-/*        Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        ContentValues contentValues = new ContentValues();
-        String filename = createMediaFilename(mediaType, suffix, 0, "." + extension, currentDate);
-        if( MyDebug.LOG )
-            Log.d(TAG, "filename: " + filename);
-        String mime_type = getCaptureInfoMimeTypeByExtension(extension);
-        if( MyDebug.LOG )
-            Log.d(TAG, "mime_type: " + mime_type);
-
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-            String relative_path = getSaveRelativeFolder() + File.separator + getRawSensorInfoFolderName(currentDate);
-            if( MyDebug.LOG )
-                Log.d(TAG, "relative_path: " + relative_path);
-        }
-
-
-        Uri fileUri = getContext().getContentResolver().insert(folder, contentValues);
-        if( MyDebug.LOG )
-            Log.d(TAG, "uri: " + fileUri);
-        if(fileUri == null) {
-            throw new IOException();
-        }
-
-        return fileUri;*/
+    public Uri createOutputCaptureInfoFileMediaStore(int mediaType, String extension, String suffix, Date currentDate) {
         ContentValues values = new ContentValues();
         String filename = createMediaFilename(mediaType, suffix, 0, "." + extension, currentDate);
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
@@ -116,19 +86,16 @@ public class StorageUtilsWrapper extends StorageUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             values.put(
                     MediaStore.MediaColumns.RELATIVE_PATH,
-                    Environment.DIRECTORY_DOCUMENTS + File.separator + getRawSensorInfoFolderName(currentDate)
+                    Environment.DIRECTORY_DOCUMENTS +
+                            File.separator +
+                            getSaveLocation() +
+                            File.separator +
+                            getRawSensorInfoFolderName(currentDate)
             );
         }
 
-        Uri uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);      //important!
+        Uri uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
         return uri;
-    }
-
-    private String getCaptureInfoMimeTypeByExtension(String extension) {
-        // Note: MediaStore doesn't allow saving anything that is
-        // not under "video/*" mime type in DCIM directory
-        // return "video/" + extension;
-        return "text/" + extension;
     }
 
     /**
@@ -136,7 +103,14 @@ public class StorageUtilsWrapper extends StorageUtils {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private Uri createOutputCaptureInfoFileSAF(int type, String suffix, String extension, Date currentDate) throws IOException {
-        String mimeType = "text/csv";
+        String mimeType;
+        if (type == MEDIA_TYPE_IMAGE || type == MEDIA_TYPE_VIDEO_FRAME) {
+            mimeType = "image/" + extension;
+        } else if (type == MEDIA_TYPE_RAW_SENSOR_INFO) {
+            mimeType = "text/" + extension;
+        } else {
+            throw new IllegalArgumentException("Provided content type was not supported");
+        }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
         // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
         String filename = createMediaFilename(

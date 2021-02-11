@@ -41,7 +41,6 @@ public class RawSensorInfo implements SensorEventListener {
     final private Sensor mSensorAccel;
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;
-    // TODO: change this for MediaStore
     private final Map<Integer, Uri> mLastSensorFileUri;
     private final Map<Integer, File> mLastSensorFile;
 
@@ -158,7 +157,6 @@ public class RawSensorInfo implements SensorEventListener {
                 }
                 sensorOutputStream = new FileOutputStream(outputFile);
             } else {
-                // TODO: does it work for SAF?
                 Uri outputUri = storageUtils.createOutputCaptureInfoUri(StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", sensorType, date);
                 if (sensorType.equals(SENSOR_TYPE_ACCEL)) {
                     mLastSensorFileUri.put(Sensor.TYPE_ACCELEROMETER, outputUri);
@@ -273,7 +271,7 @@ public class RawSensorInfo implements SensorEventListener {
         }
     }
 
-    public String getLastSensorInfoFileName(Integer sensorType) throws FileNotFoundException {
+    public String getLastSensorInfoFileName(Integer sensorType) {
         StorageUtilsWrapper storageUtils = mContext.getStorageUtils();
         ApplicationInterface.VideoMethod method = storageUtils.createOutputVideoMethod();
         if (method == ApplicationInterface.VideoMethod.FILE) {

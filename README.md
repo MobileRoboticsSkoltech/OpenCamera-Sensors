@@ -7,10 +7,6 @@ OpenCamera Sensors is an Android application for synchronized recording of video
 
 This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popular open-source camera application with flexibility in camera parameters settings, actively supported by the community. By regular merging of Open Camera updates our app will adapt to new smartphones and APIs — this is an advantage over the other video + IMU recording applications built from scratch for Camera2API.
 
-## Branch-level TODO:
-- Organize all files in one subdirectory
-- Move all new storage-related methods from ApplicationInterface and RawSensorInfo to StorageUtilsWrapper
-
 ## Usage
 
 ![screenshot settings](https://imgur.com/BytzCvA.png)

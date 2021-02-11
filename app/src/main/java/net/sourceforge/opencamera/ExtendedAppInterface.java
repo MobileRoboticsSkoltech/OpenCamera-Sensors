@@ -1,15 +1,19 @@
 package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.hardware.Sensor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.OpenableColumns;
 import android.util.Log;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
+import net.sourceforge.opencamera.ui.FileInfo;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -92,6 +96,34 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public boolean getSaveFramesPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
+
+    public FileInfo getLastVideoFileInfo() {
+        VideoMethod videoMethod = createOutputVideoMethod();
+        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
+            return getFileInfoByUri(last_video_file_uri);
+        } else {
+            return new FileInfo(last_video_file.length(), last_video_file.getName());
+        }
+    }
+
+    public FileInfo getFileInfoByUri(Uri returnUri) {
+        Cursor returnCursor =
+                getContext().getContentResolver().query(returnUri, null, null, null, null);
+        /*
+         * Get the column indexes of the data in the Cursor,
+         * move to the first row in the Cursor, get the data,
+         * and display it.
+         */
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+
+        Long size = returnCursor.getLong(sizeIndex);
+        String name = returnCursor.getString(nameIndex);
+        returnCursor.close();
+        return new FileInfo(size, name);
+    }
+
 
     @Override
     public void startingVideo() {

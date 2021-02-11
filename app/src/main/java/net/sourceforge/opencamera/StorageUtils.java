@@ -61,7 +61,7 @@ public class StorageUtils {
     private final MyApplicationInterface applicationInterface;
     private Uri last_media_scanned;
 
-    private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DCIM;
+    private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DOCUMENTS;
 
     // for testing:
     public volatile boolean failed_to_scan;
@@ -326,7 +326,7 @@ public class StorageUtils {
     // only valid if !isUsingSAF()
     String getSaveLocation() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
+        return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera_Sensors");
     }
 
     // only valid if isUsingSAF()

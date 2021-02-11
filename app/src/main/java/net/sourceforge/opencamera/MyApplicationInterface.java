@@ -100,35 +100,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         }
     }
 
-    public FileInfo getLastVideoFileInfo() {
-        VideoMethod videoMethod = createOutputVideoMethod();
-        if (videoMethod == VideoMethod.SAF || videoMethod == VideoMethod.MEDIASTORE) {
-            return getFileInfoByUri(last_video_file_uri);
-        } else {
-            return new FileInfo(last_video_file.length(), last_video_file.getName());
-        }
-    }
-
-    public FileInfo getFileInfoByUri(Uri returnUri) {
-        Cursor returnCursor =
-                main_activity.getContentResolver().query(returnUri, null, null, null, null);
-        /*
-         * Get the column indexes of the data in the Cursor,
-         * move to the first row in the Cursor, get the data,
-         * and display it.
-         */
-        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-
-        Long size = returnCursor.getLong(sizeIndex);
-        String name = returnCursor.getString(nameIndex);
-        returnCursor.close();
-        return new FileInfo(size, name);
-    }
-
-    private File last_video_file = null;
-    private Uri last_video_file_uri = null;
+    protected File last_video_file = null;
+    protected Uri last_video_file_uri = null;
 
     private final Timer subtitleVideoTimer = new Timer();
     private TimerTask subtitleVideoTimerTask;
@@ -374,7 +347,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public Uri createOutputVideoMediaStore(String extension) throws IOException {
         mLastVideoDate = new Date();
-        Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+        /*Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
                 MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         ContentValues contentValues = new ContentValues();
@@ -400,7 +373,31 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( last_video_file_uri == null ) {
             throw new IOException();
         }
+*/
+        ContentValues values = new ContentValues();
+        String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, mLastVideoDate);
+        if( MyDebug.LOG )
+            Log.d(TAG, "filename: " + filename);
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
+        String mime_type = storageUtils.getVideoMimeType(extension);
+        if( MyDebug.LOG )
+            Log.d(TAG, "mime_type: " + mime_type);
+        values.put(MediaStore.Video.Media.MIME_TYPE, mime_type);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    storageUtils.getSaveRelativeFolder()
+            );
 
+            values.put(MediaStore.Video.Media.IS_PENDING, 1);
+        }
+
+        last_video_file_uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
+        if( MyDebug.LOG )
+            Log.d(TAG, "uri: " + last_video_file_uri);
+        if( last_video_file_uri == null ) {
+            throw new IOException();
+        }
         return last_video_file_uri;
     }
 
@@ -2160,7 +2157,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                         uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
                                     }
                                     else {
-                                        Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                                        /*Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
                                                 MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
                                                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                                         ContentValues contentValues = new ContentValues();
@@ -2178,6 +2175,24 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                             contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
                                         }
                                         uri = main_activity.getContentResolver().insert(folder, contentValues);
+                                        if( uri == null ) {
+                                            throw new IOException();
+                                        }*/
+                                        ContentValues values = new ContentValues();
+                                        values.put(MediaStore.Video.Media.DISPLAY_NAME, subtitle_filename);
+                                        values.put(MediaStore.Images.Media.MIME_TYPE, "text/srt");
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                            values.put(
+                                                    MediaStore.MediaColumns.RELATIVE_PATH,
+                                                    storageUtils.getSaveRelativeFolder()
+                                            );
+
+                                            values.put(MediaStore.Video.Media.IS_PENDING, 1);
+                                        }
+
+                                        uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
+                                        if( MyDebug.LOG )
+                                            Log.d(TAG, "uri: " + uri);
                                         if( uri == null ) {
                                             throw new IOException();
                                         }
