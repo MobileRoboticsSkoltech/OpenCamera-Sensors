@@ -16,7 +16,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - (Optional) Enable **save frames** option if you want to verify recorded data correctness
 - **Switch to video**, setup ISO and exposure time
 - **Record video**
-- **Get data** from ```DCIM/OpenCamera```:
+- **Get data** from ```Documents/OpenCamera_Sensors```:
     - Video file
     - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
         -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
