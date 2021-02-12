@@ -43,6 +43,7 @@ import android.location.Location;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.renderscript.Allocation;
@@ -2422,9 +2423,11 @@ public class ImageSaver extends Thread {
                 saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, extension, request.current_date);
             }
             else if( MainActivity.useScopedStorage() ) {
+
                 if( MyDebug.LOG )
                     Log.d(TAG, "use media store");
                 use_media_store = true;
+                /*
                 Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
                         MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -2445,7 +2448,27 @@ public class ImageSaver extends Thread {
                     contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
                 }
 
-                saveUri = main_activity.getContentResolver().insert(folder, contentValues);
+                saveUri = main_activity.getContentResolver().insert(folder, contentValues);*/
+
+                contentValues = new ContentValues();
+                String picName = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, 0, "." + extension, request.current_date);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "picName: " + picName);
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, picName);
+                String mime_type = storageUtils.getImageMimeType(extension);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "mime_type: " + mime_type);
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, mime_type);
+                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    String relative_path = storageUtils.getSaveRelativeFolder();
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "relative_path: " + relative_path);
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, relative_path);
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 1);
+                }
+
+                saveUri = main_activity.getContentResolver().insert(MediaStore.Files.getContentUri("external"), contentValues);
+
                 if( MyDebug.LOG )
                     Log.d(TAG, "saveUri: " + saveUri);
                 if( saveUri == null ) {
