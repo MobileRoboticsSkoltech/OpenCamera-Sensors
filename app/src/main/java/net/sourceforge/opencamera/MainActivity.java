@@ -4982,6 +4982,12 @@ public class MainActivity extends Activity {
         return this.applicationInterface.getStorageUtils().getImageFolder();
     }
 
+    public File getRawSensorInfoFolder() {
+        return this.applicationInterface.getStorageUtils().getRawSensorInfoFolder(
+                applicationInterface.mLastVideoDate
+        );
+    }
+
     public ToastBoxer getChangedAutoStabiliseToastBoxer() {
         return changed_auto_stabilise_toast;
     }

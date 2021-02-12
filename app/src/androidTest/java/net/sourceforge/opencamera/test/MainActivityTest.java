@@ -3546,8 +3546,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     private enum UriType {
-        MEDIASTORE_IMAGES,
-        MEDIASTORE_VIDEOS,
+        MEDIASTORE_FILES,
         STORAGE_ACCESS_FRAMEWORK
     }
 
@@ -3561,11 +3560,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         String [] projection;
         switch( uri_type ) {
-            case MEDIASTORE_IMAGES:
-                projection = new String[] {MediaStore.Images.ImageColumns.DISPLAY_NAME};
-                break;
-            case MEDIASTORE_VIDEOS:
-                projection = new String[] {MediaStore.Video.VideoColumns.DISPLAY_NAME};
+            case MEDIASTORE_FILES:
+                projection = new String[] {MediaStore.Files.FileColumns.DISPLAY_NAME};
                 break;
             case STORAGE_ACCESS_FRAMEWORK:
                 projection = new String[] {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
@@ -3576,12 +3572,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         String selection = "";
         switch( uri_type ) {
-            case MEDIASTORE_IMAGES:
-                selection = MediaStore.Images.ImageColumns.BUCKET_ID + " = " + bucket_id;
-                break;
-            case MEDIASTORE_VIDEOS:
-                selection = MediaStore.Video.VideoColumns.BUCKET_ID + " = " + bucket_id;
-                break;
+            case MEDIASTORE_FILES:
+                selection = MediaStore.Files.FileColumns.BUCKET_ID + " = " + bucket_id;
             case STORAGE_ACCESS_FRAMEWORK:
                 break;
             default:
@@ -3623,8 +3615,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             else {
                 String save_folder = mActivity.getStorageUtils().getImageFolderPath();
                 String bucket_id = String.valueOf(save_folder.toLowerCase().hashCode());
-                files.addAll( mediaFilesinSaveFolder(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, bucket_id, UriType.MEDIASTORE_IMAGES) );
-                files.addAll( mediaFilesinSaveFolder(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, bucket_id, UriType.MEDIASTORE_VIDEOS) );
+                files.addAll( mediaFilesinSaveFolder(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, bucket_id, UriType.MEDIASTORE_FILES) );
             }
 
             if( files.size() == 0 ) {
@@ -7826,16 +7817,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.AccelPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.GyroPreferenceKey, true);
         editor.apply();
         updateForSettings();
 
         // count initial files in folder
         File folder = mActivity.getImageFolder();
+        int expectedNFiles;
         Log.d(TAG, "folder: " + folder);
-        int expectedNFiles = 1;
-        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+        if (MainActivity.useScopedStorage()) {
+            // a directory with sensors is not counted as a file
+            expectedNFiles = 1;
+        } else {
+            expectedNFiles = 2;
+        }
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles - 1);
 
-        assertEquals(expectedNFiles + 1, nNewFiles);
+        assertEquals(expectedNFiles, nNewFiles);
+        // check sensor info folder
+        assertTrue(mActivity.getRawSensorInfoFolder().exists());
     }
 
     /* Test recording video with raw IMU sensor info
@@ -7851,10 +7852,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.putString(PreferenceKeys.SaveLocationSAFPreferenceKey, "content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FOpenCamera");
         editor.apply();
         updateForSettings();
-        int expectedNFiles = 1;
-        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+        int expectedNFiles;
+        if (MainActivity.useScopedStorage()) {
+            expectedNFiles = 1;
+        } else {
+            expectedNFiles = 2;
+        }
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles - 1);
 
-        assertEquals(expectedNFiles + 1, nNewFiles);
+        assertEquals(expectedNFiles, nNewFiles);
     }
 
     /* Test recording video with custom gamma profile.

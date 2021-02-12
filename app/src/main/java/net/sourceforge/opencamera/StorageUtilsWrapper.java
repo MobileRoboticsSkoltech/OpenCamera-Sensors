@@ -159,7 +159,7 @@ public class StorageUtilsWrapper extends StorageUtils {
         return file;
     }
 
-    private File getRawSensorInfoFolder(Date currentVideoDate) {
+    public File getRawSensorInfoFolder(Date currentVideoDate) {
         String name = getRawSensorInfoFolderName(currentVideoDate);
         return getImageFolderChild(name);
     }
