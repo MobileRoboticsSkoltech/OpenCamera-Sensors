@@ -8266,6 +8266,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         Log.d(TAG, "check still taking video");
         assertTrue( mPreview.isVideoRecording() );
 
+        clickView(takePhotoButton);
+
         int n_new_files = getNFiles() - n_files;
         Log.d(TAG, "n_new_files: " + n_new_files);
         assertEquals(1, n_new_files);
