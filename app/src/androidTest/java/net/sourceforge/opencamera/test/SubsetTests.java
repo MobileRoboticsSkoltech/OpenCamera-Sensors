@@ -22,9 +22,8 @@ public class SubsetTests {
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotTimer"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotPausePreview"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotMax"));
-        // Basic photo tests
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhoto"));
-        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuous"));
+        // Basic photo tests (without autofocus for instrumentation)
+        suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNoAutofocus"));
         suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuousNoTouch"));
 
         return suite;
