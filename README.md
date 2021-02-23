@@ -28,6 +28,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - **Connect** smartphone to the same network as PC
 - Use scripts provided in ```./api_client/``` directory to **send requests** for the application:
 
+
 ![remote control methods](https://www.websequencediagrams.com/files/render?link=6txhpHrdgaebT4DYz2C3SaEQjHM1esYDkJZJvPZcgCJHbRAg3c8hqcJYgOmGirze)
 
 ## Good practices for data recording
