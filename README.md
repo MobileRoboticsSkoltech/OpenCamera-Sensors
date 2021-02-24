@@ -4,7 +4,7 @@
 
 ## Install
 
-[Get latest dev build apk](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk)
+[Get latest dev build apk](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk) | [Dev branch README](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/blob/control_server/README.md)
 
 ## Description
 
