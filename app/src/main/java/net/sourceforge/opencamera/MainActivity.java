@@ -720,9 +720,9 @@ public class MainActivity extends Activity {
      */
     public static boolean useScopedStorage() {
         // Disable this for our app until this part is integrated properly
-//        return false;
+        return false;
         //return true;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
@@ -1412,7 +1412,6 @@ public class MainActivity extends Activity {
         // Create Remote controller for OpenCamera Sensors
         if (applicationInterface.getRemoteRecControlPref()) {
             try {
-                if (mRpcServer != null) mRpcServer.stopExecuting();
                 mRpcServer = new RemoteRpcServer(this);
                 mRpcServer.start();
                 Log.d(TAG, "App rpc listener thread started");
@@ -3370,10 +3369,7 @@ public class MainActivity extends Activity {
             protected Bitmap doInBackground(Void... params) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "doInBackground");
-                StorageUtils.Media media = null;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    media = applicationInterface.getStorageUtils().getLatestMedia();
-                }
+                StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
                 Bitmap thumbnail = null;
                 KeyguardManager keyguard_manager = (KeyguardManager)MainActivity.this.getSystemService(Context.KEYGUARD_SERVICE);
                 boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
@@ -3597,10 +3593,7 @@ public class MainActivity extends Activity {
         if( uri == null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "go to latest media");
-            StorageUtils.Media media = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                media = applicationInterface.getStorageUtils().getLatestMedia();
-            }
+            StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
             if( media != null ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "latest uri:" + media.uri);
@@ -4980,12 +4973,6 @@ public class MainActivity extends Activity {
 
     public File getImageFolder() {
         return this.applicationInterface.getStorageUtils().getImageFolder();
-    }
-
-    public File getRawSensorInfoFolder() {
-        return this.applicationInterface.getStorageUtils().getRawSensorInfoFolder(
-                applicationInterface.mLastVideoDate
-        );
     }
 
     public ToastBoxer getChangedAutoStabiliseToastBoxer() {

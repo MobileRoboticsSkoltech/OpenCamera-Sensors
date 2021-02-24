@@ -11,7 +11,7 @@ def main():
     remote = RemoteControl(HOST)
     print("Connected")
     
-    accel_data, gyro_data = remote.get_imu(10000, True, True)
+    accel_data, gyro_data = remote.get_imu(10000, True, False)
     print("Accelerometer data length: %d" % len(accel_data))
     with open("accel.csv", "w+") as accel:
         accel.writelines(accel_data)

@@ -7,6 +7,7 @@ OpenCamera Sensors is an Android application for synchronized recording of video
 
 This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popular open-source camera application with flexibility in camera parameters settings, actively supported by the community. By regular merging of Open Camera updates our app will adapt to new smartphones and APIs — this is an advantage over the other video + IMU recording applications built from scratch for Camera2API.
 
+
 ## Usage
 
 ![screenshot settings](https://imgur.com/BytzCvA.png)
@@ -16,7 +17,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - (Optional) Enable **save frames** option if you want to verify recorded data correctness
 - **Switch to video**, setup ISO and exposure time
 - **Record video**
-- **Get data** from ```Documents/OpenCamera_Sensors```:
+- **Get data** from ```DCIM/OpenCamera```:
     - Video file
     - IMU data and frame timestamps in the directory ```{VIDEO_DATE}```:
         -```{VIDEO_NAME}_gyro.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
@@ -26,10 +27,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 ### Remote recording
 
 - **Connect** smartphone to the same network as PC
-- Use scripts provided in ```./api_client/``` directory to **send requests** for the application:
-
-
-![remote control methods](https://www.websequencediagrams.com/files/render?link=6txhpHrdgaebT4DYz2C3SaEQjHM1esYDkJZJvPZcgCJHbRAg3c8hqcJYgOmGirze)
+- Use scripts provided in ```./api_client/``` directory to **send requests** for the application
 
 ## Good practices for data recording
 

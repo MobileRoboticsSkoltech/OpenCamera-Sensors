@@ -1,36 +1,11 @@
 package net.sourceforge.opencamera;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.cameracontroller.RawImage;
-import net.sourceforge.opencamera.preview.ApplicationInterface;
-import net.sourceforge.opencamera.preview.BasicApplicationInterface;
-import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.preview.VideoProfile;
-import net.sourceforge.opencamera.ui.DrawPreview;
-import net.sourceforge.opencamera.ui.FileInfo;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -51,13 +26,33 @@ import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.preview.ApplicationInterface;
+import net.sourceforge.opencamera.preview.BasicApplicationInterface;
+import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.ui.DrawPreview;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /** Our implementation of ApplicationInterface, see there for details.
  */
@@ -91,8 +86,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
-    protected File last_video_file = null;
-    protected Uri last_video_file_uri = null;
+    public File getLastVideoFile() {
+        if (storageUtils.isUsingSAF()) {
+            return storageUtils.getFileFromDocumentUriSAF(last_video_file_uri, false);
+        } else {
+            return last_video_file;
+        }
+    }
+
+    private File last_video_file = null;
+    private Uri last_video_file_uri = null;
 
     private final Timer subtitleVideoTimer = new Timer();
     private TimerTask subtitleVideoTimerTask;
@@ -338,9 +341,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     @Override
     public Uri createOutputVideoMediaStore(String extension) throws IOException {
         mLastVideoDate = new Date();
-        /*Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        Uri folder = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         ContentValues contentValues = new ContentValues();
         String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, mLastVideoDate);
         if( MyDebug.LOG )
@@ -350,13 +351,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "mime_type: " + mime_type);
         contentValues.put(MediaStore.Video.Media.MIME_TYPE, mime_type);
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-            String relative_path = storageUtils.getSaveRelativeFolder();
-            if( MyDebug.LOG )
-                Log.d(TAG, "relative_path: " + relative_path);
-            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, relative_path);
-            contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
-        }
 
         last_video_file_uri = main_activity.getContentResolver().insert(folder, contentValues);
         if( MyDebug.LOG )
@@ -364,31 +358,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( last_video_file_uri == null ) {
             throw new IOException();
         }
-*/
-        ContentValues values = new ContentValues();
-        String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, mLastVideoDate);
-        if( MyDebug.LOG )
-            Log.d(TAG, "filename: " + filename);
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-        String mime_type = storageUtils.getVideoMimeType(extension);
-        if( MyDebug.LOG )
-            Log.d(TAG, "mime_type: " + mime_type);
-        values.put(MediaStore.Video.Media.MIME_TYPE, mime_type);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            values.put(
-                    MediaStore.MediaColumns.RELATIVE_PATH,
-                    storageUtils.getSaveRelativeFolder()
-            );
 
-            values.put(MediaStore.Video.Media.IS_PENDING, 1);
-        }
-
-        last_video_file_uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
-        if( MyDebug.LOG )
-            Log.d(TAG, "uri: " + last_video_file_uri);
-        if( last_video_file_uri == null ) {
-            throw new IOException();
-        }
         return last_video_file_uri;
     }
 
@@ -2148,9 +2118,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                         uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
                                     }
                                     else {
-                                        /*Uri folder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-                                                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) :
-                                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                                        Uri folder = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                                         ContentValues contentValues = new ContentValues();
                                         contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, subtitle_filename);
                                         // set mime type - it's unclear if .SRT files have an official mime type, but (a) we must set a mime type otherwise
@@ -2158,32 +2126,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                                         // "java.lang.IllegalArgumentException: MIME type text/plain cannot be inserted into content://media/external_primary/video/media; expected MIME type under video/*"
                                         // and we need the file to be saved in the same folder (in DCIM/ ) as the video
                                         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "video/x-srt");
-                                        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-                                            String relative_path = storageUtils.getSaveRelativeFolder();
-                                            if( MyDebug.LOG )
-                                                Log.d(TAG, "relative_path: " + relative_path);
-                                            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, relative_path);
-                                            contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
-                                        }
                                         uri = main_activity.getContentResolver().insert(folder, contentValues);
-                                        if( uri == null ) {
-                                            throw new IOException();
-                                        }*/
-                                        ContentValues values = new ContentValues();
-                                        values.put(MediaStore.Video.Media.DISPLAY_NAME, subtitle_filename);
-                                        values.put(MediaStore.Images.Media.MIME_TYPE, "text/srt");
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                            values.put(
-                                                    MediaStore.MediaColumns.RELATIVE_PATH,
-                                                    storageUtils.getSaveRelativeFolder()
-                                            );
-
-                                            values.put(MediaStore.Video.Media.IS_PENDING, 1);
-                                        }
-
-                                        uri = getContext().getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
-                                        if( MyDebug.LOG )
-                                            Log.d(TAG, "uri: " + uri);
                                         if( uri == null ) {
                                             throw new IOException();
                                         }
@@ -2236,19 +2179,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                         if( pfd_saf != null ) {
                             try {
                                 pfd_saf.close();
-                            }
-                            catch(IOException e) {
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             pfd_saf = null;
-                        }
+                        }/*
                         if( video_method == VideoMethod.MEDIASTORE ) {
-                            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-                                main_activity.getContentResolver().update(uri, contentValues, null, null);
-                            }
-                        }
+                        }*/
                     }
                     return super.cancel();
                 }
@@ -2407,15 +2344,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
      *  file.
      */
     private void completeVideo(final VideoMethod video_method, final Uri uri) {
-        if( MyDebug.LOG )
+        if (MyDebug.LOG)
             Log.d(TAG, "completeVideo");
-        if( video_method == VideoMethod.MEDIASTORE ) {
-            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-                main_activity.getContentResolver().update(uri, contentValues, null, null);
-            }
-        }
+        /*if( video_method == VideoMethod.MEDIASTORE ) {
+        }*/
     }
 
     private boolean broadcastVideo(final VideoMethod video_method, final Uri uri, final String filename) {

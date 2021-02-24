@@ -16,9 +16,7 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,7 +76,7 @@ public class VideoFrameInfo implements Closeable {
         durationsNs = new ArrayList<>();
 
 
-        OutputStream frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
+        File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
                 StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
         );
         mFrameBufferedWriter = new BufferedWriter(
@@ -130,7 +128,7 @@ public class VideoFrameInfo implements Closeable {
                                 if (MyDebug.LOG) {
                                     Log.d(TAG, "Should save frame, timestamp: " + timestamp);
                                 }
-                                OutputStream frameFile = mStorageUtils.createOutputCaptureInfo(
+                                File frameFile = mStorageUtils.createOutputCaptureInfo(
                                         StorageUtils.MEDIA_TYPE_VIDEO_FRAME, "jpg", String.valueOf(timestamp), mVideoDate
                                 );
                                 writeFrameJpeg(bitmap, frameFile, rotation);
@@ -164,7 +162,8 @@ public class VideoFrameInfo implements Closeable {
         }
     }
 
-    private void writeFrameJpeg(Bitmap bitmap, OutputStream fos, int rotation) throws IOException  {
+    private void writeFrameJpeg(Bitmap bitmap, File frameFile, int rotation) throws IOException {
+        FileOutputStream fos = new FileOutputStream(frameFile);
         // Apply rotation
         Matrix matrix = new Matrix();
         matrix.postRotate(rotation);

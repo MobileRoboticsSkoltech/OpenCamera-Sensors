@@ -31,8 +31,6 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import net.sourceforge.opencamera.preview.ApplicationInterface;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -61,7 +59,7 @@ public class StorageUtils {
     private final MyApplicationInterface applicationInterface;
     private Uri last_media_scanned;
 
-    private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DOCUMENTS;
+    private final static String RELATIVE_FOLDER_BASE = Environment.DIRECTORY_DCIM;
 
     // for testing:
     public volatile boolean failed_to_scan;
@@ -276,10 +274,6 @@ public class StorageUtils {
         }
     }
 
-    public ApplicationInterface.VideoMethod createOutputVideoMethod() {
-        return applicationInterface.createOutputVideoMethod();
-    }
-
     /** Wrapper for broadcastFile, when we only have a Uri (e.g., for SAF)
      */
     public void broadcastUri(final Uri uri, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean image_capture_intent) {
@@ -326,7 +320,7 @@ public class StorageUtils {
     // only valid if !isUsingSAF()
     String getSaveLocation() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera_Sensors");
+        return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
     }
 
     // only valid if isUsingSAF()
@@ -894,7 +888,7 @@ public class StorageUtils {
             if( this.mediastore )
                 return this.uri;
             else {
-                try {
+                /*try {
                     // should only have allowed mediastore==null when using scoped storage
                     if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
                         return MediaStore.getMediaUri(context, this.uri);
@@ -902,7 +896,7 @@ public class StorageUtils {
                 }
                 catch(Exception e) {
                     e.printStackTrace();
-                }
+                }*/
                 return null;
             }
         }
