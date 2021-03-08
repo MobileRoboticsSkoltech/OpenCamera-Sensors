@@ -86,11 +86,7 @@ public class RemoteRpcServer extends Thread {
             if (MyDebug.LOG) {
                 Log.d(TAG, "IMU request file sent");
             }
-            return;
-        }
-
-        // Video remote control API
-        if (msg.equals(mConfig.getProperty("VIDEO_START_REQUEST"))) {
+        } else if (msg.equals(mConfig.getProperty("VIDEO_START_REQUEST"))) {
             outputStream.println(
                     mRequestHandler.handleVideoStartRequest()
             );
@@ -100,6 +96,10 @@ public class RemoteRpcServer extends Thread {
             );
         } else if (msg.equals(mConfig.getProperty("GET_VIDEO_REQUEST"))) {
             mRequestHandler.handleVideoGetRequest(outputStream);
+        } else {
+            outputStream.println(
+                mRequestHandler.handleInvalidRequest()
+            );
         }
     }
 

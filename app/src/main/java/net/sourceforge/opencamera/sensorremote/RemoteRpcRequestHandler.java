@@ -61,6 +61,10 @@ public class RemoteRpcRequestHandler {
         return res;
     }
 
+    RemoteRpcResponse handleInvalidRequest() {
+        return mResponseBuilder.error("Invalid request", mContext);
+    }
+
     RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro) {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
