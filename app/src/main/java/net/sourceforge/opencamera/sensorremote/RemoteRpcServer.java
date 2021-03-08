@@ -19,7 +19,6 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -32,7 +31,6 @@ public class RemoteRpcServer extends Thread {
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
     private static final Pattern IMU_REQUEST_PATTERN = Pattern.compile(IMU_REQUEST_REGEX);
 
-    private final ServerSocket mRpcSocket;
     private final Properties mConfig;
     private final RemoteRpcRequestHandler mRequestHandler;
     private volatile boolean mIsExecuting;
@@ -42,9 +40,6 @@ public class RemoteRpcServer extends Thread {
         mContext = context;
         mConfig = RemoteRpcConfig.getProperties(context);
         mRequestHandler = new RemoteRpcRequestHandler(context);
-        mRpcSocket = new ServerSocket(Integer.parseInt(mConfig.getProperty("RPC_PORT")));
-        mRpcSocket.setReuseAddress(true);
-        mRpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
 
         if (MyDebug.LOG) {
             Log.d(TAG, "Hostname " + getIPAddress());
@@ -122,40 +117,46 @@ public class RemoteRpcServer extends Thread {
         if (MyDebug.LOG) {
             Log.d(TAG, "waiting to accept connection from client...");
         }
+            try (
+                    ServerSocket rpcSocket = new ServerSocket(Integer.parseInt(mConfig.getProperty("RPC_PORT")))
+            ) {
+                rpcSocket.setReuseAddress(true);
+                rpcSocket.setSoTimeout(SOCKET_WAIT_TIME_MS);
+                while (mIsExecuting) {
+                    try (
+                            Socket clientSocket = rpcSocket.accept()
+                    ) {
+                        clientSocket.setKeepAlive(true);
+                        if (MyDebug.LOG) {
+                            Log.d(TAG, "accepted connection from client");
+                        }
+                        try (
+                                InputStream inputStream = clientSocket.getInputStream();
+                                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                                PrintStream outputStream = new PrintStream(clientSocket.getOutputStream());
+                                BufferedOutputStream outputByte = new BufferedOutputStream(clientSocket.getOutputStream())
+                        ) {
 
-        try (
-                Socket clientSocket = mRpcSocket.accept()
-        ) {
-            while (mIsExecuting) {
-                clientSocket.setKeepAlive(true);
-                if (MyDebug.LOG) {
-                    Log.d(TAG, "accepted connection from client");
-                }
-                try (
-                        InputStream inputStream = clientSocket.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                        PrintStream outputStream = new PrintStream(clientSocket.getOutputStream());
-                        BufferedOutputStream outputByte = new BufferedOutputStream(clientSocket.getOutputStream())
-                ) {
+                            String inputLine;
+                            while (mIsExecuting && !clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
+                                // Received new request from the client
+                                handleRequest(inputLine, outputStream, outputByte);
+                                outputStream.flush();
+                            }
+                        }
+                        if (MyDebug.LOG) {
+                            Log.d(TAG, "closing connection to client");
+                        }
 
-                    String inputLine;
-                    while (mIsExecuting && !clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
-                        // Received new request from the client
-                        handleRequest(inputLine, outputStream, outputByte);
-                        outputStream.flush();
+                    } catch (IOException e) {
+                   /* if (MyDebug.LOG) {
+                        Log.d(TAG, "socket timed out, waiting for new connection to client");
+                    }*/
                     }
                 }
-                if (MyDebug.LOG) {
-                    Log.d(TAG, "closing connection to client");
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (SocketTimeoutException | SocketException e) {
-               /* if (MyDebug.LOG) {
-                    Log.d(TAG, "socket timed out, waiting for new connection to client");
-                }*/
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
