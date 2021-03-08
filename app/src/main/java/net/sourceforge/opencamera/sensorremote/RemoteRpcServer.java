@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.sensorremote;
 
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -24,7 +23,6 @@ import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,11 +30,12 @@ public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
+    private static final Pattern IMU_REQUEST_PATTERN = Pattern.compile(IMU_REQUEST_REGEX);
 
     private final ServerSocket mRpcSocket;
     private final Properties mConfig;
     private final RemoteRpcRequestHandler mRequestHandler;
-    private final AtomicBoolean mIsExecuting = new AtomicBoolean();
+    private volatile boolean mIsExecuting;
     private final MainActivity mContext;
 
     public RemoteRpcServer(MainActivity context) throws IOException {
@@ -54,17 +53,19 @@ public class RemoteRpcServer extends Thread {
     }
 
     public boolean isExecuting() {
-        return mIsExecuting.get();
+        return mIsExecuting;
     }
 
+    /**
+     * Safe to call even when not executing
+     */
     public void stopExecuting() {
-        mIsExecuting.set(false);
+        mIsExecuting = false;
     }
 
     private void handleRequest(String msg, PrintStream outputStream, BufferedOutputStream outputByte) {
         // IMU remote control API
-        Pattern r = Pattern.compile(IMU_REQUEST_REGEX);
-        Matcher imuRequestMatcher = r.matcher(msg);
+        Matcher imuRequestMatcher = IMU_REQUEST_PATTERN.matcher(msg);
         if (imuRequestMatcher.find()) {
             long duration = Long.parseLong(imuRequestMatcher.group(2));
             boolean wantAccel = Integer.parseInt(imuRequestMatcher.group(4)) == 1;
@@ -117,45 +118,41 @@ public class RemoteRpcServer extends Thread {
                 }
         );
 
-        mIsExecuting.set(true);
+        mIsExecuting = true;
         if (MyDebug.LOG) {
             Log.d(TAG, "waiting to accept connection from client...");
         }
-        while (mIsExecuting.get()) {
-            try {
-                Socket clientSocket = mRpcSocket.accept();
+
+        try (
+                Socket clientSocket = mRpcSocket.accept()
+        ) {
+            while (mIsExecuting) {
                 clientSocket.setKeepAlive(true);
                 if (MyDebug.LOG) {
                     Log.d(TAG, "accepted connection from client");
                 }
-                InputStream inputStream = clientSocket.getInputStream();
-                PrintStream outputStream = new PrintStream(clientSocket.getOutputStream());
-                BufferedOutputStream outputByte = new BufferedOutputStream(clientSocket.getOutputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                try (
+                        InputStream inputStream = clientSocket.getInputStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                        PrintStream outputStream = new PrintStream(clientSocket.getOutputStream());
+                        BufferedOutputStream outputByte = new BufferedOutputStream(clientSocket.getOutputStream())
+                ) {
 
-                String inputLine;
-                while (!clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
-                    // Received new request from the client
-                    handleRequest(inputLine, outputStream, outputByte);
-                    outputStream.flush();
+                    String inputLine;
+                    while (mIsExecuting && !clientSocket.isClosed() && (inputLine = reader.readLine()) != null) {
+                        // Received new request from the client
+                        handleRequest(inputLine, outputStream, outputByte);
+                        outputStream.flush();
+                    }
                 }
                 if (MyDebug.LOG) {
                     Log.d(TAG, "closing connection to client");
                 }
-                outputByte.close();
-                outputStream.close();
-            } catch (SocketTimeoutException e) {
+            }
+        } catch (SocketTimeoutException | SocketException e) {
                /* if (MyDebug.LOG) {
                     Log.d(TAG, "socket timed out, waiting for new connection to client");
                 }*/
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Stopped accepting requests, close the server socket
-        try {
-            mRpcSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

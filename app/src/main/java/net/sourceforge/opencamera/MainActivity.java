@@ -45,10 +45,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.renderscript.RenderScript;
 import android.speech.tts.TextToSpeech;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.exifinterface.media.ExifInterface;
-
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -74,6 +70,7 @@ import android.widget.ZoomControls;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
@@ -242,12 +239,10 @@ public class MainActivity extends Activity {
             Log.d(TAG, "activity_count: " + activity_count);
         super.onCreate(savedInstanceState);
 
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
-            // don't show orientation animations
-            WindowManager.LayoutParams layout = getWindow().getAttributes();
-            layout.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
-            getWindow().setAttributes(layout);
-        }
+        // don't show orientation animations
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+        getWindow().setAttributes(layout);
 
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // initialise any unset preferences to their default values
@@ -1418,6 +1413,7 @@ public class MainActivity extends Activity {
 
             } catch (IOException e) {
                 e.printStackTrace();
+                mRpcServer = null;
             }
 
         }
@@ -1514,7 +1510,7 @@ public class MainActivity extends Activity {
         this.app_is_paused = true;
 
         // Stop Remote controller for OpenCamera Sensors
-        if (mRpcServer != null && mRpcServer.isExecuting()) {
+        if (mRpcServer != null) {
             mRpcServer.stopExecuting();
             mRpcServer = null;
         }

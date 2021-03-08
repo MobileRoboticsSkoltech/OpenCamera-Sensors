@@ -36,10 +36,12 @@ public class RemoteRpcRequestHandler {
     public static final long PHASE_POLL_TIMEOUT_MS = 10_000;
     private final RawSensorInfo mRawSensorInfo;
     private final MainActivity mContext;
+    private final RemoteRpcResponse.Builder mResponseBuilder;
 
     RemoteRpcRequestHandler(MainActivity context) {
         mContext = context;
         mRawSensorInfo = context.getRawSensorInfoManager();
+        mResponseBuilder = new RemoteRpcResponse.Builder(context);
     }
 
     private String getSensorData(File imuFile) throws IOException {
@@ -84,7 +86,7 @@ public class RemoteRpcRequestHandler {
             if (wantAccel && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER) ||
                     wantGyro && !mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE)
             ) {
-                return RemoteRpcResponse.error("Requested sensor wasn't supported", mContext);
+                return mResponseBuilder.error("Requested sensor wasn't supported", mContext);
             }
 
             try {
@@ -115,16 +117,16 @@ public class RemoteRpcRequestHandler {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return RemoteRpcResponse.error("Failed to open IMU file", mContext);
+                    return mResponseBuilder.error("Failed to open IMU file", mContext);
                 }
 
-                return RemoteRpcResponse.success(msg.toString(), mContext);
+                return mResponseBuilder.success(msg.toString(), mContext);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
-                return RemoteRpcResponse.error("Error in IMU recording", mContext);
+                return mResponseBuilder.error("Error in IMU recording", mContext);
             }
         } else {
-            return RemoteRpcResponse.error("Error in IMU recording", mContext);
+            return mResponseBuilder.error("Error in IMU recording", mContext);
         }
     }
 
@@ -154,19 +156,19 @@ public class RemoteRpcRequestHandler {
                 phaseInfo = videoPhaseInfoReporter
                         .poll(PHASE_POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
                 if (phaseInfo != null) {
-                    return RemoteRpcResponse.success(phaseInfo.toString(), mContext);
+                    return mResponseBuilder.success(phaseInfo.toString(), mContext);
                 } else {
-                    return RemoteRpcResponse.error("Failed to retrieve phase info, reached poll limit", mContext);
+                    return mResponseBuilder.error("Failed to retrieve phase info, reached poll limit", mContext);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                return RemoteRpcResponse.error("Failed to retrieve phase info", mContext);
+                return mResponseBuilder.error("Failed to retrieve phase info", mContext);
             }
         } else {
             if (MyDebug.LOG) {
                 Log.d(TAG, "Video frame info wasn't initialized, failed to retrieve phase info");
             }
-            return RemoteRpcResponse.error("Video frame info wasn't initialized, failed to retrieve phase info", mContext);
+            return mResponseBuilder.error("Video frame info wasn't initialized, failed to retrieve phase info", mContext);
         }
     }
 
@@ -179,7 +181,7 @@ public class RemoteRpcRequestHandler {
                     }
                 }
         );
-        return RemoteRpcResponse.success("", mContext);
+        return mResponseBuilder.success("", mContext);
     }
 
     void handleVideoGetRequest(PrintStream outputStream) {
@@ -196,10 +198,10 @@ public class RemoteRpcRequestHandler {
                 ExtendedAppInterface appInterface = mContext.getApplicationInterface();
                 File videoFile = appInterface.getLastVideoFile();
                 boolean canRead = videoFile.canRead();
-                Log.d(TAG, "yay " + canRead);
-                if (videoFile != null && videoFile.canRead()) {
+                Log.d(TAG, "Can read video file: " + canRead);
+                if (videoFile.canRead()) {
                     // Transfer file size in bytes and filename
-                    outputStream.println(RemoteRpcResponse.success(
+                    outputStream.println(mResponseBuilder.success(
                             videoFile.length() + "\n" + videoFile.getName() + "\n",
                             mContext
                     ));
@@ -215,15 +217,15 @@ public class RemoteRpcRequestHandler {
                     outputStream.flush();
                     inputStream.close();
                 } else {
-                    outputStream.println(RemoteRpcResponse.error("Couldn't get last video file data", mContext));
+                    outputStream.println(mResponseBuilder.error("Couldn't get last video file data", mContext));
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
-                outputStream.println(RemoteRpcResponse.error("Error getting video file", mContext));
+                outputStream.println(mResponseBuilder.error("Error getting video file", mContext));
             }
         } else {
             outputStream.println(
-                    RemoteRpcResponse.error("Null reference", mContext)
+                    mResponseBuilder.error("Null reference", mContext)
             );
         }
     }
