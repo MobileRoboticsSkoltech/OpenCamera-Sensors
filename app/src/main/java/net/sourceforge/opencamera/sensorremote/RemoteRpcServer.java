@@ -25,6 +25,17 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * OpenCamera Sensors server v. 0.0
+ *
+ * Accepted message types:
+ *  - get IMU (accelerometer/gyroscope)
+ *  - start/stop video
+ * Response structure:
+ *  - 1st line: SUCCESS/ERROR message
+ *  - 2nd line: version string
+ *  - the rest: request response
+ */
 public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;

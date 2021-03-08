@@ -5,6 +5,9 @@ from progress.bar import Bar
 
 BUFFER_SIZE = 4096
 PROPS_PATH = '../app/src/main/assets/server_config.properties'
+SUPPORTED_SERVER_VERSIONS = [
+    'v.0.0'
+]
 
 
 class RemoteControl:
@@ -77,6 +80,8 @@ class RemoteControl:
 
         line = socket_file.readline()
         avg_duration_ns = float(line)
+
+        socket_file.readline()
         return phase_ns, avg_duration_ns
 
     def stop_video(self):
@@ -108,7 +113,7 @@ class RemoteControl:
         status, socket_file = self._send_and_get_response_status_bytes(
             (self.props['GET_VIDEO_REQUEST'] + "\n").encode()
         )
-        print(status)
+        # print(status)
         # get video data length
         line = socket_file.readline()
         data_length = int(line.decode())
@@ -119,7 +124,7 @@ class RemoteControl:
         print(filename)
         # end marker
         marker = socket_file.readline()
-        print(marker)
+        # print(marker)
         # close socket file, start receiving video bytes until length
         socket_file.close()
         if want_progress_bar:
@@ -137,6 +142,12 @@ class RemoteControl:
         socket_file.flush()
         # receive response
         status = socket_file.readline()
+        version = socket_file.readline().strip('\n')
+        if (version not in SUPPORTED_SERVER_VERSIONS):
+            socket_file.close()
+            self.socket.close()
+            print('Status: %s' % status)
+            raise RuntimeError('Unsupported app server version: %s' % version)
         if status.strip('\n') == self.props['ERROR']:
             msg = socket_file.readline()
             socket_file.close()
@@ -168,6 +179,11 @@ class RemoteControl:
         socket_file.flush()
         # receive response
         status = socket_file.readline()
+        version = socket_file.readline().decode().strip('\n')
+        if (version not in SUPPORTED_SERVER_VERSIONS):
+            socket_file.close()
+            self.socket.close()
+            raise RuntimeError('Unsupported app server version: %s' % version)
         if status.decode().strip('\n') == self.props['ERROR']:
             msg = socket_file.readline()
             socket_file.close()

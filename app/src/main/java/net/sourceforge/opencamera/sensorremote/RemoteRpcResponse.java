@@ -17,7 +17,6 @@ public class RemoteRpcResponse {
         mMessage = "";
     }
 
-
     public String getMessage() {
         return mMessage;
     }
@@ -53,17 +52,20 @@ public class RemoteRpcResponse {
         private final String mEndDelimiter;
         private final String mSuccess;
         private final String mError;
+        private final String mServerVersion;
 
         public Builder(Context context) {
             Properties config = RemoteRpcConfig.getProperties(context);
             mEndDelimiter = config.getProperty("CHUNK_END_DELIMITER");
             mSuccess = config.getProperty("SUCCESS");
             mError = config.getProperty("ERROR");
+            mServerVersion = config.getProperty("SERVER_VERSION");
         }
 
         public RemoteRpcResponse error(String message, Context context) {
             RemoteRpcResponse result = new RemoteRpcResponse();
-            result.mMessage = mError +
+            result.mMessage = mError + "\n" +
+                    mServerVersion +
                     "\n" +
                     message +
                     "\n" +
@@ -73,7 +75,8 @@ public class RemoteRpcResponse {
 
         public RemoteRpcResponse success(String message, Context context) {
             RemoteRpcResponse result = new RemoteRpcResponse();
-            result.mMessage = mSuccess +
+            result.mMessage = mSuccess + "\n" +
+                    mServerVersion +
                     "\n" +
                     message +
                     mEndDelimiter;
