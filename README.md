@@ -1,10 +1,10 @@
-![OpenCamera Sensors logo](https://imgur.com/NnS1NW5.png)
+![OpenCamera Sensors logo](https://imgur.com/7qjCtgp.png)
 
 [![Build Status](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors.svg?branch=master)](https://travis-ci.org/MobileRoboticsSkoltech/OpenCamera-Sensors)
 
 ## Install
 
-[Get latest dev build apk](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk) | [Dev branch README](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/blob/control_server/README.md)
+[Get latest apk](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk)
 
 ## Description
 
