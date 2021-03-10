@@ -73,6 +73,14 @@
             android:key="preference_imu_recording"
             android:title="Enable video with IMU recording"
             android:summary="Enable synchronized IMU and video recording with timestamps"
+            android:defaultValue="true"
+            />
+
+        <SwitchPreference
+            android:key="preference_remote_rec_control"
+            android:title="Enable remote recording control"
+            android:summary="Accept remote control messages over the network. Restart required"
+            android:defaultValue="true"
             />
 
         <CheckBoxPreference
@@ -91,6 +99,7 @@
             android:key="preference_save_video_frames"
             android:title="Save video frames during video + IMU recording"
             android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+            android:defaultValue="true"
             />
 
         <Preference
@@ -117,7 +126,6 @@
             android:entryValues="@array/preference_sample_rate_values"
             />
     </PreferenceCategory>
-
     <PreferenceCategory
         android:key="preference_category_camera_controls"
         android:title="@string/preference_category_camera_controls">

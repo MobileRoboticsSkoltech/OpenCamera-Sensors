@@ -60,6 +60,7 @@ script:
        --app $TRAVIS_BUILD_DIR/app/build/outputs/apk/debug/app-debug.apk
        --test $TRAVIS_BUILD_DIR/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
        --device model=blueline,version=28,locale=en,orientation=portrait
+       --device model=x1q,version=29,locale=en,orientation=portrait
        --test-targets "class net.sourceforge.opencamera.test.SubsetTests";
     fi
 
@@ -68,9 +69,9 @@ deploy:
   provider: releases
   api-key: $GITHUB_API_KEY
   file: $TRAVIS_BUILD_DIR/app/build/outputs/apk/release/app-release.apk
-  name: dev-build-$TRAVIS_TAG
+  name: $TRAVIS_TAG
   body: Automatic build of $TRAVIS_BRANCH ($TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
-  prerelease: true
+  prerelease: false
   overwrite: true
   target_commitish: $TRAVIS_COMMIT
   on:
