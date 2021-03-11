@@ -65,7 +65,7 @@ public class RawSensorInfo implements SensorEventListener {
         return mUsedSensorMap.get(sensorType) != null;
     }
 
-    public RawSensorInfo(Context context) {
+    public RawSensorInfo(MainActivity context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mUsedSensorMap = new HashMap<>();
         mSensorWriterMap = new HashMap<>();
@@ -76,6 +76,7 @@ public class RawSensorInfo implements SensorEventListener {
         }
 /*      mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mContext = context;
         mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         if (MyDebug.LOG) {

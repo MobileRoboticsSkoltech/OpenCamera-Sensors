@@ -86,6 +86,14 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     private boolean panorama_pic_accepted; // whether the last panorama picture was accepted, or else needs to be retaken
     private boolean panorama_dir_left_to_right = true; // direction of panorama (set after we've captured two images)
 
+    public File getLastVideoFile() {
+        if (storageUtils.isUsingSAF()) {
+            return storageUtils.getFileFromDocumentUriSAF(last_video_file_uri, false);
+        } else {
+            return last_video_file;
+        }
+    }
+
     private File last_video_file = null;
     private Uri last_video_file_uri = null;
 
@@ -332,9 +340,10 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public Uri createOutputVideoMediaStore(String extension) throws IOException {
+        mLastVideoDate = new Date();
         Uri folder = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         ContentValues contentValues = new ContentValues();
-        String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, new Date());
+        String filename = storageUtils.createMediaFilename(StorageUtils.MEDIA_TYPE_VIDEO, "", 0, "." + extension, mLastVideoDate);
         if( MyDebug.LOG )
             Log.d(TAG, "filename: " + filename);
         contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);

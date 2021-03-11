@@ -1,34 +1,29 @@
 package net.sourceforge.opencamera;
 
-import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
-import net.sourceforge.opencamera.preview.Preview;
-import net.sourceforge.opencamera.preview.VideoProfile;
-import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
-import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
-import net.sourceforge.opencamera.ui.FolderChooserDialog;
-import net.sourceforge.opencamera.ui.MainUI;
-import net.sourceforge.opencamera.ui.ManualSeekbars;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.Manifest;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -48,29 +43,8 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.AlertDialog;
-import android.app.KeyguardManager;
-import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.renderscript.RenderScript;
 import android.speech.tts.TextToSpeech;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.exifinterface.media.ExifInterface;
-
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -93,6 +67,33 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
+
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
+import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
+import net.sourceforge.opencamera.sensorremote.RemoteRpcServer;
+import net.sourceforge.opencamera.ui.FolderChooserDialog;
+import net.sourceforge.opencamera.ui.MainUI;
+import net.sourceforge.opencamera.ui.ManualSeekbars;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /** The main Activity for Open Camera.
  */
@@ -201,6 +202,8 @@ public class MainActivity extends Activity {
     private static final float WATER_DENSITY_SALTWATER = 1.03f;
     private float mWaterDensity = 1.0f;
 
+    private RemoteRpcServer mRpcServer;
+
     /**
      * Outer onCreate() for OpenCamera Sensors additional
      * initial operations
@@ -236,12 +239,10 @@ public class MainActivity extends Activity {
             Log.d(TAG, "activity_count: " + activity_count);
         super.onCreate(savedInstanceState);
 
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
-            // don't show orientation animations
-            WindowManager.LayoutParams layout = getWindow().getAttributes();
-            layout.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
-            getWindow().setAttributes(layout);
-        }
+        // don't show orientation animations
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+        getWindow().setAttributes(layout);
 
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // initialise any unset preferences to their default values
@@ -713,9 +714,10 @@ public class MainActivity extends Activity {
     /** Whether to use codepaths that are compatible with scoped storage.
      */
     public static boolean useScopedStorage() {
-        //return false;
+        // Disable this for our app until this part is integrated properly
+        return false;
         //return true;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+        //return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
     public int getNavigationGap() {
@@ -1402,6 +1404,19 @@ public class MainActivity extends Activity {
         super.onResume();
         this.app_is_paused = false; // must be set before initLocation() at least
 
+        // Create Remote controller for OpenCamera Sensors
+        if (applicationInterface.getRemoteRecControlPref()) {
+            try {
+                mRpcServer = new RemoteRpcServer(this);
+                mRpcServer.start();
+                Log.d(TAG, "App rpc listener thread started");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                mRpcServer = null;
+            }
+
+        }
         cancelImageSavingNotification();
 
         // Set black window background; also needed if we hide the virtual buttons in immersive mode
@@ -1493,6 +1508,12 @@ public class MainActivity extends Activity {
         }
         super.onPause(); // docs say to call this before freeing other things
         this.app_is_paused = true;
+
+        // Stop Remote controller for OpenCamera Sensors
+        if (mRpcServer != null) {
+            mRpcServer.stopExecuting();
+            mRpcServer = null;
+        }
 
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);

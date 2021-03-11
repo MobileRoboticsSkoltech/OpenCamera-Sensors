@@ -2,19 +2,19 @@ package net.sourceforge.opencamera;
 
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
-import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
@@ -31,7 +31,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
-                getLastVideoDate(), mMainActivity, getSaveFramesPref()
+                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
         );
     }
 
@@ -52,8 +52,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         super.onDestroy();
     }
 
+    public BlockingQueue<VideoPhaseInfo> getVideoPhaseInfoReporter() {
+        return mMainActivity.getPreview().getVideoPhaseInfoReporter();
+    }
+
     public boolean getIMURecordingPref() {
         return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
+    }
+
+    public boolean getRemoteRecControlPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.RemoteRecControlPreferenceKey, false);
     }
 
     private boolean getAccelPref() {
@@ -134,8 +142,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             }
         } else if (getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
+            mMainActivity.getPreview().stopVideo(false);
         } else if (getIMURecordingPref() && !(getGyroPref() ||  getMagneticPref() || getAccelPref())) {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
+            mMainActivity.getPreview().stopVideo(false);
         }
         super.startingVideo();
     }

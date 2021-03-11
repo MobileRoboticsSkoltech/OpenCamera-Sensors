@@ -1,44 +1,5 @@
 package net.sourceforge.opencamera.preview;
 
-import net.sourceforge.opencamera.ExtendedAppInterface;
-import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
-import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.cameracontroller.RawImage;
-//import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.ScriptC_histogram_compute;
-import net.sourceforge.opencamera.TakePhoto;
-import net.sourceforge.opencamera.ToastBoxer;
-import net.sourceforge.opencamera.cameracontroller.CameraController;
-import net.sourceforge.opencamera.cameracontroller.CameraController1;
-import net.sourceforge.opencamera.cameracontroller.CameraController2;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerManager1;
-import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
-import net.sourceforge.opencamera.preview.ApplicationInterface.NoFreeStorageException;
-import net.sourceforge.opencamera.preview.camerasurface.CameraSurface;
-import net.sourceforge.opencamera.preview.camerasurface.MySurfaceView;
-import net.sourceforge.opencamera.preview.camerasurface.MyTextureView;
-
-import java.io.File;
-//import java.io.FileOutputStream;
-import java.io.IOException;
-//import java.io.OutputStream;
-import java.lang.ref.WeakReference;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -69,7 +30,6 @@ import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-//import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.renderscript.Allocation;
@@ -77,8 +37,6 @@ import android.renderscript.Element;
 import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
 import android.renderscript.Type;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
@@ -90,21 +48,68 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
-import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-/** This class was originally named due to encapsulating the camera preview,
- *  but in practice it's grown to more than this, and includes most of the
- *  operation of the camera. It exists at a higher level than CameraController
- *  (i.e., this isn't merely a low level wrapper to the camera API, but
- *  supports much of the Open Camera logic and functionality). Communication to
- *  the rest of the application is available through ApplicationInterface.
- *  We could probably do with decoupling this class into separate components!
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+
+import net.sourceforge.opencamera.ExtendedAppInterface;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.ScriptC_histogram_compute;
+import net.sourceforge.opencamera.TakePhoto;
+import net.sourceforge.opencamera.ToastBoxer;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController1;
+import net.sourceforge.opencamera.cameracontroller.CameraController2;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerException;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager1;
+import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
+import net.sourceforge.opencamera.cameracontroller.RawImage;
+import net.sourceforge.opencamera.preview.ApplicationInterface.NoFreeStorageException;
+import net.sourceforge.opencamera.preview.camerasurface.CameraSurface;
+import net.sourceforge.opencamera.preview.camerasurface.MySurfaceView;
+import net.sourceforge.opencamera.preview.camerasurface.MyTextureView;
+import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
+import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+//import net.sourceforge.opencamera.MainActivity;
+//import java.io.FileOutputStream;
+//import java.io.OutputStream;
+//import android.os.Environment;
+
+/**
+ * This class was originally named due to encapsulating the camera preview,
+ * but in practice it's grown to more than this, and includes most of the
+ * operation of the camera. It exists at a higher level than CameraController
+ * (i.e., this isn't merely a low level wrapper to the camera API, but
+ * supports much of the Open Camera logic and functionality). Communication to
+ * the rest of the application is available through ApplicationInterface.
+ * We could probably do with decoupling this class into separate components!
  */
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
     private static final String TAG = "Preview";
@@ -123,6 +128,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
      * Should be instantiated per video.
      */
     private VideoFrameInfo mVideoFrameInfoWriter;
+    private final BlockingQueue<VideoPhaseInfo> mVideoPhaseInfoReporter;
+    private final BlockingQueue<String> mVideoAvailableReporter;
 
     private RenderScript rs; // lazily created, so we don't take up resources if application isn't using renderscript
     private ScriptC_histogram_compute histogramScript; // lazily create for performance
@@ -408,6 +415,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
+    public BlockingQueue<String> getVideoAvailableReporter() {
+        return mVideoAvailableReporter;
+    }
+
     public Preview(ExtendedAppInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "new Preview");
@@ -435,13 +446,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             using_texture_view = true;
         }
 
-        if( using_texture_view ) {
+        if(using_texture_view) {
             this.cameraSurface = new MyTextureView(getContext(), this);
             // a TextureView can't be used both as a camera preview, and used for drawing on, so we use a separate CanvasView
             this.canvasView = new CanvasView(getContext(), this);
             camera_controller_manager = new CameraControllerManager2(getContext());
-        }
-        else {
+        } else {
             this.cameraSurface = new MySurfaceView(getContext(), this);
             camera_controller_manager = new CameraControllerManager1();
         }
@@ -454,15 +464,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener());
         gestureDetector.setOnDoubleTapListener(new DoubleTapListener());
         scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-        accessibility_manager = (AccessibilityManager)activity.getSystemService(Activity.ACCESSIBILITY_SERVICE);
+        accessibility_manager = (AccessibilityManager) activity.getSystemService(Activity.ACCESSIBILITY_SERVICE);
 
         parent.addView(cameraSurface.getView());
-        if( canvasView != null ) {
+        if (canvasView != null) {
             parent.addView(canvasView);
         }
+
+        mVideoPhaseInfoReporter = new ArrayBlockingQueue<>(1);
+        mVideoAvailableReporter = new ArrayBlockingQueue<>(1);
     }
 
-	/*private void previewToCamera(float [] coords) {
+    public BlockingQueue<VideoPhaseInfo> getVideoPhaseInfoReporter() {
+        return mVideoPhaseInfoReporter;
+    }
+
+    /*private void previewToCamera(float [] coords) {
 		float alpha = coords[0] / (float)this.getWidth();
 		float beta = coords[1] / (float)this.getHeight();
 		coords[0] = 2000.0f * alpha - 1000.0f;
@@ -1039,6 +1056,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         videoFileInfo.close();
 
         applicationInterface.stoppedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+        if (videoFileInfo.video_filename != null) mVideoAvailableReporter.add(videoFileInfo.video_filename);
         if( nextVideoFileInfo != null ) {
             // if nextVideoFileInfo is not-null, it means we received MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING but not
             // MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED, so it is the application responsibility to create the zero-size
@@ -5369,23 +5387,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 Uri uri;
                 if( method == ApplicationInterface.VideoMethod.SAF ) {
                     uri = applicationInterface.createOutputVideoSAF(extension);
-                }
-                else if( method == ApplicationInterface.VideoMethod.MEDIASTORE ) {
+                } else if( method == ApplicationInterface.VideoMethod.MEDIASTORE ) {
                     uri = applicationInterface.createOutputVideoMediaStore(extension);
                 }
                 else {
                     uri = applicationInterface.createOutputVideoUri();
                 }
-                if( MyDebug.LOG )
+                if (MyDebug.LOG)
                     Log.d(TAG, "save to: " + uri);
                 video_pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "rw");
                 video_uri = uri;
             }
 
             video_file_info = new VideoFileInfo(method, video_uri, video_filename, video_pfd_saf);
-        }
-        catch(IOException e) {
-            if( MyDebug.LOG )
+        } catch (IOException e) {
+            if (MyDebug.LOG)
                 Log.e(TAG, "Couldn't create media video file; check storage permissions?");
             e.printStackTrace();
         }
@@ -5404,11 +5420,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return video_file_info;
     }
 
-    /** Start video recording.
+    public VideoFrameInfo getVideoFrameInfoWriter() {
+        return mVideoFrameInfoWriter;
+    }
+
+    /**
+     * Start video recording.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void startVideoRecording(final boolean max_filesize_restart) {
-        if( MyDebug.LOG )
+        if (MyDebug.LOG)
             Log.d(TAG, "startVideoRecording");
 
         focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
@@ -5612,13 +5633,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             }
                         }
                 );
-              
+
                 if( test_video_cameracontrollerexception ) {
                     if( MyDebug.LOG )
                         Log.d(TAG, "test_video_cameracontrollerexception is true");
                     throw new CameraControllerException();
                 }
-              
+
                 if( MyDebug.LOG )
                     Log.d(TAG, "about to start video recorder");
 
@@ -5746,6 +5767,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         video_start_time = System.currentTimeMillis();
         video_start_time_set = true;
         applicationInterface.startedVideo();
+        mVideoAvailableReporter.clear();
         // Don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file.
         // Don't do any further calls after applicationInterface.startedVideo() that might throw an error - instead video error
         // should be handled by including a call to stopVideo() (since the video_recorder has started).
