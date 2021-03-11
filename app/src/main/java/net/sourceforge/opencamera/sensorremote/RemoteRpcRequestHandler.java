@@ -20,6 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -65,7 +66,7 @@ public class RemoteRpcRequestHandler {
         return mResponseBuilder.error("Invalid request", mContext);
     }
 
-    RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro) {
+    RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro, boolean wantMagnetic) {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
             Callable<Void> recStartCallable = () -> {
@@ -73,11 +74,11 @@ public class RemoteRpcRequestHandler {
                 SharedPreferences.Editor prefEditor = sharedPreferences.edit();
                 prefEditor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
                 prefEditor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
+                prefEditor.putBoolean(PreferenceKeys.MagnetometerPrefKey, wantMagnetic);
                 prefEditor.apply();
 
-                mRawSensorInfo.enableSensors(0, 0);
                 Date currentDate = new Date();
-                mRawSensorInfo.startRecording(currentDate);
+                mContext.getApplicationInterface().startImu(wantAccel, wantGyro, wantMagnetic, currentDate);
                 return null;
             };
 
@@ -94,7 +95,6 @@ public class RemoteRpcRequestHandler {
             }
 
             try {
-
                 // Await recording start
                 FutureTask<Void> recStartTask = new FutureTask<>(recStartCallable);
                 mContext.runOnUiThread(recStartTask);
@@ -107,14 +107,21 @@ public class RemoteRpcRequestHandler {
                 recStopTask.get();
                 StringBuilder msg = new StringBuilder();
                 try {
-                    if (wantAccel && mRawSensorInfo.getLastAccelPath() != null) {
-                        File imuFile = new File(mRawSensorInfo.getLastAccelPath());
+                    Map<Integer, File> lastSensorFiles = mRawSensorInfo.getLastSensorFilesMap();
+                    if (wantAccel && lastSensorFiles.get(Sensor.TYPE_ACCELEROMETER) != null) {
+                        File imuFile = lastSensorFiles.get(Sensor.TYPE_ACCELEROMETER);
                         msg.append(getSensorData(imuFile));
                         msg.append(SENSOR_DATA_END_MARKER);
                         msg.append("\n");
                     }
-                    if (wantGyro && mRawSensorInfo.getLastGyroPath() != null) {
-                        File imuFile = new File(mRawSensorInfo.getLastGyroPath());
+                    if (wantGyro && lastSensorFiles.get(Sensor.TYPE_GYROSCOPE) != null) {
+                        File imuFile = lastSensorFiles.get(Sensor.TYPE_GYROSCOPE);
+                        msg.append(getSensorData(imuFile));
+                        msg.append(SENSOR_DATA_END_MARKER);
+                        msg.append("\n");
+                    }
+                    if (wantGyro && lastSensorFiles.get(Sensor.TYPE_MAGNETIC_FIELD) != null) {
+                        File imuFile = lastSensorFiles.get(Sensor.TYPE_MAGNETIC_FIELD);
                         msg.append(getSensorData(imuFile));
                         msg.append(SENSOR_DATA_END_MARKER);
                         msg.append("\n");

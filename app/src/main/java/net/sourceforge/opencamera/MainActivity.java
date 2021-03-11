@@ -69,6 +69,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
@@ -99,6 +100,8 @@ import java.util.Map;
  */
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
+    private static final int WRITE_EXTERNAL_STORAGE = 0;
+    private static final int REQUEST_PERMISSION = 0;
 
     private static int activity_count = 0;
 
@@ -211,6 +214,17 @@ public class MainActivity extends Activity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int permissionCheckStorage = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheckStorage != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions( MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION);
+
+            return;
+        }
         this.mRawSensorInfo = new RawSensorInfo(this);
         if (MyDebug.LOG) {
             Log.d(TAG, "Created RawSensorInfo object");

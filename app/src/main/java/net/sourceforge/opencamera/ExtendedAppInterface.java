@@ -12,6 +12,7 @@ import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -99,6 +100,34 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
 
+    public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
+        if (wantAccel) {
+            int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
+            }
+        }
+        if (wantGyro) {
+            int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
+            }
+        }
+        if (wantMagnetic) {
+            int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
+            }
+        }
+
+        //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
+        Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
+        wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+        mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
+    }
+
     @Override
     public void startingVideo() {
         if (MyDebug.LOG) {
@@ -107,31 +136,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref() || getMagneticPref())) {
             // Extracting sample rates from shared preferences
             try {
-                if (getAccelPref()) {
-                    int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
-                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
-                        mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
-                    }
-                }
-                if (getGyroPref()) {
-                    int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
-                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
-                        mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
-                    }
-                }
-                if (getMagneticPref()) {
-                    int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
-                    if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
-                        mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
-                    }
-                }
-
-                //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
-                Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
-                wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
-                wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
-                wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
-                mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, wantSensorRecordingMap);
+                startImu(getAccelPref(), getGyroPref(), getMagneticPref(), mLastVideoDate);
                 // TODO: add message to strings.xml
                 mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {
