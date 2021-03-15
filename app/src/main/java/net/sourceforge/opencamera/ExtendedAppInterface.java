@@ -136,9 +136,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref() || getMagneticPref())) {
             // Extracting sample rates from shared preferences
             try {
+                mMainActivity.getPreview().showToast("Starting video with IMU recording...", true);
                 startImu(getAccelPref(), getGyroPref(), getMagneticPref(), mLastVideoDate);
                 // TODO: add message to strings.xml
-                mMainActivity.getPreview().showToast(null, "Starting video with IMU recording");
             } catch (NumberFormatException e) {
                 if (MyDebug.LOG) {
                     Log.e(TAG, "Failed to retrieve the sample rate preference value");
@@ -165,7 +165,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mRawSensorInfo.disableSensors();
 
             // TODO: add message to strings.xml
-            mMainActivity.getPreview().showToast(null, "Finished video with IMU recording");
+            mMainActivity.getPreview().showToast("Stopping video with IMU recording...", true);
         }
 
         super.stoppingVideo();

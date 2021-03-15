@@ -962,9 +962,37 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         cameraSurface.setTransform(matrix);
     }
 
-    private void stopVideoPostPrepare() {
-        applicationInterface.stoppingVideo();
+    private void stopVideoPostPrepare(boolean from_restart) {
         Log.d(TAG, "Stopping video post prepare");
+
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "stopVideo()");
+
+        applicationInterface.cameraInOperation(false, true);
+        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+
+
+        if( video_recorder == null ) {
+            // no need to do anything if not recording
+            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
+            if( MyDebug.LOG )
+                Log.d(TAG, "video wasn't recording anyway");
+            return;
+        }
+        if( flashVideoTimerTask != null ) {
+            flashVideoTimerTask.cancel();
+            flashVideoTimerTask = null;
+        }
+        if( batteryCheckVideoTimerTask != null ) {
+            batteryCheckVideoTimerTask.cancel();
+            batteryCheckVideoTimerTask = null;
+        }
+        if( !from_restart ) {
+            remaining_restart_video = 0;
+        }
+
+
         if( video_recorder != null ) { // check again, just to be safe
             if( MyDebug.LOG )
                 Log.d(TAG, "stop video recording");
@@ -1004,40 +1032,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void stopVideo(boolean from_restart) {
+        applicationInterface.stoppingVideo();
+
         camera_controller.closeVideoRecordingSession();
-
-        if( MyDebug.LOG )
-            Log.d(TAG, "stopVideo()");
-
-        applicationInterface.cameraInOperation(false, true);
-        reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-
-
-        if( video_recorder == null ) {
-            // no need to do anything if not recording
-            // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
-            if( MyDebug.LOG )
-                Log.d(TAG, "video wasn't recording anyway");
-            return;
-        }
-        if( flashVideoTimerTask != null ) {
-            flashVideoTimerTask.cancel();
-            flashVideoTimerTask = null;
-        }
-        if( batteryCheckVideoTimerTask != null ) {
-            batteryCheckVideoTimerTask.cancel();
-            batteryCheckVideoTimerTask = null;
-        }
-        if( !from_restart ) {
-            remaining_restart_video = 0;
-        }
 
         /*
            If camera2api is not used, we should stop video immediately. Otherwise it is done in callback
            after captureSession is closed
          */
         if (!usingCamera2API()) {
-            stopVideoPostPrepare();
+            stopVideoPostPrepare(from_restart);
         }
     }
 
@@ -5625,7 +5629,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
                             @Override
                             public void onVideoCaptureSessionClosed() {
-                                stopVideoPostPrepare();
+                                stopVideoPostPrepare(false);
                                 if (mVideoFrameInfoWriter != null) {
                                     mVideoFrameInfoWriter.close();
                                     mVideoFrameInfoWriter = null;

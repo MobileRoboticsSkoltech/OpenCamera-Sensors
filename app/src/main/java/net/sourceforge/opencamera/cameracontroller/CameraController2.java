@@ -1,17 +1,5 @@
 package net.sourceforge.opencamera.cameracontroller;
 
-import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.preview.VideoProfile;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Queue;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -36,7 +24,6 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.AudioManager;
-import androidx.exifinterface.media.ExifInterface;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaActionSound;
@@ -44,8 +31,6 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -54,6 +39,22 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
+
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.preview.VideoProfile;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Queue;
 
 /** Provides support using Android 5's Camera 2 API
  *  android.hardware.camera2.*.
@@ -5106,8 +5107,15 @@ public class CameraController2 extends CameraController {
         // onClosed() callback to ensure that
         // mediaRecorder encodes all the frames
         // from the capture session
-        captureSession.close();
-        captureSession = null;
+        synchronized( background_camera_lock ) {
+            if (captureSession != null) {
+                Log.d(TAG, "Before captureSession.close()");
+                captureSession.close();
+                Log.d(TAG, "After captureSession.close()");
+
+                captureSession = null;
+            }
+        }
     }
 
     private List<Surface> getCaptureSessionOutputSurfaces(
@@ -7219,11 +7227,9 @@ public class CameraController2 extends CameraController {
         if (MyDebug.LOG) {
             Log.d(TAG, "Create video frame image reader for capture session");
         }
-        List<android.util.Size> yuvSizes = Arrays.asList(
-                characteristics.get(
-                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                        .getOutputSizes(ImageFormat.YUV_420_888)
-        );
+        android.util.Size[] yuvSizes = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                .getOutputSizes(ImageFormat.YUV_420_888);
         List<CameraController.Size> controllerSizes = new LinkedList<>();
         for (android.util.Size yuvSize : yuvSizes) {
             controllerSizes.add(new CameraController.Size(yuvSize.getWidth(), yuvSize.getHeight()));
