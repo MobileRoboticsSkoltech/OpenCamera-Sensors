@@ -120,7 +120,7 @@ public class RemoteRpcRequestHandler {
                         msg.append(SENSOR_DATA_END_MARKER);
                         msg.append("\n");
                     }
-                    if (wantGyro && lastSensorFiles.get(Sensor.TYPE_MAGNETIC_FIELD) != null) {
+                    if (wantMagnetic && lastSensorFiles.get(Sensor.TYPE_MAGNETIC_FIELD) != null) {
                         File imuFile = lastSensorFiles.get(Sensor.TYPE_MAGNETIC_FIELD);
                         msg.append(getSensorData(imuFile));
                         msg.append(SENSOR_DATA_END_MARKER);
