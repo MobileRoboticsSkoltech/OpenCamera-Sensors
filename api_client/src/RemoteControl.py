@@ -6,7 +6,7 @@ from progress.bar import Bar
 BUFFER_SIZE = 4096
 PROPS_PATH = '../app/src/main/assets/server_config.properties'
 SUPPORTED_SERVER_VERSIONS = [
-    'v.0.0'
+    'v.0.1'
 ]
 NUM_SENSORS = 3
 

@@ -357,7 +357,7 @@
         <item>@string/duration_45m</item>
         <item>@string/duration_1h</item>
     </string-array>
-    <string-array name="preference_sample_rate_values">
+    <string-array name="imu_preference_sample_rate_values">
         <item>20000</item>
         <item>10000</item>
         <item>5000</item>
@@ -365,11 +365,28 @@
         <item>0</item>
     </string-array>
     <!-- TODO: Move entries to strings.xml -->
-    <string-array name="preference_sample_rate_entries">
+    <string-array name="imu_preference_sample_rate_entries">
         <item>50 Hz</item>
         <item>100 Hz</item>
         <item>200 Hz</item>
         <item>500 Hz</item>
+        <item>Maximum possible</item>
+    </string-array>
+    <string-array name="magnetic_preference_sample_rate_values">
+        <item>1000000</item>
+        <item>100000</item>
+        <item>50000</item>
+        <item>20000</item>
+        <item>10000</item>
+        <item>0</item>
+    </string-array>
+    <!-- TODO: Move entries to strings.xml -->
+    <string-array name="magnetic_preference_sample_rate_entries">
+        <item>1 Hz</item>
+        <item>10 Hz</item>
+        <item>20 Hz</item>
+        <item>50 Hz</item>
+        <item>100 Hz</item>
         <item>Maximum possible</item>
     </string-array>
     <string-array name="preference_video_max_duration_values">

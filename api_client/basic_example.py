@@ -1,7 +1,7 @@
 import time
 from src.RemoteControl import RemoteControl
 
-HOST = '192.168.1.100'  # The smartphone's IP address
+HOST = '192.168.1.75'  # The smartphone's IP address
 
 
 def main():

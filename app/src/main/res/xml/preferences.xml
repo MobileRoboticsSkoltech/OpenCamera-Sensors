@@ -132,8 +132,8 @@
                     android:key="preference_accel_sample_rate"
                     android:title="Accelerometer frequency"
                     android:summary="Accelerometer sampling frequency in Hz"
-                    android:entries="@array/preference_sample_rate_entries"
-                    android:entryValues="@array/preference_sample_rate_values"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
                     android:defaultValue="0"
                     />
 
@@ -142,8 +142,8 @@
                     android:title="Gyroscope frequency"
                     android:defaultValue="0"
                     android:summary="Gyroscope sampling frequency in Hz"
-                    android:entries="@array/preference_sample_rate_entries"
-                    android:entryValues="@array/preference_sample_rate_values"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
                     />
 
                 <ListPreference
@@ -151,8 +151,8 @@
                     android:title="Magnetometer frequency"
                     android:defaultValue="0"
                     android:summary="Magnetometer sampling frequency in Hz"
-                    android:entries="@array/preference_sample_rate_entries"
-                    android:entryValues="@array/preference_sample_rate_values"
+                    android:entries="@array/magnetic_preference_sample_rate_entries"
+                    android:entryValues="@array/magnetic_preference_sample_rate_values"
                     />
             </PreferenceCategory>
         </PreferenceScreen>
