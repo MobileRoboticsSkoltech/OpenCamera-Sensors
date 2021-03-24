@@ -963,6 +963,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     private void stopVideoPostPrepare(boolean from_restart) {
+        applicationInterface.stoppingVideo();
         Log.d(TAG, "Stopping video post prepare");
 
         if( video_recorder != null ) { // check again, just to be safe
@@ -1004,7 +1005,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void stopVideo(boolean from_restart) {
-        applicationInterface.stoppingVideo();
+        camera_controller.closeVideoRecordingSession();
         if( MyDebug.LOG )
             Log.d(TAG, "stopVideo()");
 
@@ -1031,8 +1032,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             remaining_restart_video = 0;
         }
 
-
-        camera_controller.closeVideoRecordingSession();
 
         /*
            If camera2api is not used, we should stop video immediately. Otherwise it is done in callback
