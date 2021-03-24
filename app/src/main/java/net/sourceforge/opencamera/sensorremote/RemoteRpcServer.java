@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
-    private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)";
+    private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)(&magnetic=)(\\d)";
     private static final Pattern IMU_REQUEST_PATTERN = Pattern.compile(IMU_REQUEST_REGEX);
 
     private final Properties mConfig;
@@ -76,11 +76,12 @@ public class RemoteRpcServer extends Thread {
             long duration = Long.parseLong(imuRequestMatcher.group(2));
             boolean wantAccel = Integer.parseInt(imuRequestMatcher.group(4)) == 1;
             boolean wantGyro = Integer.parseInt(imuRequestMatcher.group(6)) == 1;
+            boolean wantMagnetic = Integer.parseInt(imuRequestMatcher.group(8)) == 1;
 
             if (MyDebug.LOG) {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
-            RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro);
+            RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro, wantMagnetic);
 
             outputStream.println(imuResponse.toString());
             if (MyDebug.LOG) {

@@ -313,6 +313,10 @@ public class PreferenceKeys {
 
     public static final String GyroPreferenceKey = "preference_gyro";
 
+    public static final String MagnetometerPrefKey = "preference_magnetometer";
+
+    public static final String SupportsMagnetometerKey = "preference_supports_magnetometer";
+
     public static final String SupportsAccelKey = "supports_accel";
 
     public static final String SupportsGyroKey = "supports_gyro";
@@ -322,6 +326,8 @@ public class PreferenceKeys {
     public static final String AccelSampleRatePreferenceKey = "preference_accel_sample_rate";
 
     public static final String GyroSampleRatePreferenceKey = "preference_gyro_sample_rate";
+
+    public static final String MagneticSampleRatePreferenceKey = "preference_magnetic_sample_rate";
 
     public static String getVideoFPSPreferenceKey(int cameraId) {
         // for cameraId==0, we return preference_video_fps instead of preference_video_fps_0, for

@@ -69,6 +69,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
@@ -99,6 +100,8 @@ import java.util.Map;
  */
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
+    private static final int WRITE_EXTERNAL_STORAGE = 0;
+    private static final int REQUEST_PERMISSION = 0;
 
     private static int activity_count = 0;
 
@@ -211,6 +214,17 @@ public class MainActivity extends Activity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int permissionCheckStorage = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheckStorage != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions( MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION);
+
+            return;
+        }
         this.mRawSensorInfo = new RawSensorInfo(this);
         if (MyDebug.LOG) {
             Log.d(TAG, "Created RawSensorInfo object");
@@ -2314,6 +2328,7 @@ public class MainActivity extends Activity {
         Bundle bundle = new Bundle();
         bundle.putBoolean(PreferenceKeys.SupportsGyroKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE));
         bundle.putBoolean(PreferenceKeys.SupportsAccelKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER));
+        bundle.putBoolean(PreferenceKeys.SupportsMagnetometerKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_MAGNETIC_FIELD));
 
         bundle.putInt("cameraId", this.preview.getCameraId());
         bundle.putInt("nCameras", preview.getCameraControllerManager().getNumberOfCameras());
@@ -3365,7 +3380,10 @@ public class MainActivity extends Activity {
             protected Bitmap doInBackground(Void... params) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "doInBackground");
-                StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
+                StorageUtils.Media media = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    media = applicationInterface.getStorageUtils().getLatestMedia();
+                }
                 Bitmap thumbnail = null;
                 KeyguardManager keyguard_manager = (KeyguardManager)MainActivity.this.getSystemService(Context.KEYGUARD_SERVICE);
                 boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
@@ -3589,7 +3607,10 @@ public class MainActivity extends Activity {
         if( uri == null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "go to latest media");
-            StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
+            StorageUtils.Media media = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                media = applicationInterface.getStorageUtils().getLatestMedia();
+            }
             if( media != null ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "latest uri:" + media.uri);

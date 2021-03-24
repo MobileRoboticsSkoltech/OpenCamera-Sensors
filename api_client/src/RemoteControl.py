@@ -6,9 +6,9 @@ from progress.bar import Bar
 BUFFER_SIZE = 4096
 PROPS_PATH = '../app/src/main/assets/server_config.properties'
 SUPPORTED_SERVER_VERSIONS = [
-    'v.0.0'
+    'v.0.1'
 ]
-
+NUM_SENSORS = 3
 
 class RemoteControl:
     """
@@ -26,24 +26,27 @@ class RemoteControl:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((hostname, int(self.props['RPC_PORT'])))
 
-    def get_imu(self, duration_ms, want_accel, want_gyro):
+    def get_imu(self, duration_ms, want_accel, want_gyro, want_magnetic):
         """
         Request IMU data recording
         :param duration_ms: (int) duration in milliseconds
         :param want_accel: (boolean) request accelerometer recording
         :param want_gyro: (boolean) request gyroscope recording
-        :return: Tuple (accel_data, gyro_data) - csv data strings
+        :param want_gyro: (boolean) request magnetometer recording
+        :return: Tuple (accel_data, gyro_data, magnetic_data) - csv data strings
         If one of the sensors wasn't requested, the corresponding data is None
         """
         accel = int(want_accel)
         gyro = int(want_gyro)
+        magnetic = int(want_magnetic)
         status, socket_file = self._send_and_get_response_status(
-            'imu?duration=%d&accel=%d&gyro=%d\n' % (duration_ms, accel, gyro)
+            'imu?duration=%d&accel=%d&gyro=%d&magnetic=%d\n' % (duration_ms, accel, gyro, magnetic)
         )
         accel_data = None
         gyro_data = None
+        magnetic_data = None
 
-        for i in range(2):
+        for i in range(NUM_SENSORS):
             # read filename or end marker
             line = socket_file.readline()
             msg = line.strip('\n')
@@ -62,8 +65,11 @@ class RemoteControl:
                 accel_data = data
             elif msg.endswith("gyro.csv"):
                 gyro_data = data
+            elif msg.endswith("magnetic.csv"):
+                magnetic_data = data
+
         socket_file.close()
-        return accel_data, gyro_data
+        return accel_data, gyro_data, magnetic_data
 
     def start_video(self):
         """

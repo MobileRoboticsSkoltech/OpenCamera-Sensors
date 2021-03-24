@@ -83,18 +83,6 @@
             android:defaultValue="true"
             />
 
-        <CheckBoxPreference
-            android:key="preference_accel"
-            android:title="ACCELEROMETER"
-            android:defaultValue="true"
-            />
-
-        <CheckBoxPreference
-            android:key="preference_gyro"
-            android:title="GYROSCOPE"
-            android:defaultValue="true"
-            />
-
         <SwitchPreference
             android:key="preference_save_video_frames"
             android:title="Save video frames during video + IMU recording"
@@ -102,29 +90,72 @@
             android:defaultValue="true"
             />
 
-        <Preference
-            android:key="preference_characteristics"
-            android:title="Important characteristics"
-            android:summary="API support, IMU + camera sync support"
-            />
+        <PreferenceScreen
+            android:key="preference_screen_camera_controls_more"
+            android:title="More sensor controls"
+            android:icon="@drawable/ic_more_horiz_white_48dp"
+            android:persistent="false">
 
-        <ListPreference
-            android:key="preference_accel_sample_rate"
-            android:title="Accelerometer frequency"
-            android:summary="Accelerometer sampling frequency in Hz"
-            android:entries="@array/preference_sample_rate_entries"
-            android:entryValues="@array/preference_sample_rate_values"
-            android:defaultValue="0"
-            />
+            <Preference
+                android:key="preference_characteristics"
+                android:title="Important characteristics"
+                android:summary="API support, IMU + camera sync support"
+                />
 
-        <ListPreference
-            android:key="preference_gyro_sample_rate"
-            android:title="Gyroscope frequency"
-            android:defaultValue="0"
-            android:summary="Gyroscope sampling frequency in Hz"
-            android:entries="@array/preference_sample_rate_entries"
-            android:entryValues="@array/preference_sample_rate_values"
-            />
+            <PreferenceCategory
+                android:key="preference_category_enabled_sensors"
+                android:title="Enabled sensors">
+                <CheckBoxPreference
+                    android:key="preference_accel"
+                    android:title="ACCELEROMETER"
+                    android:defaultValue="true"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_gyro"
+                    android:title="GYROSCOPE"
+                    android:defaultValue="true"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_magnetometer"
+                    android:title="MAGNETOMETER"
+                    android:defaultValue="true"
+                    />
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="preference_category_sample_rates"
+                android:title="Sensor sample rates">
+
+                <ListPreference
+                    android:key="preference_accel_sample_rate"
+                    android:title="Accelerometer frequency"
+                    android:summary="Accelerometer sampling frequency in Hz"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
+                    android:defaultValue="0"
+                    />
+
+                <ListPreference
+                    android:key="preference_gyro_sample_rate"
+                    android:title="Gyroscope frequency"
+                    android:defaultValue="0"
+                    android:summary="Gyroscope sampling frequency in Hz"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
+                    />
+
+                <ListPreference
+                    android:key="preference_magnetic_sample_rate"
+                    android:title="Magnetometer frequency"
+                    android:defaultValue="0"
+                    android:summary="Magnetometer sampling frequency in Hz"
+                    android:entries="@array/magnetic_preference_sample_rate_entries"
+                    android:entryValues="@array/magnetic_preference_sample_rate_values"
+                    />
+            </PreferenceCategory>
+        </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
         android:key="preference_category_camera_controls"

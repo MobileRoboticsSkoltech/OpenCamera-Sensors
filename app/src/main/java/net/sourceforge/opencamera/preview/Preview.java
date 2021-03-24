@@ -962,9 +962,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         cameraSurface.setTransform(matrix);
     }
 
-    private void stopVideoPostPrepare() {
+    private void stopVideoPostPrepare(boolean from_restart) {
         applicationInterface.stoppingVideo();
         Log.d(TAG, "Stopping video post prepare");
+
         if( video_recorder != null ) { // check again, just to be safe
             if( MyDebug.LOG )
                 Log.d(TAG, "stop video recording");
@@ -1005,7 +1006,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void stopVideo(boolean from_restart) {
         camera_controller.closeVideoRecordingSession();
-
         if( MyDebug.LOG )
             Log.d(TAG, "stopVideo()");
 
@@ -1032,12 +1032,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             remaining_restart_video = 0;
         }
 
+
         /*
            If camera2api is not used, we should stop video immediately. Otherwise it is done in callback
            after captureSession is closed
          */
         if (!usingCamera2API()) {
-            stopVideoPostPrepare();
+            stopVideoPostPrepare(from_restart);
         }
     }
 
@@ -5625,7 +5626,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
                             @Override
                             public void onVideoCaptureSessionClosed() {
-                                stopVideoPostPrepare();
+                                stopVideoPostPrepare(false);
                                 if (mVideoFrameInfoWriter != null) {
                                     mVideoFrameInfoWriter.close();
                                     mVideoFrameInfoWriter = null;

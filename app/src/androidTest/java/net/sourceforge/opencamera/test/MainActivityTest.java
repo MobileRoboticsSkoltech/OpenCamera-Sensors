@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.opencamera.LocationSupplier;
@@ -31,6 +32,7 @@ import net.sourceforge.opencamera.preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
+import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.ui.FolderChooserDialog;
 import net.sourceforge.opencamera.ui.PopupView;
 
@@ -47,6 +49,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.Sensor;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.TonemapCurve;
@@ -7836,6 +7839,64 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
 
         assertEquals(expectedNFiles + 1, nNewFiles);
+    }
+
+    /* Test recording video with all sensors enabled
+        Assumes all of the sensors are supported
+     */
+    public void testVideoAllSensors() throws InterruptedException {
+        Log.d(TAG, "testVideoAllSensors");
+        // check sensor files
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, true, true);
+        assertSensorRecFileExists(Sensor.TYPE_GYROSCOPE, sensorFilesMap);
+        assertSensorRecFileExists(Sensor.TYPE_MAGNETIC_FIELD, sensorFilesMap);
+        assertSensorRecFileExists(Sensor.TYPE_ACCELEROMETER, sensorFilesMap);
+    }
+
+    public void testVideoMagnetometer() throws InterruptedException {
+        Log.d(TAG, "testVideoMagnetometer");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(true, false, false);
+        assertSensorRecFileExists(Sensor.TYPE_MAGNETIC_FIELD, sensorFilesMap);
+    }
+
+    public void testVideoAccel() throws InterruptedException {
+        Log.d(TAG, "testVideoAccel");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, true, false);
+        assertSensorRecFileExists(Sensor.TYPE_ACCELEROMETER, sensorFilesMap);
+    }
+
+    public void testVideoGyro() throws InterruptedException {
+        Log.d(TAG, "testVideoGyro");
+        Map<Integer, File> sensorFilesMap = subTestVideoSensors(false, false, true);
+        assertSensorRecFileExists(Sensor.TYPE_GYROSCOPE, sensorFilesMap);
+    }
+
+    private void assertSensorRecFileExists(Integer sensorType, Map<Integer, File> sensorFilesMap) {
+        assertTrue(
+                mActivity.getRawSensorInfoManager().isSensorAvailable(sensorType) &&
+                sensorFilesMap.get(sensorType).canRead()
+        );
+    }
+
+    public Map<Integer, File> subTestVideoSensors(boolean wantMagnetic, boolean wantAccel, boolean wantGyro) throws InterruptedException {
+        setToDefault();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        SharedPreferences.Editor editor = settings.edit();
+        // enable all of the sensors
+        editor.putBoolean(PreferenceKeys.IMURecordingPreferenceKey, true);
+        editor.putBoolean(PreferenceKeys.MagnetometerPrefKey, wantMagnetic);
+        editor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
+        editor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
+        editor.apply();
+        updateForSettings();
+
+        // count initial files in folder
+        File folder = mActivity.getImageFolder();
+        Log.d(TAG, "folder: " + folder);
+        int expectedNFiles = 1;
+        int nNewFiles = subTestTakeVideo(false, false, true, false, null, 5000, false, expectedNFiles);
+        return mActivity.getRawSensorInfoManager()
+                .getLastSensorFilesMap();
     }
 
     /* Test recording video with raw IMU sensor info

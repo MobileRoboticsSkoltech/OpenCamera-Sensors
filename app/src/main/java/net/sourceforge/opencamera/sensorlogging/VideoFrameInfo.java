@@ -191,7 +191,9 @@ public class VideoFrameInfo implements Closeable {
 
         try {
             if (mFrameBufferedWriter != null) {
+                Log.d(TAG, "Before writer close()");
                 mFrameBufferedWriter.close();
+                Log.d(TAG, "After writer close()");
             }
         } catch (IOException e) {
             Log.d(TAG, "Exception occurred when attempting to close mFrameBufferedWriter");
