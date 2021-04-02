@@ -61,6 +61,7 @@ import androidx.core.content.ContextCompat;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;
@@ -139,6 +140,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private RefreshPreviewBitmapTask refreshPreviewBitmapTask;
 
     private boolean want_histogram; // whether to generate a histogram, requires want_preview_bitmap==true
+
     public enum HistogramType {
         HISTOGRAM_TYPE_RGB,
         HISTOGRAM_TYPE_LUMINANCE,
@@ -5800,7 +5802,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     });
                 }
             }
-            flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
+            long flashStrobePeriod = applicationInterface.getSensorSampleRatePref(
+                    PreferenceKeys.FlashStrobeFreqPreferenceKey
+            );
+            flashVideoTimer.scheduleAtFixedRate(flashVideoTimerTask = new FlashVideoTimerTask(), 0, flashStrobePeriod);
         }
 
         if( applicationInterface.getVideoLowPowerCheckPref() ) {

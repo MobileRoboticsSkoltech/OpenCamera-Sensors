@@ -90,6 +90,14 @@
             android:defaultValue="true"
             />
 
+
+        <SwitchPreference
+            android:key="preference_video_flash"
+            android:title="@string/preference_video_flash"
+            android:summary="Enables flash blinking during video recording"
+            android:defaultValue="false"
+            />
+
         <PreferenceScreen
             android:key="preference_screen_camera_controls_more"
             android:title="More sensor controls"
@@ -153,6 +161,14 @@
                     android:summary="Magnetometer sampling frequency in Hz"
                     android:entries="@array/magnetic_preference_sample_rate_entries"
                     android:entryValues="@array/magnetic_preference_sample_rate_values"
+                    />
+                <ListPreference
+                    android:key="preference_strobe_freq"
+                    android:title="Flash strobe frequency"
+                    android:defaultValue="1000"
+                    android:summary="Flash frequency in Hz"
+                    android:entries="@array/flash_sample_rate_entries"
+                    android:entryValues="@array/flash_sample_rate_values"
                     />
             </PreferenceCategory>
         </PreferenceScreen>
@@ -1290,13 +1306,6 @@
                     android:title="@string/preference_video_low_power_check"
                     android:summary="@string/preference_video_low_power_check_summary"
                     android:defaultValue="true"
-                    />
-
-                <SwitchPreference
-                    android:key="preference_video_flash"
-                    android:title="@string/preference_video_flash"
-                    android:summary="@string/preference_video_flash_summary"
-                    android:defaultValue="false"
                     />
 
             </PreferenceCategory>
