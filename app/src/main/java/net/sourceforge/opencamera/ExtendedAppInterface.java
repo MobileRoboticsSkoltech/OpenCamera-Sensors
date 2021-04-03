@@ -100,10 +100,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
 
-    public boolean getFlashStrobePref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.VideoFlashPreferenceKey, false);
-    }
-
     public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
         if (wantAccel) {
             int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
@@ -156,12 +152,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
             mMainActivity.getPreview().stopVideo(false);
         }
-
-//        // TODO: enable blinking flash task
-//        if (getVideoFlashPref()) {
-//
-//        }
-
         super.startingVideo();
     }
 
