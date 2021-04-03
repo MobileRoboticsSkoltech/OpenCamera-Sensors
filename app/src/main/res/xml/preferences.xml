@@ -93,8 +93,8 @@
 
         <SwitchPreference
             android:key="preference_video_flash"
-            android:title="@string/preference_video_flash"
-            android:summary="Enables flash blinking during video recording"
+            android:title="Flash blinking during video recording"
+            android:summary="Enables flash strobe during video recording"
             android:defaultValue="false"
             />
 
@@ -166,7 +166,7 @@
                     android:key="preference_strobe_freq"
                     android:title="Flash strobe frequency"
                     android:defaultValue="1000"
-                    android:summary="Flash frequency in Hz"
+                    android:summary="Flash frequency in Hz. Choosing higher values may cause frame drops."
                     android:entries="@array/flash_sample_rate_entries"
                     android:entryValues="@array/flash_sample_rate_values"
                     />
