@@ -373,12 +373,14 @@
         <item>Maximum possible</item>
     </string-array>
     <string-array name="flash_sample_rate_values">
+        <item>2000</item>
         <item>1000</item>
         <item>500</item>
         <item>200</item>
     </string-array>
     <!-- TODO: Move entries to strings.xml -->
     <string-array name="flash_sample_rate_entries">
+        <item>0.5 Hz</item>
         <item>1 Hz</item>
         <item>2 Hz</item>
         <item>5 Hz</item>
