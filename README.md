@@ -22,6 +22,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - Go to preferences, enable Camera2API and press the “Enable sync video IMU recording” switch
 - (Optional) **Disable video stabilization** in video preferences of OpenCamera Sensors to minimize preprocessing effects
 - (Optional) Enable **save frames** option if you want to verify recorded data correctness
+- (Optional) Enable flash strobe and specify its frequency in additional sensor settings
 - **Switch to video**, setup ISO and exposure time
 - **Record video**
 - **Get data** from ```DCIM/OpenCamera```:
