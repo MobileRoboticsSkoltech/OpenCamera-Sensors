@@ -16,15 +16,22 @@ class RemoteControl:
     running OpenCamera Sensors application
     """
 
-    def __init__(self, hostname):
+    def __init__(self, hostname, timeout=None):
         """
         Args:
             hostname (str): Smartphones hostname (IP address) in the current network.
             Is displayed in the dialog when starting OpenCamera Sensors on the smartphone.
+            timeout (float): Connection timeout in seconds
         """
         self._load_properties(PROPS_PATH)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((hostname, int(self.props['RPC_PORT'])))
+        self.socket.settimeout(timeout)
+        try:
+            self.socket.connect((hostname, int(self.props['RPC_PORT'])))
+            self.socket.settimeout(None)
+        except socket.timeout:
+            print("Connection timed out")
+            sys.exit()
 
     def get_imu(self, duration_ms, want_accel, want_gyro, want_magnetic):
         """
