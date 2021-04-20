@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
+import net.sourceforge.opencamera.sensorlogging.FlashController;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
@@ -26,6 +27,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
     private final RawSensorInfo mRawSensorInfo;
+
+    public FlashController getFlashController() {
+        return mFlashController;
+    }
+
+    private final FlashController mFlashController;
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
@@ -40,6 +47,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         super(mainActivity, savedInstanceState);
         mRawSensorInfo = mainActivity.getRawSensorInfoManager();
         mMainActivity = mainActivity;
+        mFlashController = new FlashController(mainActivity);
+
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
@@ -152,6 +161,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
             mMainActivity.getPreview().stopVideo(false);
         }
+
+        if (getVideoFlashPref()) {
+            try {
+                mFlashController.startRecording(mLastVideoDate);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to start flash controller");
+                e.printStackTrace();
+            }
+        }
+
         super.startingVideo();
     }
 
@@ -166,6 +185,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
             // TODO: add message to strings.xml
             mMainActivity.getPreview().showToast("Stopping video with IMU recording...", true);
+        }
+
+        if (mFlashController.isRecording()) {
+            mFlashController.stopRecording();
         }
 
         super.stoppingVideo();

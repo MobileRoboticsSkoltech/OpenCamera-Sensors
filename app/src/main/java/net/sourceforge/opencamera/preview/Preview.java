@@ -5145,6 +5145,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         // turn on torch
         cancelAutoFocus();
         camera_controller.setFlashValue("flash_torch");
+        applicationInterface.getFlashController().onFlashFired();
         try {
             Thread.sleep(100);
         }
