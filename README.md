@@ -32,6 +32,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
         - ```{VIDEO_NAME}_accel.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
         - ```{VIDEO_NAME}_magnetic.csv```, data format: ```X-data, Y-data, Z-data, timestamp (ns)```
         - ```{VIDEO_NAME}_timestamps.csv```, data format: ```timestamp (ns)```
+        - ```{VIDEO_NAME}_flash.csv```, data format: ```timestamp (ns)``` (timestamps of when the flash fired)
 
 ### Remote recording
 
