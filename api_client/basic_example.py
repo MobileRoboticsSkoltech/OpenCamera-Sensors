@@ -10,13 +10,12 @@ def main():
     remote = RemoteControl(HOST)
     print("Connected")
     
-    accel_data, gyro_data, magnetic_data = remote.get_imu(10000, True, False, True)
-    print("Magnetometer data length: %d" % len(magnetic_data))
-    with open("magnetic.csv", "w+") as imu_file:
-        imu_file.writelines(magnetic_data)
+    #print("Magnetometer data length: %d" % len(magnetic_data))
+    #with open("magnetic.csv", "w+") as imu_file:
+    #    imu_file.writelines(magnetic_data)
     
-    phase, duration = remote.start_video()
-    print("%d %f" % (phase, duration))
+    phase, duration, exp_time = remote.start_video()
+    print("%d %f" % (exp_time, duration))
     time.sleep(5)
     remote.stop_video()
 

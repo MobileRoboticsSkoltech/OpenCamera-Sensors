@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera.sensorlogging;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.util.Log;
@@ -11,6 +10,7 @@ import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.StorageUtils;
 import net.sourceforge.opencamera.StorageUtilsWrapper;
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
+import net.sourceforge.opencamera.preview.Preview;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -47,7 +47,7 @@ public class VideoFrameInfo implements Closeable {
     private final ExtendedAppInterface mAppInterface;
     private final BufferedWriter mFrameBufferedWriter;
     private final boolean mShouldSaveFrames;
-    private final Context mContext;
+    private final MainActivity mContext;
     private final YuvImageUtils mYuvUtils;
     private final BlockingQueue<VideoPhaseInfo> mPhaseInfoReporter;
     private final List<Long> durationsNs;
@@ -102,8 +102,14 @@ public class VideoFrameInfo implements Closeable {
                             mLastTimestamp = timestamp;
                         } else if (mFrameNumber == PHASE_CALC_N_FRAMES) {
                             // Should report phase
+                            Preview preview = mContext.getPreview();
+
+                            long exposureTime = 0;
+                            if(preview.getCameraController().captureResultHasExposureTime() ) {
+                                exposureTime = preview.getCameraController().captureResultExposureTime();
+                            }
                             mPhaseInfoReporter.add(
-                                    new VideoPhaseInfo(timestamp, durationsNs)
+                                    new VideoPhaseInfo(timestamp, durationsNs, exposureTime)
                             );
                         }
 
