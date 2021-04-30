@@ -6,7 +6,7 @@ from progress.bar import Bar
 BUFFER_SIZE = 4096
 PROPS_PATH = '../app/src/main/assets/server_config.properties'
 SUPPORTED_SERVER_VERSIONS = [
-    'v.0.1'
+    'v.0.1.1'
 ]
 NUM_SENSORS = 3
 
@@ -81,7 +81,7 @@ class RemoteControl:
     def start_video(self):
         """
         Starts video recording and receives phase and duration info
-        :return: Tuple (phase, average duration) - all in nanoseconds
+        :return: Tuple (phase, average duration, exposure time) - all in nanoseconds
         """
         status, socket_file = self._send_and_get_response_status(
             self.props['VIDEO_START_REQUEST']
@@ -94,8 +94,11 @@ class RemoteControl:
         line = socket_file.readline()
         avg_duration_ns = float(line)
 
+        line = socket_file.readline()
+        exposure_time = int(line)
+
         socket_file.readline()
-        return phase_ns, avg_duration_ns
+        return phase_ns, avg_duration_ns, exposure_time
 
     def stop_video(self):
         """
