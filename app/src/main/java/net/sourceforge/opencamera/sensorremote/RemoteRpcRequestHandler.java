@@ -1,14 +1,11 @@
 package net.sourceforge.opencamera.sensorremote;
 
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
@@ -70,12 +67,12 @@ public class RemoteRpcRequestHandler {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
             Callable<Void> recStartCallable = () -> {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor prefEditor = sharedPreferences.edit();
-                prefEditor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
-                prefEditor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
-                prefEditor.putBoolean(PreferenceKeys.MagnetometerPrefKey, wantMagnetic);
-                prefEditor.apply();
+//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+//                SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+//                prefEditor.putBoolean(PreferenceKeys.AccelPreferenceKey, wantAccel);
+//                prefEditor.putBoolean(PreferenceKeys.GyroPreferenceKey, wantGyro);
+//                prefEditor.putBoolean(PreferenceKeys.MagnetometerPrefKey, wantMagnetic);
+//                prefEditor.apply();
 
                 Date currentDate = new Date();
                 mContext.getApplicationInterface().startImu(wantAccel, wantGyro, wantMagnetic, currentDate);
