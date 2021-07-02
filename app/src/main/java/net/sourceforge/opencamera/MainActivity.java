@@ -263,6 +263,15 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after setting default preference values: " + (System.currentTimeMillis() - debug_time));
 
+        // Enable all sensors on startup
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+        prefEditor.putBoolean(PreferenceKeys.AccelPreferenceKey, true);
+        prefEditor.putBoolean(PreferenceKeys.GyroPreferenceKey, true);
+        prefEditor.putBoolean(PreferenceKeys.MagnetometerPrefKey, true);
+        prefEditor.apply();
+
+
         if( getIntent() != null && getIntent().getExtras() != null ) {
             // whether called from testing
             is_test = getIntent().getExtras().getBoolean("test_project");
@@ -283,7 +292,6 @@ public class MainActivity extends Activity {
             if( MyDebug.LOG )
                 Log.d(TAG, "shortcut: " + getIntent().getAction());
         }
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         // determine whether we should support "auto stabilise" feature
         // risk of running out of memory on lower end devices, due to manipulation of large bitmaps
@@ -365,7 +373,7 @@ public class MainActivity extends Activity {
         mainUI.closeExposureUI();
 
         // set up the camera and its preview
-        preview = new Preview(applicationInterface, ((ViewGroup) this.findViewById(R.id.preview)));
+        preview = new Preview(applicationInterface, this.findViewById(R.id.preview));
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 
