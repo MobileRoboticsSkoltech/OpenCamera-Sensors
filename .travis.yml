@@ -40,7 +40,7 @@ cache:
     - "$HOME/google-cloud-sdk/"
 
 before_script:
-  - python3 --version
+  - python3.6 --version
   - export CLOUDSDK_PYTHON=$(which python3.6)
   - gcloud version || true
   - export CLOUDSDK_CORE_DISABLE_PROMPTS=1
