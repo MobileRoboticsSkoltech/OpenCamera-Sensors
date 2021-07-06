@@ -33,12 +33,15 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_9e5ce9a0670f_key -iv $encrypted_9e5ce9a0670f_iv -in opencamera-extended-firebase-adminsdk-yv5yz-e33a8ce5c1.json.enc -out ./opencamera-extended-firebase-adminsdk-yv5yz-e33a8ce5c1.json -d
   - openssl aes-256-cbc -K $encrypted_cec398169802_key -iv $encrypted_cec398169802_iv -in my-release-key.keystore.enc -out ./my-release-key.keystore -d
   - yes | sdkmanager "platforms;android-28"
+  - curl -L https://packagecloud.io/github/git-lfs/gpgkey | sudo apt-key add -
 
 cache:
   directories:
     - "$HOME/google-cloud-sdk/"
 
 before_script:
+  - python3.6 --version
+  - export CLOUDSDK_PYTHON=$(which python3.6)
   - gcloud version || true
   - export CLOUDSDK_CORE_DISABLE_PROMPTS=1
   - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
