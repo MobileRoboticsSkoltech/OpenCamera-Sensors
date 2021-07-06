@@ -7,7 +7,7 @@ addons:
     sources:
       - deadsnakes
     packages:
-      - python3.7
+      - python3.6
 
 env:
   global:
@@ -41,7 +41,7 @@ cache:
 
 before_script:
   - python3 --version
-  - export CLOUDSDK_PYTHON=$(which python3.7)
+  - export CLOUDSDK_PYTHON=$(which python3.6)
   - gcloud version || true
   - export CLOUDSDK_CORE_DISABLE_PROMPTS=1
   - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
