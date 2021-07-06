@@ -1,6 +1,6 @@
 language: android
 os: linux
-dist: bionic
+dist: xenial
 
 addons:
   apt:
@@ -34,7 +34,6 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_cec398169802_key -iv $encrypted_cec398169802_iv -in my-release-key.keystore.enc -out ./my-release-key.keystore -d
   - yes | sdkmanager "platforms;android-28"
   - curl -L https://packagecloud.io/github/git-lfs/gpgkey | sudo apt-key add -
-
 
 cache:
   directories:
