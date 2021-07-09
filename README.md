@@ -6,7 +6,9 @@ OpenCamera Sensors is an Android application for synchronized recording of video
 
 ## Install
 
-[Get latest apk](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk)
+[Get latest apk from GH releases](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors/releases/latest/download/app-release.apk)
+
+<center><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="170"></center>
 
 ## Description
 
