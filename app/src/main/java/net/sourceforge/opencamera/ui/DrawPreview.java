@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.GyroSensor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
@@ -49,6 +50,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class DrawPreview {
     private static final String TAG = "DrawPreview";
@@ -1234,6 +1236,19 @@ public class DrawPreview {
                 else {
                     location_y += height;
                 }
+            }
+        }
+
+        // RecSync leader-client information
+        if( applicationInterface instanceof ExtendedAppInterface ) {
+            TextView textView = ((ExtendedAppInterface) applicationInterface).getSyncStatusText();
+            int height = applicationInterface.drawTextWithBackground(canvas, p, (String) textView.getText(), textView.getCurrentTextColor(), Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+            height += gap_y;
+            if( ui_rotation == 90 ) {
+                location_y -= height;
+            }
+            else {
+                location_y += height;
             }
         }
 

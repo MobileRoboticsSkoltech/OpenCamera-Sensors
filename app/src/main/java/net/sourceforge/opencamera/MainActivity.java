@@ -729,6 +729,9 @@ public class MainActivity extends Activity {
             notificationManager.createNotificationChannel(channel);
         }
 
+        // start RecSync leader-client setup
+        applicationInterface.startSoftwareSync();
+
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
     }

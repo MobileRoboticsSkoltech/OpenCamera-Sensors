@@ -1,10 +1,15 @@
 package net.sourceforge.opencamera;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.TextView;
+
+import com.googleresearch.capturesync.SoftwareSyncController;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
 import net.sourceforge.opencamera.sensorlogging.FlashController;
@@ -36,6 +41,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
+
+    private SoftwareSyncController mSoftwareSyncController;
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
@@ -200,5 +207,29 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public YuvImageUtils getYuvUtils() {
         return mYuvUtils;
+    }
+
+    public void startSoftwareSync() {
+        // Start softwaresync, close it first if it's already running.
+        if (mSoftwareSyncController != null) {
+            mSoftwareSyncController.close();
+            mSoftwareSyncController = null;
+        }
+
+        try {
+            mSoftwareSyncController =
+                    new SoftwareSyncController(mMainActivity, null, new TextView(mMainActivity));
+        } catch (IllegalStateException e) {
+            // If wifi is disabled, start pick wifi activity.
+            Log.e(
+                    TAG,
+                    "Couldn't start SoftwareSync due to " + e + ", requesting user pick a wifi network.");
+            mMainActivity.finish(); // Close current app, expect user to restart.
+            mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+        }
+    }
+
+    public TextView getSyncStatusText() {
+        return mSoftwareSyncController.getStatusText();
     }
 }
