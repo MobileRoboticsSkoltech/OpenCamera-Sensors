@@ -64,7 +64,7 @@ public final class NetworkHelpers {
   }
 
   /**
-   * Finds this devices's IPv4 address that is not localhost and not on a dummy interface.
+   * Finds this devices's IPv4 address that is not localhost and is on a wlan interface.
    *
    * @return the String IP address on success.
    * @throws SocketException on failure to find a suitable IP address.
@@ -74,7 +74,7 @@ public final class NetworkHelpers {
     for (NetworkInterface intf : interfaces) {
       for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
         if (!addr.isLoopbackAddress()
-            && !intf.getName().equals("dummy0")
+            && intf.getName().startsWith("wlan")
             && addr instanceof Inet4Address) {
           return addr;
         }
