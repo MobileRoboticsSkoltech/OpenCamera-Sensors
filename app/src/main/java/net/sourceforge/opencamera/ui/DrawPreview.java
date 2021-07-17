@@ -1242,13 +1242,17 @@ public class DrawPreview {
         // RecSync leader-client information
         if( applicationInterface instanceof ExtendedAppInterface ) {
             TextView textView = ((ExtendedAppInterface) applicationInterface).getSyncStatusText();
-            int height = applicationInterface.drawTextWithBackground(canvas, p, (String) textView.getText(), textView.getCurrentTextColor(), Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
-            height += gap_y;
-            if( ui_rotation == 90 ) {
-                location_y -= height;
-            }
-            else {
-                location_y += height;
+            String[] lines = ((String) textView.getText()).split("\n");
+            int color = textView.getCurrentTextColor();
+            for (String line : lines) {
+                int height = applicationInterface.drawTextWithBackground(canvas, p, line, color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                height += gap_y;
+                if( ui_rotation == 90 ) {
+                    location_y -= height;
+                }
+                else {
+                    location_y += height;
+                }
             }
         }
 
