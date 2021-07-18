@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
  */
 
 package com.googleresearch.capturesync;
@@ -37,7 +40,6 @@ import net.sourceforge.opencamera.MainActivity;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,7 +103,7 @@ public class SoftwareSyncController implements Closeable {
 
         try {
             NetworkHelpers networkHelper = new NetworkHelpers(wifiManager);
-            localAddress = NetworkHelpers.getIPAddress();
+            localAddress = networkHelper.getIPAddress();
             // TODO: hotspot patch
             leaderAddress = networkHelper.getHotspotServerAddress();
 
@@ -122,7 +124,7 @@ public class SoftwareSyncController implements Closeable {
                     String.format(
                             "Current IP: %s , Leader IP: %s | Leader? %s",
                             localAddress, leaderAddress, isLeader ? "Y" : "N"));
-        } catch (UnknownHostException | SocketException e) {
+        } catch (UnknownHostException e) {
             if (isLeader) {
                 Log.e(TAG, "Error: " + e);
                 throw new IllegalStateException(

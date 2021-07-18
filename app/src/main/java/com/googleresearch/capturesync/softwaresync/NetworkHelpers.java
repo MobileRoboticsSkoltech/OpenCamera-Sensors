@@ -12,19 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
  */
 
 package com.googleresearch.capturesync.softwaresync;
 
 import android.net.wifi.WifiManager;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.List;
 
 /** Helper functions for determining local IP address and host IP address on the network. */
 public final class NetworkHelpers {
@@ -45,41 +43,34 @@ public final class NetworkHelpers {
    *
    * @return IP address of the hotspot host.
    */
-  public InetAddress getHotspotServerAddress() throws SocketException, UnknownHostException {
+  public InetAddress getHotspotServerAddress() throws UnknownHostException {
     if (wifiManager.isWifiEnabled()) {
       // Return the DHCP server address, which is the hotspot ip address.
       int serverAddress = wifiManager.getDhcpInfo().serverAddress;
-      // DhcpInfo integer addresses are Little Endian and InetAddresses.fromInteger() are Big Endian
-      // so reverse the bytes before converting from Integer.
-      byte[] addressBytes = {
-        (byte) (0xff & serverAddress),
-        (byte) (0xff & (serverAddress >> 8)),
-        (byte) (0xff & (serverAddress >> 16)),
-        (byte) (0xff & (serverAddress >> 24))
-      };
-      return InetAddress.getByAddress(addressBytes);
+      return InetAddress.getByAddress(addressIntToBytes(serverAddress));
     }
     // If wifi is disabled, then this is the hotspot host, return the local ip address.
     return getIPAddress();
   }
 
   /**
-   * Finds this devices's IPv4 address that is not localhost and is on a wlan interface.
+   * Finds this device's wlan IP address. Requires ACCESS_WIFI_STATE permission.
    *
-   * @return the String IP address on success.
-   * @throws SocketException on failure to find a suitable IP address.
+   * @return wlan IP address of this device.
    */
-  public static InetAddress getIPAddress() throws SocketException {
-    List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-    for (NetworkInterface intf : interfaces) {
-      for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
-        if (!addr.isLoopbackAddress()
-            && intf.getName().startsWith("wlan")
-            && addr instanceof Inet4Address) {
-          return addr;
-        }
-      }
-    }
-    throw new SocketException("No viable IP Network addresses found.");
+  public InetAddress getIPAddress() throws UnknownHostException {
+    int address = wifiManager.getConnectionInfo().getIpAddress();
+    return InetAddress.getByAddress(addressIntToBytes(address));
+  }
+
+  private byte[] addressIntToBytes(int address) {
+    // DhcpInfo and ConnectionInfo integer addresses are Little Endian and
+    // InetAddresses.fromInteger() are Big Endian so reverse the bytes before converting.
+    return new byte[] {
+            (byte) (0xff & address),
+            (byte) (0xff & (address >> 8)),
+            (byte) (0xff & (address >> 16)),
+            (byte) (0xff & (address >> 24))
+    };
   }
 }
