@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The Google Research Authors.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,6 +40,7 @@ import net.sourceforge.opencamera.MainActivity;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,36 +104,30 @@ public class SoftwareSyncController implements Closeable {
 
         try {
             NetworkHelpers networkHelper = new NetworkHelpers(wifiManager);
-            localAddress = networkHelper.getIPAddress();
-            // TODO: hotspot patch
-            leaderAddress = networkHelper.getHotspotServerAddress();
+            isLeader = networkHelper.isLeader();
 
-            // Note: This is a brittle way of checking leadership that may not work on all devices.
-            // Leader only if it is the one with same IP address as the server, or a zero IP address.
-            if (localAddress.equals(leaderAddress)) {
-                Log.d(TAG, "Leader == Local Address");
-                isLeader = true;
-            } else if (localAddress.equals(InetAddress.getByName("0.0.0.0"))) {
-//              Log.d(TAG, "Leader == 0.0.0.0");
-                // TODO: hotspot patch
-                isLeader = true;
+            if (isLeader) {
+                // IP determination is not yet implemented for a leader.
+                localAddress = null;
+                leaderAddress = null;
+            } else {
+                localAddress = networkHelper.getIPAddress();
+                leaderAddress = networkHelper.getHotspotServerAddress();
             }
-//        isLeader = true;
 
             Log.w(
                     TAG,
                     String.format(
                             "Current IP: %s , Leader IP: %s | Leader? %s",
                             localAddress, leaderAddress, isLeader ? "Y" : "N"));
+        } catch (SocketException e) {
+            Log.e(TAG, "Error: " + e);
+            throw new IllegalStateException(
+                    "Unable to determine leadership, check if WiFi or hotspot is enabled.", e);
         } catch (UnknownHostException e) {
-            if (isLeader) {
-                Log.e(TAG, "Error: " + e);
-                throw new IllegalStateException(
-                        "Unable to get IP addresses, check if WiFi hotspot is enabled.", e);
-            } else {
-                throw new IllegalStateException(
-                        "Unable to get IP addresses, check Network permissions.", e);
-            }
+            Log.e(TAG, "Error: " + e);
+            throw new IllegalStateException(
+                    "Unable to get IP addresses, check Network permissions.", e);
         }
 
         // Set up shared rpcs.
