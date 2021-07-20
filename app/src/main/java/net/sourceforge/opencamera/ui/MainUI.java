@@ -2490,7 +2490,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "close RecSync");
         if( recSyncIsOpen() ) {
-            clearRemoteControlForPopup(); // TODO what is it?
+            // TODO clear RemoteControl when it is going to be implemented
             clearSelectionState();
 
             rec_sync_view_is_open = false;

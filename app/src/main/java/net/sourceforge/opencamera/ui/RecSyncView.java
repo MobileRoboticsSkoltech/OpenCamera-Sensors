@@ -4,7 +4,6 @@ import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.preview.Preview;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -47,7 +46,6 @@ public class RecSyncView extends LinearLayout {
 
         final MainActivity mainActivity = (MainActivity) this.getContext();
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
-        final Preview preview = mainActivity.getPreview();
 
         boolean small_screen = false;
         total_width_dp = 280;
@@ -79,8 +77,7 @@ public class RecSyncView extends LinearLayout {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            // TODO sync settings
-            preview.showToast(null, "Sync settings finished");
+            mainActivity.clickedSyncSettings();
         });
 
         // button sync devices
@@ -89,8 +86,7 @@ public class RecSyncView extends LinearLayout {
                 Log.d(TAG, "clicked to buttonSyncDevices");
             }
 
-            // TODO sync devices
-            preview.showToast(null, "Sync devices finished"); // TODO bug in repeated clicks
+            mainActivity.clickedSyncDevices();
         });
     }
 

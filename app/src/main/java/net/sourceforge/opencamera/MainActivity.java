@@ -166,6 +166,8 @@ public class MainActivity extends Activity {
     private final ToastBoxer screen_locked_toast = new ToastBoxer();
     private final ToastBoxer stamp_toast = new ToastBoxer();
     private final ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
+    private final ToastBoxer sync_settings_toast = new ToastBoxer();
+    private final ToastBoxer sync_devices_toast = new ToastBoxer();
     private final ToastBoxer white_balance_lock_toast = new ToastBoxer();
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
@@ -1792,7 +1794,24 @@ public class MainActivity extends Activity {
         }
 
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
-        this.closeRecSync();
+    }
+
+    public void clickedSyncSettings() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSyncSettings");
+
+        // TODO sync settings
+
+        preview.showToast(sync_settings_toast, "Sync settings finished");
+    }
+
+    public void clickedSyncDevices() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSyncDevices");
+
+        // TODO sync devices
+
+        preview.showToast(sync_devices_toast, "Sync devices finished");
     }
 
     public void clickedAutoLevel(View view) {
