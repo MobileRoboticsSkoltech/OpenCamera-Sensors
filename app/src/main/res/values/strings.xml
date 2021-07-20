@@ -71,7 +71,11 @@
     
     <string name="failed_to_stamp">Failed to stamp info to photo</string>
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
-    
+
+    <string name="preference_switch_rec_sync">Use RecSync</string>
+    <string name="sync_devices">Sync devises</string>
+    <string name="sync_settings">Sync settings</string>
+
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (slower to take photos, and may fail on devices with too low memory)</string>

@@ -53,6 +53,11 @@ public class MainUI {
 
     private final MainActivity main_activity;
 
+    private volatile boolean rec_sync_view_is_open;
+    private RecSyncView rec_sync_view;
+    private final static boolean cache_rec_sync = true;
+    private boolean force_destroy_rec_sync = false;
+
     private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
     private PopupView popup_view;
     private final static boolean cache_popup = true; // if false, we recreate the popup each time
@@ -318,6 +323,7 @@ public class MainUI {
             }
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
+            buttons_permanent.add(main_activity.findViewById(R.id.recSync));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
@@ -724,6 +730,49 @@ public class MainUI {
             );
         }
 
+        if( recSyncIsOpen() )
+        {
+            final View view = main_activity.findViewById(R.id.rec_sync_container);
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+                layoutParams.addRule(align_right, 0);
+                layoutParams.addRule(above, 0);
+                layoutParams.addRule(below, 0);
+                layoutParams.addRule(left_of, 0);
+                layoutParams.addRule(right_of, R.id.recSync);
+                layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+            }
+            else {
+                layoutParams.addRule(align_right, R.id.recSync);
+                layoutParams.addRule(above, 0);
+                layoutParams.addRule(below, R.id.recSync);
+                layoutParams.addRule(left_of, 0);
+                layoutParams.addRule(right_of, 0);
+                layoutParams.addRule(align_parent_top, 0);
+                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+            }
+            view.setLayoutParams(layoutParams);
+
+            view.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "onGlobalLayout()");
+                            setRecSyncViewRotation(ui_rotation, display_height);
+
+                            if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
+                                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            }
+                            else {
+                                view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                            }
+                        }
+                    }
+            );
+        }
+
         if( !popup_container_only ) {
             setTakePhotoIcon();
             // no need to call setSwitchCameraContentDescription()
@@ -805,6 +854,66 @@ public class MainUI {
                     view.setTranslationX( - popup_height );
                 else if( ui_rotation == 270 )
                     view.setTranslationY( - popup_width );
+            }
+        }
+    }
+
+    private void setRecSyncViewRotation(int ui_rotation, int display_height) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setRecSyncViewRotation");
+        View view = main_activity.findViewById(R.id.rec_sync_container);
+        setViewRotation(view, ui_rotation);
+        // reset:
+        view.setTranslationX(0.0f);
+        view.setTranslationY(0.0f);
+
+        int recSync_width = view.getWidth();
+        int recSync_height = view.getHeight();
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "recSync_width: " + recSync_width);
+            Log.d(TAG, "recSync_height: " + recSync_height);
+            if( rec_sync_view != null )
+                Log.d(TAG, "recSync total width: " + rec_sync_view.getTotalWidth());
+        }
+        if( rec_sync_view != null && recSync_width > rec_sync_view.getTotalWidth()*1.2  ) {
+            Log.e(TAG, "### recSync view is too big?!");
+            force_destroy_rec_sync = true;
+        }
+        else {
+            force_destroy_rec_sync = false;
+        }
+
+        if( ui_rotation == 0 || ui_rotation == 180 ) {
+            view.setPivotX(recSync_width/2.0f);
+            view.setPivotY(recSync_height/2.0f);
+        }
+        else if( ui_placement == UIPlacement.UIPLACEMENT_TOP ) {
+            view.setPivotX(0.0f);
+            view.setPivotY(0.0f);
+            if( ui_rotation == 90 ) {
+                //noinspection SuspiciousNameCombination
+                view.setTranslationX(recSync_height);
+            }
+            else if( ui_rotation == 270 ) {
+                view.setTranslationY(display_height);
+            }
+        }
+        else {
+            view.setPivotX(recSync_width);
+            view.setPivotY(ui_placement == UIPlacement.UIPLACEMENT_RIGHT ? 0.0f : recSync_height);
+            if( ui_placement == UIPlacement.UIPLACEMENT_RIGHT ) {
+                if( ui_rotation == 90 ) {
+                    //noinspection SuspiciousNameCombination
+                    view.setTranslationY( recSync_width );
+                }
+                else if( ui_rotation == 270 )
+                    view.setTranslationX( - recSync_height );
+            }
+            else {
+                if( ui_rotation == 90 )
+                    view.setTranslationX( - recSync_height );
+                else if( ui_rotation == 270 )
+                    view.setTranslationY( - recSync_width );
             }
         }
     }
@@ -1060,6 +1169,7 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
+                View recSyncButton = main_activity.findViewById(R.id.recSync);
                 View galleryButton = main_activity.findViewById(R.id.gallery);
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
@@ -1094,6 +1204,7 @@ public class MainUI {
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 popupButton.setVisibility(visibility);
+                recSyncButton.setVisibility(visibility);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1184,6 +1295,7 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
+                View recSyncButton = main_activity.findViewById(R.id.recSync);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
                 if( main_activity.showSwitchMultiCamIcon() )
@@ -1213,6 +1325,7 @@ public class MainUI {
                     audioControlButton.setVisibility(visibility);
                 if( !(show_gui_photo && show_gui_video) ) {
                     closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
+                    closeRecSync();
                 }
 
                 View remoteConnectedIcon = main_activity.findViewById(R.id.kraken_icon);
@@ -1226,6 +1339,7 @@ public class MainUI {
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
+                recSyncButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility);
 
                 if( show_gui_photo && show_gui_video ) {
                     layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
@@ -1378,6 +1492,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "toggleExposureUI");
         closePopup();
+        closeRecSync();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
             closeExposureUI();
@@ -2279,6 +2394,131 @@ public class MainUI {
     }
 
     /**
+     * Opens or closes the settings RecSync on the camera preview
+     */
+    public void toggleRecSyncSettings() {
+        final ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
+        if( recSyncIsOpen() ) {
+            closeRecSync();
+            return;
+        }
+        if( main_activity.getPreview().getCameraController() == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "camera not opened!");
+            return;
+        }
+
+        if( MyDebug.LOG )
+            Log.d(TAG, "open RecSync");
+
+        closePopup();
+        closeExposureUI();
+
+        final long time_s = System.currentTimeMillis();
+
+        {
+            rec_sync_container.setBackgroundColor(Color.BLACK);
+            rec_sync_container.setAlpha(0.9f);
+        }
+
+        if( rec_sync_view == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "create new rec_sync_view");
+            rec_sync_view = new RecSyncView(main_activity);
+            rec_sync_container.addView(rec_sync_view);
+        }
+        else {
+            if( MyDebug.LOG )
+                Log.d(TAG, "use cached rec_sync_view");
+            rec_sync_view.setVisibility(View.VISIBLE);
+        }
+        rec_sync_view_is_open = true;
+
+        rec_sync_container.getViewTreeObserver().addOnGlobalLayoutListener(
+                new OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "onGlobalLayout()");
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
+                        layoutUI(true);
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
+                        // stop listening - only want to call this once!
+                        if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
+                            rec_sync_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        else {
+                            rec_sync_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        }
+
+                        UIPlacement ui_placement = computeUIPlacement();
+                        float pivot_x;
+                        float pivot_y;
+                        switch( ui_placement ) {
+                            case UIPLACEMENT_TOP:
+                                if( main_activity.getPreview().getUIRotation() == 270 ) {
+                                    pivot_x = 0.0f;
+                                    pivot_y = 1.0f;
+                                }
+                                else {
+                                    pivot_x = 0.0f;
+                                    pivot_y = 0.0f;
+                                }
+                                break;
+                            case UIPLACEMENT_LEFT:
+                                pivot_x = 1.0f;
+                                pivot_y = 1.0f;
+                                break;
+                            default:
+                                pivot_x = 1.0f;
+                                pivot_y = 0.0f;
+                                break;
+                        }
+                        ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, pivot_x, Animation.RELATIVE_TO_SELF, pivot_y);
+                        animation.setDuration(100);
+                        rec_sync_container.setAnimation(animation);
+                    }
+                }
+        );
+        if( MyDebug.LOG )
+            Log.d(TAG, "time to create recSync: " + (System.currentTimeMillis() - time_s));
+    }
+
+    public void closeRecSync() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "close RecSync");
+        if( recSyncIsOpen() ) {
+            clearRemoteControlForPopup(); // TODO what is it?
+            clearSelectionState();
+
+            rec_sync_view_is_open = false;
+
+            if( cache_rec_sync && !force_destroy_rec_sync ) {
+                rec_sync_view.setVisibility(View.GONE);
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "destroyRecSync");
+                force_destroy_rec_sync = false;
+                if( recSyncIsOpen() ) {
+                    closeRecSync();
+                }
+                ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
+                rec_sync_container.removeAllViews();
+                rec_sync_view = null;
+            }
+
+            main_activity.initImmersiveMode(); // to reset the timer when closing the recsync
+        }
+    }
+
+    public boolean recSyncIsOpen() {
+        return rec_sync_view_is_open;
+    }
+
+    /**
      * Opens or closes the settings popup on the camera preview. The popup that
      * differs depending whether we're in photo or video mode
      */
@@ -2298,6 +2538,7 @@ public class MainUI {
             Log.d(TAG, "open popup");
 
         closeExposureUI();
+        closeRecSync();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
 

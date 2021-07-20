@@ -119,6 +119,9 @@ public class PreferenceKeys {
 
     public static final String AutoStabilisePreferenceKey = "preference_auto_stabilise";
 
+    // for recSync
+    public static final String SwitchRecSyncPreferenceKey = "switch_rec_sync";
+
     public static final String PhotoModePreferenceKey = "preference_photo_mode";
 
     public static final String HDRSaveExpoPreferenceKey = "preference_hdr_save_expo";
