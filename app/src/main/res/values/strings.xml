@@ -73,6 +73,7 @@
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
 
     <string name="preference_switch_rec_sync">Use RecSync</string>
+    <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_devices">Sync devises</string>
     <string name="sync_settings">Sync settings</string>
 
