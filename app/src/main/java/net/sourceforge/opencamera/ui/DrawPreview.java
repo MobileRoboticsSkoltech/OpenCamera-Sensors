@@ -89,6 +89,7 @@ public class DrawPreview {
     private boolean is_high_speed;
     private float capture_rate_factor;
     private boolean auto_stabilise_pref;
+    private boolean enable_rec_sync_pref;
     private String preference_grid_pref;
     private String ghost_image_pref;
     private String ghost_selected_image_pref = "";
@@ -564,6 +565,7 @@ public class DrawPreview {
         capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
 
         auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
+        enable_rec_sync_pref = ((ExtendedAppInterface) applicationInterface).getEnableRecSyncPref();
 
         preference_grid_pref = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
 
@@ -1240,7 +1242,7 @@ public class DrawPreview {
         }
 
         // RecSync leader-client information
-        if( applicationInterface instanceof ExtendedAppInterface ) {
+        if(enable_rec_sync_pref) {
             TextView textView = ((ExtendedAppInterface) applicationInterface).getSyncStatusText();
             String[] lines = ((String) textView.getText()).split("\n");
             int color = textView.getCurrentTextColor();

@@ -65,9 +65,9 @@ public class RecSyncView extends LinearLayout {
 
         // TODO if (support recSync)
 
-        // checkbox switch recSync
+        // checkbox enable recSync
         CheckBox checkBox = new CheckBox(main_activity);
-        checkBox.setText(getResources().getString(R.string.preference_switch_rec_sync));
+        checkBox.setText(getResources().getString(R.string.preference_enable_rec_sync));
         checkBox.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
         checkBox.setTextColor(Color.WHITE);
         {
@@ -83,13 +83,13 @@ public class RecSyncView extends LinearLayout {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 
-        boolean switch_rec_sync = sharedPreferences.getBoolean(PreferenceKeys.SwitchRecSyncPreferenceKey, false);
-        if (switch_rec_sync)
-            checkBox.setChecked(switch_rec_sync);
+        boolean enable_rec_sync = sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+        if (enable_rec_sync)
+            checkBox.setChecked(enable_rec_sync);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView,
                                          boolean isChecked) {
-                main_activity.clickedSwitchRecSync();
+                main_activity.clickedEnableRecSync();
             }
         });
 

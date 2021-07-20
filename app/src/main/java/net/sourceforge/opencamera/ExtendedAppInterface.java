@@ -116,6 +116,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
 
+    public boolean getEnableRecSyncPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+    }
+
     public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
         if (wantAccel) {
             int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
@@ -227,6 +231,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mMainActivity.finish(); // Close current app, expect user to restart.
             mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
         }
+    }
+
+    public void stopSoftwareSync() {
+        mSoftwareSyncController.close();
     }
 
     public TextView getSyncStatusText() {

@@ -730,7 +730,9 @@ public class MainActivity extends Activity {
         }
 
         // start RecSync leader-client setup
-        applicationInterface.startSoftwareSync();
+        if (sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false)) {
+            applicationInterface.startSoftwareSync();
+        }
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
@@ -1772,13 +1774,25 @@ public class MainActivity extends Activity {
         preview.showToast(stamp_toast, value ? R.string.stamp_enabled : R.string.stamp_disabled);
     }
 
-    public void clickedSwitchRecSync() {
+    public void clickedEnableRecSync() {
         if( MyDebug.LOG )
-            Log.d(TAG, "clickedSwitchRecSync");
+            Log.d(TAG, "clickedEnableRecSync");
+        boolean value = applicationInterface.getEnableRecSyncPref();
+        value = !value;
 
-        // TODO show client/leader info
-        // TODO open video mode
-        // in MyApplicationInterface?
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, value);
+        editor.apply();
+
+        if( value ) {
+            applicationInterface.startSoftwareSync();
+        } else {
+            applicationInterface.stopSoftwareSync();
+        }
+
+        applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
+        this.closeRecSync();
     }
 
     public void clickedAutoLevel(View view) {
