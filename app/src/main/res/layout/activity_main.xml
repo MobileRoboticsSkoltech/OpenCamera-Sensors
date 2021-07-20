@@ -205,6 +205,20 @@
         />
 
     <ImageButton
+        android:id="@+id/recSync"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/rec_sync_settings"
+        android:src="@drawable/ic_recsync"
+        android:background="@color/icons_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedRecSyncSettings"
+        />
+
+    <ImageButton
         android:id="@+id/popup"
         android:layout_width="@dimen/onscreen_button_size"
         android:layout_height="@dimen/onscreen_button_size"
@@ -621,6 +635,15 @@
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/popup"
         android:layout_below="@+id/popup"
+        android:fadeScrollbars="false"
+        />
+
+    <ScrollView
+        android:id="@+id/rec_sync_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/recSync"
+        android:layout_below="@+id/recSync"
         android:fadeScrollbars="false"
         />
     
