@@ -6,8 +6,6 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.preview.Preview;
 
-import java.text.DecimalFormat;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -19,6 +17,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+
+import androidx.annotation.StringRes;
 
 /**
  * This defines the UI for the "recSync" button, that provides quick access to a
@@ -33,24 +33,25 @@ public class RecSyncView extends LinearLayout {
     private static final float title_text_size_dip = 17.0f;
     private static final float standard_text_size_dip = 16.0f;
 
+    private final float scale = getResources().getDisplayMetrics().density;
     private int total_width_dp;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final DecimalFormat decimal_format_1dp_force0 = new DecimalFormat("0.0");
 
     public RecSyncView(Context context) {
         super(context);
-        if (MyDebug.LOG)
+
+        if (MyDebug.LOG) {
             Log.d(TAG, "new RecSyncView: " + this);
+        }
 
         this.setOrientation(LinearLayout.VERTICAL);
-        final float scale = getResources().getDisplayMetrics().density;
 
-        final MainActivity main_activity = (MainActivity) this.getContext();
+        final MainActivity mainActivity = (MainActivity) this.getContext();
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        final Preview preview = mainActivity.getPreview();
 
         boolean small_screen = false;
         total_width_dp = 280;
-        int max_width_dp = main_activity.getMainUI().getMaxHeightDp(false);
+        int max_width_dp = mainActivity.getMainUI().getMaxHeightDp(false);
         if (total_width_dp > max_width_dp) {
             total_width_dp = max_width_dp;
             small_screen = true;
@@ -61,15 +62,48 @@ public class RecSyncView extends LinearLayout {
             Log.d(TAG, "small_screen: " + small_screen);
         }
 
-        final Preview preview = main_activity.getPreview();
-
         // TODO if (support recSync)
 
         // checkbox enable recSync
-        CheckBox checkBox = new CheckBox(main_activity);
-        checkBox.setText(getResources().getString(R.string.preference_enable_rec_sync));
+        addCheckbox(mainActivity, R.string.preference_enable_rec_sync, sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false), (buttonView, isChecked) -> {
+            if (MyDebug.LOG) {
+                Log.d(TAG, "pressed checkboxEnableRecSync");
+            }
+
+            mainActivity.clickedEnableRecSync();
+        });
+
+        // button sync settings
+        addButton(R.string.sync_settings, view -> {
+            if (MyDebug.LOG) {
+                Log.d(TAG, "clicked to buttonSyncSettings");
+            }
+
+            // TODO sync settings
+            preview.showToast(null, "Sync settings finished");
+        });
+
+        // button sync devices
+        addButton(R.string.sync_devices, view -> {
+            if (MyDebug.LOG) {
+                Log.d(TAG, "clicked to buttonSyncDevices");
+            }
+
+            // TODO sync devices
+            preview.showToast(null, "Sync devices finished"); // TODO bug in repeated clicks
+        });
+    }
+
+    public int getTotalWidth() {
+        return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+    }
+
+    private void addCheckbox(MainActivity context, @StringRes int text, boolean isChecked, CompoundButton.OnCheckedChangeListener listener) {
+        CheckBox checkBox = new CheckBox(context);
+        checkBox.setText(getResources().getString(text));
         checkBox.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
         checkBox.setTextColor(Color.WHITE);
+
         {
             // align the checkbox a bit better
             LayoutParams params = new LayoutParams(
@@ -81,67 +115,23 @@ public class RecSyncView extends LinearLayout {
             checkBox.setLayoutParams(params);
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        if (isChecked) {
+            checkBox.setChecked(isChecked);
+        }
 
-        boolean enable_rec_sync = sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
-        if (enable_rec_sync)
-            checkBox.setChecked(enable_rec_sync);
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView,
-                                         boolean isChecked) {
-                main_activity.clickedEnableRecSync();
-            }
-        });
+        checkBox.setOnCheckedChangeListener(listener);
 
         this.addView(checkBox);
+    }
 
-        // button sync settings TODO createButton() for this
-
-        final Button buttonSyncSettings = new Button(this.getContext());
-        buttonSyncSettings.setBackgroundColor(Color.TRANSPARENT);
-        buttonSyncSettings.setText(R.string.sync_settings);
-        buttonSyncSettings.setAllCaps(false);
-        buttonSyncSettings.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
-        this.addView(buttonSyncSettings);
-
-        buttonSyncSettings.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                if (MyDebug.LOG)
-                    Log.d(TAG, "clicked to buttonSyncSettings");
-
-                // TODO sync settings
-                preview.showToast(null, "Sync settings finished");
-            }
-        });
-
-
-        // button sync devices
-
+    private void addButton(@StringRes int text, View.OnClickListener listener) {
         final Button buttonSyncDevices = new Button(this.getContext());
         buttonSyncDevices.setBackgroundColor(Color.TRANSPARENT);
-        buttonSyncDevices.setText(R.string.sync_devices);
+        buttonSyncDevices.setText(text);
         buttonSyncDevices.setAllCaps(false);
         buttonSyncDevices.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
         this.addView(buttonSyncDevices);
 
-        buttonSyncDevices.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                if (MyDebug.LOG)
-                    Log.d(TAG, "clicked to buttonSyncDevices");
-
-                // TODO sync devices
-                preview.showToast(null, "Sync devices finished"); // TODO bug in repeated clicks
-            }
-        });
-
-    }
-
-    public int getTotalWidth() {
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+        buttonSyncDevices.setOnClickListener(listener);
     }
 }
