@@ -741,7 +741,7 @@ public class MainUI {
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, R.id.recSync);
                 layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, 0);
             }
             else {
                 layoutParams.addRule(align_right, R.id.recSync);
@@ -750,7 +750,7 @@ public class MainUI {
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, 0);
                 layoutParams.addRule(align_parent_top, 0);
-                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, 0);
             }
             view.setLayoutParams(layoutParams);
 

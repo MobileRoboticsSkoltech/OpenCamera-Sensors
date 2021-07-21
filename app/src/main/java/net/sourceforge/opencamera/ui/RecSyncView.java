@@ -107,7 +107,8 @@ public class RecSyncView extends LinearLayout {
                     LayoutParams.MATCH_PARENT
             );
             final int left_padding = (int) (10 * scale + 0.5f); // convert dps to pixels
-            params.setMargins(left_padding, 0, 0, 0);
+            final int right_padding = (int) (20 * scale + 0.5f); // convert dps to pixels
+            params.setMargins(left_padding, 0, right_padding, 0);
             checkBox.setLayoutParams(params);
         }
 
