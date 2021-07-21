@@ -74,8 +74,9 @@
 
     <string name="preference_enable_rec_sync">Use RecSync</string>
     <string name="rec_sync_settings">RecSync settings</string>
+    <string name="sync_settings_unblocked">Block and sync settings</string>
+    <string name="sync_settings_blocked">Unblock settings</string>
     <string name="sync_devices">Sync devices</string>
-    <string name="sync_settings">Sync settings</string>
 
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>

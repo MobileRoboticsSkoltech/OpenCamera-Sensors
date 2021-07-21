@@ -1796,13 +1796,13 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
     }
 
-    public void clickedSyncSettings() {
+    public void clickedSyncSettings(boolean isSettingsBlocked) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
 
         // TODO sync settings
 
-        preview.showToast(sync_settings_toast, "Sync settings finished");
+        preview.showToast(sync_settings_toast, isSettingsBlocked ? "Settings are unblocked" : "Settings are blocked and synced");
     }
 
     public void clickedSyncDevices() {

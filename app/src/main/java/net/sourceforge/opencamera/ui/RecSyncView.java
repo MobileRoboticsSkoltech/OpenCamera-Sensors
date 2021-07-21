@@ -35,6 +35,9 @@ public class RecSyncView extends LinearLayout {
     private final float scale = getResources().getDisplayMetrics().density;
     private int total_width_dp;
 
+    // TODO move this to a class that controls RecSync status
+    private boolean is_settings_blocked = false;
+
     public RecSyncView(Context context) {
         super(context);
 
@@ -60,8 +63,6 @@ public class RecSyncView extends LinearLayout {
             Log.d(TAG, "small_screen: " + small_screen);
         }
 
-        // TODO if (support recSync)
-
         // checkbox enable recSync
         addCheckbox(mainActivity, R.string.preference_enable_rec_sync, sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false), (buttonView, isChecked) -> {
             if (MyDebug.LOG) {
@@ -72,12 +73,20 @@ public class RecSyncView extends LinearLayout {
         });
 
         // button sync settings
-        addButton(R.string.sync_settings, view -> {
+        addButton(R.string.sync_settings_unblocked, view -> {
             if (MyDebug.LOG) {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            mainActivity.clickedSyncSettings();
+            if (is_settings_blocked) {
+                ((Button) view).setText(R.string.sync_settings_unblocked);
+            } else {
+                ((Button) view).setText(R.string.sync_settings_blocked);
+            }
+
+            mainActivity.clickedSyncSettings(is_settings_blocked);
+
+            is_settings_blocked = !is_settings_blocked;
         });
 
         // button sync devices
