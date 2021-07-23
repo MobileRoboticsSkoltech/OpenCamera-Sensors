@@ -384,27 +384,35 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         Log.d(TAG, "Applying and locking settings.");
 
         Preview preview = mMainActivity.getPreview();
-        CameraController cameraController = preview.getCameraController();
 
         if (preview.isVideo() != settings.isVideo) {
-            mMainActivity.clickedSwitchVideo(null);
+            mMainActivity.runOnUiThread(() -> mMainActivity.clickedSwitchVideo(null));
+
+            // Need to wait until CameraController gets reinitialized and some settings get restored
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
-        cameraController.setExposureTime(settings.exposure);
+        CameraController cameraController = preview.getCameraController();
+
         if (!preview.isExposureLocked()) {
-            mMainActivity.clickedExposureLock(null);
+            mMainActivity.runOnUiThread(() -> mMainActivity.clickedExposureLock(null));
         }
+        cameraController.setExposureTime(settings.exposure);
 
         if (settings.syncIso) {
             cameraController.setManualISO(true, settings.iso);
         }
 
         if (settings.syncWb) {
-            cameraController.setWhiteBalance(settings.wbMode);
-            cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
-            if (!preview.isWhiteBalanceLocked()) {
-                mMainActivity.clickedWhiteBalanceLock(null);
+            if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !preview.isWhiteBalanceLocked()) {
+                mMainActivity.runOnUiThread(() -> mMainActivity.clickedWhiteBalanceLock(null));
             }
+            cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
+            cameraController.setWhiteBalance(settings.wbMode);
         }
 
         if (settings.syncFlash) {
@@ -421,6 +429,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             editor.apply();
         }
 
-        getDrawPreview().updateSettings();
+        getDrawPreview().updateSettings(); // To ensure that the changes get cached
     }
 }
