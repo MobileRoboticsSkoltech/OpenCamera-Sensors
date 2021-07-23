@@ -68,46 +68,33 @@
         android:key="preference_category_sensors"
         android:title="OpenCamera Sensors">
 
-        <!-- TODO: add to strings.xml-->
-        <SwitchPreference
-            android:key="preference_imu_recording"
-            android:title="Enable video with IMU recording"
-            android:summary="Enable synchronized IMU and video recording with timestamps"
-            android:defaultValue="true"
-            />
-
-        <SwitchPreference
-            android:key="preference_remote_rec_control"
-            android:title="Enable remote recording control"
-            android:summary="Accept remote control messages over the network. Restart required"
-            android:defaultValue="true"
-            />
-
-        <SwitchPreference
-            android:key="preference_save_video_frames"
-            android:title="Save video frames during video + IMU recording"
-            android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
-            android:defaultValue="true"
-            />
-
-
-        <SwitchPreference
-            android:key="preference_video_flash"
-            android:title="Flash blinking during video recording"
-            android:summary="Enables flash strobe during video recording"
-            android:defaultValue="false"
-            />
+        <!-- TODO: add to strings.xml -->
 
         <PreferenceScreen
-            android:key="preference_screen_camera_controls_more"
-            android:title="More sensor controls"
-            android:icon="@drawable/ic_more_horiz_white_48dp"
-            android:persistent="false">
+            android:key="preference_imu_settings"
+            android:title="IMU settings..."
+            android:icon="@drawable/ic_imu_outline_white_48dp"
+            android:persistent="false"
+            >
 
             <Preference
                 android:key="preference_characteristics"
                 android:title="Important characteristics"
                 android:summary="API support, IMU + camera sync support"
+                />
+
+            <SwitchPreference
+                android:key="preference_imu_recording"
+                android:title="Enable video with IMU recording"
+                android:summary="Enable synchronized IMU and video recording with timestamps"
+                android:defaultValue="true"
+                />
+
+            <SwitchPreference
+                android:key="preference_save_video_frames"
+                android:title="Save video frames during video + IMU recording"
+                android:summary="Can be used for debugging frame timestamps by matching video frames with saved images"
+                android:defaultValue="true"
                 />
 
             <PreferenceCategory
@@ -172,6 +159,70 @@
                     />
             </PreferenceCategory>
         </PreferenceScreen>
+        <PreferenceScreen
+            android:icon="@drawable/ic_recsync"
+            android:key="preference_rec_sync_settings"
+            android:persistent="false"
+            android:title="RecSync settings...">
+
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="preference_enable_rec_sync"
+                android:title="@string/preference_enable_rec_sync" />
+
+
+            <PreferenceCategory
+                android:key="preference_sync_settings"
+                android:title="Sync settings">
+
+                <CheckBoxPreference
+                    android:key="preference_sync_exposure"
+                    android:title="Exposure"
+                    android:icon="@drawable/ic_exposure_white_48dp"
+                    android:defaultValue="true"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_sync_iso"
+                    android:title="ISO"
+                    android:icon="@drawable/iso_icon"
+                    android:defaultValue="false"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_sync_wb"
+                    android:title="White balance"
+                    android:icon="@drawable/white_balance_unlocked"
+                    android:defaultValue="false"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_sync_flash"
+                    android:title="Flash"
+                    android:icon="@drawable/baseline_highlight_white_48"
+                    android:defaultValue="false"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_sync_format"
+                    android:title="File format"
+                    android:icon="@drawable/ic_save_white_48dp"
+                    android:defaultValue="false"
+                    />
+
+            </PreferenceCategory>
+        </PreferenceScreen>
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="preference_remote_rec_control"
+            android:summary="Accept remote control messages over the network. Restart required"
+            android:title="Enable remote recording control" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="preference_video_flash"
+            android:summary="Enables flash strobe during video recording"
+            android:title="Flash blinking during video recording" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="preference_category_camera_controls"
