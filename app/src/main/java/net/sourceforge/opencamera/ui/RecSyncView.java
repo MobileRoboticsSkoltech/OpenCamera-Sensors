@@ -2,13 +2,10 @@ package net.sourceforge.opencamera.ui;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -19,9 +16,13 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.StringRes;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
 /**
  * This defines the UI for the "recSync" button, that provides quick access to a
  * range of options.
+ *
+ * Requires {@link SoftwareSyncController} to be initialized (i.e. RecSync to be started)
  */
 
 public class RecSyncView extends LinearLayout {
@@ -35,9 +36,6 @@ public class RecSyncView extends LinearLayout {
     private final float scale = getResources().getDisplayMetrics().density;
     private int total_width_dp;
 
-    // TODO move this to a class that controls RecSync status
-    private boolean is_settings_blocked = false;
-
     public RecSyncView(Context context) {
         super(context);
 
@@ -48,7 +46,14 @@ public class RecSyncView extends LinearLayout {
         this.setOrientation(LinearLayout.VERTICAL);
 
         final MainActivity mainActivity = (MainActivity) this.getContext();
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        final SoftwareSyncController softwareSyncController = mainActivity.getApplicationInterface().getSoftwareSyncController();
+
+        if (softwareSyncController == null) {
+            throw new IllegalStateException("SoftwareSyncController is not initialized");
+        }
+        if (!softwareSyncController.isLeader()) {
+            throw new IllegalStateException("RecSyncView should only be shown to a leader");
+        }
 
         boolean small_screen = false;
         total_width_dp = 280;
@@ -63,30 +68,15 @@ public class RecSyncView extends LinearLayout {
             Log.d(TAG, "small_screen: " + small_screen);
         }
 
-        // checkbox enable recSync
-        addCheckbox(mainActivity, R.string.preference_enable_rec_sync, sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false), (buttonView, isChecked) -> {
-            if (MyDebug.LOG) {
-                Log.d(TAG, "pressed checkboxEnableRecSync");
-            }
-
-            mainActivity.clickedEnableRecSync();
-        });
-
         // button sync settings
-        addButton(R.string.sync_settings_unblocked, view -> {
+        addButton(R.string.sync_settings_unlocked, view -> {
             if (MyDebug.LOG) {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            if (is_settings_blocked) {
-                ((Button) view).setText(R.string.sync_settings_unblocked);
-            } else {
-                ((Button) view).setText(R.string.sync_settings_blocked);
-            }
+            mainActivity.clickedSyncSettings();
 
-            mainActivity.clickedSyncSettings(is_settings_blocked);
-
-            is_settings_blocked = !is_settings_blocked;
+            ((Button) view).setText(softwareSyncController.isSettingsLocked() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked);
         });
 
         // button sync devices

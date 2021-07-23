@@ -85,11 +85,12 @@ public class SoftwareSyncLeader extends SoftwareSyncBase {
     setLeaderFromLocalNs(localClock.read() - initialTime);
 
     // Add client-specific RPC callbacks.
+
+    // Received heartbeat from client, send back an acknowledge and then check the client state and
+    // add to sntp queue if needed.
     rpcMap.put(
         SyncConstants.METHOD_HEARTBEAT,
         payload -> {
-          // Received heartbeat from client, send back an acknowledge and then
-          // check the client state and add to sntp queue if needed.
           Log.v(TAG, "Heartbeat received from client: " + payload);
           try {
             processHeartbeatRpc(payload);

@@ -73,6 +73,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
@@ -1779,15 +1781,8 @@ public class MainActivity extends Activity {
     public void clickedEnableRecSync() {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedEnableRecSync");
-        boolean value = applicationInterface.getEnableRecSyncPref();
-        value = !value;
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, value);
-        editor.apply();
-
-        if( value ) {
+        if( applicationInterface.getEnableRecSyncPref() ) {
             applicationInterface.startSoftwareSync();
         } else {
             applicationInterface.stopSoftwareSync();
@@ -1796,13 +1791,18 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
     }
 
-    public void clickedSyncSettings(boolean isSettingsBlocked) {
+    public void clickedSyncSettings() {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
 
-        // TODO sync settings
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        softwareSyncController.switchSettingsLock();
 
-        preview.showToast(sync_settings_toast, isSettingsBlocked ? "Settings are unblocked" : "Settings are blocked and synced");
+        if( softwareSyncController.isSettingsLocked() ) {
+            ExtendedAppInterface.SettingsContainer settings = applicationInterface.collectSettings();
+            applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
+            preview.showToast(sync_settings_toast, R.string.settings_synced);
+        }
     }
 
     public void clickedSyncDevices() {
@@ -1811,7 +1811,7 @@ public class MainActivity extends Activity {
 
         // TODO sync devices
 
-        preview.showToast(sync_devices_toast, "Sync devices finished");
+        preview.showToast(sync_devices_toast, R.string.devices_synced);
     }
 
     public void clickedAutoLevel(View view) {

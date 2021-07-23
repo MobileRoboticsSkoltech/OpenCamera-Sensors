@@ -121,6 +121,14 @@ public class PreferenceKeys {
 
     public static final String EnableRecSyncPreferenceKey = "preference_enable_rec_sync";
 
+    public static final String SyncIsoPreferenceKey = "preference_sync_iso";
+
+    public static final String SyncWbPreferenceKey = "preference_sync_wb";
+
+    public static final String SyncFlashPreferenceKey = "preference_sync_flash";
+
+    public static final String SyncFormatPreferenceKey = "preference_sync_format";
+
     public static final String PhotoModePreferenceKey = "preference_photo_mode";
 
     public static final String HDRSaveExpoPreferenceKey = "preference_hdr_save_expo";

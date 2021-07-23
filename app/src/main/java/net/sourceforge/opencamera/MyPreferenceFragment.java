@@ -1691,6 +1691,23 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
+        {
+            final Preference pref = findPreference(PreferenceKeys.EnableRecSyncPreferenceKey);
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals("preference_enable_rec_sync") ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked enable RecSync");
+
+                        MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                        main_activity.clickedEnableRecSync();
+                    }
+                    return true;
+                }
+            });
+        }
+
         setupDependencies();
     }
 

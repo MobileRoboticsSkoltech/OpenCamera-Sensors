@@ -5,13 +5,18 @@ import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.googleresearch.capturesync.SoftwareSyncController;
+import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 
+import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
+import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.sensorlogging.FlashController;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
@@ -41,6 +46,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
+    private final Handler sendSettingsHandler = new Handler();
 
     private SoftwareSyncController mSoftwareSyncController;
 
@@ -55,7 +61,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mRawSensorInfo = mainActivity.getRawSensorInfoManager();
         mMainActivity = mainActivity;
         mFlashController = new FlashController(mainActivity);
-
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
@@ -103,10 +108,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         );
         int sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
         try {
-            if (sensorSampleRateString != null) sensorSampleRate = Integer.parseInt(sensorSampleRateString);
-        }
-        catch(NumberFormatException exception) {
-            if( MyDebug.LOG )
+            if (sensorSampleRateString != null)
+                sensorSampleRate = Integer.parseInt(sensorSampleRateString);
+        } catch (NumberFormatException exception) {
+            if (MyDebug.LOG)
                 Log.e(TAG, "Sample rate invalid format: " + sensorSampleRateString);
         }
         return sensorSampleRate;
@@ -168,7 +173,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         } else if (getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
             mMainActivity.getPreview().stopVideo(false);
-        } else if (getIMURecordingPref() && !(getGyroPref() ||  getMagneticPref() || getAccelPref())) {
+        } else if (getIMURecordingPref() && !(getGyroPref() || getMagneticPref() || getAccelPref())) {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
             mMainActivity.getPreview().stopVideo(false);
         }
@@ -213,6 +218,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mYuvUtils;
     }
 
+    /**
+     * Starts RecSync by instantiating a {@link SoftwareSyncController}. If one is already running
+     * then it is closed and a new one is initialized.
+     * <p>
+     * Starts pick WiFI activity if neither WiFi nor hotspot is enabled.
+     */
     public void startSoftwareSync() {
         // Start softwaresync, close it first if it's already running.
         if (mSoftwareSyncController != null) {
@@ -233,11 +244,183 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
     }
 
+    /**
+     * Closes {@link SoftwareSyncController} if one is running.
+     */
     public void stopSoftwareSync() {
-        mSoftwareSyncController.close();
+        if (mSoftwareSyncController != null) {
+            mSoftwareSyncController.close();
+        }
     }
 
+    public SoftwareSyncController getSoftwareSyncController() {
+        return mSoftwareSyncController;
+    }
+
+    /**
+     * Provides the current leader-client status of RecSync.
+     *
+     * @return a {@link TextView} describing the current status.
+     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized.
+     */
     public TextView getSyncStatusText() {
-        return mSoftwareSyncController.getStatusText();
+        if (mSoftwareSyncController != null) {
+            return mSoftwareSyncController.getStatusText();
+        } else {
+            throw new IllegalStateException("Cannot provide sync status when RecSync is not running");
+        }
+    }
+
+    /**
+     * Container for the values of the settings and their "to be synced" statuses.
+     */
+    public static class SettingsContainer {
+        final public boolean syncIso;
+        final public boolean syncWb;
+        final public boolean syncFlash;
+        final public boolean syncFormat;
+
+        final public boolean isVideo;
+        final public long exposure;
+        final public int iso;
+        final public int wbTemperature;
+        final public String wbMode;
+        final public String flash;
+        final public String format;
+
+        public SettingsContainer(boolean syncIso, boolean syncWb, boolean syncFlash, boolean syncFormat,
+                                 boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
+            this.syncIso = syncIso;
+            this.syncWb = syncWb;
+            this.syncFlash = syncFlash;
+            this.syncFormat = syncFormat;
+            this.isVideo = isVideo;
+            this.exposure = exposure;
+            this.iso = iso;
+            this.wbTemperature = wbTemperature;
+            this.wbMode = wbMode;
+            this.flash = flash;
+            this.format = format;
+        }
+    }
+
+    /**
+     * Collects current syncing preferences and settings.
+     *
+     * @return a container with collected settings.
+     */
+    public SettingsContainer collectSettings() {
+        Log.d(TAG, "Collecting current settings.");
+
+        Preview preview = mMainActivity.getPreview();
+        CameraController cameraController = preview.getCameraController();
+
+        boolean isVideo = preview.isVideo();
+
+        SettingsContainer settings = new SettingsContainer(
+                mSharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false),
+                mSharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false),
+                mSharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false),
+                mSharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false),
+                isVideo,
+                cameraController.captureResultExposureTime(),
+                cameraController.captureResultIso(),
+                cameraController.captureResultWhiteBalanceTemperature(),
+                cameraController.getWhiteBalance(),
+                cameraController.getFlashValue(),
+                isVideo ?
+                        mSharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default") :
+                        mSharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg")
+        );
+
+        return settings;
+    }
+
+    /**
+     * Schedules a broadcast of the current settings to clients.
+     *
+     * @param settings describes the settings to be broadcast.
+     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized after the
+     * delay.
+     */
+    public void scheduleBroadcastSettings(SettingsContainer settings) {
+        sendSettingsHandler.removeCallbacks(null);
+        sendSettingsHandler.postDelayed(
+                () -> {
+                    Log.d(TAG, "Broadcasting current settings.");
+
+                    // Construct the payload
+                    String[] payloadParts = {
+                            String.valueOf(settings.syncIso),
+                            String.valueOf(settings.syncWb),
+                            String.valueOf(settings.syncFlash),
+                            String.valueOf(settings.syncFormat),
+                            String.valueOf(settings.isVideo),
+                            String.valueOf(settings.exposure),
+                            String.valueOf(settings.iso),
+                            String.valueOf(settings.wbTemperature),
+                            settings.wbMode,
+                            settings.flash,
+                            settings.format
+                    };
+                    String payload = TextUtils.join(",", payloadParts);
+
+                    // Send settings to all devices
+                    if (mSoftwareSyncController == null) {
+                        throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
+                    }
+                    ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync())
+                            .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, payload);
+                },
+                500);
+    }
+
+    /**
+     * Applies the values of the settings received from a leader and locks them.
+     *
+     * @param settings describes the settings to be changed and the values to be applied.
+     */
+    public void applyAndLockSettings(SettingsContainer settings) {
+        Log.d(TAG, "Applying and locking settings.");
+
+        Preview preview = mMainActivity.getPreview();
+        CameraController cameraController = preview.getCameraController();
+
+        if (preview.isVideo() != settings.isVideo) {
+            mMainActivity.clickedSwitchVideo(null);
+        }
+
+        cameraController.setExposureTime(settings.exposure);
+        if (!preview.isExposureLocked()) {
+            mMainActivity.clickedExposureLock(null);
+        }
+
+        if (settings.syncIso) {
+            cameraController.setManualISO(true, settings.iso);
+        }
+
+        if (settings.syncWb) {
+            cameraController.setWhiteBalance(settings.wbMode);
+            cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
+            if (!preview.isWhiteBalanceLocked()) {
+                mMainActivity.clickedWhiteBalanceLock(null);
+            }
+        }
+
+        if (settings.syncFlash) {
+            cameraController.setFlashValue(settings.flash);
+        }
+
+        if (settings.syncFormat) {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            if (settings.isVideo) {
+                editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
+            } else {
+                editor.putString(PreferenceKeys.ImageFormatPreferenceKey, settings.format);
+            }
+            editor.apply();
+        }
+
+        getDrawPreview().updateSettings();
     }
 }

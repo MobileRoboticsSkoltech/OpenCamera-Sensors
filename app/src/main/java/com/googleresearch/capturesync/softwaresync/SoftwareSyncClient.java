@@ -83,14 +83,16 @@ public class SoftwareSyncClient extends SoftwareSyncBase {
     super(name, localClock, address, leaderAddress);
 
     // Add client-specific RPC callbacks.
+
+    // Leader responded to heartbeat. Update last response and change sync status as needed.
     rpcMap.put(
         SyncConstants.METHOD_HEARTBEAT_ACK,
         payload -> {
-          // Leader responded to heartbeat. update last response and change sync status as needed.
           lastLeaderResponseTimeNs = localClock.read();
           Log.v(TAG, "Heartbeat acknowledge received from leader.");
           updateState();
         });
+    // Set the received offset and update state.
     rpcMap.put(
         SyncConstants.METHOD_OFFSET_UPDATE,
         payload -> {

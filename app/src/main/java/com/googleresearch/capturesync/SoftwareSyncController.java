@@ -35,6 +35,7 @@ import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 import com.googleresearch.capturesync.softwaresync.SyncConstants;
 import com.googleresearch.capturesync.softwaresync.TimeUtils;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 
 import java.io.Closeable;
@@ -58,15 +59,16 @@ public class SoftwareSyncController implements Closeable {
     private final TextView statusView;
     private final PhaseAlignController phaseAlignController;
     private boolean isLeader;
-    SoftwareSyncBase softwareSync;
+    private boolean isSettingsLocked;
+    private SoftwareSyncBase softwareSync;
 
     /* Tell devices to save the frame at the requested trigger time. */
     public static final int METHOD_SET_TRIGGER_TIME = 200_000;
 
     /* Tell devices to phase align. */
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
-    /* Tell devices to set manual exposure and white balance to the requested values. */
-    public static final int METHOD_SET_2A = 200_002;
+    /* Tell devices to set chosen settings to the requested values. */
+    public static final int METHOD_SET_SETTINGS = 200_002;
     public static final int METHOD_START_RECORDING = 200_003;
     public static final int METHOD_STOP_RECORDING = 200_004;
 
@@ -102,6 +104,7 @@ public class SoftwareSyncController implements Closeable {
         String name = lastFourSerial();
         Log.w(TAG, "Name/Serial# (Last 4 digits): " + name);
 
+        // Determine leadership.
         try {
             NetworkHelpers networkHelper = new NetworkHelpers(wifiManager);
             isLeader = networkHelper.isLeader();
@@ -132,6 +135,7 @@ public class SoftwareSyncController implements Closeable {
 
         // Set up shared rpcs.
         Map<Integer, RpcCallback> sharedRpcs = new HashMap<>();
+
         //sharedRpcs.put(
         //        METHOD_SET_TRIGGER_TIME,
         //        payload -> {
@@ -140,7 +144,6 @@ public class SoftwareSyncController implements Closeable {
         //            // TODO: (MROB) change to video
         //            context.setUpcomingCaptureStill(upcomingTriggerTimeNs);
         //        });
-
 
         //sharedRpcs.put(
         //        METHOD_DO_PHASE_ALIGN,
@@ -152,38 +155,62 @@ public class SoftwareSyncController implements Closeable {
         //            phaseAlignController.startAlign();
         //        });
 
-        //sharedRpcs.put(
-        //        METHOD_SET_2A,
-        //        payload -> {
-        //            Log.v(TAG, "Received payload: " + payload);
-        //
-        //            String[] segments = payload.split(",");
-        //            if (segments.length != 2) {
-        //                throw new IllegalArgumentException("Wrong number of segments in payload: " + payload);
-        //            }
-        //            long sensorExposureNs = Long.parseLong(segments[0]);
-        //            int sensorSensitivity = Integer.parseInt(segments[1]);
-        //            context.set2aAndUpdatePreview(sensorExposureNs, sensorSensitivity);
-        //        });
+        // Apply the received settings.
+        sharedRpcs.put(
+                METHOD_SET_SETTINGS,
+                payload -> {
+                    Log.v(TAG, "Received payload: " + payload);
+
+                    String[] segments = payload.split(",");
+                    if (segments.length != 11) {
+                        throw new IllegalArgumentException("Wrong number of segments in payload: " + payload);
+                    }
+
+                    ExtendedAppInterface.SettingsContainer settings = new ExtendedAppInterface.SettingsContainer(
+                            // preferences
+                            Boolean.parseBoolean(segments[0]), // syncIso
+                            Boolean.parseBoolean(segments[1]), // syncWb
+                            Boolean.parseBoolean(segments[2]), // syncFlash
+                            Boolean.parseBoolean(segments[3]), // syncFormat
+                            // values
+                            Boolean.parseBoolean(segments[4]), // isVideo
+                            Long.parseLong(segments[5]), // exposure
+                            Integer.parseInt(segments[6]), // iso
+                            Integer.parseInt(segments[7]), // wbTemperature
+                            segments[8], // wbMode
+                            segments[9], // flash
+                            segments[10] // format
+                    );
+
+                    context.getApplicationInterface().applyAndLockSettings(settings);
+                });
 
         if (isLeader) {
             // Leader.
             long initTimeNs = TimeUtils.millisToNanos(System.currentTimeMillis());
+
             // Create rpc mapping specific to leader.
             Map<Integer, RpcCallback> leaderRpcs = new HashMap<>(sharedRpcs);
+
+            // Update status text when the status changes.
             leaderRpcs.put(SyncConstants.METHOD_MSG_ADDED_CLIENT, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_REMOVED_CLIENT, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_SYNCING, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_OFFSET_UPDATED, payload -> updateClientsUI());
+
             softwareSync = new SoftwareSyncLeader(name, initTimeNs, localAddress, leaderRpcs);
         } else {
             // Client.
             Map<Integer, RpcCallback> clientRpcs = new HashMap<>(sharedRpcs);
+
+            // Update status text to "waiting for leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
                             context.runOnUiThread(
                                     () -> statusView.setText(softwareSync.getName() + ": Waiting for Leader")));
+
+            // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
@@ -208,6 +235,7 @@ public class SoftwareSyncController implements Closeable {
             //            );
             //        });
 
+            // Update status text to "synced to leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
@@ -217,6 +245,7 @@ public class SoftwareSyncController implements Closeable {
                                                     String.format(
                                                             "Client %s\n-Synced to Leader %s",
                                                             softwareSync.getName(), softwareSync.getLeaderAddress()))));
+
             softwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
         }
 
@@ -275,6 +304,13 @@ public class SoftwareSyncController implements Closeable {
         }
     }
 
+    /**
+     * Change the lock status of the settings selected for synchronization.
+     */
+    public void switchSettingsLock() {
+        isSettingsLocked = !isSettingsLocked;
+    }
+
     private String lastFourSerial() {
         String serial = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
         if (serial.length() <= 4) {
@@ -288,7 +324,15 @@ public class SoftwareSyncController implements Closeable {
         return isLeader;
     }
 
+    public boolean isSettingsLocked() {
+        return isSettingsLocked;
+    }
+
     public TextView getStatusText() {
         return statusView;
+    }
+
+    public SoftwareSyncBase getSoftwareSync() {
+        return softwareSync;
     }
 }
