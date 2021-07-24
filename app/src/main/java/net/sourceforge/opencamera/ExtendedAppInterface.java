@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -276,105 +275,24 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Container for the values of the settings and their "to be synced" statuses.
-     */
-    public static class SettingsContainer {
-        final public boolean syncIso;
-        final public boolean syncWb;
-        final public boolean syncFlash;
-        final public boolean syncFormat;
-
-        final public boolean isVideo;
-        final public long exposure;
-        final public int iso;
-        final public int wbTemperature;
-        final public String wbMode;
-        final public String flash;
-        final public String format;
-
-        public SettingsContainer(boolean syncIso, boolean syncWb, boolean syncFlash, boolean syncFormat,
-                                 boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
-            this.syncIso = syncIso;
-            this.syncWb = syncWb;
-            this.syncFlash = syncFlash;
-            this.syncFormat = syncFormat;
-            this.isVideo = isVideo;
-            this.exposure = exposure;
-            this.iso = iso;
-            this.wbTemperature = wbTemperature;
-            this.wbMode = wbMode;
-            this.flash = flash;
-            this.format = format;
-        }
-    }
-
-    /**
-     * Collects current syncing preferences and settings.
-     *
-     * @return a container with collected settings.
-     */
-    public SettingsContainer collectSettings() {
-        Log.d(TAG, "Collecting current settings.");
-
-        Preview preview = mMainActivity.getPreview();
-        CameraController cameraController = preview.getCameraController();
-
-        boolean isVideo = preview.isVideo();
-
-        SettingsContainer settings = new SettingsContainer(
-                mSharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false),
-                mSharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false),
-                mSharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false),
-                mSharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false),
-                isVideo,
-                cameraController.captureResultExposureTime(),
-                cameraController.captureResultIso(),
-                cameraController.captureResultWhiteBalanceTemperature(),
-                cameraController.getWhiteBalance(),
-                cameraController.getFlashValue(),
-                isVideo ?
-                        mSharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default") :
-                        mSharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg")
-        );
-
-        return settings;
-    }
-
-    /**
      * Schedules a broadcast of the current settings to clients.
      *
      * @param settings describes the settings to be broadcast.
      * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized after the
      * delay.
      */
-    public void scheduleBroadcastSettings(SettingsContainer settings) {
+    public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
         sendSettingsHandler.removeCallbacks(null);
         sendSettingsHandler.postDelayed(
                 () -> {
                     Log.d(TAG, "Broadcasting current settings.");
-
-                    // Construct the payload
-                    String[] payloadParts = {
-                            String.valueOf(settings.syncIso),
-                            String.valueOf(settings.syncWb),
-                            String.valueOf(settings.syncFlash),
-                            String.valueOf(settings.syncFormat),
-                            String.valueOf(settings.isVideo),
-                            String.valueOf(settings.exposure),
-                            String.valueOf(settings.iso),
-                            String.valueOf(settings.wbTemperature),
-                            settings.wbMode,
-                            settings.flash,
-                            settings.format
-                    };
-                    String payload = TextUtils.join(",", payloadParts);
 
                     // Send settings to all devices
                     if (mSoftwareSyncController == null) {
                         throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
                     }
                     ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync())
-                            .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, payload);
+                            .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, settings.asString());
                 },
                 500);
     }
@@ -384,7 +302,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      *
      * @param settings describes the settings to be changed and the values to be applied.
      */
-    public void applyAndLockSettings(SettingsContainer settings) {
+    public void applyAndLockSettings(SyncSettingsContainer settings) {
         Log.d(TAG, "Applying and locking settings.");
 
         Preview preview = mMainActivity.getPreview();

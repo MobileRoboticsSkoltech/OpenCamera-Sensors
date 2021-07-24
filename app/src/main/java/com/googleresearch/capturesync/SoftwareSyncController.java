@@ -35,8 +35,8 @@ import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 import com.googleresearch.capturesync.softwaresync.SyncConstants;
 import com.googleresearch.capturesync.softwaresync.TimeUtils;
 
-import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.SyncSettingsContainer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -59,7 +59,6 @@ public class SoftwareSyncController implements Closeable {
     private final TextView statusView;
     private final PhaseAlignController phaseAlignController;
     private boolean isLeader;
-    private boolean isSettingsLocked;
     private SoftwareSyncBase softwareSync;
 
     /* Tell devices to save the frame at the requested trigger time. */
@@ -166,7 +165,7 @@ public class SoftwareSyncController implements Closeable {
                         throw new IllegalArgumentException("Wrong number of segments in payload: " + payload);
                     }
 
-                    ExtendedAppInterface.SettingsContainer settings = new ExtendedAppInterface.SettingsContainer(
+                    SyncSettingsContainer settings = new SyncSettingsContainer(
                             // preferences
                             Boolean.parseBoolean(segments[0]), // syncIso
                             Boolean.parseBoolean(segments[1]), // syncWb
@@ -305,10 +304,20 @@ public class SoftwareSyncController implements Closeable {
     }
 
     /**
-     * Change the lock status of the settings selected for synchronization.
+     * Change the lock status of the settings selected for synchronization. If the settings are
+     * getting locked then the provided settings are saved for broadcasts.
+     *
+     * @param settings the locked settings to be saved.
+     * @throws IllegalArgumentException if null is provided when settings are to be locked.
      */
-    public void switchSettingsLock() {
-        isSettingsLocked = !isSettingsLocked;
+    public void switchSettingsLock(SyncSettingsContainer settings) {
+        if (isSettingsLocked()) {
+            ((SoftwareSyncLeader) softwareSync).setSavedSettings(null);
+        } else if (settings != null) {
+            ((SoftwareSyncLeader) softwareSync).setSavedSettings(settings);
+        } else {
+            throw new IllegalArgumentException("Settings to be locked cannot be null");
+        }
     }
 
     private String lastFourSerial() {
@@ -324,8 +333,17 @@ public class SoftwareSyncController implements Closeable {
         return isLeader;
     }
 
+    /**
+     * Current lock status of the leader's settings.
+     *
+     * @return true if the settings are locked, false if they are not.
+     * @throws IllegalStateException if the device if not a leader.
+     */
     public boolean isSettingsLocked() {
-        return isSettingsLocked;
+        if (isLeader) {
+            return ((SoftwareSyncLeader) softwareSync).getSavedSettings() != null;
+        }
+        throw new IllegalStateException("Cannot check the settings lock status for a client");
     }
 
     public TextView getStatusText() {

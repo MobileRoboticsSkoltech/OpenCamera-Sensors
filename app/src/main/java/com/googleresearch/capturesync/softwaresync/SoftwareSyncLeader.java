@@ -18,6 +18,10 @@ package com.googleresearch.capturesync.softwaresync;
 
 import android.util.Log;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
+import net.sourceforge.opencamera.SyncSettingsContainer;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -59,6 +63,9 @@ public class SoftwareSyncLeader extends SoftwareSyncBase {
 
   /** Manages SNTP synchronization of clients. */
   private final SimpleNetworkTimeProtocol sntp;
+
+  /** Saved settings for broadcasts to new clients. */
+  private SyncSettingsContainer savedSettings;
 
   public SoftwareSyncLeader(
       String name, long initialTime, InetAddress address, Map<Integer, RpcCallback> rpcCallbacks) {
@@ -139,6 +146,10 @@ public class SoftwareSyncLeader extends SoftwareSyncBase {
       if (!clientExists) {
         // Notify via message on interface if client is new.
         onRpc(SyncConstants.METHOD_MSG_ADDED_CLIENT, updatedClient.name());
+        // Broadcast the saved settings if any.
+        if (savedSettings != null) {
+          sendRpc(SoftwareSyncController.METHOD_SET_SETTINGS, savedSettings.asString(), address);
+        }
       }
     }
   }
@@ -269,5 +280,13 @@ public class SoftwareSyncLeader extends SoftwareSyncBase {
     if (!clientSyncState) {
       sntp.submitNewSyncRequest(clientAddress);
     }
+  }
+
+  public SyncSettingsContainer getSavedSettings() {
+    return savedSettings;
+  }
+
+  public void setSavedSettings(SyncSettingsContainer value) {
+    savedSettings = value;
   }
 }

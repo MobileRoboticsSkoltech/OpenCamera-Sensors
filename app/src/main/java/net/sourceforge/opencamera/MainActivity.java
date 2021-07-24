@@ -1796,13 +1796,15 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedSyncSettings");
 
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        softwareSyncController.switchSettingsLock();
+        SyncSettingsContainer settings = null;
 
-        if( softwareSyncController.isSettingsLocked() ) {
-            ExtendedAppInterface.SettingsContainer settings = applicationInterface.collectSettings();
+        if( !softwareSyncController.isSettingsLocked() ) {
+            settings = new SyncSettingsContainer(this);
             applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(sync_settings_toast, R.string.settings_synced);
         }
+
+        softwareSyncController.switchSettingsLock(settings);
     }
 
     public void clickedSyncDevices() {
