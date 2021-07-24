@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -23,8 +24,11 @@ import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -408,21 +412,38 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         if (settings.syncWb) {
+            // Lock wb only if the selected mode is not auto
             if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !preview.isWhiteBalanceLocked()) {
                 mMainActivity.runOnUiThread(() -> mMainActivity.clickedWhiteBalanceLock(null));
             }
-            cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
-            cameraController.setWhiteBalance(settings.wbMode);
+            // If the selected mode is supported set it, otherwise try to set manual mode
+            List<String> supportedValues = preview.getSupportedWhiteBalances();
+            if (supportedValues.contains(settings.wbMode)) {
+                cameraController.setWhiteBalance(settings.wbMode);
+            } else if (supportedValues.contains("manual")) {
+                cameraController.setWhiteBalance("manual");
+            }
+            // If the resulting selected mode is manual apply the selected temperature
+            if (cameraController.getWhiteBalance().equals("manual")) {
+                cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
+            }
         }
 
         if (settings.syncFlash) {
-            cameraController.setFlashValue(settings.flash);
+            List<String> supportedValues = preview.getSupportedFlashValues();
+            if (supportedValues.contains(settings.flash)) {
+                cameraController.setFlashValue(settings.flash);
+            }
         }
 
         if (settings.syncFormat) {
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             if (settings.isVideo) {
-                editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
+                // Check that the selected format is supported (HEVC and WebM may be not)
+                List<String> supportedFormats = getSupportedVideoFormats();
+                if (supportedFormats.contains(settings.format)) {
+                    editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
+                }
             } else {
                 editor.putString(PreferenceKeys.ImageFormatPreferenceKey, settings.format);
             }
@@ -430,5 +451,17 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         getDrawPreview().updateSettings(); // To ensure that the changes get cached
+    }
+
+    private List<String> getSupportedVideoFormats() {
+        // Construct the list of the supported formats the same way MyPreferenceFragment does
+        List<String> supportedFormats = new ArrayList<>(Arrays.asList(mMainActivity.getResources().getStringArray(R.array.preference_video_output_format_values)));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            supportedFormats.remove("preference_video_output_format_mpeg4_hevc");
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            supportedFormats.remove("preference_video_output_format_webm");
+        }
+        return supportedFormats;
     }
 }
