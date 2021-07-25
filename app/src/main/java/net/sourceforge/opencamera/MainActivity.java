@@ -1466,6 +1466,12 @@ public class MainActivity extends Activity {
         soundPoolManager.loadSound(R.raw.mybeep);
         soundPoolManager.loadSound(R.raw.mybeep_hi);
 
+        // start RecSync if needed
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) {
+            applicationInterface.startSoftwareSync();
+        }
+
         mainUI.layoutUI();
 
         updateGalleryIcon(); // update in case images deleted whilst idle
@@ -1505,12 +1511,6 @@ public class MainActivity extends Activity {
                     }
                 }
             }
-        }
-
-        // start RecSync if needed
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) {
-            applicationInterface.startSoftwareSync();
         }
 
         if( MyDebug.LOG ) {
