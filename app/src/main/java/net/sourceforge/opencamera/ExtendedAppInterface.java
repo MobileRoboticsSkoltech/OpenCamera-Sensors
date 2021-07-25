@@ -1,8 +1,13 @@
 package net.sourceforge.opencamera;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -25,6 +30,7 @@ import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -72,7 +78,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-
     }
 
     @Override
@@ -247,12 +252,72 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     new SoftwareSyncController(mMainActivity, null, new TextView(mMainActivity));
         } catch (IllegalStateException e) {
             // If wifi is disabled, start pick wifi activity.
-            Log.e(
-                    TAG,
-                    "Couldn't start SoftwareSync due to " + e + ", requesting user pick a wifi network.");
-            mMainActivity.finish(); // Close current app, expect user to restart.
-            mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+            requestWifiPick(TAG, "Couldn't start SoftwareSync due to " + e + ", requesting user to pick a wifi network.");
+            return;
         }
+
+        // Listen for wifi or hotpot status changes.
+        IntentFilter intentFilter = new IntentFilter();
+        if (mSoftwareSyncController.isLeader()) {
+            // Need to get WIFI_AP_STATE_CHANGED_ACTION hidden in WiFiManager.
+            String action;
+            WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            try {
+                Field field = wifiManager.getClass().getDeclaredField("WIFI_AP_STATE_CHANGED_ACTION");
+                action = (String) field.get(wifiManager);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException("Cannot get WIFI_AP_STATE_CHANGED_ACTION value from WifiManager.", e);
+            }
+            intentFilter.addAction(action);
+            mMainActivity.registerReceiver(new HotspotStatusChecker(), intentFilter);
+        } else {
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            mMainActivity.registerReceiver(new WifiStatusChecker(), intentFilter);
+        }
+    }
+
+    private class HotspotStatusChecker extends BroadcastReceiver {
+        private static final String TAG = "HotspotStatusChecker";
+
+        private final int WIFI_AP_STATE_ENABLED;
+
+        HotspotStatusChecker() {
+            // Need to get WIFI_AP_STATE_ENABLED hidden in WifiManager
+            WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            try {
+                Field field = wifiManager.getClass().getDeclaredField("WIFI_AP_STATE_ENABLED");
+                WIFI_AP_STATE_ENABLED = (int) field.get(wifiManager);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException("Cannot get WIFI_AP_STATE_ENABLED value from WifiManager.", e);
+            }
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
+            if (state != WIFI_AP_STATE_ENABLED) {
+                requestWifiPick(TAG, "Hotspot has been stopped, requesting user to pick a wifi network.");
+            }
+        }
+    }
+
+    private class WifiStatusChecker extends BroadcastReceiver {
+        private static final String TAG = "WifiStatusChecker";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            if (networkInfo == null || networkInfo.getType() != ConnectivityManager.TYPE_WIFI) {
+                requestWifiPick(TAG, "WiFi connection has been closed, requesting user to pick a wifi network.");
+            }
+        }
+    }
+
+    private void requestWifiPick(String tag, String logMessage) {
+        Log.e(tag, logMessage);
+        mMainActivity.finish(); // Close current app, expect user to restart.
+        mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
     }
 
     /**
