@@ -8,6 +8,7 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.R;
+import com.googleresearch.capturesync.SoftwareSyncController;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -1113,6 +1114,13 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
     }
 
+    public boolean showRecSyncIcon() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        final SoftwareSyncController softwareSyncController = main_activity.getApplicationInterface().getSoftwareSyncController();
+        return sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
+                softwareSyncController.isLeader();
+    }
+
     public boolean showStampIcon() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
@@ -1204,7 +1212,8 @@ public class MainUI {
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 popupButton.setVisibility(visibility);
-                recSyncButton.setVisibility(visibility);
+                if( showRecSyncIcon() )
+                    recSyncButton.setVisibility(visibility);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1339,7 +1348,8 @@ public class MainUI {
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
-                recSyncButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility);
+                if( showRecSyncIcon() )
+                    recSyncButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility);
 
                 if( show_gui_photo && show_gui_video ) {
                     layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons

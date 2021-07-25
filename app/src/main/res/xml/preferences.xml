@@ -175,7 +175,8 @@
 
             <PreferenceCategory
                 android:key="preference_sync_settings"
-                android:title="Sync settings">
+                android:title="Sync settings"
+                android:dependency="preference_enable_rec_sync">
 
                 <CheckBoxPreference
                     android:key="preference_sync_exposure"
@@ -183,6 +184,7 @@
                     android:summary="Exposure time always syncs and locks."
                     android:icon="@drawable/ic_exposure_white_48dp"
                     android:defaultValue="true"
+                    android:enabled="false"
                     />
 
                 <CheckBoxPreference
