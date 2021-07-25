@@ -256,6 +256,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
     }
 
+    public boolean isSoftwareSyncRunning() {
+        return mSoftwareSyncController != null;
+    }
+
     public SoftwareSyncController getSoftwareSyncController() {
         return mSoftwareSyncController;
     }
