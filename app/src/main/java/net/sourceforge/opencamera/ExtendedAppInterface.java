@@ -326,9 +326,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public void stopSoftwareSync() {
         if (mSoftwareSyncController != null) {
             mSoftwareSyncController.close();
+            mSoftwareSyncController = null;
         }
     }
 
+    /**
+     * Whether SoftwareSync is currently running (i.e. {@link SoftwareSyncController} is
+     * initialized).
+     *
+     * @return true if SoftwareSync is currently running, false if it is not.
+     */
     public boolean isSoftwareSyncRunning() {
         return mSoftwareSyncController != null;
     }
