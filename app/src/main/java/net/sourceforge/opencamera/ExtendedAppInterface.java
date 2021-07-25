@@ -78,6 +78,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     @Override
     void onDestroy() {
         mYuvUtils.close();
+        if (applySettingsTask != null) {
+            applySettingsTask.cancel(true);
+        }
         stopSoftwareSync();
         super.onDestroy();
     }
