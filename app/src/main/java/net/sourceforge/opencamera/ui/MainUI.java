@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MainActivity;
@@ -1116,9 +1117,10 @@ public class MainUI {
 
     public boolean showRecSyncIcon() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-        final SoftwareSyncController softwareSyncController = main_activity.getApplicationInterface().getSoftwareSyncController();
+        final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+        final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
         return sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
-                softwareSyncController.isLeader();
+                extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader();
     }
 
     public boolean showStampIcon() {
@@ -1349,7 +1351,7 @@ public class MainUI {
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
                 if( showRecSyncIcon() )
-                    recSyncButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility);
+                    recSyncButton.setVisibility(visibility);
 
                 if( show_gui_photo && show_gui_video ) {
                     layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
