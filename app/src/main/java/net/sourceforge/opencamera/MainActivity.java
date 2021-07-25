@@ -1475,36 +1475,6 @@ public class MainActivity extends Activity {
         if( !camera_in_background ) {
             // don't restart camera if we're showing a dialog or settings
             preview.onResume();
-
-            // don't restart RecSync if camera is not to be opened
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) {
-                // Need to wait until camera is opened
-                new AsyncTask<Void, Void, Void>() {
-                    private static final String TAG = "MainActivity/AsyncTask";
-
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "doInBackground");
-
-                        while( !preview.openCameraAttempted() ) {
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "Starting RecSync");
-
-                        applicationInterface.startSoftwareSync();
-
-                        return null;
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
         }
 
         {
@@ -1535,6 +1505,12 @@ public class MainActivity extends Activity {
                     }
                 }
             }
+        }
+
+        // start RecSync if needed
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) {
+            applicationInterface.startSoftwareSync();
         }
 
         if( MyDebug.LOG ) {

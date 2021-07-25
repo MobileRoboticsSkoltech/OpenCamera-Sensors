@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +24,7 @@ import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -53,6 +55,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     private SoftwareSyncController mSoftwareSyncController;
 
+    private ApplySettingsTask applySettingsTask = null;
+
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
                 getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
@@ -74,6 +78,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     @Override
     void onDestroy() {
         mYuvUtils.close();
+        stopSoftwareSync();
         super.onDestroy();
     }
 
@@ -283,7 +288,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      *
      * @param settings describes the settings to be broadcast.
      * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized after the
-     * delay.
+     *                               delay.
      */
     public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
         sendSettingsHandler.removeCallbacks(null);
@@ -302,88 +307,139 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Applies the values of the settings received from a leader and locks them.
+     * Creates an {@link AsyncTask} to apply the values of the settings received from a leader and
+     * lock them. Closes the previous task if it exists and is still running.
      *
      * @param settings describes the settings to be changed and the values to be applied.
      */
     public void applyAndLockSettings(SyncSettingsContainer settings) {
         Log.d(TAG, "Applying and locking settings.");
 
-        Preview preview = mMainActivity.getPreview();
-
-        if (preview.isVideo() != settings.isVideo) {
-            mMainActivity.runOnUiThread(() -> mMainActivity.clickedSwitchVideo(null));
-
-            // Need to wait until CameraController gets reinitialized and some settings get restored
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        // Cancel previous task if it is still running
+        if (applySettingsTask != null && applySettingsTask.getStatus() != AsyncTask.Status.FINISHED) {
+            applySettingsTask.cancel(true);
         }
 
-        CameraController cameraController = preview.getCameraController();
-
-        if (!preview.isExposureLocked()) {
-            mMainActivity.runOnUiThread(() -> mMainActivity.clickedExposureLock(null));
-        }
-        cameraController.setExposureTime(settings.exposure);
-
-        if (settings.syncIso) {
-            cameraController.setManualISO(true, settings.iso);
-        }
-
-        if (settings.syncWb) {
-            // Lock wb only if the selected mode is not auto
-            if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !preview.isWhiteBalanceLocked()) {
-                mMainActivity.runOnUiThread(() -> mMainActivity.clickedWhiteBalanceLock(null));
-            }
-            // If the selected mode is supported set it, otherwise try to set manual mode
-            List<String> supportedValues = preview.getSupportedWhiteBalances();
-            if (supportedValues.contains(settings.wbMode)) {
-                cameraController.setWhiteBalance(settings.wbMode);
-            } else if (supportedValues.contains("manual")) {
-                cameraController.setWhiteBalance("manual");
-            }
-            // If the resulting selected mode is manual apply the selected temperature
-            if (cameraController.getWhiteBalance().equals("manual")) {
-                cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
-            }
-        }
-
-        if (settings.syncFlash) {
-            List<String> supportedValues = preview.getSupportedFlashValues();
-            if (supportedValues.contains(settings.flash)) {
-                cameraController.setFlashValue(settings.flash);
-            }
-        }
-
-        if (settings.syncFormat) {
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            if (settings.isVideo) {
-                // Check that the selected format is supported (HEVC and WebM may be not)
-                List<String> supportedFormats = getSupportedVideoFormats();
-                if (supportedFormats.contains(settings.format)) {
-                    editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
-                }
-            } else {
-                editor.putString(PreferenceKeys.ImageFormatPreferenceKey, settings.format);
-            }
-            editor.apply();
-        }
-
-        getDrawPreview().updateSettings(); // To ensure that the changes get cached
+        // Create a new task to wait until camera is opened
+        applySettingsTask = new ApplySettingsTask(this);
+        applySettingsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, settings);
     }
 
-    private List<String> getSupportedVideoFormats() {
-        // Construct the list of the supported formats the same way MyPreferenceFragment does
-        List<String> supportedFormats = new ArrayList<>(Arrays.asList(mMainActivity.getResources().getStringArray(R.array.preference_video_output_format_values)));
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            supportedFormats.remove("preference_video_output_format_mpeg4_hevc");
+    private static class ApplySettingsTask extends AsyncTask<SyncSettingsContainer, Void, Void> {
+        private static final String TAG = "ApplySettingsTask";
+
+        final WeakReference<ExtendedAppInterface> extendedAppInterfaceRef;
+
+        ApplySettingsTask(ExtendedAppInterface extendedAppInterface) {
+            extendedAppInterfaceRef = new WeakReference<>(extendedAppInterface);
         }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            supportedFormats.remove("preference_video_output_format_webm");
+
+        @Override
+        protected Void doInBackground(SyncSettingsContainer... settingsContainers) {
+            Log.d(TAG, "doInBackground");
+
+            if (settingsContainers.length != 1) {
+                throw new IllegalArgumentException(
+                        String.format("One SyncSettingsContainer must be passed but was %d", settingsContainers.length)
+                );
+            }
+            final SyncSettingsContainer settings = settingsContainers[0];
+
+            ExtendedAppInterface extendedAppInterface = extendedAppInterfaceRef.get();
+            if (extendedAppInterface == null) {
+                return null;
+            }
+
+            MainActivity mainActivity = extendedAppInterface.mMainActivity;
+            Preview preview = mainActivity.getPreview();
+
+            // If camera is not opened wait until it is
+            waitForCameraToOpen(preview);
+
+            if (preview.isVideo() != settings.isVideo) {
+                mainActivity.runOnUiThread(() -> mainActivity.clickedSwitchVideo(null));
+
+                // Need to wait until camera gets reopened
+                waitForCameraToOpen(preview);
+            }
+
+            CameraController cameraController = preview.getCameraController();
+
+            if (!preview.isExposureLocked()) {
+                mainActivity.runOnUiThread(() -> mainActivity.clickedExposureLock(null));
+            }
+            cameraController.setExposureTime(settings.exposure);
+
+            if (settings.syncIso) {
+                cameraController.setManualISO(true, settings.iso);
+            }
+
+            if (settings.syncWb) {
+                // Lock wb only if the selected mode is not auto
+                if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !preview.isWhiteBalanceLocked()) {
+                    mainActivity.runOnUiThread(() -> mainActivity.clickedWhiteBalanceLock(null));
+                }
+                // If the selected mode is supported set it, otherwise try to set manual mode
+                List<String> supportedValues = preview.getSupportedWhiteBalances();
+                if (supportedValues.contains(settings.wbMode)) {
+                    cameraController.setWhiteBalance(settings.wbMode);
+                } else if (supportedValues.contains("manual")) {
+                    cameraController.setWhiteBalance("manual");
+                }
+                // If the resulting selected mode is manual apply the selected temperature
+                if (cameraController.getWhiteBalance().equals("manual")) {
+                    cameraController.setWhiteBalanceTemperature(settings.wbTemperature);
+                }
+            }
+
+            if (settings.syncFlash) {
+                List<String> supportedValues = preview.getSupportedFlashValues();
+                if (supportedValues.contains(settings.flash)) {
+                    cameraController.setFlashValue(settings.flash);
+                }
+            }
+
+            if (settings.syncFormat) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                if (settings.isVideo) {
+                    // Check that the selected format is supported (HEVC and WebM may be not)
+                    List<String> supportedFormats = getSupportedVideoFormats(mainActivity);
+                    if (supportedFormats.contains(settings.format)) {
+                        editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
+                    }
+                } else {
+                    editor.putString(PreferenceKeys.ImageFormatPreferenceKey, settings.format);
+                }
+                editor.apply();
+            }
+
+            extendedAppInterface.getDrawPreview().updateSettings(); // Ensure that the changes get cached
+            return null;
         }
-        return supportedFormats;
+
+        private void waitForCameraToOpen(Preview preview) {
+            Log.d(TAG, "Waiting for camera to open...");
+
+            while (!preview.openCameraAttempted()) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        private List<String> getSupportedVideoFormats(MainActivity mainActivity) {
+            // Construct the list of the supported formats the same way MyPreferenceFragment does
+            List<String> supportedFormats = new ArrayList<>(Arrays.asList(mainActivity.getResources().getStringArray(R.array.preference_video_output_format_values)));
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                supportedFormats.remove("preference_video_output_format_mpeg4_hevc");
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                supportedFormats.remove("preference_video_output_format_webm");
+            }
+            return supportedFormats;
+        }
     }
 }
