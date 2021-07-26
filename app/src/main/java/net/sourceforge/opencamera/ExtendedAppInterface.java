@@ -64,6 +64,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private SoftwareSyncController mSoftwareSyncController;
 
     private ApplySettingsTask applySettingsTask = null;
+    private BroadcastReceiver connectionStatusChecker = null;
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
@@ -244,9 +245,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public void startSoftwareSync() {
         // Start softwaresync, close it first if it's already running.
-        if (mSoftwareSyncController != null) {
-            mSoftwareSyncController.close();
-            mSoftwareSyncController = null;
+        if (isSoftwareSyncRunning()) {
+            stopSoftwareSync();
         }
 
         try {
@@ -271,10 +271,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 throw new IllegalStateException("Cannot get WIFI_AP_STATE_CHANGED_ACTION value from WifiManager.", e);
             }
             intentFilter.addAction(action);
-            mMainActivity.registerReceiver(new HotspotStatusChecker(), intentFilter);
+            connectionStatusChecker = new HotspotStatusChecker();
+            mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
         } else {
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            mMainActivity.registerReceiver(new WifiStatusChecker(), intentFilter);
+            connectionStatusChecker = new WifiStatusChecker();
+            mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
         }
     }
 
@@ -327,6 +329,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public void stopSoftwareSync() {
         if (mSoftwareSyncController != null) {
+            mMainActivity.unregisterReceiver(connectionStatusChecker);
+            connectionStatusChecker = null;
             mSoftwareSyncController.close();
             mSoftwareSyncController = null;
         }
