@@ -1161,6 +1161,7 @@ public class MainUI {
                 // if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
@@ -1214,8 +1215,7 @@ public class MainUI {
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 popupButton.setVisibility(visibility);
-                if( showRecSyncIcon() )
-                    recSyncButton.setVisibility(visibility);
+                recSyncButton.setVisibility(visibility_recsync);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1291,6 +1291,7 @@ public class MainUI {
                 final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
+                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
@@ -1350,8 +1351,7 @@ public class MainUI {
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
-                if( showRecSyncIcon() )
-                    recSyncButton.setVisibility(visibility);
+                recSyncButton.setVisibility(visibility_recsync);
 
                 if( show_gui_photo && show_gui_video ) {
                     layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
