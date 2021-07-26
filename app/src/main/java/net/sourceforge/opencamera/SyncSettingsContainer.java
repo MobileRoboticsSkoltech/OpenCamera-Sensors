@@ -11,7 +11,7 @@ import net.sourceforge.opencamera.preview.Preview;
  * Container for the values of the settings and their "to be synced" statuses for RecSync.
  */
 public class SyncSettingsContainer {
-    final public boolean syncIso;
+    final public boolean syncISO;
     final public boolean syncWb;
     final public boolean syncFlash;
     final public boolean syncFormat;
@@ -36,7 +36,7 @@ public class SyncSettingsContainer {
         Preview preview = mainActivity.getPreview();
         CameraController cameraController = preview.getCameraController();
 
-        syncIso = sharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
+        syncISO = sharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
         syncWb = sharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
         syncFlash = sharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
         syncFormat = sharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
@@ -55,7 +55,7 @@ public class SyncSettingsContainer {
     /**
      * The container saves the provided values.
      *
-     * @param syncIso whether to sync ISO or not.
+     * @param syncISO whether to sync ISO or not.
      * @param syncWb whether to sync white balance or not.
      * @param syncFlash whether to sync flash mode or not.
      * @param syncFormat whether to sync video/image format or not.
@@ -67,9 +67,9 @@ public class SyncSettingsContainer {
      * @param flash flash mode.
      * @param format video/image format (must match the chosen capture mode).
      */
-    public SyncSettingsContainer(boolean syncIso, boolean syncWb, boolean syncFlash, boolean syncFormat,
-                             boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
-        this.syncIso = syncIso;
+    public SyncSettingsContainer(boolean syncISO, boolean syncWb, boolean syncFlash, boolean syncFormat,
+                                 boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
+        this.syncISO = syncISO;
         this.syncWb = syncWb;
         this.syncFlash = syncFlash;
         this.syncFormat = syncFormat;
@@ -94,7 +94,7 @@ public class SyncSettingsContainer {
     public String asString() {
         if (asStringCached == null) {
             String[] parts = {
-                    String.valueOf(syncIso),
+                    String.valueOf(syncISO),
                     String.valueOf(syncWb),
                     String.valueOf(syncFlash),
                     String.valueOf(syncFormat),
