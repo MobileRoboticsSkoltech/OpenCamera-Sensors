@@ -1696,7 +1696,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
-                    if( pref.getKey().equals("preference_enable_rec_sync") ) {
+                    if( pref.getKey().equals(PreferenceKeys.EnableRecSyncPreferenceKey) ) {
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked enable RecSync");
 

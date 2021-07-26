@@ -1548,6 +1548,7 @@ public class MainActivity extends Activity {
         }
 
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
+        mainUI.destroyRecSync(); // in case connection type changes (and so does the leadership)
         mSensorManager.unregisterListener(accelerometerListener);
         magneticSensor.unregisterMagneticListener(mSensorManager);
         orientationEventListener.disable();
@@ -2705,6 +2706,11 @@ public class MainActivity extends Activity {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "updateForSettings: time after destroy popup: " + (System.currentTimeMillis() - debug_time));
             }
+        }
+
+        mainUI.destroyRecSync(); // important as enable RecSync preference might have been changed
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "updateForSettings: time after destroy RecSync: " + (System.currentTimeMillis() - debug_time));
         }
 
         // update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!

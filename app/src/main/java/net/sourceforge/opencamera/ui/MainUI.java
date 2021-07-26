@@ -2511,19 +2511,23 @@ public class MainUI {
                 rec_sync_view.setVisibility(View.GONE);
             }
             else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "destroyRecSync");
-                force_destroy_rec_sync = false;
-                if( recSyncIsOpen() ) {
-                    closeRecSync();
-                }
-                ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
-                rec_sync_container.removeAllViews();
-                rec_sync_view = null;
+                destroyRecSync();
             }
 
             main_activity.initImmersiveMode(); // to reset the timer when closing the recsync
         }
+    }
+
+    public void destroyRecSync() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "destroyRecSync");
+        force_destroy_rec_sync = false;
+        if( recSyncIsOpen() ) {
+            closeRecSync();
+        }
+        ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
+        rec_sync_container.removeAllViews();
+        rec_sync_view = null;
     }
 
     public boolean recSyncIsOpen() {
