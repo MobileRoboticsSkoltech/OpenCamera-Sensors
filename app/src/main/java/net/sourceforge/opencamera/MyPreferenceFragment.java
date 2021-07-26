@@ -35,7 +35,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.preference.TwoStatePreference;
 import android.text.SpannableString;
 //import android.text.Spanned;
@@ -776,26 +775,20 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 Log.d(TAG, "supports_camera2: " + supports_camera2);
             ListPreference cameraApiPref = (ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey);
             String cameraApi = cameraApiPref.getValue();
-            if( supports_camera2 && cameraApi != null ) {
-                if ( cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time ) {
-                    getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
-                    MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-                    final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
-                    final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
-                    if ( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
-                            extendedAppInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
-                        getPreferenceScreen().findPreference("preference_sync_settings").setEnabled(false);
-                    }
-                }
-                else {
-                    getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
-                    getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support required");
+            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time) {
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
+
+                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                if ( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
+                        extendedAppInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
+                    getPreferenceScreen().findPreference("preference_sync_settings").setEnabled(false);
                 }
             }
             else {
-                PreferenceScreen screen = getPreferenceScreen();
-                Preference pref = getPreferenceScreen().findPreference("preference_rec_sync_settings");
-                screen.removePreference(pref);
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support required");
             }
         }
 
