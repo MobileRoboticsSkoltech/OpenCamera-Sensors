@@ -770,29 +770,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
-            final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
-            if( MyDebug.LOG )
-                Log.d(TAG, "supports_camera2: " + supports_camera2);
-            ListPreference cameraApiPref = (ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey);
-            String cameraApi = cameraApiPref.getValue();
-            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time) {
-                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
-
-                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-                final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
-                final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
-                if ( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
-                        extendedAppInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
-                    getPreferenceScreen().findPreference("preference_sync_settings").setEnabled(false);
-                }
-            }
-            else {
-                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
-                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support required");
-            }
-        }
-
-        {
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
             if( supports_iso_range ) {
@@ -905,6 +882,27 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_online");
             pg.removePreference(pref);
         }*/
+
+        // must be called after the camera api selection checks
+        {
+            final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
+            String cameraApi = ((ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey)).getValue();
+            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time) {
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
+
+                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                if ( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
+                        extendedAppInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
+                    getPreferenceScreen().findPreference("preference_sync_settings").setEnabled(false);
+                }
+            }
+            else {
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support required");
+            }
+        }
 
         {
             final Preference pref = findPreference("preference_online_help");
