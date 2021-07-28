@@ -468,7 +468,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 return null;
             }
 
-            waitForCameraToOpen(preview); // If camera is not opened wait until it is
+            waitForCameraToOpen(); // If camera is not opened wait until it is
 
             // Close some UI elements for the changes to be reflected in them
             mainActivity.runOnUiThread(() -> {
@@ -491,7 +491,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             return null;
         }
 
-        private void waitForCameraToOpen(Preview preview) {
+        private void waitForCameraToOpen() {
+            Preview preview = previewRef.get();
+            if (preview == null) return;
+
             Log.d(TAG, "Waiting for camera to open...");
 
             while (!preview.openCameraAttempted()) {
@@ -513,7 +516,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             if (preview.isVideo() != settings.isVideo) {
                 mainActivity.runOnUiThread(() -> mainActivity.clickedSwitchVideo(null));
 
-                waitForCameraToOpen(preview); // Need to wait until camera gets reopened
+                waitForCameraToOpen(); // Need to wait until camera gets reopened
+
+                // Need to wait for capture mode to change
+                while (settings.isVideo != preview.isVideo()) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
