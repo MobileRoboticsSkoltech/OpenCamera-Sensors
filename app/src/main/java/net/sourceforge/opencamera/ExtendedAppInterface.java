@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -253,9 +254,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mSoftwareSyncController =
                     new SoftwareSyncController(mMainActivity, null, new TextView(mMainActivity));
         } catch (IllegalStateException e) {
-            // If wifi is disabled, start pick wifi activity.
-            Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled. Requesting user to pick a Wi-Fi network.");
-            requestWifiPick();
+            // Wi-Fi and hotspot are disabled.
+            Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");
+            disableRecSyncSetting();
+            showSimpleAlert("Cannot start RecSync", "Enable either Wi-Fi or hotspot for RecSync to be able to start.");
             return;
         }
 
@@ -300,8 +302,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         public void onReceive(Context context, Intent intent) {
             int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
             if (state != WIFI_AP_STATE_ENABLED) {
-                Log.e(TAG, "Hotspot has been stopped, requesting user to pick a Wi-Fi network.");
-                requestWifiPick();
+                Log.e(TAG, "Hotspot has been stopped, disabling RecSync.");
+                disableRecSyncSetting();
+                showSimpleAlert("Hotspot was stopped", "Stopping RecSync. Enable either Wi-Fi or hotspot and re-enable RecSync in the settings.");
             }
         }
     }
@@ -314,22 +317,39 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
             if (networkInfo == null || networkInfo.getType() != ConnectivityManager.TYPE_WIFI) {
-                Log.e(TAG, "Wi-Fi connection has been closed, requesting user to pick a Wi-Fi network.");
-                requestWifiPick();
+                Log.e(TAG, "Wi-Fi connection has been closed, disabling RecSync.");
+                disableRecSyncSetting();
+                showSimpleAlert("Wi-Fi was stopped", "Stopping RecSync. Enable either Wi-Fi or hotspot and re-enable RecSync in the settings.");
             }
         }
     }
 
-    private void requestWifiPick() {
-        mMainActivity.finish(); // Close current app, expect user to restart.
-        mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+    private void disableRecSyncSetting() {
+        if (!mMainActivity.isCameraInBackground()) {
+            mMainActivity.openSettings();
+        }
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+        editor.apply();
+        stopSoftwareSync(); // Preference wasn't clicked so this won't be triggered
+        getDrawPreview().updateSettings(); // Because we cache the enable RecSync setting
+    }
+
+    private void showSimpleAlert(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(android.R.string.ok, null);
+
+        AlertDialog alert = builder.create();
+        mMainActivity.showAlert(alert);
     }
 
     /**
      * Closes {@link SoftwareSyncController} if one is running.
      */
     public void stopSoftwareSync() {
-        if (mSoftwareSyncController != null) {
+        if (isSoftwareSyncRunning()) {
             mMainActivity.unregisterReceiver(connectionStatusChecker);
             connectionStatusChecker = null;
             mSoftwareSyncController.close();
