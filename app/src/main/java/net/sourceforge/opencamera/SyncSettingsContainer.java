@@ -18,8 +18,6 @@ import java.nio.charset.StandardCharsets;
  * Container for the values of the settings and their "to be synced" statuses for RecSync.
  */
 public class SyncSettingsContainer implements Serializable {
-    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
-
     final public boolean syncISO;
     final public boolean syncWb;
     final public boolean syncFlash;
@@ -111,7 +109,8 @@ public class SyncSettingsContainer implements Serializable {
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot serialize the settings object");
             }
-            asStringCached = bytesToString(byteArray.toByteArray());
+            // Byte-wise ISO_8859_1 is required for the encoding and decoding to work correctly
+            asStringCached = new String(byteArray.toByteArray(), StandardCharsets.ISO_8859_1);
         }
         return asStringCached;
     }
@@ -125,7 +124,7 @@ public class SyncSettingsContainer implements Serializable {
      * @throws IOException if failed to deserialize the given string.
      */
     public static SyncSettingsContainer fromString(String serializedSettings) throws IOException {
-        final ByteArrayInputStream byteArray = new ByteArrayInputStream(stringToBytes(serializedSettings));
+        final ByteArrayInputStream byteArray = new ByteArrayInputStream(serializedSettings.getBytes(StandardCharsets.ISO_8859_1));
         final ObjectInputStream objectReader = new ObjectInputStream(byteArray);
 
         try {
@@ -133,25 +132,5 @@ public class SyncSettingsContainer implements Serializable {
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    private static String bytesToString(byte[] bytes) {
-        byte[] hexChars = new byte[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars, StandardCharsets.UTF_8);
-    }
-
-    private static byte[] stringToBytes(String str) {
-        final int l = str.length();
-        byte[] bytes = new byte[l / 2];
-        for (int i = 0; i < l; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(str.charAt(i), 16) << 4)
-                    + Character.digit(str.charAt(i + 1), 16));
-        }
-        return bytes;
     }
 }
