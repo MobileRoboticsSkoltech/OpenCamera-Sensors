@@ -118,7 +118,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Retrieves gyroscope and accelerometer sample rate preference and converts it to number
+     * Retrieves gyroscope and accelerometer sample rate preference and converts it to number.
      */
     public int getSensorSampleRatePref(String prefKey) {
         String sensorSampleRateString = mSharedPreferences.getString(
@@ -241,7 +241,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * Starts RecSync by instantiating a {@link SoftwareSyncController}. If one is already running
      * then it is closed and a new one is initialized.
      * <p>
-     * Starts pick WiFI activity if neither WiFi nor hotspot is enabled.
+     * Starts pick Wi-Fi activity if neither Wi-Fi nor hotspot is enabled.
      */
     public void startSoftwareSync() {
         // Start softwaresync, close it first if it's already running.
@@ -254,7 +254,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     new SoftwareSyncController(mMainActivity, null, new TextView(mMainActivity));
         } catch (IllegalStateException e) {
             // If wifi is disabled, start pick wifi activity.
-            requestWifiPick(TAG, "Couldn't start SoftwareSync due to " + e + ", requesting user to pick a wifi network.");
+            Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled. Requesting user to pick a Wi-Fi network.");
+            requestWifiPick();
             return;
         }
 
@@ -272,12 +273,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             }
             intentFilter.addAction(action);
             connectionStatusChecker = new HotspotStatusChecker();
-            mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
         } else {
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             connectionStatusChecker = new WifiStatusChecker();
-            mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
         }
+        mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
     }
 
     private class HotspotStatusChecker extends BroadcastReceiver {
@@ -300,7 +300,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         public void onReceive(Context context, Intent intent) {
             int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
             if (state != WIFI_AP_STATE_ENABLED) {
-                requestWifiPick(TAG, "Hotspot has been stopped, requesting user to pick a wifi network.");
+                Log.e(TAG, "Hotspot has been stopped, requesting user to pick a Wi-Fi network.");
+                requestWifiPick();
             }
         }
     }
@@ -313,13 +314,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
             if (networkInfo == null || networkInfo.getType() != ConnectivityManager.TYPE_WIFI) {
-                requestWifiPick(TAG, "WiFi connection has been closed, requesting user to pick a wifi network.");
+                Log.e(TAG, "Wi-Fi connection has been closed, requesting user to pick a Wi-Fi network.");
+                requestWifiPick();
             }
         }
     }
 
-    private void requestWifiPick(String tag, String logMessage) {
-        Log.e(tag, logMessage);
+    private void requestWifiPick() {
         mMainActivity.finish(); // Close current app, expect user to restart.
         mMainActivity.startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
     }

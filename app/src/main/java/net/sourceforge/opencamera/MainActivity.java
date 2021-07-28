@@ -1801,7 +1801,7 @@ public class MainActivity extends Activity {
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
         SyncSettingsContainer settings = null;
 
-        if( !softwareSyncController.isSettingsLocked() ) {
+        if( !softwareSyncController.isSettingsBroadcasting() ) {
             settings = new SyncSettingsContainer(this);
             applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(sync_settings_toast, R.string.settings_synced);

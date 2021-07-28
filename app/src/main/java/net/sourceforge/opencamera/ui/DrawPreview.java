@@ -1240,7 +1240,7 @@ public class DrawPreview {
         }
 
         // RecSync leader-client information
-        if( ((ExtendedAppInterface) applicationInterface).isSoftwareSyncRunning() ) {
+        if( applicationInterface instanceof ExtendedAppInterface && ((ExtendedAppInterface) applicationInterface).isSoftwareSyncRunning() ) {
             TextView textView = ((ExtendedAppInterface) applicationInterface).getSyncStatusText();
             String[] lines = ((String) textView.getText()).split("\n");
             int color = textView.getCurrentTextColor();

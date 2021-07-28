@@ -45,19 +45,19 @@ public class RecSyncView extends LinearLayout {
 
         this.setOrientation(LinearLayout.VERTICAL);
 
-        final MainActivity mainActivity = (MainActivity) this.getContext();
-        final SoftwareSyncController softwareSyncController = mainActivity.getApplicationInterface().getSoftwareSyncController();
+        final MainActivity main_activity = (MainActivity) this.getContext();
+        final SoftwareSyncController software_sync_controller = main_activity.getApplicationInterface().getSoftwareSyncController();
 
-        if (softwareSyncController == null) {
+        if (software_sync_controller == null) {
             throw new IllegalStateException("SoftwareSyncController is not initialized");
         }
-        if (!softwareSyncController.isLeader()) {
+        if (!software_sync_controller.isLeader()) {
             throw new IllegalStateException("RecSyncView should only be shown to a leader");
         }
 
         boolean small_screen = false;
         total_width_dp = 280;
-        int max_width_dp = mainActivity.getMainUI().getMaxHeightDp(false);
+        int max_width_dp = main_activity.getMainUI().getMaxHeightDp(false);
         if (total_width_dp > max_width_dp) {
             total_width_dp = max_width_dp;
             small_screen = true;
@@ -74,9 +74,9 @@ public class RecSyncView extends LinearLayout {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            mainActivity.clickedSyncSettings();
+            main_activity.clickedSyncSettings();
 
-            ((Button) view).setText(softwareSyncController.isSettingsLocked() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked);
+            ((Button) view).setText(software_sync_controller.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked);
         });
 
         // button sync devices
@@ -85,7 +85,7 @@ public class RecSyncView extends LinearLayout {
                 Log.d(TAG, "clicked to buttonSyncDevices");
             }
 
-            mainActivity.clickedSyncDevices();
+            main_activity.clickedSyncDevices();
         });
     }
 
@@ -93,11 +93,11 @@ public class RecSyncView extends LinearLayout {
         return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
     }
 
-    private void addCheckbox(MainActivity context, @StringRes int text, boolean isChecked, CompoundButton.OnCheckedChangeListener listener) {
-        CheckBox checkBox = new CheckBox(context);
-        checkBox.setText(getResources().getString(text));
-        checkBox.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
-        checkBox.setTextColor(Color.WHITE);
+    private void addCheckbox(MainActivity context, @StringRes int text, boolean is_checked, CompoundButton.OnCheckedChangeListener listener) {
+        CheckBox check_box = new CheckBox(context);
+        check_box.setText(getResources().getString(text));
+        check_box.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
+        check_box.setTextColor(Color.WHITE);
 
         {
             // align the checkbox a bit better
@@ -108,26 +108,26 @@ public class RecSyncView extends LinearLayout {
             final int left_padding = (int) (10 * scale + 0.5f); // convert dps to pixels
             final int right_padding = (int) (20 * scale + 0.5f); // convert dps to pixels
             params.setMargins(left_padding, 0, right_padding, 0);
-            checkBox.setLayoutParams(params);
+            check_box.setLayoutParams(params);
         }
 
-        if (isChecked) {
-            checkBox.setChecked(isChecked);
+        if (is_checked) {
+            check_box.setChecked(is_checked);
         }
 
-        checkBox.setOnCheckedChangeListener(listener);
+        check_box.setOnCheckedChangeListener(listener);
 
-        this.addView(checkBox);
+        this.addView(check_box);
     }
 
     private void addButton(@StringRes int text, View.OnClickListener listener) {
-        final Button buttonSyncDevices = new Button(this.getContext());
-        buttonSyncDevices.setBackgroundColor(Color.TRANSPARENT);
-        buttonSyncDevices.setText(text);
-        buttonSyncDevices.setAllCaps(false);
-        buttonSyncDevices.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
-        this.addView(buttonSyncDevices);
+        final Button button_sync_devices = new Button(this.getContext());
+        button_sync_devices.setBackgroundColor(Color.TRANSPARENT);
+        button_sync_devices.setText(text);
+        button_sync_devices.setAllCaps(false);
+        button_sync_devices.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
+        this.addView(button_sync_devices);
 
-        buttonSyncDevices.setOnClickListener(listener);
+        button_sync_devices.setOnClickListener(listener);
     }
 }

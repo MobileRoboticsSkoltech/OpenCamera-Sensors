@@ -311,7 +311,7 @@ public class SoftwareSyncController implements Closeable {
      * @throws IllegalArgumentException if null is provided when settings are to be locked.
      */
     public void switchSettingsLock(SyncSettingsContainer settings) {
-        if (isSettingsLocked()) {
+        if (isSettingsBroadcasting()) {
             ((SoftwareSyncLeader) softwareSync).setSavedSettings(null);
         } else if (settings != null) {
             ((SoftwareSyncLeader) softwareSync).setSavedSettings(settings);
@@ -334,12 +334,13 @@ public class SoftwareSyncController implements Closeable {
     }
 
     /**
-     * Current lock status of the leader's settings.
+     * Current broadcasting status of the leader's settings. If this is true then each new client
+     * will receive the previously saved settings of the leader.
      *
-     * @return true if the settings are locked, false if they are not.
+     * @return true if the settings are being broadcast, false if they are not.
      * @throws IllegalStateException if the device if not a leader.
      */
-    public boolean isSettingsLocked() {
+    public boolean isSettingsBroadcasting() {
         if (isLeader) {
             return ((SoftwareSyncLeader) softwareSync).getSavedSettings() != null;
         }

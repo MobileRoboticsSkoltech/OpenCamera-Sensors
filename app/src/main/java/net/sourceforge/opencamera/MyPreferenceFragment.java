@@ -1767,8 +1767,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         if( MyDebug.LOG )
                             Log.d(TAG, "user clicked enable RecSync");
 
-                        MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-                        main_activity.clickedEnableRecSync();
+                        ((MainActivity)MyPreferenceFragment.this.getActivity()).clickedEnableRecSync();
                     }
                     return true;
                 }
