@@ -160,28 +160,16 @@ public class SoftwareSyncController implements Closeable {
                 payload -> {
                     Log.v(TAG, "Received payload: " + payload);
 
-                    String[] segments = payload.split(",");
-                    if (segments.length != 11) {
-                        throw new IllegalArgumentException("Wrong number of segments in payload: " + payload);
+                    SyncSettingsContainer settings = null;
+                    try {
+                        settings = SyncSettingsContainer.fromString(payload);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Failed to deserialize the settings string: " + payload + "\n" + e.getMessage());
                     }
 
-                    SyncSettingsContainer settings = new SyncSettingsContainer(
-                            // preferences
-                            Boolean.parseBoolean(segments[0]), // syncIso
-                            Boolean.parseBoolean(segments[1]), // syncWb
-                            Boolean.parseBoolean(segments[2]), // syncFlash
-                            Boolean.parseBoolean(segments[3]), // syncFormat
-                            // values
-                            Boolean.parseBoolean(segments[4]), // isVideo
-                            Long.parseLong(segments[5]), // exposure
-                            Integer.parseInt(segments[6]), // iso
-                            Integer.parseInt(segments[7]), // wbTemperature
-                            segments[8], // wbMode
-                            segments[9], // flash
-                            segments[10] // format
-                    );
-
-                    context.getApplicationInterface().applyAndLockSettings(settings);
+                    if (settings != null) {
+                        context.getApplicationInterface().applyAndLockSettings(settings);
+                    }
                 });
 
         if (isLeader) {
