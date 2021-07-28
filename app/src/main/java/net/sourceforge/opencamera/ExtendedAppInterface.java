@@ -43,35 +43,24 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * Extended implementation of ApplicationInterface, adds raw sensor recording layer to the
- * interface.
+ * Extended implementation of ApplicationInterface, adds raw sensor recording layer and RecSync
+ * controls to the interface.
  */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
     private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
     private final RawSensorInfo mRawSensorInfo;
-
-    public FlashController getFlashController() {
-        return mFlashController;
-    }
-
     private final FlashController mFlashController;
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
+    private final TextView mSyncStatusText;
     private final Handler sendSettingsHandler = new Handler();
 
-    private SoftwareSyncController mSoftwareSyncController;
-
+    private SoftwareSyncController softwareSyncController;
     private ApplySettingsTask applySettingsTask = null;
     private BroadcastReceiver connectionStatusChecker = null;
-
-    public VideoFrameInfo setupFrameInfo() throws IOException {
-        return new VideoFrameInfo(
-                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
-        );
-    }
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
@@ -82,20 +71,38 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
+        mSyncStatusText = new TextView(mMainActivity);
     }
 
-    @Override
-    void onDestroy() {
-        mYuvUtils.close();
-        if (applySettingsTask != null) {
-            applySettingsTask.cancel(true);
-        }
-        stopSoftwareSync();
-        super.onDestroy();
+    public VideoFrameInfo setupFrameInfo() throws IOException {
+        return new VideoFrameInfo(
+                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
+        );
+    }
+
+    public FlashController getFlashController() {
+        return mFlashController;
+    }
+
+    public SoftwareSyncController getSoftwareSyncController() {
+        return softwareSyncController;
+    }
+
+    public YuvImageUtils getYuvUtils() {
+        return mYuvUtils;
     }
 
     public BlockingQueue<VideoPhaseInfo> getVideoPhaseInfoReporter() {
         return mMainActivity.getPreview().getVideoPhaseInfoReporter();
+    }
+
+    /**
+     * Provides the current leader-client status of RecSync.
+     *
+     * @return a {@link TextView} describing the current status.
+     */
+    public TextView getSyncStatusText() {
+        return mSyncStatusText;
     }
 
     public boolean getIMURecordingPref() {
@@ -106,16 +113,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.RemoteRecControlPreferenceKey, false);
     }
 
-    private boolean getAccelPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
+    public boolean getSaveFramesPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
 
-    private boolean getGyroPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
-    }
-
-    private boolean getMagneticPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
+    public boolean getEnableRecSyncPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
     }
 
     /**
@@ -137,40 +140,26 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return sensorSampleRate;
     }
 
-    public boolean getSaveFramesPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
+    private boolean getAccelPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
     }
 
-    public boolean getEnableRecSyncPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+    private boolean getGyroPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
     }
 
-    public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
-        if (wantAccel) {
-            int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
-            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
-                mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
-            }
-        }
-        if (wantGyro) {
-            int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
-            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
-                mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
-            }
-        }
-        if (wantMagnetic) {
-            int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
-            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
-                mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
-            }
-        }
+    private boolean getMagneticPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
+    }
 
-        //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
-        Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
-        wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
-        wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
-        wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
-        mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
+    @Override
+    void onDestroy() {
+        mYuvUtils.close();
+        if (applySettingsTask != null) {
+            applySettingsTask.cancel(true);
+        }
+        stopSoftwareSync();
+        super.onDestroy();
     }
 
     @Override
@@ -234,8 +223,32 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mMainActivity.getPreview().showToast(null, "Couldn't write frame timestamps");
     }
 
-    public YuvImageUtils getYuvUtils() {
-        return mYuvUtils;
+    public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
+        if (wantAccel) {
+            int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
+            }
+        }
+        if (wantGyro) {
+            int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
+            }
+        }
+        if (wantMagnetic) {
+            int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
+            }
+        }
+
+        //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
+        Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
+        wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+        mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
     }
 
     /**
@@ -251,8 +264,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         try {
-            mSoftwareSyncController =
-                    new SoftwareSyncController(mMainActivity, null, new TextView(mMainActivity));
+            softwareSyncController =
+                    new SoftwareSyncController(mMainActivity, null, mSyncStatusText);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
             Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");
@@ -263,7 +276,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         // Listen for wifi or hotpot status changes.
         IntentFilter intentFilter = new IntentFilter();
-        if (mSoftwareSyncController.isLeader()) {
+        if (softwareSyncController.isLeader()) {
             // Need to get WIFI_AP_STATE_CHANGED_ACTION hidden in WiFiManager.
             String action;
             WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -352,8 +365,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (isSoftwareSyncRunning()) {
             mMainActivity.unregisterReceiver(connectionStatusChecker);
             connectionStatusChecker = null;
-            mSoftwareSyncController.close();
-            mSoftwareSyncController = null;
+            softwareSyncController.close();
+            softwareSyncController = null;
         }
     }
 
@@ -364,25 +377,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * @return true if SoftwareSync is currently running, false if it is not.
      */
     public boolean isSoftwareSyncRunning() {
-        return mSoftwareSyncController != null;
-    }
-
-    public SoftwareSyncController getSoftwareSyncController() {
-        return mSoftwareSyncController;
-    }
-
-    /**
-     * Provides the current leader-client status of RecSync.
-     *
-     * @return a {@link TextView} describing the current status.
-     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized.
-     */
-    public TextView getSyncStatusText() {
-        if (mSoftwareSyncController != null) {
-            return mSoftwareSyncController.getStatusText();
-        } else {
-            throw new IllegalStateException("Cannot provide sync status when RecSync is not running");
-        }
+        return softwareSyncController != null;
     }
 
     /**
@@ -399,10 +394,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     Log.d(TAG, "Broadcasting current settings.");
 
                     // Send settings to all devices
-                    if (mSoftwareSyncController == null) {
+                    if (softwareSyncController == null) {
                         throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
                     }
-                    ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync())
+                    ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
                             .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, settings.asString());
                 },
                 500);
