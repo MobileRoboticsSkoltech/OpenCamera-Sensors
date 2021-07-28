@@ -1,19 +1,19 @@
 /**
  * Copyright 2019 The Google Research Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- *
+ * <p>
+ * <p>
  * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
  */
 
@@ -44,6 +44,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -53,7 +54,6 @@ import java.util.Map.Entry;
  * Controller managing setup and tear down the SoftwareSync object.
  */
 public class SoftwareSyncController implements Closeable {
-
     private static final String TAG = "SoftwareSyncController";
     private final MainActivity context;
     private final TextView statusView;
@@ -61,12 +61,11 @@ public class SoftwareSyncController implements Closeable {
     private boolean isLeader;
     private SoftwareSyncBase softwareSync;
 
-    /* Tell devices to save the frame at the requested trigger time. */
+    /** Tell devices to save the frame at the requested trigger time. */
     public static final int METHOD_SET_TRIGGER_TIME = 200_000;
-
-    /* Tell devices to phase align. */
+    /** Tell devices to phase align. */
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
-    /* Tell devices to set chosen settings to the requested values. */
+    /** Tell devices to set chosen settings to the requested values. */
     public static final int METHOD_SET_SETTINGS = 200_002;
     public static final int METHOD_START_RECORDING = 200_003;
     public static final int METHOD_STOP_RECORDING = 200_004;
@@ -195,14 +194,14 @@ public class SoftwareSyncController implements Closeable {
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
                             context.runOnUiThread(
-                                    () -> statusView.setText(softwareSync.getName() + ": Waiting for Leader")));
+                                    () -> statusView.setText(String.format(Locale.ENGLISH, "%s: Waiting for Leader", softwareSync.getName()))));
 
             // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
                             context.runOnUiThread(
-                                    () -> statusView.setText(softwareSync.getName() + ": Waiting for Sync")));
+                                    () -> statusView.setText(String.format(Locale.ENGLISH, "%s: Waiting for Sync", softwareSync.getName()))));
 
             //clientRpcs.put(
             //        METHOD_START_RECORDING,
@@ -239,13 +238,13 @@ public class SoftwareSyncController implements Closeable {
         if (isLeader) {
             context.runOnUiThread(
                     () -> {
-                        statusView.setText("Leader : " + softwareSync.getName());
+                        statusView.setText(String.format(Locale.ENGLISH, "Leader: %s", softwareSync.getName()));
                         statusView.setTextColor(Color.rgb(0, 139, 0)); // Dark green.
                     });
         } else {
             context.runOnUiThread(
                     () -> {
-                        statusView.setText("Client : " + softwareSync.getName());
+                        statusView.setText(String.format(Locale.ENGLISH, "Client: %s", softwareSync.getName()));
                         statusView.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
                     });
         }
@@ -263,14 +262,15 @@ public class SoftwareSyncController implements Closeable {
                 () -> {
                     StringBuilder msg = new StringBuilder();
                     msg.append(
-                            String.format("Leader %s: %d clients.\n", softwareSync.getName(), clientCount));
+                            String.format(Locale.ENGLISH,
+                                    "Leader %s: %d clients.\n", softwareSync.getName(), clientCount));
                     for (Entry<InetAddress, ClientInfo> entry : leader.getClients().entrySet()) {
                         ClientInfo client = entry.getValue();
                         if (client.syncAccuracy() == 0) {
                             msg.append(String.format("-Client %s: syncing...\n", client.name()));
                         } else {
                             msg.append(
-                                    String.format(
+                                    String.format(Locale.ENGLISH,
                                             "-Client %s: %.2f ms sync\n", client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
@@ -333,10 +333,6 @@ public class SoftwareSyncController implements Closeable {
             return ((SoftwareSyncLeader) softwareSync).getSavedSettings() != null;
         }
         throw new IllegalStateException("Cannot check the settings lock status for a client");
-    }
-
-    public TextView getStatusText() {
-        return statusView;
     }
 
     public SoftwareSyncBase getSoftwareSync() {
