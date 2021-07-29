@@ -1639,12 +1639,17 @@ public class MainActivity extends Activity {
     public void clickedTakePhoto(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
-        this.takePicture(false);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if( !sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) )
+            this.takePicture(false);
+        else {
+            preview.showToast(store_location_toast, "Photo is not supported in RecSync mode");
+        }
     }
 
     /** User has clicked button to take a photo snapshot whilst video recording.
      */
-    public void clickedTakePhotoVideoSnapshot(View view) {
+    public void clickedTakePhotoVideoSnapshot(View view) { // TODO support for RecSync
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhotoVideoSnapshot");
         this.takePicture(true);
@@ -1653,7 +1658,8 @@ public class MainActivity extends Activity {
     public void clickedPauseVideo(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedPauseVideo");
-        if( preview.isVideoRecording() ) { // just in case
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // block pause button TODO support pause for RecSync
+        if( preview.isVideoRecording() && !sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();
         }
