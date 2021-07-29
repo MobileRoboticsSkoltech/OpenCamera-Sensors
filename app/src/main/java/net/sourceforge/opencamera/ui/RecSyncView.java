@@ -74,9 +74,7 @@ public class RecSyncView extends LinearLayout {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            main_activity.clickedSyncSettings();
-
-            ((Button) view).setText(software_sync_controller.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked);
+            main_activity.clickedSyncSettings(view);
         });
 
         // button sync devices

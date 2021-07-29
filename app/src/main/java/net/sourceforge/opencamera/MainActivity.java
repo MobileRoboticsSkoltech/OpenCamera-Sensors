@@ -62,6 +62,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -1794,7 +1795,7 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
     }
 
-    public void clickedSyncSettings() {
+    public void clickedSyncSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
 
@@ -1808,6 +1809,8 @@ public class MainActivity extends Activity {
         }
 
         softwareSyncController.switchSettingsLock(settings);
+
+        ((Button) view).setText(softwareSyncController.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked);
     }
 
     public void clickedSyncDevices() {
