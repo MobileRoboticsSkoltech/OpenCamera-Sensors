@@ -60,6 +60,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
@@ -4468,6 +4469,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( change_user_pref ) {
                 // now save
                 applicationInterface.setVideoPref(is_video);
+
+                final MainActivity mainActivity = (MainActivity) this.getContext();
+                if (mainActivity.getMainUI().getRecSyncView() != null && mainActivity.getMainUI().getRecSyncView().checkSyncSettingsButton())
+                    mainActivity.clickedSyncSettings();
             }
             if( !during_startup ) {
                 // if during startup, updateFlashForVideo() needs to always be explicitly called anyway
