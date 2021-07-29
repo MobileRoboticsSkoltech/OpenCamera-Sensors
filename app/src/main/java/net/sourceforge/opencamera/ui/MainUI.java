@@ -3235,6 +3235,10 @@ public class MainUI {
         return popup_view;
     }
 
+    public RecSyncView getRecSyncView() {
+        return rec_sync_view;
+    }
+
     public boolean testGetRemoteControlMode() {
         return remote_control_mode;
     }

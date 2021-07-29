@@ -36,6 +36,11 @@ public class RecSyncView extends LinearLayout {
     private final float scale = getResources().getDisplayMetrics().density;
     private int total_width_dp;
 
+    private final SoftwareSyncController software_sync_controller;
+
+    private final Button button_sync_settings;
+    private final Button button_sync_devices;
+
     public RecSyncView(Context context) {
         super(context);
 
@@ -54,6 +59,7 @@ public class RecSyncView extends LinearLayout {
         if (!software_sync_controller.isLeader()) {
             throw new IllegalStateException("RecSyncView should only be shown to a leader");
         }
+        this.software_sync_controller = software_sync_controller;
 
         boolean small_screen = false;
         total_width_dp = 280;
@@ -68,17 +74,15 @@ public class RecSyncView extends LinearLayout {
             Log.d(TAG, "small_screen: " + small_screen);
         }
 
-        // button sync settings
-        addButton(R.string.sync_settings_unlocked, view -> {
+        button_sync_settings = addButton(R.string.sync_settings_unlocked, view -> {
             if (MyDebug.LOG) {
                 Log.d(TAG, "clicked to buttonSyncSettings");
             }
 
-            main_activity.clickedSyncSettings(view);
+            main_activity.clickedSyncSettings();
         });
 
-        // button sync devices
-        addButton(R.string.sync_devices, view -> {
+        button_sync_devices = addButton(R.string.sync_devices, view -> {
             if (MyDebug.LOG) {
                 Log.d(TAG, "clicked to buttonSyncDevices");
             }
@@ -91,7 +95,13 @@ public class RecSyncView extends LinearLayout {
         return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
     }
 
-    private void addCheckbox(MainActivity context, @StringRes int text, boolean is_checked, CompoundButton.OnCheckedChangeListener listener) {
+    public void updateSyncSettingsButton() {
+        button_sync_settings.setText(
+                software_sync_controller.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked
+        );
+    }
+
+    private CheckBox addCheckbox(MainActivity context, @StringRes int text, boolean is_checked, CompoundButton.OnCheckedChangeListener listener) {
         CheckBox check_box = new CheckBox(context);
         check_box.setText(getResources().getString(text));
         check_box.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
@@ -116,16 +126,19 @@ public class RecSyncView extends LinearLayout {
         check_box.setOnCheckedChangeListener(listener);
 
         this.addView(check_box);
+
+        return check_box;
     }
 
-    private void addButton(@StringRes int text, View.OnClickListener listener) {
+    private Button addButton(@StringRes int text, View.OnClickListener listener) {
         final Button button_sync_devices = new Button(this.getContext());
         button_sync_devices.setBackgroundColor(Color.TRANSPARENT);
         button_sync_devices.setText(text);
         button_sync_devices.setAllCaps(false);
         button_sync_devices.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
+        button_sync_devices.setOnClickListener(listener);
         this.addView(button_sync_devices);
 
-        button_sync_devices.setOnClickListener(listener);
+        return button_sync_devices;
     }
 }
