@@ -18,8 +18,13 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+
+import com.googleresearch.capturesync.PhaseAlignController;
 import com.googleresearch.capturesync.SoftwareSyncController;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
+import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
+import com.googleresearch.capturesync.softwaresync.phasealign.PhaseConfig;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
@@ -31,9 +36,14 @@ import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
 import net.sourceforge.opencamera.ui.MainUI;
 import net.sourceforge.opencamera.ui.ManualSeekbars;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -55,7 +65,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
+    private final PhaseAlignController mPhaseAlignController;
     private final TextView mSyncStatusText;
+
+    private final PeriodCalculator periodCalculator = new PeriodCalculator();
     private final Handler sendSettingsHandler = new Handler();
 
     private SoftwareSyncController softwareSyncController;
@@ -71,7 +84,24 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
+        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mSyncStatusText = new TextView(mMainActivity);
+    }
+
+    private PhaseConfig getDefaultPhaseConfig() {
+        PhaseConfig phaseConfig;
+        try {
+            InputStream inputStream = mMainActivity.getResources().openRawResource(R.raw.default_phaseconfig);
+            byte[] buffer = new byte[inputStream.available()];
+            // noinspection ResultOfMethodCallIgnored
+            inputStream.read(buffer);
+            inputStream.close();
+            JSONObject json = new JSONObject(new String(buffer, StandardCharsets.UTF_8));
+            phaseConfig = PhaseConfig.parseFromJSON(json);
+        } catch (JSONException | IOException e) {
+            throw new IllegalArgumentException("Error parsing default phase config file: ", e);
+        }
+        return phaseConfig;
     }
 
     public VideoFrameInfo setupFrameInfo() throws IOException {
@@ -257,6 +287,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * <p>
      * Starts pick Wi-Fi activity if neither Wi-Fi nor hotspot is enabled.
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void startSoftwareSync() {
         // Start softwaresync, close it first if it's already running.
         if (isSoftwareSyncRunning()) {
@@ -265,7 +296,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         try {
             softwareSyncController =
-                    new SoftwareSyncController(mMainActivity, null, mSyncStatusText);
+                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, periodCalculator, mSyncStatusText);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
             Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");

@@ -887,7 +887,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         {
             final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
             String cameraApi = ((ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey)).getValue();
-            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time) {
+            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
 
                 MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
@@ -900,7 +900,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
             else {
                 getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
-                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support required");
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support and Android 7.0 or higher required");
             }
         }
 
