@@ -1641,8 +1641,7 @@ public class MainActivity extends Activity {
 
     public void clickedTakePhoto(View view) {
         boolean is_rec_sync_run = isRecSyncRunning();
-        boolean is_leader = isLeader();
-        if( is_rec_sync_run && !is_leader ) return;
+        if( is_rec_sync_run && !isClient() ) return;
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
         if( is_rec_sync_run ) {
