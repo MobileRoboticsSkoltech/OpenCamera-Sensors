@@ -9,7 +9,6 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.R;
-import com.googleresearch.capturesync.SoftwareSyncController;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -931,8 +930,12 @@ public class MainUI {
             int resource;
             int content_description;
             int switch_video_content_description;
-            boolean isClient = main_activity.isRecSyncRunning() && main_activity.isClient();
-            if( isClient ) {
+            boolean is_client;
+            {
+                final ExtendedAppInterface appInterface = main_activity.getApplicationInterface();
+                is_client = appInterface.isSoftwareSyncRunning() && !appInterface.getSoftwareSyncController().isLeader();
+            }
+            if( is_client ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "set icon empty");
                 resource = R.drawable.ic_empty;
@@ -967,10 +970,7 @@ public class MainUI {
 
             view = main_activity.findViewById(R.id.switch_video);
             view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
-            if( isClient )
-                resource = R.drawable.ic_empty;
-            else
-                resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
+            resource = is_client ? R.drawable.ic_empty : main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
             view.setImageResource(resource);
             view.setTag(resource); // for testing
         }
@@ -1127,7 +1127,10 @@ public class MainUI {
     }
 
     public boolean showRecSyncIcon() {
-        return main_activity.isRecSyncRunning() && main_activity.isLeader();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+        return sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
+                extendedAppInterface.isSoftwareSyncRunning() && extendedAppInterface.getSoftwareSyncController().isLeader();
     }
 
     public boolean showStampIcon() {

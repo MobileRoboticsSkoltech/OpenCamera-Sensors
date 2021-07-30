@@ -1642,11 +1642,13 @@ public class MainActivity extends Activity {
     }
 
     public void clickedTakePhoto(View view) {
-        boolean is_rec_sync_run = isRecSyncRunning();
-        if( is_rec_sync_run && isClient() ) return;
+        // RecSync clients are not allowed to click this button
+        final boolean is_rec_sync_running = applicationInterface.isSoftwareSyncRunning();
+        if( is_rec_sync_running && !applicationInterface.getSoftwareSyncController().isLeader() ) return;
+
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
-        if( is_rec_sync_run ) {
+        if( is_rec_sync_running ) {
             if( !preview.isVideo() ) {
                 preview.showToast(rec_sync_toast, "Photo is not supported in RecSync mode");
                 return;
@@ -1670,8 +1672,9 @@ public class MainActivity extends Activity {
     public void clickedPauseVideo(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedPauseVideo");
-        // block pause button TODO support pause for RecSync
-        if( preview.isVideoRecording() && !isRecSyncRunning() ) { // just in case
+        // we block pause button at RecSync mode
+        // TODO support pause for RecSync
+        if( preview.isVideoRecording() && !applicationInterface.isSoftwareSyncRunning() ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();
         }
@@ -2133,7 +2136,9 @@ public class MainActivity extends Activity {
      * Toggles Photo/Video mode
      */
     public void clickedSwitchVideo(View view) {
-        if( isRecSyncRunning() && isClient() ) return;
+        // RecSync clients are not allowed to switch capture mode
+        if( applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader() ) return;
+
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSwitchVideo");
         this.closePopup();
@@ -5002,9 +5007,10 @@ public class MainActivity extends Activity {
     }
 
     public boolean supportsPanorama() {
-        // don't support panorama mode if called from image capture intent
+        // 1) don't support panorama mode if called from image capture intent
         // in theory this works, but problem that currently we'd end up doing the processing on the UI thread, so risk ANR
-        if( applicationInterface.isImageCaptureIntent() || isRecSyncRunning())
+        // 2) don't support panorama mode when RecSync is running
+        if( applicationInterface.isImageCaptureIntent() || applicationInterface.isSoftwareSyncRunning())
             return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
@@ -5582,21 +5588,6 @@ public class MainActivity extends Activity {
 
     ToastBoxer getAudioControlToast() {
         return this.audio_control_toast;
-    }
-
-    public boolean isRecSyncRunning() {
-        applicationInterface = getApplicationInterface();
-        return applicationInterface.getEnableRecSyncPref() && applicationInterface.isSoftwareSyncRunning();
-    }
-
-    public boolean isClient() {
-        applicationInterface = getApplicationInterface();
-        return !applicationInterface.isLeader();
-    }
-
-    public boolean isLeader() {
-        applicationInterface = getApplicationInterface();
-        return applicationInterface.isLeader();
     }
 
     // for testing:

@@ -4472,10 +4472,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 // now save
                 applicationInterface.setVideoPref(is_video);
 
-                final MainActivity mainActivity = (MainActivity) this.getContext();
-                final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-                if( softwareSyncController != null && softwareSyncController.isSettingsBroadcasting() )
-                    mainActivity.clickedSyncSettings();
+                // have to stop settings broadcasting because the mode has changed
+                if( applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isSettingsBroadcasting() )
+                    ((MainActivity) getContext()).clickedSyncSettings();
             }
             if( !during_startup ) {
                 // if during startup, updateFlashForVideo() needs to always be explicitly called anyway
