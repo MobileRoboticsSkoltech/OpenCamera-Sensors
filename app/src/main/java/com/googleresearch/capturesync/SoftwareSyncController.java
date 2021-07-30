@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * <p>
- * <p>
  * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
  */
 
@@ -22,9 +21,13 @@ package com.googleresearch.capturesync;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.googleresearch.capturesync.softwaresync.ClientInfo;
 import com.googleresearch.capturesync.softwaresync.NetworkHelpers;
@@ -34,6 +37,7 @@ import com.googleresearch.capturesync.softwaresync.SoftwareSyncClient;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 import com.googleresearch.capturesync.softwaresync.SyncConstants;
 import com.googleresearch.capturesync.softwaresync.TimeUtils;
+import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.SyncSettingsContainer;
@@ -47,25 +51,26 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
-// Note : Needs Network permissions.
+import java.util.NoSuchElementException;
 
 /**
- * Controller managing setup and tear down the SoftwareSync object.
+ * Controller managing setup and tear down the SoftwareSync object. Needs Network permissions.
  */
 public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
     private final MainActivity context;
     private final TextView statusView;
     private final PhaseAlignController phaseAlignController;
+    private final PeriodCalculator periodCalculator;
     private boolean isLeader;
     private SoftwareSyncBase softwareSync;
+    private AlignPhasesTask alignPhasesTask;
 
     /** Tell devices to save the frame at the requested trigger time. */
     public static final int METHOD_SET_TRIGGER_TIME = 200_000;
-    /** Tell devices to phase align. */
+    /** Tell devices to calculate frames period and phase align. */
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
-    /** Tell devices to set chosen settings to the requested values. */
+    /** Tell devices to set the chosen settings to the requested values. */
     public static final int METHOD_SET_SETTINGS = 200_002;
     public static final int METHOD_START_RECORDING = 200_003;
     public static final int METHOD_STOP_RECORDING = 200_004;
@@ -77,15 +82,18 @@ public class SoftwareSyncController implements Closeable {
      * captureButton - The button used to send at trigger request by the leader. - statusView - The
      * TextView used to show currently connected clients on the leader device.
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public SoftwareSyncController(
-            MainActivity context, PhaseAlignController phaseAlignController, TextView statusView) {
+            MainActivity context, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView statusView) {
         this.context = context;
         this.phaseAlignController = phaseAlignController;
+        this.periodCalculator = periodCalculator;
         this.statusView = statusView;
 
         setupSoftwareSync();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressWarnings("StringSplitter")
     private void setupSoftwareSync() {
         Log.w(TAG, "setup SoftwareSync");
@@ -143,15 +151,18 @@ public class SoftwareSyncController implements Closeable {
         //            context.setUpcomingCaptureStill(upcomingTriggerTimeNs);
         //        });
 
-        //sharedRpcs.put(
-        //        METHOD_DO_PHASE_ALIGN,
-        //        payload -> {
-        //            // Note: One could pass the current phase of the leader and have all clients sync to
-        //            // that, reducing potential error, though special attention should be placed to phases
-        //            // close to the zero or period boundary.
-        //            Log.v(TAG, "Starting phase alignment.");
-        //            phaseAlignController.startAlign();
-        //        });
+        // Start frames period calculation and then the phase aligning algorithm.
+        sharedRpcs.put(
+                METHOD_DO_PHASE_ALIGN,
+                payload -> {
+                    Log.v(TAG, "Phase alignment request received.");
+                    if (alignPhasesTask == null || alignPhasesTask.getStatus() == AsyncTask.Status.FINISHED) {
+                        alignPhasesTask = new AlignPhasesTask(phaseAlignController, periodCalculator);
+                        alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    } else {
+                        Log.e(TAG, "Phase aligning is already running.");
+                    }
+                });
 
         // Apply the received settings.
         sharedRpcs.put(
@@ -247,6 +258,39 @@ public class SoftwareSyncController implements Closeable {
                         statusView.setText(String.format(Locale.ENGLISH, "Client: %s", softwareSync.getName()));
                         statusView.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
                     });
+        }
+    }
+
+    private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = "AlignPhasesTask";
+
+        private final PhaseAlignController phaseAlignController;
+        private final PeriodCalculator periodCalculator;
+
+        AlignPhasesTask(PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
+            this.phaseAlignController = phaseAlignController;
+            this.periodCalculator = periodCalculator;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.v(TAG, "Calculating frames period.");
+            try {
+                long periodNs = periodCalculator.getPeriodNs();
+                Log.d(TAG, "Calculated frames period: " + periodNs);
+                phaseAlignController.setPeriodNs(periodNs);
+            } catch (InterruptedException | NoSuchElementException e) {
+                Log.e(TAG, "Failed calculating frames period: ", e);
+            }
+
+            // Note: One could pass the current phase of the leader and have all clients sync to
+            // that, reducing potential error, though special attention should be placed to phases
+            // close to the zero or period boundary.
+            Log.v(TAG, "Starting phase alignment.");
+            phaseAlignController.startAlign();
+
+            return null;
         }
     }
 

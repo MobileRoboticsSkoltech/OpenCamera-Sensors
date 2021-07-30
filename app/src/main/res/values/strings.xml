@@ -76,9 +76,9 @@
     <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
     <string name="sync_settings_locked">Unlock settings</string>
-    <string name="settings_synced">Settings are locked and synced</string>
+    <string name="settings_synced">Settings broadcasting started</string>
     <string name="sync_devices">Sync devices</string>
-    <string name="devices_synced">Devices are synced</string>
+    <string name="devices_synced">Devices sync started</string>
 
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * <p>
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
  */
 
 package com.googleresearch.capturesync;
@@ -110,6 +112,13 @@ public class PhaseAlignController {
     }
 
     private void work(int iterationsLeft) {
+        if (latestResponse == null) {
+            inAlignState = false;
+            Log.e(TAG, "Aligning failed: no timestamps available, latest response is null.");
+            context.getPreview().showToast("Phase aligning failed", false);
+            return;
+        }
+
         // Check if Aligned / Not Aligned but able to iterate / Ran out of iterations.
         if (latestResponse.isAligned()) { // Aligned.
             Log.i(
@@ -122,6 +131,7 @@ public class PhaseAlignController {
             }
 
             Log.d(TAG, "Aligned.");
+            context.getPreview().showToast("Phase aligning finished", false);
         } else if (!latestResponse.isAligned() && iterationsLeft > 0) {
             // Not aligned but able to run another alignment iteration.
             doPhaseAlignStep();
@@ -139,6 +149,7 @@ public class PhaseAlignController {
                 inAlignState = false;
             }
             Log.d(TAG, "Finishing alignment, reached max iterations.");
+            context.getPreview().showToast("Phase aligning failed", false);
         }
     }
 }

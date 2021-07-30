@@ -69,11 +69,13 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.googleresearch.capturesync.SoftwareSyncController;
+import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
@@ -1468,7 +1470,7 @@ public class MainActivity extends Activity {
 
         // start RecSync if needed
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) {
+        if( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
             applicationInterface.startSoftwareSync();
         }
 
@@ -1787,6 +1789,7 @@ public class MainActivity extends Activity {
         preview.showToast(stamp_toast, value ? R.string.stamp_enabled : R.string.stamp_disabled);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void clickedEnableRecSync() {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedEnableRecSync");
@@ -1821,7 +1824,15 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncDevices");
 
-        // TODO sync devices
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+
+        if( !softwareSyncController.isSettingsBroadcasting() ) {
+            preview.showToast(sync_devices_toast, "Cannot sync with unlocked settings");
+            return;
+        }
+
+        final SoftwareSyncLeader softwareSyncLeader = (SoftwareSyncLeader) softwareSyncController.getSoftwareSync();
+        softwareSyncLeader.broadcastRpc(SoftwareSyncController.METHOD_DO_PHASE_ALIGN, "");
 
         preview.showToast(sync_devices_toast, R.string.devices_synced);
     }
