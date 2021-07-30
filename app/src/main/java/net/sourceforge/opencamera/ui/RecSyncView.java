@@ -41,8 +41,6 @@ public class RecSyncView extends LinearLayout {
     private final Button button_sync_settings;
     private final Button button_sync_devices;
 
-    private boolean is_locked_button_sync_devices = false;
-
     public RecSyncView(Context context) {
         super(context);
 
@@ -98,18 +96,9 @@ public class RecSyncView extends LinearLayout {
     }
 
     public void updateSyncSettingsButton() {
-        if ( software_sync_controller.isSettingsBroadcasting() ) {
-            is_locked_button_sync_devices = true;
-            button_sync_settings.setText(R.string.sync_settings_locked);
-        }
-        else {
-            is_locked_button_sync_devices = false;
-            button_sync_settings.setText(R.string.sync_settings_unlocked);
-        }
-    }
-
-    public boolean checkSyncSettingsButton() {
-        return is_locked_button_sync_devices;
+        button_sync_settings.setText(
+                software_sync_controller.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked
+        );
     }
 
     private CheckBox addCheckbox(MainActivity context, @StringRes int text, boolean is_checked, CompoundButton.OnCheckedChangeListener listener) {

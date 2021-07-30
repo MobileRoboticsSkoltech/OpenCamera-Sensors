@@ -214,6 +214,8 @@ public class MainActivity extends Activity {
 
     private RemoteRpcServer mRpcServer;
 
+    private boolean is_sync_devices = false;
+
     /**
      * Outer onCreate() for OpenCamera Sensors additional
      * initial operations
@@ -1641,7 +1643,7 @@ public class MainActivity extends Activity {
 
     public void clickedTakePhoto(View view) {
         boolean is_rec_sync_run = isRecSyncRunning();
-        if( is_rec_sync_run && !isClient() ) return;
+        if( is_rec_sync_run && isClient() ) return;
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
         if( is_rec_sync_run ) {
@@ -1649,7 +1651,7 @@ public class MainActivity extends Activity {
                 preview.showToast(rec_sync_toast, "Photo is not supported in RecSync mode");
                 return;
             }
-            if( mainUI.getRecSyncView() == null || mainUI.getRecSyncView().checkSyncSettingsButton() ) {
+            if( !is_sync_devices ) { // TODO check sync devices
                 preview.showToast(rec_sync_toast, "Devices are not synced");;
                 return;
             }
@@ -1841,6 +1843,8 @@ public class MainActivity extends Activity {
 
         final SoftwareSyncLeader softwareSyncLeader = (SoftwareSyncLeader) softwareSyncController.getSoftwareSync();
         softwareSyncLeader.broadcastRpc(SoftwareSyncController.METHOD_DO_PHASE_ALIGN, "");
+
+        is_sync_devices = !is_sync_devices;
 
         preview.showToast(sync_devices_toast, R.string.devices_synced);
     }

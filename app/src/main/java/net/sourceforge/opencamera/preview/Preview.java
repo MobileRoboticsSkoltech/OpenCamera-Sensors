@@ -59,6 +59,8 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -4471,7 +4473,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 applicationInterface.setVideoPref(is_video);
 
                 final MainActivity mainActivity = (MainActivity) this.getContext();
-                if (mainActivity.getMainUI().getRecSyncView() != null && mainActivity.getMainUI().getRecSyncView().checkSyncSettingsButton())
+                final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+                if( softwareSyncController != null && softwareSyncController.isSettingsBroadcasting() )
                     mainActivity.clickedSyncSettings();
             }
             if( !during_startup ) {
