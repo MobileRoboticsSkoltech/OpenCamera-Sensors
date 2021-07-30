@@ -280,6 +280,8 @@
     <string name="start_video">Start recording video</string>
     <string name="stop_video">Stop recording video</string>
 
+    <string name="do_nothing">Do nothing in this mode</string>
+
     <string name="max_filesize">Max file size</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
     <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->

@@ -151,6 +151,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
     }
 
+    public boolean isLeader() {
+        return softwareSyncController.isLeader();
+    }
+
     /**
      * Retrieves gyroscope and accelerometer sample rate preference and converts it to number.
      */

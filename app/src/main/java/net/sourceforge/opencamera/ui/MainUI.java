@@ -931,7 +931,15 @@ public class MainUI {
             int resource;
             int content_description;
             int switch_video_content_description;
-            if( main_activity.getPreview().isVideo() ) {
+            boolean isClient = main_activity.isRecSyncRunning() && main_activity.isClient();
+            if( isClient ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "set icon empty");
+                resource = R.drawable.ic_empty;
+                content_description = R.string.do_nothing;
+                switch_video_content_description = R.string.do_nothing;
+            }
+            else if( main_activity.getPreview().isVideo() ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "set icon to video");
                 resource = main_activity.getPreview().isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
@@ -959,7 +967,10 @@ public class MainUI {
 
             view = main_activity.findViewById(R.id.switch_video);
             view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
-            resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
+            if( isClient )
+                resource = R.drawable.ic_empty;
+            else
+                resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
             view.setImageResource(resource);
             view.setTag(resource); // for testing
         }
@@ -1116,11 +1127,7 @@ public class MainUI {
     }
 
     public boolean showRecSyncIcon() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-        final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
-        final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
-        return sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
-                extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader();
+        return main_activity.isRecSyncRunning() && main_activity.isLeader();
     }
 
     public boolean showStampIcon() {

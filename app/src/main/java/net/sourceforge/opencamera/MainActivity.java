@@ -176,6 +176,7 @@ public class MainActivity extends Activity {
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
     private final ToastBoxer store_location_toast = new ToastBoxer();
+    private final ToastBoxer rec_sync_toast = new ToastBoxer();
     private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     private String push_info_toast_text; // can be used to "push" extra text to the info text for showPhotoVideoToast()
 
@@ -1639,14 +1640,22 @@ public class MainActivity extends Activity {
     }
 
     public void clickedTakePhoto(View view) {
+        boolean is_rec_sync_run = isRecSyncRunning();
+        boolean is_leader = isLeader();
+        if( is_rec_sync_run && !is_leader ) return;
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if( !sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) )
-            this.takePicture(false);
-        else {
-            preview.showToast(store_location_toast, "Photo is not supported in RecSync mode");
+        if( is_rec_sync_run ) {
+            if( !preview.isVideo() ) {
+                preview.showToast(rec_sync_toast, "Photo is not supported in RecSync mode");
+                return;
+            }
+            if( mainUI.getRecSyncView() == null || mainUI.getRecSyncView().checkSyncSettingsButton() ) {
+                preview.showToast(rec_sync_toast, "Devices are not synced");;
+                return;
+            }
         }
+        this.takePicture(false);
     }
 
     /** User has clicked button to take a photo snapshot whilst video recording.
@@ -1660,8 +1669,8 @@ public class MainActivity extends Activity {
     public void clickedPauseVideo(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedPauseVideo");
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // block pause button TODO support pause for RecSync
-        if( preview.isVideoRecording() && !sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) ) { // just in case
+        // block pause button TODO support pause for RecSync
+        if( preview.isVideoRecording() && !isRecSyncRunning() ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();
         }
@@ -2121,6 +2130,7 @@ public class MainActivity extends Activity {
      * Toggles Photo/Video mode
      */
     public void clickedSwitchVideo(View view) {
+        if( isRecSyncRunning() && isClient() ) return;
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSwitchVideo");
         this.closePopup();
@@ -4991,7 +5001,7 @@ public class MainActivity extends Activity {
     public boolean supportsPanorama() {
         // don't support panorama mode if called from image capture intent
         // in theory this works, but problem that currently we'd end up doing the processing on the UI thread, so risk ANR
-        if( applicationInterface.isImageCaptureIntent() )
+        if( applicationInterface.isImageCaptureIntent() || isRecSyncRunning())
             return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
@@ -5569,6 +5579,21 @@ public class MainActivity extends Activity {
 
     ToastBoxer getAudioControlToast() {
         return this.audio_control_toast;
+    }
+
+    public boolean isRecSyncRunning() {
+        applicationInterface = getApplicationInterface();
+        return applicationInterface.getEnableRecSyncPref() && applicationInterface.isSoftwareSyncRunning();
+    }
+
+    public boolean isClient() {
+        applicationInterface = getApplicationInterface();
+        return !applicationInterface.isLeader();
+    }
+
+    public boolean isLeader() {
+        applicationInterface = getApplicationInterface();
+        return applicationInterface.isLeader();
     }
 
     // for testing:
