@@ -49,6 +49,7 @@ public class PhaseAlignController {
     private final Handler handler;
     private final Object lock = new Object();
     private boolean inAlignState = false;
+    private boolean wasAligned = false;
 
     private PhaseAligner phaseAligner;
     private final PhaseConfig phaseConfig;
@@ -114,6 +115,7 @@ public class PhaseAlignController {
     private void work(int iterationsLeft) {
         if (latestResponse == null) {
             inAlignState = false;
+            wasAligned = false;
             Log.e(TAG, "Aligning failed: no timestamps available, latest response is null.");
             context.getPreview().showToast("Phase aligning failed", false);
             return;
@@ -130,6 +132,7 @@ public class PhaseAlignController {
                 inAlignState = false;
             }
 
+            wasAligned = true;
             Log.d(TAG, "Aligned.");
             context.getPreview().showToast("Phase aligning finished", false);
         } else if (!latestResponse.isAligned() && iterationsLeft > 0) {
@@ -148,8 +151,20 @@ public class PhaseAlignController {
             synchronized (lock) {
                 inAlignState = false;
             }
+
+            wasAligned = false;
             Log.d(TAG, "Finishing alignment, reached max iterations.");
             context.getPreview().showToast("Phase aligning failed", false);
         }
+    }
+
+    /**
+     * Indicates whether the last finished alignment attempt was successful.
+     *
+     * @return true if the last alignment attempt was successful, false if it wasn't or no attempts
+     * were made.
+     */
+    public boolean wasAligned() {
+        return wasAligned;
     }
 }

@@ -365,6 +365,10 @@ public class SoftwareSyncController implements Closeable {
         return isLeader;
     }
 
+    public boolean isAligned() {
+        return phaseAlignController.wasAligned();
+    }
+
     /**
      * Current broadcasting status of the leader's settings. If this is true then each new client
      * will receive the previously saved settings of the leader.
