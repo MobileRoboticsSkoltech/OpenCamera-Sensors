@@ -94,7 +94,6 @@ public class SoftwareSyncController implements Closeable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    @SuppressWarnings("StringSplitter")
     private void setupSoftwareSync() {
         Log.w(TAG, "setup SoftwareSync");
         if (softwareSync != null) {
@@ -294,6 +293,15 @@ public class SoftwareSyncController implements Closeable {
         }
     }
 
+    private String lastFourSerial() {
+        String serial = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+        if (serial.length() <= 4) {
+            return serial;
+        } else {
+            return serial.substring(serial.length() - 4);
+        }
+    }
+
     /**
      * Show the number of connected clients on the leader status UI.
      *
@@ -352,19 +360,21 @@ public class SoftwareSyncController implements Closeable {
         }
     }
 
-    private String lastFourSerial() {
-        String serial = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-        if (serial.length() <= 4) {
-            return serial;
-        } else {
-            return serial.substring(serial.length() - 4);
-        }
-    }
-
+    /**
+     * Indicates whether this device is a leader.
+     *
+     * @return true if this device is a leader, false if it is a client.
+     */
     public boolean isLeader() {
         return isLeader;
     }
 
+    /**
+     * Indicates whether the last finished alignment attempt was successful.
+     *
+     * @return true if the last alignment attempt was successful, false if it wasn't or no attempts
+     * were made.
+     */
     public boolean isAligned() {
         return phaseAlignController.wasAligned();
     }
@@ -381,6 +391,17 @@ public class SoftwareSyncController implements Closeable {
             return ((SoftwareSyncLeader) softwareSync).getSavedSettings() != null;
         }
         throw new IllegalStateException("Cannot check the settings lock status for a client");
+    }
+
+    /**
+     * Provides the given timestamp to {@link PeriodCalculator} and a converted to leader time
+     * domain version of the given timestamp to {@link PhaseAlignController}.
+     *
+     * @param timestamp a timestamp to be provided.
+     */
+    public void updateTimestamp(long timestamp) {
+        periodCalculator.onFrameTimestamp(timestamp);
+        phaseAlignController.updateCaptureTimestamp(softwareSync.leaderTimeForLocalTimeNs(timestamp));
     }
 
     public SoftwareSyncBase getSoftwareSync() {

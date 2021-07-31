@@ -44,6 +44,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.preview.VideoProfile;
 
@@ -211,7 +213,7 @@ public class CameraController2 extends CameraController {
     private boolean is_video_high_speed; // whether we're actually recording in high speed
     private List<int[]> ae_fps_ranges;
     private List<int[]> hs_fps_ranges;
-    //private ImageReader previewImageReader;
+    private ImageReader previewImageReader;
     private SurfaceTexture texture;
     private Surface surface_texture;
     private HandlerThread thread;
@@ -1257,6 +1259,26 @@ public class CameraController2 extends CameraController {
         return temperature;
     }
 
+    private class OnPreviewFrameAvailableListener implements ImageReader.OnImageAvailableListener {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            if (MyDebug.LOG) {
+                Log.v(TAG, "Frame during preview");
+            }
+            Image image = reader.acquireNextImage();
+
+            final long timestamp = image.getTimestamp();
+            if (MyDebug.LOG)
+                Log.v(TAG, "preview frame timestamp: " + timestamp);
+
+            ExtendedAppInterface appInterface = ((MainActivity) context).getApplicationInterface();
+            if (appInterface.isSoftwareSyncRunning())
+                appInterface.getSoftwareSyncController().updateTimestamp(timestamp);
+
+            image.close();
+        }
+    }
+
     private class OnVideoFrameImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
@@ -2095,10 +2117,10 @@ public class CameraController2 extends CameraController {
             camera = null;
         }
         closePictureImageReader();
-        /*if( previewImageReader != null ) {
+        if( previewImageReader != null ) {
             previewImageReader.close();
             previewImageReader = null;
-        }*/
+        }
         if( thread != null ) {
             // should only close thread after closing the camera, otherwise we get messages "sending message to a Handler on a dead thread"
             // see https://sourceforge.net/p/opencamera/discussion/general/thread/32c2b01b/?limit=25
@@ -4126,11 +4148,12 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "setPreviewSize: " + width + " , " + height);
         preview_width = width;
         preview_height = height;
-        /*if( previewImageReader != null ) {
+        if( previewImageReader != null ) {
             previewImageReader.close();
         }
-        previewImageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2); 
-        */
+        previewImageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
+        previewImageReader.setOnImageAvailableListener(new OnPreviewFrameAvailableListener(), null);
+        previewBuilder.addTarget(previewImageReader.getSurface());
     }
 
     @Override
@@ -5137,32 +5160,35 @@ public class CameraController2 extends CameraController {
                         preview_surface,
                         video_recorder_surface,
                         imageReader.getSurface(),
-                        videoFrameImageReader.getSurface()
+                        videoFrameImageReader.getSurface(),
+                        previewImageReader.getSurface()
                     );
                 } else if (supports_photo_video_recording && !want_video_high_speed && wantVideoImuRecording) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
-                        videoFrameImageReader.getSurface()
+                        videoFrameImageReader.getSurface(),
+                        previewImageReader.getSurface()
                     );
                 } else if (supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
-                        imageReader.getSurface()
+                        imageReader.getSurface(),
+                        previewImageReader.getSurface()
                     );
                 } else {
-                    surfaces = Arrays.asList(preview_surface, video_recorder_surface);
+                    surfaces = Arrays.asList(preview_surface, video_recorder_surface, previewImageReader.getSurface());
                 }
                 // n.b., raw not supported for photo snapshots while video recording
             } else if( want_video_high_speed ) {
                 // future proofing - at the time of writing want_video_high_speed is only set when recording video,
                 // but if ever this is changed, can only support the preview_surface as a target
-                surfaces = Collections.singletonList(preview_surface);
+                surfaces = Arrays.asList(preview_surface, previewImageReader.getSurface());
             } else if( imageReaderRaw != null ) {
-                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface(), previewImageReader.getSurface());
             } else {
-                surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), previewImageReader.getSurface());
             }
             if( MyDebug.LOG ) {
                 Log.d(TAG, "texture: " + texture);
