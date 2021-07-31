@@ -4149,6 +4149,7 @@ public class CameraController2 extends CameraController {
         preview_width = width;
         preview_height = height;
         if( previewImageReader != null ) {
+            previewBuilder.removeTarget(previewImageReader.getSurface());
             previewImageReader.close();
         }
         previewImageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
@@ -5337,6 +5338,7 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "add surface to previewBuilder: " + surface);
                         }
                         previewBuilder.addTarget(surface);
+                        previewBuilder.addTarget(previewImageReader.getSurface());
 
                         if (video_recorder != null && want_video_imu_recording && supports_photo_video_recording) {
                             if( MyDebug.LOG ) {
@@ -6901,6 +6903,7 @@ public class CameraController2 extends CameraController {
                 precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
                 precaptureBuilder.addTarget(getPreviewSurface());
+                precaptureBuilder.addTarget(previewImageReader.getSurface());
 
                 state = STATE_WAITING_PRECAPTURE_START;
                 precapture_state_change_time_ms = System.currentTimeMillis();
