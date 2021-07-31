@@ -59,7 +59,7 @@ import java.util.NoSuchElementException;
 public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
     private final MainActivity context;
-    private final TextView statusView;
+    private final TextView syncStatus;
     private final PhaseAlignController phaseAlignController;
     private final PeriodCalculator periodCalculator;
     private boolean isLeader;
@@ -84,11 +84,11 @@ public class SoftwareSyncController implements Closeable {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public SoftwareSyncController(
-            MainActivity context, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView statusView) {
+            MainActivity context, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView syncStatus) {
         this.context = context;
         this.phaseAlignController = phaseAlignController;
         this.periodCalculator = periodCalculator;
-        this.statusView = statusView;
+        this.syncStatus = syncStatus;
 
         setupSoftwareSync();
     }
@@ -204,14 +204,14 @@ public class SoftwareSyncController implements Closeable {
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
                             context.runOnUiThread(
-                                    () -> statusView.setText(String.format(Locale.ENGLISH, "%s: Waiting for Leader", softwareSync.getName()))));
+                                    () -> syncStatus.setText(String.format(Locale.ENGLISH, "%s: Waiting for Leader", softwareSync.getName()))));
 
             // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
                             context.runOnUiThread(
-                                    () -> statusView.setText(String.format(Locale.ENGLISH, "%s: Waiting for Sync", softwareSync.getName()))));
+                                    () -> syncStatus.setText(String.format(Locale.ENGLISH, "%s: Waiting for Sync", softwareSync.getName()))));
 
             //clientRpcs.put(
             //        METHOD_START_RECORDING,
@@ -237,7 +237,7 @@ public class SoftwareSyncController implements Closeable {
                     payload ->
                             context.runOnUiThread(
                                     () ->
-                                            statusView.setText(
+                                            syncStatus.setText(
                                                     String.format(
                                                             "Client %s\n-Synced to Leader %s",
                                                             softwareSync.getName(), softwareSync.getLeaderAddress()))));
@@ -248,14 +248,14 @@ public class SoftwareSyncController implements Closeable {
         if (isLeader) {
             context.runOnUiThread(
                     () -> {
-                        statusView.setText(String.format(Locale.ENGLISH, "Leader: %s", softwareSync.getName()));
-                        statusView.setTextColor(Color.rgb(0, 139, 0)); // Dark green.
+                        syncStatus.setText(String.format(Locale.ENGLISH, "Leader: %s", softwareSync.getName()));
+                        syncStatus.setTextColor(Color.rgb(0, 139, 0)); // Dark green.
                     });
         } else {
             context.runOnUiThread(
                     () -> {
-                        statusView.setText(String.format(Locale.ENGLISH, "Client: %s", softwareSync.getName()));
-                        statusView.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
+                        syncStatus.setText(String.format(Locale.ENGLISH, "Client: %s", softwareSync.getName()));
+                        syncStatus.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
                     });
         }
     }
@@ -277,7 +277,7 @@ public class SoftwareSyncController implements Closeable {
             Log.v(TAG, "Calculating frames period.");
             try {
                 long periodNs = periodCalculator.getPeriodNs();
-                Log.d(TAG, "Calculated frames period: " + periodNs);
+                Log.i(TAG, "Calculated frames period: " + periodNs);
                 phaseAlignController.setPeriodNs(periodNs);
             } catch (InterruptedException | NoSuchElementException e) {
                 Log.e(TAG, "Failed calculating frames period: ", e);
@@ -326,7 +326,7 @@ public class SoftwareSyncController implements Closeable {
                                             "-Client %s: %.2f ms sync\n", client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
-                    statusView.setText(msg.toString());
+                    syncStatus.setText(msg.toString());
                 });
     }
 

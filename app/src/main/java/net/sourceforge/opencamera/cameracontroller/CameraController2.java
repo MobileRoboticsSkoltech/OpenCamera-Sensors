@@ -7459,6 +7459,22 @@ public class CameraController2 extends CameraController {
     }
     */
 
+    public void injectFrameWithExposure(long desiredExposureTimeNs) throws CameraAccessException {
+        CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+        builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+        builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, desiredExposureTimeNs);
+
+        try {
+            final List<Surface> surfaces = getCaptureSessionOutputSurfaces(null, true, true);
+            for (Surface surface : surfaces) builder.addTarget(surface);
+        } catch (CameraControllerException e) {
+            Log.wtf(TAG, "Failed to add surfaces for frame injection builder", e); // wtf bcs videoRecorder is null
+        }
+
+        capture(builder.build()); // to use the preconfigured previewCaptureCallback and handler
+    }
+
     private final CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
         private long last_process_frame_number = 0;
         private int last_af_state = -1;

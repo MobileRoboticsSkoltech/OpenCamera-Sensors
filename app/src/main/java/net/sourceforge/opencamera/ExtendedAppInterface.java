@@ -67,6 +67,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final TextView mSyncStatusText;
+    private final TextView mPhaseErrorText;
 
     private final PeriodCalculator periodCalculator = new PeriodCalculator();
     private final Handler sendSettingsHandler = new Handler();
@@ -84,8 +85,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mSyncStatusText = new TextView(mMainActivity);
+        mPhaseErrorText = new TextView(mMainActivity);
+        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity, mPhaseErrorText);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -133,6 +135,15 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public TextView getSyncStatusText() {
         return mSyncStatusText;
+    }
+
+    /**
+     * Provides the current phase error from RecSync.
+     *
+     * @return a {@link TextView} describing the current phase error.
+     */
+    public TextView getPhaseErrorText() {
+        return mPhaseErrorText;
     }
 
     public boolean getIMURecordingPref() {

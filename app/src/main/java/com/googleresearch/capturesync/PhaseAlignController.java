@@ -18,14 +18,25 @@
 
 package com.googleresearch.capturesync;
 
+import android.graphics.Color;
+import android.hardware.camera2.CameraAccessException;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+
+import com.googleresearch.capturesync.softwaresync.TimeUtils;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseAligner;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseConfig;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseResponse;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.cameracontroller.CameraController;
+import net.sourceforge.opencamera.cameracontroller.CameraController2;
+
+import java.util.Locale;
 
 /**
  * Calculates and adjusts camera phase by inserting frames of varying exposure lengths.
@@ -46,6 +57,8 @@ public class PhaseAlignController {
     private static final int PHASE_SETTLE_DELAY_MS = 400;
     private final MainActivity context;
 
+    private final TextView phaseError;
+
     private final Handler handler;
     private final Object lock = new Object();
     private boolean inAlignState = false;
@@ -55,12 +68,13 @@ public class PhaseAlignController {
     private final PhaseConfig phaseConfig;
     private PhaseResponse latestResponse;
 
-    public PhaseAlignController(PhaseConfig config, MainActivity context) {
+    public PhaseAlignController(PhaseConfig config, MainActivity context, TextView phaseError) {
         handler = new Handler();
         phaseConfig = config;
         phaseAligner = new PhaseAligner(config);
         Log.v(TAG, "Loaded phase align config.");
         this.context = context;
+        this.phaseError = phaseError;
     }
 
     protected void setPeriodNs(long periodNs) {
@@ -78,12 +92,22 @@ public class PhaseAlignController {
     public long updateCaptureTimestamp(long timestampNs) {
         // TODO(samansaari) : Rename passTimestamp -> updateCaptureTimestamp or similar in softwaresync.
         latestResponse = phaseAligner.passTimestamp(timestampNs);
-        // TODO (samansari) : Pull this into an interface/callback.
-        // context.runOnUiThread(() -> context.updatePhaseTextView(latestResponse.diffFromGoalNs()));
+        updatePhaseError();
         return latestResponse.phaseNs();
     }
 
+    private void updatePhaseError() {
+        final String phaseErrorStr = String.format(Locale.ENGLISH,
+                "Phase Error: %.2f ms", TimeUtils.nanosToMillis((double) latestResponse.diffFromGoalNs())
+        );
+        context.runOnUiThread(() -> {
+            phaseError.setText(phaseErrorStr);
+            phaseError.setTextColor(latestResponse.isAligned() ? Color.GREEN : Color.RED);
+        });
+    }
+
     /** Submit an frame with a specific exposure to offset future frames and align phase. */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void doPhaseAlignStep() {
         Log.i(
                 TAG,
@@ -95,10 +119,22 @@ public class PhaseAlignController {
                         latestResponse.exposureTimeToShiftNs() * 1e-6f,
                         phaseAligner.getConfig().minExposureNs() * 1e-6f));
 
-        // TODO(samansari): Make this an interface.
-        // context.injectFrame(latestResponse.exposureTimeToShiftNs());
+        final CameraController cameraController = context.getPreview().getCameraController();
+        if (cameraController == null) {
+            throw new IllegalStateException("Frame injection failed: camera is not open.");
+        }
+        if (!(cameraController instanceof CameraController2)) {
+            throw new IllegalStateException("Frame injection failed: not using Camera2 API.");
+        }
+
+        try {
+            ((CameraController2) cameraController).injectFrameWithExposure(latestResponse.exposureTimeToShiftNs());
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Frame injection failed.", e);
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startAlign() {
         synchronized (lock) {
             if (inAlignState) {
@@ -112,6 +148,7 @@ public class PhaseAlignController {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void work(int iterationsLeft) {
         if (latestResponse == null) {
             inAlignState = false;
