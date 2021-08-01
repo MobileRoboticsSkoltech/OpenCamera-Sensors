@@ -170,8 +170,6 @@ public class MainActivity extends Activity {
     private final ToastBoxer screen_locked_toast = new ToastBoxer();
     private final ToastBoxer stamp_toast = new ToastBoxer();
     private final ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
-    private final ToastBoxer sync_settings_toast = new ToastBoxer();
-    private final ToastBoxer sync_devices_toast = new ToastBoxer();
     private final ToastBoxer white_balance_lock_toast = new ToastBoxer();
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
@@ -1644,25 +1642,26 @@ public class MainActivity extends Activity {
     public void clickedTakePhoto(View view) {
         // RecSync clients are not allowed to click this button
         final boolean is_rec_sync_running = applicationInterface.isSoftwareSyncRunning();
-        SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
         if( is_rec_sync_running && !softwareSyncController.isLeader() ) return;
 
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
         if( is_rec_sync_running ) {
             if( !preview.isVideo() ) {
-                preview.showToast(rec_sync_toast, "Photo is not supported in RecSync mode");
+                preview.showToast(rec_sync_toast, R.string.rec_sync_photo_not_supported);
                 return;
             }
             if( !softwareSyncController.isSettingsBroadcasting() ) {
-                preview.showToast(rec_sync_toast, "The settings is not synced");
+                preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
                 return;
             }
             if( !softwareSyncController.isAligned() ) {
-                preview.showToast(rec_sync_toast, "The device is not synced");
+                preview.showToast(rec_sync_toast, R.string.rec_sync_phases_not_aligned);
                 return;
             }
         }
+
         this.takePicture(false);
     }
 
@@ -1831,28 +1830,26 @@ public class MainActivity extends Activity {
         if( !softwareSyncController.isSettingsBroadcasting() ) {
             settings = new SyncSettingsContainer(this);
             applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
-            preview.showToast(sync_settings_toast, R.string.settings_synced);
+            preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         }
 
         softwareSyncController.switchSettingsLock(settings);
         mainUI.getRecSyncView().updateSyncSettingsButton();
     }
 
-    public void clickedSyncDevices() {
+    public void clickedAlignPhases() {
         if( MyDebug.LOG )
-            Log.d(TAG, "clickedSyncDevices");
+            Log.d(TAG, "clickedAlignPhases");
 
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
 
         if( !softwareSyncController.isSettingsBroadcasting() ) {
-            preview.showToast(sync_devices_toast, "Cannot sync with unlocked settings");
+            preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
             return;
         }
 
         final SoftwareSyncLeader softwareSyncLeader = (SoftwareSyncLeader) softwareSyncController.getSoftwareSync();
         softwareSyncLeader.broadcastRpc(SoftwareSyncController.METHOD_DO_PHASE_ALIGN, "");
-
-        preview.showToast(sync_devices_toast, R.string.devices_synced);
     }
 
     public void clickedAutoLevel(View view) {
@@ -5123,6 +5120,10 @@ public class MainActivity extends Activity {
 
     public ToastBoxer getChangedAutoStabiliseToastBoxer() {
         return changed_auto_stabilise_toast;
+    }
+
+    public ToastBoxer getRecSyncToastBoxer() {
+        return rec_sync_toast;
     }
 
     private String getPhotoModeString(MyApplicationInterface.PhotoMode photo_mode, boolean string_for_std) {

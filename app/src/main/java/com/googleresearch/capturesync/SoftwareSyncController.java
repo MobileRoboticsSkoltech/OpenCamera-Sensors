@@ -40,6 +40,7 @@ import com.googleresearch.capturesync.softwaresync.TimeUtils;
 import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.SyncSettingsContainer;
 
 import java.io.Closeable;
@@ -204,14 +205,14 @@ public class SoftwareSyncController implements Closeable {
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
                             context.runOnUiThread(
-                                    () -> syncStatus.setText(String.format(Locale.ENGLISH, "%s: Waiting for Leader", softwareSync.getName()))));
+                                    () -> syncStatus.setText(context.getString(R.string.rec_sync_waiting_for_leader, softwareSync.getName()))));
 
             // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
                             context.runOnUiThread(
-                                    () -> syncStatus.setText(String.format(Locale.ENGLISH, "%s: Waiting for Sync", softwareSync.getName()))));
+                                    () -> syncStatus.setText(context.getString(R.string.rec_sync_waiting_for_sync, softwareSync.getName()))));
 
             //clientRpcs.put(
             //        METHOD_START_RECORDING,
@@ -236,10 +237,9 @@ public class SoftwareSyncController implements Closeable {
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
                             context.runOnUiThread(
-                                    () ->
-                                            syncStatus.setText(
-                                                    String.format(
-                                                            "Client %s\n-Synced to Leader %s",
+                                    () -> syncStatus.setText(
+                                                    context.getString(
+                                                            R.string.rec_sync_synced_to_leader,
                                                             softwareSync.getName(), softwareSync.getLeaderAddress()))));
 
             softwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
@@ -247,17 +247,12 @@ public class SoftwareSyncController implements Closeable {
 
         if (isLeader) {
             context.runOnUiThread(
-                    () -> {
-                        syncStatus.setText(String.format(Locale.ENGLISH, "Leader: %s", softwareSync.getName()));
-                        syncStatus.setTextColor(Color.rgb(0, 139, 0)); // Dark green.
-                    });
+                    () -> syncStatus.setText(context.getString(R.string.rec_sync_leader, softwareSync.getName())));
         } else {
             context.runOnUiThread(
-                    () -> {
-                        syncStatus.setText(String.format(Locale.ENGLISH, "Client: %s", softwareSync.getName()));
-                        syncStatus.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
-                    });
+                    () -> syncStatus.setText(context.getString(R.string.rec_sync_client, softwareSync.getName())));
         }
+        context.runOnUiThread(() -> syncStatus.setTextColor(Color.rgb(0, 139, 0))); // Dark green.
     }
 
     private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
@@ -314,16 +309,16 @@ public class SoftwareSyncController implements Closeable {
                 () -> {
                     StringBuilder msg = new StringBuilder();
                     msg.append(
-                            String.format(Locale.ENGLISH,
-                                    "Leader %s: %d clients.\n", softwareSync.getName(), clientCount));
+                            context.getString(
+                                    R.string.rec_sync_clients_num, softwareSync.getName(), clientCount));
                     for (Entry<InetAddress, ClientInfo> entry : leader.getClients().entrySet()) {
                         ClientInfo client = entry.getValue();
                         if (client.syncAccuracy() == 0) {
-                            msg.append(String.format("-Client %s: syncing...\n", client.name()));
+                            msg.append(context.getString(R.string.rec_sync_client_syncing, client.name()));
                         } else {
                             msg.append(
-                                    String.format(Locale.ENGLISH,
-                                            "-Client %s: %.2f ms sync\n", client.name(), client.syncAccuracy() / 1e6));
+                                    context.getString(
+                                            R.string.rec_sync_client_synced, client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
                     syncStatus.setText(msg.toString());

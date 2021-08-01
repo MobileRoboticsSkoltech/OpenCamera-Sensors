@@ -33,6 +33,7 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PhaseConfig;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseResponse;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
 
@@ -136,6 +137,7 @@ public class PhaseAlignController {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startAlign() {
+        context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_started);
         synchronized (lock) {
             if (inAlignState) {
                 Log.i(TAG, "startAlign() called while already aligning.");
@@ -154,7 +156,7 @@ public class PhaseAlignController {
             inAlignState = false;
             wasAligned = false;
             Log.e(TAG, "Aligning failed: no timestamps available, latest response is null.");
-            context.getPreview().showToast("Phase aligning failed", false);
+            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_failed);
             return;
         }
 
@@ -171,7 +173,7 @@ public class PhaseAlignController {
 
             wasAligned = true;
             Log.d(TAG, "Aligned.");
-            context.getPreview().showToast("Phase aligning finished", false);
+            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_finished);
         } else if (!latestResponse.isAligned() && iterationsLeft > 0) {
             // Not aligned but able to run another alignment iteration.
             doPhaseAlignStep();
@@ -191,7 +193,7 @@ public class PhaseAlignController {
 
             wasAligned = false;
             Log.d(TAG, "Finishing alignment, reached max iterations.");
-            context.getPreview().showToast("Phase aligning failed", false);
+            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_failed);
         }
     }
 
