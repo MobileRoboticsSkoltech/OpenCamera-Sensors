@@ -1640,29 +1640,35 @@ public class MainActivity extends Activity {
     }
 
     public void clickedTakePhoto(View view) {
-        // RecSync clients are not allowed to click this button
         final boolean is_rec_sync_running = applicationInterface.isSoftwareSyncRunning();
-        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        if( is_rec_sync_running && !softwareSyncController.isLeader() ) return;
 
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
         if( is_rec_sync_running ) {
-            if( !preview.isVideo() ) {
-                preview.showToast(rec_sync_toast, R.string.rec_sync_photo_not_supported);
+            final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+
+            if( !softwareSyncController.isLeader() ) { // clients cannot click this button
                 return;
             }
-            if( !softwareSyncController.isSettingsBroadcasting() ) {
+            if( !softwareSyncController.isSettingsBroadcasting() ) { // settings need to be being broadcast
                 preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
                 return;
             }
-            if( !softwareSyncController.isAligned() ) {
+            /*if( !softwareSyncController.isAligned() ) { // phases need to be aligned
                 preview.showToast(rec_sync_toast, R.string.rec_sync_phases_not_aligned);
                 return;
-            }
-        }
+            }*/
 
-        this.takePicture(false);
+            if( preview.isVideo() ) {
+                // start synchronous video recording
+                applicationInterface.broadcastRecordingRequest();
+            } else {
+                // photos are not yet supported
+                preview.showToast(rec_sync_toast, R.string.rec_sync_photo_not_supported);
+            }
+        } else {
+            this.takePicture(false);
+        }
     }
 
     /** User has clicked button to take a photo snapshot whilst video recording.

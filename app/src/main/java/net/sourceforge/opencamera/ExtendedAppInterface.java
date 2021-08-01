@@ -424,11 +424,32 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Schedules a broadcast of the current settings to clients.
+     * Broadcasts a video recording request to clients. The request will be received by the leader
+     * too.
+     *
+     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized or this
+     *                               device is not a leader.
+     */
+    public void broadcastRecordingRequest() {
+        Log.d(TAG, "Broadcasting video recording request.");
+
+        if (!isSoftwareSyncRunning()) {
+            throw new IllegalStateException("Cannot broadcast recording request when RecSync is not running");
+        }
+        if (!softwareSyncController.isLeader()) {
+            throw new IllegalStateException("Cannot broadcast recording request from a client");
+        }
+        ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
+                .broadcastRpc(SoftwareSyncController.METHOD_RECORD, "");
+    }
+
+    /**
+     * Schedules a broadcast of the current settings to clients. The settings will be applied to the
+     * leader too.
      *
      * @param settings describes the settings to be broadcast.
-     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized after the
-     *                               delay.
+     * @throws IllegalStateException if after the delay {@link SoftwareSyncController} is not
+     *                               initialized or this device is not a leader.
      */
     public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
         sendSettingsHandler.removeCallbacks(null);
@@ -436,10 +457,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 () -> {
                     Log.d(TAG, "Broadcasting current settings.");
 
-                    // Send settings to all devices
-                    if (softwareSyncController == null) {
+                    if (!isSoftwareSyncRunning()) {
                         throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
                     }
+                    if (!softwareSyncController.isLeader()) {
+                        throw new IllegalStateException("Cannot broadcast settings from a client");
+                    }
+
+                    // Send settings to all devices
                     ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
                             .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, settings.asString());
                 },

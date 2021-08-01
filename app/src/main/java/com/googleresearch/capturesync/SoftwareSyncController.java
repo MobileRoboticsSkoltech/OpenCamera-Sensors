@@ -49,7 +49,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -73,8 +72,8 @@ public class SoftwareSyncController implements Closeable {
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
     /** Tell devices to set the chosen settings to the requested values. */
     public static final int METHOD_SET_SETTINGS = 200_002;
-    public static final int METHOD_START_RECORDING = 200_003;
-    public static final int METHOD_STOP_RECORDING = 200_004;
+    /** Tell devices to start or stop video recording. */
+    public static final int METHOD_RECORD = 200_003;
 
     private long upcomingTriggerTimeNs;
 
@@ -145,7 +144,7 @@ public class SoftwareSyncController implements Closeable {
         //sharedRpcs.put(
         //        METHOD_SET_TRIGGER_TIME,
         //        payload -> {
-        //            Log.v(TAG, "Setting next trigger to" + payload);
+        //            Log.d(TAG, "Setting next trigger to" + payload);
         //            upcomingTriggerTimeNs = Long.valueOf(payload);
         //            // TODO: (MROB) change to video
         //            context.setUpcomingCaptureStill(upcomingTriggerTimeNs);
@@ -155,7 +154,7 @@ public class SoftwareSyncController implements Closeable {
         sharedRpcs.put(
                 METHOD_DO_PHASE_ALIGN,
                 payload -> {
-                    Log.v(TAG, "Phase alignment request received.");
+                    Log.d(TAG, "Phase alignment request received.");
                     if (alignPhasesTask == null || alignPhasesTask.getStatus() == AsyncTask.Status.FINISHED) {
                         alignPhasesTask = new AlignPhasesTask(phaseAlignController, periodCalculator);
                         alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -168,7 +167,7 @@ public class SoftwareSyncController implements Closeable {
         sharedRpcs.put(
                 METHOD_SET_SETTINGS,
                 payload -> {
-                    Log.v(TAG, "Received payload: " + payload);
+                    Log.d(TAG, "Received payload with settings: " + payload);
 
                     SyncSettingsContainer settings = null;
                     try {
@@ -180,6 +179,14 @@ public class SoftwareSyncController implements Closeable {
                     if (settings != null) {
                         context.getApplicationInterface().applyAndLockSettings(settings);
                     }
+                });
+
+        // Start video recording or stop if it is in process.
+        sharedRpcs.put(
+                METHOD_RECORD,
+                payload -> {
+                    Log.d(TAG, "Received record request. Current recording status: " + context.getPreview().isVideoRecording());
+                    context.runOnUiThread(() -> context.takePicture(false));
                 });
 
         if (isLeader) {
@@ -213,24 +220,6 @@ public class SoftwareSyncController implements Closeable {
                     payload ->
                             context.runOnUiThread(
                                     () -> syncStatus.setText(context.getString(R.string.rec_sync_waiting_for_sync, softwareSync.getName()))));
-
-            //clientRpcs.put(
-            //        METHOD_START_RECORDING,
-            //        payload -> {
-            //            Log.v(TAG, "Starting video");
-            //            context.runOnUiThread(
-            //                    () -> context.startVideo(false)
-            //            );
-            //        });
-
-            //clientRpcs.put(
-            //        METHOD_STOP_RECORDING,
-            //        payload -> {
-            //            Log.v(TAG, "Stopping video");
-            //            context.runOnUiThread(
-            //                    context::stopVideo
-            //            );
-            //        });
 
             // Update status text to "synced to leader".
             clientRpcs.put(
