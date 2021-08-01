@@ -82,11 +82,6 @@ public class PhaseAlignController {
         this.phaseAligner = new PhaseAligner(phaseConfig);
     }
 
-    protected void setMinExposureNs(long minExposureNs) {
-        phaseConfig.setMinExposureNs(minExposureNs);
-        this.phaseAligner = new PhaseAligner(phaseConfig);
-    }
-
     /**
      * Update the latest phase response from the latest frame timestamp to keep track of phase.
      *
