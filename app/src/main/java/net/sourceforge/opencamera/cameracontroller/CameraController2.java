@@ -1261,7 +1261,7 @@ public class CameraController2 extends CameraController {
 
     private class OnPreviewFrameAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
-        public void onImageAvailable(ImageReader reader) {
+        public synchronized void onImageAvailable(ImageReader reader) {
             if (MyDebug.LOG) {
                 Log.v(TAG, "Frame during preview");
             }
@@ -7463,6 +7463,11 @@ public class CameraController2 extends CameraController {
     */
 
     public void injectFrameWithExposure(long desiredExposureTimeNs) throws CameraAccessException {
+        if( camera == null ) {
+            if( MyDebug.LOG ) Log.d(TAG, "no camera");
+            return;
+        }
+
         CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
         builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
@@ -7475,7 +7480,14 @@ public class CameraController2 extends CameraController {
             Log.wtf(TAG, "Failed to add surfaces for frame injection builder", e); // wtf bcs videoRecorder is null
         }
 
-        capture(builder.build()); // to use the preconfigured previewCaptureCallback and handler
+        // the alignment fails when using the preconfigured previewCaptureCallback
+        synchronized( background_camera_lock ) {
+            if( captureSession == null ) {
+                if( MyDebug.LOG ) Log.d(TAG, "no capture session");
+                return;
+            }
+            captureSession.capture(builder.build(), null, handler);
+        }
     }
 
     private final CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
