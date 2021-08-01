@@ -1380,13 +1380,8 @@ public class MainUI {
     public void updateSwitchVideoIcon() {
         ImageButton view = main_activity.findViewById(R.id.switch_video);
         ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
-        boolean notEnabled = applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader();
-        if( notEnabled ) {
-            view.setEnabled(false);
-        }
-        else {
-            view.setEnabled(true);
-        }
+        boolean enabled = !applicationInterface.isSoftwareSyncRunning() || applicationInterface.getSoftwareSyncController().isLeader();
+        view.setEnabled(enabled);
     }
 
     public void updateWhiteBalanceLockIcon() {
