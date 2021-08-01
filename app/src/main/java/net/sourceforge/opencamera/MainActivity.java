@@ -1644,7 +1644,8 @@ public class MainActivity extends Activity {
     public void clickedTakePhoto(View view) {
         // RecSync clients are not allowed to click this button
         final boolean is_rec_sync_running = applicationInterface.isSoftwareSyncRunning();
-        if( is_rec_sync_running && !applicationInterface.getSoftwareSyncController().isLeader() ) return;
+        SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        if( is_rec_sync_running && !softwareSyncController.isLeader() ) return;
 
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
@@ -1653,8 +1654,12 @@ public class MainActivity extends Activity {
                 preview.showToast(rec_sync_toast, "Photo is not supported in RecSync mode");
                 return;
             }
-            if( !applicationInterface.getSoftwareSyncController().isAligned() ) {
-                preview.showToast(rec_sync_toast, "The device is not synced");;
+            if( !softwareSyncController.isSettingsBroadcasting() ) {
+                preview.showToast(rec_sync_toast, "The settings is not synced");
+                return;
+            }
+            if( !softwareSyncController.isAligned() ) {
+                preview.showToast(rec_sync_toast, "The device is not synced");
                 return;
             }
         }
