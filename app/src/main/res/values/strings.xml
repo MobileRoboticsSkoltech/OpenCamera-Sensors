@@ -83,6 +83,7 @@
     <string name="rec_sync_settings_not_broadcast">Settings are not being broadcast</string>
     <string name="rec_sync_phases_not_aligned">Phases are not aligned</string>
 
+    <string name="calculating_period">Calculating frames period for %.2f s</string>
     <string name="phase_alignment_started">Phase alignment started</string>
     <string name="phase_alignment_finished">Phase alignment finished</string>
     <string name="phase_alignment_failed">Phase alignment failed</string>

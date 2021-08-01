@@ -160,7 +160,7 @@ public class SoftwareSyncController implements Closeable {
                         alignPhasesTask = new AlignPhasesTask(phaseAlignController, periodCalculator);
                         alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else {
-                        Log.e(TAG, "Phase aligning is already running.");
+                        Log.e(TAG, "Phase alignment is already running.");
                     }
                 });
 

@@ -66,10 +66,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
+    private final PeriodCalculator mPeriodCalculator;
     private final TextView mSyncStatusText;
     private final TextView mPhaseErrorText;
 
-    private final PeriodCalculator periodCalculator = new PeriodCalculator();
     private final Handler sendSettingsHandler = new Handler();
 
     private SoftwareSyncController softwareSyncController;
@@ -85,9 +85,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-        mSyncStatusText = new TextView(mMainActivity);
-        mPhaseErrorText = new TextView(mMainActivity);
+        mSyncStatusText = new TextView(mainActivity);
+        mPhaseErrorText = new TextView(mainActivity);
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity, mPhaseErrorText);
+        mPeriodCalculator = new PeriodCalculator(mainActivity);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -307,7 +308,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         try {
             softwareSyncController =
-                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, periodCalculator, mSyncStatusText);
+                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, mPeriodCalculator, mSyncStatusText);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
             Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");
