@@ -934,6 +934,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
+        if (applicationInterface.isSoftwareSyncRunning())
+            applicationInterface.getSoftwareSyncController().updateTimestamp(arg0.getTimestamp());
+
         refreshPreviewBitmap();
     }
 

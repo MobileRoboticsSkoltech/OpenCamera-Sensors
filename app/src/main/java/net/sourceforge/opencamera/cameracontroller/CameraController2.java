@@ -44,8 +44,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
-import net.sourceforge.opencamera.ExtendedAppInterface;
-import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.preview.VideoProfile;
 
@@ -213,7 +211,7 @@ public class CameraController2 extends CameraController {
     private boolean is_video_high_speed; // whether we're actually recording in high speed
     private List<int[]> ae_fps_ranges;
     private List<int[]> hs_fps_ranges;
-    private ImageReader previewImageReader;
+    //private ImageReader previewImageReader;
     private SurfaceTexture texture;
     private Surface surface_texture;
     private HandlerThread thread;
@@ -1259,26 +1257,6 @@ public class CameraController2 extends CameraController {
         return temperature;
     }
 
-    private class OnPreviewFrameAvailableListener implements ImageReader.OnImageAvailableListener {
-        @Override
-        public synchronized void onImageAvailable(ImageReader reader) {
-            if (MyDebug.LOG) {
-                Log.v(TAG, "Frame during preview");
-            }
-            Image image = reader.acquireNextImage();
-
-            final long timestamp = image.getTimestamp();
-            if (MyDebug.LOG)
-                Log.v(TAG, "preview frame timestamp: " + timestamp);
-
-            ExtendedAppInterface appInterface = ((MainActivity) context).getApplicationInterface();
-            if (appInterface.isSoftwareSyncRunning())
-                appInterface.getSoftwareSyncController().updateTimestamp(timestamp);
-
-            image.close();
-        }
-    }
-
     private class OnVideoFrameImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
@@ -2117,10 +2095,10 @@ public class CameraController2 extends CameraController {
             camera = null;
         }
         closePictureImageReader();
-        if( previewImageReader != null ) {
+        /*if( previewImageReader != null ) {
             previewImageReader.close();
             previewImageReader = null;
-        }
+        }*/
         if( thread != null ) {
             // should only close thread after closing the camera, otherwise we get messages "sending message to a Handler on a dead thread"
             // see https://sourceforge.net/p/opencamera/discussion/general/thread/32c2b01b/?limit=25
@@ -4148,13 +4126,12 @@ public class CameraController2 extends CameraController {
             Log.d(TAG, "setPreviewSize: " + width + " , " + height);
         preview_width = width;
         preview_height = height;
-        if( previewImageReader != null ) {
+        /*if( previewImageReader != null ) {
             previewBuilder.removeTarget(previewImageReader.getSurface());
             previewImageReader.close();
         }
         previewImageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
-        previewImageReader.setOnImageAvailableListener(new OnPreviewFrameAvailableListener(), null);
-        previewBuilder.addTarget(previewImageReader.getSurface());
+        */
     }
 
     @Override
@@ -5182,11 +5159,11 @@ public class CameraController2 extends CameraController {
             } else if( want_video_high_speed ) {
                 // future proofing - at the time of writing want_video_high_speed is only set when recording video,
                 // but if ever this is changed, can only support the preview_surface as a target
-                surfaces = Arrays.asList(preview_surface, previewImageReader.getSurface());
+                surfaces = Collections.singletonList(preview_surface);
             } else if( imageReaderRaw != null ) {
-                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface(), previewImageReader.getSurface());
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
             } else {
-                surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), previewImageReader.getSurface());
+                surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
             }
             if( MyDebug.LOG ) {
                 Log.d(TAG, "texture: " + texture);
@@ -5262,7 +5239,6 @@ public class CameraController2 extends CameraController {
                         if( MyDebug.LOG )
                             Log.d(TAG, "remove old target: " + surface_texture);
                         previewBuilder.removeTarget(surface_texture);
-                        previewBuilder.removeTarget(previewImageReader.getSurface());
                     }
                     this.surface_texture = new Surface(texture);
                     if( MyDebug.LOG )
@@ -5336,13 +5312,6 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "add surface to previewBuilder: " + surface);
                         }
                         previewBuilder.addTarget(surface);
-
-                        if( video_recorder == null ) {
-                            if( MyDebug.LOG ) {
-                                Log.d(TAG, "add previewImageReader surface to previewBuilder: " + previewImageReader.getSurface());
-                            }
-                            previewBuilder.addTarget(previewImageReader.getSurface());
-                        }
 
                         if (video_recorder != null && want_video_imu_recording && supports_photo_video_recording) {
                             if( MyDebug.LOG ) {
@@ -6907,7 +6876,6 @@ public class CameraController2 extends CameraController {
                 precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
                 precaptureBuilder.addTarget(getPreviewSurface());
-                precaptureBuilder.addTarget(previewImageReader.getSurface());
 
                 state = STATE_WAITING_PRECAPTURE_START;
                 precapture_state_change_time_ms = System.currentTimeMillis();
