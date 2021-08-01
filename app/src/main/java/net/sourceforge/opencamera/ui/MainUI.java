@@ -1377,6 +1377,18 @@ public class MainUI {
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
     }
 
+    public void updateSwitchVideoIcon() {
+        ImageButton view = main_activity.findViewById(R.id.switch_video);
+        ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        boolean notEnabled = applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader();
+        if( notEnabled ) {
+            view.setEnabled(false);
+        }
+        else {
+            view.setEnabled(true);
+        }
+    }
+
     public void updateWhiteBalanceLockIcon() {
         ImageButton view = main_activity.findViewById(R.id.white_balance_lock);
         boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
@@ -1485,6 +1497,7 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+        this.updateSwitchVideoIcon();
     }
 
     public void audioControlStarted() {

@@ -438,6 +438,8 @@ public class MainActivity extends Activity {
         // initialise on-screen button visibility
         View switchCameraButton = findViewById(R.id.switch_camera);
         switchCameraButton.setVisibility(n_cameras > 1 ? View.VISIBLE : View.GONE);
+        View switchVideoButton = findViewById(R.id.switch_video);
+        switchVideoButton.setEnabled(true);
         // switchMultiCameraButton visibility updated below in mainUI.updateOnScreenIcons(), as it also depends on user preference
         View speechRecognizerButton = findViewById(R.id.audio_control);
         speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
@@ -2132,9 +2134,6 @@ public class MainActivity extends Activity {
      * Toggles Photo/Video mode
      */
     public void clickedSwitchVideo(View view) {
-        // RecSync clients are not allowed to switch capture mode
-        if( applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader() ) return;
-
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSwitchVideo");
         this.closePopup();
