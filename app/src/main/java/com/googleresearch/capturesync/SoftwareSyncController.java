@@ -155,6 +155,7 @@ public class SoftwareSyncController implements Closeable {
                 METHOD_DO_PHASE_ALIGN,
                 payload -> {
                     Log.v(TAG, "Phase alignment request received.");
+                    phaseAlignController.setMinExposureNs(context.getPreview().getMinimumExposureTime());
                     if (alignPhasesTask == null || alignPhasesTask.getStatus() == AsyncTask.Status.FINISHED) {
                         alignPhasesTask = new AlignPhasesTask(phaseAlignController, periodCalculator);
                         alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

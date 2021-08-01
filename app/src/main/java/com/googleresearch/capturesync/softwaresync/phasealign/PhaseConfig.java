@@ -28,7 +28,7 @@ public final class PhaseConfig {
   private final long goalPhaseNs;
   private final long alignThresholdNs;
   private final long overheadNs;
-  private final long minExposureNs;
+  private long minExposureNs;
 
   private PhaseConfig(
       long periodNs, long goalPhaseNs, long alignThresholdNs, long overheadNs, long minExposureNs) {
@@ -41,6 +41,10 @@ public final class PhaseConfig {
 
   public void setPeriodNs(long periodNs) {
     this.periodNs = periodNs;
+  }
+
+  public void setMinExposureNs(long minExposureNs) {
+    this.minExposureNs = minExposureNs;
   }
 
   /** Parse from a given JSON. */
