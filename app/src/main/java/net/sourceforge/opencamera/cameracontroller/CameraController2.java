@@ -5161,25 +5161,22 @@ public class CameraController2 extends CameraController {
                         preview_surface,
                         video_recorder_surface,
                         imageReader.getSurface(),
-                        videoFrameImageReader.getSurface(),
-                        previewImageReader.getSurface()
+                        videoFrameImageReader.getSurface()
                     );
                 } else if (supports_photo_video_recording && !want_video_high_speed && wantVideoImuRecording) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
-                        videoFrameImageReader.getSurface(),
-                        previewImageReader.getSurface()
+                        videoFrameImageReader.getSurface()
                     );
                 } else if (supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
-                        imageReader.getSurface(),
-                        previewImageReader.getSurface()
+                        imageReader.getSurface()
                     );
                 } else {
-                    surfaces = Arrays.asList(preview_surface, video_recorder_surface, previewImageReader.getSurface());
+                    surfaces = Arrays.asList(preview_surface, video_recorder_surface);
                 }
                 // n.b., raw not supported for photo snapshots while video recording
             } else if( want_video_high_speed ) {
@@ -5265,6 +5262,7 @@ public class CameraController2 extends CameraController {
                         if( MyDebug.LOG )
                             Log.d(TAG, "remove old target: " + surface_texture);
                         previewBuilder.removeTarget(surface_texture);
+                        previewBuilder.removeTarget(previewImageReader.getSurface());
                     }
                     this.surface_texture = new Surface(texture);
                     if( MyDebug.LOG )
@@ -5338,7 +5336,13 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "add surface to previewBuilder: " + surface);
                         }
                         previewBuilder.addTarget(surface);
-                        previewBuilder.addTarget(previewImageReader.getSurface());
+
+                        if( video_recorder == null ) {
+                            if( MyDebug.LOG ) {
+                                Log.d(TAG, "add previewImageReader surface to previewBuilder: " + previewImageReader.getSurface());
+                            }
+                            previewBuilder.addTarget(previewImageReader.getSurface());
+                        }
 
                         if (video_recorder != null && want_video_imu_recording && supports_photo_video_recording) {
                             if( MyDebug.LOG ) {
