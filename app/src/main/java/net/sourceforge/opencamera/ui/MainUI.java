@@ -1011,14 +1011,19 @@ public class MainUI {
         if (MyDebug.LOG)
             Log.d(TAG, "setPauseVideoContentDescription()");
         ImageButton pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+        boolean is_rec_sync_run;
+        {
+            final ExtendedAppInterface appInterface = main_activity.getApplicationInterface();
+            is_rec_sync_run = appInterface.isSoftwareSyncRunning();
+        }
         int content_description;
         if( main_activity.getPreview().isVideoRecordingPaused() ) {
             content_description = R.string.resume_video;
-            pauseVideoButton.setImageResource(R.drawable.ic_play_circle_outline_white_48dp);
+            pauseVideoButton.setImageResource(is_rec_sync_run ? R.drawable.ic_empty : R.drawable.ic_play_circle_outline_white_48dp);
         }
         else {
             content_description = R.string.pause_video;
-            pauseVideoButton.setImageResource(R.drawable.ic_pause_circle_outline_white_48dp);
+            pauseVideoButton.setImageResource(is_rec_sync_run ? R.drawable.ic_empty : R.drawable.ic_pause_circle_outline_white_48dp);
         }
         if( MyDebug.LOG )
             Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));
