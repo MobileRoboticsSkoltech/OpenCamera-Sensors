@@ -1606,6 +1606,10 @@ public class MainActivity extends Activity {
     }
 
     private boolean longClickedTakePhoto() {
+        // RecSync clients are not allowed to click this button
+        if( applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader() )
+            return false;
+
         if( MyDebug.LOG )
             Log.d(TAG, "longClickedTakePhoto");
         // need to check whether fast burst is supported (including for the current resolution),
