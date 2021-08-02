@@ -255,7 +255,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (isSoftwareSyncRunning() && !softwareSyncController.isLeader()) {
             ImageButton view = mMainActivity.findViewById(R.id.take_photo);
             view.setImageResource(R.drawable.ic_empty);
-            view.setContentDescription( getContext().getResources().getString(R.string.do_nothing) );
+            view.setContentDescription(getContext().getResources().getString(R.string.do_nothing));
         }
     }
 
@@ -444,6 +444,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     /**
      * Broadcasts a video recording request to clients. The request will be received by the leader
      * too.
+     * <p>
+     * All receivers will switch their recording status to the opposite of the current status on
+     * this device (i.e. if this device is recording a video, it will stop and so will all the
+     * clients).
+     * <p>
+     * If a client already has the recording status equal to the opposite of the status of this
+     * device, it will not be changed.
      *
      * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized or this
      *                               device is not a leader.
@@ -457,8 +464,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (!softwareSyncController.isLeader()) {
             throw new IllegalStateException("Cannot broadcast recording request from a client");
         }
-        ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
-                .broadcastRpc(SoftwareSyncController.METHOD_RECORD, "");
+        ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_RECORD,
+                String.valueOf(mMainActivity.getPreview().isVideoRecording())
+        );
     }
 
     /**
@@ -483,8 +492,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     }
 
                     // Send settings to all devices
-                    ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
-                            .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, settings.asString());
+                    ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync()).broadcastRpc(
+                            SoftwareSyncController.METHOD_SET_SETTINGS,
+                            settings.asString()
+                    );
                 },
                 500);
     }

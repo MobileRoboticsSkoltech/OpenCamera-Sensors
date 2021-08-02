@@ -58,6 +58,7 @@ import java.util.NoSuchElementException;
  */
 public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
+
     private final MainActivity context;
     private final TextView syncStatus;
     private final PhaseAlignController phaseAlignController;
@@ -66,13 +67,21 @@ public class SoftwareSyncController implements Closeable {
     private SoftwareSyncBase softwareSync;
     private AlignPhasesTask alignPhasesTask;
 
-    /** Tell devices to save the frame at the requested trigger time. */
+    /**
+     * Tell devices to save the frame at the requested trigger time.
+     */
     public static final int METHOD_SET_TRIGGER_TIME = 200_000;
-    /** Tell devices to calculate frames period and phase align. */
+    /**
+     * Tell devices to calculate frames period and phase align.
+     */
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
-    /** Tell devices to set the chosen settings to the requested values. */
+    /**
+     * Tell devices to set the chosen settings to the requested values.
+     */
     public static final int METHOD_SET_SETTINGS = 200_002;
-    /** Tell devices to start or stop video recording. */
+    /**
+     * Tell devices to start or stop video recording.
+     */
     public static final int METHOD_RECORD = 200_003;
 
     private long upcomingTriggerTimeNs;
@@ -181,12 +190,20 @@ public class SoftwareSyncController implements Closeable {
                     }
                 });
 
-        // Start video recording or stop if it is in process.
+        // Switch the recording status (start or stop video recording) to the opposite of the received one.
         sharedRpcs.put(
                 METHOD_RECORD,
                 payload -> {
-                    Log.d(TAG, "Received record request. Current recording status: " + context.getPreview().isVideoRecording());
-                    context.runOnUiThread(() -> context.takePicture(false));
+                    Log.d(TAG, String.format(
+                            "Received record request with payload: %s. Current recording status: %s.",
+                            payload, context.getPreview().isVideoRecording()));
+                    if (!context.getPreview().isVideo()) {
+                        // This should not happen as capture mode is synced before recording.
+                        throw new IllegalStateException("Received recording request in photo mode");
+                    }
+                    if (context.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
+                        context.runOnUiThread(() -> context.takePicture(false));
+                    }
                 });
 
         if (isLeader) {
@@ -227,9 +244,9 @@ public class SoftwareSyncController implements Closeable {
                     payload ->
                             context.runOnUiThread(
                                     () -> syncStatus.setText(
-                                                    context.getString(
-                                                            R.string.rec_sync_synced_to_leader,
-                                                            softwareSync.getName(), softwareSync.getLeaderAddress()))));
+                                            context.getString(
+                                                    R.string.rec_sync_synced_to_leader,
+                                                    softwareSync.getName(), softwareSync.getLeaderAddress()))));
 
             softwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
         }
