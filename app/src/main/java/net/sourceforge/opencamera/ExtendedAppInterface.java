@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -250,6 +251,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         super.startingVideo();
+
+        if (isSoftwareSyncRunning() && !softwareSyncController.isLeader()) {
+            ImageButton view = mMainActivity.findViewById(R.id.take_photo);
+            view.setImageResource(R.drawable.ic_empty);
+            view.setContentDescription( getContext().getResources().getString(R.string.do_nothing) );
+        }
     }
 
     @Override
