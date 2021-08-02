@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.util.Log;
 
+import com.googleresearch.capturesync.softwaresync.TimeDomainConverter;
+
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -32,7 +34,8 @@ import java.util.concurrent.Executors;
  */
 public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
-    private final static String TIMESTAMP_FILE_SUFFIX = "_timestamps";
+    private final static String UNSYNCED_TIMESTAMP_FILE_SUFFIX = "_imu_timestamps";
+    private final static String SYNCED_TIMESTAMP_FILE_SUFFIX = "_recsync_timestamps";
     /*
     Value used to save frames for debugging and matching frames with video
     TODO: in future versions make sure this value is big enough not to cause frame rate drop / buffer allocation problems on devices other than already tested
@@ -45,11 +48,13 @@ public class VideoFrameInfo implements Closeable {
     private final Date mVideoDate;
     private final StorageUtilsWrapper mStorageUtils;
     private final ExtendedAppInterface mAppInterface;
-    private final BufferedWriter mFrameBufferedWriter;
+    private final BufferedWriter mUnsyncedFrameBufferedWriter;
+    private final BufferedWriter mSyncedFrameBufferedWriter;
     private final boolean mShouldSaveFrames;
     private final MainActivity mContext;
     private final YuvImageUtils mYuvUtils;
     private final BlockingQueue<VideoPhaseInfo> mPhaseInfoReporter;
+    private final TimeDomainConverter timeDomainConverter;
     private final List<Long> durationsNs;
     private long mLastTimestamp = 0;
 
@@ -62,6 +67,8 @@ public class VideoFrameInfo implements Closeable {
     public VideoFrameInfo(
             Date videoDate,
             MainActivity context,
+            boolean shouldSaveUnsyncedTimestamps,
+            boolean shouldSaveSyncedTimestamps,
             boolean shouldSaveFrames,
             BlockingQueue<VideoPhaseInfo> videoPhaseInfoReporter
     ) throws IOException {
@@ -75,13 +82,28 @@ public class VideoFrameInfo implements Closeable {
         mPhaseInfoReporter.clear();
         durationsNs = new ArrayList<>();
 
+        if (shouldSaveUnsyncedTimestamps) {
+            File unsyncedTimestampFile = mStorageUtils.createOutputCaptureInfo(
+                    StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", UNSYNCED_TIMESTAMP_FILE_SUFFIX, mVideoDate
+            );
+            mUnsyncedFrameBufferedWriter = new BufferedWriter(new PrintWriter(unsyncedTimestampFile));
+        } else {
+            mUnsyncedFrameBufferedWriter = null;
+        }
+        if (shouldSaveSyncedTimestamps) {
+            if (!mAppInterface.isSoftwareSyncRunning()) {
+                throw new IllegalArgumentException("Cannot save synced timestamps without RecSync running");
+            }
 
-        File frameTimestampFile = mStorageUtils.createOutputCaptureInfo(
-                StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", TIMESTAMP_FILE_SUFFIX, mVideoDate
-        );
-        mFrameBufferedWriter = new BufferedWriter(
-                new PrintWriter(frameTimestampFile)
-        );
+            File syncedTimestampFile = mStorageUtils.createOutputCaptureInfo(
+                    StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", SYNCED_TIMESTAMP_FILE_SUFFIX, mVideoDate
+            );
+            mSyncedFrameBufferedWriter = new BufferedWriter(new PrintWriter(syncedTimestampFile));
+            timeDomainConverter = mAppInterface.getSoftwareSyncController().getSoftwareSync();
+        } else {
+            mSyncedFrameBufferedWriter = null;
+            timeDomainConverter = null;
+        }
     }
 
     public void submitProcessFrame(long timestamp) {
@@ -156,15 +178,29 @@ public class VideoFrameInfo implements Closeable {
     }
 
     private void writeFrameTimestamp(long timestamp) {
-        try {
-            mFrameBufferedWriter
-                    .append(Long.toString(timestamp))
-                    .append("\n");
-        } catch (IOException e) {
-            mAppInterface.onFrameInfoRecordingFailed();
-            Log.e(TAG, "Failed to write frame info, timestamp: " + timestamp);
-            e.printStackTrace();
-            this.close();
+        if (mUnsyncedFrameBufferedWriter != null) {
+            try {
+                mUnsyncedFrameBufferedWriter
+                        .append(Long.toString(timestamp))
+                        .append("\n");
+            } catch (IOException e) {
+                mAppInterface.onFrameInfoRecordingFailed();
+                Log.e(TAG, "Failed to write unsynced frame info, timestamp: " + timestamp);
+                e.printStackTrace();
+                this.close();
+            }
+        }
+        if (mSyncedFrameBufferedWriter != null) {
+            try {
+                mSyncedFrameBufferedWriter
+                        .append(Long.toString(timeDomainConverter.leaderTimeForLocalTimeNs(timestamp)))
+                        .append("\n");
+            } catch (IOException e) {
+                mAppInterface.onFrameInfoRecordingFailed();
+                Log.e(TAG, "Failed to write synced frame info, unsynced timestamp: " + timestamp);
+                e.printStackTrace();
+                this.close();
+            }
         }
     }
 
@@ -195,15 +231,25 @@ public class VideoFrameInfo implements Closeable {
             Log.d(TAG, "Closing frame info, frame number: " + mFrameNumber);
         }
 
-        try {
-            if (mFrameBufferedWriter != null) {
-                Log.d(TAG, "Before writer close()");
-                mFrameBufferedWriter.close();
-                Log.d(TAG, "After writer close()");
+        if (mUnsyncedFrameBufferedWriter != null) {
+            try {
+                Log.d(TAG, "Before unsynced writer close()");
+                mUnsyncedFrameBufferedWriter.close();
+                Log.d(TAG, "After unsynced writer close()");
+            } catch (IOException e) {
+                Log.d(TAG, "Exception occurred when attempting to close mUnsyncedFrameBufferedWriter");
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            Log.d(TAG, "Exception occurred when attempting to close mFrameBufferedWriter");
-            e.printStackTrace();
+        }
+        if (mSyncedFrameBufferedWriter != null) {
+            try {
+                Log.d(TAG, "Before synced writer close()");
+                mSyncedFrameBufferedWriter.close();
+                Log.d(TAG, "After synced writer close()");
+            } catch (IOException e) {
+                Log.d(TAG, "Exception occurred when attempting to close mSyncedFrameBufferedWriter");
+                e.printStackTrace();
+            }
         }
     }
 }

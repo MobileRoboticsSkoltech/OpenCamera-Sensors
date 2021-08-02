@@ -5595,8 +5595,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 boolean want_video_imu_recording = applicationInterface.getIMURecordingPref();
                 boolean want_save_frames = applicationInterface.getSaveFramesPref();
 
+                boolean want_rec_sync = applicationInterface.isSoftwareSyncRunning();
 
-                if (want_video_imu_recording) {
+                if( want_video_imu_recording || want_rec_sync ) {
                     try {
                         mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
                     } catch (IOException e) {
@@ -5620,17 +5621,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         want_photo_video_recording,
                         want_video_imu_recording,
                         want_save_frames,
+                        want_rec_sync,
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
-                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                if( mVideoFrameInfoWriter != null && (want_video_imu_recording || want_rec_sync) ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
                                 }
                             }
 
                             @Override
                             public void onVideoFrameTimestampAvailable(long timestamp) {
-                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                if( mVideoFrameInfoWriter != null && (want_video_imu_recording || want_rec_sync) ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp);
                                 }
                             }
@@ -5638,7 +5640,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             @Override
                             public void onVideoCaptureSessionClosed() {
                                 stopVideoPostPrepare(false);
-                                if (mVideoFrameInfoWriter != null) {
+                                if( mVideoFrameInfoWriter != null ) {
                                     mVideoFrameInfoWriter.close();
                                     mVideoFrameInfoWriter = null;
                                 }

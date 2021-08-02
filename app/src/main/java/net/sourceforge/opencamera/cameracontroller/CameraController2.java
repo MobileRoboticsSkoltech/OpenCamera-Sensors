@@ -5122,31 +5122,36 @@ public class CameraController2 extends CameraController {
     private List<Surface> getCaptureSessionOutputSurfaces(
         final MediaRecorder videoRecorder,
         boolean wantPhotoVideoRecording,
-        boolean wantVideoImuRecording
+        boolean wantVideoImuRecording,
+        boolean wantRecSync
     ) throws CameraControllerException {
         List<Surface> surfaces;
         synchronized( background_camera_lock ) {
             Surface preview_surface = getPreviewSurface();
             if( videoRecorder != null ) {
-                if (wantVideoImuRecording && videoFrameImageReader == null) {
+                if( wantVideoImuRecording && videoFrameImageReader == null ) {
                     Log.e(TAG, "Video frame image reader was null for video IMU recording");
                     throw new CameraControllerException();
                 }
+                if( wantRecSync && videoFrameImageReader == null ) {
+                    Log.e(TAG, "Video frame image reader was null for video recording with RecSync");
+                    throw new CameraControllerException();
+                }
 
-                if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording && wantVideoImuRecording ) {
+                if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording && (wantVideoImuRecording || wantRecSync) ) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
                         imageReader.getSurface(),
                         videoFrameImageReader.getSurface()
                     );
-                } else if (supports_photo_video_recording && !want_video_high_speed && wantVideoImuRecording) {
+                } else if( supports_photo_video_recording && !want_video_high_speed && (wantVideoImuRecording || wantRecSync) ) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
                         videoFrameImageReader.getSurface()
                     );
-                } else if (supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording) {
+                } else if( supports_photo_video_recording && !want_video_high_speed && wantPhotoVideoRecording ) {
                     surfaces = Arrays.asList(
                         preview_surface,
                         video_recorder_surface,
@@ -5178,13 +5183,14 @@ public class CameraController2 extends CameraController {
         final MediaRecorder videoRecorder,
         boolean wantPhotoVideoRecording
     ) throws CameraControllerException {
-        createCaptureSession(videoRecorder, wantPhotoVideoRecording, false);
+        createCaptureSession(videoRecorder, wantPhotoVideoRecording, false, false);
     }
 
     private void createCaptureSession(
             final MediaRecorder video_recorder,
             boolean want_photo_video_recording,
-            boolean want_video_imu_recording
+            boolean want_video_imu_recording,
+            boolean want_rec_sync
     ) throws CameraControllerException {
         if( MyDebug.LOG )
             Log.d(TAG, "create capture session");
@@ -5313,7 +5319,7 @@ public class CameraController2 extends CameraController {
                         }
                         previewBuilder.addTarget(surface);
 
-                        if (video_recorder != null && want_video_imu_recording && supports_photo_video_recording) {
+                        if (video_recorder != null && supports_photo_video_recording && (want_video_imu_recording || want_rec_sync)) {
                             if( MyDebug.LOG ) {
                                 Log.d(TAG, "add videoFrameImageReader surface to " +
                                         "previewBuilder: " + videoFrameImageReader.getSurface());
@@ -5392,7 +5398,7 @@ public class CameraController2 extends CameraController {
             }
             final MyStateCallback myStateCallback = new MyStateCallback();
 
-            List<Surface> surfaces = getCaptureSessionOutputSurfaces(video_recorder, want_photo_video_recording, want_video_imu_recording);
+            List<Surface> surfaces = getCaptureSessionOutputSurfaces(video_recorder, want_photo_video_recording, want_video_imu_recording, want_rec_sync);
 
             if( MyDebug.LOG ) {
                 if( video_recorder == null ) {
@@ -7291,6 +7297,7 @@ public class CameraController2 extends CameraController {
             boolean want_photo_video_recording,
             boolean want_video_imu_recording,
             boolean want_save_frames,
+            boolean want_rec_sync,
             VideoFrameInfoCallback video_frame_info_callback
     ) throws CameraControllerException {
         mVideoFrameInfoCallback = video_frame_info_callback;
@@ -7311,11 +7318,11 @@ public class CameraController2 extends CameraController {
             previewIsVideoMode = true;
             previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
             camera_settings.setupBuilder(previewBuilder, false);
-            if(video_recorder != null && supports_photo_video_recording && want_video_imu_recording) {
-                // Requested synchronized video and IMU recording
+            if(video_recorder != null && supports_photo_video_recording && (want_video_imu_recording || want_rec_sync)) {
+                // Requested synchronized video and IMU recording or RecSync
                 createVideoFrameImageReader(profile.videoFrameWidth, profile.videoFrameHeight);
             }
-            createCaptureSession(video_recorder, want_photo_video_recording, want_video_imu_recording);
+            createCaptureSession(video_recorder, want_photo_video_recording, want_video_imu_recording, want_rec_sync);
         }
         catch(CameraAccessException e) {
             if( MyDebug.LOG ) {
@@ -7446,7 +7453,7 @@ public class CameraController2 extends CameraController {
         builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, desiredExposureTimeNs);
 
         try {
-            final List<Surface> surfaces = getCaptureSessionOutputSurfaces(null, true, true);
+            final List<Surface> surfaces = getCaptureSessionOutputSurfaces(null, true, true, true);
             for (Surface surface : surfaces) builder.addTarget(surface);
         } catch (CameraControllerException e) {
             Log.wtf(TAG, "Failed to add surfaces for frame injection builder", e); // wtf bcs videoRecorder is null

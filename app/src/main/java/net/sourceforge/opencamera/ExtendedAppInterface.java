@@ -107,9 +107,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return phaseConfig;
     }
 
+    /**
+     * Create {@link VideoFrameInfo} with the current preferences.
+     *
+     * @return the created {@link VideoFrameInfo}.
+     * @throws IOException if unable to create files for timestamps recording.
+     */
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
-                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
+                getLastVideoDate(),
+                mMainActivity,
+                getIMURecordingPref(),
+                getEnableRecSyncPref(),
+                getIMURecordingPref() && getSaveFramesPref(),
+                getVideoPhaseInfoReporter()
         );
     }
 
