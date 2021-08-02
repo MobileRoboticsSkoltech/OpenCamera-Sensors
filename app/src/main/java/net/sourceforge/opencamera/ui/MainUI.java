@@ -1363,9 +1363,7 @@ public class MainUI {
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
                 recSyncButton.setVisibility(visibility_recsync);
 
-                if( show_gui_photo && show_gui_video ) {
-                    layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
-                }
+                layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
             }
         });
     }
