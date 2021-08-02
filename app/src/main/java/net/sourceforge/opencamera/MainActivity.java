@@ -1348,7 +1348,8 @@ public class MainActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyDown: " + keyCode);
-        if( camera_in_background ) {
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        if( camera_in_background || applicationInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
             // don't allow keys such as volume keys for taking photo when camera in background!
             if( MyDebug.LOG )
                 Log.d(TAG, "camera is in background");
@@ -1364,7 +1365,8 @@ public class MainActivity extends Activity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyUp: " + keyCode);
-        if( camera_in_background ) {
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        if( camera_in_background || applicationInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
             // don't allow keys such as volume keys for taking photo when camera in background!
             if( MyDebug.LOG )
                 Log.d(TAG, "camera is in background");
