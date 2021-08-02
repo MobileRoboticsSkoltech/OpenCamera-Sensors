@@ -8,6 +8,9 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,12 +18,27 @@ import java.util.stream.Collectors;
 
 public class PeriodCalculator {
     private final static long CALC_DURATION_MS = 10000;
+
+    private final MainActivity context;
     private volatile boolean shouldRegister;
     private ArrayList<Long> registeredTimestamps = new ArrayList<>();
 
-    // Blocking call, returns 0 in case of error
+    public PeriodCalculator(MainActivity context) {
+        this.context = context;
+    }
+
+    /**
+     * Calculates frames period for this device using timestamps received from
+     * {@link #onFrameTimestamp} during the waiting time.
+     * <p>
+     * Blocking call, sleeps for {@link #CALC_DURATION_MS}.
+     *
+     * @return the calculated period, 0 in case of error.
+     * @throws InterruptedException if interrupted while sleeping.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public long getPeriodNs() throws InterruptedException {
+        context.getPreview().showToast(context.getRecSyncToastBoxer(), context.getString(R.string.calculating_period, CALC_DURATION_MS * 1e-3));
         // Start recording timestamps
         registeredTimestamps = new ArrayList<>();
         shouldRegister = true;

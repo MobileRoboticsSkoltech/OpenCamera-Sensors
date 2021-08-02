@@ -75,10 +75,27 @@
     <string name="preference_enable_rec_sync">Use RecSync</string>
     <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
-    <string name="sync_settings_locked">Unlock settings</string>
-    <string name="settings_synced">Settings broadcasting started</string>
-    <string name="sync_devices">Sync devices</string>
-    <string name="devices_synced">Devices sync started</string>
+    <string name="sync_settings_locked">Stop settings broadcast</string>
+    <string name="settings_broadcast_started">Settings broadcast started</string>
+    <string name="align_phases">Align phases</string>
+
+    <string name="rec_sync_photo_not_supported">Photo is not supported in RecSync mode</string>
+    <string name="rec_sync_settings_not_broadcast">Settings are not being broadcast</string>
+    <string name="rec_sync_phases_not_aligned">Phases are not aligned</string>
+
+    <string name="calculating_period">Calculating frames period for %.2f s</string>
+    <string name="phase_alignment_started">Phase alignment started</string>
+    <string name="phase_alignment_finished">Phase alignment finished</string>
+    <string name="phase_alignment_failed">Phase alignment failed</string>
+
+    <string name="rec_sync_waiting_for_leader">%s: Waiting for Leader</string>
+    <string name="rec_sync_waiting_for_sync">%s: Waiting for Sync</string>
+    <string name="rec_sync_synced_to_leader">Client %s\n-Synced to Leader %s</string>
+    <string name="rec_sync_leader">Leader: %s</string>
+    <string name="rec_sync_client">Client: %s</string>
+    <string name="rec_sync_clients_num">Leader %s: %d clients.\n</string>
+    <string name="rec_sync_client_syncing">-Client %s: syncing…\n</string>
+    <string name="rec_sync_client_synced">-Client %s: %.2f ms sync\n</string>
 
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>

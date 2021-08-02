@@ -82,12 +82,12 @@ public class RecSyncView extends LinearLayout {
             main_activity.clickedSyncSettings();
         });
 
-        button_sync_devices = addButton(R.string.sync_devices, view -> {
+        button_sync_devices = addButton(R.string.align_phases, view -> {
             if (MyDebug.LOG) {
-                Log.d(TAG, "clicked to buttonSyncDevices");
+                Log.d(TAG, "clicked to buttonAlignPhases");
             }
 
-            main_activity.clickedSyncDevices();
+            main_activity.clickedAlignPhases();
         });
     }
 

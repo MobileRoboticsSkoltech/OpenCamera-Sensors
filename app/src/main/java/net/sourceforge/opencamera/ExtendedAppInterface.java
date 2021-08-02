@@ -66,10 +66,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
+    private final PeriodCalculator mPeriodCalculator;
     private final TextView mSyncStatusText;
     private final TextView mPhaseErrorText;
 
-    private final PeriodCalculator periodCalculator = new PeriodCalculator();
     private final Handler sendSettingsHandler = new Handler();
 
     private SoftwareSyncController softwareSyncController;
@@ -85,9 +85,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-        mSyncStatusText = new TextView(mMainActivity);
-        mPhaseErrorText = new TextView(mMainActivity);
+        mSyncStatusText = new TextView(mainActivity);
+        mPhaseErrorText = new TextView(mainActivity);
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity, mPhaseErrorText);
+        mPeriodCalculator = new PeriodCalculator(mainActivity);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -106,9 +107,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return phaseConfig;
     }
 
+    /**
+     * Create {@link VideoFrameInfo} with the current preferences.
+     *
+     * @return the created {@link VideoFrameInfo}.
+     * @throws IOException if unable to create files for timestamps recording.
+     */
     public VideoFrameInfo setupFrameInfo() throws IOException {
         return new VideoFrameInfo(
-                getLastVideoDate(), mMainActivity, getSaveFramesPref(), getVideoPhaseInfoReporter()
+                getLastVideoDate(),
+                mMainActivity,
+                getIMURecordingPref(),
+                getEnableRecSyncPref(),
+                getIMURecordingPref() && getSaveFramesPref(),
+                getVideoPhaseInfoReporter()
         );
     }
 
@@ -307,7 +319,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         try {
             softwareSyncController =
-                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, periodCalculator, mSyncStatusText);
+                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, mPeriodCalculator, mSyncStatusText);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
             Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");
@@ -423,11 +435,32 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Schedules a broadcast of the current settings to clients.
+     * Broadcasts a video recording request to clients. The request will be received by the leader
+     * too.
+     *
+     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized or this
+     *                               device is not a leader.
+     */
+    public void broadcastRecordingRequest() {
+        Log.d(TAG, "Broadcasting video recording request.");
+
+        if (!isSoftwareSyncRunning()) {
+            throw new IllegalStateException("Cannot broadcast recording request when RecSync is not running");
+        }
+        if (!softwareSyncController.isLeader()) {
+            throw new IllegalStateException("Cannot broadcast recording request from a client");
+        }
+        ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
+                .broadcastRpc(SoftwareSyncController.METHOD_RECORD, "");
+    }
+
+    /**
+     * Schedules a broadcast of the current settings to clients. The settings will be applied to the
+     * leader too.
      *
      * @param settings describes the settings to be broadcast.
-     * @throws IllegalStateException if {@link SoftwareSyncController} is not initialized after the
-     *                               delay.
+     * @throws IllegalStateException if after the delay {@link SoftwareSyncController} is not
+     *                               initialized or this device is not a leader.
      */
     public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
         sendSettingsHandler.removeCallbacks(null);
@@ -435,10 +468,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 () -> {
                     Log.d(TAG, "Broadcasting current settings.");
 
-                    // Send settings to all devices
-                    if (softwareSyncController == null) {
+                    if (!isSoftwareSyncRunning()) {
                         throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
                     }
+                    if (!softwareSyncController.isLeader()) {
+                        throw new IllegalStateException("Cannot broadcast settings from a client");
+                    }
+
+                    // Send settings to all devices
                     ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync())
                             .broadcastRpc(SoftwareSyncController.METHOD_SET_SETTINGS, settings.asString());
                 },
