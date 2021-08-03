@@ -80,7 +80,7 @@
     <string name="settings_broadcast_started">Settings broadcast started</string>
     <string name="align_phases">Align phases</string>
 
-    <string name="rec_sync_photo_not_supported">Photo is not supported in RecSync mode</string>
+    <string name="rec_sync_only_video_supported">Only video recording is supported in RecSync mode</string>
     <string name="rec_sync_settings_not_broadcast">Settings are not being broadcast</string>
     <string name="rec_sync_phases_not_aligned">Phases are not aligned</string>
 

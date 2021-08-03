@@ -1348,8 +1348,7 @@ public class MainActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyDown: " + keyCode);
-        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        if( camera_in_background || applicationInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
+        if( camera_in_background ) {
             // don't allow keys such as volume keys for taking photo when camera in background!
             if( MyDebug.LOG )
                 Log.d(TAG, "camera is in background");
@@ -1365,8 +1364,7 @@ public class MainActivity extends Activity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyUp: " + keyCode);
-        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        if( camera_in_background || applicationInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
+        if( camera_in_background ) {
             // don't allow keys such as volume keys for taking photo when camera in background!
             if( MyDebug.LOG )
                 Log.d(TAG, "camera is in background");
@@ -1646,35 +1644,9 @@ public class MainActivity extends Activity {
     }
 
     public void clickedTakePhoto(View view) {
-        final boolean is_rec_sync_running = applicationInterface.isSoftwareSyncRunning();
-
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhoto");
-        if( is_rec_sync_running ) {
-            final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-
-            if( !softwareSyncController.isLeader() ) { // clients cannot click this button
-                return;
-            }
-            if( !softwareSyncController.isSettingsBroadcasting() ) { // settings need to be being broadcast
-                preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
-                return;
-            }
-            /*if( !softwareSyncController.isAligned() ) { // phases need to be aligned
-                preview.showToast(rec_sync_toast, R.string.rec_sync_phases_not_aligned);
-                return;
-            }*/
-
-            if( preview.isVideo() ) {
-                // start synchronous video recording
-                applicationInterface.broadcastRecordingRequest();
-            } else {
-                // photos are not yet supported
-                preview.showToast(rec_sync_toast, R.string.rec_sync_photo_not_supported);
-            }
-        } else {
-            this.takePicture(false);
-        }
+        this.takePicture(false);
     }
 
     /** User has clicked button to take a photo snapshot whilst video recording.
@@ -4419,31 +4391,55 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "takePicture");
 
-        if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
-            if( preview.isTakingPhoto() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "ignore whilst taking panorama photo");
-            }
-            else if( applicationInterface.getGyroSensor().isRecording() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "panorama complete");
-                applicationInterface.finishPanorama();
+        if( applicationInterface.isSoftwareSyncRunning() ) {
+            final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+
+            if( !softwareSyncController.isLeader() ) { // clients cannot use this button
                 return;
             }
-            else if( !applicationInterface.canTakeNewPhoto() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "can't start new panoroma, still saving in background");
-                // we need to test here, otherwise the Preview won't take a new photo - but we'll think we've
-                // started the panorama!
+            if( !softwareSyncController.isSettingsBroadcasting() ) { // settings need to be being broadcast
+                preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
+                return;
             }
-            else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "start panorama");
-                applicationInterface.startPanorama();
-            }
-        }
+            /*if( !softwareSyncController.isAligned() ) { // phases need to be aligned
+                preview.showToast(rec_sync_toast, R.string.rec_sync_phases_not_aligned);
+                return;
+            }*/
 
-        this.takePicturePressed(photo_snapshot, false);
+            if( preview.isVideo() ) {
+                // start synchronous video recording
+                applicationInterface.broadcastRecordingRequest();
+            } else {
+                // other modes are not yet supported
+                preview.showToast(rec_sync_toast, R.string.rec_sync_only_video_supported);
+            }
+        } else {
+            if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
+                if( preview.isTakingPhoto() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "ignore whilst taking panorama photo");
+                }
+                else if( applicationInterface.getGyroSensor().isRecording() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "panorama complete");
+                    applicationInterface.finishPanorama();
+                    return;
+                }
+                else if( !applicationInterface.canTakeNewPhoto() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't start new panoroma, still saving in background");
+                    // we need to test here, otherwise the Preview won't take a new photo - but we'll think we've
+                    // started the panorama!
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "start panorama");
+                    applicationInterface.startPanorama();
+                }
+            }
+
+            this.takePicturePressed(photo_snapshot, false);
+        }
     }
 
     /** Returns whether the last photo operation was a continuous fast burst.
@@ -4458,7 +4454,7 @@ public class MainActivity extends Activity {
      *                       on the current mode.
      * @param continuous_fast_burst If true, then start a continuous fast burst.
      */
-    void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
+    public void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
         if( MyDebug.LOG )
             Log.d(TAG, "takePicturePressed");
 

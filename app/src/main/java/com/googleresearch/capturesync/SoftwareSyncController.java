@@ -202,7 +202,7 @@ public class SoftwareSyncController implements Closeable {
                         throw new IllegalStateException("Received recording request in photo mode");
                     }
                     if (context.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
-                        context.runOnUiThread(() -> context.takePicture(false));
+                        context.runOnUiThread(() -> context.takePicturePressed(false, false));
                     }
                 });
 
