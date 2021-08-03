@@ -1679,7 +1679,7 @@ public class MainActivity extends Activity {
 
     /** User has clicked button to take a photo snapshot whilst video recording.
      */
-    public void clickedTakePhotoVideoSnapshot(View view) { // TODO support for RecSync
+    public void clickedTakePhotoVideoSnapshot(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTakePhotoVideoSnapshot");
         this.takePicture(true);
@@ -1689,7 +1689,6 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedPauseVideo");
         // we block pause button at RecSync mode
-        // TODO support pause for RecSync
         if( preview.isVideoRecording() && !applicationInterface.isSoftwareSyncRunning() ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();

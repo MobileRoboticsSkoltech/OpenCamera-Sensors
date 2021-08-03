@@ -1387,6 +1387,13 @@ public class MainUI {
         view.setEnabled(enabled);
     }
 
+    public void updateTakePhotoWhenVideoRecordingIcon() {
+        ImageButton view = main_activity.findViewById(R.id.take_photo_when_video_recording);
+        ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        boolean enabled = !applicationInterface.isSoftwareSyncRunning();
+        view.setEnabled(enabled);
+    }
+
     public void updateWhiteBalanceLockIcon() {
         ImageButton view = main_activity.findViewById(R.id.white_balance_lock);
         boolean enabled = main_activity.getPreview().isWhiteBalanceLocked();
@@ -1496,6 +1503,7 @@ public class MainUI {
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
         this.updateSwitchVideoIcon();
+        this.updateTakePhotoWhenVideoRecordingIcon();
     }
 
     public void audioControlStarted() {
