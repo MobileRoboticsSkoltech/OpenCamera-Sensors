@@ -900,7 +900,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
             else {
                 getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
-                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary("Camera2 API support and Android 7.0 or higher required");
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary(R.string.recsync_unsupported_summary);
             }
         }
 

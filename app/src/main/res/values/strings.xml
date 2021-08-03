@@ -73,6 +73,7 @@
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
 
     <string name="preference_enable_rec_sync">Use RecSync</string>
+    <string name="recsync_unsupported_summary">Camera2 API, manual exposure time support and Android 7.0 or higher required</string>
     <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
     <string name="sync_settings_locked">Stop settings broadcast</string>
