@@ -34,6 +34,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -5421,6 +5425,22 @@ public class MainActivity extends Activity {
 		/*if( audio_listener != null ) {
 			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
 		}*/
+        if( applicationInterface.isSoftwareSyncRunning() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ) {
+            final String camera_id = String.valueOf(getActualCameraId());
+            try {
+                final int ts_source = ((CameraManager) getSystemService(Context.CAMERA_SERVICE))
+                        .getCameraCharacteristics(camera_id)
+                        .get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
+                if( ts_source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME ) {
+                    toast_string += "\n" + getString(R.string.timestamp_source, "realtime");
+                } else {
+                    toast_string += "\n" + getString(R.string.timestamp_source, "unknown");
+                }
+                simple = false;
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Failed to check timestamping characteristic for camera " + camera_id);
+            }
+        }
 
         if( MyDebug.LOG ) {
             Log.d(TAG, "toast_string: " + toast_string);
