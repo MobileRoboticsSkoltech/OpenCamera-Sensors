@@ -264,6 +264,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public void startedVideo() {
         super.startedVideo();
         if (isSoftwareSyncRunning()) {
+            View pauseVideoButton = mMainActivity.findViewById(R.id.pause_video);
+            pauseVideoButton.setVisibility(View.GONE);
             View takePhotoVideoButton = mMainActivity.findViewById(R.id.take_photo_when_video_recording);
             takePhotoVideoButton.setVisibility(View.GONE);
         }
