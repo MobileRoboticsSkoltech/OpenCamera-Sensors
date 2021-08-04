@@ -135,7 +135,7 @@ public class VideoFrameInfo implements Closeable {
                             );
                         }
 
-                        writeFrameTimestamp(timestamp);
+                        writeTimestamp(timestamp);
                         mFrameNumber++;
                     }
             );
@@ -177,30 +177,22 @@ public class VideoFrameInfo implements Closeable {
         submitProcessFrame(timestamp);
     }
 
-    private void writeFrameTimestamp(long timestamp) {
-        if (mUnsyncedFrameBufferedWriter != null) {
-            try {
-                mUnsyncedFrameBufferedWriter
-                        .append(Long.toString(timestamp))
-                        .append("\n");
-            } catch (IOException e) {
-                mAppInterface.onFrameInfoRecordingFailed();
-                Log.e(TAG, "Failed to write unsynced frame info, timestamp: " + timestamp);
-                e.printStackTrace();
-                this.close();
-            }
-        }
-        if (mSyncedFrameBufferedWriter != null) {
-            try {
-                mSyncedFrameBufferedWriter
-                        .append(Long.toString(timeDomainConverter.leaderTimeForLocalTimeNs(timestamp)))
-                        .append("\n");
-            } catch (IOException e) {
-                mAppInterface.onFrameInfoRecordingFailed();
-                Log.e(TAG, "Failed to write synced frame info, unsynced timestamp: " + timestamp);
-                e.printStackTrace();
-                this.close();
-            }
+    private void writeTimestamp(long timestamp) {
+        writeTimestamp(mUnsyncedFrameBufferedWriter, timestamp);
+        writeTimestamp(mSyncedFrameBufferedWriter,
+                timeDomainConverter.leaderTimeForLocalTimeNs(timestamp)
+        );
+    }
+
+    private void writeTimestamp(BufferedWriter writer, long timestamp) {
+        if (writer == null) return;
+        try {
+            writer.append(Long.toString(timestamp)).append("\n");
+        } catch (IOException e) {
+            mAppInterface.onFrameInfoRecordingFailed();
+            Log.e(TAG, "Failed to write timestamp " + timestamp + " using " + writer.toString());
+            e.printStackTrace();
+            this.close();
         }
     }
 
@@ -231,25 +223,20 @@ public class VideoFrameInfo implements Closeable {
             Log.d(TAG, "Closing frame info, frame number: " + mFrameNumber);
         }
 
-        if (mUnsyncedFrameBufferedWriter != null) {
-            try {
-                Log.d(TAG, "Before unsynced writer close()");
-                mUnsyncedFrameBufferedWriter.close();
-                Log.d(TAG, "After unsynced writer close()");
-            } catch (IOException e) {
-                Log.d(TAG, "Exception occurred when attempting to close mUnsyncedFrameBufferedWriter");
-                e.printStackTrace();
-            }
-        }
-        if (mSyncedFrameBufferedWriter != null) {
-            try {
-                Log.d(TAG, "Before synced writer close()");
-                mSyncedFrameBufferedWriter.close();
-                Log.d(TAG, "After synced writer close()");
-            } catch (IOException e) {
-                Log.d(TAG, "Exception occurred when attempting to close mSyncedFrameBufferedWriter");
-                e.printStackTrace();
-            }
+        closeWriter(mUnsyncedFrameBufferedWriter);
+        closeWriter(mSyncedFrameBufferedWriter);
+    }
+
+    private void closeWriter(BufferedWriter writer) {
+        if (writer == null) return;
+        final String writerName = writer.toString();
+        try {
+            Log.d(TAG, "Before " + writerName + " close()");
+            writer.close();
+            Log.d(TAG, "After " + writerName + " close()");
+        } catch (IOException e) {
+            Log.d(TAG, "Exception occurred when attempting to close " + writerName);
+            e.printStackTrace();
         }
     }
 }
