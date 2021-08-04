@@ -45,7 +45,6 @@ import net.sourceforge.opencamera.cameracontroller.CameraController2;
  * values.
  */
 public class PhaseAlignController {
-    public static final String INJECT_FRAME = "injection_frame";
     private static final String TAG = "PhaseAlignController";
 
     // Maximum number of phase alignment iteration steps in the alignment process.
@@ -60,8 +59,12 @@ public class PhaseAlignController {
     private final Handler handler;
     private final Object lock = new Object();
     private Runnable onFinished;
+
     private boolean inAlignState = false;
+    private boolean stopAlign = false;
     private boolean wasAligned = false;
+
+    private CameraController2 cameraController;
 
     private PhaseAligner phaseAligner;
     private final PhaseConfig phaseConfig;
@@ -105,37 +108,10 @@ public class PhaseAlignController {
     }
 
     /**
-     * Submit a frame with a specific exposure to offset future frames and align phase.
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void doPhaseAlignStep() {
-        Log.i(
-                TAG,
-                String.format(
-                        "Current Phase: %.3f ms, Diff: %.3f ms, inserting frame exposure %.6f ms, lower bound"
-                                + " %.6f ms.",
-                        latestResponse.phaseNs() * 1e-6f,
-                        latestResponse.diffFromGoalNs() * 1e-6f,
-                        latestResponse.exposureTimeToShiftNs() * 1e-6f,
-                        phaseAligner.getConfig().minExposureNs() * 1e-6f));
-
-        final CameraController cameraController = context.getPreview().getCameraController();
-        if (cameraController == null) {
-            throw new IllegalStateException("Frame injection failed: camera is not open.");
-        }
-        if (!(cameraController instanceof CameraController2)) {
-            throw new IllegalStateException("Frame injection failed: not using Camera2 API.");
-        }
-
-        try {
-            ((CameraController2) cameraController).injectFrameWithExposure(latestResponse.exposureTimeToShiftNs());
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "Frame injection failed.", e);
-        }
-    }
-
-    /**
      * Starts phase alignment if it is not running.
+     * <p>
+     * Needs to be stopped with {@link #stopAlign} if {@link CameraController} changes during the
+     * alignment.
      *
      * @param onFinished a {@link Runnable} to be called when the alignment is finished (regardless
      *                   of was if successful or not). If phase alignment is already running, this
@@ -144,12 +120,23 @@ public class PhaseAlignController {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startAlign(Runnable onFinished) {
         context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_started);
+
+        final CameraController currentCameraController = context.getPreview().getCameraController();
+        if (currentCameraController == null) {
+            throw new IllegalStateException("Alignment start failed: camera is not open.");
+        }
+        if (!(currentCameraController instanceof CameraController2)) {
+            throw new IllegalStateException("Alignment start failed: not using Camera2 API.");
+        }
+        cameraController = (CameraController2) currentCameraController;
+
         synchronized (lock) {
             if (inAlignState) {
                 Log.i(TAG, "startAlign() called while already aligning.");
                 return;
             }
             inAlignState = true;
+            stopAlign = false;
             this.onFinished = onFinished;
             // Start inserting frames every {@code PHASE_SETTLE_DELAY_MS} ms to try and push the phase to
             // the goal phase. Stop after aligned to threshold or after {@code MAX_ITERATIONS}.
@@ -175,8 +162,13 @@ public class PhaseAlignController {
 
             onAlignmentFinished(true);
             Log.d(TAG, "Aligned.");
-        } else if (!latestResponse.isAligned() && iterationsLeft > 0) {
-            // Not aligned but able to run another alignment iteration.
+        } else if (!latestResponse.isAligned() && iterationsLeft > 0) { // Not aligned but able to run another alignment iteration.
+            if (stopAlign) {
+                onAlignmentFinished(false);
+                Log.d(TAG, "Stopping alignment as received a command to.");
+                return;
+            }
+
             doPhaseAlignStep();
             Log.v(TAG, "Queued another phase align step.");
             // TODO (samansari) : Replace this brittle delay-based solution to a response-based one.
@@ -194,6 +186,28 @@ public class PhaseAlignController {
         }
     }
 
+    /**
+     * Submit a frame with a specific exposure to offset future frames and align phase.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void doPhaseAlignStep() {
+        Log.i(
+                TAG,
+                String.format(
+                        "Current Phase: %.3f ms, Diff: %.3f ms, inserting frame exposure %.6f ms, lower bound"
+                                + " %.6f ms.",
+                        latestResponse.phaseNs() * 1e-6f,
+                        latestResponse.diffFromGoalNs() * 1e-6f,
+                        latestResponse.exposureTimeToShiftNs() * 1e-6f,
+                        phaseAligner.getConfig().minExposureNs() * 1e-6f));
+
+        try {
+            cameraController.injectFrameWithExposure(latestResponse.exposureTimeToShiftNs());
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Frame injection failed.", e);
+        }
+    }
+
     private void onAlignmentFinished(boolean wasAligned) {
         synchronized (lock) {
             inAlignState = false;
@@ -202,6 +216,13 @@ public class PhaseAlignController {
         if (onFinished != null) onFinished.run();
         context.getPreview().showToast(context.getRecSyncToastBoxer(),
                 wasAligned ? R.string.phase_alignment_succeeded : R.string.phase_alignment_failed);
+    }
+
+    /**
+     * Stop phase alignment if it is running.
+     */
+    public void stopAlign() {
+        if (inAlignState) stopAlign = true;
     }
 
     /**

@@ -218,6 +218,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     @Override
+    public void cameraClosed() {
+        mPhaseAlignController.stopAlign();
+        super.cameraClosed();
+    }
+
+    @Override
     public void startingVideo() {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
