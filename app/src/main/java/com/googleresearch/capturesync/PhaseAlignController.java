@@ -37,8 +37,6 @@ import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
 
-import java.util.Locale;
-
 /**
  * Calculates and adjusts camera phase by inserting frames of varying exposure lengths.
  *
@@ -56,12 +54,12 @@ public class PhaseAlignController {
     private static final int MAX_ITERATIONS = 60;
     // Delay after an alignment step to wait for phase to settle before starting the next iteration.
     private static final int PHASE_SETTLE_DELAY_MS = 400;
+
     private final MainActivity context;
-
     private final TextView phaseError;
-
     private final Handler handler;
     private final Object lock = new Object();
+    private Runnable onFinished;
     private boolean inAlignState = false;
     private boolean wasAligned = false;
 
@@ -98,16 +96,17 @@ public class PhaseAlignController {
     }
 
     private void updatePhaseError() {
-        final String phaseErrorStr = String.format(Locale.ENGLISH,
-                "Phase Error: %.2f ms", TimeUtils.nanosToMillis((double) latestResponse.diffFromGoalNs())
-        );
+        final String phaseErrorStr = context.getString(R.string.phase_error,
+                TimeUtils.nanosToMillis((double) latestResponse.diffFromGoalNs()));
         context.runOnUiThread(() -> {
             phaseError.setText(phaseErrorStr);
             phaseError.setTextColor(latestResponse.isAligned() ? Color.GREEN : Color.RED);
         });
     }
 
-    /** Submit an frame with a specific exposure to offset future frames and align phase. */
+    /**
+     * Submit a frame with a specific exposure to offset future frames and align phase.
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void doPhaseAlignStep() {
         Log.i(
@@ -135,8 +134,15 @@ public class PhaseAlignController {
         }
     }
 
+    /**
+     * Starts phase alignment if it is not running.
+     *
+     * @param onFinished a {@link Runnable} to be called when the alignment is finished (regardless
+     *                   of was if successful or not). If phase alignment is already running, this
+     *                   parameter is ignored.
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void startAlign() {
+    public void startAlign(Runnable onFinished) {
         context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_started);
         synchronized (lock) {
             if (inAlignState) {
@@ -144,6 +150,7 @@ public class PhaseAlignController {
                 return;
             }
             inAlignState = true;
+            this.onFinished = onFinished;
             // Start inserting frames every {@code PHASE_SETTLE_DELAY_MS} ms to try and push the phase to
             // the goal phase. Stop after aligned to threshold or after {@code MAX_ITERATIONS}.
             handler.post(() -> work(MAX_ITERATIONS));
@@ -153,10 +160,8 @@ public class PhaseAlignController {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void work(int iterationsLeft) {
         if (latestResponse == null) {
-            inAlignState = false;
-            wasAligned = false;
+            onAlignmentFinished(false);
             Log.e(TAG, "Aligning failed: no timestamps available, latest response is null.");
-            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_failed);
             return;
         }
 
@@ -167,13 +172,9 @@ public class PhaseAlignController {
                     String.format(
                             "Reached: Current Phase: %.3f ms, Diff: %.3f ms",
                             latestResponse.phaseNs() * 1e-6f, latestResponse.diffFromGoalNs() * 1e-6f));
-            synchronized (lock) {
-                inAlignState = false;
-            }
 
-            wasAligned = true;
+            onAlignmentFinished(true);
             Log.d(TAG, "Aligned.");
-            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_finished);
         } else if (!latestResponse.isAligned() && iterationsLeft > 0) {
             // Not aligned but able to run another alignment iteration.
             doPhaseAlignStep();
@@ -187,14 +188,20 @@ public class PhaseAlignController {
                     String.format(
                             "Failed to Align, Stopping at: Current Phase: %.3f ms, Diff: %.3f ms",
                             latestResponse.phaseNs() * 1e-6f, latestResponse.diffFromGoalNs() * 1e-6f));
-            synchronized (lock) {
-                inAlignState = false;
-            }
 
-            wasAligned = false;
+            onAlignmentFinished(false);
             Log.d(TAG, "Finishing alignment, reached max iterations.");
-            context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_failed);
         }
+    }
+
+    private void onAlignmentFinished(boolean wasAligned) {
+        synchronized (lock) {
+            inAlignState = false;
+        }
+        this.wasAligned = wasAligned;
+        if (onFinished != null) onFinished.run();
+        context.getPreview().showToast(context.getRecSyncToastBoxer(),
+                wasAligned ? R.string.phase_alignment_succeeded : R.string.phase_alignment_failed);
     }
 
     /**

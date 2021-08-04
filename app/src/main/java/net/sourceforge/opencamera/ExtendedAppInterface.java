@@ -517,8 +517,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * lock them. Closes the previous task if it exists and is still running.
      *
      * @param settings describes the settings to be changed and the values to be applied.
+     * @param onFinished a {@link Runnable} to be called when the settings are applied (and not if
+     *                   the task is cancelled before finishing).
      */
-    public void applyAndLockSettings(SyncSettingsContainer settings) {
+    public void applyAndLockSettings(SyncSettingsContainer settings, Runnable onFinished) {
         Log.d(TAG, "Applying and locking settings.");
 
         // Cancel previous task if it is still running
@@ -527,7 +529,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         // Create a new task to wait until camera is opened
-        applySettingsTask = new ApplySettingsTask(this);
+        applySettingsTask = new ApplySettingsTask(this, onFinished);
         applySettingsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, settings);
     }
 
@@ -541,14 +543,17 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         final private ManualSeekbars manualSeekbars;
 
+        final private Runnable onFinished;
+
         private CameraController cameraController;
 
-        ApplySettingsTask(ExtendedAppInterface extendedAppInterface) {
+        ApplySettingsTask(ExtendedAppInterface extendedAppInterface, Runnable onFinished) {
             // Use weak references so that the task allows MainActivity to be garbage collected
             extendedAppInterfaceRef = new WeakReference<>(extendedAppInterface);
             mainActivityRef = new WeakReference<>(extendedAppInterface.mMainActivity);
             previewRef = new WeakReference<>(extendedAppInterface.mMainActivity.getPreview());
             mainUIRef = new WeakReference<>(extendedAppInterface.mMainActivity.getMainUI());
+            this.onFinished = onFinished;
 
             manualSeekbars = extendedAppInterface.mMainActivity.getManualSeekbars();
         }
@@ -758,6 +763,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 supportedFormats.remove("preference_video_output_format_webm");
             }
             return supportedFormats;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            if (onFinished != null) onFinished.run();
         }
     }
 }

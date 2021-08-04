@@ -86,8 +86,9 @@
     <string name="rec_sync_phases_not_aligned">Phases are not aligned</string>
 
     <string name="calculating_period">Calculating frames period for %.2f s</string>
+    <string name="phase_error">Phase Error: %.2f ms</string>
     <string name="phase_alignment_started">Phase alignment started</string>
-    <string name="phase_alignment_finished">Phase alignment finished</string>
+    <string name="phase_alignment_succeeded">Phase alignment succeeded</string>
     <string name="phase_alignment_failed">Phase alignment failed</string>
 
     <string name="rec_sync_waiting_for_leader">%s: Waiting for Leader</string>

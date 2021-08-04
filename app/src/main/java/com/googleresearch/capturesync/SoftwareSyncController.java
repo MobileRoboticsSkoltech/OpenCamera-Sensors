@@ -63,9 +63,22 @@ public class SoftwareSyncController implements Closeable {
     private final TextView syncStatus;
     private final PhaseAlignController phaseAlignController;
     private final PeriodCalculator periodCalculator;
-    private boolean isLeader;
     private SoftwareSyncBase softwareSync;
     private AlignPhasesTask alignPhasesTask;
+
+    private boolean isLeader;
+    private State state = State.IDLE;
+
+    /**
+     * Possible states of RecSync on this device.
+     */
+    public enum State {
+        IDLE, // When other states are not applicable.
+        SETTINGS_APPLICATION, // Received setting are being applied.
+        PERIOD_CALCULATION, // PeriodCalculator is calculating.
+        PHASE_ALIGNMENT, // PhaseAlignController is aligning.
+        RECORDING // A video is being recorded.
+    }
 
     /**
      * Tell devices to save the frame at the requested trigger time.
@@ -164,12 +177,14 @@ public class SoftwareSyncController implements Closeable {
                 METHOD_DO_PHASE_ALIGN,
                 payload -> {
                     Log.d(TAG, "Phase alignment request received.");
-                    if (alignPhasesTask == null || alignPhasesTask.getStatus() == AsyncTask.Status.FINISHED) {
-                        alignPhasesTask = new AlignPhasesTask(phaseAlignController, periodCalculator);
-                        alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    } else {
-                        Log.e(TAG, "Phase alignment is already running.");
+
+                    if (state == State.PERIOD_CALCULATION || state == State.PHASE_ALIGNMENT) {
+                        Log.d(TAG, "The previous phase alignment request is still processing.");
+                        return;
                     }
+
+                    alignPhasesTask = new AlignPhasesTask(this, phaseAlignController, periodCalculator);
+                    alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 });
 
         // Apply the received settings.
@@ -177,6 +192,11 @@ public class SoftwareSyncController implements Closeable {
                 METHOD_SET_SETTINGS,
                 payload -> {
                     Log.d(TAG, "Received payload with settings: " + payload);
+
+                    if (state != State.IDLE && state != State.SETTINGS_APPLICATION) {
+                        Log.d(TAG, "Settings cannot be applied at state " + state);
+                        return;
+                    }
 
                     SyncSettingsContainer settings = null;
                     try {
@@ -186,7 +206,8 @@ public class SoftwareSyncController implements Closeable {
                     }
 
                     if (settings != null) {
-                        context.getApplicationInterface().applyAndLockSettings(settings);
+                        state = State.SETTINGS_APPLICATION;
+                        context.getApplicationInterface().applyAndLockSettings(settings, () -> state = State.IDLE);
                     }
                 });
 
@@ -197,11 +218,18 @@ public class SoftwareSyncController implements Closeable {
                     Log.d(TAG, String.format(
                             "Received record request with payload: %s. Current recording status: %s.",
                             payload, context.getPreview().isVideoRecording()));
+
+                    if (state != State.IDLE && state != State.RECORDING) {
+                        Log.d(TAG, "Recording status cannot be switched at state " + state);
+                        return;
+                    }
+
                     if (!context.getPreview().isVideo()) {
-                        // This should not happen as capture mode is synced before recording.
+                        // This should not happen as capture mode is to be synced before recording.
                         throw new IllegalStateException("Received recording request in photo mode");
                     }
                     if (context.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
+                        state = (state == State.RECORDING) ? State.IDLE : State.RECORDING;
                         context.runOnUiThread(() -> context.takePicturePressed(false, false));
                     }
                 });
@@ -264,10 +292,14 @@ public class SoftwareSyncController implements Closeable {
     private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = "AlignPhasesTask";
 
+        private final SoftwareSyncController softwareSyncController;
         private final PhaseAlignController phaseAlignController;
         private final PeriodCalculator periodCalculator;
 
-        AlignPhasesTask(PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
+        AlignPhasesTask(SoftwareSyncController softwareSyncController,
+                        PhaseAlignController phaseAlignController,
+                        PeriodCalculator periodCalculator) {
+            this.softwareSyncController = softwareSyncController;
             this.phaseAlignController = phaseAlignController;
             this.periodCalculator = periodCalculator;
         }
@@ -275,7 +307,14 @@ public class SoftwareSyncController implements Closeable {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         protected Void doInBackground(Void... voids) {
+            if (softwareSyncController.state != State.IDLE) {
+                Log.d(TAG, "Period calculation and phase alignment cannot be started at state " +
+                        softwareSyncController.state);
+                return null;
+            }
+
             Log.v(TAG, "Calculating frames period.");
+            softwareSyncController.state = State.PERIOD_CALCULATION;
             try {
                 long periodNs = periodCalculator.getPeriodNs();
                 Log.i(TAG, "Calculated frames period: " + periodNs);
@@ -288,7 +327,8 @@ public class SoftwareSyncController implements Closeable {
             // that, reducing potential error, though special attention should be placed to phases
             // close to the zero or period boundary.
             Log.v(TAG, "Starting phase alignment.");
-            phaseAlignController.startAlign();
+            softwareSyncController.state = State.PHASE_ALIGNMENT;
+            phaseAlignController.startAlign(() -> softwareSyncController.state = State.IDLE);
 
             return null;
         }
@@ -401,7 +441,9 @@ public class SoftwareSyncController implements Closeable {
      * @param timestamp a timestamp to be provided.
      */
     public void updateTimestamp(long timestamp) {
-        periodCalculator.onFrameTimestamp(timestamp);
+        if (state != State.PHASE_ALIGNMENT) { // No need to, when phase alignment is running.
+            periodCalculator.onFrameTimestamp(timestamp);
+        }
         phaseAlignController.updateCaptureTimestamp(softwareSync.leaderTimeForLocalTimeNs(timestamp));
     }
 
