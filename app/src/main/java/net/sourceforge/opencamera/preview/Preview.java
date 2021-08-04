@@ -4474,7 +4474,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 applicationInterface.setVideoPref(is_video);
 
                 // have to stop settings broadcasting because the mode has changed
-                if( applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader() && applicationInterface.getSoftwareSyncController().isSettingsBroadcasting() )
+                if( applicationInterface.isSoftwareSyncRunning() &&
+                        applicationInterface.getSoftwareSyncController().isLeader() &&
+                        applicationInterface.getSoftwareSyncController().isSettingsBroadcasting() )
                     ((MainActivity) getContext()).clickedSyncSettings();
             }
             if( !during_startup ) {

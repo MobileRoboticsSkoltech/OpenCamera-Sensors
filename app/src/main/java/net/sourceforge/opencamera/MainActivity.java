@@ -1664,8 +1664,7 @@ public class MainActivity extends Activity {
     public void clickedPauseVideo(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedPauseVideo");
-        // we block pause button at RecSync mode
-        if( preview.isVideoRecording() && !applicationInterface.isSoftwareSyncRunning() ) { // just in case
+        if( preview.isVideoRecording() ) { // just in case
             preview.pauseVideo();
             mainUI.setPauseVideoContentDescription();
         }
