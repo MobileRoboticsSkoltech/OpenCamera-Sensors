@@ -178,14 +178,12 @@ public class VideoFrameInfo implements Closeable {
     }
 
     private void writeTimestamp(long timestamp) {
-        writeTimestamp(mUnsyncedFrameBufferedWriter, timestamp);
-        writeTimestamp(mSyncedFrameBufferedWriter,
-                timeDomainConverter.leaderTimeForLocalTimeNs(timestamp)
-        );
+        if (mUnsyncedFrameBufferedWriter != null) writeTimestamp(mUnsyncedFrameBufferedWriter, timestamp);
+        if (mSyncedFrameBufferedWriter != null) writeTimestamp(mSyncedFrameBufferedWriter,
+                timeDomainConverter.leaderTimeForLocalTimeNs(timestamp));
     }
 
     private void writeTimestamp(BufferedWriter writer, long timestamp) {
-        if (writer == null) return;
         try {
             writer.append(Long.toString(timestamp)).append("\n");
         } catch (IOException e) {
@@ -223,12 +221,11 @@ public class VideoFrameInfo implements Closeable {
             Log.d(TAG, "Closing frame info, frame number: " + mFrameNumber);
         }
 
-        closeWriter(mUnsyncedFrameBufferedWriter);
-        closeWriter(mSyncedFrameBufferedWriter);
+        if (mUnsyncedFrameBufferedWriter != null) closeWriter(mUnsyncedFrameBufferedWriter);
+        if (mSyncedFrameBufferedWriter != null) closeWriter(mSyncedFrameBufferedWriter);
     }
 
     private void closeWriter(BufferedWriter writer) {
-        if (writer == null) return;
         final String writerName = writer.toString();
         try {
             Log.d(TAG, "Before " + writerName + " close()");
