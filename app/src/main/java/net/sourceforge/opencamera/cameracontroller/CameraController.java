@@ -592,9 +592,8 @@ public abstract class CameraController {
             MediaRecorder video_recorder,
             VideoProfile profile,
             boolean want_photo_video_recording,
-            boolean want_video_imu_recording,
+            boolean want_save_timestamps,
             boolean want_save_frames,
-            boolean want_rec_sync,
             VideoFrameInfoCallback video_frame_info_callback
     ) throws CameraControllerException;
     public abstract void closeVideoRecordingSession();
