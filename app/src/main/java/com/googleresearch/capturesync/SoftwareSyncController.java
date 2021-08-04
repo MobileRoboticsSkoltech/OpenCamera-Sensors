@@ -356,7 +356,8 @@ public class SoftwareSyncController implements Closeable {
                     StringBuilder msg = new StringBuilder();
                     msg.append(
                             context.getString(
-                                    R.string.rec_sync_clients_num, softwareSync.getName(), clientCount));
+                                    R.string.rec_sync_leader_clients, softwareSync.getName(),
+                                    context.getResources().getQuantityString(R.plurals.clients_num, clientCount, clientCount)));
                     for (Entry<InetAddress, ClientInfo> entry : leader.getClients().entrySet()) {
                         ClientInfo client = entry.getValue();
                         if (client.syncAccuracy() == 0) {

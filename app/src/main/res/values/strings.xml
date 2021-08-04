@@ -72,7 +72,21 @@
     <string name="failed_to_stamp">Failed to stamp info to photo</string>
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
 
+    <string name="preference_rec_sync_settings">RecSync settings…</string>
     <string name="preference_enable_rec_sync">Use RecSync</string>
+    <string name="preference_enable_rec_sync_summary">Enable or disable RecSync. It is used for synchronous multi-cam recording. Requires Camera2 API support and Wi-Fi or hotspot to be enabled.</string>
+    <string name="preference_sync_settings">Sync settings</string>
+    <string name="preference_sync_exposure">Exposure</string>
+    <string name="preference_sync_exposure_summary">Exposure time always syncs and locks.</string>
+    <string name="preference_sync_iso">ISO</string>
+    <string name="preference_sync_iso_summary">Whether to sync ISO value. It is locked when synced.</string>
+    <string name="preference_sync_wb">White balance</string>
+    <string name="preference_sync_wb_summary">Whether to sync white balance. If a client supports the selected white balance mode then it is synced. If the selected mode is unsupported or it is manual then the selected white balance temperature is synced.</string>
+    <string name="preference_sync_flash">Flash</string>
+    <string name="preference_sync_flash_summary">Whether to sync flash or torch mode.</string>
+    <string name="preference_sync_format">File format</string>
+    <string name="preference_sync_format_summary">Whether to sync the file format used for saving photos or videos (depends on the capture mode selected by a leader at the time of synchronization). If the selected format is unsupported by a client then it remains unchanged.</string>
+
     <string name="recsync_unsupported_summary">Camera2 API, manual exposure time support and Android 7.0 or higher required</string>
     <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
@@ -96,7 +110,11 @@
     <string name="rec_sync_synced_to_leader">Client %s\n-Synced to Leader %s</string>
     <string name="rec_sync_leader">Leader: %s</string>
     <string name="rec_sync_client">Client: %s</string>
-    <string name="rec_sync_clients_num">Leader %s: %d clients.\n</string>
+    <string name="rec_sync_leader_clients">Leader %s: %s.\n</string>
+    <plurals name="clients_num">
+        <item quantity="one">%d client</item>
+        <item quantity="other">%d clients</item>
+    </plurals>
     <string name="rec_sync_client_syncing">-Client %s: syncing…\n</string>
     <string name="rec_sync_client_synced">-Client %s: %.2f ms sync\n</string>
 

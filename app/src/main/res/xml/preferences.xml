@@ -163,25 +163,24 @@
             android:icon="@drawable/ic_recsync"
             android:key="preference_rec_sync_settings"
             android:persistent="false"
-            android:title="RecSync settings...">
+            android:title="@string/preference_rec_sync_settings">
 
             <SwitchPreference
                 android:defaultValue="false"
                 android:key="preference_enable_rec_sync"
                 android:title="@string/preference_enable_rec_sync"
-                android:summary="Enable or disable RecSync. It is used for synchronous multi-cam recording. Requires Camera2 API support and WiFi or hotspot to be enabled."
+                android:summary="@string/preference_enable_rec_sync_summary"
                 />
-
 
             <PreferenceCategory
                 android:key="preference_sync_settings"
-                android:title="Sync settings"
+                android:title="@string/preference_sync_settings"
                 android:dependency="preference_enable_rec_sync">
 
                 <CheckBoxPreference
                     android:key="preference_sync_exposure"
-                    android:title="Exposure"
-                    android:summary="Exposure time always syncs and locks."
+                    android:title="@string/preference_sync_exposure"
+                    android:summary="@string/preference_sync_exposure_summary"
                     android:icon="@drawable/ic_exposure_white_48dp"
                     android:defaultValue="true"
                     android:enabled="false"
@@ -189,32 +188,32 @@
 
                 <CheckBoxPreference
                     android:key="preference_sync_iso"
-                    android:title="ISO"
-                    android:summary="Whether to sync ISO value. It is locked when synced."
+                    android:title="@string/preference_sync_iso"
+                    android:summary="@string/preference_sync_iso_summary"
                     android:icon="@drawable/iso_icon"
                     android:defaultValue="false"
                     />
 
                 <CheckBoxPreference
                     android:key="preference_sync_wb"
-                    android:title="White balance"
-                    android:summary="Whether to sync white balance. If a client supports the selected white balance mode then it is synced. If the selected mode is unsupported or it is manual then the selected white balance temperature is synced."
+                    android:title="@string/preference_sync_wb"
+                    android:summary="@string/preference_sync_wb_summary"
                     android:icon="@drawable/white_balance_unlocked"
                     android:defaultValue="false"
                     />
 
                 <CheckBoxPreference
                     android:key="preference_sync_flash"
-                    android:title="Flash"
-                    android:summary="Whether to sync flash or torch mode."
+                    android:title="@string/preference_sync_flash"
+                    android:summary="@string/preference_sync_flash_summary"
                     android:icon="@drawable/baseline_highlight_white_48"
                     android:defaultValue="false"
                     />
 
                 <CheckBoxPreference
                     android:key="preference_sync_format"
-                    android:title="File format"
-                    android:summary="Whether to sync the file format used for saving photos or videos (depends on the capture mode selected by a leader at the time of synchronization). If the selected format is unsupported by a client then it remains unchanged."
+                    android:title="@string/preference_sync_format"
+                    android:summary="@string/preference_sync_format_summary"
                     android:icon="@drawable/ic_save_white_48dp"
                     android:defaultValue="false"
                     />
