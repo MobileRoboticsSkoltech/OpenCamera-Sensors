@@ -4,7 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.util.Log;
 
-import com.googleresearch.capturesync.softwaresync.TimeDomainConverter;
+import com.googleresearch.capturesync.SoftwareSyncController;
+import com.googleresearch.capturesync.softwaresync.SoftwareSyncBase;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
@@ -35,11 +36,11 @@ import java.util.concurrent.Executors;
 public class VideoFrameInfo implements Closeable {
     private final static String TAG = "FrameInfo";
     private final static String UNSYNCED_TIMESTAMP_FILE_SUFFIX = "_imu_timestamps";
-    private final static String SYNCED_TIMESTAMP_FILE_SUFFIX = "_recsync_timestamps";
+    private final static String SYNCED_TIMESTAMP_FILE_SUFFIX = "_recsync";
     /*
     Value used to save frames for debugging and matching frames with video
     TODO: in future versions make sure this value is big enough not to cause frame rate drop / buffer allocation problems on devices other than already tested
-     */
+    */
     private final static int EVERY_N_FRAME = 60;
     private final static int PHASE_CALC_N_FRAMES = 60;
 
@@ -54,7 +55,7 @@ public class VideoFrameInfo implements Closeable {
     private final MainActivity mContext;
     private final YuvImageUtils mYuvUtils;
     private final BlockingQueue<VideoPhaseInfo> mPhaseInfoReporter;
-    private final TimeDomainConverter timeDomainConverter;
+    private final SoftwareSyncBase softwareSync;
     private final List<Long> durationsNs;
     private long mLastTimestamp = 0;
 
@@ -94,15 +95,19 @@ public class VideoFrameInfo implements Closeable {
             if (!mAppInterface.isSoftwareSyncRunning()) {
                 throw new IllegalArgumentException("Cannot save synced timestamps without RecSync running");
             }
+            final SoftwareSyncController softwareSyncController = mAppInterface.getSoftwareSyncController();
+            softwareSync = softwareSyncController.getSoftwareSync();
 
+            final String suffix = SYNCED_TIMESTAMP_FILE_SUFFIX +
+                    (softwareSyncController.isLeader() ? "_leader_" : "_client_") +
+                    softwareSync.getName();
             File syncedTimestampFile = mStorageUtils.createOutputCaptureInfo(
-                    StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", SYNCED_TIMESTAMP_FILE_SUFFIX, mVideoDate
+                    StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", suffix, mVideoDate
             );
             mSyncedFrameBufferedWriter = new BufferedWriter(new PrintWriter(syncedTimestampFile));
-            timeDomainConverter = mAppInterface.getSoftwareSyncController().getSoftwareSync();
         } else {
             mSyncedFrameBufferedWriter = null;
-            timeDomainConverter = null;
+            softwareSync = null;
         }
     }
 
@@ -180,7 +185,7 @@ public class VideoFrameInfo implements Closeable {
     private void writeTimestamp(long timestamp) {
         if (mUnsyncedFrameBufferedWriter != null) writeTimestamp(mUnsyncedFrameBufferedWriter, timestamp);
         if (mSyncedFrameBufferedWriter != null) writeTimestamp(mSyncedFrameBufferedWriter,
-                timeDomainConverter.leaderTimeForLocalTimeNs(timestamp));
+                softwareSync.leaderTimeForLocalTimeNs(timestamp));
     }
 
     private void writeTimestamp(BufferedWriter writer, long timestamp) {
