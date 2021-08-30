@@ -72,11 +72,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final TextView mSyncStatusText;
     private final TextView mPhaseErrorText;
 
-    private final Handler sendSettingsHandler = new Handler();
+    private final Handler mSendSettingsHandler = new Handler();
 
-    private SoftwareSyncController softwareSyncController;
-    private ApplySettingsTask applySettingsTask = null;
-    private BroadcastReceiver connectionStatusChecker = null;
+    private SoftwareSyncController mSoftwareSyncController;
+    private ApplySettingsTask mApplySettingsTask = null;
+    private BroadcastReceiver mConnectionStatusChecker = null;
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
         super(mainActivity, savedInstanceState);
@@ -131,7 +131,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     public SoftwareSyncController getSoftwareSyncController() {
-        return softwareSyncController;
+        return mSoftwareSyncController;
     }
 
     public YuvImageUtils getYuvUtils() {
@@ -210,8 +210,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     @Override
     void onDestroy() {
         mYuvUtils.close();
-        if (applySettingsTask != null) {
-            applySettingsTask.cancel(true);
+        if (mApplySettingsTask != null) {
+            mApplySettingsTask.cancel(true);
         }
         stopSoftwareSync();
         super.onDestroy();
@@ -259,7 +259,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         super.startingVideo();
 
-        if (isSoftwareSyncRunning() && !softwareSyncController.isLeader()) {
+        if (isSoftwareSyncRunning() && !mSoftwareSyncController.isLeader()) {
             ImageButton view = mMainActivity.findViewById(R.id.take_photo);
             view.setImageResource(R.drawable.ic_empty);
             view.setContentDescription(getContext().getResources().getString(R.string.do_nothing));
@@ -343,7 +343,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         try {
-            softwareSyncController =
+            mSoftwareSyncController =
                     new SoftwareSyncController(mMainActivity, mPhaseAlignController, mPeriodCalculator, mSyncStatusText);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
@@ -355,7 +355,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         // Listen for wifi or hotpot status changes.
         IntentFilter intentFilter = new IntentFilter();
-        if (softwareSyncController.isLeader()) {
+        if (mSoftwareSyncController.isLeader()) {
             // Need to get WIFI_AP_STATE_CHANGED_ACTION hidden in WiFiManager.
             String action;
             WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -366,12 +366,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 throw new IllegalStateException("Cannot get WIFI_AP_STATE_CHANGED_ACTION value from WifiManager.", e);
             }
             intentFilter.addAction(action);
-            connectionStatusChecker = new HotspotStatusChecker();
+            mConnectionStatusChecker = new HotspotStatusChecker();
         } else {
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            connectionStatusChecker = new WifiStatusChecker();
+            mConnectionStatusChecker = new WifiStatusChecker();
         }
-        mMainActivity.registerReceiver(connectionStatusChecker, intentFilter);
+        mMainActivity.registerReceiver(mConnectionStatusChecker, intentFilter);
     }
 
     private class HotspotStatusChecker extends BroadcastReceiver {
@@ -442,10 +442,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      */
     public void stopSoftwareSync() {
         if (isSoftwareSyncRunning()) {
-            mMainActivity.unregisterReceiver(connectionStatusChecker);
-            connectionStatusChecker = null;
-            softwareSyncController.close();
-            softwareSyncController = null;
+            mMainActivity.unregisterReceiver(mConnectionStatusChecker);
+            mConnectionStatusChecker = null;
+            mSoftwareSyncController.close();
+            mSoftwareSyncController = null;
         }
     }
 
@@ -456,7 +456,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * @return true if SoftwareSync is currently running, false if it is not.
      */
     public boolean isSoftwareSyncRunning() {
-        return softwareSyncController != null;
+        return mSoftwareSyncController != null;
     }
 
     /**
@@ -479,10 +479,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (!isSoftwareSyncRunning()) {
             throw new IllegalStateException("Cannot broadcast recording request when RecSync is not running");
         }
-        if (!softwareSyncController.isLeader()) {
+        if (!mSoftwareSyncController.isLeader()) {
             throw new IllegalStateException("Cannot broadcast recording request from a client");
         }
-        ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync()).broadcastRpc(
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
                 SoftwareSyncController.METHOD_RECORD,
                 String.valueOf(mMainActivity.getPreview().isVideoRecording())
         );
@@ -497,20 +497,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      *                               initialized or this device is not a leader.
      */
     public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
-        sendSettingsHandler.removeCallbacks(null);
-        sendSettingsHandler.postDelayed(
+        mSendSettingsHandler.removeCallbacks(null);
+        mSendSettingsHandler.postDelayed(
                 () -> {
                     Log.d(TAG, "Broadcasting current settings.");
 
                     if (!isSoftwareSyncRunning()) {
                         throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
                     }
-                    if (!softwareSyncController.isLeader()) {
+                    if (!mSoftwareSyncController.isLeader()) {
                         throw new IllegalStateException("Cannot broadcast settings from a client");
                     }
 
                     // Send settings to all devices
-                    ((SoftwareSyncLeader) softwareSyncController.getSoftwareSync()).broadcastRpc(
+                    ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
                             SoftwareSyncController.METHOD_SET_SETTINGS,
                             settings.asString()
                     );
@@ -522,7 +522,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
      * Creates an {@link AsyncTask} to apply the values of the settings received from a leader and
      * lock them. Closes the previous task if it exists and is still running.
      *
-     * @param settings describes the settings to be changed and the values to be applied.
+     * @param settings   describes the settings to be changed and the values to be applied.
      * @param onFinished a {@link Runnable} to be called when the settings are applied (and not if
      *                   the task is cancelled before finishing).
      */
@@ -530,13 +530,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         Log.d(TAG, "Applying and locking settings.");
 
         // Cancel previous task if it is still running
-        if (applySettingsTask != null && applySettingsTask.getStatus() != AsyncTask.Status.FINISHED) {
-            applySettingsTask.cancel(true);
+        if (mApplySettingsTask != null && mApplySettingsTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mApplySettingsTask.cancel(true);
         }
 
         // Create a new task to wait until camera is opened
-        applySettingsTask = new ApplySettingsTask(this, onFinished);
-        applySettingsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, settings);
+        mApplySettingsTask = new ApplySettingsTask(this, onFinished);
+        mApplySettingsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, settings);
     }
 
     private static class ApplySettingsTask extends AsyncTask<SyncSettingsContainer, Void, Void> {

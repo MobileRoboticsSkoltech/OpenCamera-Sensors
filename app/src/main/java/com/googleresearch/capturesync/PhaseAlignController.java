@@ -54,34 +54,34 @@ public class PhaseAlignController {
     // Delay after an alignment step to wait for phase to settle before starting the next iteration.
     private static final int PHASE_SETTLE_DELAY_MS = 400;
 
-    private final MainActivity context;
-    private final TextView phaseError;
-    private final Handler handler;
-    private final Object lock = new Object();
-    private Runnable onFinished;
+    private final MainActivity mMainActivity;
+    private final TextView mPhaseError;
+    private final Handler mHandler;
+    private final Object mLock = new Object();
+    private Runnable mOnFinished;
 
-    private boolean inAlignState = false;
-    private boolean stopAlign = false;
-    private boolean wasAligned = false;
+    private boolean mInAlignState = false;
+    private boolean mStopAlign = false;
+    private boolean mWasAligned = false;
 
-    private CameraController2 cameraController;
+    private CameraController2 mCameraController;
 
-    private PhaseAligner phaseAligner;
-    private final PhaseConfig phaseConfig;
-    private PhaseResponse latestResponse;
+    private PhaseAligner mPhaseAligner;
+    private final PhaseConfig mPhaseConfig;
+    private PhaseResponse mLatestResponse;
 
     public PhaseAlignController(PhaseConfig config, MainActivity context, TextView phaseError) {
-        handler = new Handler();
-        phaseConfig = config;
-        phaseAligner = new PhaseAligner(config);
+        mHandler = new Handler();
+        mPhaseConfig = config;
+        mPhaseAligner = new PhaseAligner(config);
         Log.v(TAG, "Loaded phase align config.");
-        this.context = context;
-        this.phaseError = phaseError;
+        mMainActivity = context;
+        mPhaseError = phaseError;
     }
 
     protected void setPeriodNs(long periodNs) {
-        phaseConfig.setPeriodNs(periodNs);
-        this.phaseAligner = new PhaseAligner(phaseConfig);
+        mPhaseConfig.setPeriodNs(periodNs);
+        mPhaseAligner = new PhaseAligner(mPhaseConfig);
     }
 
     /**
@@ -93,24 +93,24 @@ public class PhaseAlignController {
      */
     public long updateCaptureTimestamp(long timestampNs) {
         // TODO(samansaari) : Rename passTimestamp -> updateCaptureTimestamp or similar in softwaresync.
-        latestResponse = phaseAligner.passTimestamp(timestampNs);
+        mLatestResponse = mPhaseAligner.passTimestamp(timestampNs);
         updatePhaseError();
-        return latestResponse.phaseNs();
+        return mLatestResponse.phaseNs();
     }
 
     private void updatePhaseError() {
-        final String phaseErrorStr = context.getString(R.string.phase_error,
-                TimeUtils.nanosToMillis((double) latestResponse.diffFromGoalNs()));
-        context.runOnUiThread(() -> {
-            phaseError.setText(phaseErrorStr);
-            phaseError.setTextColor(latestResponse.isAligned() ? Color.GREEN : Color.RED);
+        final String phaseErrorStr = mMainActivity.getString(R.string.phase_error,
+                TimeUtils.nanosToMillis((double) mLatestResponse.diffFromGoalNs()));
+        mMainActivity.runOnUiThread(() -> {
+            mPhaseError.setText(phaseErrorStr);
+            mPhaseError.setTextColor(mLatestResponse.isAligned() ? Color.GREEN : Color.RED);
         });
     }
 
     /**
      * Starts phase alignment if it is not running.
      * <p>
-     * Needs to be stopped with {@link #stopAlign} if {@link CameraController} changes during the
+     * Needs to be stopped with {@link #mStopAlign} if {@link CameraController} changes during the
      * alignment.
      *
      * @param onFinished a {@link Runnable} to be called when the alignment is finished (regardless
@@ -119,51 +119,51 @@ public class PhaseAlignController {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startAlign(Runnable onFinished) {
-        context.getPreview().showToast(context.getRecSyncToastBoxer(), R.string.phase_alignment_started);
+        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(), R.string.phase_alignment_started);
 
-        final CameraController currentCameraController = context.getPreview().getCameraController();
+        final CameraController currentCameraController = mMainActivity.getPreview().getCameraController();
         if (currentCameraController == null) {
             throw new IllegalStateException("Alignment start failed: camera is not open.");
         }
         if (!(currentCameraController instanceof CameraController2)) {
             throw new IllegalStateException("Alignment start failed: not using Camera2 API.");
         }
-        cameraController = (CameraController2) currentCameraController;
+        mCameraController = (CameraController2) currentCameraController;
 
-        synchronized (lock) {
-            if (inAlignState) {
+        synchronized (mLock) {
+            if (mInAlignState) {
                 Log.i(TAG, "startAlign() called while already aligning.");
                 return;
             }
-            inAlignState = true;
-            stopAlign = false;
-            this.onFinished = onFinished;
+            mInAlignState = true;
+            mStopAlign = false;
+            mOnFinished = onFinished;
             // Start inserting frames every {@code PHASE_SETTLE_DELAY_MS} ms to try and push the phase to
             // the goal phase. Stop after aligned to threshold or after {@code MAX_ITERATIONS}.
-            handler.post(() -> work(MAX_ITERATIONS));
+            mHandler.post(() -> work(MAX_ITERATIONS));
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void work(int iterationsLeft) {
-        if (latestResponse == null) {
+        if (mLatestResponse == null) {
             onAlignmentFinished(false);
             Log.e(TAG, "Aligning failed: no timestamps available, latest response is null.");
             return;
         }
 
         // Check if Aligned / Not Aligned but able to iterate / Ran out of iterations.
-        if (latestResponse.isAligned()) { // Aligned.
+        if (mLatestResponse.isAligned()) { // Aligned.
             Log.i(
                     TAG,
                     String.format(
                             "Reached: Current Phase: %.3f ms, Diff: %.3f ms",
-                            latestResponse.phaseNs() * 1e-6f, latestResponse.diffFromGoalNs() * 1e-6f));
+                            mLatestResponse.phaseNs() * 1e-6f, mLatestResponse.diffFromGoalNs() * 1e-6f));
 
             onAlignmentFinished(true);
             Log.d(TAG, "Aligned.");
-        } else if (!latestResponse.isAligned() && iterationsLeft > 0) { // Not aligned but able to run another alignment iteration.
-            if (stopAlign) {
+        } else if (!mLatestResponse.isAligned() && iterationsLeft > 0) { // Not aligned but able to run another alignment iteration.
+            if (mStopAlign) {
                 onAlignmentFinished(false);
                 Log.d(TAG, "Stopping alignment as received a command to.");
                 return;
@@ -172,14 +172,14 @@ public class PhaseAlignController {
             doPhaseAlignStep();
             Log.v(TAG, "Queued another phase align step.");
             // TODO (samansari) : Replace this brittle delay-based solution to a response-based one.
-            handler.postDelayed(
+            mHandler.postDelayed(
                     () -> work(iterationsLeft - 1), PHASE_SETTLE_DELAY_MS); // Try again after it settles.
         } else { // Reached max iterations before aligned.
             Log.i(
                     TAG,
                     String.format(
                             "Failed to Align, Stopping at: Current Phase: %.3f ms, Diff: %.3f ms",
-                            latestResponse.phaseNs() * 1e-6f, latestResponse.diffFromGoalNs() * 1e-6f));
+                            mLatestResponse.phaseNs() * 1e-6f, mLatestResponse.diffFromGoalNs() * 1e-6f));
 
             onAlignmentFinished(false);
             Log.d(TAG, "Finishing alignment, reached max iterations.");
@@ -196,25 +196,25 @@ public class PhaseAlignController {
                 String.format(
                         "Current Phase: %.3f ms, Diff: %.3f ms, inserting frame exposure %.6f ms, lower bound"
                                 + " %.6f ms.",
-                        latestResponse.phaseNs() * 1e-6f,
-                        latestResponse.diffFromGoalNs() * 1e-6f,
-                        latestResponse.exposureTimeToShiftNs() * 1e-6f,
-                        phaseAligner.getConfig().minExposureNs() * 1e-6f));
+                        mLatestResponse.phaseNs() * 1e-6f,
+                        mLatestResponse.diffFromGoalNs() * 1e-6f,
+                        mLatestResponse.exposureTimeToShiftNs() * 1e-6f,
+                        mPhaseAligner.getConfig().minExposureNs() * 1e-6f));
 
         try {
-            cameraController.injectFrameWithExposure(latestResponse.exposureTimeToShiftNs());
+            mCameraController.injectFrameWithExposure(mLatestResponse.exposureTimeToShiftNs());
         } catch (CameraAccessException e) {
             Log.e(TAG, "Frame injection failed.", e);
         }
     }
 
     private void onAlignmentFinished(boolean wasAligned) {
-        synchronized (lock) {
-            inAlignState = false;
+        synchronized (mLock) {
+            mInAlignState = false;
         }
-        this.wasAligned = wasAligned;
-        if (onFinished != null) onFinished.run();
-        context.getPreview().showToast(context.getRecSyncToastBoxer(),
+        mWasAligned = wasAligned;
+        if (mOnFinished != null) mOnFinished.run();
+        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(),
                 wasAligned ? R.string.phase_alignment_succeeded : R.string.phase_alignment_failed);
     }
 
@@ -222,7 +222,7 @@ public class PhaseAlignController {
      * Stop phase alignment if it is running.
      */
     public void stopAlign() {
-        if (inAlignState) stopAlign = true;
+        if (mInAlignState) mStopAlign = true;
     }
 
     /**
@@ -232,6 +232,6 @@ public class PhaseAlignController {
      * were made.
      */
     public boolean wasAligned() {
-        return wasAligned;
+        return mWasAligned;
     }
 }

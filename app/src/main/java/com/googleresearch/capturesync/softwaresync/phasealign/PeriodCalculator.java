@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 public class PeriodCalculator {
     private final static long CALC_DURATION_MS = 10000;
 
-    private final MainActivity context;
-    private volatile boolean shouldRegister;
-    private ArrayList<Long> registeredTimestamps = new ArrayList<>();
+    private final MainActivity mMainActivity;
+    private volatile boolean mShouldRegister;
+    private ArrayList<Long> mRegisteredTimestamps = new ArrayList<>();
 
-    public PeriodCalculator(MainActivity context) {
-        this.context = context;
+    public PeriodCalculator(MainActivity mainActivity) {
+        mMainActivity = mainActivity;
     }
 
     /**
@@ -38,14 +38,14 @@ public class PeriodCalculator {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public long getPeriodNs() throws InterruptedException {
-        context.getPreview().showToast(context.getRecSyncToastBoxer(), context.getString(R.string.calculating_period, CALC_DURATION_MS * 1e-3));
+        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(), mMainActivity.getString(R.string.calculating_period, CALC_DURATION_MS * 1e-3));
         // Start recording timestamps
-        registeredTimestamps = new ArrayList<>();
-        shouldRegister = true;
+        mRegisteredTimestamps = new ArrayList<>();
+        mShouldRegister = true;
         Thread.sleep(CALC_DURATION_MS);
         // Stop recording timestamps and calculate period
-        shouldRegister = false;
-        return calcPeriodNsClusters(getDiff(registeredTimestamps));
+        mShouldRegister = false;
+        return calcPeriodNsClusters(getDiff(mRegisteredTimestamps));
     }
 
     private ArrayList<Long> getDiff(ArrayList<Long> arrayList) {
@@ -67,8 +67,8 @@ public class PeriodCalculator {
         double weightedSum = 0L;
         for (int i = 0; i < nClust; i++) {
             int finalI = i;
-            ArrayList<Long> clust = (ArrayList<Long>)numArray.stream().filter(
-                    x -> (x > (finalI + 0.5)*initEstimate) && (x < (finalI + 1.5)*initEstimate)
+            ArrayList<Long> clust = (ArrayList<Long>) numArray.stream().filter(
+                    x -> (x > (finalI + 0.5) * initEstimate) && (x < (finalI + 1.5) * initEstimate)
             ).collect(Collectors.toList());
             if (clust.size() > 0) {
                 weightedSum += 1.0 * median(clust) / (i + 1) * clust.size();
@@ -87,17 +87,17 @@ public class PeriodCalculator {
         numArray.sort(Comparator.naturalOrder());
         double median;
         if (numArray.size() % 2 == 0)
-            median = ((double)numArray.get(numArray.size()/2)
-                    + (double)numArray.get(numArray.size()/2 - 1))/2;
+            median = ((double) numArray.get(numArray.size() / 2)
+                    + (double) numArray.get(numArray.size() / 2 - 1)) / 2;
         else
-            median = (double) numArray.get(numArray.size()/2);
-        return (long)median;
+            median = (double) numArray.get(numArray.size() / 2);
+        return (long) median;
     }
 
     public void onFrameTimestamp(long timestampNs) {
         // Register timestamp
-        if (shouldRegister) {
-            registeredTimestamps.add(timestampNs);
+        if (mShouldRegister) {
+            mRegisteredTimestamps.add(timestampNs);
         }
     }
 }

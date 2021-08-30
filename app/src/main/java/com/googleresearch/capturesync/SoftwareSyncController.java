@@ -59,15 +59,15 @@ import java.util.NoSuchElementException;
 public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
 
-    private final MainActivity context;
-    private final TextView syncStatus;
-    private final PhaseAlignController phaseAlignController;
-    private final PeriodCalculator periodCalculator;
-    private SoftwareSyncBase softwareSync;
-    private AlignPhasesTask alignPhasesTask;
+    private final MainActivity mMainActivity;
+    private final TextView mSyncStatus;
+    private final PhaseAlignController mPhaseAlignController;
+    private final PeriodCalculator mPeriodCalculator;
+    private SoftwareSyncBase mSoftwareSync;
+    private AlignPhasesTask mAlignPhasesTask;
 
-    private boolean isLeader;
-    private State state = State.IDLE;
+    private boolean mIsLeader;
+    private State mState = State.IDLE;
 
     /**
      * Possible states of RecSync on this device.
@@ -97,7 +97,7 @@ public class SoftwareSyncController implements Closeable {
      */
     public static final int METHOD_RECORD = 200_003;
 
-    private long upcomingTriggerTimeNs;
+    private long mUpcomingTriggerTimeNs;
 
     /**
      * Constructor passed in with: - context - For setting UI elements and triggering captures. -
@@ -106,11 +106,11 @@ public class SoftwareSyncController implements Closeable {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public SoftwareSyncController(
-            MainActivity context, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView syncStatus) {
-        this.context = context;
-        this.phaseAlignController = phaseAlignController;
-        this.periodCalculator = periodCalculator;
-        this.syncStatus = syncStatus;
+            MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView syncStatus) {
+        mMainActivity = mainActivity;
+        mPhaseAlignController = phaseAlignController;
+        mPeriodCalculator = periodCalculator;
+        mSyncStatus = syncStatus;
 
         setupSoftwareSync();
     }
@@ -118,12 +118,12 @@ public class SoftwareSyncController implements Closeable {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void setupSoftwareSync() {
         Log.w(TAG, "setup SoftwareSync");
-        if (softwareSync != null) {
+        if (mSoftwareSync != null) {
             return;
         }
 
         // Get Wifi Manager and use NetworkHelpers to determine local and leader IP addresses.
-        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         InetAddress leaderAddress;
         InetAddress localAddress;
 
@@ -134,9 +134,9 @@ public class SoftwareSyncController implements Closeable {
         // Determine leadership.
         try {
             NetworkHelpers networkHelper = new NetworkHelpers(wifiManager);
-            isLeader = networkHelper.isLeader();
+            mIsLeader = networkHelper.isLeader();
 
-            if (isLeader) {
+            if (mIsLeader) {
                 // IP determination is not yet implemented for a leader.
                 localAddress = null;
                 leaderAddress = null;
@@ -149,7 +149,7 @@ public class SoftwareSyncController implements Closeable {
                     TAG,
                     String.format(
                             "Current IP: %s , Leader IP: %s | Leader? %s",
-                            localAddress, leaderAddress, isLeader ? "Y" : "N"));
+                            localAddress, leaderAddress, mIsLeader ? "Y" : "N"));
         } catch (SocketException e) {
             Log.e(TAG, "Error: " + e);
             throw new IllegalStateException(
@@ -178,13 +178,13 @@ public class SoftwareSyncController implements Closeable {
                 payload -> {
                     Log.d(TAG, "Phase alignment request received.");
 
-                    if (state == State.PERIOD_CALCULATION || state == State.PHASE_ALIGNMENT) {
+                    if (mState == State.PERIOD_CALCULATION || mState == State.PHASE_ALIGNMENT) {
                         Log.d(TAG, "The previous phase alignment request is still processing.");
                         return;
                     }
 
-                    alignPhasesTask = new AlignPhasesTask(this, phaseAlignController, periodCalculator);
-                    alignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    mAlignPhasesTask = new AlignPhasesTask(this, mPhaseAlignController, mPeriodCalculator);
+                    mAlignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 });
 
         // Apply the received settings.
@@ -193,8 +193,8 @@ public class SoftwareSyncController implements Closeable {
                 payload -> {
                     Log.d(TAG, "Received payload with settings: " + payload);
 
-                    if (state != State.IDLE && state != State.SETTINGS_APPLICATION) {
-                        Log.d(TAG, "Settings cannot be applied at state " + state);
+                    if (mState != State.IDLE && mState != State.SETTINGS_APPLICATION) {
+                        Log.d(TAG, "Settings cannot be applied at state " + mState);
                         return;
                     }
 
@@ -206,8 +206,8 @@ public class SoftwareSyncController implements Closeable {
                     }
 
                     if (settings != null) {
-                        state = State.SETTINGS_APPLICATION;
-                        context.getApplicationInterface().applyAndLockSettings(settings, () -> state = State.IDLE);
+                        mState = State.SETTINGS_APPLICATION;
+                        mMainActivity.getApplicationInterface().applyAndLockSettings(settings, () -> mState = State.IDLE);
                     }
                 });
 
@@ -217,24 +217,24 @@ public class SoftwareSyncController implements Closeable {
                 payload -> {
                     Log.d(TAG, String.format(
                             "Received record request with payload: %s. Current recording status: %s.",
-                            payload, context.getPreview().isVideoRecording()));
+                            payload, mMainActivity.getPreview().isVideoRecording()));
 
-                    if (state != State.IDLE && state != State.RECORDING) {
-                        Log.d(TAG, "Recording status cannot be switched at state " + state);
+                    if (mState != State.IDLE && mState != State.RECORDING) {
+                        Log.d(TAG, "Recording status cannot be switched at state " + mState);
                         return;
                     }
 
-                    if (!context.getPreview().isVideo()) {
+                    if (!mMainActivity.getPreview().isVideo()) {
                         // This should not happen as capture mode is to be synced before recording.
                         throw new IllegalStateException("Received recording request in photo mode");
                     }
-                    if (context.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
-                        state = (state == State.RECORDING) ? State.IDLE : State.RECORDING;
-                        context.runOnUiThread(() -> context.takePicturePressed(false, false));
+                    if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
+                        mState = (mState == State.RECORDING) ? State.IDLE : State.RECORDING;
+                        mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
                     }
                 });
 
-        if (isLeader) {
+        if (mIsLeader) {
             // Leader.
             long initTimeNs = TimeUtils.millisToNanos(System.currentTimeMillis());
 
@@ -247,7 +247,7 @@ public class SoftwareSyncController implements Closeable {
             leaderRpcs.put(SyncConstants.METHOD_MSG_SYNCING, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_OFFSET_UPDATED, payload -> updateClientsUI());
 
-            softwareSync = new SoftwareSyncLeader(name, initTimeNs, localAddress, leaderRpcs);
+            mSoftwareSync = new SoftwareSyncLeader(name, initTimeNs, localAddress, leaderRpcs);
         } else {
             // Client.
             Map<Integer, RpcCallback> clientRpcs = new HashMap<>(sharedRpcs);
@@ -256,69 +256,69 @@ public class SoftwareSyncController implements Closeable {
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
-                            context.runOnUiThread(
-                                    () -> syncStatus.setText(context.getString(R.string.rec_sync_waiting_for_leader, softwareSync.getName()))));
+                            mMainActivity.runOnUiThread(
+                                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()))));
 
             // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
-                            context.runOnUiThread(
-                                    () -> syncStatus.setText(context.getString(R.string.rec_sync_waiting_for_sync, softwareSync.getName()))));
+                            mMainActivity.runOnUiThread(
+                                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName()))));
 
             // Update status text to "synced to leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
-                            context.runOnUiThread(
-                                    () -> syncStatus.setText(
-                                            context.getString(
+                            mMainActivity.runOnUiThread(
+                                    () -> mSyncStatus.setText(
+                                            mMainActivity.getString(
                                                     R.string.rec_sync_synced_to_leader,
-                                                    softwareSync.getName(), softwareSync.getLeaderAddress()))));
+                                                    mSoftwareSync.getName(), mSoftwareSync.getLeaderAddress()))));
 
-            softwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
+            mSoftwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
         }
 
-        if (isLeader) {
-            context.runOnUiThread(
-                    () -> syncStatus.setText(context.getString(R.string.rec_sync_leader, softwareSync.getName())));
+        if (mIsLeader) {
+            mMainActivity.runOnUiThread(
+                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_leader, mSoftwareSync.getName())));
         } else {
-            context.runOnUiThread(
-                    () -> syncStatus.setText(context.getString(R.string.rec_sync_client, softwareSync.getName())));
+            mMainActivity.runOnUiThread(
+                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_client, mSoftwareSync.getName())));
         }
-        context.runOnUiThread(() -> syncStatus.setTextColor(Color.rgb(0, 139, 0))); // Dark green.
+        mMainActivity.runOnUiThread(() -> mSyncStatus.setTextColor(Color.rgb(0, 139, 0))); // Dark green.
     }
 
     private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = "AlignPhasesTask";
 
-        private final SoftwareSyncController softwareSyncController;
-        private final PhaseAlignController phaseAlignController;
-        private final PeriodCalculator periodCalculator;
+        private final SoftwareSyncController mSoftwareSyncController;
+        private final PhaseAlignController mPhaseAlignController;
+        private final PeriodCalculator mPeriodCalculator;
 
         AlignPhasesTask(SoftwareSyncController softwareSyncController,
                         PhaseAlignController phaseAlignController,
                         PeriodCalculator periodCalculator) {
-            this.softwareSyncController = softwareSyncController;
-            this.phaseAlignController = phaseAlignController;
-            this.periodCalculator = periodCalculator;
+            mSoftwareSyncController = softwareSyncController;
+            mPhaseAlignController = phaseAlignController;
+            mPeriodCalculator = periodCalculator;
         }
 
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         protected Void doInBackground(Void... voids) {
-            if (softwareSyncController.state != State.IDLE) {
+            if (mSoftwareSyncController.mState != State.IDLE) {
                 Log.d(TAG, "Period calculation and phase alignment cannot be started at state " +
-                        softwareSyncController.state);
+                        mSoftwareSyncController.mState);
                 return null;
             }
 
             Log.v(TAG, "Calculating frames period.");
-            softwareSyncController.state = State.PERIOD_CALCULATION;
+            mSoftwareSyncController.mState = State.PERIOD_CALCULATION;
             try {
-                long periodNs = periodCalculator.getPeriodNs();
+                long periodNs = mPeriodCalculator.getPeriodNs();
                 Log.i(TAG, "Calculated frames period: " + periodNs);
-                phaseAlignController.setPeriodNs(periodNs);
+                mPhaseAlignController.setPeriodNs(periodNs);
             } catch (InterruptedException | NoSuchElementException e) {
                 Log.e(TAG, "Failed calculating frames period: ", e);
             }
@@ -327,15 +327,15 @@ public class SoftwareSyncController implements Closeable {
             // that, reducing potential error, though special attention should be placed to phases
             // close to the zero or period boundary.
             Log.v(TAG, "Starting phase alignment.");
-            softwareSyncController.state = State.PHASE_ALIGNMENT;
-            phaseAlignController.startAlign(() -> softwareSyncController.state = State.IDLE);
+            mSoftwareSyncController.mState = State.PHASE_ALIGNMENT;
+            mPhaseAlignController.startAlign(() -> mSoftwareSyncController.mState = State.IDLE);
 
             return null;
         }
     }
 
     private String lastFourSerial() {
-        String serial = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+        String serial = Secure.getString(mMainActivity.getContentResolver(), Secure.ANDROID_ID);
         if (serial.length() <= 4) {
             return serial;
         } else {
@@ -349,39 +349,39 @@ public class SoftwareSyncController implements Closeable {
      * <p>If the number of clients doesn't equal TOTAL_NUM_CLIENTS, show as bright red.
      */
     private void updateClientsUI() {
-        SoftwareSyncLeader leader = ((SoftwareSyncLeader) softwareSync);
+        SoftwareSyncLeader leader = ((SoftwareSyncLeader) mSoftwareSync);
         final int clientCount = leader.getClients().size();
-        context.runOnUiThread(
+        mMainActivity.runOnUiThread(
                 () -> {
                     StringBuilder msg = new StringBuilder();
                     msg.append(
-                            context.getString(
-                                    R.string.rec_sync_leader_clients, softwareSync.getName(),
-                                    context.getResources().getQuantityString(R.plurals.clients_num, clientCount, clientCount)));
+                            mMainActivity.getString(
+                                    R.string.rec_sync_leader_clients, mSoftwareSync.getName(),
+                                    mMainActivity.getResources().getQuantityString(R.plurals.clients_num, clientCount, clientCount)));
                     for (Entry<InetAddress, ClientInfo> entry : leader.getClients().entrySet()) {
                         ClientInfo client = entry.getValue();
                         if (client.syncAccuracy() == 0) {
-                            msg.append(context.getString(R.string.rec_sync_client_syncing, client.name()));
+                            msg.append(mMainActivity.getString(R.string.rec_sync_client_syncing, client.name()));
                         } else {
                             msg.append(
-                                    context.getString(
+                                    mMainActivity.getString(
                                             R.string.rec_sync_client_synced, client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
-                    syncStatus.setText(msg.toString());
+                    mSyncStatus.setText(msg.toString());
                 });
     }
 
     @Override
     public void close() {
         Log.w(TAG, "close SoftwareSyncController");
-        if (softwareSync != null) {
+        if (mSoftwareSync != null) {
             try {
-                softwareSync.close();
+                mSoftwareSync.close();
             } catch (IOException e) {
                 throw new IllegalStateException("Error closing SoftwareSync", e);
             }
-            softwareSync = null;
+            mSoftwareSync = null;
         }
     }
 
@@ -394,9 +394,9 @@ public class SoftwareSyncController implements Closeable {
      */
     public void switchSettingsLock(SyncSettingsContainer settings) {
         if (isSettingsBroadcasting()) {
-            ((SoftwareSyncLeader) softwareSync).setSavedSettings(null);
+            ((SoftwareSyncLeader) mSoftwareSync).setSavedSettings(null);
         } else if (settings != null) {
-            ((SoftwareSyncLeader) softwareSync).setSavedSettings(settings);
+            ((SoftwareSyncLeader) mSoftwareSync).setSavedSettings(settings);
         } else {
             throw new IllegalArgumentException("Settings to be locked cannot be null");
         }
@@ -408,7 +408,7 @@ public class SoftwareSyncController implements Closeable {
      * @return true if this device is a leader, false if it is a client.
      */
     public boolean isLeader() {
-        return isLeader;
+        return mIsLeader;
     }
 
     /**
@@ -418,7 +418,7 @@ public class SoftwareSyncController implements Closeable {
      * were made.
      */
     public boolean isAligned() {
-        return phaseAlignController.wasAligned();
+        return mPhaseAlignController.wasAligned();
     }
 
     /**
@@ -429,8 +429,8 @@ public class SoftwareSyncController implements Closeable {
      * @throws IllegalStateException if the device if not a leader.
      */
     public boolean isSettingsBroadcasting() {
-        if (isLeader) {
-            return ((SoftwareSyncLeader) softwareSync).getSavedSettings() != null;
+        if (mIsLeader) {
+            return ((SoftwareSyncLeader) mSoftwareSync).getSavedSettings() != null;
         }
         throw new IllegalStateException("Cannot check the settings lock status for a client");
     }
@@ -442,13 +442,13 @@ public class SoftwareSyncController implements Closeable {
      * @param timestamp a timestamp to be provided.
      */
     public void updateTimestamp(long timestamp) {
-        if (state != State.PHASE_ALIGNMENT) { // No need to, when phase alignment is running.
-            periodCalculator.onFrameTimestamp(timestamp);
+        if (mState != State.PHASE_ALIGNMENT) { // No need to, when phase alignment is running.
+            mPeriodCalculator.onFrameTimestamp(timestamp);
         }
-        phaseAlignController.updateCaptureTimestamp(softwareSync.leaderTimeForLocalTimeNs(timestamp));
+        mPhaseAlignController.updateCaptureTimestamp(mSoftwareSync.leaderTimeForLocalTimeNs(timestamp));
     }
 
     public SoftwareSyncBase getSoftwareSync() {
-        return softwareSync;
+        return mSoftwareSync;
     }
 }

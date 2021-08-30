@@ -31,7 +31,7 @@ public class SyncSettingsContainer implements Serializable {
     final public String flash;
     final public String format;
 
-    private String asStringCached = null;
+    private String mAsStringCached = null;
 
     /**
      * Settings are collected from the current device.
@@ -100,7 +100,7 @@ public class SyncSettingsContainer implements Serializable {
      * @return a constructed string.
      */
     public String asString() {
-        if (asStringCached == null) {
+        if (mAsStringCached == null) {
             final ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
             try {
                 final ObjectOutputStream objectWriter = new ObjectOutputStream(byteArray);
@@ -110,9 +110,9 @@ public class SyncSettingsContainer implements Serializable {
                 throw new IllegalStateException("Cannot serialize the settings object");
             }
             // Byte-wise ISO_8859_1 is required for the encoding and decoding to work correctly
-            asStringCached = new String(byteArray.toByteArray(), StandardCharsets.ISO_8859_1);
+            mAsStringCached = new String(byteArray.toByteArray(), StandardCharsets.ISO_8859_1);
         }
-        return asStringCached;
+        return mAsStringCached;
     }
 
     /**

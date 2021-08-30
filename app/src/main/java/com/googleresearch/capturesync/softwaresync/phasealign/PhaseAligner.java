@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The Google Research Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,76 +38,80 @@ package com.googleresearch.capturesync.softwaresync.phasealign;
  * user can check to stope via when the phase response is aligned with `isAligned`.
  */
 public final class PhaseAligner {
-  private final PhaseConfig config;
+    private final PhaseConfig mConfig;
 
-  /** Instantiate phase aligner using configuration options from a PhaseConfig proto. */
-  public PhaseAligner(PhaseConfig config) {
-    this.config = config;
-  }
-
-  /**
-   * Given the latest image sequence timestamp, Responds with phase alignment information.
-   *
-   * <p>The response contains an estimated sensor exposure time or frame duration needed to align
-   * align future frames to the desired goal phase, as well as the current alignment state.
-   *
-   * @param timestampNs timestamp in the same clock domain as used in the phase configuration. This
-   *     can be either the local clock domain or the software synchronized leader clock domain, as
-   *     long as it stays consistent for the duration of the phase aligner instance.
-   * @return PhaseResponse containing the current phase state as well as the estimated sensor
-   *     exposure time and frame duration needed to align.
-   */
-  public final PhaseResponse passTimestamp(long timestampNs) {
-    long phaseNs = timestampNs % config.periodNs();
-    long diffFromGoalNs = config.goalPhaseNs() - phaseNs;
-    boolean isAligned = Math.abs(diffFromGoalNs) < config.alignThresholdNs();
-
-    /* Stop early if already aligned. */
-    if (isAligned) {
-      return PhaseResponse.builder()
-          .setPhaseNs(phaseNs)
-          .setExposureTimeToShiftNs(0)
-          .setFrameDurationToShiftNs(0)
-          .setDiffFromGoalNs(diffFromGoalNs)
-          .setIsAligned(isAligned)
-          .build();
-    }
-
-    /* Since we can only shift phase into the future, shift negative offsets over by one period. */
-    long desiredPhaseOffsetNs = diffFromGoalNs;
-    if (diffFromGoalNs < 0) {
-      desiredPhaseOffsetNs += config.periodNs();
-    }
-
-    /*
-     * Calculate the frame duration needed to align to the `goalPhaseNs`, using the linear
-     * relationship between offset and phase shift. Since durations <= period have no effect, add
-     * another period to the duration.
+    /**
+     * Instantiate phase aligner using configuration options from a PhaseConfig proto.
      */
-    long frameDurationNsToShift = desiredPhaseOffsetNs / 2 + config.periodNs();
+    public PhaseAligner(PhaseConfig config) {
+        mConfig = config;
+    }
 
-    /*
-     * Convert to estimated shift exposure time by removing the average overheadNs. Note: The
-     * majority of noise in phase alignment is due to this varying estimated overheadNs.
+    /**
+     * Given the latest image sequence timestamp, Responds with phase alignment information.
      *
-     * <p>Due to the indirect control of frame duration, choosing offsets <= minExposure causes no
-     * change in phase. To avoid this, a minimum offset is manually chosen for the specific device
-     * architecture.
+     * <p>The response contains an estimated sensor exposure time or frame duration needed to align
+     * align future frames to the desired goal phase, as well as the current alignment state.
+     *
+     * @param timestampNs timestamp in the same clock domain as used in the phase configuration. This
+     *                    can be either the local clock domain or the software synchronized leader clock domain, as
+     *                    long as it stays consistent for the duration of the phase aligner instance.
+     * @return PhaseResponse containing the current phase state as well as the estimated sensor
+     * exposure time and frame duration needed to align.
      */
-    long exposureTimeNsToShift =
-        Math.max(config.minExposureNs(), frameDurationNsToShift - config.overheadNs());
+    public final PhaseResponse passTimestamp(long timestampNs) {
+        long phaseNs = timestampNs % mConfig.periodNs();
+        long diffFromGoalNs = mConfig.goalPhaseNs() - phaseNs;
+        boolean isAligned = Math.abs(diffFromGoalNs) < mConfig.alignThresholdNs();
 
-    return PhaseResponse.builder()
-        .setPhaseNs(phaseNs)
-        .setExposureTimeToShiftNs(exposureTimeNsToShift)
-        .setFrameDurationToShiftNs(frameDurationNsToShift)
-        .setDiffFromGoalNs(diffFromGoalNs)
-        .setIsAligned(isAligned)
-        .build();
-  }
+        /* Stop early if already aligned. */
+        if (isAligned) {
+            return PhaseResponse.builder()
+                    .setPhaseNs(phaseNs)
+                    .setExposureTimeToShiftNs(0)
+                    .setFrameDurationToShiftNs(0)
+                    .setDiffFromGoalNs(diffFromGoalNs)
+                    .setIsAligned(isAligned)
+                    .build();
+        }
 
-  /** Returns the configuration options used to set up the phase aligner. */
-  public final PhaseConfig getConfig() {
-    return config;
-  }
+        /* Since we can only shift phase into the future, shift negative offsets over by one period. */
+        long desiredPhaseOffsetNs = diffFromGoalNs;
+        if (diffFromGoalNs < 0) {
+            desiredPhaseOffsetNs += mConfig.periodNs();
+        }
+
+        /*
+         * Calculate the frame duration needed to align to the `goalPhaseNs`, using the linear
+         * relationship between offset and phase shift. Since durations <= period have no effect, add
+         * another period to the duration.
+         */
+        long frameDurationNsToShift = desiredPhaseOffsetNs / 2 + mConfig.periodNs();
+
+        /*
+         * Convert to estimated shift exposure time by removing the average overheadNs. Note: The
+         * majority of noise in phase alignment is due to this varying estimated overheadNs.
+         *
+         * <p>Due to the indirect control of frame duration, choosing offsets <= minExposure causes no
+         * change in phase. To avoid this, a minimum offset is manually chosen for the specific device
+         * architecture.
+         */
+        long exposureTimeNsToShift =
+                Math.max(mConfig.minExposureNs(), frameDurationNsToShift - mConfig.overheadNs());
+
+        return PhaseResponse.builder()
+                .setPhaseNs(phaseNs)
+                .setExposureTimeToShiftNs(exposureTimeNsToShift)
+                .setFrameDurationToShiftNs(frameDurationNsToShift)
+                .setDiffFromGoalNs(diffFromGoalNs)
+                .setIsAligned(isAligned)
+                .build();
+    }
+
+    /**
+     * Returns the configuration options used to set up the phase aligner.
+     */
+    public final PhaseConfig getConfig() {
+        return mConfig;
+    }
 }
