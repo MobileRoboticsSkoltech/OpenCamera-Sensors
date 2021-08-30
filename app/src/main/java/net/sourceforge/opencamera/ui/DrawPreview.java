@@ -50,7 +50,6 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class DrawPreview {
     private static final String TAG = "DrawPreview";
@@ -1241,13 +1240,13 @@ public class DrawPreview {
 
         // RecSync
         if( applicationInterface instanceof ExtendedAppInterface && ((ExtendedAppInterface) applicationInterface).isSoftwareSyncRunning() ) {
+            final ExtendedAppInterface extendedAppInterface = (ExtendedAppInterface) applicationInterface;
+
             // leader-client information
             {
-                TextView textView = ((ExtendedAppInterface) applicationInterface).getSyncStatusText();
-                String[] lines = ((String) textView.getText()).split("\n");
-                int color = textView.getCurrentTextColor();
+                String[] lines = extendedAppInterface.getSyncStatusText().split("\n");
                 for (String line : lines) {
-                    int height = applicationInterface.drawTextWithBackground(canvas, p, line, color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                    int height = extendedAppInterface.drawTextWithBackground(canvas, p, line, Color.rgb(0, 139, 0), Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
                     height += gap_y;
                     if( ui_rotation == 90 ) {
                         location_y -= height;
@@ -1259,9 +1258,9 @@ public class DrawPreview {
             }
 
             // phase error
-            {
-                TextView textView = ((ExtendedAppInterface) applicationInterface).getPhaseErrorText();
-                int height = applicationInterface.drawTextWithBackground(canvas, p, (String) textView.getText(), textView.getCurrentTextColor(), Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+            Pair<String, Integer> phaseError = extendedAppInterface.getPhaseErrorText();
+            if( phaseError != null ) {
+                int height = extendedAppInterface.drawTextWithBackground(canvas, p, phaseError.first, phaseError.second, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
                 height += gap_y;
                 if( ui_rotation == 90 ) {
                     location_y -= height;

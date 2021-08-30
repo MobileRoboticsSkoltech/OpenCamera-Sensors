@@ -19,13 +19,11 @@
 package com.googleresearch.capturesync;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
@@ -60,9 +58,9 @@ public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
 
     private final MainActivity mMainActivity;
-    private final TextView mSyncStatus;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
+    private String mSyncStatus;
     private SoftwareSyncBase mSoftwareSync;
     private AlignPhasesTask mAlignPhasesTask;
 
@@ -106,11 +104,10 @@ public class SoftwareSyncController implements Closeable {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public SoftwareSyncController(
-            MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator, TextView syncStatus) {
+            MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
         mMainActivity = mainActivity;
         mPhaseAlignController = phaseAlignController;
         mPeriodCalculator = periodCalculator;
-        mSyncStatus = syncStatus;
 
         setupSoftwareSync();
     }
@@ -257,36 +254,34 @@ public class SoftwareSyncController implements Closeable {
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
                             mMainActivity.runOnUiThread(
-                                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()))));
+                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName())));
 
             // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
                             mMainActivity.runOnUiThread(
-                                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName()))));
+                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName())));
 
             // Update status text to "synced to leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
-                            mMainActivity.runOnUiThread(
-                                    () -> mSyncStatus.setText(
-                                            mMainActivity.getString(
-                                                    R.string.rec_sync_synced_to_leader,
-                                                    mSoftwareSync.getName(), mSoftwareSync.getLeaderAddress()))));
+                            mMainActivity.runOnUiThread(() -> mSyncStatus =
+                                    mMainActivity.getString(
+                                            R.string.rec_sync_synced_to_leader,
+                                            mSoftwareSync.getName(), mSoftwareSync.getLeaderAddress())));
 
             mSoftwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
         }
 
         if (mIsLeader) {
             mMainActivity.runOnUiThread(
-                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_leader, mSoftwareSync.getName())));
+                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_leader, mSoftwareSync.getName()));
         } else {
             mMainActivity.runOnUiThread(
-                    () -> mSyncStatus.setText(mMainActivity.getString(R.string.rec_sync_client, mSoftwareSync.getName())));
+                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_client, mSoftwareSync.getName()));
         }
-        mMainActivity.runOnUiThread(() -> mSyncStatus.setTextColor(Color.rgb(0, 139, 0))); // Dark green.
     }
 
     private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
@@ -368,7 +363,7 @@ public class SoftwareSyncController implements Closeable {
                                             R.string.rec_sync_client_synced, client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
-                    mSyncStatus.setText(msg.toString());
+                    mSyncStatus = msg.toString();
                 });
     }
 
@@ -450,5 +445,9 @@ public class SoftwareSyncController implements Closeable {
 
     public SoftwareSyncBase getSoftwareSync() {
         return mSoftwareSync;
+    }
+
+    public String getSyncStatus() {
+        return mSyncStatus;
     }
 }

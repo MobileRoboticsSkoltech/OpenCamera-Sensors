@@ -23,7 +23,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.TextView;
+import android.util.Pair;
 
 import androidx.annotation.RequiresApi;
 
@@ -55,7 +55,6 @@ public class PhaseAlignController {
     private static final int PHASE_SETTLE_DELAY_MS = 400;
 
     private final MainActivity mMainActivity;
-    private final TextView mPhaseError;
     private final Handler mHandler;
     private final Object mLock = new Object();
     private Runnable mOnFinished;
@@ -70,13 +69,12 @@ public class PhaseAlignController {
     private final PhaseConfig mPhaseConfig;
     private PhaseResponse mLatestResponse;
 
-    public PhaseAlignController(PhaseConfig config, MainActivity context, TextView phaseError) {
+    public PhaseAlignController(PhaseConfig config, MainActivity mainActivity) {
         mHandler = new Handler();
         mPhaseConfig = config;
         mPhaseAligner = new PhaseAligner(config);
         Log.v(TAG, "Loaded phase align config.");
-        mMainActivity = context;
-        mPhaseError = phaseError;
+        mMainActivity = mainActivity;
     }
 
     protected void setPeriodNs(long periodNs) {
@@ -94,17 +92,7 @@ public class PhaseAlignController {
     public long updateCaptureTimestamp(long timestampNs) {
         // TODO(samansaari) : Rename passTimestamp -> updateCaptureTimestamp or similar in softwaresync.
         mLatestResponse = mPhaseAligner.passTimestamp(timestampNs);
-        updatePhaseError();
         return mLatestResponse.phaseNs();
-    }
-
-    private void updatePhaseError() {
-        final String phaseErrorStr = mMainActivity.getString(R.string.phase_error,
-                TimeUtils.nanosToMillis((double) mLatestResponse.diffFromGoalNs()));
-        mMainActivity.runOnUiThread(() -> {
-            mPhaseError.setText(phaseErrorStr);
-            mPhaseError.setTextColor(mLatestResponse.isAligned() ? Color.GREEN : Color.RED);
-        });
     }
 
     /**
@@ -233,5 +221,23 @@ public class PhaseAlignController {
      */
     public boolean wasAligned() {
         return mWasAligned;
+    }
+
+    /**
+     * The current phase error description, if it is available.
+     *
+     * @return a {@link Pair} of a string containing the current phase error and an integer
+     * describing its color (depends on the current alignment status) if phase error is determined,
+     * or null otherwise.
+     */
+    public Pair<String, Integer> getPhaseError() {
+        if (mLatestResponse != null) {
+            final String phaseError = mMainActivity.getString(R.string.phase_error,
+                    TimeUtils.nanosToMillis((double) mLatestResponse.diffFromGoalNs()));
+            final int color = (mLatestResponse.isAligned()) ? Color.GREEN : Color.RED;
+            return new Pair<>(phaseError, color);
+        } else {
+            return null;
+        }
     }
 }

@@ -16,9 +16,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
@@ -69,8 +69,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
-    private final TextView mSyncStatusText;
-    private final TextView mPhaseErrorText;
 
     private final Handler mSendSettingsHandler = new Handler();
 
@@ -87,9 +85,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-        mSyncStatusText = new TextView(mainActivity);
-        mPhaseErrorText = new TextView(mainActivity);
-        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity, mPhaseErrorText);
+        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mPeriodCalculator = new PeriodCalculator(mainActivity);
     }
 
@@ -145,19 +141,19 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     /**
      * Provides the current leader-client status of RecSync.
      *
-     * @return a {@link TextView} describing the current status.
+     * @return a string describing the current status.
      */
-    public TextView getSyncStatusText() {
-        return mSyncStatusText;
+    public String getSyncStatusText() {
+        return mSoftwareSyncController.getSyncStatus();
     }
 
     /**
      * Provides the current phase error from RecSync.
      *
-     * @return a {@link TextView} describing the current phase error.
+     * @return a {@link Pair} of a string with its color describing the current phase error.
      */
-    public TextView getPhaseErrorText() {
-        return mPhaseErrorText;
+    public Pair<String, Integer> getPhaseErrorText() {
+        return mPhaseAlignController.getPhaseError();
     }
 
     public boolean getIMURecordingPref() {
@@ -344,7 +340,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         try {
             mSoftwareSyncController =
-                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, mPeriodCalculator, mSyncStatusText);
+                    new SoftwareSyncController(mMainActivity, mPhaseAlignController, mPeriodCalculator);
         } catch (IllegalStateException e) {
             // Wi-Fi and hotspot are disabled.
             Log.e(TAG, "Couldn't start SoftwareSync: Wi-Fi and hotspot are disabled.");
