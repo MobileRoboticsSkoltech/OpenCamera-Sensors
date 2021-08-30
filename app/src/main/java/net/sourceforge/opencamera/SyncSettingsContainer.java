@@ -34,45 +34,19 @@ public class SyncSettingsContainer implements Serializable {
     private String mAsStringCached = null;
 
     /**
-     * Settings are collected from the current device.
-     *
-     * @param mainActivity - MainActivity of this device.
-     */
-    public SyncSettingsContainer(MainActivity mainActivity) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
-        Preview preview = mainActivity.getPreview();
-        CameraController cameraController = preview.getCameraController();
-
-        syncISO = sharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
-        syncWb = sharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
-        syncFlash = sharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
-        syncFormat = sharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
-
-        isVideo = preview.isVideo();
-        exposure = cameraController.captureResultExposureTime();
-        iso = cameraController.captureResultIso();
-        wbTemperature = cameraController.captureResultWhiteBalanceTemperature();
-        wbMode = cameraController.getWhiteBalance();
-        flash = cameraController.getFlashValue();
-        format = isVideo ?
-                sharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default") :
-                sharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg");
-    }
-
-    /**
      * The container saves the provided values.
      *
-     * @param syncISO whether to sync ISO or not.
-     * @param syncWb whether to sync white balance or not.
-     * @param syncFlash whether to sync flash mode or not.
-     * @param syncFormat whether to sync video/image format or not.
-     * @param isVideo capture mode (true if video, false if photo).
-     * @param exposure exposure time.
-     * @param iso ISO value.
+     * @param syncISO       whether to sync ISO or not.
+     * @param syncWb        whether to sync white balance or not.
+     * @param syncFlash     whether to sync flash mode or not.
+     * @param syncFormat    whether to sync video/image format or not.
+     * @param isVideo       capture mode (true if video, false if photo).
+     * @param exposure      exposure time.
+     * @param iso           ISO value.
      * @param wbTemperature white balance temperature.
-     * @param wbMode white balance mode.
-     * @param flash flash mode.
-     * @param format video/image format (must match the chosen capture mode).
+     * @param wbMode        white balance mode.
+     * @param flash         flash mode.
+     * @param format        video/image format (must match the chosen capture mode).
      */
     public SyncSettingsContainer(boolean syncISO, boolean syncWb, boolean syncFlash, boolean syncFormat,
                                  boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
@@ -88,6 +62,35 @@ public class SyncSettingsContainer implements Serializable {
         this.wbMode = wbMode;
         this.flash = flash;
         this.format = format;
+    }
+
+    /**
+     * Builds {@link SyncSettingsContainer} using settings collected from the current device.
+     *
+     * @param mainActivity - MainActivity of this device.
+     */
+    public static SyncSettingsContainer build(MainActivity mainActivity) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        Preview preview = mainActivity.getPreview();
+        CameraController cameraController = preview.getCameraController();
+
+        boolean syncISO = sharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
+        boolean syncWb = sharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
+        boolean syncFlash = sharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
+        boolean syncFormat = sharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
+
+        boolean isVideo = preview.isVideo();
+        long exposure = cameraController.captureResultExposureTime();
+        int iso = cameraController.captureResultIso();
+        int wbTemperature = cameraController.captureResultWhiteBalanceTemperature();
+        String wbMode = cameraController.getWhiteBalance();
+        String flash = cameraController.getFlashValue();
+        String format = isVideo ?
+                sharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default") :
+                sharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg");
+
+        return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat,
+                isVideo, exposure, iso, wbTemperature, wbMode, flash, format);
     }
 
     /**

@@ -1814,7 +1814,7 @@ public class MainActivity extends Activity {
         SyncSettingsContainer settings = null;
 
         if( !softwareSyncController.isSettingsBroadcasting() ) {
-            settings = new SyncSettingsContainer(this);
+            settings = SyncSettingsContainer.build(this);
             applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         }
