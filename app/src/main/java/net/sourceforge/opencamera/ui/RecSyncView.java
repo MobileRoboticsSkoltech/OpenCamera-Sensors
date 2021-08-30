@@ -11,7 +11,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
 import androidx.annotation.StringRes;
@@ -21,7 +20,7 @@ import com.googleresearch.capturesync.SoftwareSyncController;
 /**
  * This defines the UI for the "recSync" button, that provides quick access to a
  * range of options.
- *
+ * <p>
  * Requires {@link SoftwareSyncController} to be initialized (i.e. RecSync to be started)
  */
 
@@ -39,7 +38,7 @@ public class RecSyncView extends LinearLayout {
     private final SoftwareSyncController software_sync_controller;
 
     private final Button button_sync_settings;
-    private final Button button_sync_devices;
+    private final Button button_align_phases;
 
     public RecSyncView(Context context) {
         super(context);
@@ -74,21 +73,8 @@ public class RecSyncView extends LinearLayout {
             Log.d(TAG, "small_screen: " + small_screen);
         }
 
-        button_sync_settings = addButton(R.string.sync_settings_unlocked, view -> {
-            if (MyDebug.LOG) {
-                Log.d(TAG, "clicked to buttonSyncSettings");
-            }
-
-            main_activity.clickedSyncSettings();
-        });
-
-        button_sync_devices = addButton(R.string.align_phases, view -> {
-            if (MyDebug.LOG) {
-                Log.d(TAG, "clicked to buttonAlignPhases");
-            }
-
-            main_activity.clickedAlignPhases();
-        });
+        button_sync_settings = addButton(R.string.sync_settings_unlocked);
+        button_align_phases = addButton(R.string.align_phases);
     }
 
     public int getTotalWidth() {
@@ -101,7 +87,15 @@ public class RecSyncView extends LinearLayout {
         );
     }
 
-    private CheckBox addCheckbox(MainActivity context, @StringRes int text, boolean is_checked, CompoundButton.OnCheckedChangeListener listener) {
+    public void setSyncSettingsOnClickListener(View.OnClickListener listener) {
+        button_sync_settings.setOnClickListener(listener);
+    }
+
+    public void setAlignPhasesOnClickListener(View.OnClickListener listener) {
+        button_align_phases.setOnClickListener(listener);
+    }
+
+    private CheckBox addCheckbox(Context context, @StringRes int text, boolean is_checked) {
         CheckBox check_box = new CheckBox(context);
         check_box.setText(getResources().getString(text));
         check_box.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
@@ -123,22 +117,19 @@ public class RecSyncView extends LinearLayout {
             check_box.setChecked(is_checked);
         }
 
-        check_box.setOnCheckedChangeListener(listener);
-
         this.addView(check_box);
 
         return check_box;
     }
 
-    private Button addButton(@StringRes int text, View.OnClickListener listener) {
-        final Button button_sync_devices = new Button(this.getContext());
-        button_sync_devices.setBackgroundColor(Color.TRANSPARENT);
-        button_sync_devices.setText(text);
-        button_sync_devices.setAllCaps(false);
-        button_sync_devices.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
-        button_sync_devices.setOnClickListener(listener);
-        this.addView(button_sync_devices);
+    private Button addButton(@StringRes int text) {
+        final Button button = new Button(this.getContext());
+        button.setBackgroundColor(Color.TRANSPARENT);
+        button.setText(text);
+        button.setAllCaps(false);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, title_text_size_dip);
+        this.addView(button);
 
-        return button_sync_devices;
+        return button;
     }
 }

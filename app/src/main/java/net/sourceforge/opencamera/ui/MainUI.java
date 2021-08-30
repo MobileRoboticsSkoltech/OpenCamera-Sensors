@@ -2453,6 +2453,21 @@ public class MainUI {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new rec_sync_view");
             rec_sync_view = new RecSyncView(main_activity);
+
+            rec_sync_view.setSyncSettingsOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonSyncSettings");
+
+                main_activity.clickedSyncSettings();
+            });
+
+            rec_sync_view.setAlignPhasesOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonAlignPhases");
+
+                main_activity.clickedAlignPhases();
+            });
+
             rec_sync_container.addView(rec_sync_view);
         }
         else {
