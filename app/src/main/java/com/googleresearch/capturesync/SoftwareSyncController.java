@@ -200,7 +200,7 @@ public class SoftwareSyncController implements Closeable {
 
                     SyncSettingsContainer settings = null;
                     try {
-                        settings = SyncSettingsContainer.fromString(payload);
+                        settings = SyncSettingsContainer.deserializeFromString(payload);
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to deserialize the settings string: " + payload + "\n" + e.getMessage());
                     }

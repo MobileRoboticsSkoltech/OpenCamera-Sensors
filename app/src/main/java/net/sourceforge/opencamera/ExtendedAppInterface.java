@@ -512,7 +512,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     // Send settings to all devices
                     ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
                             SoftwareSyncController.METHOD_SET_SETTINGS,
-                            settings.asString()
+                            settings.serializeToString()
                     );
                 },
                 500);

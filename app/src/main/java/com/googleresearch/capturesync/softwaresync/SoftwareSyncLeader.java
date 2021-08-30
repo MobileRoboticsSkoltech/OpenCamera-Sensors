@@ -159,7 +159,7 @@ public class SoftwareSyncLeader extends SoftwareSyncBase {
                 onRpc(SyncConstants.METHOD_MSG_ADDED_CLIENT, updatedClient.name());
                 // Broadcast the saved settings if any.
                 if (mSavedSettings != null) {
-                    sendRpc(SoftwareSyncController.METHOD_SET_SETTINGS, mSavedSettings.asString(), address);
+                    sendRpc(SoftwareSyncController.METHOD_SET_SETTINGS, mSavedSettings.serializeToString(), address);
                 }
             }
         }

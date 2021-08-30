@@ -102,7 +102,7 @@ public class SyncSettingsContainer implements Serializable {
      *
      * @return a constructed string.
      */
-    public String asString() {
+    public String serializeToString() {
         if (mAsStringCached == null) {
             final ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
             try {
@@ -120,13 +120,13 @@ public class SyncSettingsContainer implements Serializable {
 
     /**
      * The container is constructed from a string that was build using this class's
-     * {@link #asString()}.
+     * {@link #serializeToString()}.
      *
      * @param serializedSettings string containing a serialized {@link SyncSettingsContainer}.
      * @return a {@link SyncSettingsContainer} deserialized from the given string.
      * @throws IOException if failed to deserialize the given string.
      */
-    public static SyncSettingsContainer fromString(String serializedSettings) throws IOException {
+    public static SyncSettingsContainer deserializeFromString(String serializedSettings) throws IOException {
         final ByteArrayInputStream byteArray = new ByteArrayInputStream(serializedSettings.getBytes(StandardCharsets.ISO_8859_1));
         final ObjectInputStream objectReader = new ObjectInputStream(byteArray);
 
