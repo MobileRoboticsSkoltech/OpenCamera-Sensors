@@ -1820,7 +1820,8 @@ public class MainActivity extends Activity {
         }
 
         softwareSyncController.switchSettingsLock(settings);
-        mainUI.getRecSyncView().updateSyncSettingsButton();
+        mainUI.getRecSyncView().updateSyncSettingsButton(softwareSyncController.isSettingsBroadcasting() ?
+                R.string.sync_settings_locked : R.string.sync_settings_unlocked);
     }
 
     public void clickedAlignPhases() {

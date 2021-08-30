@@ -35,8 +35,6 @@ public class RecSyncView extends LinearLayout {
     private final float scale = getResources().getDisplayMetrics().density;
     private int total_width_dp;
 
-    private final SoftwareSyncController software_sync_controller;
-
     private final Button button_sync_settings;
     private final Button button_align_phases;
 
@@ -58,7 +56,6 @@ public class RecSyncView extends LinearLayout {
         if (!software_sync_controller.isLeader()) {
             throw new IllegalStateException("RecSyncView should only be shown to a leader");
         }
-        this.software_sync_controller = software_sync_controller;
 
         boolean small_screen = false;
         total_width_dp = 280;
@@ -81,10 +78,8 @@ public class RecSyncView extends LinearLayout {
         return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
     }
 
-    public void updateSyncSettingsButton() {
-        button_sync_settings.setText(
-                software_sync_controller.isSettingsBroadcasting() ? R.string.sync_settings_locked : R.string.sync_settings_unlocked
-        );
+    public void updateSyncSettingsButton(@StringRes int text) {
+        button_sync_settings.setText(text);
     }
 
     public void setSyncSettingsOnClickListener(View.OnClickListener listener) {
