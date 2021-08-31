@@ -14,6 +14,7 @@ import net.sourceforge.opencamera.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class PeriodCalculator {
@@ -48,20 +49,15 @@ public class PeriodCalculator {
         return calcPeriodNsClusters(getDiff(mRegisteredTimestamps));
     }
 
-    private ArrayList<Long> getDiff(ArrayList<Long> arrayList) {
-        Long prev = 0L;
-        ArrayList<Long> result = new ArrayList<>();
-        for (Long aLong : arrayList) {
-            if (prev != 0L) {
-                result.add(aLong - prev);
-            }
-            prev = aLong;
-        }
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private List<Long> getDiff(ArrayList<Long> list) {
+        List<Long> result = StreamUtils.zip(list.stream(), list.stream().skip(1),
+                (Long x, Long y) -> y - x).collect(Collectors.toList());
         return result;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private long calcPeriodNsClusters(ArrayList<Long> numArray) {
+    private long calcPeriodNsClusters(List<Long> numArray) {
         long initEstimate = Collections.min(numArray);
         long nClust = Math.round(1.0 * Collections.max(numArray) / initEstimate);
         double weightedSum = 0L;
