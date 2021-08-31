@@ -23,6 +23,7 @@ public class StreamUtils {
     /**
      * Constructs a new stream with the results of applying the provided function to the contents
      * of the provided streams one by one.
+     * Original implementation: https://stackoverflow.com/a/23529010.
      *
      * @param a      the first stream.
      * @param b      the second stream.
