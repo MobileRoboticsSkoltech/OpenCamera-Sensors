@@ -1,5 +1,5 @@
 /**
- * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech.
  */
 
 package com.googleresearch.capturesync.softwaresync.phasealign;

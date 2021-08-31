@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * <p>
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech.
  */
 
 package com.googleresearch.capturesync.softwaresync;
