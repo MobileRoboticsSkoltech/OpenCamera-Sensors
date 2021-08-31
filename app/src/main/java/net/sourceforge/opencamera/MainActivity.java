@@ -2423,7 +2423,9 @@ public class MainActivity extends Activity {
         closeRecSync();
         preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
-        preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        if( this.preview.isVideoRecording() ) {
+            preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        }
         applicationInterface.stopPanorama(true); // important to stop panorama recording, as we might end up as we'll be changing camera parameters when the settings window closes
         stopAudioListeners();
 
@@ -2659,7 +2661,9 @@ public class MainActivity extends Activity {
             bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
         }
 
-        bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+        if( this.preview.getCameraController() != null ) {
+            bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+        }
 
         putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
         putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
