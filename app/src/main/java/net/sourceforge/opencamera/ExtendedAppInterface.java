@@ -556,7 +556,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
                 getDrawPreview().updateSettings(); // Ensure that the changes get cached
 
-                onFinished.run();
+                if (onFinished != null) onFinished.run();
             };
 
             // Run if camera is not going to be reopened
