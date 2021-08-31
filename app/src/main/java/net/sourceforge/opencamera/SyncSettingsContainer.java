@@ -69,7 +69,7 @@ public class SyncSettingsContainer implements Serializable {
      *
      * @param mainActivity - MainActivity of this device.
      */
-    public static SyncSettingsContainer build(MainActivity mainActivity) {
+    public static SyncSettingsContainer buildFrom(MainActivity mainActivity) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         Preview preview = mainActivity.getPreview();
         CameraController cameraController = preview.getCameraController();
