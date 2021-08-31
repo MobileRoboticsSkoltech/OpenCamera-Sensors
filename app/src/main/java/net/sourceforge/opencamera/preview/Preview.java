@@ -1754,6 +1754,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( this.using_android_l ) {
                 configureTransform();
             }
+
+            applicationInterface.cameraOpened();
         }
 
         if( MyDebug.LOG ) {

@@ -10,7 +10,6 @@ import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +42,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -69,11 +67,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
-
     private final Handler mSendSettingsHandler = new Handler();
 
     private SoftwareSyncController mSoftwareSyncController;
-    private ApplySettingsTask mApplySettingsTask = null;
+    private Runnable mApplySettingsRunnable = null;
     private BroadcastReceiver mConnectionStatusChecker = null;
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
@@ -206,11 +203,15 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     @Override
     void onDestroy() {
         mYuvUtils.close();
-        if (mApplySettingsTask != null) {
-            mApplySettingsTask.cancel(true);
-        }
         stopSoftwareSync();
         super.onDestroy();
+    }
+
+    public void cameraOpened() {
+        // Should be at the end of this method as it may close the camera
+        if (mApplySettingsRunnable != null) {
+            mApplySettingsRunnable.run();
+        }
     }
 
     @Override
@@ -515,237 +516,166 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Creates an {@link AsyncTask} to apply the values of the settings received from a leader and
-     * lock them. Closes the previous task if it exists and is still running.
+     * Applies the settings received from a leader and locks them. Closes the previous attempt if it
+     * exists and is still running.
      *
      * @param settings   describes the settings to be changed and the values to be applied.
-     * @param onFinished a {@link Runnable} to be called when the settings are applied (and not if
-     *                   the task is cancelled before finishing).
+     * @param onFinished a {@link Runnable} to be called when the settings are applied.
      */
     public void applyAndLockSettings(SyncSettingsContainer settings, Runnable onFinished) {
         Log.d(TAG, "Applying and locking settings.");
 
-        // Cancel previous task if it is still running
-        if (mApplySettingsTask != null && mApplySettingsTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mApplySettingsTask.cancel(true);
-        }
+        final Preview preview = mMainActivity.getPreview();
+        final MainUI mainUI = mMainActivity.getMainUI();
+        final SettingsApplicationUtils utils = new SettingsApplicationUtils(preview, mainUI);
 
-        // Create a new task to wait until camera is opened
-        mApplySettingsTask = new ApplySettingsTask(this, onFinished);
-        mApplySettingsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, settings);
-    }
-
-    private static class ApplySettingsTask extends AsyncTask<SyncSettingsContainer, Void, Void> {
-        private static final String TAG = "ApplySettingsTask";
-
-        final private WeakReference<ExtendedAppInterface> extendedAppInterfaceRef;
-        final private WeakReference<MainActivity> mainActivityRef;
-        final private WeakReference<Preview> previewRef;
-        final private WeakReference<MainUI> mainUIRef;
-
-        final private ManualSeekbars manualSeekbars;
-
-        final private Runnable onFinished;
-
-        private CameraController cameraController;
-
-        ApplySettingsTask(ExtendedAppInterface extendedAppInterface, Runnable onFinished) {
-            // Use weak references so that the task allows MainActivity to be garbage collected
-            extendedAppInterfaceRef = new WeakReference<>(extendedAppInterface);
-            mainActivityRef = new WeakReference<>(extendedAppInterface.mMainActivity);
-            previewRef = new WeakReference<>(extendedAppInterface.mMainActivity.getPreview());
-            mainUIRef = new WeakReference<>(extendedAppInterface.mMainActivity.getMainUI());
-            this.onFinished = onFinished;
-
-            manualSeekbars = extendedAppInterface.mMainActivity.getManualSeekbars();
-        }
-
-        @Override
-        protected Void doInBackground(SyncSettingsContainer... settingsContainers) {
-            Log.d(TAG, "doInBackground");
-
-            if (settingsContainers.length != 1) {
-                throw new IllegalArgumentException(
-                        String.format("One SyncSettingsContainer must be passed but was %d", settingsContainers.length)
-                );
-            }
-            final SyncSettingsContainer settings = settingsContainers[0];
-
-            final ExtendedAppInterface extendedAppInterface = extendedAppInterfaceRef.get();
-            final MainActivity mainActivity = mainActivityRef.get();
-            final Preview preview = previewRef.get();
-            final MainUI mainUI = mainUIRef.get();
-            if (extendedAppInterface == null || mainActivity == null || preview == null || mainUI == null) {
-                return null;
-            }
-
-            waitForCameraToOpen(); // If camera is not opened wait until it is
+        // Create a new runnable to wait until camera is opened
+        mApplySettingsRunnable = () -> {
+            mApplySettingsRunnable = null;
 
             // Close some UI elements for the changes to be reflected in them
-            mainActivity.runOnUiThread(() -> {
+            mMainActivity.runOnUiThread(() -> {
                 mainUI.closeExposureUI();
                 mainUI.closePopup();
                 mainUI.destroyPopup();
             });
 
-            syncCaptureFormat(settings);
+            utils.syncCaptureFormat(settings);
 
-            cameraController = preview.getCameraController();
+            // Need to wait until camera gets reopened
+            mApplySettingsRunnable = () -> {
+                mApplySettingsRunnable = null;
 
-            syncExposure(settings);
-            if (settings.syncISO) syncISO(settings);
-            if (settings.syncWb) syncWb(settings);
-            if (settings.syncFlash) syncFlash(settings);
-            if (settings.syncFormat) syncFormat(settings);
+                utils.setCameraController(preview.getCameraController());
 
-            extendedAppInterface.getDrawPreview().updateSettings(); // Ensure that the changes get cached
-            return null;
+                utils.syncExposure(settings);
+                if (settings.syncISO) utils.syncISO(settings);
+                if (settings.syncWb) utils.syncWb(settings);
+                if (settings.syncFlash) utils.syncFlash(settings);
+                if (settings.syncFormat) utils.syncFormat(settings);
+
+                getDrawPreview().updateSettings(); // Ensure that the changes get cached
+
+                onFinished.run();
+            };
+
+            // Run if camera is not going to be reopened
+            if (!utils.isModeSwitchRequired(settings)) mApplySettingsRunnable.run();
+        };
+
+        // Run if camera is already opened
+        if (!preview.openCameraFailed()) mApplySettingsRunnable.run();
+    }
+
+    private class SettingsApplicationUtils {
+        private final Preview mPreview;
+        private final MainUI mMainUI;
+        private final ManualSeekbars mManualSeekbars = mMainActivity.getManualSeekbars();
+
+        private CameraController mCameraController;
+
+        SettingsApplicationUtils(Preview preview, MainUI mainUI) {
+            mPreview = preview;
+            mMainUI = mainUI;
         }
 
-        private void waitForCameraToOpen() {
-            Preview preview = previewRef.get();
-            if (preview == null) return;
+        public void setCameraController(CameraController value) {
+            mCameraController = value;
+        }
 
-            Log.d(TAG, "Waiting for camera to open...");
-
-            while (!preview.openCameraAttempted()) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+        public boolean isModeSwitchRequired(SyncSettingsContainer settings) {
+            return mPreview.isVideo() != settings.isVideo;
         }
 
         private void syncCaptureFormat(SyncSettingsContainer settings) {
-            MainActivity mainActivity = mainActivityRef.get();
-            Preview preview = previewRef.get();
-            if (mainActivity == null || preview == null) return;
-
             Log.d(TAG, "Syncing settings: capture format");
 
-            if (preview.isVideo() != settings.isVideo) {
-                mainActivity.runOnUiThread(() -> mainActivity.clickedSwitchVideo(null));
-
-                waitForCameraToOpen(); // Need to wait until camera gets reopened
-
-                // Need to wait for capture mode to change
-                while (settings.isVideo != preview.isVideo()) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
+            if (isModeSwitchRequired(settings)) {
+                mMainActivity.runOnUiThread(() -> mMainActivity.clickedSwitchVideo(null));
             }
         }
 
         private void syncExposure(SyncSettingsContainer settings) {
-            MainActivity mainActivity = mainActivityRef.get();
-            Preview preview = previewRef.get();
-            if (mainActivity == null || preview == null) return;
-
             Log.d(TAG, "Syncing settings: exposure");
 
-            if (!preview.isExposureLocked()) {
-                mainActivity.runOnUiThread(() -> mainActivity.clickedExposureLock(null));
+            if (!mPreview.isExposureLocked()) {
+                mMainActivity.runOnUiThread(() -> mMainActivity.clickedExposureLock(null));
             }
-            preview.setExposureTime(settings.exposure);
+            mPreview.setExposureTime(settings.exposure);
             // Reflect the change in the UI
-            manualSeekbars.setProgressSeekbarShutterSpeed(
-                    mainActivity.findViewById(R.id.exposure_time_seekbar),
-                    preview.getMinimumExposureTime(),
-                    preview.getMaximumExposureTime(),
-                    cameraController.getExposureTime()
+            mManualSeekbars.setProgressSeekbarShutterSpeed(
+                    mMainActivity.findViewById(R.id.exposure_time_seekbar),
+                    mPreview.getMinimumExposureTime(),
+                    mPreview.getMaximumExposureTime(),
+                    mCameraController.getExposureTime()
             ); // We get exposure from the controller in case the selected value is unsupported
         }
 
         private void syncISO(SyncSettingsContainer settings) {
-            ExtendedAppInterface extendedAppInterface = extendedAppInterfaceRef.get();
-            MainActivity mainActivity = mainActivityRef.get();
-            Preview preview = previewRef.get();
-            MainUI mainUI = mainUIRef.get();
-            if (extendedAppInterface == null || mainActivity == null || preview == null || mainUI == null) {
-                return;
-            }
-
             Log.d(TAG, "Syncing settings: ISO");
 
-            cameraController.setManualISO(true, settings.iso); // Set ISO to manual (lock it)
+            mCameraController.setManualISO(true, settings.iso); // Set ISO to manual (lock it)
             // Reflect the change in the UI
-            preview.setISO(settings.iso);
-            extendedAppInterface.setISOPref("" + cameraController.getISO()); // So it is not set to auto
-            mainActivity.runOnUiThread(() -> {
-                mainUI.setupExposureUI();
-                mainUI.closeExposureUI();
+            mPreview.setISO(settings.iso);
+            setISOPref("" + mCameraController.getISO()); // So it is not set to auto
+            mMainActivity.runOnUiThread(() -> {
+                mMainUI.setupExposureUI();
+                mMainUI.closeExposureUI();
             });
-            manualSeekbars.setProgressSeekbarISO(
-                    mainActivity.findViewById(R.id.iso_seekbar),
-                    preview.getMinimumISO(),
-                    preview.getMaximumISO(),
-                    cameraController.getISO()
+            mManualSeekbars.setProgressSeekbarISO(
+                    mMainActivity.findViewById(R.id.iso_seekbar),
+                    mPreview.getMinimumISO(),
+                    mPreview.getMaximumISO(),
+                    mCameraController.getISO()
             ); // We get ISO from the controller in case the selected value is unsupported
         }
 
         private void syncWb(SyncSettingsContainer settings) {
-            ExtendedAppInterface extendedAppInterface = extendedAppInterfaceRef.get();
-            MainActivity mainActivity = mainActivityRef.get();
-            Preview preview = previewRef.get();
-            if (extendedAppInterface == null || mainActivity == null || preview == null) return;
-
             Log.d(TAG, "Syncing settings: white balance");
 
             // Lock wb only if the selected mode is not auto
-            if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !preview.isWhiteBalanceLocked()) {
-                mainActivity.runOnUiThread(() -> mainActivity.clickedWhiteBalanceLock(null));
+            if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !mPreview.isWhiteBalanceLocked()) {
+                mMainActivity.runOnUiThread(() -> mMainActivity.clickedWhiteBalanceLock(null));
             }
             // If the selected mode is supported set it, otherwise try to set manual mode
-            List<String> supportedValues = preview.getSupportedWhiteBalances();
+            List<String> supportedValues = mPreview.getSupportedWhiteBalances();
             if (supportedValues.contains(settings.wbMode)) {
-                cameraController.setWhiteBalance(settings.wbMode);
+                mCameraController.setWhiteBalance(settings.wbMode);
             } else if (supportedValues.contains("manual")) {
-                cameraController.setWhiteBalance("manual");
+                mCameraController.setWhiteBalance("manual");
             }
-            String resultingWbMode = cameraController.getWhiteBalance();
-            extendedAppInterface.setWhiteBalancePref(resultingWbMode); // Reflect the resulting mode in the UI
+            String resultingWbMode = mCameraController.getWhiteBalance();
+            setWhiteBalancePref(resultingWbMode); // Reflect the resulting mode in the UI
             // If the resulting mode is manual apply the selected temperature
             if (resultingWbMode.equals("manual")) {
-                preview.setWhiteBalanceTemperature(settings.wbTemperature);
+                mPreview.setWhiteBalanceTemperature(settings.wbTemperature);
                 // Reflect the change in the UI
-                manualSeekbars.setProgressSeekbarWhiteBalance(
-                        mainActivity.findViewById(R.id.white_balance_seekbar),
-                        preview.getMinimumWhiteBalanceTemperature(),
-                        preview.getMaximumWhiteBalanceTemperature(),
-                        cameraController.getWhiteBalanceTemperature()
+                mManualSeekbars.setProgressSeekbarWhiteBalance(
+                        mMainActivity.findViewById(R.id.white_balance_seekbar),
+                        mPreview.getMinimumWhiteBalanceTemperature(),
+                        mPreview.getMaximumWhiteBalanceTemperature(),
+                        mCameraController.getWhiteBalanceTemperature()
                 ); // We get the temperature from the controller in case the selected value is unsupported
             }
         }
 
         private void syncFlash(SyncSettingsContainer settings) {
-            MainActivity mainActivity = mainActivityRef.get();
-            Preview preview = previewRef.get();
-            MainUI mainUI = mainUIRef.get();
-            if (mainActivity == null || preview == null || mainUI == null) return;
-
             Log.d(TAG, "Syncing settings: flash mode");
 
-            mainActivity.runOnUiThread(() -> {
-                preview.updateFlash(settings.flash);
-                mainUI.setPopupIcon(); // Reflect the change in the UI
+            mMainActivity.runOnUiThread(() -> {
+                mPreview.updateFlash(settings.flash);
+                mMainUI.setPopupIcon(); // Reflect the change in the UI
             });
         }
 
         private void syncFormat(SyncSettingsContainer settings) {
-            MainActivity mainActivity = mainActivityRef.get();
-            if (mainActivity == null) return;
-
             Log.d(TAG, "Syncing settings: file format");
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             if (settings.isVideo) {
                 // Check that the selected format is supported (HEVC and WebM may be not)
-                List<String> supportedFormats = getSupportedVideoFormats(mainActivity);
+                List<String> supportedFormats = getSupportedVideoFormats();
                 if (supportedFormats.contains(settings.format)) {
                     editor.putString(PreferenceKeys.VideoFormatPreferenceKey, settings.format);
                 }
@@ -755,9 +685,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             editor.apply();
         }
 
-        private List<String> getSupportedVideoFormats(MainActivity mainActivity) {
+        private List<String> getSupportedVideoFormats() {
             // Construct the list of the supported formats the same way MyPreferenceFragment does
-            List<String> supportedFormats = new ArrayList<>(Arrays.asList(mainActivity.getResources().getStringArray(R.array.preference_video_output_format_values)));
+            List<String> supportedFormats = new ArrayList<>(Arrays.asList(mMainActivity.getResources().getStringArray(R.array.preference_video_output_format_values)));
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 supportedFormats.remove("preference_video_output_format_mpeg4_hevc");
             }
@@ -765,11 +695,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                 supportedFormats.remove("preference_video_output_format_webm");
             }
             return supportedFormats;
-        }
-
-        @Override
-        protected void onPostExecute(Void unused) {
-            if (onFinished != null) onFinished.run();
         }
     }
 }
