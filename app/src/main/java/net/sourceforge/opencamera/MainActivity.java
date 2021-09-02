@@ -1809,6 +1809,12 @@ public class MainActivity extends Activity {
     public void clickedSyncSettings() {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
+        syncSettings();
+    }
+
+    public void syncSettings() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "syncSettings");
 
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
         SyncSettingsContainer settings = null;
@@ -1827,6 +1833,12 @@ public class MainActivity extends Activity {
     public void clickedAlignPhases() {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedAlignPhases");
+        alignPhases();
+    }
+
+    public void alignPhases() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "alignPhases");
 
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
 
@@ -2122,9 +2134,9 @@ public class MainActivity extends Activity {
     /**
      * Toggles Photo/Video mode
      */
-    public void clickedSwitchVideo(View view) {
+    public void switchVideo(View view) {
         if( MyDebug.LOG )
-            Log.d(TAG, "clickedSwitchVideo");
+            Log.d(TAG, "switchVideo");
         this.closePopup();
         this.closeRecSync();
         mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
@@ -2153,9 +2165,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void clickedSwitchVideo(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSwitchVideo");
+        switchVideo(view);
+    }
+
     public void clickedWhiteBalanceLock(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedWhiteBalanceLock");
+        lockWhiteBalance(view);
+    }
+
+    public void lockWhiteBalance(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "lockWhiteBalance");
         this.preview.toggleWhiteBalanceLock();
         mainUI.updateWhiteBalanceLockIcon();
         preview.showToast(white_balance_lock_toast, preview.isWhiteBalanceLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
@@ -2164,6 +2188,12 @@ public class MainActivity extends Activity {
     public void clickedExposureLock(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedExposureLock");
+        lockExposure(view);
+    }
+
+    public void lockExposure(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "lockExposure");
         this.preview.toggleExposureLock();
         mainUI.updateExposureLockIcon();
         preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);

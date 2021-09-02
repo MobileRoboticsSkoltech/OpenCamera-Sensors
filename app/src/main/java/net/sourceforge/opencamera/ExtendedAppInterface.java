@@ -591,7 +591,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             Log.d(TAG, "Syncing settings: capture format");
 
             if (isModeSwitchRequired(settings)) {
-                mMainActivity.runOnUiThread(() -> mMainActivity.clickedSwitchVideo(null));
+                mMainActivity.runOnUiThread(() -> mMainActivity.switchVideo(null));
             }
         }
 
@@ -599,7 +599,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             Log.d(TAG, "Syncing settings: exposure");
 
             if (!mPreview.isExposureLocked()) {
-                mMainActivity.runOnUiThread(() -> mMainActivity.clickedExposureLock(null));
+                mMainActivity.runOnUiThread(() -> mMainActivity.lockExposure(null));
             }
             mPreview.setExposureTime(settings.exposure);
             // Reflect the change in the UI
@@ -635,7 +635,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
             // Lock wb only if the selected mode is not auto
             if (!settings.wbMode.equals(CameraController.WHITE_BALANCE_DEFAULT) && !mPreview.isWhiteBalanceLocked()) {
-                mMainActivity.runOnUiThread(() -> mMainActivity.clickedWhiteBalanceLock(null));
+                mMainActivity.runOnUiThread(() -> mMainActivity.lockWhiteBalance(null));
             }
             // If the selected mode is supported set it, otherwise try to set manual mode
             List<String> supportedValues = mPreview.getSupportedWhiteBalances();

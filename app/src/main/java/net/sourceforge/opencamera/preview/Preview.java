@@ -4479,7 +4479,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 if( applicationInterface.isSoftwareSyncRunning() &&
                         applicationInterface.getSoftwareSyncController().isLeader() &&
                         applicationInterface.getSoftwareSyncController().isSettingsBroadcasting() )
-                    ((MainActivity) getContext()).clickedSyncSettings();
+                    ((MainActivity) getContext()).syncSettings();
             }
             if( !during_startup ) {
                 // if during startup, updateFlashForVideo() needs to always be explicitly called anyway
