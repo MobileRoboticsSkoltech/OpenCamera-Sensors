@@ -117,6 +117,8 @@
     </plurals>
     <string name="rec_sync_client_syncing">-Client %s: syncing…\n</string>
     <string name="rec_sync_client_synced">-Client %s: %.2f ms sync\n</string>
+    <string name="realtime">realtime</string>
+    <string name="unknown">unknown</string>
 
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>

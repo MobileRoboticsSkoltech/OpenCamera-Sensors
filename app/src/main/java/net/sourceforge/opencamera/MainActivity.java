@@ -5436,9 +5436,9 @@ public class MainActivity extends Activity {
                         .getCameraCharacteristics(camera_id)
                         .get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
                 if( ts_source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME ) {
-                    toast_string += "\n" + getString(R.string.timestamp_source, "realtime");
+                    toast_string += "\n" + getString(R.string.timestamp_source, R.string.realtime);
                 } else {
-                    toast_string += "\n" + getString(R.string.timestamp_source, "unknown");
+                    toast_string += "\n" + getString(R.string.timestamp_source, R.string.unknown);
                 }
                 simple = false;
             } catch (CameraAccessException e) {

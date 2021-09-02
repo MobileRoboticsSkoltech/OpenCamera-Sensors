@@ -118,6 +118,8 @@
     </plurals>
     <string name="rec_sync_client_syncing">-Клиент %s: синхронизация…\n</string>
     <string name="rec_sync_client_synced">-Клиент %s: %.2f мс синхронизирован\n</string>
+    <string name="realtime">реал. время</string>
+    <string name="unknown">неизвестно</string>
     
     <string name="preference_category_camera_effects">Эффекты</string>
     <string name="preference_auto_stabilise">Автостабилизация</string>

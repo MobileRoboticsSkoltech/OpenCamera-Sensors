@@ -777,7 +777,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
             else {
                 getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setEnabled(false);
-                getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setSummary("Not supported.");
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setSummary(R.string.not_supported);
                 editor.putBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
                 editor.apply();
             }
@@ -787,7 +787,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
             else {
                 getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setEnabled(false);
-                getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setSummary("Not supported.");
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setSummary(R.string.not_supported);
                 editor.putBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
                 editor.apply();
             }
@@ -796,7 +796,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             }
             else {
                 getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setEnabled(false);
-                getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setSummary("Not supported.");
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setSummary(R.string.not_supported);
                 editor.putBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
                 editor.apply();
             }
