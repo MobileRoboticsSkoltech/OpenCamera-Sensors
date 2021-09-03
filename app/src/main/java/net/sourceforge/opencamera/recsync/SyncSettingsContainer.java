@@ -1,8 +1,10 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.recsync;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
 

@@ -86,6 +86,7 @@ import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorremote.RemoteRpcServer;
@@ -1821,7 +1822,7 @@ public class MainActivity extends Activity {
 
         if( !softwareSyncController.isSettingsBroadcasting() ) {
             settings = SyncSettingsContainer.buildFrom(this);
-            applicationInterface.scheduleBroadcastSettings(settings); // leader's settings are locked here as well
+            applicationInterface.getSoftwareSyncUtils().scheduleBroadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         }
 
@@ -4446,7 +4447,7 @@ public class MainActivity extends Activity {
 
             if( preview.isVideo() ) {
                 // start synchronous video recording
-                applicationInterface.broadcastRecordingRequest();
+                applicationInterface.getSoftwareSyncUtils().broadcastRecordingRequest();
             } else {
                 // other modes are not yet supported
                 preview.showToast(rec_sync_toast, R.string.rec_sync_only_video_supported);
@@ -5466,9 +5467,9 @@ public class MainActivity extends Activity {
                         .getCameraCharacteristics(camera_id)
                         .get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
                 if( ts_source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME ) {
-                    toast_string += "\n" + getString(R.string.timestamp_source, R.string.realtime);
+                    toast_string += "\n" + getString(R.string.timestamp_source, getString(R.string.realtime));
                 } else {
-                    toast_string += "\n" + getString(R.string.timestamp_source, R.string.unknown);
+                    toast_string += "\n" + getString(R.string.timestamp_source, getString(R.string.unknown));
                 }
                 simple = false;
             } catch (CameraAccessException e) {

@@ -39,7 +39,7 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.SyncSettingsContainer;
+import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -204,7 +204,7 @@ public class SoftwareSyncController implements Closeable {
 
                     if (settings != null) {
                         mState = State.SETTINGS_APPLICATION;
-                        mMainActivity.getApplicationInterface().applyAndLockSettings(settings, () -> mState = State.IDLE);
+                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> mState = State.IDLE);
                     }
                 });
 

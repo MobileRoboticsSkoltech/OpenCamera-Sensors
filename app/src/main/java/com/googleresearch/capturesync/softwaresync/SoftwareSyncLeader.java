@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.googleresearch.capturesync.SoftwareSyncController;
 
-import net.sourceforge.opencamera.SyncSettingsContainer;
+import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 
 import java.io.IOException;
 import java.net.InetAddress;
