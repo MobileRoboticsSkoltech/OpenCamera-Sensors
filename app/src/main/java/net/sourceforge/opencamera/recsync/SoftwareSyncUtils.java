@@ -5,8 +5,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import com.googleresearch.capturesync.SoftwareSyncController;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
+
 import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceKeys;

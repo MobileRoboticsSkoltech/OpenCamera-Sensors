@@ -23,7 +23,6 @@ import com.googleresearch.capturesync.SoftwareSyncController;
  * <p>
  * Requires {@link SoftwareSyncController} to be initialized (i.e. RecSync to be started)
  */
-
 public class RecSyncView extends LinearLayout {
     private static final String TAG = "RecSyncView";
     public static final float ALPHA_BUTTON_SELECTED = 1.0f;
@@ -109,10 +108,13 @@ public class RecSyncView extends LinearLayout {
 
         return button;
     }
+
     static class Utils {
 
+        /**
+         * Aligns the provided checkbox a bit better.
+         */
         public static void alignCheckbox(CheckBox check_box, float scale) {
-            // align the checkbox a bit better
             LayoutParams params = new LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT
