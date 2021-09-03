@@ -1817,6 +1817,10 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "syncSettings");
 
+        if( !applicationInterface.isSoftwareSyncRunning() ) {
+            throw new IllegalStateException("Cannot sync settings when RecSync is not running");
+        }
+
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
         SyncSettingsContainer settings = null;
 
@@ -1840,6 +1844,10 @@ public class MainActivity extends Activity {
     public void alignPhases() {
         if( MyDebug.LOG )
             Log.d(TAG, "alignPhases");
+
+        if( !applicationInterface.isSoftwareSyncRunning() ) {
+            throw new IllegalStateException("Cannot sync settings when RecSync is not running");
+        }
 
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
 

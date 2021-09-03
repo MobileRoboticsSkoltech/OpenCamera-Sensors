@@ -32,9 +32,9 @@ public class SoftwareSyncUtils {
     private final Handler mSendSettingsHandler = new Handler();
     private Runnable mApplySettingsRunnable = null;
 
-    public SoftwareSyncUtils(MainActivity mainActivity, ExtendedAppInterface extendedAppInterface) {
+    public SoftwareSyncUtils(MainActivity mainActivity) {
         mMainActivity = mainActivity;
-        mApplicationInterface = extendedAppInterface;
+        mApplicationInterface = mMainActivity.getApplicationInterface();
         mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 

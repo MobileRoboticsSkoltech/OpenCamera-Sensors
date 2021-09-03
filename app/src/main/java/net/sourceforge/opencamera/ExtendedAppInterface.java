@@ -59,9 +59,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
-    private final SoftwareSyncUtils mSoftwareSyncUtils;
 
     private SoftwareSyncController mSoftwareSyncController;
+    private SoftwareSyncUtils mSoftwareSyncUtils;
     private BroadcastReceiver mConnectionStatusChecker = null;
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
@@ -75,7 +75,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mYuvUtils = new YuvImageUtils(mainActivity);
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mPeriodCalculator = new PeriodCalculator(mainActivity);
-        mSoftwareSyncUtils = new SoftwareSyncUtils(mainActivity, this);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -205,9 +204,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public void cameraOpened() {
         // Should be at the end of this method as it may close the camera
-        final Runnable applySettingsRunnable = mSoftwareSyncUtils.getApplySettingsRunnable();
-        if (applySettingsRunnable != null) {
-            applySettingsRunnable.run();
+        if (isSoftwareSyncRunning()) {
+            final Runnable applySettingsRunnable = mSoftwareSyncUtils.getApplySettingsRunnable();
+            if (applySettingsRunnable != null) {
+                applySettingsRunnable.run();
+            }
         }
     }
 
@@ -366,6 +367,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             mConnectionStatusChecker = new WifiStatusChecker();
         }
         mMainActivity.registerReceiver(mConnectionStatusChecker, intentFilter);
+
+        mSoftwareSyncUtils = new SoftwareSyncUtils(mMainActivity);
     }
 
     private class HotspotStatusChecker extends BroadcastReceiver {
@@ -437,6 +440,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public void stopSoftwareSync() {
         if (isSoftwareSyncRunning()) {
             mMainActivity.unregisterReceiver(mConnectionStatusChecker);
+            mSoftwareSyncUtils = null;
             mConnectionStatusChecker = null;
             mSoftwareSyncController.close();
             mSoftwareSyncController = null;
