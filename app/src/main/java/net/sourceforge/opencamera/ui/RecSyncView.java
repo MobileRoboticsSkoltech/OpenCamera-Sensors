@@ -88,17 +88,7 @@ public class RecSyncView extends LinearLayout {
         check_box.setTextSize(TypedValue.COMPLEX_UNIT_DIP, standard_text_size_dip);
         check_box.setTextColor(Color.WHITE);
 
-        {
-            // align the checkbox a bit better
-            LayoutParams params = new LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT
-            );
-            final int left_padding = (int) (10 * scale + 0.5f); // convert dps to pixels
-            final int right_padding = (int) (20 * scale + 0.5f); // convert dps to pixels
-            params.setMargins(left_padding, 0, right_padding, 0);
-            check_box.setLayoutParams(params);
-        }
+        Utils.alignCheckbox(check_box, scale);
 
         if (is_checked) {
             check_box.setChecked(is_checked);
@@ -118,5 +108,19 @@ public class RecSyncView extends LinearLayout {
         this.addView(button);
 
         return button;
+    }
+    static class Utils {
+
+        public static void alignCheckbox(CheckBox check_box, float scale) {
+            // align the checkbox a bit better
+            LayoutParams params = new LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT
+            );
+            final int left_padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+            final int right_padding = (int) (20 * scale + 0.5f); // convert dps to pixels
+            params.setMargins(left_padding, 0, right_padding, 0);
+            check_box.setLayoutParams(params);
+        }
     }
 }
