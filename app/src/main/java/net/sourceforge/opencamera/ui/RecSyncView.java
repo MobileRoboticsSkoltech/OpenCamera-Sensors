@@ -48,14 +48,6 @@ public class RecSyncView extends LinearLayout {
         this.setOrientation(LinearLayout.VERTICAL);
 
         final MainActivity main_activity = (MainActivity) this.getContext();
-        final SoftwareSyncController software_sync_controller = main_activity.getApplicationInterface().getSoftwareSyncController();
-
-        if (software_sync_controller == null) {
-            throw new IllegalStateException("SoftwareSyncController is not initialized");
-        }
-        if (!software_sync_controller.isLeader()) {
-            throw new IllegalStateException("RecSyncView should only be shown to a leader");
-        }
 
         boolean small_screen = false;
         total_width_dp = 280;
