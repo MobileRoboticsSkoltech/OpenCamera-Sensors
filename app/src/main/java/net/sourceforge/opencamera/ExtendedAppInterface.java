@@ -371,9 +371,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (!mMainActivity.isCameraInBackground()) {
             mMainActivity.openSettings();
         }
-        mPrefs.editEnableRecSync();
+        mPrefs.setEnableRecSyncPref(false);
         stopSoftwareSync(); // Preference wasn't clicked so this won't be triggered
-        getDrawPreview().updateSettings(); // Because we cache to enable RecSync setting
+        getDrawPreview().updateSettings(); // Because we cache the enable RecSync setting
     }
 
     private void showSimpleAlert(String title, String message) {

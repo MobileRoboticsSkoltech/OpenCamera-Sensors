@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.recsync;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceHandler;
-import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
 
@@ -86,8 +85,8 @@ public class SyncSettingsContainer implements Serializable {
         String wbMode = cameraController.getWhiteBalance();
         String flash = cameraController.getFlashValue();
         String format = isVideo ?
-                prefs.getVideoFormatPref(PreferenceKeys.VideoOutputFormatDefaultPreferenceKey) :
-                prefs.getImageFormatPref(PreferenceKeys.ImageFormatJpegPreferenceKey);
+                prefs.getVideoFormatPref() :
+                prefs.getImageFormatPref();
 
         return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat,
                 isVideo, exposure, iso, wbTemperature, wbMode, flash, format);

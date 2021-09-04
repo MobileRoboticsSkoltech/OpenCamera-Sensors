@@ -7,13 +7,10 @@ import android.util.Log;
 public class PreferenceHandler {
     private static final String TAG = "PreferenceHandler";
 
-    private final MainActivity mMainActivity;
     private final SharedPreferences mSharedPreferences;
-
     private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
     PreferenceHandler(MainActivity mainActivity) {
-        mMainActivity = mainActivity;
         this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
     }
 
@@ -49,12 +46,12 @@ public class PreferenceHandler {
         return mSharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
     }
 
-    public String getVideoFormatPref(String defValue) {
-        return mSharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, defValue);
+    public String getVideoFormatPref() {
+        return mSharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, PreferenceKeys.VideoOutputFormatDefaultPreferenceKey);
     }
 
-    public String getImageFormatPref(String defValue) {
-        return mSharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, defValue);
+    public String getImageFormatPref() {
+        return mSharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, PreferenceKeys.ImageFormatJpegPreferenceKey);
     }
 
     /**
@@ -88,9 +85,9 @@ public class PreferenceHandler {
         return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
     }
 
-    void editEnableRecSync() {
+    void setEnableRecSyncPref(boolean value) {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, value);
         editor.apply();
     }
 }
