@@ -7,11 +7,12 @@ import android.util.Log;
 public class PreferenceHandler {
     private static final String TAG = "PreferenceHandler";
 
-    private final SharedPreferences mSharedPreferences;
     private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
+    private final SharedPreferences mSharedPreferences;
+
     PreferenceHandler(MainActivity mainActivity) {
-        this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
     }
 
     public boolean getIMURecordingPref() {
