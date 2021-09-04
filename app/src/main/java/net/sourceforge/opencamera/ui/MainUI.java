@@ -1127,10 +1127,9 @@ public class MainUI {
     }
 
     public boolean showRecSyncIcon() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-        final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
-        return sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
-                extendedAppInterface.isSoftwareSyncRunning() && extendedAppInterface.getSoftwareSyncController().isLeader();
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        return applicationInterface.getPrefs().getEnableRecSyncPref() &&
+                applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
     }
 
     public boolean showStampIcon() {

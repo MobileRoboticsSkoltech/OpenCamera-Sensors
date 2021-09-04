@@ -5,14 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -50,15 +48,14 @@ import java.util.concurrent.BlockingQueue;
  */
 public class ExtendedAppInterface extends MyApplicationInterface {
     private static final String TAG = "ExtendedAppInterface";
-    private static final int SENSOR_FREQ_DEFAULT_PREF = 0;
 
     private final RawSensorInfo mRawSensorInfo;
     private final FlashController mFlashController;
-    private final SharedPreferences mSharedPreferences;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
+    private final PreferenceHandler mPrefs;
 
     private SoftwareSyncController mSoftwareSyncController;
     private SoftwareSyncUtils mSoftwareSyncUtils;
@@ -69,12 +66,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mRawSensorInfo = mainActivity.getRawSensorInfoManager();
         mMainActivity = mainActivity;
         mFlashController = new FlashController(mainActivity);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mPeriodCalculator = new PeriodCalculator(mainActivity);
+        mPrefs = new PreferenceHandler(mainActivity);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -103,9 +100,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return new VideoFrameInfo(
                 getLastVideoDate(),
                 mMainActivity,
-                getIMURecordingPref(),
-                getEnableRecSyncPref(),
-                getIMURecordingPref() && getSaveFramesPref(),
+                mPrefs.getIMURecordingPref(),
+                mPrefs.getEnableRecSyncPref(),
+                mPrefs.getIMURecordingPref() && mPrefs.getSaveFramesPref(),
                 getVideoPhaseInfoReporter()
         );
     }
@@ -148,51 +145,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mPhaseAlignController.getPhaseError();
     }
 
-    public boolean getIMURecordingPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.IMURecordingPreferenceKey, false);
-    }
-
-    public boolean getRemoteRecControlPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.RemoteRecControlPreferenceKey, false);
-    }
-
-    public boolean getSaveFramesPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
-    }
-
-    public boolean getEnableRecSyncPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
-    }
-
-    /**
-     * Retrieves gyroscope and accelerometer sample rate preference and converts it to number.
-     */
-    public int getSensorSampleRatePref(String prefKey) {
-        String sensorSampleRateString = mSharedPreferences.getString(
-                prefKey,
-                String.valueOf(SENSOR_FREQ_DEFAULT_PREF)
-        );
-        int sensorSampleRate = SENSOR_FREQ_DEFAULT_PREF;
-        try {
-            if (sensorSampleRateString != null)
-                sensorSampleRate = Integer.parseInt(sensorSampleRateString);
-        } catch (NumberFormatException exception) {
-            if (MyDebug.LOG)
-                Log.e(TAG, "Sample rate invalid format: " + sensorSampleRateString);
-        }
-        return sensorSampleRate;
-    }
-
-    private boolean getAccelPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
-    }
-
-    private boolean getGyroPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.GyroPreferenceKey, true);
-    }
-
-    private boolean getMagneticPref() {
-        return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
+    public PreferenceHandler getPrefs() {
+        return mPrefs;
     }
 
     @Override
@@ -223,11 +177,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
         }
-        if (getIMURecordingPref() && useCamera2() && (getGyroPref() || getAccelPref() || getMagneticPref())) {
+        if (mPrefs.getIMURecordingPref() && useCamera2() && (mPrefs.getGyroPref() || mPrefs.getAccelPref() || mPrefs.getMagneticPref())) {
             // Extracting sample rates from shared preferences
             try {
                 mMainActivity.getPreview().showToast("Starting video with IMU recording...", true);
-                startImu(getAccelPref(), getGyroPref(), getMagneticPref(), mLastVideoDate);
+                startImu(mPrefs.getAccelPref(), mPrefs.getGyroPref(), mPrefs.getMagneticPref(), mLastVideoDate);
                 // TODO: add message to strings.xml
             } catch (NumberFormatException e) {
                 if (MyDebug.LOG) {
@@ -235,10 +189,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
                     e.printStackTrace();
                 }
             }
-        } else if (getIMURecordingPref() && !useCamera2()) {
+        } else if (mPrefs.getIMURecordingPref() && !useCamera2()) {
             mMainActivity.getPreview().showToast(null, "Not using Camera2API! Can't record in sync with IMU");
             mMainActivity.getPreview().stopVideo(false);
-        } else if (getIMURecordingPref() && !(getGyroPref() || getMagneticPref() || getAccelPref())) {
+        } else if (mPrefs.getIMURecordingPref() && !(mPrefs.getGyroPref() || mPrefs.getMagneticPref() || mPrefs.getAccelPref())) {
             mMainActivity.getPreview().showToast(null, "Requested IMU recording but no sensors were enabled");
             mMainActivity.getPreview().stopVideo(false);
         }
@@ -298,19 +252,19 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
         if (wantAccel) {
-            int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
+            int accelSampleRate = mPrefs.getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
             if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
                 mMainActivity.getPreview().showToast(null, "Accelerometer unavailable");
             }
         }
         if (wantGyro) {
-            int gyroSampleRate = getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
+            int gyroSampleRate = mPrefs.getSensorSampleRatePref(PreferenceKeys.GyroSampleRatePreferenceKey);
             if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate)) {
                 mMainActivity.getPreview().showToast(null, "Gyroscope unavailable");
             }
         }
         if (wantMagnetic) {
-            int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
+            int magneticSampleRate = mPrefs.getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
             if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
                 mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
             }
@@ -318,9 +272,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
         //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
         Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
-        wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
-        wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
-        wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, mPrefs.getAccelPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, mPrefs.getGyroPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, mPrefs.getMagneticPref());
         mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
     }
 
@@ -417,11 +371,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (!mMainActivity.isCameraInBackground()) {
             mMainActivity.openSettings();
         }
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
-        editor.apply();
+        mPrefs.editEnableRecSync();
         stopSoftwareSync(); // Preference wasn't clicked so this won't be triggered
-        getDrawPreview().updateSettings(); // Because we cache the enable RecSync setting
+        getDrawPreview().updateSettings(); // Because we cache to enable RecSync setting
     }
 
     private void showSimpleAlert(String title, String message) {

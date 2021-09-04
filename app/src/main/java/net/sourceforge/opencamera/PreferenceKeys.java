@@ -398,5 +398,10 @@ public class PreferenceKeys {
     public static final String ShutterSoundPreferenceKey = "preference_shutter_sound";
 
     public static final String ImmersiveModePreferenceKey = "preference_immersive_mode";
-    public static final String AddYPRToComments="preference_comment_ypr";
+
+    public static final String AddYPRToComments = "preference_comment_ypr";
+
+    public static final String VideoOutputFormatDefaultPreferenceKey = "preference_video_output_format_default";
+
+    public static final String ImageFormatJpegPreferenceKey = "preference_image_format_jpeg";
 }

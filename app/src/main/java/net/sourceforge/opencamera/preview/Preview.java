@@ -63,6 +63,7 @@ import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.PreferenceHandler;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;
@@ -5594,9 +5595,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     throw new IOException();
                 }
 
+                PreferenceHandler prefs = applicationInterface.getPrefs();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
-                boolean want_save_timestamps = applicationInterface.getIMURecordingPref() || applicationInterface.isSoftwareSyncRunning();
-                boolean want_save_frames = applicationInterface.getSaveFramesPref();
+                boolean want_save_timestamps = prefs.getIMURecordingPref() || applicationInterface.isSoftwareSyncRunning();
+                boolean want_save_frames = prefs.getSaveFramesPref();
 
                 if( want_save_timestamps ) {
                     try {
@@ -5813,9 +5815,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     });
                 }
             }
-            long flashStrobePeriod = applicationInterface.getSensorSampleRatePref(
-                    PreferenceKeys.FlashStrobeFreqPreferenceKey
-            );
+            PreferenceHandler prefs = applicationInterface.getPrefs();
+            long flashStrobePeriod = prefs.getSensorSampleRatePref(PreferenceKeys.FlashStrobeFreqPreferenceKey);
             flashVideoTimer.scheduleAtFixedRate(flashVideoTimerTask = new FlashVideoTimerTask(), 0, flashStrobePeriod);
         }
 

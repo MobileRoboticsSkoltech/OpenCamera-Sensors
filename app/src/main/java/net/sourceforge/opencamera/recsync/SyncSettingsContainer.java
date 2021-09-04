@@ -1,9 +1,7 @@
 package net.sourceforge.opencamera.recsync;
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.PreferenceHandler;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.preview.Preview;
@@ -72,14 +70,14 @@ public class SyncSettingsContainer implements Serializable {
      * @param mainActivity - MainActivity of this device.
      */
     public static SyncSettingsContainer buildFrom(MainActivity mainActivity) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        PreferenceHandler prefs = mainActivity.getApplicationInterface().getPrefs();
         Preview preview = mainActivity.getPreview();
         CameraController cameraController = preview.getCameraController();
 
-        boolean syncISO = sharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
-        boolean syncWb = sharedPreferences.getBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
-        boolean syncFlash = sharedPreferences.getBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
-        boolean syncFormat = sharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
+        boolean syncISO = prefs.getSyncIsoPref();
+        boolean syncWb = prefs.getSyncWbPref();
+        boolean syncFlash = prefs.getSyncFlashPref();
+        boolean syncFormat = prefs.getSyncFormatPref();
 
         boolean isVideo = preview.isVideo();
         long exposure = cameraController.captureResultExposureTime();
@@ -88,8 +86,8 @@ public class SyncSettingsContainer implements Serializable {
         String wbMode = cameraController.getWhiteBalance();
         String flash = cameraController.getFlashValue();
         String format = isVideo ?
-                sharedPreferences.getString(PreferenceKeys.VideoFormatPreferenceKey, "preference_video_output_format_default") :
-                sharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, "preference_image_format_jpeg");
+                prefs.getVideoFormatPref(PreferenceKeys.VideoOutputFormatDefaultPreferenceKey) :
+                prefs.getImageFormatPref(PreferenceKeys.ImageFormatJpegPreferenceKey);
 
         return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat,
                 isVideo, exposure, iso, wbTemperature, wbMode, flash, format);
