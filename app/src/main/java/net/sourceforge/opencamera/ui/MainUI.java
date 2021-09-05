@@ -26,7 +26,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -56,7 +55,7 @@ public class MainUI {
     private final MainActivity main_activity;
 
     private volatile boolean rec_sync_view_is_open;
-    private View rec_sync_view;
+    private RecSyncView rec_sync_view;
     private final static boolean cache_rec_sync = true;
     private boolean force_destroy_rec_sync = false;
 
@@ -875,9 +874,9 @@ public class MainUI {
             Log.d(TAG, "recSync_width: " + recSync_width);
             Log.d(TAG, "recSync_height: " + recSync_height);
             if( rec_sync_view != null )
-                Log.d(TAG, "recSync total width: " + getRecSyncViewTotalWidth());
+                Log.d(TAG, "recSync total width: " + rec_sync_view.getTotalWidth());
         }
-        if( rec_sync_view != null && recSync_width > getRecSyncViewTotalWidth()*1.2  ) {
+        if( rec_sync_view != null && recSync_width > rec_sync_view.getTotalWidth()*1.2  ) {
             Log.e(TAG, "### recSync view is too big?!");
             force_destroy_rec_sync = true;
         }
@@ -918,11 +917,6 @@ public class MainUI {
                     view.setTranslationY( - recSync_width );
             }
         }
-    }
-
-    private int getRecSyncViewTotalWidth() {
-        final int total_width_dp = Math.min(200, getMaxHeightDp(false));
-        return (int) (total_width_dp * rec_sync_view.getResources().getDisplayMetrics().density + 0.5f); // convert dps to pixels;
     }
 
     /** Set icons for taking photos vs videos.
@@ -2457,9 +2451,23 @@ public class MainUI {
         if( rec_sync_view == null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new rec_sync_view");
+            rec_sync_view = new RecSyncView(main_activity);
 
-            LayoutInflater inflater = main_activity.getLayoutInflater();
-            rec_sync_view = inflater.inflate(R.layout.recsyncview_layout, rec_sync_container);
+            rec_sync_view.setSyncSettingsOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonSyncSettings");
+
+                main_activity.clickedSyncSettings();
+            });
+
+            rec_sync_view.setAlignPhasesOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonAlignPhases");
+
+                main_activity.clickedAlignPhases();
+            });
+
+            rec_sync_container.addView(rec_sync_view);
         }
         else {
             if( MyDebug.LOG )
@@ -3257,7 +3265,7 @@ public class MainUI {
         return popup_view;
     }
 
-    public View getRecSyncView() {
+    public RecSyncView getRecSyncView() {
         return rec_sync_view;
     }
 

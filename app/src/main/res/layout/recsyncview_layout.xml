@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@android:color/transparent"
-        android:onClick="clickedSyncSettings"
         android:text="@string/sync_settings_unlocked"
         android:textAllCaps="false"
         android:textSize="17sp" />
@@ -23,7 +22,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@android:color/transparent"
-        android:onClick="clickedAlignPhases"
         android:text="@string/align_phases"
         android:textAllCaps="false"
         android:textSize="17sp" />
