@@ -73,10 +73,10 @@ public class SyncSettingsContainer implements Serializable {
         Preview preview = mainActivity.getPreview();
         CameraController cameraController = preview.getCameraController();
 
-        boolean syncISO = prefs.getSyncIsoPref();
-        boolean syncWb = prefs.getSyncWbPref();
-        boolean syncFlash = prefs.getSyncFlashPref();
-        boolean syncFormat = prefs.getSyncFormatPref();
+        boolean syncISO = prefs.isSyncIsoEnabled();
+        boolean syncWb = prefs.isSyncWbEnabled();
+        boolean syncFlash = prefs.isSyncFlashEnabled();
+        boolean syncFormat = prefs.isSyncFormatEnabled();
 
         boolean isVideo = preview.isVideo();
         long exposure = cameraController.captureResultExposureTime();
@@ -85,8 +85,8 @@ public class SyncSettingsContainer implements Serializable {
         String wbMode = cameraController.getWhiteBalance();
         String flash = cameraController.getFlashValue();
         String format = isVideo ?
-                prefs.getVideoFormatPref() :
-                prefs.getImageFormatPref();
+                prefs.getVideoFormat() :
+                prefs.getImageFormat();
 
         return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat,
                 isVideo, exposure, iso, wbTemperature, wbMode, flash, format);

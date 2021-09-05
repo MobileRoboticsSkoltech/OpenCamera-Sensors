@@ -1128,7 +1128,7 @@ public class MainUI {
 
     public boolean showRecSyncIcon() {
         final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
-        return applicationInterface.getPrefs().getEnableRecSyncPref() &&
+        return applicationInterface.getPrefs().isEnableRecSyncEnabled() &&
                 applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
     }
 

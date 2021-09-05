@@ -5597,8 +5597,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
                 PreferenceHandler prefs = applicationInterface.getPrefs();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
-                boolean want_save_timestamps = prefs.getIMURecordingPref() || applicationInterface.isSoftwareSyncRunning();
-                boolean want_save_frames = prefs.getSaveFramesPref();
+                boolean want_save_timestamps = prefs.isIMURecordingEnabled() || applicationInterface.isSoftwareSyncRunning();
+                boolean want_save_frames = prefs.isSaveFramesEnabled();
 
                 if( want_save_timestamps ) {
                     try {
@@ -5816,7 +5816,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 }
             }
             PreferenceHandler prefs = applicationInterface.getPrefs();
-            long flashStrobePeriod = prefs.getSensorSampleRatePref(PreferenceKeys.FlashStrobeFreqPreferenceKey);
+            long flashStrobePeriod = prefs.getSensorSampleRate(PreferenceKeys.FlashStrobeFreqPreferenceKey);
             flashVideoTimer.scheduleAtFixedRate(flashVideoTimerTask = new FlashVideoTimerTask(), 0, flashStrobePeriod);
         }
 

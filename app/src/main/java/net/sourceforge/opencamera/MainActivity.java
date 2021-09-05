@@ -1440,7 +1440,7 @@ public class MainActivity extends Activity {
 
         // Create Remote controller for OpenCamera Sensors
         PreferenceHandler prefs = applicationInterface.getPrefs();
-        if (prefs.getRemoteRecControlPref()) {
+        if (prefs.isRemoteRecControlEnabled()) {
             try {
                 mRpcServer = new RemoteRpcServer(this);
                 mRpcServer.start();
@@ -1476,7 +1476,7 @@ public class MainActivity extends Activity {
         soundPoolManager.loadSound(R.raw.mybeep_hi);
 
         // start RecSync if needed
-        if( prefs.getEnableRecSyncPref() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+        if( prefs.isEnableRecSyncEnabled() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
             applicationInterface.startSoftwareSync();
         }
 
@@ -1799,7 +1799,7 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedEnableRecSync");
 
         PreferenceHandler prefs = applicationInterface.getPrefs();
-        if( prefs.getEnableRecSyncPref() ) {
+        if( prefs.isEnableRecSyncEnabled() ) {
             applicationInterface.startSoftwareSync();
         } else {
             applicationInterface.stopSoftwareSync();
