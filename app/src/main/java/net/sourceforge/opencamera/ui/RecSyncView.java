@@ -44,17 +44,14 @@ public class RecSyncView extends LinearLayout {
 
         final MainActivity main_activity = (MainActivity) this.getContext();
 
-        boolean small_screen = false;
         total_width_dp = 280;
         int max_width_dp = main_activity.getMainUI().getMaxHeightDp(false);
         if (total_width_dp > max_width_dp) {
             total_width_dp = max_width_dp;
-            small_screen = true;
         }
         if (MyDebug.LOG) {
             Log.d(TAG, "max_width_dp: " + max_width_dp);
             Log.d(TAG, "total_width_dp: " + total_width_dp);
-            Log.d(TAG, "small_screen: " + small_screen);
         }
 
         LayoutInflater inflater = main_activity.getLayoutInflater();
