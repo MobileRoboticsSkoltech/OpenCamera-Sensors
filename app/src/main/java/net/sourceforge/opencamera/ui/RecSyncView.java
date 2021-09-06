@@ -13,13 +13,9 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.StringRes;
 
-import com.googleresearch.capturesync.SoftwareSyncController;
-
 /**
  * This defines the UI for the "recSync" button, that provides quick access to a
  * range of options.
- * <p>
- * Requires {@link SoftwareSyncController} to be initialized (i.e. RecSync to be started)
  */
 public class RecSyncView extends LinearLayout {
     private static final String TAG = "RecSyncView";
