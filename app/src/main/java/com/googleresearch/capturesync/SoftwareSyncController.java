@@ -1,30 +1,31 @@
 /**
  * Copyright 2019 The Google Research Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- *
- * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech
+ * <p>
+ * Modifications copyright (C) 2021 Mobile Robotics Lab. at Skoltech.
  */
 
 package com.googleresearch.capturesync;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.googleresearch.capturesync.softwaresync.ClientInfo;
 import com.googleresearch.capturesync.softwaresync.NetworkHelpers;
@@ -34,8 +35,11 @@ import com.googleresearch.capturesync.softwaresync.SoftwareSyncClient;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 import com.googleresearch.capturesync.softwaresync.SyncConstants;
 import com.googleresearch.capturesync.softwaresync.TimeUtils;
+import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -45,56 +49,78 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-// Note : Needs Network permissions.
+import java.util.NoSuchElementException;
 
 /**
- * Controller managing setup and tear down the SoftwareSync object.
+ * Controller managing setup and tear down the SoftwareSync object. Needs Network permissions.
  */
 public class SoftwareSyncController implements Closeable {
-
     private static final String TAG = "SoftwareSyncController";
-    private final MainActivity context;
-    private final TextView statusView;
-    private final PhaseAlignController phaseAlignController;
-    private boolean isLeader;
-    SoftwareSyncBase softwareSync;
 
-    /* Tell devices to save the frame at the requested trigger time. */
+    private final MainActivity mMainActivity;
+    private final PhaseAlignController mPhaseAlignController;
+    private final PeriodCalculator mPeriodCalculator;
+    private String mSyncStatus;
+    private SoftwareSyncBase mSoftwareSync;
+    private AlignPhasesTask mAlignPhasesTask;
+
+    private boolean mIsLeader;
+    private State mState = State.IDLE;
+
+    /**
+     * Possible states of RecSync on this device.
+     */
+    public enum State {
+        IDLE, // When other states are not applicable.
+        SETTINGS_APPLICATION, // Received setting are being applied.
+        PERIOD_CALCULATION, // PeriodCalculator is calculating.
+        PHASE_ALIGNMENT, // PhaseAlignController is aligning.
+        RECORDING // A video is being recorded.
+    }
+
+    /**
+     * Tell devices to save the frame at the requested trigger time.
+     */
     public static final int METHOD_SET_TRIGGER_TIME = 200_000;
-
-    /* Tell devices to phase align. */
+    /**
+     * Tell devices to calculate frames period and phase align.
+     */
     public static final int METHOD_DO_PHASE_ALIGN = 200_001;
-    /* Tell devices to set manual exposure and white balance to the requested values. */
-    public static final int METHOD_SET_2A = 200_002;
-    public static final int METHOD_START_RECORDING = 200_003;
-    public static final int METHOD_STOP_RECORDING = 200_004;
+    /**
+     * Tell devices to set the chosen settings to the requested values.
+     */
+    public static final int METHOD_SET_SETTINGS = 200_002;
+    /**
+     * Tell devices to start or stop video recording.
+     */
+    public static final int METHOD_RECORD = 200_003;
 
-    private long upcomingTriggerTimeNs;
+    private long mUpcomingTriggerTimeNs;
 
     /**
      * Constructor passed in with: - context - For setting UI elements and triggering captures. -
      * captureButton - The button used to send at trigger request by the leader. - statusView - The
      * TextView used to show currently connected clients on the leader device.
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public SoftwareSyncController(
-            MainActivity context, PhaseAlignController phaseAlignController, TextView statusView) {
-        this.context = context;
-        this.phaseAlignController = phaseAlignController;
-        this.statusView = statusView;
+            MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
+        mMainActivity = mainActivity;
+        mPhaseAlignController = phaseAlignController;
+        mPeriodCalculator = periodCalculator;
 
         setupSoftwareSync();
     }
 
-    @SuppressWarnings("StringSplitter")
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void setupSoftwareSync() {
         Log.w(TAG, "setup SoftwareSync");
-        if (softwareSync != null) {
+        if (mSoftwareSync != null) {
             return;
         }
 
         // Get Wifi Manager and use NetworkHelpers to determine local and leader IP addresses.
-        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         InetAddress leaderAddress;
         InetAddress localAddress;
 
@@ -102,11 +128,12 @@ public class SoftwareSyncController implements Closeable {
         String name = lastFourSerial();
         Log.w(TAG, "Name/Serial# (Last 4 digits): " + name);
 
+        // Determine leadership.
         try {
             NetworkHelpers networkHelper = new NetworkHelpers(wifiManager);
-            isLeader = networkHelper.isLeader();
+            mIsLeader = networkHelper.isLeader();
 
-            if (isLeader) {
+            if (mIsLeader) {
                 // IP determination is not yet implemented for a leader.
                 localAddress = null;
                 leaderAddress = null;
@@ -119,7 +146,7 @@ public class SoftwareSyncController implements Closeable {
                     TAG,
                     String.format(
                             "Current IP: %s , Leader IP: %s | Leader? %s",
-                            localAddress, leaderAddress, isLeader ? "Y" : "N"));
+                            localAddress, leaderAddress, mIsLeader ? "Y" : "N"));
         } catch (SocketException e) {
             Log.e(TAG, "Error: " + e);
             throw new IllegalStateException(
@@ -132,106 +159,182 @@ public class SoftwareSyncController implements Closeable {
 
         // Set up shared rpcs.
         Map<Integer, RpcCallback> sharedRpcs = new HashMap<>();
+
         //sharedRpcs.put(
         //        METHOD_SET_TRIGGER_TIME,
         //        payload -> {
-        //            Log.v(TAG, "Setting next trigger to" + payload);
+        //            Log.d(TAG, "Setting next trigger to" + payload);
         //            upcomingTriggerTimeNs = Long.valueOf(payload);
         //            // TODO: (MROB) change to video
         //            context.setUpcomingCaptureStill(upcomingTriggerTimeNs);
         //        });
 
+        // Start frames period calculation and then the phase aligning algorithm.
+        sharedRpcs.put(
+                METHOD_DO_PHASE_ALIGN,
+                payload -> {
+                    Log.d(TAG, "Phase alignment request received.");
 
-        //sharedRpcs.put(
-        //        METHOD_DO_PHASE_ALIGN,
-        //        payload -> {
-        //            // Note: One could pass the current phase of the leader and have all clients sync to
-        //            // that, reducing potential error, though special attention should be placed to phases
-        //            // close to the zero or period boundary.
-        //            Log.v(TAG, "Starting phase alignment.");
-        //            phaseAlignController.startAlign();
-        //        });
+                    if (mState == State.PERIOD_CALCULATION || mState == State.PHASE_ALIGNMENT) {
+                        Log.d(TAG, "The previous phase alignment request is still processing.");
+                        return;
+                    }
 
-        //sharedRpcs.put(
-        //        METHOD_SET_2A,
-        //        payload -> {
-        //            Log.v(TAG, "Received payload: " + payload);
-        //
-        //            String[] segments = payload.split(",");
-        //            if (segments.length != 2) {
-        //                throw new IllegalArgumentException("Wrong number of segments in payload: " + payload);
-        //            }
-        //            long sensorExposureNs = Long.parseLong(segments[0]);
-        //            int sensorSensitivity = Integer.parseInt(segments[1]);
-        //            context.set2aAndUpdatePreview(sensorExposureNs, sensorSensitivity);
-        //        });
+                    mAlignPhasesTask = new AlignPhasesTask(this, mPhaseAlignController, mPeriodCalculator);
+                    mAlignPhasesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                });
 
-        if (isLeader) {
+        // Apply the received settings.
+        sharedRpcs.put(
+                METHOD_SET_SETTINGS,
+                payload -> {
+                    Log.d(TAG, "Received payload with settings: " + payload);
+
+                    if (mState != State.IDLE && mState != State.SETTINGS_APPLICATION) {
+                        Log.d(TAG, "Settings cannot be applied at state " + mState);
+                        return;
+                    }
+
+                    SyncSettingsContainer settings = null;
+                    try {
+                        settings = SyncSettingsContainer.deserializeFromString(payload);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Failed to deserialize the settings string: " + payload + "\n" + e.getMessage());
+                    }
+
+                    if (settings != null) {
+                        mState = State.SETTINGS_APPLICATION;
+                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> mState = State.IDLE);
+                    }
+                });
+
+        // Switch the recording status (start or stop video recording) to the opposite of the received one.
+        sharedRpcs.put(
+                METHOD_RECORD,
+                payload -> {
+                    Log.d(TAG, String.format(
+                            "Received record request with payload: %s. Current recording status: %s.",
+                            payload, mMainActivity.getPreview().isVideoRecording()));
+
+                    if (mState != State.IDLE && mState != State.RECORDING) {
+                        Log.d(TAG, "Recording status cannot be switched at state " + mState);
+                        return;
+                    }
+
+                    if (!mMainActivity.getPreview().isVideo()) {
+                        // This should not happen as capture mode is to be synced before recording.
+                        throw new IllegalStateException("Received recording request in photo mode");
+                    }
+                    if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
+                        mState = (mState == State.RECORDING) ? State.IDLE : State.RECORDING;
+                        mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
+                    }
+                });
+
+        if (mIsLeader) {
             // Leader.
             long initTimeNs = TimeUtils.millisToNanos(System.currentTimeMillis());
+
             // Create rpc mapping specific to leader.
             Map<Integer, RpcCallback> leaderRpcs = new HashMap<>(sharedRpcs);
+
+            // Update status text when the status changes.
             leaderRpcs.put(SyncConstants.METHOD_MSG_ADDED_CLIENT, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_REMOVED_CLIENT, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_SYNCING, payload -> updateClientsUI());
             leaderRpcs.put(SyncConstants.METHOD_MSG_OFFSET_UPDATED, payload -> updateClientsUI());
-            softwareSync = new SoftwareSyncLeader(name, initTimeNs, localAddress, leaderRpcs);
+
+            mSoftwareSync = new SoftwareSyncLeader(name, initTimeNs, localAddress, leaderRpcs);
         } else {
             // Client.
             Map<Integer, RpcCallback> clientRpcs = new HashMap<>(sharedRpcs);
+
+            // Update status text to "waiting for leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload ->
-                            context.runOnUiThread(
-                                    () -> statusView.setText(softwareSync.getName() + ": Waiting for Leader")));
+                            mMainActivity.runOnUiThread(
+                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName())));
+
+            // Update status text to "waiting for sync".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload ->
-                            context.runOnUiThread(
-                                    () -> statusView.setText(softwareSync.getName() + ": Waiting for Sync")));
+                            mMainActivity.runOnUiThread(
+                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName())));
 
-            //clientRpcs.put(
-            //        METHOD_START_RECORDING,
-            //        payload -> {
-            //            Log.v(TAG, "Starting video");
-            //            context.runOnUiThread(
-            //                    () -> context.startVideo(false)
-            //            );
-            //        });
-
-            //clientRpcs.put(
-            //        METHOD_STOP_RECORDING,
-            //        payload -> {
-            //            Log.v(TAG, "Stopping video");
-            //            context.runOnUiThread(
-            //                    context::stopVideo
-            //            );
-            //        });
-
+            // Update status text to "synced to leader".
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
-                            context.runOnUiThread(
-                                    () ->
-                                            statusView.setText(
-                                                    String.format(
-                                                            "Client %s\n-Synced to Leader %s",
-                                                            softwareSync.getName(), softwareSync.getLeaderAddress()))));
-            softwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
+                            mMainActivity.runOnUiThread(() -> mSyncStatus =
+                                    mMainActivity.getString(
+                                            R.string.rec_sync_synced_to_leader,
+                                            mSoftwareSync.getName(), mSoftwareSync.getLeaderAddress())));
+
+            mSoftwareSync = new SoftwareSyncClient(name, localAddress, leaderAddress, clientRpcs);
         }
 
-        if (isLeader) {
-            context.runOnUiThread(
-                    () -> {
-                        statusView.setText("Leader : " + softwareSync.getName());
-                        statusView.setTextColor(Color.rgb(0, 139, 0)); // Dark green.
-                    });
+        if (mIsLeader) {
+            mMainActivity.runOnUiThread(
+                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_leader, mSoftwareSync.getName()));
         } else {
-            context.runOnUiThread(
-                    () -> {
-                        statusView.setText("Client : " + softwareSync.getName());
-                        statusView.setTextColor(Color.rgb(0, 0, 139)); // Dark blue.
-                    });
+            mMainActivity.runOnUiThread(
+                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_client, mSoftwareSync.getName()));
+        }
+    }
+
+    private static class AlignPhasesTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = "AlignPhasesTask";
+
+        private final SoftwareSyncController mSoftwareSyncController;
+        private final PhaseAlignController mPhaseAlignController;
+        private final PeriodCalculator mPeriodCalculator;
+
+        AlignPhasesTask(SoftwareSyncController softwareSyncController,
+                        PhaseAlignController phaseAlignController,
+                        PeriodCalculator periodCalculator) {
+            mSoftwareSyncController = softwareSyncController;
+            mPhaseAlignController = phaseAlignController;
+            mPeriodCalculator = periodCalculator;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (mSoftwareSyncController.mState != State.IDLE) {
+                Log.d(TAG, "Period calculation and phase alignment cannot be started at state " +
+                        mSoftwareSyncController.mState);
+                return null;
+            }
+
+            Log.v(TAG, "Calculating frames period.");
+            mSoftwareSyncController.mState = State.PERIOD_CALCULATION;
+            try {
+                long periodNs = mPeriodCalculator.getPeriodNs();
+                Log.i(TAG, "Calculated frames period: " + periodNs);
+                mPhaseAlignController.setPeriodNs(periodNs);
+            } catch (InterruptedException | NoSuchElementException e) {
+                Log.e(TAG, "Failed calculating frames period: ", e);
+            }
+
+            // Note: One could pass the current phase of the leader and have all clients sync to
+            // that, reducing potential error, though special attention should be placed to phases
+            // close to the zero or period boundary.
+            Log.v(TAG, "Starting phase alignment.");
+            mSoftwareSyncController.mState = State.PHASE_ALIGNMENT;
+            mPhaseAlignController.startAlign(() -> mSoftwareSyncController.mState = State.IDLE);
+
+            return null;
+        }
+    }
+
+    private String lastFourSerial() {
+        String serial = Secure.getString(mMainActivity.getContentResolver(), Secure.ANDROID_ID);
+        if (serial.length() <= 4) {
+            return serial;
+        } else {
+            return serial.substring(serial.length() - 4);
         }
     }
 
@@ -241,54 +344,110 @@ public class SoftwareSyncController implements Closeable {
      * <p>If the number of clients doesn't equal TOTAL_NUM_CLIENTS, show as bright red.
      */
     private void updateClientsUI() {
-        SoftwareSyncLeader leader = ((SoftwareSyncLeader) softwareSync);
+        SoftwareSyncLeader leader = ((SoftwareSyncLeader) mSoftwareSync);
         final int clientCount = leader.getClients().size();
-        context.runOnUiThread(
+        mMainActivity.runOnUiThread(
                 () -> {
                     StringBuilder msg = new StringBuilder();
                     msg.append(
-                            String.format("Leader %s: %d clients.\n", softwareSync.getName(), clientCount));
+                            mMainActivity.getString(
+                                    R.string.rec_sync_leader_clients, mSoftwareSync.getName(),
+                                    mMainActivity.getResources().getQuantityString(R.plurals.clients_num, clientCount, clientCount)));
                     for (Entry<InetAddress, ClientInfo> entry : leader.getClients().entrySet()) {
                         ClientInfo client = entry.getValue();
                         if (client.syncAccuracy() == 0) {
-                            msg.append(String.format("-Client %s: syncing...\n", client.name()));
+                            msg.append(mMainActivity.getString(R.string.rec_sync_client_syncing, client.name()));
                         } else {
                             msg.append(
-                                    String.format(
-                                            "-Client %s: %.2f ms sync\n", client.name(), client.syncAccuracy() / 1e6));
+                                    mMainActivity.getString(
+                                            R.string.rec_sync_client_synced, client.name(), client.syncAccuracy() / 1e6));
                         }
                     }
-                    statusView.setText(msg.toString());
+                    mSyncStatus = msg.toString();
                 });
     }
 
     @Override
     public void close() {
         Log.w(TAG, "close SoftwareSyncController");
-        if (softwareSync != null) {
+        if (mSoftwareSync != null) {
             try {
-                softwareSync.close();
+                mSoftwareSync.close();
             } catch (IOException e) {
                 throw new IllegalStateException("Error closing SoftwareSync", e);
             }
-            softwareSync = null;
+            mSoftwareSync = null;
         }
     }
 
-    private String lastFourSerial() {
-        String serial = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-        if (serial.length() <= 4) {
-            return serial;
+    /**
+     * Change the lock status of the settings selected for synchronization. If the settings are
+     * getting locked then the provided settings are saved for broadcasts.
+     *
+     * @param settings the locked settings to be saved.
+     * @throws IllegalArgumentException if null is provided when settings are to be locked.
+     */
+    public void switchSettingsLock(SyncSettingsContainer settings) {
+        if (isSettingsBroadcasting()) {
+            ((SoftwareSyncLeader) mSoftwareSync).setSavedSettings(null);
+        } else if (settings != null) {
+            ((SoftwareSyncLeader) mSoftwareSync).setSavedSettings(settings);
         } else {
-            return serial.substring(serial.length() - 4);
+            throw new IllegalArgumentException("Settings to be locked cannot be null");
         }
     }
 
+    /**
+     * Indicates whether this device is a leader.
+     *
+     * @return true if this device is a leader, false if it is a client.
+     */
     public boolean isLeader() {
-        return isLeader;
+        return mIsLeader;
     }
 
-    public TextView getStatusText() {
-        return statusView;
+    /**
+     * Indicates whether the last finished alignment attempt was successful.
+     *
+     * @return true if the last alignment attempt was successful, false if it wasn't or no attempts
+     * were made.
+     */
+    public boolean isAligned() {
+        return mPhaseAlignController.wasAligned();
+    }
+
+    /**
+     * Current broadcasting status of the leader's settings. If this is true then each new client
+     * will receive the previously saved settings of the leader.
+     *
+     * @return true if the settings are being broadcast, false if they are not.
+     * @throws IllegalStateException if the device if not a leader.
+     */
+    public boolean isSettingsBroadcasting() {
+        if (mIsLeader) {
+            return ((SoftwareSyncLeader) mSoftwareSync).getSavedSettings() != null;
+        }
+        throw new IllegalStateException("Cannot check the settings lock status for a client");
+    }
+
+    /**
+     * Provides the given timestamp to {@link PeriodCalculator} and a converted to leader time
+     * domain version of the given timestamp to {@link PhaseAlignController}.
+     *
+     * @param timestamp a timestamp to be provided.
+     */
+    public void updateTimestamp(long timestamp) {
+        if (mState != State.PHASE_ALIGNMENT) { // No need to, when phase alignment is running.
+            mPeriodCalculator.onFrameTimestamp(timestamp);
+        }
+        mPhaseAlignController.updateCaptureTimestamp(mSoftwareSync.leaderTimeForLocalTimeNs(timestamp));
+    }
+
+    public SoftwareSyncBase getSoftwareSync() {
+        return mSoftwareSync;
+    }
+
+    public String getSyncStatus() {
+        return mSyncStatus;
     }
 }

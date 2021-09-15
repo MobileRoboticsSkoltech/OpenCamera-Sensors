@@ -34,6 +34,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -69,15 +73,20 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
+
+import com.googleresearch.capturesync.SoftwareSyncController;
+import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.preview.VideoProfile;
+import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 import net.sourceforge.opencamera.remotecontrol.BluetoothRemoteControl;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorremote.RemoteRpcServer;
@@ -170,6 +179,7 @@ public class MainActivity extends Activity {
     private final ToastBoxer exposure_lock_toast = new ToastBoxer();
     private final ToastBoxer audio_control_toast = new ToastBoxer();
     private final ToastBoxer store_location_toast = new ToastBoxer();
+    private final ToastBoxer rec_sync_toast = new ToastBoxer();
     private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     private String push_info_toast_text; // can be used to "push" extra text to the info text for showPhotoVideoToast()
 
@@ -431,6 +441,8 @@ public class MainActivity extends Activity {
         // initialise on-screen button visibility
         View switchCameraButton = findViewById(R.id.switch_camera);
         switchCameraButton.setVisibility(n_cameras > 1 ? View.VISIBLE : View.GONE);
+        View switchVideoButton = findViewById(R.id.switch_video);
+        switchVideoButton.setEnabled(true);
         // switchMultiCameraButton visibility updated below in mainUI.updateOnScreenIcons(), as it also depends on user preference
         View speechRecognizerButton = findViewById(R.id.audio_control);
         speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
@@ -728,9 +740,6 @@ public class MainActivity extends Activity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
-
-        // start RecSync leader-client setup
-        applicationInterface.startSoftwareSync();
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
@@ -1430,7 +1439,8 @@ public class MainActivity extends Activity {
         this.app_is_paused = false; // must be set before initLocation() at least
 
         // Create Remote controller for OpenCamera Sensors
-        if (applicationInterface.getRemoteRecControlPref()) {
+        PreferenceHandler prefs = applicationInterface.getPrefs();
+        if (prefs.isRemoteRecControlEnabled()) {
             try {
                 mRpcServer = new RemoteRpcServer(this);
                 mRpcServer.start();
@@ -1464,6 +1474,11 @@ public class MainActivity extends Activity {
         soundPoolManager.initSound();
         soundPoolManager.loadSound(R.raw.mybeep);
         soundPoolManager.loadSound(R.raw.mybeep_hi);
+
+        // start RecSync if needed
+        if( prefs.isEnableRecSyncEnabled() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+            applicationInterface.startSoftwareSync();
+        }
 
         mainUI.layoutUI();
 
@@ -1541,6 +1556,7 @@ public class MainActivity extends Activity {
         }
 
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
+        mainUI.destroyRecSync(); // in case connection type changes (and so does the leadership)
         mSensorManager.unregisterListener(accelerometerListener);
         magneticSensor.unregisterMagneticListener(mSensorManager);
         orientationEventListener.disable();
@@ -1561,6 +1577,7 @@ public class MainActivity extends Activity {
         soundPoolManager.releaseSound();
         applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
         applicationInterface.getDrawPreview().clearGhostImage();
+        applicationInterface.stopSoftwareSync(); // should be called before preview pauses
         preview.onPause();
 
         if( applicationInterface.getImageSaver().getNImagesToSave() > 0) {
@@ -1592,6 +1609,10 @@ public class MainActivity extends Activity {
     }
 
     private boolean longClickedTakePhoto() {
+        // RecSync clients are not allowed to click this button
+        if( applicationInterface.isSoftwareSyncRunning() && !applicationInterface.getSoftwareSyncController().isLeader() )
+            return false;
+
         if( MyDebug.LOG )
             Log.d(TAG, "longClickedTakePhoto");
         // need to check whether fast burst is supported (including for the current resolution),
@@ -1772,13 +1793,72 @@ public class MainActivity extends Activity {
         preview.showToast(stamp_toast, value ? R.string.stamp_enabled : R.string.stamp_disabled);
     }
 
-    public void clickedSwitchRecSync() {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void clickedEnableRecSync() {
         if( MyDebug.LOG )
-            Log.d(TAG, "clickedSwitchRecSync");
+            Log.d(TAG, "clickedEnableRecSync");
 
-        // TODO show client/leader info
-        // TODO open video mode
-        // in MyApplicationInterface?
+        PreferenceHandler prefs = applicationInterface.getPrefs();
+        if( prefs.isEnableRecSyncEnabled() ) {
+            applicationInterface.startSoftwareSync();
+        } else {
+            applicationInterface.stopSoftwareSync();
+        }
+
+        applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
+    }
+
+    public void clickedSyncSettings() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSyncSettings");
+        syncSettings();
+    }
+
+    public void syncSettings() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "syncSettings");
+
+        if( !applicationInterface.isSoftwareSyncRunning() ) {
+            throw new IllegalStateException("Cannot sync settings when RecSync is not running");
+        }
+
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        SyncSettingsContainer settings = null;
+
+        if( !softwareSyncController.isSettingsBroadcasting() ) {
+            settings = SyncSettingsContainer.buildFrom(this);
+            applicationInterface.getSoftwareSyncUtils().scheduleBroadcastSettings(settings); // leader's settings are locked here as well
+            preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
+        }
+
+        softwareSyncController.switchSettingsLock(settings);
+        mainUI.getRecSyncView().updateSyncSettingsButton(softwareSyncController.isSettingsBroadcasting() ?
+                R.string.sync_settings_locked : R.string.sync_settings_unlocked);
+    }
+
+    public void clickedAlignPhases() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedAlignPhases");
+        alignPhases();
+    }
+
+    public void alignPhases() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "alignPhases");
+
+        if( !applicationInterface.isSoftwareSyncRunning() ) {
+            throw new IllegalStateException("Cannot sync settings when RecSync is not running");
+        }
+
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+
+        if( !softwareSyncController.isSettingsBroadcasting() ) {
+            preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
+            return;
+        }
+
+        final SoftwareSyncLeader softwareSyncLeader = (SoftwareSyncLeader) softwareSyncController.getSoftwareSync();
+        softwareSyncLeader.broadcastRpc(SoftwareSyncController.METHOD_DO_PHASE_ALIGN, "");
     }
 
     public void clickedAutoLevel(View view) {
@@ -2064,9 +2144,9 @@ public class MainActivity extends Activity {
     /**
      * Toggles Photo/Video mode
      */
-    public void clickedSwitchVideo(View view) {
+    public void switchVideo(View view) {
         if( MyDebug.LOG )
-            Log.d(TAG, "clickedSwitchVideo");
+            Log.d(TAG, "switchVideo");
         this.closePopup();
         this.closeRecSync();
         mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
@@ -2095,9 +2175,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void clickedSwitchVideo(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedSwitchVideo");
+        switchVideo(view);
+    }
+
     public void clickedWhiteBalanceLock(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedWhiteBalanceLock");
+        lockWhiteBalance(view);
+    }
+
+    public void lockWhiteBalance(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "lockWhiteBalance");
         this.preview.toggleWhiteBalanceLock();
         mainUI.updateWhiteBalanceLockIcon();
         preview.showToast(white_balance_lock_toast, preview.isWhiteBalanceLocked() ? R.string.white_balance_locked : R.string.white_balance_unlocked);
@@ -2106,6 +2198,12 @@ public class MainActivity extends Activity {
     public void clickedExposureLock(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedExposureLock");
+        lockExposure(view);
+    }
+
+    public void lockExposure(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "lockExposure");
         this.preview.toggleExposureLock();
         mainUI.updateExposureLockIcon();
         preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);
@@ -2365,7 +2463,9 @@ public class MainActivity extends Activity {
         closeRecSync();
         preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
-        preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        if( this.preview.isVideoRecording() ) {
+            preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        }
         applicationInterface.stopPanorama(true); // important to stop panorama recording, as we might end up as we'll be changing camera parameters when the settings window closes
         stopAudioListeners();
 
@@ -2601,7 +2701,9 @@ public class MainActivity extends Activity {
             bundle.putBooleanArray("video_fps_high_speed", video_fps_high_speed_array);
         }
 
-        bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+        if( this.preview.getCameraController() != null ) {
+            bundle.putBoolean(PreferenceKeys.SupportsVideoImuSync, this.preview.getCameraController().supportsVideoImuSync());
+        }
 
         putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
         putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
@@ -2668,6 +2770,11 @@ public class MainActivity extends Activity {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "updateForSettings: time after destroy popup: " + (System.currentTimeMillis() - debug_time));
             }
+        }
+
+        mainUI.destroyRecSync(); // important as enable RecSync preference might have been changed
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "updateForSettings: time after destroy RecSync: " + (System.currentTimeMillis() - debug_time));
         }
 
         // update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
@@ -4332,31 +4439,55 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "takePicture");
 
-        if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
-            if( preview.isTakingPhoto() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "ignore whilst taking panorama photo");
-            }
-            else if( applicationInterface.getGyroSensor().isRecording() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "panorama complete");
-                applicationInterface.finishPanorama();
+        if( applicationInterface.isSoftwareSyncRunning() ) {
+            final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+
+            if( !softwareSyncController.isLeader() ) { // clients cannot use this button
                 return;
             }
-            else if( !applicationInterface.canTakeNewPhoto() ) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "can't start new panoroma, still saving in background");
-                // we need to test here, otherwise the Preview won't take a new photo - but we'll think we've
-                // started the panorama!
+            if( !softwareSyncController.isSettingsBroadcasting() ) { // settings need to be being broadcast
+                preview.showToast(rec_sync_toast, R.string.rec_sync_settings_not_broadcast);
+                return;
             }
-            else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "start panorama");
-                applicationInterface.startPanorama();
-            }
-        }
+            /*if( !softwareSyncController.isAligned() ) { // phases need to be aligned
+                preview.showToast(rec_sync_toast, R.string.rec_sync_phases_not_aligned);
+                return;
+            }*/
 
-        this.takePicturePressed(photo_snapshot, false);
+            if( preview.isVideo() ) {
+                // start synchronous video recording
+                applicationInterface.getSoftwareSyncUtils().broadcastRecordingRequest();
+            } else {
+                // other modes are not yet supported
+                preview.showToast(rec_sync_toast, R.string.rec_sync_only_video_supported);
+            }
+        } else {
+            if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.Panorama ) {
+                if( preview.isTakingPhoto() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "ignore whilst taking panorama photo");
+                }
+                else if( applicationInterface.getGyroSensor().isRecording() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "panorama complete");
+                    applicationInterface.finishPanorama();
+                    return;
+                }
+                else if( !applicationInterface.canTakeNewPhoto() ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "can't start new panoroma, still saving in background");
+                    // we need to test here, otherwise the Preview won't take a new photo - but we'll think we've
+                    // started the panorama!
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "start panorama");
+                    applicationInterface.startPanorama();
+                }
+            }
+
+            this.takePicturePressed(photo_snapshot, false);
+        }
     }
 
     /** Returns whether the last photo operation was a continuous fast burst.
@@ -4371,7 +4502,7 @@ public class MainActivity extends Activity {
      *                       on the current mode.
      * @param continuous_fast_burst If true, then start a continuous fast burst.
      */
-    void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
+    public void takePicturePressed(boolean photo_snapshot, boolean continuous_fast_burst) {
         if( MyDebug.LOG )
             Log.d(TAG, "takePicturePressed");
 
@@ -4928,9 +5059,10 @@ public class MainActivity extends Activity {
     }
 
     public boolean supportsPanorama() {
-        // don't support panorama mode if called from image capture intent
+        // 1) don't support panorama mode if called from image capture intent
         // in theory this works, but problem that currently we'd end up doing the processing on the UI thread, so risk ANR
-        if( applicationInterface.isImageCaptureIntent() )
+        // 2) don't support panorama mode when RecSync is running
+        if( applicationInterface.isImageCaptureIntent() || applicationInterface.isSoftwareSyncRunning())
             return false;
         // require 256MB just to be safe, due to the large number of images that may be created
         // also require at least Android 5, for Renderscript
@@ -5043,6 +5175,10 @@ public class MainActivity extends Activity {
 
     public ToastBoxer getChangedAutoStabiliseToastBoxer() {
         return changed_auto_stabilise_toast;
+    }
+
+    public ToastBoxer getRecSyncToastBoxer() {
+        return rec_sync_toast;
     }
 
     private String getPhotoModeString(MyApplicationInterface.PhotoMode photo_mode, boolean string_for_std) {
@@ -5333,6 +5469,22 @@ public class MainActivity extends Activity {
 		/*if( audio_listener != null ) {
 			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
 		}*/
+        if( applicationInterface.isSoftwareSyncRunning() && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP ) {
+            final String camera_id = String.valueOf(getActualCameraId());
+            try {
+                final int ts_source = ((CameraManager) getSystemService(Context.CAMERA_SERVICE))
+                        .getCameraCharacteristics(camera_id)
+                        .get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
+                if( ts_source == CameraMetadata.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME ) {
+                    toast_string += "\n" + getString(R.string.timestamp_source, getString(R.string.realtime));
+                } else {
+                    toast_string += "\n" + getString(R.string.timestamp_source, getString(R.string.unknown));
+                }
+                simple = false;
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Failed to check timestamping characteristic for camera " + camera_id);
+            }
+        }
 
         if( MyDebug.LOG ) {
             Log.d(TAG, "toast_string: " + toast_string);

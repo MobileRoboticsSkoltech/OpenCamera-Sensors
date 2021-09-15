@@ -47,6 +47,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -768,6 +770,40 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         }
 
         {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            if( supports_iso_range ) {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setEnabled(true);
+            }
+            else {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setEnabled(false);
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncIsoPreferenceKey).setSummary(R.string.not_supported);
+                editor.putBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
+                editor.apply();
+            }
+
+            if( supports_white_balance_temperature ) {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setEnabled(true);
+            }
+            else {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setEnabled(false);
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncWbPreferenceKey).setSummary(R.string.not_supported);
+                editor.putBoolean(PreferenceKeys.SyncWbPreferenceKey, false);
+                editor.apply();
+            }
+            if( supports_flash ) {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setEnabled(true);
+            }
+            else {
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setEnabled(false);
+                getPreferenceScreen().findPreference(PreferenceKeys.SyncFlashPreferenceKey).setSummary(R.string.not_supported);
+                editor.putBoolean(PreferenceKeys.SyncFlashPreferenceKey, false);
+                editor.apply();
+            }
+
+        }
+
+        {
             List<String> camera_api_values = new ArrayList<>();
             List<String> camera_api_entries = new ArrayList<>();
 
@@ -806,6 +842,14 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                                 if( MyDebug.LOG )
                                     Log.d(TAG, "user changed camera API - need to restart");
                                 MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                                if( list_pref.getValue().equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) ) {
+                                    if( MyDebug.LOG )
+                                        Log.d(TAG, "user changed camera API to not Camera2 API");
+                                    final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
+                                    editor.apply();
+                                }
                                 main_activity.restartOpenCamera();
                             }
                         }
@@ -838,6 +882,27 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_online");
             pg.removePreference(pref);
         }*/
+
+        // must be called after the camera api selection checks
+        {
+            final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
+            String cameraApi = ((ListPreference)findPreference(PreferenceKeys.CameraAPIPreferenceKey)).getValue();
+            if( supports_camera2 && cameraApi != null && cameraApi.equals(PreferenceKeys.CameraAPIPreferenceCamera2 ) && supports_exposure_time && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(true);
+
+                MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                final ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                final SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                if ( sharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false) &&
+                        extendedAppInterface.isSoftwareSyncRunning() && !softwareSyncController.isLeader() ) {
+                    getPreferenceScreen().findPreference("preference_sync_settings").setEnabled(false);
+                }
+            }
+            else {
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setEnabled(false);
+                getPreferenceScreen().findPreference("preference_rec_sync_settings").setSummary(R.string.recsync_unsupported_summary);
+            }
+        }
 
         {
             final Preference pref = findPreference("preference_online_help");
@@ -1687,6 +1752,22 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         dialogs.add(alert);
                     }
                     return false;
+                }
+            });
+        }
+
+        {
+            final Preference pref = findPreference(PreferenceKeys.EnableRecSyncPreferenceKey);
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                    if( pref.getKey().equals(PreferenceKeys.EnableRecSyncPreferenceKey) ) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "user clicked enable RecSync");
+
+                        ((MainActivity)MyPreferenceFragment.this.getActivity()).clickedEnableRecSync();
+                    }
+                    return true;
                 }
             });
         }

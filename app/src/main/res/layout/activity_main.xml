@@ -216,6 +216,7 @@
         android:backgroundTint="@color/icons_background_tint"
         android:backgroundTintMode="src_in"
         android:onClick="clickedRecSyncSettings"
+        android:visibility="gone"
         />
 
     <ImageButton

@@ -60,8 +60,10 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import net.sourceforge.opencamera.ExtendedAppInterface;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.PreferenceHandler;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.ScriptC_histogram_compute;
 import net.sourceforge.opencamera.TakePhoto;
@@ -933,6 +935,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
+        if (applicationInterface.isSoftwareSyncRunning())
+            applicationInterface.getSoftwareSyncController().updateTimestamp(arg0.getTimestamp());
+
         refreshPreviewBitmap();
     }
 
@@ -1750,6 +1755,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( this.using_android_l ) {
                 configureTransform();
             }
+
+            applicationInterface.cameraOpened();
         }
 
         if( MyDebug.LOG ) {
@@ -4468,6 +4475,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             if( change_user_pref ) {
                 // now save
                 applicationInterface.setVideoPref(is_video);
+
+                // have to stop settings broadcasting because the mode has changed
+                if( applicationInterface.isSoftwareSyncRunning() &&
+                        applicationInterface.getSoftwareSyncController().isLeader() &&
+                        applicationInterface.getSoftwareSyncController().isSettingsBroadcasting() )
+                    ((MainActivity) getContext()).syncSettings();
             }
             if( !during_startup ) {
                 // if during startup, updateFlashForVideo() needs to always be explicitly called anyway
@@ -5582,13 +5595,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     throw new IOException();
                 }
 
+                PreferenceHandler prefs = applicationInterface.getPrefs();
                 boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
+                boolean want_save_timestamps = prefs.isIMURecordingEnabled() || applicationInterface.isSoftwareSyncRunning();
+                boolean want_save_frames = prefs.isSaveFramesEnabled();
 
-                boolean want_video_imu_recording = applicationInterface.getIMURecordingPref();
-                boolean want_save_frames = applicationInterface.getSaveFramesPref();
-
-
-                if (want_video_imu_recording) {
+                if( want_save_timestamps ) {
                     try {
                         mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
                     } catch (IOException e) {
@@ -5610,19 +5622,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         local_video_recorder,
                         profile,
                         want_photo_video_recording,
-                        want_video_imu_recording,
+                        want_save_timestamps,
                         want_save_frames,
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
-                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                if( mVideoFrameInfoWriter != null && want_save_timestamps ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
                                 }
                             }
 
                             @Override
                             public void onVideoFrameTimestampAvailable(long timestamp) {
-                                if (mVideoFrameInfoWriter != null && want_video_imu_recording) {
+                                if( mVideoFrameInfoWriter != null && want_save_timestamps ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp);
                                 }
                             }
@@ -5630,7 +5642,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                             @Override
                             public void onVideoCaptureSessionClosed() {
                                 stopVideoPostPrepare(false);
-                                if (mVideoFrameInfoWriter != null) {
+                                if( mVideoFrameInfoWriter != null ) {
                                     mVideoFrameInfoWriter.close();
                                     mVideoFrameInfoWriter = null;
                                 }
@@ -5803,9 +5815,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     });
                 }
             }
-            long flashStrobePeriod = applicationInterface.getSensorSampleRatePref(
-                    PreferenceKeys.FlashStrobeFreqPreferenceKey
-            );
+            PreferenceHandler prefs = applicationInterface.getPrefs();
+            long flashStrobePeriod = prefs.getSensorSampleRate(PreferenceKeys.FlashStrobeFreqPreferenceKey);
             flashVideoTimer.scheduleAtFixedRate(flashVideoTimerTask = new FlashVideoTimerTask(), 0, flashStrobePeriod);
         }
 

@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MainActivity;
@@ -741,7 +742,7 @@ public class MainUI {
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, R.id.recSync);
                 layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, 0);
             }
             else {
                 layoutParams.addRule(align_right, R.id.recSync);
@@ -750,7 +751,7 @@ public class MainUI {
                 layoutParams.addRule(left_of, 0);
                 layoutParams.addRule(right_of, 0);
                 layoutParams.addRule(align_parent_top, 0);
-                layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+                layoutParams.addRule(align_parent_bottom, 0);
             }
             view.setLayoutParams(layoutParams);
 
@@ -929,7 +930,19 @@ public class MainUI {
             int resource;
             int content_description;
             int switch_video_content_description;
-            if( main_activity.getPreview().isVideo() ) {
+            boolean is_client;
+            {
+                final ExtendedAppInterface appInterface = main_activity.getApplicationInterface();
+                is_client = appInterface.isSoftwareSyncRunning() && !appInterface.getSoftwareSyncController().isLeader();
+            }
+            if( is_client ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "set icon empty");
+                resource = R.drawable.ic_empty;
+                content_description = R.string.do_nothing;
+                switch_video_content_description = R.string.do_nothing;
+            }
+            else if( main_activity.getPreview().isVideo() ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "set icon to video");
                 resource = main_activity.getPreview().isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
@@ -957,7 +970,7 @@ public class MainUI {
 
             view = main_activity.findViewById(R.id.switch_video);
             view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
-            resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
+            resource = is_client ? R.drawable.ic_empty : main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
             view.setImageResource(resource);
             view.setTag(resource); // for testing
         }
@@ -1113,6 +1126,12 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
     }
 
+    public boolean showRecSyncIcon() {
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        return applicationInterface.getPrefs().isEnableRecSyncEnabled() &&
+                applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
+    }
+
     public boolean showStampIcon() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
@@ -1151,6 +1170,7 @@ public class MainUI {
                 // if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
@@ -1204,7 +1224,7 @@ public class MainUI {
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 popupButton.setVisibility(visibility);
-                recSyncButton.setVisibility(visibility);
+                recSyncButton.setVisibility(visibility_recsync);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1280,6 +1300,7 @@ public class MainUI {
                 final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
+                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
@@ -1339,11 +1360,9 @@ public class MainUI {
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
-                recSyncButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility);
+                recSyncButton.setVisibility(visibility_recsync);
 
-                if( show_gui_photo && show_gui_video ) {
-                    layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
-                }
+                layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
             }
         });
     }
@@ -1353,6 +1372,13 @@ public class MainUI {
         boolean enabled = main_activity.getPreview().isExposureLocked();
         view.setImageResource(enabled ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
+    }
+
+    public void updateSwitchVideoIcon() {
+        ImageButton view = main_activity.findViewById(R.id.switch_video);
+        ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        boolean enabled = !applicationInterface.isSoftwareSyncRunning() || applicationInterface.getSoftwareSyncController().isLeader();
+        view.setEnabled(enabled);
     }
 
     public void updateWhiteBalanceLockIcon() {
@@ -1463,6 +1489,7 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+        this.updateSwitchVideoIcon();
     }
 
     public void audioControlStarted() {
@@ -2425,6 +2452,21 @@ public class MainUI {
             if( MyDebug.LOG )
                 Log.d(TAG, "create new rec_sync_view");
             rec_sync_view = new RecSyncView(main_activity);
+
+            rec_sync_view.setSyncSettingsOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonSyncSettings");
+
+                main_activity.clickedSyncSettings();
+            });
+
+            rec_sync_view.setAlignPhasesOnClickListener(view -> {
+                if (MyDebug.LOG)
+                    Log.d(TAG, "clicked to buttonAlignPhases");
+
+                main_activity.clickedAlignPhases();
+            });
+
             rec_sync_container.addView(rec_sync_view);
         }
         else {
@@ -2490,7 +2532,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "close RecSync");
         if( recSyncIsOpen() ) {
-            clearRemoteControlForPopup(); // TODO what is it?
+            // TODO clear RemoteControl when it is going to be implemented
             clearSelectionState();
 
             rec_sync_view_is_open = false;
@@ -2499,19 +2541,23 @@ public class MainUI {
                 rec_sync_view.setVisibility(View.GONE);
             }
             else {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "destroyRecSync");
-                force_destroy_rec_sync = false;
-                if( recSyncIsOpen() ) {
-                    closeRecSync();
-                }
-                ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
-                rec_sync_container.removeAllViews();
-                rec_sync_view = null;
+                destroyRecSync();
             }
 
             main_activity.initImmersiveMode(); // to reset the timer when closing the recsync
         }
+    }
+
+    public void destroyRecSync() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "destroyRecSync");
+        force_destroy_rec_sync = false;
+        if( recSyncIsOpen() ) {
+            closeRecSync();
+        }
+        ViewGroup rec_sync_container = main_activity.findViewById(R.id.rec_sync_container);
+        rec_sync_container.removeAllViews();
+        rec_sync_view = null;
     }
 
     public boolean recSyncIsOpen() {
@@ -3217,6 +3263,10 @@ public class MainUI {
 
     public PopupView getPopupView() {
         return popup_view;
+    }
+
+    public RecSyncView getRecSyncView() {
+        return rec_sync_view;
     }
 
     public boolean testGetRemoteControlMode() {
