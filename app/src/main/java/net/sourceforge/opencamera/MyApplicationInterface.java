@@ -1906,7 +1906,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public void touchEvent(MotionEvent event) {
         main_activity.getMainUI().closeExposureUI();
         main_activity.getMainUI().closePopup();
-        main_activity.getMainUI().closeRecSync();
         if( main_activity.usingKitKatImmersiveMode() ) {
             main_activity.setImmersiveMode(false);
         }
@@ -2630,7 +2629,6 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "cameraClosed");
         this.stopPanorama(true);
         main_activity.getMainUI().closeExposureUI();
-        main_activity.getMainUI().closeRecSync();
         main_activity.getMainUI().destroyPopup(); // need to close popup - and when camera reopened, it may have different settings
         drawPreview.clearContinuousFocusMove();
     }
