@@ -1804,10 +1804,11 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
     }
 
-    public void clickedSyncSettings() {
+    public void clickedSyncSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
         syncSettings();
+        mainUI.updateSyncSettingsIcon();
     }
 
     public void syncSettings() {
@@ -2203,12 +2204,6 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedExposure");
         mainUI.toggleExposureUI();
-    }
-
-    public void clickedRecSyncSettings(View view) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "clickedRecSyncSettings");
-        // mainUI.toggleRecSyncSettings();
     }
 
     public void clickedSettings(View view) {
@@ -2927,6 +2922,11 @@ public class MainActivity extends Activity {
         }
         if( !mainUI.showFaceDetectionIcon() ) {
             View button = findViewById(R.id.face_detection);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showSyncSettingsIcon() ) {
+            View button = findViewById(R.id.sync_settings);
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }

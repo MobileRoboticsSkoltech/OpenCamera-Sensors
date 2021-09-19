@@ -319,7 +319,7 @@ public class MainUI {
             }
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
-            buttons_permanent.add(main_activity.findViewById(R.id.recSync));
+            buttons_permanent.add(main_activity.findViewById(R.id.sync_settings));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
@@ -1018,7 +1018,7 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
     }
 
-    public boolean showRecSyncIcon() {
+    public boolean showSyncSettingsIcon() {
         final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
         return applicationInterface.getPrefs().isEnableRecSyncEnabled() &&
                 applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
@@ -1062,7 +1062,6 @@ public class MainUI {
                 // if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
-                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
@@ -1081,7 +1080,7 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
-                View recSyncButton = main_activity.findViewById(R.id.recSync);
+                View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
                 View galleryButton = main_activity.findViewById(R.id.gallery);
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
@@ -1113,10 +1112,11 @@ public class MainUI {
                     cycleFlashButton.setVisibility(visibility);
                 if( showFaceDetectionIcon() )
                     faceDetectionButton.setVisibility(visibility);
+                if( showSyncSettingsIcon() )
+                    syncSettingsButton.setVisibility(visibility);
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 popupButton.setVisibility(visibility);
-                recSyncButton.setVisibility(visibility_recsync);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1192,7 +1192,6 @@ public class MainUI {
                 final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
-                final int visibility_recsync = showRecSyncIcon() ? visibility : View.GONE; // for UI that is hidden when the device is not a RecSync leader
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
@@ -1208,7 +1207,7 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
-                View recSyncButton = main_activity.findViewById(R.id.recSync);
+                View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
                 if( main_activity.showSwitchMultiCamIcon() )
@@ -1234,6 +1233,8 @@ public class MainUI {
                     cycleFlashButton.setVisibility(visibility);
                 if( showFaceDetectionIcon() )
                     faceDetectionButton.setVisibility(visibility);
+                if( showSyncSettingsIcon() )
+                    syncSettingsButton.setVisibility(visibility);
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 if( !(show_gui_photo && show_gui_video) ) {
@@ -1251,7 +1252,6 @@ public class MainUI {
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
-                recSyncButton.setVisibility(visibility_recsync);
 
                 layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
             }
@@ -1368,6 +1368,14 @@ public class MainUI {
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.face_detection_disable : R.string.face_detection_enable) );
     }
 
+    public void updateSyncSettingsIcon() {
+        ImageButton view = main_activity.findViewById(R.id.sync_settings);
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        boolean enabled = applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isSettingsBroadcasting();
+        view.setImageResource(enabled ? R.drawable.ic_sync_settings_red_48dp : R.drawable.ic_sync_settings_48dp);
+        view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.sync_settings_locked : R.string.sync_settings_unlocked) );
+    }
+
     public void updateOnScreenIcons() {
         if( MyDebug.LOG )
             Log.d(TAG, "updateOnScreenIcons");
@@ -1381,6 +1389,7 @@ public class MainUI {
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
         this.updateSwitchVideoIcon();
+        this.updateSyncSettingsIcon();
     }
 
     public void audioControlStarted() {

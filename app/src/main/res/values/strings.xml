@@ -88,7 +88,6 @@
     <string name="preference_sync_format_summary">Whether to sync the file format used for saving photos or videos (depends on the capture mode selected by a leader at the time of synchronization). If the selected format is unsupported by a client then it remains unchanged.</string>
 
     <string name="recsync_unsupported_summary">Camera2 API, manual exposure time support and Android 7.0 or higher required</string>
-    <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
     <string name="sync_settings_locked">Stop settings broadcast</string>
     <string name="settings_broadcast_started">Settings broadcast started</string>

@@ -87,7 +87,6 @@
     <string name="preference_sync_format_summary">Синхронизировать ли формат файла, используемый для сохранения фото и видео (зависит от режима съемки, выбранного лидером в момент синхронизации). Если выбранный формат не поддерживается клиентом, то его настройка не изменяется.</string>
 
     <string name="recsync_unsupported_summary">Требуется поддержка Camera2 API, ручного режима экспозиции и Android 7.0 или выше</string>
-    <string name="rec_sync_settings">Настройки RecSync</string>
     <string name="sync_settings_unlocked">Блокировать и синх. настройки</string>
     <string name="sync_settings_locked">Остановить передачу настроек</string>
     <string name="settings_broadcast_started">Передача настроек началась</string>
