@@ -42,6 +42,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.ZoomControls;
 
+import com.googleresearch.capturesync.SoftwareSyncController;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -492,6 +494,9 @@ public class MainUI {
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
             layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
+            setViewRotation(view, ui_rotation);
+
+            view = main_activity.findViewById(R.id.align_phases);
             setViewRotation(view, ui_rotation);
 
             view = main_activity.findViewById(R.id.zoom);
@@ -1020,8 +1025,13 @@ public class MainUI {
 
     public boolean showSyncSettingsIcon() {
         final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
-        return applicationInterface.getPrefs().isEnableRecSyncEnabled() &&
-                applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
+        return applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
+    }
+
+    public boolean showAlignPhasesIcon() {
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        return applicationInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
     }
 
     public boolean showStampIcon() {
@@ -1081,6 +1091,7 @@ public class MainUI {
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
                 View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
+                View alignPhasesButton = main_activity.findViewById(R.id.align_phases);
                 View galleryButton = main_activity.findViewById(R.id.gallery);
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
@@ -1094,6 +1105,8 @@ public class MainUI {
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility);
+                if( showAlignPhasesIcon() )
+                    alignPhasesButton.setVisibility(visibility);
                 if( showExposureLockIcon() )
                     exposureLockButton.setVisibility(visibility);
                 if( showWhiteBalanceLockIcon() )
@@ -1208,6 +1221,7 @@ public class MainUI {
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
                 View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
+                View alignPhasesButton = main_activity.findViewById(R.id.align_phases);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
                 if( main_activity.showSwitchMultiCamIcon() )
@@ -1215,6 +1229,8 @@ public class MainUI {
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
+                if( showAlignPhasesIcon() )
+                    alignPhasesButton.setVisibility(visibility);
                 if( showExposureLockIcon() )
                     exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
                 if( showWhiteBalanceLockIcon() )
@@ -1371,7 +1387,8 @@ public class MainUI {
     public void updateSyncSettingsIcon() {
         ImageButton view = main_activity.findViewById(R.id.sync_settings);
         final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
-        boolean enabled = applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isSettingsBroadcasting();
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        boolean enabled = applicationInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
         view.setImageResource(enabled ? R.drawable.ic_sync_settings_red_48dp : R.drawable.ic_sync_settings_48dp);
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.sync_settings_locked : R.string.sync_settings_unlocked) );
     }

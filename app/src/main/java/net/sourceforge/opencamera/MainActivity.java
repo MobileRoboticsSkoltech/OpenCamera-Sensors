@@ -1809,6 +1809,10 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedSyncSettings");
         syncSettings();
         mainUI.updateSyncSettingsIcon();
+
+        // need to update alignPhases button visibility
+        View button = findViewById(R.id.align_phases);
+        button.setVisibility(mainUI.showAlignPhasesIcon() ? View.VISIBLE : View.GONE);
     }
 
     public void syncSettings() {
@@ -1833,7 +1837,7 @@ public class MainActivity extends Activity {
         //         R.string.sync_settings_locked : R.string.sync_settings_unlocked);
     }
 
-    public void clickedAlignPhases() {
+    public void clickedAlignPhases(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedAlignPhases");
         alignPhases();
@@ -2927,6 +2931,11 @@ public class MainActivity extends Activity {
         }
         if( !mainUI.showSyncSettingsIcon() ) {
             View button = findViewById(R.id.sync_settings);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showAlignPhasesIcon() ) {
+            View button = findViewById(R.id.align_phases);
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
