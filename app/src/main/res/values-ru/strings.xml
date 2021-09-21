@@ -73,7 +73,9 @@
 
     <string name="preference_rec_sync_settings">Настройки RecSync…</string>
     <string name="preference_enable_rec_sync">Использовать RecSync</string>
-    <string name="preference_enable_rec_sync_summary">Включить или выключить RecSync. Он используется для синхронизированной записи с нескольких камер. Требуется поддержка Camera2 API и включённый Wi-Fi или хотспот.</string>
+    <string name="preference_enable_rec_sync_summary">Включить или выключить RecSync. Он используется для синхронизированной записи с нескольких камер. Требуется поддержка Camera2 API и включённый Wi-Fi или точка доступа.</string>
+    <string name="preference_enable_phase_alignment">Включить выравнивание фазы</string>
+    <string name="preference_enable_phase_alignment_summary">Позволяет синхронизировать видео с погрешностью менее миллисекунды через выравнивание фазы кадра. Для корректной работы требуется использовать устройства одинаковой модели с поддержкой временных меток кадра в реальном времени.</string>
     <string name="preference_sync_settings">Синхронизация настроек</string>
     <string name="preference_sync_exposure">Экспозиция</string>
     <string name="preference_sync_exposure_summary">Экспозиция всегда синхронизируется и блокируется.</string>

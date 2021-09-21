@@ -121,6 +121,8 @@ public class PreferenceKeys {
 
     public static final String EnableRecSyncPreferenceKey = "preference_enable_rec_sync";
 
+    public static final String EnablePhaseAlignmentPreferenceKey = "preference_enable_phase_alignment";
+
     public static final String SyncIsoPreferenceKey = "preference_sync_iso";
 
     public static final String SyncWbPreferenceKey = "preference_sync_wb";

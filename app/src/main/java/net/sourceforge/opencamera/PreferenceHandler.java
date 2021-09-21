@@ -32,6 +32,10 @@ public class PreferenceHandler {
         return mSharedPreferences.getBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, false);
     }
 
+    public boolean isEnablePhaseAlignmentEnabled() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.EnablePhaseAlignmentPreferenceKey, false);
+    }
+
     public boolean isSyncIsoEnabled() {
         return mSharedPreferences.getBoolean(PreferenceKeys.SyncIsoPreferenceKey, false);
     }

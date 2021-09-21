@@ -1031,7 +1031,8 @@ public class MainUI {
     public boolean showAlignPhasesIcon() {
         final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
         final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        return applicationInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
+        return applicationInterface.getPrefs().isEnablePhaseAlignmentEnabled() && applicationInterface.isSoftwareSyncRunning() &&
+                softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
     }
 
     public boolean showStampIcon() {
