@@ -65,6 +65,7 @@ public class SoftwareSyncController implements Closeable {
     private AlignPhasesTask mAlignPhasesTask;
 
     private boolean mIsLeader;
+    private boolean mIsPeriodCalculated = false;
     private State mState = State.IDLE;
 
     /**
@@ -226,8 +227,14 @@ public class SoftwareSyncController implements Closeable {
                         throw new IllegalStateException("Received recording request in photo mode");
                     }
                     if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
-                        mState = (mState == State.RECORDING) ? State.IDLE : State.RECORDING;
+                        if (mState == State.RECORDING) {
+                            mIsPeriodCalculated = false;
+                            mState = State.IDLE;
+                        } else {
+                            mState = State.RECORDING;
+                        }
                         mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
+                        // TODO: if the recording is finished need to prepare for the next one
                     }
                 });
 
@@ -308,14 +315,17 @@ public class SoftwareSyncController implements Closeable {
                 return null;
             }
 
-            Log.v(TAG, "Calculating frames period.");
-            mSoftwareSyncController.mState = State.PERIOD_CALCULATION;
-            try {
-                long periodNs = mPeriodCalculator.getPeriodNs();
-                Log.i(TAG, "Calculated frames period: " + periodNs);
-                mPhaseAlignController.setPeriodNs(periodNs);
-            } catch (InterruptedException | NoSuchElementException e) {
-                Log.e(TAG, "Failed calculating frames period: ", e);
+            if (!mSoftwareSyncController.mIsPeriodCalculated) {
+                Log.v(TAG, "Calculating frames period.");
+                mSoftwareSyncController.mState = State.PERIOD_CALCULATION;
+                try {
+                    long periodNs = mPeriodCalculator.getPeriodNs();
+                    Log.i(TAG, "Calculated frames period: " + periodNs);
+                    mPhaseAlignController.setPeriodNs(periodNs);
+                    mSoftwareSyncController.mIsPeriodCalculated = true;
+                } catch (InterruptedException | NoSuchElementException e) {
+                    Log.e(TAG, "Failed calculating frames period: ", e);
+                }
             }
 
             // Note: One could pass the current phase of the leader and have all clients sync to
@@ -398,6 +408,13 @@ public class SoftwareSyncController implements Closeable {
     }
 
     /**
+     * Clears frames period state so it is to be recalculated during the next phase alignment.
+     */
+    public void clearPeriodState() {
+        mIsPeriodCalculated = false;
+    }
+
+    /**
      * Indicates whether this device is a leader.
      *
      * @return true if this device is a leader, false if it is a client.
@@ -412,7 +429,7 @@ public class SoftwareSyncController implements Closeable {
      * @return true if the last alignment attempt was successful, false if it wasn't or no attempts
      * were made.
      */
-    public boolean isAligned() {
+    public boolean wasAligned() {
         return mPhaseAlignController.wasAligned();
     }
 

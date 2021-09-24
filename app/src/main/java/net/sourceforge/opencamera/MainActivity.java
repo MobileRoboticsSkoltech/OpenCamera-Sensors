@@ -1830,6 +1830,8 @@ public class MainActivity extends Activity {
             settings = SyncSettingsContainer.buildFrom(this);
             applicationInterface.getSoftwareSyncUtils().scheduleBroadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
+        } else {
+            softwareSyncController.clearPeriodState();
         }
 
         softwareSyncController.switchSettingsLock(settings);
@@ -2447,6 +2449,10 @@ public class MainActivity extends Activity {
         applicationInterface.stopPanorama(true); // important to stop panorama recording, as we might end up as we'll be changing camera parameters when the settings window closes
         stopAudioListeners();
 
+        if( applicationInterface.isSoftwareSyncRunning() ) {
+            applicationInterface.getSoftwareSyncController().clearPeriodState();
+        }
+
         Bundle bundle = new Bundle();
         bundle.putBoolean(PreferenceKeys.SupportsGyroKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_GYROSCOPE));
         bundle.putBoolean(PreferenceKeys.SupportsAccelKey, mRawSensorInfo.isSensorAvailable(Sensor.TYPE_ACCELEROMETER));
@@ -2990,6 +2996,8 @@ public class MainActivity extends Activity {
                 mainUI.destroyPopup();
             }
         }
+
+        // TODO: check if RecSync is running and camera needs to be prepared
     }
 
     @Override
