@@ -1556,7 +1556,6 @@ public class MainActivity extends Activity {
         }
 
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
-        mainUI.destroyRecSync(); // in case connection type changes (and so does the leadership)
         mSensorManager.unregisterListener(accelerometerListener);
         magneticSensor.unregisterMagneticListener(mSensorManager);
         orientationEventListener.disable();
@@ -1723,7 +1722,6 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the geotagging setting
         initLocation(); // required to enable or disable GPS, also requests permission if necessary
         this.closePopup();
-        this.closeRecSync();
 
         String message = getResources().getString(R.string.preference_location) + ": " + getResources().getString(value ? R.string.on : R.string.off);
         preview.showToast(store_location_toast, message);
@@ -1733,7 +1731,6 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedTextStamp");
         this.closePopup();
-        this.closeRecSync();
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle(R.string.preference_textstamp);
@@ -1779,7 +1776,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedStamp");
 
         this.closePopup();
-        this.closeRecSync();
 
         boolean value = applicationInterface.getStampPref().equals("preference_stamp_yes");
         value = !value;
@@ -1808,10 +1804,15 @@ public class MainActivity extends Activity {
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the enable RecSync setting
     }
 
-    public void clickedSyncSettings() {
+    public void clickedSyncSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSyncSettings");
         syncSettings();
+        mainUI.updateSyncSettingsIcon();
+
+        // need to update alignPhases button visibility
+        View button = findViewById(R.id.align_phases);
+        button.setVisibility(mainUI.showAlignPhasesIcon() ? View.VISIBLE : View.GONE);
     }
 
     public void syncSettings() {
@@ -1832,11 +1833,9 @@ public class MainActivity extends Activity {
         }
 
         softwareSyncController.switchSettingsLock(settings);
-        mainUI.getRecSyncView().updateSyncSettingsButton(softwareSyncController.isSettingsBroadcasting() ?
-                R.string.sync_settings_locked : R.string.sync_settings_unlocked);
     }
 
-    public void clickedAlignPhases() {
+    public void clickedAlignPhases(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedAlignPhases");
         alignPhases();
@@ -1893,7 +1892,6 @@ public class MainActivity extends Activity {
         mainUI.updateAutoLevelIcon();
         applicationInterface.getDrawPreview().updateSettings(); // because we cache the auto-stabilise setting
         this.closePopup();
-        this.closeRecSync();
     }
 
     public void clickedCycleFlash(View view) {
@@ -1909,7 +1907,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedFaceDetection");
 
         this.closePopup();
-        this.closeRecSync();
 
         boolean value = applicationInterface.getFaceDetectionPref();
         value = !value;
@@ -1934,7 +1931,6 @@ public class MainActivity extends Activity {
             return;
         }
         this.closePopup();
-        this.closeRecSync();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
         if( audio_control.equals("voice") && speechControl.hasSpeechRecognition() ) {
@@ -2100,7 +2096,6 @@ public class MainActivity extends Activity {
             return;
         }
         this.closePopup();
-        this.closeRecSync();
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextCameraId();
             if( !isMultiCamEnabled() ) {
@@ -2133,7 +2128,6 @@ public class MainActivity extends Activity {
             return;
         }
         this.closePopup();
-        this.closeRecSync();
         if( this.preview.canSwitchCamera() ) {
             int cameraId = getNextMultiCameraId();
             pushCameraIdToast(cameraId);
@@ -2148,7 +2142,6 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "switchVideo");
         this.closePopup();
-        this.closeRecSync();
         mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
 
         // In practice stopping the gyro sensor shouldn't be needed as (a) we don't show the switch
@@ -2215,12 +2208,6 @@ public class MainActivity extends Activity {
         mainUI.toggleExposureUI();
     }
 
-    public void clickedRecSyncSettings(View view) {
-        if( MyDebug.LOG )
-            Log.d(TAG, "clickedRecSyncSettings");
-        mainUI.toggleRecSyncSettings();
-    }
-
     public void clickedSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSettings");
@@ -2231,10 +2218,6 @@ public class MainActivity extends Activity {
         return mainUI.popupIsOpen();
     }
 
-    public boolean recSyncIsOpen() {
-        return mainUI.recSyncIsOpen();
-    }
-
     // for testing
     public View getUIButton(String key) {
         return mainUI.getUIButton(key);
@@ -2242,10 +2225,6 @@ public class MainActivity extends Activity {
 
     public void closePopup() {
         mainUI.closePopup();
-    }
-
-    public void closeRecSync() {
-        mainUI.closeRecSync();
     }
 
     public Bitmap getPreloadedBitmap(int resource) {
@@ -2460,7 +2439,6 @@ public class MainActivity extends Activity {
         if( MyDebug.LOG )
             Log.d(TAG, "openSettings");
         closePopup();
-        closeRecSync();
         preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
         if( this.preview.isVideoRecording() ) {
@@ -2772,7 +2750,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        mainUI.destroyRecSync(); // important as enable RecSync preference might have been changed
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: time after destroy RecSync: " + (System.currentTimeMillis() - debug_time));
         }
@@ -2950,6 +2927,16 @@ public class MainActivity extends Activity {
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
+        if( !mainUI.showSyncSettingsIcon() ) {
+            View button = findViewById(R.id.sync_settings);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
+        if( !mainUI.showAlignPhasesIcon() ) {
+            View button = findViewById(R.id.align_phases);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
         if( !showSwitchMultiCamIcon() ) {
             // also handle the multi-cam icon here, as this can change when switching between front/back cameras
             // (e.g., if say a device only has multiple back cameras)
@@ -3025,10 +3012,6 @@ public class MainActivity extends Activity {
         else {
             if( popupIsOpen() ) {
                 closePopup();
-                return;
-            }
-            if( recSyncIsOpen() ) {
-                closeRecSync();
                 return;
             }
         }
@@ -4507,7 +4490,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "takePicturePressed");
 
         closePopup();
-        closeRecSync();
 
         this.last_continuous_fast_burst = continuous_fast_burst;
         this.preview.takePicturePressed(photo_snapshot, continuous_fast_burst);

@@ -75,6 +75,8 @@
     <string name="preference_rec_sync_settings">RecSync settings…</string>
     <string name="preference_enable_rec_sync">Use RecSync</string>
     <string name="preference_enable_rec_sync_summary">Enable or disable RecSync. It is used for synchronous multi-cam recording. Requires Camera2 API support and Wi-Fi or hotspot to be enabled.</string>
+    <string name="preference_enable_phase_alignment">Enable phase alignment</string>
+    <string name="preference_enable_phase_alignment_summary">Enables the ability to achieve sub-millisecond video synchronization via frame phase alignment. Devices of the same model with realtime timestamping support are needed for this to work properly.</string>
     <string name="preference_sync_settings">Sync settings</string>
     <string name="preference_sync_exposure">Exposure</string>
     <string name="preference_sync_exposure_summary">Exposure time always syncs and locks.</string>
@@ -88,7 +90,6 @@
     <string name="preference_sync_format_summary">Whether to sync the file format used for saving photos or videos (depends on the capture mode selected by a leader at the time of synchronization). If the selected format is unsupported by a client then it remains unchanged.</string>
 
     <string name="recsync_unsupported_summary">Camera2 API, manual exposure time support and Android 7.0 or higher required</string>
-    <string name="rec_sync_settings">RecSync settings</string>
     <string name="sync_settings_unlocked">Lock and sync settings</string>
     <string name="sync_settings_locked">Stop settings broadcast</string>
     <string name="settings_broadcast_started">Settings broadcast started</string>
