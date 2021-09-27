@@ -1029,10 +1029,7 @@ public class MainUI {
     }
 
     public boolean showAlignPhasesIcon() {
-        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
-        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
-        return applicationInterface.getPrefs().isEnablePhaseAlignmentEnabled() && applicationInterface.isSoftwareSyncRunning() &&
-                softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
+        return main_activity.getApplicationInterface().getPrefs().isEnablePhaseAlignmentEnabled();
     }
 
     public boolean showStampIcon() {
@@ -1073,6 +1070,12 @@ public class MainUI {
                 // if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+                final int visibility_settings_sync; // for UI that is hidden when settings are being broadcast
+                {
+                    ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                    SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility;
+                }
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
@@ -1105,11 +1108,11 @@ public class MainUI {
                     switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
-                    exposureButton.setVisibility(visibility);
+                    exposureButton.setVisibility(visibility_settings_sync);
                 if( showAlignPhasesIcon() )
-                    alignPhasesButton.setVisibility(visibility);
+                    alignPhasesButton.setVisibility(visibility_settings_sync == View.GONE ? visibility : View.GONE); // is shown when settings are being broadcast
                 if( showExposureLockIcon() )
-                    exposureLockButton.setVisibility(visibility);
+                    exposureLockButton.setVisibility(visibility_settings_sync);
                 if( showWhiteBalanceLockIcon() )
                     whiteBalanceLockButton.setVisibility(visibility);
                 if( showCycleRawIcon() )
@@ -1130,7 +1133,7 @@ public class MainUI {
                     syncSettingsButton.setVisibility(visibility);
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
-                popupButton.setVisibility(visibility);
+                popupButton.setVisibility(visibility_settings_sync);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1206,6 +1209,14 @@ public class MainUI {
                 final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
+                final int visibility_settings_sync; // for UI that is hidden while taking photo or video and when settings are being broadcast
+                final int visibility_settings_sync_video; // for UI that is hidden while taking photo and when settings are being broadcast
+                {
+                    ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                    SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility;
+                    visibility_settings_sync_video = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility_video;
+                }
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
@@ -1229,11 +1240,11 @@ public class MainUI {
                     switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
-                    exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
+                    exposureButton.setVisibility(visibility_settings_sync_video); // still allow exposure when recording video
                 if( showAlignPhasesIcon() )
-                    alignPhasesButton.setVisibility(visibility);
+                    alignPhasesButton.setVisibility(visibility_settings_sync == View.GONE ? visibility : View.GONE); // is shown when settings are being broadcast
                 if( showExposureLockIcon() )
-                    exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
+                    exposureLockButton.setVisibility(visibility_settings_sync_video); // still allow exposure lock when recording video
                 if( showWhiteBalanceLockIcon() )
                     whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
                 if( showCycleRawIcon() )
@@ -1268,7 +1279,7 @@ public class MainUI {
                         Log.d(TAG, "Remote control DISconnected");
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
-                popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
+                popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_settings_sync_video : visibility_settings_sync); // still allow popup in order to change flash mode when recording video
 
                 layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
             }

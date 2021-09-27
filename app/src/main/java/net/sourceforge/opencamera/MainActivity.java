@@ -1810,9 +1810,13 @@ public class MainActivity extends Activity {
         syncSettings();
         mainUI.updateSyncSettingsIcon();
 
-        // need to update alignPhases button visibility
-        View button = findViewById(R.id.align_phases);
-        button.setVisibility(mainUI.showAlignPhasesIcon() ? View.VISIBLE : View.GONE);
+        // need to update button visibility
+        if( mainUI.inImmersiveMode() ) {
+            mainUI.setImmersiveMode(true);
+        } else {
+            mainUI.showGUI();
+        }
+        mainUI.layoutUI();
     }
 
     public void syncSettings() {
@@ -4882,7 +4886,11 @@ public class MainActivity extends Activity {
         // However still nee to update visibility of icons where visibility depends on camera setup - e.g., exposure button
         // not supported for high speed video frame rates - see testTakeVideoFPSHighSpeedManual().
         View exposureButton = findViewById(R.id.exposure);
-        exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+        {
+            SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+            exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() &&
+                    !(applicationInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting()) ? View.VISIBLE : View.GONE);
+        }
 
         // needed as availability of some icons is per-camera (e.g., flash, RAW)
         // for making icons visible, this is done elsewhere in call to MainUI.showGUI()
