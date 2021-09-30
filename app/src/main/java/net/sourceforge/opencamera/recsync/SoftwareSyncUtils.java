@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.recsync;
 
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -29,7 +28,6 @@ public class SoftwareSyncUtils {
     private final ExtendedAppInterface mApplicationInterface;
     private final SoftwareSyncController mSoftwareSyncController;
 
-    private final Handler mSendSettingsHandler = new Handler();
     private Runnable mApplySettingsRunnable = null;
 
     public SoftwareSyncUtils(MainActivity mainActivity) {
@@ -72,33 +70,27 @@ public class SoftwareSyncUtils {
     }
 
     /**
-     * Schedules a broadcast of the current settings to clients. The settings will be applied to the
-     * leader too.
+     * Broadcasts the current settings to clients. The settings are applied to the leader too.
      *
      * @param settings describes the settings to be broadcast.
      * @throws IllegalStateException if after the delay {@link SoftwareSyncController} is not
      *                               initialized or this device is not a leader.
      */
-    public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
-        mSendSettingsHandler.removeCallbacks(null);
-        mSendSettingsHandler.postDelayed(
-                () -> {
-                    Log.d(TAG, "Broadcasting current settings.");
+    public void broadcastSettings(SyncSettingsContainer settings) {
+        Log.d(TAG, "Broadcasting current settings.");
 
-                    if (!mApplicationInterface.isSoftwareSyncRunning()) {
-                        throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
-                    }
-                    if (!mSoftwareSyncController.isLeader()) {
-                        throw new IllegalStateException("Cannot broadcast settings from a client");
-                    }
+        if (!mApplicationInterface.isSoftwareSyncRunning()) {
+            throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
+        }
+        if (!mSoftwareSyncController.isLeader()) {
+            throw new IllegalStateException("Cannot broadcast settings from a client");
+        }
 
-                    // Send settings to all devices
-                    ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
-                            SoftwareSyncController.METHOD_SET_SETTINGS,
-                            settings.serializeToString()
-                    );
-                },
-                500);
+        // Send settings to all devices
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_SET_SETTINGS,
+                settings.serializeToString()
+        );
     }
 
     /**

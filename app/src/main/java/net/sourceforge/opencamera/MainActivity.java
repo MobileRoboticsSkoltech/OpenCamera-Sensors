@@ -1832,7 +1832,7 @@ public class MainActivity extends Activity {
 
         if( !softwareSyncController.isSettingsBroadcasting() ) {
             settings = SyncSettingsContainer.buildFrom(this);
-            applicationInterface.getSoftwareSyncUtils().scheduleBroadcastSettings(settings); // leader's settings are locked here as well
+            applicationInterface.getSoftwareSyncUtils().broadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         } else {
             softwareSyncController.clearPeriodState();
