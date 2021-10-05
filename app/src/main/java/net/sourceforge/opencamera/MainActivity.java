@@ -1836,6 +1836,7 @@ public class MainActivity extends Activity {
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         } else {
             softwareSyncController.clearPeriodState();
+            applicationInterface.getSoftwareSyncUtils().broadcastClearVideoPreparationRequest();
         }
 
         softwareSyncController.switchSettingsLock(settings);
@@ -3001,7 +3002,9 @@ public class MainActivity extends Activity {
             }
         }
 
-        // TODO: check if RecSync is running and camera needs to be prepared
+        if( applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isVideoPreparationNeeded() ) {
+            applicationInterface.getSoftwareSyncUtils().prepareVideoRecording();
+        }
     }
 
     @Override

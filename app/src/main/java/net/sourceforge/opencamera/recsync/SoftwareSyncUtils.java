@@ -26,6 +26,7 @@ public class SoftwareSyncUtils {
 
     private final MainActivity mMainActivity;
     private final ExtendedAppInterface mApplicationInterface;
+    private final Preview mPreview;
     private final SoftwareSyncController mSoftwareSyncController;
 
     private Runnable mApplySettingsRunnable = null;
@@ -33,6 +34,7 @@ public class SoftwareSyncUtils {
     public SoftwareSyncUtils(MainActivity mainActivity) {
         mMainActivity = mainActivity;
         mApplicationInterface = mMainActivity.getApplicationInterface();
+        mPreview = mMainActivity.getPreview();;
         mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 
@@ -65,8 +67,40 @@ public class SoftwareSyncUtils {
         }
         ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
                 SoftwareSyncController.METHOD_RECORD,
-                String.valueOf(mMainActivity.getPreview().isVideoRecording())
+                String.valueOf(mPreview.isVideoRecording())
         );
+    }
+
+    /**
+     * Prepares the application for video recording to be started to the moment when
+     * {@link android.hardware.camera2.CameraCaptureSession} gets reopened.
+     *
+     * Removes the previous preparation if there was one.
+     */
+    public void prepareVideoRecording() {
+        removeVideoRecordingPreparation(); // In case we want to re-prepare for some reason
+
+        mPreview.prepareVideoRecording();
+    }
+
+    /**
+     * Removes the preparation for video recording of the application if it is set.
+     */
+    public void removeVideoRecordingPreparation() {
+        if (mPreview.isVideoRecordingPrepared()) mPreview.stopVideo(false);
+    }
+
+    /**
+     * Starts video recording if the application was previously prepared for it by calling
+     * {@link #prepareVideoRecording}.
+     *
+     * @return true if the recording was started, false otherwise.
+     */
+    public boolean startPreparedVideoRecording() {
+        if (!mPreview.isVideoRecordingPrepared()) return false;
+
+        mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
+        return true;
     }
 
     /**
@@ -91,6 +125,14 @@ public class SoftwareSyncUtils {
                 SoftwareSyncController.METHOD_SET_SETTINGS,
                 settings.serializeToString()
         );
+    }
+
+    /**
+     * Broadcasts a request to remove the video recording preparation.
+     */
+    public void broadcastClearVideoPreparationRequest() {
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_STOP_PREPARE, "");
     }
 
     /**

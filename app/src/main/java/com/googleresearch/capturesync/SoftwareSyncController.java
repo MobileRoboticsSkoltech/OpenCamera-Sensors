@@ -66,6 +66,7 @@ public class SoftwareSyncController implements Closeable {
 
     private boolean mIsLeader;
     private boolean mIsPeriodCalculated = false;
+    private boolean mIsVideoPreparationNeeded = false;
     private State mState = State.IDLE;
 
     /**
@@ -95,6 +96,10 @@ public class SoftwareSyncController implements Closeable {
      * Tell devices to start or stop video recording.
      */
     public static final int METHOD_RECORD = 200_003;
+    /**
+     * Tell devices to remove video recording preparation.
+     */
+    public static final int METHOD_STOP_PREPARE = 200_004;
 
     private long mUpcomingTriggerTimeNs;
 
@@ -204,9 +209,23 @@ public class SoftwareSyncController implements Closeable {
                     }
 
                     if (settings != null) {
+                        mIsVideoPreparationNeeded = true;
                         mState = State.SETTINGS_APPLICATION;
-                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> mState = State.IDLE);
+                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> {
+                            mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording();
+                            mState = State.IDLE;
+                        });
                     }
+                });
+
+        // Remove video preparation
+        sharedRpcs.put(
+                METHOD_STOP_PREPARE,
+                payload -> {
+                    Log.d(TAG, "Request to clear video recording preparation received.");
+
+                    mIsVideoPreparationNeeded = false;
+                    mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
                 });
 
         // Switch the recording status (start or stop video recording) to the opposite of the received one.
@@ -227,14 +246,20 @@ public class SoftwareSyncController implements Closeable {
                         throw new IllegalStateException("Received recording request in photo mode");
                     }
                     if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
-                        if (mState == State.RECORDING) {
+                        if (mState == State.RECORDING) { // Need to stop recording.
                             mIsPeriodCalculated = false;
-                            mState = State.IDLE;
-                        } else {
+                            mMainActivity.runOnUiThread(() -> {
+                                mMainActivity.takePicturePressed(false, false);
+                                mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording(); // Prepare to the next recording
+                                mState = State.IDLE;
+                            });
+                        } else { // Need to start recording.
                             mState = State.RECORDING;
+                            if (!mMainActivity.getApplicationInterface().getSoftwareSyncUtils().startPreparedVideoRecording()) {
+                                mState = State.IDLE;
+                                // TODO: inform user that preparation is required.
+                            }
                         }
-                        mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
-                        // TODO: if the recording is finished need to prepare for the next one
                     }
                 });
 
@@ -256,21 +281,27 @@ public class SoftwareSyncController implements Closeable {
             // Client.
             Map<Integer, RpcCallback> clientRpcs = new HashMap<>(sharedRpcs);
 
-            // Update status text to "waiting for leader".
+            // Adjust the state when waiting for the first connection to a leader.
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
-                    payload ->
-                            mMainActivity.runOnUiThread(
-                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName())));
+                    payload -> {
+                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
+                        mIsVideoPreparationNeeded = false;
+                        mMainActivity.runOnUiThread(
+                                () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()));
+                    });
 
-            // Update status text to "waiting for sync".
+            // Adjust the state after the connection with a leader is lost.
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
-                    payload ->
-                            mMainActivity.runOnUiThread(
-                                    () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName())));
+                    payload -> {
+                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
+                        mIsVideoPreparationNeeded = false;
+                        mMainActivity.runOnUiThread(
+                                () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName()));
+                    });
 
-            // Update status text to "synced to leader".
+            // Adjust the state after connecting to a leader.
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_OFFSET_UPDATED,
                     payload ->
@@ -427,7 +458,7 @@ public class SoftwareSyncController implements Closeable {
      * Indicates whether the last finished alignment attempt was successful.
      *
      * @return true if the last alignment attempt was successful, false if it wasn't or no attempts
-     * were made.
+     * have been made.
      */
     public boolean wasAligned() {
         return mPhaseAlignController.wasAligned();
@@ -438,13 +469,22 @@ public class SoftwareSyncController implements Closeable {
      * will receive the previously saved settings of the leader.
      *
      * @return true if the settings are being broadcast, false if they are not.
-     * @throws IllegalStateException if the device if not a leader.
+     * @throws IllegalStateException if the device is not a leader.
      */
     public boolean isSettingsBroadcasting() {
         if (mIsLeader) {
             return ((SoftwareSyncLeader) mSoftwareSync).getSavedSettings() != null;
         }
         throw new IllegalStateException("Cannot check the settings lock status for a client");
+    }
+
+    /**
+     * Shows whether is device is expected to be prepared for video recording.
+     *
+     * @return true if video recording preparation is expected, false otherwise.
+     */
+    public boolean isVideoPreparationNeeded() {
+        return mIsVideoPreparationNeeded;
     }
 
     /**
