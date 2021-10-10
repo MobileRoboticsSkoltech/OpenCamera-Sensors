@@ -51,8 +51,9 @@ public class PeriodCalculator {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private List<Long> getDiff(ArrayList<Long> list) {
+        // TODO: check if filtering remains necessary after phase alignment gets fixed.
         List<Long> result = StreamUtils.zip(list.stream(), list.stream().skip(1),
-                (Long x, Long y) -> y - x).collect(Collectors.toList());
+                (Long x, Long y) -> y - x).filter(it -> it != 0L).collect(Collectors.toList());
         return result;
     }
 
