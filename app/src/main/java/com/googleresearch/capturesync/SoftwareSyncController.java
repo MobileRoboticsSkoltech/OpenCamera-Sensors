@@ -247,7 +247,6 @@ public class SoftwareSyncController implements Closeable {
                     }
                     if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
                         if (mState == State.RECORDING) { // Need to stop recording.
-                            mIsPeriodCalculated = false;
                             mMainActivity.runOnUiThread(() -> {
                                 mMainActivity.takePicturePressed(false, false);
                                 mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording(); // Prepare to the next recording
