@@ -2456,6 +2456,7 @@ public class MainActivity extends Activity {
 
         if( applicationInterface.isSoftwareSyncRunning() ) {
             applicationInterface.getSoftwareSyncController().clearPeriodState();
+            applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
         }
 
         Bundle bundle = new Bundle();
@@ -3000,10 +3001,6 @@ public class MainActivity extends Activity {
                 // sync (e.g., changing the Repeat Mode)
                 mainUI.destroyPopup();
             }
-        }
-
-        if( applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isVideoPreparationNeeded() ) {
-            applicationInterface.getSoftwareSyncUtils().prepareVideoRecording();
         }
     }
 

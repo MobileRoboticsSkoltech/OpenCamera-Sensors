@@ -157,8 +157,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     public void cameraOpened() {
-        // Should be at the end of this method as it may close the camera
         if (isSoftwareSyncRunning()) {
+            if (mSoftwareSyncController.isVideoPreparationNeeded()) {
+                mSoftwareSyncUtils.prepareVideoRecording();
+            }
+
+            // Should be at the end of this method as it may close the camera
             final Runnable applySettingsRunnable = mSoftwareSyncUtils.getApplySettingsRunnable();
             if (applySettingsRunnable != null) {
                 applySettingsRunnable.run();
