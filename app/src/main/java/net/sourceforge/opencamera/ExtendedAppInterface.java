@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -248,6 +249,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         super.stoppingVideo();
+    }
+
+    @Override
+    public void stoppedVideo(VideoMethod video_method, Uri uri, String filename) {
+        super.stoppedVideo(video_method, uri, filename);
+
+        // Prepare to the next recording
+        if (mSoftwareSyncController.isVideoPreparationNeeded()) mSoftwareSyncUtils.prepareVideoRecording();
     }
 
     public void onFrameInfoRecordingFailed() {
