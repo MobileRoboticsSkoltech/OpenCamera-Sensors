@@ -5632,21 +5632,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 boolean want_save_frames = prefs.isSaveFramesEnabled();
 
                 if( want_save_timestamps ) {
-                    try {
-                        mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
-                    } catch (IOException e) {
-                        Log.e(TAG, "Exception starting video frame info recorder");
-                        e.printStackTrace();
-                        applicationInterface.onFrameInfoRecordingFailed();
-                        applicationInterface.stoppingVideo();
-
-                        video_recorder.reset();
-                        video_recorder.release();
-                        video_recorder = null;
-                        video_recorder_is_paused = false;
-                        applicationInterface.cameraInOperation(false, true);
-                        this.reconnectCamera(true);
-                    }
+                    mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
                 }
 
                 camera_controller.initVideoRecorderPostPrepare(
@@ -5658,14 +5644,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
-                                if( mVideoFrameInfoWriter != null && want_save_timestamps ) {
+                                if( mVideoFrameInfoWriter != null && isVideoRecording() && want_save_timestamps ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
                                 }
                             }
 
                             @Override
                             public void onVideoFrameTimestampAvailable(long timestamp) {
-                                if( mVideoFrameInfoWriter != null && want_save_timestamps ) {
+                                if( mVideoFrameInfoWriter != null && isVideoRecording() && want_save_timestamps ) {
                                     mVideoFrameInfoWriter.submitProcessFrame(timestamp);
                                 }
                             }
@@ -5755,6 +5741,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         applicationInterface.cameraInOperation(true, true);
         applicationInterface.startingVideo();
+
+        try {
+            mVideoFrameInfoWriter.prepare();
+        } catch (IOException e) {
+            Log.e(TAG, "Exception preparing video frame info recorder");
+            e.printStackTrace();
+            applicationInterface.onFrameInfoRecordingFailed();
+            applicationInterface.stoppingVideo();
+
+            video_recorder.reset();
+            video_recorder.release();
+            video_recorder = null;
+            video_recorder_is_paused = false;
+            applicationInterface.cameraInOperation(false, true);
+            this.reconnectCamera(true);
+        }
 
         try {
             local_video_recorder.start();

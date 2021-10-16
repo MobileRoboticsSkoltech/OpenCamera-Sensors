@@ -92,12 +92,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Create {@link VideoFrameInfo} with the current preferences.
+     * Creates an unprepared {@link VideoFrameInfo} with the current preferences.
      *
      * @return the created {@link VideoFrameInfo}.
-     * @throws IOException if unable to create files for timestamps recording.
      */
-    public VideoFrameInfo setupFrameInfo() throws IOException {
+    public VideoFrameInfo setupFrameInfo() {
         return new VideoFrameInfo(
                 getLastVideoDate(),
                 mMainActivity,
@@ -182,6 +181,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
         }
+
         if (mPrefs.isIMURecordingEnabled() && useCamera2() && (mPrefs.isGyroEnabled() || mPrefs.isAccelEnabled() || mPrefs.isMagneticEnabled())) {
             // Extracting sample rates from shared preferences
             try {

@@ -1261,7 +1261,7 @@ public class CameraController2 extends CameraController {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if (MyDebug.LOG) {
-                Log.d(TAG, "Frame during video recording");
+                Log.d(TAG, "new video frame available");
             }
             Image image = reader.acquireNextImage();
 
@@ -1285,7 +1285,7 @@ public class CameraController2 extends CameraController {
             }
 
             if (MyDebug.LOG) {
-                Log.d(TAG, "Released frame during video recording");
+                Log.d(TAG, "released video frame");
             }
             image.close();
         }
