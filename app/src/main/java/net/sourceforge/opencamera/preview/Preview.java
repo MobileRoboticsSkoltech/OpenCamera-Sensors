@@ -5478,7 +5478,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private boolean prepareVideoRecording(final boolean max_filesize_restart, final MediaRecorder local_video_recorder, final VideoProfile profile) {
         if (MyDebug.LOG)
-            Log.d(TAG, "startVideoRecording");
+            Log.d(TAG, "prepareVideoRecording");
 
         boolean successful = false;
 
@@ -5742,20 +5742,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         applicationInterface.cameraInOperation(true, true);
         applicationInterface.startingVideo();
 
-        try {
-            mVideoFrameInfoWriter.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "Exception preparing video frame info recorder");
-            e.printStackTrace();
-            applicationInterface.onFrameInfoRecordingFailed();
-            applicationInterface.stoppingVideo();
+        if( mVideoFrameInfoWriter != null ) {
+            Log.d(TAG, "preparing videoFrameInfoWriter");
 
-            video_recorder.reset();
-            video_recorder.release();
-            video_recorder = null;
-            video_recorder_is_paused = false;
-            applicationInterface.cameraInOperation(false, true);
-            this.reconnectCamera(true);
+            try {
+                mVideoFrameInfoWriter.prepare();
+            } catch (IOException e) {
+                Log.e(TAG, "Exception preparing video frame info recorder");
+                e.printStackTrace();
+                applicationInterface.onFrameInfoRecordingFailed();
+                applicationInterface.stoppingVideo();
+
+                video_recorder.reset();
+                video_recorder.release();
+                video_recorder = null;
+                video_recorder_is_paused = false;
+                applicationInterface.cameraInOperation(false, true);
+                this.reconnectCamera(true);
+            }
         }
 
         try {
