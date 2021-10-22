@@ -213,6 +213,7 @@ public class SoftwareSyncController implements Closeable {
                         mState = State.SETTINGS_APPLICATION;
                         mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> {
                             mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording();
+                            Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
                         });
                     }
@@ -338,6 +339,8 @@ public class SoftwareSyncController implements Closeable {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         protected Void doInBackground(Void... voids) {
+            Log.d(TAG, "Starting AlignPhasesTask");
+
             if (mSoftwareSyncController.mState != State.IDLE) {
                 Log.d(TAG, "Period calculation and phase alignment cannot be started at state " +
                         mSoftwareSyncController.mState);
