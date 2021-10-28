@@ -72,7 +72,7 @@ public class SoftwareSyncController implements Closeable {
     /**
      * Possible states of RecSync on this device.
      */
-    public enum State {
+    private enum State {
         IDLE, // When other states are not applicable.
         SETTINGS_APPLICATION, // Received setting are being applied.
         PERIOD_CALCULATION, // PeriodCalculator is calculating.
@@ -209,10 +209,10 @@ public class SoftwareSyncController implements Closeable {
                     }
 
                     if (settings != null) {
-                        mIsVideoPreparationNeeded = true;
                         mState = State.SETTINGS_APPLICATION;
                         mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> {
                             mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording();
+                            mIsVideoPreparationNeeded = true;
                             Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
                         });
@@ -280,7 +280,7 @@ public class SoftwareSyncController implements Closeable {
             // Client.
             Map<Integer, RpcCallback> clientRpcs = new HashMap<>(sharedRpcs);
 
-            // Adjust the state when waiting for the first connection to a leader.
+            // Adjust the state when waiting to connect to a leader.
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload -> {
@@ -290,11 +290,10 @@ public class SoftwareSyncController implements Closeable {
                                 () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()));
                     });
 
-            // Adjust the state after the connection with a leader is lost.
+            // Adjust the state when establishing a connection to a leader.
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_SYNCING,
                     payload -> {
-                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
                         mIsVideoPreparationNeeded = false;
                         mMainActivity.runOnUiThread(
                                 () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_sync, mSoftwareSync.getName()));

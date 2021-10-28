@@ -34,7 +34,7 @@ public class SoftwareSyncUtils {
     public SoftwareSyncUtils(MainActivity mainActivity) {
         mMainActivity = mainActivity;
         mApplicationInterface = mMainActivity.getApplicationInterface();
-        mPreview = mMainActivity.getPreview();;
+        mPreview = mMainActivity.getPreview();
         mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 
@@ -74,12 +74,15 @@ public class SoftwareSyncUtils {
     /**
      * Prepares the application for video recording to be started to the moment when
      * {@link android.hardware.camera2.CameraCaptureSession} gets reopened.
-     *
+     * <p>
      * Removes the previous preparation if there was one.
      */
     public void prepareVideoRecording() {
+        Log.d(TAG, "Preparing video recording.");
+
         removeVideoRecordingPreparation(); // In case we want to re-prepare for some reason
 
+        Log.d(TAG, "About to call Preview.prepareVideoRecording().");
         mPreview.prepareVideoRecording();
     }
 
@@ -87,7 +90,12 @@ public class SoftwareSyncUtils {
      * Removes the preparation for video recording of the application if it is set.
      */
     public void removeVideoRecordingPreparation() {
-        if (mPreview.isVideoRecordingPrepared()) mPreview.stopVideo(false);
+        Log.d(TAG, "Removing video recording preparation.");
+
+        if (mPreview.isVideoRecordingPrepared()) {
+            Log.d(TAG, "About to call mPreview.stopVideo().");
+            mPreview.stopVideo(false);
+        }
     }
 
     /**
@@ -149,9 +157,16 @@ public class SoftwareSyncUtils {
         final MainUI mainUI = mMainActivity.getMainUI();
         final SettingsApplicationUtils utils = new SettingsApplicationUtils(preview, mainUI);
 
+        final boolean isModeSwitchRequired = utils.isModeSwitchRequired(settings);
+
         // Create a new runnable to wait until camera is opened
         mApplySettingsRunnable = () -> {
+            Log.d(TAG, "Starting the first part of settings application.");
+
             mApplySettingsRunnable = null;
+
+            // Remove the preparation, because the recording mode might get switched
+            removeVideoRecordingPreparation();
 
             // Close some UI elements for the changes to be reflected in them
             mMainActivity.runOnUiThread(() -> {
@@ -160,10 +175,9 @@ public class SoftwareSyncUtils {
                 mainUI.destroyPopup();
             });
 
-            utils.syncCaptureFormat(settings);
-
-            // Need to wait until camera gets reopened
             mApplySettingsRunnable = () -> {
+                Log.d(TAG, "Starting the second part of settings application.");
+
                 mApplySettingsRunnable = null;
 
                 utils.setCameraController(preview.getCameraController());
@@ -176,11 +190,18 @@ public class SoftwareSyncUtils {
 
                 mApplicationInterface.getDrawPreview().updateSettings(); // Ensure that the changes get cached
 
+                Log.d(TAG, "Running onFinished().");
                 if (onFinished != null) onFinished.run();
             };
 
-            // Run if camera is not going to be reopened
-            if (!utils.isModeSwitchRequired(settings)) mApplySettingsRunnable.run();
+            // May reopen the camera
+            utils.syncCaptureFormat(settings);
+
+            // Run the second part if camera is not going to be reopened
+            if (!isModeSwitchRequired) {
+                Log.d(TAG, "Executing the second part of settings application immediately.");
+                mApplySettingsRunnable.run();
+            }
         };
 
         // Run if camera is already opened
