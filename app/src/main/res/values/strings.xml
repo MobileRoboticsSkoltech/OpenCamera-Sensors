@@ -77,6 +77,11 @@
     <string name="preference_enable_rec_sync_summary">Enable or disable RecSync. It is used for synchronous multi-cam recording. Requires Camera2 API support and Wi-Fi or hotspot to be enabled.</string>
     <string name="preference_enable_phase_alignment">Enable phase alignment</string>
     <string name="preference_enable_phase_alignment_summary">Enables the ability to achieve sub-millisecond video synchronization via frame phase alignment. Devices of the same model with realtime timestamping support are needed for this to work properly.</string>
+    <string name="preference_enable_tag_sync">Enable filename tag synchronization</string>
+    <string name="preference_enable_tag_sync_summary">Whether to sync filename tag.</string>
+    <string name="preference_upload_settings">Upload settings</string>
+    <string name="preference_save_tag">Filename tag</string>
+    <string name="preference_save_tag_summary">The prefix to use for the save filenames for the purpose of uploading. The filenames recorded have the following form: [TAG]_[ID]_[FILENAME] where [TAG] is used as a unique recording identifier and [ID] identifies the device.</string>
     <string name="preference_sync_settings">Sync settings</string>
     <string name="preference_sync_exposure">Exposure</string>
     <string name="preference_sync_exposure_summary">Exposure time always syncs and locks.</string>

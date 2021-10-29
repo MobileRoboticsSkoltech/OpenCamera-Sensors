@@ -177,7 +177,33 @@
                 android:key="preference_enable_phase_alignment"
                 android:title="@string/preference_enable_phase_alignment"
                 android:summary="@string/preference_enable_phase_alignment_summary"
+                android:dependency="preference_enable_rec_sync"
                 />
+
+            <PreferenceCategory
+                android:key="preference_upload_settings"
+                android:title="@string/preference_upload_settings"
+                android:dependency="preference_enable_rec_sync">
+
+                <SwitchPreference
+                    android:defaultValue="false"
+                    android:key="preference_enable_tag_sync"
+                    android:title="@string/preference_enable_tag_sync"
+                    android:summary="@string/preference_enable_tag_sync_summary"
+                    />
+
+                <EditTextPreference
+                    android:key="preference_save_tag"
+                    android:title="@string/preference_save_tag"
+                    android:summary="@string/preference_save_tag_summary"
+                    android:dialogTitle="@string/preference_save_tag"
+                    android:dialogMessage="@string/preference_save_tag_summary"
+                    android:inputType="text"
+                    android:defaultValue="TEST"
+                    android:dependency="preference_enable_tag_sync"
+                    />
+
+            </PreferenceCategory>
 
             <PreferenceCategory
                 android:key="preference_sync_settings"
