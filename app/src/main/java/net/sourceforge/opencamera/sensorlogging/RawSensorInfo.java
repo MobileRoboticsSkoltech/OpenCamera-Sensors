@@ -2,12 +2,17 @@ package net.sourceforge.opencamera.sensorlogging;
 
 import android.content.Context;
 import android.hardware.Sensor;
+import android.hardware.SensorAdditionalInfo;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventCallback;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
@@ -32,6 +37,7 @@ import java.util.Map;
  * Assumes all the used sensor types are motion or position sensors
  * and output [x, y, z] values -- the class should be updated if that changes
  */
+@RequiresApi(api = Build.VERSION_CODES.N)
 public class RawSensorInfo implements SensorEventListener {
     private static final String TAG = "RawSensorInfo";
     private static final String CSV_SEPARATOR = ",";
@@ -291,6 +297,17 @@ public class RawSensorInfo implements SensorEventListener {
         Sensor sensor = mUsedSensorMap.get(sensorType);
         if (sensor != null) {
             mSensorManager.registerListener(this, sensor, sampleRate);
+            SensorEventCallback eventCallback = new SensorEventCallback() {
+                @Override
+                public void onSensorAdditionalInfo(SensorAdditionalInfo additionalInfo) {
+                    Log.d(TAG, "info on: " + additionalInfo.type);
+
+                    if (additionalInfo.type == SensorAdditionalInfo.TYPE_SENSOR_PLACEMENT) {
+                        Log.d("PLCMNT", "Sensor type " + SENSOR_TYPE_NAMES.get(sensorType) + " Placement: " + Arrays.toString(additionalInfo.floatValues));
+                    }
+                }
+            };
+            mSensorManager.registerListener(eventCallback, sensor, sampleRate);
             return true;
         } else {
             return false;
