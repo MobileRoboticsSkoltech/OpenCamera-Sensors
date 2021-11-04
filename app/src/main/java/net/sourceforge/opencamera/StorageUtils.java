@@ -681,6 +681,14 @@ public class StorageUtils {
                     Log.e(TAG, "unknown type: " + type);
                 throw new RuntimeException();
         }
+        if( applicationInterface instanceof ExtendedAppInterface ) {
+            ExtendedAppInterface extendedAppInterface = (ExtendedAppInterface) applicationInterface;
+            if( sharedPreferences.getBoolean(PreferenceKeys.EnableTagSyncPreferenceKey, false) && extendedAppInterface.isSoftwareSyncRunning() ) {
+                String tag = sharedPreferences.getString(PreferenceKeys.SaveTagPreferenceKey, "TEST");
+                String id = extendedAppInterface.getSoftwareSyncController().getSoftwareSync().getName();
+                mediaFilename = tag + "_" + id + "_" + mediaFilename;
+            }
+        }
         return mediaFilename;
     }
 

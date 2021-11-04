@@ -131,6 +131,10 @@ public class PreferenceKeys {
 
     public static final String SyncFormatPreferenceKey = "preference_sync_format";
 
+    public static final String EnableTagSyncPreferenceKey = "preference_enable_tag_sync";
+
+    public static final String SaveTagPreferenceKey = "preference_save_tag";
+
     public static final String PhotoModePreferenceKey = "preference_photo_mode";
 
     public static final String HDRSaveExpoPreferenceKey = "preference_hdr_save_expo";
