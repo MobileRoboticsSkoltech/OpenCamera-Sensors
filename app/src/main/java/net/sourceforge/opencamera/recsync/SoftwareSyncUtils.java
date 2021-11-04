@@ -83,7 +83,7 @@ public class SoftwareSyncUtils {
         removeVideoRecordingPreparation(); // In case we want to re-prepare for some reason
 
         Log.d(TAG, "About to call Preview.prepareVideoRecording().");
-        mPreview.prepareVideoRecording();
+        mMainActivity.runOnUiThread(mPreview::prepareVideoRecording);
     }
 
     /**
@@ -94,7 +94,7 @@ public class SoftwareSyncUtils {
 
         if (mPreview.isVideoRecordingPrepared()) {
             Log.d(TAG, "About to call mPreview.stopVideo().");
-            mPreview.stopVideo(false);
+            mMainActivity.runOnUiThread(() -> mPreview.stopVideo(false));
         }
     }
 
