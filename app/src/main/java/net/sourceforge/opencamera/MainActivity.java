@@ -1549,6 +1549,12 @@ public class MainActivity extends Activity {
         super.onPause(); // docs say to call this before freeing other things
         this.app_is_paused = true;
 
+        // clear RecSync related state
+        if( applicationInterface.isSoftwareSyncRunning() ) {
+            applicationInterface.getSoftwareSyncController().clearPeriodState();
+            applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
+        }
+
         // Stop Remote controller for OpenCamera Sensors
         if (mRpcServer != null) {
             mRpcServer.stopExecuting();

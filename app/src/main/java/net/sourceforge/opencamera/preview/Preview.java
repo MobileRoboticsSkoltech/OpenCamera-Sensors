@@ -1025,7 +1025,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         applicationInterface.cameraInOperation(false, true);
         reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
 
-
         if( video_recorder == null ) {
             // no need to do anything if not recording
             // (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
@@ -5711,6 +5710,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         return successful;
+    }
+
+    public void removeVideoRecordingPreparation() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "removeVideoRecordingPreparation");
+
+        prepared_video_recorder.reset();
+        prepared_video_recorder.release();
+        prepared_video_recorder = null;
+
+        prepared_video_profile = null;
+
+        applicationInterface.deleteUnusedVideo(videoFileInfo.video_method, videoFileInfo.video_uri, videoFileInfo.video_filename);
+
+        stopVideo(false);
     }
 
     /**
