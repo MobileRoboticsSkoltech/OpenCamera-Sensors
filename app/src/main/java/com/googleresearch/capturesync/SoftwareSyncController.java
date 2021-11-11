@@ -39,6 +39,7 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.recsync.SoftwareSyncUtils;
 import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 
 import java.io.Closeable;
@@ -210,8 +211,9 @@ public class SoftwareSyncController implements Closeable {
 
                     if (settings != null) {
                         mState = State.SETTINGS_APPLICATION;
-                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().applyAndLockSettings(settings, () -> {
-                            mMainActivity.getApplicationInterface().getSoftwareSyncUtils().prepareVideoRecording();
+                        SoftwareSyncUtils softwareSyncUtils = mMainActivity.getApplicationInterface().getSoftwareSyncUtils();
+                        softwareSyncUtils.applyAndLockSettings(settings, () -> {
+                            softwareSyncUtils.prepareVideoRecording();
                             mIsVideoPreparationNeeded = true;
                             Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
@@ -479,7 +481,7 @@ public class SoftwareSyncController implements Closeable {
     }
 
     /**
-     * Shows whether is device is expected to be prepared for video recording.
+     * Shows whether this device is expected to be prepared for video recording.
      *
      * @return true if video recording preparation is expected, false otherwise.
      */

@@ -5559,7 +5559,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
             profile.copyToMediaRecorder(local_video_recorder);
 
-            //boolean told_app_starting = false; // true if we called applicationInterface.startingVideo()
             try {
                 ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
                 long max_filesize = video_max_filesize.max_filesize;
@@ -5607,10 +5606,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 else {
                     local_video_recorder.setOutputFile(videoFileInfo.video_pfd_saf.getFileDescriptor());
                 }
-                //applicationInterface.cameraInOperation(true, true);
-                //told_app_starting = true;
-                //applicationInterface.startingVideo();
-        		/*if( true ) // test
+                /*if( true ) // test
         			throw new IOException();*/
                 cameraSurface.setVideoRecorder(local_video_recorder);
 
@@ -5680,9 +5676,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.e(TAG, "failed to save video");
                 e.printStackTrace();
                 this.video_recorder = local_video_recorder;
-                //if( told_app_starting ) {
-                //    applicationInterface.stoppingVideo();
-                //}
                 applicationInterface.onFailedCreateVideoFileError();
                 video_recorder.reset();
                 video_recorder.release();
@@ -5698,9 +5691,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.e(TAG, "camera exception starting video recorder");
                 e.printStackTrace();
                 this.video_recorder = local_video_recorder; // still assign, so failedToStartVideoRecorder() will release the video_recorder
-                //if( told_app_starting ) {
-                //    applicationInterface.stoppingVideo();
-                //}
                 failedToStartVideoRecorder(profile);
             }
             catch(NoFreeStorageException e) {
@@ -5708,9 +5698,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                     Log.e(TAG, "nofreestorageexception starting video recorder");
                 e.printStackTrace();
                 this.video_recorder = local_video_recorder;
-                //if( told_app_starting ) {
-                //    applicationInterface.stoppingVideo();
-                //}
                 video_recorder.reset();
                 video_recorder.release();
                 video_recorder = null;
