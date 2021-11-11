@@ -249,6 +249,13 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         super.stoppingVideo();
+
+        if (isSoftwareSyncRunning() && !mSoftwareSyncController.isLeader()) {
+            ImageButton view = mMainActivity.findViewById(R.id.take_photo);
+            view.setImageResource(R.drawable.ic_empty);
+            view.setContentDescription(mMainActivity.getResources().getString(R.string.do_nothing));
+            view.setTag(R.drawable.ic_empty); // for testing
+        }
     }
 
     @Override
@@ -256,7 +263,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         super.stoppedVideo(video_method, uri, filename);
 
         // Prepare to the next recording
-        if (mSoftwareSyncController.isVideoPreparationNeeded()) mSoftwareSyncUtils.prepareVideoRecording();
+        if (mSoftwareSyncController.isVideoPreparationNeeded())
+            mSoftwareSyncUtils.prepareVideoRecording();
     }
 
     public void onFrameInfoRecordingFailed() {
