@@ -59,6 +59,7 @@ public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
 
     private final MainActivity mMainActivity;
+    private final SoftwareSyncUtils mSoftwareSyncUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
     private String mSyncStatus;
@@ -113,6 +114,7 @@ public class SoftwareSyncController implements Closeable {
     public SoftwareSyncController(
             MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
         mMainActivity = mainActivity;
+        mSoftwareSyncUtils = mainActivity.getApplicationInterface().getSoftwareSyncUtils();
         mPhaseAlignController = phaseAlignController;
         mPeriodCalculator = periodCalculator;
 
@@ -122,9 +124,7 @@ public class SoftwareSyncController implements Closeable {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void setupSoftwareSync() {
         Log.w(TAG, "setup SoftwareSync");
-        if (mSoftwareSync != null) {
-            return;
-        }
+        if (mSoftwareSync != null) return;
 
         // Get Wifi Manager and use NetworkHelpers to determine local and leader IP addresses.
         WifiManager wifiManager = (WifiManager) mMainActivity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -211,9 +211,8 @@ public class SoftwareSyncController implements Closeable {
 
                     if (settings != null) {
                         mState = State.SETTINGS_APPLICATION;
-                        SoftwareSyncUtils softwareSyncUtils = mMainActivity.getApplicationInterface().getSoftwareSyncUtils();
-                        softwareSyncUtils.applyAndLockSettings(settings, () -> {
-                            softwareSyncUtils.prepareVideoRecording();
+                        mSoftwareSyncUtils.applyAndLockSettings(settings, () -> {
+                            mSoftwareSyncUtils.prepareVideoRecording();
                             mIsVideoPreparationNeeded = true;
                             Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
@@ -228,7 +227,7 @@ public class SoftwareSyncController implements Closeable {
                     Log.d(TAG, "Request to clear video recording preparation received.");
 
                     mIsVideoPreparationNeeded = false;
-                    mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
+                    mSoftwareSyncUtils.removeVideoRecordingPreparation();
                 });
 
         // Switch the recording status (start or stop video recording) to the opposite of the received one.
@@ -256,7 +255,7 @@ public class SoftwareSyncController implements Closeable {
                             });
                         } else { // Need to start recording.
                             mState = State.RECORDING;
-                            if (!mMainActivity.getApplicationInterface().getSoftwareSyncUtils().startPreparedVideoRecording()) {
+                            if (!mSoftwareSyncUtils.startPreparedVideoRecording()) {
                                 mState = State.IDLE;
                                 // TODO: inform user that preparation is required.
                             }
@@ -286,7 +285,7 @@ public class SoftwareSyncController implements Closeable {
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload -> {
-                        mMainActivity.getApplicationInterface().getSoftwareSyncUtils().removeVideoRecordingPreparation();
+                        mSoftwareSyncUtils.removeVideoRecordingPreparation();
                         mIsVideoPreparationNeeded = false;
                         mMainActivity.runOnUiThread(
                                 () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()));
