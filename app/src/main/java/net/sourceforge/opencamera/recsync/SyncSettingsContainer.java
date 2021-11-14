@@ -21,6 +21,7 @@ public class SyncSettingsContainer implements Serializable {
     final public boolean syncWb;
     final public boolean syncFlash;
     final public boolean syncFormat;
+    final public boolean syncTag;
 
     final public boolean isVideo;
     final public long exposure;
@@ -29,6 +30,7 @@ public class SyncSettingsContainer implements Serializable {
     final public String wbMode;
     final public String flash;
     final public String format;
+    final public String tag;
 
     private String mAsStringCached = null;
 
@@ -47,12 +49,13 @@ public class SyncSettingsContainer implements Serializable {
      * @param flash         flash mode.
      * @param format        video/image format (must match the chosen capture mode).
      */
-    public SyncSettingsContainer(boolean syncISO, boolean syncWb, boolean syncFlash, boolean syncFormat,
-                                 boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format) {
+    public SyncSettingsContainer(boolean syncISO, boolean syncWb, boolean syncFlash, boolean syncFormat, boolean syncTag,
+                                 boolean isVideo, long exposure, int iso, int wbTemperature, String wbMode, String flash, String format, String tag) {
         this.syncISO = syncISO;
         this.syncWb = syncWb;
         this.syncFlash = syncFlash;
         this.syncFormat = syncFormat;
+        this.syncTag = syncTag;
 
         this.isVideo = isVideo;
         this.exposure = exposure;
@@ -61,6 +64,7 @@ public class SyncSettingsContainer implements Serializable {
         this.wbMode = wbMode;
         this.flash = flash;
         this.format = format;
+        this.tag = tag;
     }
 
     /**
@@ -77,6 +81,7 @@ public class SyncSettingsContainer implements Serializable {
         boolean syncWb = prefs.isSyncWbEnabled();
         boolean syncFlash = prefs.isSyncFlashEnabled();
         boolean syncFormat = prefs.isSyncFormatEnabled();
+        boolean syncTag = prefs.isTagSyncEnabled();
 
         boolean isVideo = preview.isVideo();
         long exposure = cameraController.captureResultExposureTime();
@@ -87,9 +92,10 @@ public class SyncSettingsContainer implements Serializable {
         String format = isVideo ?
                 prefs.getVideoFormat() :
                 prefs.getImageFormat();
+        String tag = syncTag ? prefs.getSaveTag() : "";
 
-        return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat,
-                isVideo, exposure, iso, wbTemperature, wbMode, flash, format);
+        return new SyncSettingsContainer(syncISO, syncWb, syncFlash, syncFormat, syncTag,
+                isVideo, exposure, iso, wbTemperature, wbMode, flash, format, tag);
     }
 
     /**

@@ -52,6 +52,10 @@ public class PreferenceHandler {
         return mSharedPreferences.getBoolean(PreferenceKeys.SyncFormatPreferenceKey, false);
     }
 
+    public boolean isTagSyncEnabled() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.EnableTagSyncPreferenceKey, false);
+    }
+
     public boolean isAccelEnabled() {
         return mSharedPreferences.getBoolean(PreferenceKeys.AccelPreferenceKey, true);
     }
@@ -70,6 +74,10 @@ public class PreferenceHandler {
 
     public String getImageFormat() {
         return mSharedPreferences.getString(PreferenceKeys.ImageFormatPreferenceKey, PreferenceKeys.ImageFormatJpegPreferenceKey);
+    }
+
+    public String getSaveTag() {
+        return mSharedPreferences.getString(PreferenceKeys.SaveTagPreferenceKey, "TEST");
     }
 
     /**
@@ -91,9 +99,16 @@ public class PreferenceHandler {
         return sensorSampleRate;
     }
 
-    void setEnableRecSync(boolean value) {
+    public void setEnableRecSync(boolean value) {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putBoolean(PreferenceKeys.EnableRecSyncPreferenceKey, value);
+        editor.apply();
+    }
+
+    public void setSyncTag(String value) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(PreferenceKeys.EnableTagSyncPreferenceKey, true);
+        editor.putString(PreferenceKeys.SaveTagPreferenceKey, value);
         editor.apply();
     }
 }

@@ -139,6 +139,7 @@ public class SoftwareSyncUtils {
                 if (settings.syncWb) utils.syncWb(settings);
                 if (settings.syncFlash) utils.syncFlash(settings);
                 if (settings.syncFormat) utils.syncFormat(settings);
+                if (settings.syncTag) utils.syncTag(settings);
 
                 mApplicationInterface.getDrawPreview().updateSettings(); // Ensure that the changes get cached
 
@@ -281,6 +282,12 @@ public class SoftwareSyncUtils {
                 supportedFormats.remove("preference_video_output_format_webm");
             }
             return supportedFormats;
+        }
+
+        private void syncTag(SyncSettingsContainer settings) {
+            Log.d(TAG, "Syncing settings: tag");
+
+            mApplicationInterface.getPrefs().setSyncTag(settings.tag);
         }
     }
 }
