@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -91,12 +92,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     /**
-     * Create {@link VideoFrameInfo} with the current preferences.
+     * Creates an unprepared {@link VideoFrameInfo} with the current preferences.
      *
      * @return the created {@link VideoFrameInfo}.
-     * @throws IOException if unable to create files for timestamps recording.
      */
-    public VideoFrameInfo setupFrameInfo() throws IOException {
+    public VideoFrameInfo setupFrameInfo() {
         return new VideoFrameInfo(
                 getLastVideoDate(),
                 mMainActivity,
@@ -157,8 +157,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     public void cameraOpened() {
-        // Should be at the end of this method as it may close the camera
         if (isSoftwareSyncRunning()) {
+            if (mSoftwareSyncController.isVideoPreparationNeeded()) {
+                mSoftwareSyncUtils.prepareVideoRecording();
+            }
+
+            // Should be at the end of this method as it may close the camera
             final Runnable applySettingsRunnable = mSoftwareSyncUtils.getApplySettingsRunnable();
             if (applySettingsRunnable != null) {
                 applySettingsRunnable.run();
@@ -177,6 +181,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         if (MyDebug.LOG) {
             Log.d(TAG, "starting video");
         }
+
         if (mPrefs.isIMURecordingEnabled() && useCamera2() && (mPrefs.isGyroEnabled() || mPrefs.isAccelEnabled() || mPrefs.isMagneticEnabled())) {
             // Extracting sample rates from shared preferences
             try {
@@ -244,6 +249,22 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
 
         super.stoppingVideo();
+
+        if (isSoftwareSyncRunning() && !mSoftwareSyncController.isLeader()) {
+            ImageButton view = mMainActivity.findViewById(R.id.take_photo);
+            view.setImageResource(R.drawable.ic_empty);
+            view.setContentDescription(mMainActivity.getResources().getString(R.string.do_nothing));
+            view.setTag(R.drawable.ic_empty); // for testing
+        }
+    }
+
+    @Override
+    public void stoppedVideo(VideoMethod video_method, Uri uri, String filename) {
+        super.stoppedVideo(video_method, uri, filename);
+
+        // Prepare to the next recording
+        if (mSoftwareSyncController.isVideoPreparationNeeded())
+            mSoftwareSyncUtils.prepareVideoRecording();
     }
 
     public void onFrameInfoRecordingFailed() {

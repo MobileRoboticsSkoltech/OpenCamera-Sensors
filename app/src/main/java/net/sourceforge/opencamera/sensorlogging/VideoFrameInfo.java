@@ -49,14 +49,16 @@ public class VideoFrameInfo implements Closeable {
     private final Date mVideoDate;
     private final StorageUtilsWrapper mStorageUtils;
     private final ExtendedAppInterface mAppInterface;
-    private final BufferedWriter mUnsyncedFrameBufferedWriter;
-    private final BufferedWriter mSyncedFrameBufferedWriter;
+    private final boolean mShouldSaveUnsyncedTimestamps;
+    private final boolean mShouldSaveSyncedTimestamps;
     private final boolean mShouldSaveFrames;
     private final MainActivity mContext;
     private final YuvImageUtils mYuvUtils;
     private final BlockingQueue<VideoPhaseInfo> mPhaseInfoReporter;
-    private final SoftwareSyncBase softwareSync;
     private final List<Long> durationsNs;
+    private BufferedWriter mUnsyncedFrameBufferedWriter = null;
+    private BufferedWriter mSyncedFrameBufferedWriter = null;
+    private SoftwareSyncBase softwareSync = null;
     private long mLastTimestamp = 0;
 
     private int mFrameNumber = 0;
@@ -72,28 +74,36 @@ public class VideoFrameInfo implements Closeable {
             boolean shouldSaveSyncedTimestamps,
             boolean shouldSaveFrames,
             BlockingQueue<VideoPhaseInfo> videoPhaseInfoReporter
-    ) throws IOException {
+    ) {
         mVideoDate = videoDate;
         mStorageUtils = context.getStorageUtils();
         mAppInterface = context.getApplicationInterface();
+        mShouldSaveUnsyncedTimestamps = shouldSaveUnsyncedTimestamps;
+        mShouldSaveSyncedTimestamps = shouldSaveSyncedTimestamps;
         mShouldSaveFrames = shouldSaveFrames;
         mContext = context;
         mYuvUtils = mAppInterface.getYuvUtils();
         mPhaseInfoReporter = videoPhaseInfoReporter;
         mPhaseInfoReporter.clear();
         durationsNs = new ArrayList<>();
+    }
 
-        if (shouldSaveUnsyncedTimestamps) {
+    /**
+     * Initializes writers. Frame submitting writes nothing until this method is called.
+     *
+     * @throws IOException if unable to create files for timestamps recording.
+     */
+    public void prepare() throws IOException {
+        if (mShouldSaveUnsyncedTimestamps) {
             File unsyncedTimestampFile = mStorageUtils.createOutputCaptureInfo(
                     StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", UNSYNCED_TIMESTAMP_FILE_SUFFIX, mVideoDate
             );
             mUnsyncedFrameBufferedWriter = new BufferedWriter(new PrintWriter(unsyncedTimestampFile));
-        } else {
-            mUnsyncedFrameBufferedWriter = null;
         }
-        if (shouldSaveSyncedTimestamps) {
+
+        if (mShouldSaveSyncedTimestamps) {
             if (!mAppInterface.isSoftwareSyncRunning()) {
-                throw new IllegalArgumentException("Cannot save synced timestamps without RecSync running");
+                throw new IllegalStateException("Cannot save synced timestamps without RecSync running");
             }
             final SoftwareSyncController softwareSyncController = mAppInterface.getSoftwareSyncController();
             softwareSync = softwareSyncController.getSoftwareSync();
@@ -105,9 +115,6 @@ public class VideoFrameInfo implements Closeable {
                     StorageUtils.MEDIA_TYPE_RAW_SENSOR_INFO, "csv", suffix, mVideoDate
             );
             mSyncedFrameBufferedWriter = new BufferedWriter(new PrintWriter(syncedTimestampFile));
-        } else {
-            mSyncedFrameBufferedWriter = null;
-            softwareSync = null;
         }
     }
 

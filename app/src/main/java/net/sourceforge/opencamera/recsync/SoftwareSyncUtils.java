@@ -2,7 +2,6 @@ package net.sourceforge.opencamera.recsync;
 
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -27,14 +26,15 @@ public class SoftwareSyncUtils {
 
     private final MainActivity mMainActivity;
     private final ExtendedAppInterface mApplicationInterface;
+    private final Preview mPreview;
     private final SoftwareSyncController mSoftwareSyncController;
 
-    private final Handler mSendSettingsHandler = new Handler();
     private Runnable mApplySettingsRunnable = null;
 
     public SoftwareSyncUtils(MainActivity mainActivity) {
         mMainActivity = mainActivity;
         mApplicationInterface = mMainActivity.getApplicationInterface();
+        mPreview = mMainActivity.getPreview();
         mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 
@@ -67,38 +67,80 @@ public class SoftwareSyncUtils {
         }
         ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
                 SoftwareSyncController.METHOD_RECORD,
-                String.valueOf(mMainActivity.getPreview().isVideoRecording())
+                String.valueOf(mPreview.isVideoRecording())
         );
     }
 
     /**
-     * Schedules a broadcast of the current settings to clients. The settings will be applied to the
-     * leader too.
+     * Prepares the application for video recording to be started to the moment when
+     * {@link android.hardware.camera2.CameraCaptureSession} gets reopened.
+     * <p>
+     * Removes the previous preparation if there was one.
+     */
+    public void prepareVideoRecording() {
+        Log.d(TAG, "Preparing video recording.");
+
+        removeVideoRecordingPreparation(); // In case we want to re-prepare for some reason
+
+        Log.d(TAG, "About to call Preview.prepareVideoRecording().");
+        mMainActivity.runOnUiThread(mPreview::prepareVideoRecording);
+    }
+
+    /**
+     * Removes the preparation for video recording of the application if it is set.
+     */
+    public void removeVideoRecordingPreparation() {
+        Log.d(TAG, "Removing video recording preparation.");
+
+        if (mPreview.isVideoRecordingPrepared()) {
+            Log.d(TAG, "About to call mPreview.removeVideoRecordingPreparation().");
+            mMainActivity.runOnUiThread(mPreview::removeVideoRecordingPreparation);
+        }
+    }
+
+    /**
+     * Starts video recording if the application was previously prepared for it by calling
+     * {@link #prepareVideoRecording}.
+     *
+     * @return true if the recording was started, false otherwise.
+     */
+    public boolean startPreparedVideoRecording() {
+        if (!mPreview.isVideoRecordingPrepared()) return false;
+
+        mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
+        return true;
+    }
+
+    /**
+     * Broadcasts the current settings to clients. The settings are applied to the leader too.
      *
      * @param settings describes the settings to be broadcast.
      * @throws IllegalStateException if after the delay {@link SoftwareSyncController} is not
      *                               initialized or this device is not a leader.
      */
-    public void scheduleBroadcastSettings(SyncSettingsContainer settings) {
-        mSendSettingsHandler.removeCallbacks(null);
-        mSendSettingsHandler.postDelayed(
-                () -> {
-                    Log.d(TAG, "Broadcasting current settings.");
+    public void broadcastSettings(SyncSettingsContainer settings) {
+        Log.d(TAG, "Broadcasting current settings.");
 
-                    if (!mApplicationInterface.isSoftwareSyncRunning()) {
-                        throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
-                    }
-                    if (!mSoftwareSyncController.isLeader()) {
-                        throw new IllegalStateException("Cannot broadcast settings from a client");
-                    }
+        if (!mApplicationInterface.isSoftwareSyncRunning()) {
+            throw new IllegalStateException("Cannot broadcast settings when RecSync is not running");
+        }
+        if (!mSoftwareSyncController.isLeader()) {
+            throw new IllegalStateException("Cannot broadcast settings from a client");
+        }
 
-                    // Send settings to all devices
-                    ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
-                            SoftwareSyncController.METHOD_SET_SETTINGS,
-                            settings.serializeToString()
-                    );
-                },
-                500);
+        // Send settings to all devices
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_SET_SETTINGS,
+                settings.serializeToString()
+        );
+    }
+
+    /**
+     * Broadcasts a request to remove the video recording preparation.
+     */
+    public void broadcastClearVideoPreparationRequest() {
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_STOP_PREPARE, "");
     }
 
     /**
@@ -115,9 +157,16 @@ public class SoftwareSyncUtils {
         final MainUI mainUI = mMainActivity.getMainUI();
         final SettingsApplicationUtils utils = new SettingsApplicationUtils(preview, mainUI);
 
+        final boolean isModeSwitchRequired = utils.isModeSwitchRequired(settings);
+
         // Create a new runnable to wait until camera is opened
         mApplySettingsRunnable = () -> {
+            Log.d(TAG, "Starting the first part of settings application.");
+
             mApplySettingsRunnable = null;
+
+            // Remove the preparation, because the recording mode might get switched
+            removeVideoRecordingPreparation();
 
             // Close some UI elements for the changes to be reflected in them
             mMainActivity.runOnUiThread(() -> {
@@ -126,10 +175,9 @@ public class SoftwareSyncUtils {
                 mainUI.destroyPopup();
             });
 
-            utils.syncCaptureFormat(settings);
-
-            // Need to wait until camera gets reopened
             mApplySettingsRunnable = () -> {
+                Log.d(TAG, "Starting the second part of settings application.");
+
                 mApplySettingsRunnable = null;
 
                 utils.setCameraController(preview.getCameraController());
@@ -142,11 +190,18 @@ public class SoftwareSyncUtils {
 
                 mApplicationInterface.getDrawPreview().updateSettings(); // Ensure that the changes get cached
 
+                Log.d(TAG, "Running onFinished().");
                 if (onFinished != null) onFinished.run();
             };
 
-            // Run if camera is not going to be reopened
-            if (!utils.isModeSwitchRequired(settings)) mApplySettingsRunnable.run();
+            // May reopen the camera
+            utils.syncCaptureFormat(settings);
+
+            // Run the second part if camera is not going to be reopened
+            if (!isModeSwitchRequired) {
+                Log.d(TAG, "Executing the second part of settings application immediately.");
+                mApplySettingsRunnable.run();
+            }
         };
 
         // Run if camera is already opened
