@@ -31,11 +31,11 @@ public class SoftwareSyncUtils {
 
     private Runnable mApplySettingsRunnable = null;
 
-    public SoftwareSyncUtils(MainActivity mainActivity) {
+    public SoftwareSyncUtils(MainActivity mainActivity, SoftwareSyncController softwareSyncController) {
         mMainActivity = mainActivity;
+        mSoftwareSyncController = softwareSyncController;
         mApplicationInterface = mMainActivity.getApplicationInterface();
         mPreview = mMainActivity.getPreview();
-        mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 
     public Runnable getApplySettingsRunnable() {

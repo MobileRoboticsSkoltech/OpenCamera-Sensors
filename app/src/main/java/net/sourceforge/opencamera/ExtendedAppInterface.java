@@ -343,7 +343,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
         mMainActivity.registerReceiver(mConnectionStatusChecker, intentFilter);
 
-        mSoftwareSyncUtils = new SoftwareSyncUtils(mMainActivity);
+        mSoftwareSyncUtils = mSoftwareSyncController.getSoftwareSyncUtils();
     }
 
     private class HotspotStatusChecker extends BroadcastReceiver {

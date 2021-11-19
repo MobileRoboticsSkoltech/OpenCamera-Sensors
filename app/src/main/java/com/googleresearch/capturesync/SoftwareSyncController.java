@@ -59,9 +59,9 @@ public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
 
     private final MainActivity mMainActivity;
-    private final SoftwareSyncUtils mSoftwareSyncUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
+    private final SoftwareSyncUtils mSoftwareSyncUtils;
     private String mSyncStatus;
     private SoftwareSyncBase mSoftwareSync;
     private AlignPhasesTask mAlignPhasesTask;
@@ -114,9 +114,9 @@ public class SoftwareSyncController implements Closeable {
     public SoftwareSyncController(
             MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
         mMainActivity = mainActivity;
-        mSoftwareSyncUtils = mainActivity.getApplicationInterface().getSoftwareSyncUtils();
         mPhaseAlignController = phaseAlignController;
         mPeriodCalculator = periodCalculator;
+        mSoftwareSyncUtils = new SoftwareSyncUtils(mainActivity, this);
 
         setupSoftwareSync();
     }
@@ -499,6 +499,10 @@ public class SoftwareSyncController implements Closeable {
             mPeriodCalculator.onFrameTimestamp(timestamp);
         }
         mPhaseAlignController.updateCaptureTimestamp(mSoftwareSync.leaderTimeForLocalTimeNs(timestamp));
+    }
+
+    public SoftwareSyncUtils getSoftwareSyncUtils() {
+        return mSoftwareSyncUtils;
     }
 
     public SoftwareSyncBase getSoftwareSync() {
