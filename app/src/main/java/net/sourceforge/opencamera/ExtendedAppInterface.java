@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -259,10 +258,15 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     }
 
     public void finishedVideo() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "finished video");
+        }
+
         // Prepare to the next recording
-        // TODO: check that settings are not being opened and the app is not pausing
-        if (mSoftwareSyncController.isVideoPreparationNeeded())
+        if (isSoftwareSyncRunning() && mSoftwareSyncController.isVideoPreparationNeeded()
+                && !mMainActivity.isAppPaused() && !mMainActivity.isSettingsActive()) {
             mSoftwareSyncUtils.prepareVideoRecording();
+        }
     }
 
     public void onFrameInfoRecordingFailed() {

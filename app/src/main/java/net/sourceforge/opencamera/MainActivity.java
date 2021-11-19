@@ -115,6 +115,7 @@ public class MainActivity extends Activity {
     private static int activity_count = 0;
 
     private boolean app_is_paused = true;
+    private boolean settings_is_active = false;
 
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
@@ -2452,6 +2453,9 @@ public class MainActivity extends Activity {
     public void openSettings() {
         if( MyDebug.LOG )
             Log.d(TAG, "openSettings");
+
+        settings_is_active = true;
+
         closePopup();
         preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
@@ -3010,6 +3014,8 @@ public class MainActivity extends Activity {
                 mainUI.destroyPopup();
             }
         }
+
+        settings_is_active = false;
     }
 
     @Override
@@ -5133,6 +5139,10 @@ public class MainActivity extends Activity {
 
     public boolean isAppPaused() {
         return this.app_is_paused;
+    }
+
+    public boolean isSettingsActive() {
+        return this.settings_is_active;
     }
 
     public BluetoothRemoteControl getBluetoothRemoteControl() {
