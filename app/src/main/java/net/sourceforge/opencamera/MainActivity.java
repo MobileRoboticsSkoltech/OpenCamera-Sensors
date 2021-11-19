@@ -1552,7 +1552,8 @@ public class MainActivity extends Activity {
         // clear RecSync related state
         if( applicationInterface.isSoftwareSyncRunning() ) {
             applicationInterface.getSoftwareSyncController().clearPeriodState();
-            applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
+            if( !preview.isVideoRecording() )
+                applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
         }
 
         // Stop Remote controller for OpenCamera Sensors
@@ -2462,7 +2463,8 @@ public class MainActivity extends Activity {
 
         if( applicationInterface.isSoftwareSyncRunning() ) {
             applicationInterface.getSoftwareSyncController().clearPeriodState();
-            applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
+            if( !preview.isVideoRecording() ) // need to check because video is stopped concurrently
+                applicationInterface.getSoftwareSyncUtils().removeVideoRecordingPreparation();
         }
 
         Bundle bundle = new Bundle();

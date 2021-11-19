@@ -258,11 +258,9 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
     }
 
-    @Override
-    public void stoppedVideo(VideoMethod video_method, Uri uri, String filename) {
-        super.stoppedVideo(video_method, uri, filename);
-
+    public void finishedVideo() {
         // Prepare to the next recording
+        // TODO: check that settings are not being opened and the app is not pausing
         if (mSoftwareSyncController.isVideoPreparationNeeded())
             mSoftwareSyncUtils.prepareVideoRecording();
     }
