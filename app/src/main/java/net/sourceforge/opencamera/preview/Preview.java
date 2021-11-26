@@ -1081,6 +1081,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
         videoFileInfo = new VideoFileInfo();
         nextVideoFileInfo = null;
+
+        applicationInterface.finishedVideo();
     }
 
     private Context getContext() {

@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SoftwareSyncUtils {
-    private static final String TAG = "SoftwareSyncUtils";
+public class SoftwareSyncHelper {
+    private static final String TAG = "SoftwareSyncHelper";
 
     private final MainActivity mMainActivity;
     private final ExtendedAppInterface mApplicationInterface;
@@ -31,11 +31,11 @@ public class SoftwareSyncUtils {
 
     private Runnable mApplySettingsRunnable = null;
 
-    public SoftwareSyncUtils(MainActivity mainActivity) {
+    public SoftwareSyncHelper(MainActivity mainActivity, SoftwareSyncController softwareSyncController) {
         mMainActivity = mainActivity;
+        mSoftwareSyncController = softwareSyncController;
         mApplicationInterface = mMainActivity.getApplicationInterface();
         mPreview = mMainActivity.getPreview();
-        mSoftwareSyncController = mApplicationInterface.getSoftwareSyncController();
     }
 
     public Runnable getApplySettingsRunnable() {

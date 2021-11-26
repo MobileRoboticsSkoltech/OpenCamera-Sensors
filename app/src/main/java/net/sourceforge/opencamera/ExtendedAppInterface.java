@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +24,7 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseConfig;
 
 import net.sourceforge.opencamera.cameracontroller.YuvImageUtils;
-import net.sourceforge.opencamera.recsync.SoftwareSyncUtils;
+import net.sourceforge.opencamera.recsync.SoftwareSyncHelper;
 import net.sourceforge.opencamera.sensorlogging.FlashController;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
@@ -59,7 +58,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final PreferenceHandler mPrefs;
 
     private SoftwareSyncController mSoftwareSyncController;
-    private SoftwareSyncUtils mSoftwareSyncUtils;
+    private SoftwareSyncHelper mSoftwareSyncHelper;
     private BroadcastReceiver mConnectionStatusChecker = null;
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
@@ -115,8 +114,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSoftwareSyncController;
     }
 
-    public SoftwareSyncUtils getSoftwareSyncUtils() {
-        return mSoftwareSyncUtils;
+    public SoftwareSyncHelper getSoftwareSyncUtils() {
+        return mSoftwareSyncHelper;
     }
 
     public YuvImageUtils getYuvUtils() {
@@ -159,11 +158,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public void cameraOpened() {
         if (isSoftwareSyncRunning()) {
             if (mSoftwareSyncController.isVideoPreparationNeeded()) {
-                mSoftwareSyncUtils.prepareVideoRecording();
+                mSoftwareSyncHelper.prepareVideoRecording();
             }
 
             // Should be at the end of this method as it may close the camera
-            final Runnable applySettingsRunnable = mSoftwareSyncUtils.getApplySettingsRunnable();
+            final Runnable applySettingsRunnable = mSoftwareSyncHelper.getApplySettingsRunnable();
             if (applySettingsRunnable != null) {
                 applySettingsRunnable.run();
             }
@@ -258,13 +257,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
     }
 
-    @Override
-    public void stoppedVideo(VideoMethod video_method, Uri uri, String filename) {
-        super.stoppedVideo(video_method, uri, filename);
+    public void finishedVideo() {
+        if (MyDebug.LOG) {
+            Log.d(TAG, "finished video");
+        }
 
         // Prepare to the next recording
-        if (mSoftwareSyncController.isVideoPreparationNeeded())
-            mSoftwareSyncUtils.prepareVideoRecording();
+        if (isSoftwareSyncRunning() && mSoftwareSyncController.isVideoPreparationNeeded()
+                && !mMainActivity.isAppPaused() && !mMainActivity.isSettingsActive()) {
+            mSoftwareSyncHelper.prepareVideoRecording();
+        }
     }
 
     public void onFrameInfoRecordingFailed() {
@@ -343,7 +345,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         }
         mMainActivity.registerReceiver(mConnectionStatusChecker, intentFilter);
 
-        mSoftwareSyncUtils = new SoftwareSyncUtils(mMainActivity);
+        mSoftwareSyncHelper = mSoftwareSyncController.getSoftwareSyncUtils();
     }
 
     private class HotspotStatusChecker extends BroadcastReceiver {
@@ -413,7 +415,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     public void stopSoftwareSync() {
         if (isSoftwareSyncRunning()) {
             mMainActivity.unregisterReceiver(mConnectionStatusChecker);
-            mSoftwareSyncUtils = null;
+            mSoftwareSyncHelper = null;
             mConnectionStatusChecker = null;
             mSoftwareSyncController.close();
             mSoftwareSyncController = null;

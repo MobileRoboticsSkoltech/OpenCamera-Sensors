@@ -39,7 +39,7 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
-import net.sourceforge.opencamera.recsync.SoftwareSyncUtils;
+import net.sourceforge.opencamera.recsync.SoftwareSyncHelper;
 import net.sourceforge.opencamera.recsync.SyncSettingsContainer;
 
 import java.io.Closeable;
@@ -59,9 +59,9 @@ public class SoftwareSyncController implements Closeable {
     private static final String TAG = "SoftwareSyncController";
 
     private final MainActivity mMainActivity;
-    private final SoftwareSyncUtils mSoftwareSyncUtils;
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
+    private final SoftwareSyncHelper mSoftwareSyncHelper;
     private String mSyncStatus;
     private SoftwareSyncBase mSoftwareSync;
     private AlignPhasesTask mAlignPhasesTask;
@@ -114,9 +114,9 @@ public class SoftwareSyncController implements Closeable {
     public SoftwareSyncController(
             MainActivity mainActivity, PhaseAlignController phaseAlignController, PeriodCalculator periodCalculator) {
         mMainActivity = mainActivity;
-        mSoftwareSyncUtils = mainActivity.getApplicationInterface().getSoftwareSyncUtils();
         mPhaseAlignController = phaseAlignController;
         mPeriodCalculator = periodCalculator;
+        mSoftwareSyncHelper = new SoftwareSyncHelper(mainActivity, this);
 
         setupSoftwareSync();
     }
@@ -211,8 +211,8 @@ public class SoftwareSyncController implements Closeable {
 
                     if (settings != null) {
                         mState = State.SETTINGS_APPLICATION;
-                        mSoftwareSyncUtils.applyAndLockSettings(settings, () -> {
-                            mSoftwareSyncUtils.prepareVideoRecording();
+                        mSoftwareSyncHelper.applyAndLockSettings(settings, () -> {
+                            mSoftwareSyncHelper.prepareVideoRecording();
                             mIsVideoPreparationNeeded = true;
                             Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
@@ -227,7 +227,7 @@ public class SoftwareSyncController implements Closeable {
                     Log.d(TAG, "Request to clear video recording preparation received.");
 
                     mIsVideoPreparationNeeded = false;
-                    mSoftwareSyncUtils.removeVideoRecordingPreparation();
+                    mSoftwareSyncHelper.removeVideoRecordingPreparation();
                 });
 
         // Switch the recording status (start or stop video recording) to the opposite of the received one.
@@ -255,7 +255,7 @@ public class SoftwareSyncController implements Closeable {
                             });
                         } else { // Need to start recording.
                             mState = State.RECORDING;
-                            if (!mSoftwareSyncUtils.startPreparedVideoRecording()) {
+                            if (!mSoftwareSyncHelper.startPreparedVideoRecording()) {
                                 mState = State.IDLE;
                                 // TODO: inform user that preparation is required.
                             }
@@ -285,7 +285,7 @@ public class SoftwareSyncController implements Closeable {
             clientRpcs.put(
                     SyncConstants.METHOD_MSG_WAITING_FOR_LEADER,
                     payload -> {
-                        mSoftwareSyncUtils.removeVideoRecordingPreparation();
+                        mSoftwareSyncHelper.removeVideoRecordingPreparation();
                         mIsVideoPreparationNeeded = false;
                         mMainActivity.runOnUiThread(
                                 () -> mSyncStatus = mMainActivity.getString(R.string.rec_sync_waiting_for_leader, mSoftwareSync.getName()));
@@ -499,6 +499,10 @@ public class SoftwareSyncController implements Closeable {
             mPeriodCalculator.onFrameTimestamp(timestamp);
         }
         mPhaseAlignController.updateCaptureTimestamp(mSoftwareSync.leaderTimeForLocalTimeNs(timestamp));
+    }
+
+    public SoftwareSyncHelper getSoftwareSyncUtils() {
+        return mSoftwareSyncHelper;
     }
 
     public SoftwareSyncBase getSoftwareSync() {
