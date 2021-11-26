@@ -81,8 +81,6 @@ import androidx.exifinterface.media.ExifInterface;
 import com.googleresearch.capturesync.SoftwareSyncController;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 
-import net.gotev.uploadservice.UploadServiceConfig;
-
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager;
 import net.sourceforge.opencamera.cameracontroller.CameraControllerManager2;
@@ -741,11 +739,10 @@ public class MainActivity extends Activity {
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
+            // create notification channel to uploading files
+            applicationInterface.getFileUploadService().createNotificationChannel();
         }
-
-        // create notification channel to uploading files
-        applicationInterface.getFileUploadService().createUploadServiceNotificationChannel();
-        UploadServiceConfig.initialize(getApplication(), "UploadChannel", BuildConfig.DEBUG);
+        applicationInterface.getFileUploadService().initializeNotificationConfig();
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
