@@ -7452,6 +7452,8 @@ public class CameraController2 extends CameraController {
             Log.wtf(TAG, "Failed to add surfaces for frame injection builder", e); // wtf bcs videoRecorder is null
         }
 
+        Log.i(TAG, String.format("Current exposure: %.6f ms, inserting frame with exposure %.6f ms", getExposureTime() * 1e-6f, desiredExposureTimeNs * 1e-6f));
+
         // the alignment fails when using the preconfigured previewCaptureCallback
         synchronized( background_camera_lock ) {
             if( captureSession == null ) {
