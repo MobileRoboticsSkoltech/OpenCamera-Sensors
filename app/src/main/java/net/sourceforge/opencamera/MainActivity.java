@@ -739,10 +739,7 @@ public class MainActivity extends Activity {
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
-            // create notification channel to uploading files
-            applicationInterface.getFileUploadService().createNotificationChannel();
         }
-        applicationInterface.getFileUploadService().initializeNotificationConfig();
 
         if( MyDebug.LOG )
             Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
