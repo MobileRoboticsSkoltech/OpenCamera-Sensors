@@ -1,10 +1,14 @@
 package net.sourceforge.opencamera.uploadservice
 
+import android.app.Application
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadRequest
 import net.sourceforge.opencamera.MainActivity
+import net.sourceforge.opencamera.StorageUtils
 import java.io.File
 
-class FileUploadService(private val mMainActivity: MainActivity) {
+class FileUploadService(private val mApplication: Application, private val mStorageUtils: StorageUtils) {
+    constructor(mainActivity: MainActivity) : this(mainActivity.application, mainActivity.storageUtils)
+
     /**
      * Upload files with the specified [tag] onto the remote server at [serverUrl].
      */
@@ -16,7 +20,7 @@ class FileUploadService(private val mMainActivity: MainActivity) {
      * Upload [files] from this device onto the remote server at [serverUrl].
      */
     private fun uploadFiles(files: List<File>, serverUrl: String) {
-        MultipartUploadRequest(mMainActivity, serverUrl = serverUrl).setMethod("POST").apply {
+        MultipartUploadRequest(mApplication, serverUrl = serverUrl).setMethod("POST").apply {
             files.forEach { addFileToUpload(filePath = it.name, parameterName = "files") }
         }.startUpload()
     }
@@ -25,9 +29,7 @@ class FileUploadService(private val mMainActivity: MainActivity) {
      * Find files in the save directory with name starting with the specified [tag].
      */
     private fun findFilesByTag(tag: String): List<File> {
-        val storageUtils = mMainActivity.storageUtils
-        val saveDir = if (storageUtils.isUsingSAF) storageUtils.saveLocationSAF else storageUtils.saveLocation
+        val saveDir = if (mStorageUtils.isUsingSAF) mStorageUtils.saveLocationSAF else mStorageUtils.saveLocation
         return File(saveDir).listFiles()?.filter { it.name.startsWith("${tag}_") } ?: emptyList()
     }
-
 }
