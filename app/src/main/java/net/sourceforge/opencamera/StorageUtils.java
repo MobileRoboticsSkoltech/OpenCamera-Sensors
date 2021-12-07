@@ -318,13 +318,13 @@ public class StorageUtils {
     }
 
     // only valid if !isUsingSAF()
-    String getSaveLocation() {
+    public String getSaveLocation() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(PreferenceKeys.SaveLocationPreferenceKey, "OpenCamera");
     }
 
     // only valid if isUsingSAF()
-    String getSaveLocationSAF() {
+    public String getSaveLocationSAF() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(PreferenceKeys.SaveLocationSAFPreferenceKey, "");
     }

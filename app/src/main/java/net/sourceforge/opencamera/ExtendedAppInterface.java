@@ -29,6 +29,7 @@ import net.sourceforge.opencamera.sensorlogging.FlashController;
 import net.sourceforge.opencamera.sensorlogging.RawSensorInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoFrameInfo;
 import net.sourceforge.opencamera.sensorlogging.VideoPhaseInfo;
+import net.sourceforge.opencamera.uploadservice.FileUploadService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +57,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final PhaseAlignController mPhaseAlignController;
     private final PeriodCalculator mPeriodCalculator;
     private final PreferenceHandler mPrefs;
+    private final FileUploadService mFileUploadService;
 
     private SoftwareSyncController mSoftwareSyncController;
     private SoftwareSyncUtils mSoftwareSyncUtils;
@@ -72,6 +74,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mPeriodCalculator = new PeriodCalculator(mainActivity);
         mPrefs = new PreferenceHandler(mainActivity);
+        mFileUploadService = new FileUploadService(mainActivity);
     }
 
     private PhaseConfig getDefaultPhaseConfig() {
@@ -147,6 +150,10 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     public PreferenceHandler getPrefs() {
         return mPrefs;
+    }
+
+    public FileUploadService getFileUploadService() {
+        return mFileUploadService;
     }
 
     @Override
