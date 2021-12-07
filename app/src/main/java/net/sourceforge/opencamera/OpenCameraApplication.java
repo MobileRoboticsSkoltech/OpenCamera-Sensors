@@ -10,6 +10,7 @@ import android.util.Log;
  */
 public class OpenCameraApplication extends Application {
     private static final String TAG = "OpenCameraApplication";
+    private Core core;
 
     @Override
     public void onCreate() {
@@ -17,7 +18,7 @@ public class OpenCameraApplication extends Application {
             Log.d(TAG, "onCreate");
         super.onCreate();
         checkAppReplacingState();
-        new Core(this);
+        core = new Core(this);
     }
 
     private void checkAppReplacingState() {
