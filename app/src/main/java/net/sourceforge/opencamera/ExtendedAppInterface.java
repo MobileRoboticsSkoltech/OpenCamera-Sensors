@@ -129,11 +129,16 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             }
         }
 
-        //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
+        if (!mRawSensorInfo.enableSensor(mRawSensorInfo.TYPE_GPS, 0)) {
+            mMainActivity.getPreview().showToast(null, "GPS unavailable");
+        }
+
+            //mRawSensorInfo.startRecording(mMainActivity, mLastVideoDate, get Pref(), getAccelPref())
         Map<Integer, Boolean> wantSensorRecordingMap = new HashMap<>();
         wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
         wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
         wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+        wantSensorRecordingMap.put(mRawSensorInfo.TYPE_GPS, true);
         mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
     }
 

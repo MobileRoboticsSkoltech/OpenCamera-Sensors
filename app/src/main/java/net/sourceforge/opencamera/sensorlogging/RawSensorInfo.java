@@ -5,8 +5,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.os.Bundle;
 import android.util.Log;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -32,11 +37,12 @@ import java.util.Map;
  * Assumes all the used sensor types are motion or position sensors
  * and output [x, y, z] values -- the class should be updated if that changes
  */
-public class RawSensorInfo implements SensorEventListener {
+public class RawSensorInfo implements SensorEventListener, LocationListener {
     private static final String TAG = "RawSensorInfo";
     private static final String CSV_SEPARATOR = ",";
+    public static final int TYPE_GPS = 0xabcd;
     private static final List<Integer> SENSOR_TYPES = Collections.unmodifiableList(
-            Arrays.asList(Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD)
+            Arrays.asList(TYPE_GPS, Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD)
     );
     private static final Map<Integer, String> SENSOR_TYPE_NAMES;
     static {
@@ -44,16 +50,18 @@ public class RawSensorInfo implements SensorEventListener {
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_ACCELEROMETER, "accel");
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_GYROSCOPE, "gyro");
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_MAGNETIC_FIELD, "magnetic");
+        SENSOR_TYPE_NAMES.put(TYPE_GPS, "location");
     }
 
     final private SensorManager mSensorManager;
+    private final LocationManager mLocationManager;
 /*    final private Sensor mSensorGyro;
     final private Sensor mSensorAccel;
     final private Sensor mSensorMagnetic;
     private PrintWriter mGyroBufferedWriter;
     private PrintWriter mAccelBufferedWriter;*/
     private boolean mIsRecording;
-    private final Map<Integer, Sensor> mUsedSensorMap;
+    private final Map<Integer, Object> mUsedSensorMap;
     private final Map<Integer, PrintWriter> mSensorWriterMap;
     private final Map<Integer, File> mLastSensorFilesMap;
 
@@ -67,12 +75,17 @@ public class RawSensorInfo implements SensorEventListener {
 
     public RawSensorInfo(MainActivity context) {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        mLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
         mUsedSensorMap = new HashMap<>();
         mSensorWriterMap = new HashMap<>();
         mLastSensorFilesMap = new HashMap<>();
 
         for (Integer sensorType : SENSOR_TYPES) {
-            mUsedSensorMap.put(sensorType, mSensorManager.getDefaultSensor(sensorType));
+            if (sensorType != TYPE_GPS) {
+                mUsedSensorMap.put(sensorType, mSensorManager.getDefaultSensor(sensorType));
+            } else {
+                mUsedSensorMap.put(sensorType, new Object());
+            }
         }
 /*      mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -91,20 +104,59 @@ public class RawSensorInfo implements SensorEventListener {
     }
 
     public int getSensorMinDelay(int sensorType) {
-        Sensor sensor = mUsedSensorMap.get(sensorType);
+        Object sensor = mUsedSensorMap.get(sensorType);
         if (sensor != null) {
-            return sensor.getMinDelay();
-        } else {
-            // Unsupported sensorType
-            if (MyDebug.LOG) {
-                Log.d(TAG, "Unsupported sensor type was provided");
+            if (sensor instanceof Sensor) {
+                return ((Sensor)sensor).getMinDelay();
             }
-            return 0;
+        }
+        // Unsupported sensorType
+        if (MyDebug.LOG) {
+            Log.d(TAG, "Unsupported sensor type was provided");
+        }
+        return 0;
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    private class MyEvent {
+        public int accuracy;
+        public Sensor sensor;
+        public long timestamp;
+        public float[] values;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+            MyEvent event = new MyEvent();
+            event.timestamp = location.getElapsedRealtimeNanos();
+            event.values = new float[]{(float) location.getLatitude(), (float) location.getLongitude(), (float) location.getAltitude()};
+            _onSensorChanged(event);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        MyEvent e = new MyEvent();
+        e.accuracy = event.accuracy;
+        e.sensor = event.sensor;
+        e.timestamp = event.timestamp;
+        e.values = event.values;
+        _onSensorChanged(e);
+    }
+
+    private void _onSensorChanged(MyEvent event) {
         if (mIsRecording) {
             StringBuilder sensorData = new StringBuilder();
             for (int j = 0; j < 3; j++) {
@@ -112,9 +164,9 @@ public class RawSensorInfo implements SensorEventListener {
             }
             sensorData.append(event.timestamp).append("\n");
 
-            Sensor sensor = mUsedSensorMap.get(event.sensor.getType());
+            Object sensor = mUsedSensorMap.get(event.sensor != null ? event.sensor.getType() : TYPE_GPS);
             if (sensor != null) {
-                PrintWriter sensorWriter = mSensorWriterMap.get(event.sensor.getType());
+                PrintWriter sensorWriter = mSensorWriterMap.get(event.sensor != null ? event.sensor.getType() : TYPE_GPS);
                 if (sensorWriter != null) {
                     sensorWriter.write(sensorData.toString());
                 } else {
@@ -288,9 +340,17 @@ public class RawSensorInfo implements SensorEventListener {
             Log.d(TAG, "enableSensor");
         }
 
-        Sensor sensor = mUsedSensorMap.get(sensorType);
+        Object sensor = mUsedSensorMap.get(sensorType);
         if (sensor != null) {
-            mSensorManager.registerListener(this, sensor, sampleRate);
+            if (sensorType != TYPE_GPS) {
+                mSensorManager.registerListener(this, (Sensor)sensor, sampleRate);
+            } else {
+                try {
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                } catch (SecurityException e) {
+                    return false;
+                }
+            }
             return true;
         } else {
             return false;
@@ -313,5 +373,6 @@ public class RawSensorInfo implements SensorEventListener {
             Log.d(TAG, "disableSensors");
         }
         mSensorManager.unregisterListener(this);
+        mLocationManager.removeUpdates(this);
     }
 }
