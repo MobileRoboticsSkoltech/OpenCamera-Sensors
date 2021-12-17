@@ -5628,9 +5628,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 boolean want_save_timestamps = prefs.isIMURecordingEnabled() || applicationInterface.isSoftwareSyncRunning();
                 boolean want_save_frames = prefs.isSaveFramesEnabled();
 
-                if( want_save_timestamps ) {
-                    mVideoFrameInfoWriter = applicationInterface.setupFrameInfo();
-                }
+                // VideoFrameInfo has to be saved as mVideoFrameInfoWriter might be overwritten before VideoFrameInfoCallback is called
+                final VideoFrameInfo localVideoFrameInfoWriter = want_save_timestamps ? applicationInterface.setupFrameInfo() : null;
+                mVideoFrameInfoWriter = localVideoFrameInfoWriter;
 
                 camera_controller.initVideoRecorderPostPrepare(
                         local_video_recorder,
@@ -5641,24 +5641,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                         new CameraController.VideoFrameInfoCallback() {
                             @Override
                             public void onVideoFrameAvailable(long timestamp, byte[] nv21, int width, int height) {
-                                if( mVideoFrameInfoWriter != null && isVideoRecording() && want_save_timestamps ) {
-                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
+                                if( isVideoRecording() && want_save_timestamps ) {
+                                    localVideoFrameInfoWriter.submitProcessFrame(timestamp, nv21, width, height, rotation);
                                 }
                             }
 
                             @Override
                             public void onVideoFrameTimestampAvailable(long timestamp) {
-                                if( mVideoFrameInfoWriter != null && isVideoRecording() && want_save_timestamps ) {
-                                    mVideoFrameInfoWriter.submitProcessFrame(timestamp);
+                                if( isVideoRecording() && want_save_timestamps ) {
+                                    localVideoFrameInfoWriter.submitProcessFrame(timestamp);
                                 }
                             }
 
                             @Override
                             public void onVideoCaptureSessionClosed() {
                                 stopVideoPostPrepare(false);
-                                if( mVideoFrameInfoWriter != null ) {
-                                    mVideoFrameInfoWriter.close();
-                                    mVideoFrameInfoWriter = null;
+                                if( localVideoFrameInfoWriter != null ) {
+                                    localVideoFrameInfoWriter.close();
                                 }
                             }
                         }
