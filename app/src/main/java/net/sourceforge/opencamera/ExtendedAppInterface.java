@@ -74,7 +74,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
         mPeriodCalculator = new PeriodCalculator(mainActivity);
         mPrefs = new PreferenceHandler(mainActivity);
-        mFileUploadService = new FileUploadService(mainActivity);
+        mFileUploadService = new FileUploadService(mainActivity.getApplication(), getStorageUtils());
     }
 
     private PhaseConfig getDefaultPhaseConfig() {

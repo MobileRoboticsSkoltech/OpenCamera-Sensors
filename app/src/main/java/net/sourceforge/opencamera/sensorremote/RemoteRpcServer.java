@@ -41,6 +41,8 @@ public class RemoteRpcServer extends Thread {
     private static final int SOCKET_WAIT_TIME_MS = 1000;
     private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)(&magnetic=)(\\d)";
     private static final Pattern IMU_REQUEST_PATTERN = Pattern.compile(IMU_REQUEST_REGEX);
+    private static final String VIDEO_BY_TAG_REQUEST_REGEX = "(tag\\?serverIp=)(\\S+)(\\^tag=)(\\S*)(&devices=)((\\S{4})*)";
+    private static final Pattern VIDEO_BY_TAG_REQUEST_PATTERN = Pattern.compile(VIDEO_BY_TAG_REQUEST_REGEX);
 
     private final Properties mConfig;
     private final RemoteRpcRequestHandler mRequestHandler;
@@ -72,6 +74,8 @@ public class RemoteRpcServer extends Thread {
     private void handleRequest(String msg, PrintStream outputStream, BufferedOutputStream outputByte) {
         // IMU remote control API
         Matcher imuRequestMatcher = IMU_REQUEST_PATTERN.matcher(msg);
+        // Get video by tag remote control API
+        Matcher videoByTagRequestMatcher = VIDEO_BY_TAG_REQUEST_PATTERN.matcher(msg);
         if (imuRequestMatcher.find()) {
             long duration = Long.parseLong(imuRequestMatcher.group(2));
             boolean wantAccel = Integer.parseInt(imuRequestMatcher.group(4)) == 1;
@@ -87,6 +91,13 @@ public class RemoteRpcServer extends Thread {
             if (MyDebug.LOG) {
                 Log.d(TAG, "IMU request file sent");
             }
+        } else if (videoByTagRequestMatcher.find()) {
+            String serverIp = videoByTagRequestMatcher.group(2);
+            String tag = videoByTagRequestMatcher.group(4);
+            String devicesStr = videoByTagRequestMatcher.group(6);
+            outputStream.println(
+                    mRequestHandler.handleUploadByTagRequest(serverIp, tag, devicesStr)
+            );
         } else if (msg.equals(mConfig.getProperty("VIDEO_START_REQUEST"))) {
             outputStream.println(
                     mRequestHandler.handleVideoStartRequest()

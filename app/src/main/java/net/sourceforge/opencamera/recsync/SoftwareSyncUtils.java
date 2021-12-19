@@ -154,6 +154,20 @@ public class SoftwareSyncUtils {
         if (!preview.openCameraFailed()) mApplySettingsRunnable.run();
     }
 
+    public void uploadFilesByTag(String msg) {
+        Log.d(TAG, "Syncing uploading files by tag");
+
+        if (!mApplicationInterface.isSoftwareSyncRunning()) {
+            throw new IllegalStateException("Cannot send upload request when RecSync is not running");
+        }
+        if (!mSoftwareSyncController.isLeader()) {
+            throw new IllegalStateException("Cannot send upload request from a client");
+        }
+        ((SoftwareSyncLeader) mSoftwareSyncController.getSoftwareSync()).broadcastRpc(
+                SoftwareSyncController.METHOD_UPLOAD_BY_TAG, msg
+        );
+    }
+
     private class SettingsApplicationUtils {
         private final Preview mPreview;
         private final MainUI mMainUI;

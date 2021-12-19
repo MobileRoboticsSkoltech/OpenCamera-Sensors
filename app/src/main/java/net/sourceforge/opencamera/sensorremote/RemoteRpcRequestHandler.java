@@ -138,6 +138,21 @@ public class RemoteRpcRequestHandler {
         }
     }
 
+    RemoteRpcResponse handleUploadByTagRequest(String serverIp, String tag, String devicesStr) {
+        Log.e(TAG, serverIp);
+        ExtendedAppInterface appInterface = mContext.getApplicationInterface();
+        try {
+            if (appInterface.isSoftwareSyncRunning() && appInterface.getSoftwareSyncController().isLeader()) {
+                appInterface.getSoftwareSyncUtils().uploadFilesByTag(String.format("serverIp=%s^tag=%s&devices=%s", serverIp, tag, devicesStr));
+            } else {
+                appInterface.getFileUploadService().uploadByTag(tag, serverIp);
+            }
+        } catch (IllegalArgumentException e) {
+            return mResponseBuilder.error(String.format("Files with tag %s not found.", tag), mContext);
+        }
+        return null;
+    }
+
     RemoteRpcResponse handleVideoStartRequest() {
         // Start video recording
         Preview preview = mContext.getPreview();

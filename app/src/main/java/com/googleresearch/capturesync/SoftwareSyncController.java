@@ -46,10 +46,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Controller managing setup and tear down the SoftwareSync object. Needs Network permissions.
@@ -94,6 +94,10 @@ public class SoftwareSyncController implements Closeable {
      * Tell devices to start or stop video recording.
      */
     public static final int METHOD_RECORD = 200_003;
+    /**
+     * Tell devices to upload files by tag.
+     */
+    public static final int METHOD_UPLOAD_BY_TAG = 200_004;
 
     private long mUpcomingTriggerTimeNs;
 
@@ -228,6 +232,29 @@ public class SoftwareSyncController implements Closeable {
                     if (mMainActivity.getPreview().isVideoRecording() == Boolean.parseBoolean(payload)) {
                         mState = (mState == State.RECORDING) ? State.IDLE : State.RECORDING;
                         mMainActivity.runOnUiThread(() -> mMainActivity.takePicturePressed(false, false));
+                    }
+                });
+
+        // Upload file by tag to the server.
+        sharedRpcs.put(
+                METHOD_UPLOAD_BY_TAG,
+                payload -> {
+                    Log.d(TAG, "Received payload with settings: " + payload);
+
+                    String VIDEO_BY_TAG_REQUEST_REGEX = "(serverIp=)(\\S+)(\\^tag=)(\\S*)(&devices=)((\\S{4})*)";
+                    Pattern VIDEO_BY_TAG_REQUEST_PATTERN = Pattern.compile(VIDEO_BY_TAG_REQUEST_REGEX);
+                    Matcher videoByTagRequestMatcher = VIDEO_BY_TAG_REQUEST_PATTERN.matcher(payload);
+
+                    if (!videoByTagRequestMatcher.find()) return;
+                    String serverIp = videoByTagRequestMatcher.group(2);
+                    String tag = videoByTagRequestMatcher.group(4);
+                    String devicesStr = videoByTagRequestMatcher.group(6);
+                    List<String> devices = Collections.emptyList();
+                    for (int i = 0; i < devicesStr.length() / 4; i++) {
+                        devices.add(devicesStr.substring(i * 4, i * 4 + 3));
+                    }
+                    if (devices.isEmpty() || devices.contains(lastFourSerial())) {
+                        mMainActivity.getApplicationInterface().getFileUploadService().uploadByTag(tag, serverIp);
                     }
                 });
 
