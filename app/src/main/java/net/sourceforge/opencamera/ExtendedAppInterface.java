@@ -86,6 +86,14 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.MagnetometerPrefKey, true);
     }
 
+    private boolean getRotationPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.RotationPreferenceKey, true);
+    }
+
+    private boolean getGravityPref() {
+        return mSharedPreferences.getBoolean(PreferenceKeys.GravityPreferenceKey, true);
+    }
+
     /**
      * Retrieves gyroscope and accelerometer sample rate preference and converts it to number
      */
@@ -109,7 +117,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         return mSharedPreferences.getBoolean(PreferenceKeys.saveFramesPreferenceKey, false);
     }
 
-    public void startImu(boolean wantAccel, boolean wantGyro, boolean wantMagnetic, Date currentDate) {
+    public void startImu(
+            boolean wantAccel, boolean wantGyro,
+            boolean wantMagnetic, boolean wantGravity,
+            boolean wantRotation, Date currentDate
+    ) {
         if (wantAccel) {
             int accelSampleRate = getSensorSampleRatePref(PreferenceKeys.AccelSampleRatePreferenceKey);
             if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate)) {
@@ -126,6 +138,20 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             int magneticSampleRate = getSensorSampleRatePref(PreferenceKeys.MagneticSampleRatePreferenceKey);
             if (!mRawSensorInfo.enableSensor(Sensor.TYPE_MAGNETIC_FIELD, magneticSampleRate)) {
                 mMainActivity.getPreview().showToast(null, "Magnetometer unavailable");
+            }
+        }
+
+        if (wantRotation) {
+            int rotationSampleRate = getSensorSampleRatePref(PreferenceKeys.RotationSampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_ROTATION_VECTOR, rotationSampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Rotation vector unavailable");
+            }
+        }
+
+        if (wantGravity) {
+            int gravitySampleRate = getSensorSampleRatePref(PreferenceKeys.GravitySampleRatePreferenceKey);
+            if (!mRawSensorInfo.enableSensor(Sensor.TYPE_GRAVITY, gravitySampleRate)) {
+                mMainActivity.getPreview().showToast(null, "Gravity unavailable");
             }
         }
 
@@ -146,7 +172,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             // Extracting sample rates from shared preferences
             try {
                 mMainActivity.getPreview().showToast("Starting video with IMU recording...", true);
-                startImu(getAccelPref(), getGyroPref(), getMagneticPref(), mLastVideoDate);
+                startImu(getAccelPref(), getGyroPref(), getMagneticPref(), getGravityPref(), getRotationPref(), mLastVideoDate);
                 // TODO: add message to strings.xml
             } catch (NumberFormatException e) {
                 if (MyDebug.LOG) {

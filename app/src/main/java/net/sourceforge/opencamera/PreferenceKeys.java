@@ -313,6 +313,10 @@ public class PreferenceKeys {
 
     public static final String GyroPreferenceKey = "preference_gyro";
 
+    public static final String GravityPreferenceKey = "preference_gravity";
+
+    public static final String RotationPreferenceKey = "preference_rotation";
+
     public static final String MagnetometerPrefKey = "preference_magnetometer";
 
     public static final String SupportsMagnetometerKey = "preference_supports_magnetometer";
@@ -328,6 +332,10 @@ public class PreferenceKeys {
     public static final String GyroSampleRatePreferenceKey = "preference_gyro_sample_rate";
 
     public static final String MagneticSampleRatePreferenceKey = "preference_magnetic_sample_rate";
+
+    public static final String GravitySampleRatePreferenceKey = "preference_gravity_sample_rate";
+
+    public static final String RotationSampleRatePreferenceKey = "preference_rotation_sample_rate";
 
     public static final String FlashStrobeFreqPreferenceKey = "preference_strobe_freq";
 

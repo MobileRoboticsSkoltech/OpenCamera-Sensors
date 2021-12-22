@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * OpenCamera Sensors server v. 0.0
+ * OpenCamera Sensors server v. 0.1.2
  *
  * Accepted message types:
  *  - get IMU (accelerometer/gyroscope)
@@ -39,7 +39,8 @@ import java.util.regex.Pattern;
 public class RemoteRpcServer extends Thread {
     private static final String TAG = "RemoteRpcServer";
     private static final int SOCKET_WAIT_TIME_MS = 1000;
-    private static final String IMU_REQUEST_REGEX = "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)(&magnetic=)(\\d)";
+    private static final String IMU_REQUEST_REGEX =
+            "(imu\\?duration=)(\\d+)(&accel=)(\\d)(&gyro=)(\\d)(&magnetic=)(\\d)(&gravity=)(\\d)(&rotation=)(\\d)";
     private static final Pattern IMU_REQUEST_PATTERN = Pattern.compile(IMU_REQUEST_REGEX);
 
     private final Properties mConfig;
@@ -77,11 +78,16 @@ public class RemoteRpcServer extends Thread {
             boolean wantAccel = Integer.parseInt(imuRequestMatcher.group(4)) == 1;
             boolean wantGyro = Integer.parseInt(imuRequestMatcher.group(6)) == 1;
             boolean wantMagnetic = Integer.parseInt(imuRequestMatcher.group(8)) == 1;
+            boolean wantGravity = Integer.parseInt(imuRequestMatcher.group(10)) == 1;
+            boolean wantRotation = Integer.parseInt(imuRequestMatcher.group(12)) == 1;
+
 
             if (MyDebug.LOG) {
                 Log.d(TAG, "received IMU control request, duration = " + duration);
             }
-            RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(duration, wantAccel, wantGyro, wantMagnetic);
+            RemoteRpcResponse imuResponse = mRequestHandler.handleImuRequest(
+                    duration, wantAccel, wantGyro, wantMagnetic, wantGravity, wantRotation
+            );
 
             outputStream.println(imuResponse.toString());
             if (MyDebug.LOG) {
