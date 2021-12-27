@@ -42,14 +42,28 @@ public class RawSensorInfo implements SensorEventListener, LocationListener {
     private static final String CSV_SEPARATOR = ",";
     public static final int TYPE_GPS = 0xabcd;
     private static final List<Integer> SENSOR_TYPES = Collections.unmodifiableList(
-            Arrays.asList(TYPE_GPS, Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD)
+            Arrays.asList(
+                    TYPE_GPS,
+                    Sensor.TYPE_ACCELEROMETER,
+                    Sensor.TYPE_GYROSCOPE,
+                    Sensor.TYPE_MAGNETIC_FIELD,
+                    Sensor.TYPE_ROTATION_VECTOR
+            )
     );
+
+    private final float[] accelerometerReading = new float[3];
+    private final float[] magnetometerReading = new float[3];
+
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
+
     private static final Map<Integer, String> SENSOR_TYPE_NAMES;
     static {
         SENSOR_TYPE_NAMES = new HashMap<>();
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_ACCELEROMETER, "accel");
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_GYROSCOPE, "gyro");
         SENSOR_TYPE_NAMES.put(Sensor.TYPE_MAGNETIC_FIELD, "magnetic");
+        SENSOR_TYPE_NAMES.put(Sensor.TYPE_ROTATION_VECTOR, "rotation");
         SENSOR_TYPE_NAMES.put(TYPE_GPS, "location");
     }
 
@@ -131,7 +145,8 @@ public class RawSensorInfo implements SensorEventListener, LocationListener {
 
     private class MyEvent {
         public int accuracy;
-        public Sensor sensor;
+        public int type;
+//        public Sensor sensor;
         public long timestamp;
         public float[] values;
     }
@@ -140,6 +155,7 @@ public class RawSensorInfo implements SensorEventListener, LocationListener {
     public void onLocationChanged(Location location) {
         if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
             MyEvent event = new MyEvent();
+            event.type = TYPE_GPS;
             event.timestamp = location.getElapsedRealtimeNanos();
             event.values = new float[]{(float) location.getLatitude(), (float) location.getLongitude(), (float) location.getAltitude()};
             _onSensorChanged(event);
@@ -148,25 +164,47 @@ public class RawSensorInfo implements SensorEventListener, LocationListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        MyEvent e = new MyEvent();
-        e.accuracy = event.accuracy;
-        e.sensor = event.sensor;
-        e.timestamp = event.timestamp;
-        e.values = event.values;
-        _onSensorChanged(e);
+        {
+            MyEvent e = new MyEvent();
+            e.accuracy = event.accuracy;
+            e.type = event.sensor.getType();
+            e.timestamp = event.timestamp;
+            e.values = event.values;
+            _onSensorChanged(e);
+        }
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
+            SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
+            MyEvent e = new MyEvent();
+            e.accuracy = event.accuracy;
+            e.type = Sensor.TYPE_ROTATION_VECTOR;
+            e.timestamp = event.timestamp;
+            e.values = orientationAngles;
+            _onSensorChanged(e);
+
+        }
     }
 
     private void _onSensorChanged(MyEvent event) {
         if (mIsRecording) {
+            if (event.type == Sensor.TYPE_ACCELEROMETER) {
+                System.arraycopy(event.values, 0, accelerometerReading,
+                        0, accelerometerReading.length);
+            } else if (event.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                System.arraycopy(event.values, 0, magnetometerReading,
+                        0, magnetometerReading.length);
+            }
+
             StringBuilder sensorData = new StringBuilder();
             for (int j = 0; j < 3; j++) {
                 sensorData.append(event.values[j]).append(CSV_SEPARATOR);
             }
             sensorData.append(event.timestamp).append("\n");
 
-            Object sensor = mUsedSensorMap.get(event.sensor != null ? event.sensor.getType() : TYPE_GPS);
+            Object sensor = mUsedSensorMap.get(event.type);
             if (sensor != null) {
-                PrintWriter sensorWriter = mSensorWriterMap.get(event.sensor != null ? event.sensor.getType() : TYPE_GPS);
+                PrintWriter sensorWriter = mSensorWriterMap.get(event.type);
                 if (sensorWriter != null) {
                     sensorWriter.write(sensorData.toString());
                 } else {
@@ -310,25 +348,25 @@ public class RawSensorInfo implements SensorEventListener, LocationListener {
         return mIsRecording;
     }
 
-    public void enableSensors(Map<Integer, Integer> sampleRateMap) {
-        if (MyDebug.LOG) {
-            Log.d(TAG, "enableSensors");
-        }
-        for (Integer sensorType : mUsedSensorMap.keySet()) {
-            Integer sampleRate = sampleRateMap.get(sensorType);
-            if (sampleRate == null) {
-                // Assign default value if not provided
-                sampleRate = 0;
-            }
-
-            if (sensorType != null) {
-                enableSensor(sensorType, sampleRate);
-            }
-
-        }
-        /*enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate);
-        enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate);*/
-    }
+//    public void enableSensors(Map<Integer, Integer> sampleRateMap) {
+//        if (MyDebug.LOG) {
+//            Log.d(TAG, "enableSensors");
+//        }
+//        for (Integer sensorType : mUsedSensorMap.keySet()) {
+//            Integer sampleRate = sampleRateMap.get(sensorType);
+//            if (sampleRate == null) {
+//                // Assign default value if not provided
+//                sampleRate = 0;
+//            }
+//
+//            if (sensorType != null) {
+//                enableSensor(sensorType, sampleRate);
+//            }
+//
+//        }
+//        /*enableSensor(Sensor.TYPE_GYROSCOPE, gyroSampleRate);
+//        enableSensor(Sensor.TYPE_ACCELEROMETER, accelSampleRate);*/
+//    }
 
 
     /**
