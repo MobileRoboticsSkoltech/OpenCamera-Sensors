@@ -160,6 +160,8 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         wantSensorRecordingMap.put(Sensor.TYPE_ACCELEROMETER, getAccelPref());
         wantSensorRecordingMap.put(Sensor.TYPE_GYROSCOPE, getGyroPref());
         wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_GRAVITY, getGravityPref());
+        wantSensorRecordingMap.put(Sensor.TYPE_ROTATION_VECTOR, getRotationPref());
         mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
     }
 
