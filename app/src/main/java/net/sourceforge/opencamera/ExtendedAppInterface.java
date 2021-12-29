@@ -141,7 +141,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
             }
         }
 
-        if (!mRawSensorInfo.enableSensor(mRawSensorInfo.TYPE_GPS, 0)) {
+        if (!mRawSensorInfo.enableSensor(RawSensorInfo.TYPE_GPS, 0)) {
             mMainActivity.getPreview().showToast(null, "GPS unavailable");
         }
 
@@ -168,7 +168,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         wantSensorRecordingMap.put(Sensor.TYPE_MAGNETIC_FIELD, getMagneticPref());
         wantSensorRecordingMap.put(Sensor.TYPE_GRAVITY, getGravityPref());
         wantSensorRecordingMap.put(Sensor.TYPE_ROTATION_VECTOR, getRotationPref());
-        wantSensorRecordingMap.put(mRawSensorInfo.TYPE_GPS, true);
+        wantSensorRecordingMap.put(RawSensorInfo.TYPE_GPS, true);
         mRawSensorInfo.startRecording(mMainActivity, currentDate, wantSensorRecordingMap);
     }
 

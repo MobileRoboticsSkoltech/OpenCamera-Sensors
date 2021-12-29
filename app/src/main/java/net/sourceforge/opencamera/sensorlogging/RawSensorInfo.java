@@ -37,7 +37,7 @@ import java.util.Map;
  * Assumes all the used sensor types are motion or position sensors
  * and output [x, y, z] values -- the class should be updated if that changes
  */
-public class RawSensorInfo implements SensorEventListener {
+public class RawSensorInfo implements SensorEventListener, LocationListener {
     private static final String TAG = "RawSensorInfo";
     private static final String CSV_SEPARATOR = ",";
     public static final int TYPE_GPS = 0xabcd;
