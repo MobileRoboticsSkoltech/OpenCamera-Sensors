@@ -9,13 +9,13 @@ def main():
     remote = RemoteControl(HOST)
 
     with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(remote.get_imu, 10000, True, False)
+        future = executor.submit(remote.get_imu, 10000, True, True, False, False, False)
         # Do something else
         print("doing other stuff...")
         time.sleep(10)
         print("done doing other stuff")
         # Get result when needed
-        accel_data, gyro_data = future.result()
+        accel_data, gyro_data, _, _ = future.result()
         # Process result somehow (here just file output)
         print("Accelerometer data length: %d" % len(accel_data))
         with open("accel.csv", "w+") as accel:
