@@ -126,6 +126,18 @@
                     />
 
                 <CheckBoxPreference
+                    android:key="preference_gravity"
+                    android:title="GRAVITY"
+                    android:defaultValue="true"
+                    />
+
+                <CheckBoxPreference
+                    android:key="preference_rotation"
+                    android:title="ROTATION_VECTOR"
+                    android:defaultValue="true"
+                    />
+
+                <CheckBoxPreference
                     android:key="preference_magnetometer"
                     android:title="MAGNETOMETER"
                     android:defaultValue="true"
@@ -162,6 +174,26 @@
                     android:entries="@array/magnetic_preference_sample_rate_entries"
                     android:entryValues="@array/magnetic_preference_sample_rate_values"
                     />
+
+                <ListPreference
+                    android:key="preference_gravity_sample_rate"
+                    android:title="Gravity frequency"
+                    android:defaultValue="0"
+                    android:summary="Gravity sampling frequency in Hz"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
+                    />
+                <!-- We need to adjust value arrays!!! -->
+
+                <ListPreference
+                    android:key="preference_rotation_sample_rate"
+                    android:title="Rotation frequency"
+                    android:defaultValue="0"
+                    android:summary="Rotation vector sampling frequency in Hz"
+                    android:entries="@array/imu_preference_sample_rate_entries"
+                    android:entryValues="@array/imu_preference_sample_rate_values"
+                    />
+
                 <ListPreference
                     android:key="preference_strobe_freq"
                     android:title="Flash strobe frequency"

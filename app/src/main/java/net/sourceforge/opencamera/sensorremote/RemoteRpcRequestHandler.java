@@ -63,7 +63,9 @@ public class RemoteRpcRequestHandler {
         return mResponseBuilder.error("Invalid request", mContext);
     }
 
-    RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel, boolean wantGyro, boolean wantMagnetic) {
+    RemoteRpcResponse handleImuRequest(long durationMillis, boolean wantAccel,
+                                       boolean wantGyro, boolean wantMagnetic,
+                                       boolean wantGravity, boolean wantRotation) {
         if (mRawSensorInfo != null && !mRawSensorInfo.isRecording()) {
             // TODO: custom rates?
             Callable<Void> recStartCallable = () -> {
@@ -75,7 +77,7 @@ public class RemoteRpcRequestHandler {
 //                prefEditor.apply();
 
                 Date currentDate = new Date();
-                mContext.getApplicationInterface().startImu(wantAccel, wantGyro, wantMagnetic, currentDate);
+                mContext.getApplicationInterface().startImu(wantAccel, wantGyro, wantMagnetic, wantGravity, wantRotation, currentDate);
                 return null;
             };
 
