@@ -1817,14 +1817,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedSyncSettings");
         syncSettings();
         mainUI.updateSyncSettingsIcon();
-
-        // need to update button visibility
-        if( mainUI.inImmersiveMode() ) {
-            mainUI.setImmersiveMode(true);
-        } else {
-            mainUI.showGUI();
-        }
-        mainUI.layoutUI();
     }
 
     public void syncSettings() {
