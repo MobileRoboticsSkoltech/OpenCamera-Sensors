@@ -228,6 +228,7 @@ public class SoftwareSyncController implements Closeable {
                     Log.d(TAG, "Request to clear video recording preparation received.");
 
                     mPhaseAlignController.stopAlign();
+                    clearPeriodState();
                     mIsVideoPreparationNeeded = false;
                     mSoftwareSyncHelper.removeVideoRecordingPreparation();
                     mMainActivity.getMainUI().reloadButtons();
