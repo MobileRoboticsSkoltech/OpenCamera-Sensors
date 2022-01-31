@@ -18,6 +18,7 @@
 
 package com.googleresearch.capturesync;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.hardware.camera2.CameraAccessException;
 import android.os.Build;
@@ -32,10 +33,11 @@ import com.googleresearch.capturesync.softwaresync.phasealign.PhaseAligner;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseConfig;
 import com.googleresearch.capturesync.softwaresync.phasealign.PhaseResponse;
 
-import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.ToastBoxer;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.cameracontroller.CameraController2;
+import net.sourceforge.opencamera.preview.Preview;
 
 /**
  * Calculates and adjusts camera phase by inserting frames of varying exposure lengths.
@@ -54,7 +56,10 @@ public class PhaseAlignController {
     // Delay after an alignment step to wait for phase to settle before starting the next iteration.
     private static final int PHASE_SETTLE_DELAY_MS = 400;
 
-    private final MainActivity mMainActivity;
+    private final Context mContext;
+    private final Preview mPreview;
+    private final ToastBoxer mToastBoxer;
+
     private final Handler mHandler;
     private final Object mLock = new Object();
     private Runnable mOnFinished;
@@ -69,12 +74,14 @@ public class PhaseAlignController {
     private final PhaseConfig mPhaseConfig;
     private PhaseResponse mLatestResponse;
 
-    public PhaseAlignController(PhaseConfig config, MainActivity mainActivity) {
+    public PhaseAlignController(PhaseConfig config, Context context, Preview preview, ToastBoxer toastBoxer) {
         mHandler = new Handler();
         mPhaseConfig = config;
         mPhaseAligner = new PhaseAligner(config);
         Log.v(TAG, "Loaded phase align config.");
-        mMainActivity = mainActivity;
+        mContext = context;
+        mPreview = preview;
+        mToastBoxer = toastBoxer;
     }
 
     protected void setPeriodNs(long periodNs) {
@@ -107,9 +114,9 @@ public class PhaseAlignController {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startAlign(Runnable onFinished) {
-        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(), R.string.phase_alignment_started);
+        mPreview.showToast(mToastBoxer, R.string.phase_alignment_started);
 
-        final CameraController currentCameraController = mMainActivity.getPreview().getCameraController();
+        final CameraController currentCameraController = mPreview.getCameraController();
         if (currentCameraController == null) {
             throw new IllegalStateException("Alignment start failed: camera is not open.");
         }
@@ -202,8 +209,7 @@ public class PhaseAlignController {
         }
         mWasAligned = wasAligned;
         if (mOnFinished != null) mOnFinished.run();
-        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(),
-                wasAligned ? R.string.phase_alignment_succeeded : R.string.phase_alignment_failed);
+        mPreview.showToast(mToastBoxer, wasAligned ? R.string.phase_alignment_succeeded : R.string.phase_alignment_failed);
     }
 
     /**
@@ -232,7 +238,7 @@ public class PhaseAlignController {
      */
     public Pair<String, Integer> getPhaseError() {
         if (mLatestResponse != null) {
-            final String phaseError = mMainActivity.getString(R.string.phase_error,
+            final String phaseError = mContext.getString(R.string.phase_error,
                     TimeUtils.nanosToMillis((double) mLatestResponse.diffFromGoalNs()));
             final int color = (mLatestResponse.isAligned()) ? Color.GREEN : Color.RED;
             return new Pair<>(phaseError, color);
