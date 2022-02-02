@@ -216,6 +216,7 @@ public class SoftwareSyncController implements Closeable {
                             mIsVideoPreparationNeeded = true;
                             Log.d(TAG, "Settings application finished");
                             mState = State.IDLE;
+                            mMainActivity.getMainUI().reloadButtons();
                         });
                     }
                 });
@@ -226,8 +227,11 @@ public class SoftwareSyncController implements Closeable {
                 payload -> {
                     Log.d(TAG, "Request to clear video recording preparation received.");
 
+                    mPhaseAlignController.stopAlign();
+                    clearPeriodState();
                     mIsVideoPreparationNeeded = false;
                     mSoftwareSyncHelper.removeVideoRecordingPreparation();
+                    mMainActivity.getMainUI().reloadButtons();
                 });
 
         // Switch the recording status (start or stop video recording) to the opposite of the received one.

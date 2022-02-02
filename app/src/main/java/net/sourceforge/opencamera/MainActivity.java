@@ -1817,14 +1817,6 @@ public class MainActivity extends Activity {
             Log.d(TAG, "clickedSyncSettings");
         syncSettings();
         mainUI.updateSyncSettingsIcon();
-
-        // need to update button visibility
-        if( mainUI.inImmersiveMode() ) {
-            mainUI.setImmersiveMode(true);
-        } else {
-            mainUI.showGUI();
-        }
-        mainUI.layoutUI();
     }
 
     public void syncSettings() {
@@ -1843,7 +1835,6 @@ public class MainActivity extends Activity {
             applicationInterface.getSoftwareSyncUtils().broadcastSettings(settings); // leader's settings are locked here as well
             preview.showToast(rec_sync_toast, R.string.settings_broadcast_started);
         } else {
-            softwareSyncController.clearPeriodState();
             applicationInterface.getSoftwareSyncUtils().broadcastClearVideoPreparationRequest();
         }
 

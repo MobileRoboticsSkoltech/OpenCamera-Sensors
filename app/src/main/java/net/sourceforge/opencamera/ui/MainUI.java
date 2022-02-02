@@ -1060,6 +1060,15 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowFaceDetectionPreferenceKey, false);
     }
 
+    public void reloadButtons() {
+        if( inImmersiveMode() ) {
+            setImmersiveMode(true);
+        } else {
+            showGUI();
+        }
+        layoutUI();
+    }
+
     public void setImmersiveMode(final boolean immersive_mode) {
         if( MyDebug.LOG )
             Log.d(TAG, "setImmersiveMode: " + immersive_mode);
@@ -1071,10 +1080,16 @@ public class MainUI {
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility_settings_sync; // for UI that is hidden when settings are being broadcast
+                final int visibility_align_phases; // for the phase alignment UI
                 {
                     ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
                     SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
-                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility;
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility;
+                    visibility_align_phases = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isLeader() && softwareSyncController.isVideoPreparationNeeded() ?
+                            visibility : View.GONE;
                 }
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
@@ -1110,7 +1125,7 @@ public class MainUI {
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_settings_sync);
                 if( showAlignPhasesIcon() )
-                    alignPhasesButton.setVisibility(visibility_settings_sync == View.GONE ? visibility : View.GONE); // is shown when settings are being broadcast
+                    alignPhasesButton.setVisibility(visibility_align_phases); // is shown to a leader when prepared without recording
                 if( showExposureLockIcon() )
                     exposureLockButton.setVisibility(visibility_settings_sync);
                 if( showWhiteBalanceLockIcon() )
@@ -1211,11 +1226,19 @@ public class MainUI {
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
                 final int visibility_settings_sync; // for UI that is hidden while taking photo or video and when settings are being broadcast
                 final int visibility_settings_sync_video; // for UI that is hidden while taking photo and when settings are being broadcast
+                final int visibility_align_phases; // for the phase alignment UI
                 {
                     ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
                     SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
-                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility;
-                    visibility_settings_sync_video = extendedAppInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting() ? View.GONE : visibility_video;
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility;
+                    visibility_settings_sync_video = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility_video;
+                    visibility_align_phases = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isLeader() && softwareSyncController.isVideoPreparationNeeded() ?
+                            visibility : View.GONE;
                 }
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
@@ -1242,7 +1265,7 @@ public class MainUI {
                 if( main_activity.supportsExposureButton() )
                     exposureButton.setVisibility(visibility_settings_sync_video); // still allow exposure when recording video
                 if( showAlignPhasesIcon() )
-                    alignPhasesButton.setVisibility(visibility_settings_sync == View.GONE ? visibility : View.GONE); // is shown when settings are being broadcast
+                    alignPhasesButton.setVisibility(visibility_align_phases); // is shown to a leader when prepared without recording
                 if( showExposureLockIcon() )
                     exposureLockButton.setVisibility(visibility_settings_sync_video); // still allow exposure lock when recording video
                 if( showWhiteBalanceLockIcon() )

@@ -4,12 +4,14 @@
 
 package com.googleresearch.capturesync.softwaresync.phasealign;
 
+import android.content.Context;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.ToastBoxer;
+import net.sourceforge.opencamera.preview.Preview;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +22,17 @@ import java.util.stream.Collectors;
 public class PeriodCalculator {
     private final static long CALC_DURATION_MS = 10000;
 
-    private final MainActivity mMainActivity;
+    private final Context mContext;
+    private final Preview mPreview;
+    private final ToastBoxer mToastBoxer;
+
     private volatile boolean mShouldRegister;
     private ArrayList<Long> mRegisteredTimestamps = new ArrayList<>();
 
-    public PeriodCalculator(MainActivity mainActivity) {
-        mMainActivity = mainActivity;
+    public PeriodCalculator(Context context, Preview preview, ToastBoxer toastBoxer) {
+        mContext = context;
+        mPreview = preview;
+        mToastBoxer = toastBoxer;
     }
 
     /**
@@ -39,7 +46,7 @@ public class PeriodCalculator {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public long getPeriodNs() throws InterruptedException {
-        mMainActivity.getPreview().showToast(mMainActivity.getRecSyncToastBoxer(), mMainActivity.getString(R.string.calculating_period, CALC_DURATION_MS * 1e-3));
+        mPreview.showToast(mToastBoxer, mContext.getString(R.string.calculating_period, CALC_DURATION_MS * 1e-3));
         // Start recording timestamps
         mRegisteredTimestamps = new ArrayList<>();
         mShouldRegister = true;

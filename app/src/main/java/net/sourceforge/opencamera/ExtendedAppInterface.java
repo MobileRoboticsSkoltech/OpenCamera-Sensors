@@ -53,12 +53,12 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     private final FlashController mFlashController;
     private final MainActivity mMainActivity;
     private final YuvImageUtils mYuvUtils;
-    private final PhaseAlignController mPhaseAlignController;
-    private final PeriodCalculator mPeriodCalculator;
     private final PreferenceHandler mPrefs;
 
     private SoftwareSyncController mSoftwareSyncController;
     private SoftwareSyncHelper mSoftwareSyncHelper;
+    private PhaseAlignController mPhaseAlignController;
+    private PeriodCalculator mPeriodCalculator;
     private BroadcastReceiver mConnectionStatusChecker = null;
 
     ExtendedAppInterface(MainActivity mainActivity, Bundle savedInstanceState) {
@@ -69,8 +69,6 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // We create it only once here (not during the video) as it is a costly operation
         // (instantiates RenderScript object)
         mYuvUtils = new YuvImageUtils(mainActivity);
-        mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mainActivity);
-        mPeriodCalculator = new PeriodCalculator(mainActivity);
         mPrefs = new PreferenceHandler(mainActivity);
     }
 
@@ -312,6 +310,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
         // Start softwaresync, close it first if it's already running.
         if (isSoftwareSyncRunning()) {
             stopSoftwareSync();
+        } else {
+            mPhaseAlignController = new PhaseAlignController(getDefaultPhaseConfig(), mMainActivity,
+                    mMainActivity.getPreview(), mMainActivity.getRecSyncToastBoxer());
+            mPeriodCalculator = new PeriodCalculator(mMainActivity, mMainActivity.getPreview(),
+                    mMainActivity.getRecSyncToastBoxer());
         }
 
         try {
