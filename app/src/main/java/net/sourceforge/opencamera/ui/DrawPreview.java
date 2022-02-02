@@ -1258,9 +1258,10 @@ public class DrawPreview {
             }
 
             // phase error
-            Pair<String, Integer> phaseError = extendedAppInterface.getPhaseErrorText();
+            Pair<String, Boolean> phaseError = extendedAppInterface.getPhaseErrorText();
             if( phaseError != null ) {
-                int height = extendedAppInterface.drawTextWithBackground(canvas, p, phaseError.first, phaseError.second, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                int color = phaseError.second ? Color.GREEN : Color. RED;
+                int height = extendedAppInterface.drawTextWithBackground(canvas, p, phaseError.first, color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
                 height += gap_y;
                 if( ui_rotation == 90 ) {
                     location_y -= height;

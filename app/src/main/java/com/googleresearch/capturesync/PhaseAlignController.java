@@ -19,7 +19,6 @@
 package com.googleresearch.capturesync;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.camera2.CameraAccessException;
 import android.os.Build;
 import android.os.Handler;
@@ -232,16 +231,14 @@ public class PhaseAlignController {
     /**
      * The current phase error description, if it is available.
      *
-     * @return a {@link Pair} of a string containing the current phase error and an integer
-     * describing its color (depends on the current alignment status) if phase error is determined,
-     * or null otherwise.
+     * @return a {@link Pair} of a string containing the current phase error and the current
+     * alignment status if phase error is determined, or null otherwise.
      */
-    public Pair<String, Integer> getPhaseError() {
+    public Pair<String, Boolean> getPhaseError() {
         if (mLatestResponse != null) {
             final String phaseError = mContext.getString(R.string.phase_error,
                     TimeUtils.nanosToMillis((double) mLatestResponse.diffFromGoalNs()));
-            final int color = (mLatestResponse.isAligned()) ? Color.GREEN : Color.RED;
-            return new Pair<>(phaseError, color);
+            return new Pair<>(phaseError, mLatestResponse.isAligned());
         } else {
             return null;
         }

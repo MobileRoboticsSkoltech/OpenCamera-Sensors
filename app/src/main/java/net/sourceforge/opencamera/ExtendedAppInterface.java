@@ -136,10 +136,11 @@ public class ExtendedAppInterface extends MyApplicationInterface {
     /**
      * Provides the current phase error from RecSync.
      *
-     * @return a {@link Pair} of a string with its color describing the current phase error.
+     * @return a {@link Pair} describing the current phase error if RecSync is running, or null
+     * otherwise.
      */
-    public Pair<String, Integer> getPhaseErrorText() {
-        return mPhaseAlignController.getPhaseError();
+    public Pair<String, Boolean> getPhaseErrorText() {
+        return isSoftwareSyncRunning() ? mPhaseAlignController.getPhaseError() : null;
     }
 
     public PreferenceHandler getPrefs() {
@@ -169,7 +170,7 @@ public class ExtendedAppInterface extends MyApplicationInterface {
 
     @Override
     public void cameraClosed() {
-        mPhaseAlignController.stopAlign();
+        if (isSoftwareSyncRunning()) mPhaseAlignController.stopAlign();
         super.cameraClosed();
     }
 
