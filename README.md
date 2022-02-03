@@ -54,7 +54,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 - (Optional) Choose which camera settings will be broadcasted to client smartphones in the **"Sync settings"** section
 - Switch to video, adjust the camera settings as needed and press the **settings synchronization button**
 - Wait for client smartphones to connect if needed
-- (Optional) If phase alignment was enabled, press the **phase alignment button** to start the alignment and wait for it to finish (green "Phase error" text on the preview indicates the success of the alignment)
+- (Optional) If phase alignment was enabled, press the **phase alignment button** to start the alignment and wait for it to finish ("Phase error" on the preview indicates how much the current phase differs from the targeted one -- when it becomes green, the phase is considered aligned)
 - **Start a video recording**
 
 ![screenshot_recsync_buttons](https://i.imgur.com/iQS8zpc.png)
