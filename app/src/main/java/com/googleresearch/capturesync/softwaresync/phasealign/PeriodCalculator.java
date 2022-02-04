@@ -4,6 +4,8 @@
 
 package com.googleresearch.capturesync.softwaresync.phasealign;
 
+import static com.googleresearch.capturesync.softwaresync.SyncConstants.CALC_DURATION_MS;
+
 import android.content.Context;
 import android.os.Build;
 
@@ -20,8 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PeriodCalculator {
-    private final static long CALC_DURATION_MS = 10000;
-
     private final Context mContext;
     private final Preview mPreview;
     private final ToastBoxer mToastBoxer;
@@ -39,7 +39,8 @@ public class PeriodCalculator {
      * Calculates frames period for this device using timestamps received from
      * {@link #onFrameTimestamp} during the waiting time.
      * <p>
-     * Blocking call, sleeps for {@link #CALC_DURATION_MS}.
+     * Blocking call, sleeps for
+     * {@link com.googleresearch.capturesync.softwaresync.SyncConstants#CALC_DURATION_MS CALC_DURATION_MS}.
      *
      * @return the calculated period, 0 in case of error.
      * @throws InterruptedException if interrupted while sleeping.

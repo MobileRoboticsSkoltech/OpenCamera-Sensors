@@ -22,6 +22,7 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.SystemClock;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
@@ -34,7 +35,6 @@ import com.googleresearch.capturesync.softwaresync.SoftwareSyncBase;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncClient;
 import com.googleresearch.capturesync.softwaresync.SoftwareSyncLeader;
 import com.googleresearch.capturesync.softwaresync.SyncConstants;
-import com.googleresearch.capturesync.softwaresync.TimeUtils;
 import com.googleresearch.capturesync.softwaresync.phasealign.PeriodCalculator;
 
 import net.sourceforge.opencamera.MainActivity;
@@ -82,10 +82,11 @@ public class SoftwareSyncController implements Closeable {
         RECORDING // A video is being recorded.
     }
 
-    /**
-     * Tell devices to save the frame at the requested trigger time.
+    /*
+     * In the original softwaresync this was used to tell devices to save the frame at the requested
+     * trigger time.
+     * public static final int METHOD_SET_TRIGGER_TIME = 200_000;
      */
-    public static final int METHOD_SET_TRIGGER_TIME = 200_000;
     /**
      * Tell devices to calculate frames period and phase align.
      */
@@ -102,8 +103,6 @@ public class SoftwareSyncController implements Closeable {
      * Tell devices to remove video recording preparation.
      */
     public static final int METHOD_STOP_PREPARE = 200_004;
-
-    private long mUpcomingTriggerTimeNs;
 
     /**
      * Constructor passed in with: - context - For setting UI elements and triggering captures. -
@@ -166,15 +165,6 @@ public class SoftwareSyncController implements Closeable {
 
         // Set up shared rpcs.
         Map<Integer, RpcCallback> sharedRpcs = new HashMap<>();
-
-        //sharedRpcs.put(
-        //        METHOD_SET_TRIGGER_TIME,
-        //        payload -> {
-        //            Log.d(TAG, "Setting next trigger to" + payload);
-        //            upcomingTriggerTimeNs = Long.valueOf(payload);
-        //            // TODO: (MROB) change to video
-        //            context.setUpcomingCaptureStill(upcomingTriggerTimeNs);
-        //        });
 
         // Start frames period calculation and then the phase aligning algorithm.
         sharedRpcs.put(
@@ -269,7 +259,7 @@ public class SoftwareSyncController implements Closeable {
 
         if (mIsLeader) {
             // Leader.
-            long initTimeNs = TimeUtils.millisToNanos(System.currentTimeMillis());
+            long initTimeNs = SystemClock.elapsedRealtimeNanos();
 
             // Create rpc mapping specific to leader.
             Map<Integer, RpcCallback> leaderRpcs = new HashMap<>(sharedRpcs);

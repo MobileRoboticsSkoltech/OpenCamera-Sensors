@@ -18,6 +18,9 @@
 
 package com.googleresearch.capturesync;
 
+import static com.googleresearch.capturesync.softwaresync.SyncConstants.MAX_ITERATIONS;
+import static com.googleresearch.capturesync.softwaresync.SyncConstants.PHASE_SETTLE_DELAY_MS;
+
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.os.Build;
@@ -47,13 +50,6 @@ import net.sourceforge.opencamera.preview.Preview;
  */
 public class PhaseAlignController {
     private static final String TAG = "PhaseAlignController";
-
-    // Maximum number of phase alignment iteration steps in the alignment process.
-    // TODO(samansari): Make this a parameter that you pass in to this class. Then make the class that
-    // constructs this pass the constant in.
-    private static final int MAX_ITERATIONS = 60;
-    // Delay after an alignment step to wait for phase to settle before starting the next iteration.
-    private static final int PHASE_SETTLE_DELAY_MS = 400;
 
     private final Context mContext;
     private final Preview mPreview;

@@ -40,13 +40,13 @@ public class SyncConstants {
      */
     public static final long STALE_OFFSET_TIME_NS = TimeUtils.secondsToNanos(60 * 60);
 
-    /**
+    /*
      * RPC.
      */
     public static final int RPC_PORT = 8244;
     public static final int RPC_BUFFER_SIZE = 1024;
 
-    /**
+    /*
      * RPC Method ids.
      * [0 - 9,999] Reserved for SoftwareSync.
      * - [0   -  99] Synchronization-related.
@@ -67,13 +67,25 @@ public class SyncConstants {
     public static final int METHOD_MSG_OFFSET_UPDATED = 1_105;
 
 
-    /**
-     * Clock Sync - Simple Network Time Protocol (SNTP).
-     */
+    /* Clock Sync - Simple Network Time Protocol (SNTP). */
     public static final int SNTP_PORT = 9428;
     public static final int SNTP_BUFFER_SIZE = 512;
     public static final int NUM_SNTP_CYCLES = 300;
     public static final long MIN_ROUND_TRIP_LATENCY_NS = TimeUtils.millisToNanos(1);
+
+    /**
+     * The amount of time to collect timestamps for period calculation.
+     */
+    public static final long CALC_DURATION_MS = 10000;
+
+    /**
+     * Maximum number of phase alignment iteration steps in the alignment process.
+     */
+    public static final int MAX_ITERATIONS = 60;
+    /**
+     * Delay after an alignment step to wait for phase to settle before starting the next iteration.
+     */
+    public static final int PHASE_SETTLE_DELAY_MS = 400;
 
     private SyncConstants() {
     }
