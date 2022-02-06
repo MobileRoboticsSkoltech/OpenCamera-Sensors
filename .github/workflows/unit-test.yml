@@ -32,9 +32,7 @@ jobs:
       - name: Decrypt release key
         env:
           enc_key: ${{ secrets.KeystoreEncKey }}
-          enc_iv: ${{ secrets.KeystoreEncIv }}
-        run: openssl aes-256-cbc -d -K $enc_key -iv $enc_iv -in my-release-key.keystore.enc -out ./my-release-key.keystore
-
+        run: gpg --quiet --batch --yes --decrypt --passphrase="$enc_key" --output my-release-key.keystore my-release-key.keystore.gpg
       - name: Assemble debug
         run: ./gradlew assembleDebug
 
