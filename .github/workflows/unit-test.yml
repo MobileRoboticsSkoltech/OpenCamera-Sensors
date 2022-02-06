@@ -29,10 +29,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Decrypt release key
+      - name: Decrypt keystore file
         env:
           enc_key: ${{ secrets.KeystoreEncKey }}
         run: gpg --quiet --batch --yes --decrypt --passphrase="$enc_key" --output my-release-key.keystore my-release-key.keystore.gpg
+
       - name: Assemble debug
         run: ./gradlew assembleDebug
 
