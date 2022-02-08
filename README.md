@@ -42,6 +42,30 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
     - *Note: phase, which is returned by* ```start_recording``` *method, can be used to perform synchronization with external devices*
  ![remote control methods](https://www.websequencediagrams.com/files/render?link=6txhpHrdgaebT4DYz2C3SaEQjHM1esYDkJZJvPZcgCJHbRAg3c8hqcJYgOmGirze)
 
+### Synchronized recording on multiple smartphones (RecSync)
+
+**Important**: smartphones are required to support real-time timestamping to be correctly synchronized. This can be checked on the preview message when RecSync is enabled ("Timestamp source" should be "realtime").
+![screenshot timestamp source](https://i.imgur.com/vQHufyV.png)
+
+**Leader smartphone setup:**
+- Start a **Wi-Fi hotspot**
+- Open OpenCamera Sensors, go to preferences - "RecSync settings..." and enable the **"Use RecSync"** switch
+- (Optional) Enable **phase alignment** option if synchronization precision better than half of a frame duration is required
+- (Optional) Choose which camera settings will be broadcasted to client smartphones in the **"Sync settings"** section
+- Switch to video, adjust the camera settings as needed and press the **settings synchronization button**
+- Wait for client smartphones to connect if needed
+- (Optional) If phase alignment was enabled, press the **phase alignment button** to start the alignment and wait for it to finish ("Phase error" on the preview indicates how much the current phase differs from the targeted one -- when it becomes green, the phase is considered aligned)
+- **Start a video recording**
+
+![screenshot_recsync_buttons](https://i.imgur.com/iQS8zpc.png)
+
+**Client smartphones setup:**
+- **Connect** to the leader's Wi-Fi hotspot
+- Open OpenCamera Sensors, go to preferences - "RecSync settings..." and enable the **"Use RecSync"** switch
+- Adjust the camera settings as needed (the ones that will not be broadcast by the leader) and wait for the leader to start the recording
+
+_Note: the phase needs to be re-aligned before every recording._
+
 ## Good practices for data recording
 
 - When recording video with audio recording enabled, MediaRecorder adds extra frames to the video to match the sound.

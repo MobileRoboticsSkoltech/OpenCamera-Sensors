@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.GyroSensor;
 import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
@@ -1228,6 +1229,40 @@ public class DrawPreview {
                 height += gap_y;
                 // only move location_y if we actually print something (because on old camera API, even if the ISO option has
                 // been enabled, we'll never be able to display the on-screen ISO)
+                if( ui_rotation == 90 ) {
+                    location_y -= height;
+                }
+                else {
+                    location_y += height;
+                }
+            }
+        }
+
+        // RecSync
+        if( applicationInterface instanceof ExtendedAppInterface && ((ExtendedAppInterface) applicationInterface).isSoftwareSyncRunning() ) {
+            final ExtendedAppInterface extendedAppInterface = (ExtendedAppInterface) applicationInterface;
+
+            // leader-client information
+            {
+                String[] lines = extendedAppInterface.getSyncStatusText().split("\n");
+                for (String line : lines) {
+                    int height = extendedAppInterface.drawTextWithBackground(canvas, p, line, Color.rgb(0, 139, 0), Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                    height += gap_y;
+                    if( ui_rotation == 90 ) {
+                        location_y -= height;
+                    }
+                    else {
+                        location_y += height;
+                    }
+                }
+            }
+
+            // phase error
+            Pair<String, Boolean> phaseError = extendedAppInterface.getPhaseErrorText();
+            if( phaseError != null ) {
+                int color = phaseError.second ? Color.GREEN : Color. RED;
+                int height = extendedAppInterface.drawTextWithBackground(canvas, p, phaseError.first, color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, MyApplicationInterface.Shadow.SHADOW_OUTLINE);
+                height += gap_y;
                 if( ui_rotation == 90 ) {
                     location_y -= height;
                 }

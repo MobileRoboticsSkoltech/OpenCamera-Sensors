@@ -106,6 +106,29 @@
         />
 
     <ImageButton
+        android:id="@+id/align_phases"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:layout_marginRight="5dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/align_phases"
+        android:src="@drawable/ic_align_phases_48dp"
+        android:onClick="clickedAlignPhases"
+        android:layout_below="@+id/take_photo"
+        android:layout_toLeftOf="@+id/switch_video"
+        android:layout_alignTop="@+id/switch_video"
+        android:layout_alignBottom="@+id/switch_video"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:visibility="gone"
+        />
+
+    <ImageButton
         android:id="@+id/take_photo_when_video_recording"
         android:layout_width="70dp"
         android:layout_height="70dp"
@@ -202,6 +225,21 @@
         android:backgroundTint="@color/icons_background_tint"
         android:backgroundTintMode="src_in"
         android:onClick="clickedSettings"
+        />
+
+    <ImageButton
+        android:id="@+id/sync_settings"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/sync_settings_unlocked"
+        android:src="@drawable/ic_sync_settings_48dp"
+        android:background="@color/icons_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:onClick="clickedSyncSettings"
+        android:visibility="gone"
         />
 
     <ImageButton
@@ -623,7 +661,7 @@
         android:layout_below="@+id/popup"
         android:fadeScrollbars="false"
         />
-    
+
     <ScrollView
         android:id="@+id/hide_container"
         android:layout_width="match_parent"

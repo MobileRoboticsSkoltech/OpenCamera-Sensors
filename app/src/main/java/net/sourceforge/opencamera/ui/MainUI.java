@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.ui;
 
+import net.sourceforge.opencamera.ExtendedAppInterface;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 import net.sourceforge.opencamera.MainActivity;
@@ -40,6 +41,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.ZoomControls;
+
+import com.googleresearch.capturesync.SoftwareSyncController;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -318,6 +321,7 @@ public class MainUI {
             }
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
+            buttons_permanent.add(main_activity.findViewById(R.id.sync_settings));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
@@ -490,6 +494,9 @@ public class MainUI {
             layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
             layoutParams.setMargins(0, 0, navigation_gap, 0);
             view.setLayoutParams(layoutParams);
+            setViewRotation(view, ui_rotation);
+
+            view = main_activity.findViewById(R.id.align_phases);
             setViewRotation(view, ui_rotation);
 
             view = main_activity.findViewById(R.id.zoom);
@@ -820,7 +827,19 @@ public class MainUI {
             int resource;
             int content_description;
             int switch_video_content_description;
-            if( main_activity.getPreview().isVideo() ) {
+            boolean is_client;
+            {
+                final ExtendedAppInterface appInterface = main_activity.getApplicationInterface();
+                is_client = appInterface.isSoftwareSyncRunning() && !appInterface.getSoftwareSyncController().isLeader();
+            }
+            if( is_client ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "set icon empty");
+                resource = R.drawable.ic_empty;
+                content_description = R.string.do_nothing;
+                switch_video_content_description = R.string.do_nothing;
+            }
+            else if( main_activity.getPreview().isVideo() ) {
                 if( MyDebug.LOG )
                     Log.d(TAG, "set icon to video");
                 resource = main_activity.getPreview().isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
@@ -848,7 +867,7 @@ public class MainUI {
 
             view = main_activity.findViewById(R.id.switch_video);
             view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
-            resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
+            resource = is_client ? R.drawable.ic_empty : main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
             view.setImageResource(resource);
             view.setTag(resource); // for testing
         }
@@ -1004,6 +1023,15 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowTextStampPreferenceKey, false);
     }
 
+    public boolean showSyncSettingsIcon() {
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        return applicationInterface.isSoftwareSyncRunning() && applicationInterface.getSoftwareSyncController().isLeader();
+    }
+
+    public boolean showAlignPhasesIcon() {
+        return main_activity.getApplicationInterface().getPrefs().isEnablePhaseAlignmentEnabled();
+    }
+
     public boolean showStampIcon() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         return sharedPreferences.getBoolean(PreferenceKeys.ShowStampPreferenceKey, false);
@@ -1032,6 +1060,15 @@ public class MainUI {
         return sharedPreferences.getBoolean(PreferenceKeys.ShowFaceDetectionPreferenceKey, false);
     }
 
+    public void reloadButtons() {
+        if( inImmersiveMode() ) {
+            setImmersiveMode(true);
+        } else {
+            showGUI();
+        }
+        layoutUI();
+    }
+
     public void setImmersiveMode(final boolean immersive_mode) {
         if( MyDebug.LOG )
             Log.d(TAG, "setImmersiveMode: " + immersive_mode);
@@ -1042,6 +1079,18 @@ public class MainUI {
                 // if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
                 //final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
                 final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+                final int visibility_settings_sync; // for UI that is hidden when settings are being broadcast
+                final int visibility_align_phases; // for the phase alignment UI
+                {
+                    ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                    SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility;
+                    visibility_align_phases = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isLeader() && softwareSyncController.isVideoPreparationNeeded() ?
+                            visibility : View.GONE;
+                }
                 if( MyDebug.LOG )
                     Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
                 // n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
@@ -1060,6 +1109,8 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
+                View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
+                View alignPhasesButton = main_activity.findViewById(R.id.align_phases);
                 View galleryButton = main_activity.findViewById(R.id.gallery);
                 View settingsButton = main_activity.findViewById(R.id.settings);
                 View zoomControls = main_activity.findViewById(R.id.zoom);
@@ -1072,9 +1123,11 @@ public class MainUI {
                     switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
-                    exposureButton.setVisibility(visibility);
+                    exposureButton.setVisibility(visibility_settings_sync);
+                if( showAlignPhasesIcon() )
+                    alignPhasesButton.setVisibility(visibility_align_phases); // is shown to a leader when prepared without recording
                 if( showExposureLockIcon() )
-                    exposureLockButton.setVisibility(visibility);
+                    exposureLockButton.setVisibility(visibility_settings_sync);
                 if( showWhiteBalanceLockIcon() )
                     whiteBalanceLockButton.setVisibility(visibility);
                 if( showCycleRawIcon() )
@@ -1091,9 +1144,11 @@ public class MainUI {
                     cycleFlashButton.setVisibility(visibility);
                 if( showFaceDetectionIcon() )
                     faceDetectionButton.setVisibility(visibility);
+                if( showSyncSettingsIcon() )
+                    syncSettingsButton.setVisibility(visibility);
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
-                popupButton.setVisibility(visibility);
+                popupButton.setVisibility(visibility_settings_sync);
                 galleryButton.setVisibility(visibility);
                 settingsButton.setVisibility(visibility);
                 if( MyDebug.LOG ) {
@@ -1169,6 +1224,22 @@ public class MainUI {
                 final boolean is_panorama_recording = main_activity.getApplicationInterface().getGyroSensor().isRecording();
                 final int visibility = is_panorama_recording ? View.GONE : (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
                 final int visibility_video = is_panorama_recording ? View.GONE : show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
+                final int visibility_settings_sync; // for UI that is hidden while taking photo or video and when settings are being broadcast
+                final int visibility_settings_sync_video; // for UI that is hidden while taking photo and when settings are being broadcast
+                final int visibility_align_phases; // for the phase alignment UI
+                {
+                    ExtendedAppInterface extendedAppInterface = main_activity.getApplicationInterface();
+                    SoftwareSyncController softwareSyncController = extendedAppInterface.getSoftwareSyncController();
+                    visibility_settings_sync = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility;
+                    visibility_settings_sync_video = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isVideoPreparationNeeded() ?
+                            View.GONE : visibility_video;
+                    visibility_align_phases = extendedAppInterface.isSoftwareSyncRunning() &&
+                            softwareSyncController.isLeader() && softwareSyncController.isVideoPreparationNeeded() ?
+                            visibility : View.GONE;
+                }
                 View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
                 View switchMultiCameraButton = main_activity.findViewById(R.id.switch_multi_camera);
                 View switchVideoButton = main_activity.findViewById(R.id.switch_video);
@@ -1184,15 +1255,19 @@ public class MainUI {
                 View faceDetectionButton = main_activity.findViewById(R.id.face_detection);
                 View audioControlButton = main_activity.findViewById(R.id.audio_control);
                 View popupButton = main_activity.findViewById(R.id.popup);
+                View syncSettingsButton = main_activity.findViewById(R.id.sync_settings);
+                View alignPhasesButton = main_activity.findViewById(R.id.align_phases);
                 if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
                     switchCameraButton.setVisibility(visibility);
                 if( main_activity.showSwitchMultiCamIcon() )
                     switchMultiCameraButton.setVisibility(visibility);
                 switchVideoButton.setVisibility(visibility);
                 if( main_activity.supportsExposureButton() )
-                    exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
+                    exposureButton.setVisibility(visibility_settings_sync_video); // still allow exposure when recording video
+                if( showAlignPhasesIcon() )
+                    alignPhasesButton.setVisibility(visibility_align_phases); // is shown to a leader when prepared without recording
                 if( showExposureLockIcon() )
-                    exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
+                    exposureLockButton.setVisibility(visibility_settings_sync_video); // still allow exposure lock when recording video
                 if( showWhiteBalanceLockIcon() )
                     whiteBalanceLockButton.setVisibility(visibility_video); // still allow white balance lock when recording video
                 if( showCycleRawIcon() )
@@ -1209,6 +1284,8 @@ public class MainUI {
                     cycleFlashButton.setVisibility(visibility);
                 if( showFaceDetectionIcon() )
                     faceDetectionButton.setVisibility(visibility);
+                if( showSyncSettingsIcon() )
+                    syncSettingsButton.setVisibility(visibility);
                 if( main_activity.hasAudioControl() )
                     audioControlButton.setVisibility(visibility);
                 if( !(show_gui_photo && show_gui_video) ) {
@@ -1225,11 +1302,9 @@ public class MainUI {
                         Log.d(TAG, "Remote control DISconnected");
                     remoteConnectedIcon.setVisibility(View.GONE);
                 }
-                popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
+                popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_settings_sync_video : visibility_settings_sync); // still allow popup in order to change flash mode when recording video
 
-                if( show_gui_photo && show_gui_video ) {
-                    layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
-                }
+                layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
             }
         });
     }
@@ -1239,6 +1314,13 @@ public class MainUI {
         boolean enabled = main_activity.getPreview().isExposureLocked();
         view.setImageResource(enabled ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.exposure_unlock : R.string.exposure_lock) );
+    }
+
+    public void updateSwitchVideoIcon() {
+        ImageButton view = main_activity.findViewById(R.id.switch_video);
+        ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        boolean enabled = !applicationInterface.isSoftwareSyncRunning() || applicationInterface.getSoftwareSyncController().isLeader();
+        view.setEnabled(enabled);
     }
 
     public void updateWhiteBalanceLockIcon() {
@@ -1337,6 +1419,15 @@ public class MainUI {
         view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.face_detection_disable : R.string.face_detection_enable) );
     }
 
+    public void updateSyncSettingsIcon() {
+        ImageButton view = main_activity.findViewById(R.id.sync_settings);
+        final ExtendedAppInterface applicationInterface = main_activity.getApplicationInterface();
+        final SoftwareSyncController softwareSyncController = applicationInterface.getSoftwareSyncController();
+        boolean enabled = applicationInterface.isSoftwareSyncRunning() && softwareSyncController.isLeader() && softwareSyncController.isSettingsBroadcasting();
+        view.setImageResource(enabled ? R.drawable.ic_sync_settings_red_48dp : R.drawable.ic_sync_settings_48dp);
+        view.setContentDescription( main_activity.getResources().getString(enabled ? R.string.sync_settings_locked : R.string.sync_settings_unlocked) );
+    }
+
     public void updateOnScreenIcons() {
         if( MyDebug.LOG )
             Log.d(TAG, "updateOnScreenIcons");
@@ -1349,6 +1440,8 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+        this.updateSwitchVideoIcon();
+        this.updateSyncSettingsIcon();
     }
 
     public void audioControlStarted() {

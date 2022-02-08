@@ -70,6 +70,57 @@
     
     <string name="failed_to_stamp">Не удалось добавить отметку</string>
     <string name="metres_abbreviation">м</string>
+
+    <string name="preference_rec_sync_settings">Настройки RecSync…</string>
+    <string name="preference_enable_rec_sync">Использовать RecSync</string>
+    <string name="preference_enable_rec_sync_summary">Включить или выключить RecSync. Он используется для синхронизированной записи с нескольких камер. Требуется поддержка Camera2 API и включённый Wi-Fi или точка доступа.</string>
+    <string name="preference_enable_phase_alignment">Включить выравнивание фазы</string>
+    <string name="preference_enable_phase_alignment_summary">Позволяет синхронизировать видео с погрешностью менее миллисекунды через выравнивание фазы кадра. Для корректной работы требуется использовать устройства одинаковой модели с поддержкой временных меток кадра в реальном времени.</string>
+    <string name="preference_sync_settings">Синхронизация настроек</string>
+    <string name="preference_sync_exposure">Экспозиция</string>
+    <string name="preference_sync_exposure_summary">Экспозиция всегда синхронизируется и блокируется.</string>
+    <string name="preference_sync_iso">ISO</string>
+    <string name="preference_sync_iso_summary">Синхронизировать ли ISO. Блокируется после синхронизации.</string>
+    <string name="preference_sync_wb">Баланс белого</string>
+    <string name="preference_sync_wb_summary">Синхронизировать ли баланс белого. Если клиент поддерживает выбранный режим баланса белого, то он синхронизируется. Если выбранный режим не поддерживается или выбран ручной режим, то синхронизируется температура баланса белого.</string>
+    <string name="preference_sync_flash">Вспышка</string>
+    <string name="preference_sync_flash_summary">Синхронизировать ли режим вспышки или фонаря.</string>
+    <string name="preference_sync_format">Формат файла</string>
+    <string name="preference_sync_format_summary">Синхронизировать ли формат файла, используемый для сохранения фото и видео (зависит от режима съемки, выбранного лидером в момент синхронизации). Если выбранный формат не поддерживается клиентом, то его настройка не изменяется.</string>
+
+    <string name="recsync_unsupported_summary">Требуется поддержка Camera2 API, ручного режима экспозиции и Android 7.0 или выше</string>
+    <string name="sync_settings_unlocked">Блокировать и синх. настройки</string>
+    <string name="sync_settings_locked">Остановить передачу настроек</string>
+    <string name="settings_broadcast_started">Передача настроек началась</string>
+    <string name="align_phases">Выровнять фазы</string>
+    <string name="timestamp_source">Источник отметок времени: %s</string>
+
+    <string name="rec_sync_only_video_supported">RecSync поддерживает только видео</string>
+    <string name="rec_sync_settings_not_broadcast">Настройки не передаются</string>
+    <string name="rec_sync_phases_not_aligned">Фазы не выравнены</string>
+
+    <string name="calculating_period">Расчет периода кадра %.2f сек</string>
+    <string name="phase_error">Сдвиг фазы: %.2f мс</string>
+    <string name="phase_alignment_started">Выравнивание фаз началось</string>
+    <string name="phase_alignment_succeeded">Выравнивание фаз удалось</string>
+    <string name="phase_alignment_failed">Выравнивание фаз не удалось</string>
+
+    <string name="rec_sync_waiting_for_leader">%s: Ожидание лидера</string>
+    <string name="rec_sync_waiting_for_sync">%s: Ожидание синхронизации</string>
+    <string name="rec_sync_synced_to_leader">Клиент %s\n-Синх. с лидером %s</string>
+    <string name="rec_sync_leader">Лидер: %s</string>
+    <string name="rec_sync_client">Клиент: %s</string>
+    <string name="rec_sync_leader_clients">Лидер %s: %s.\n</string>
+    <plurals name="clients_num">
+        <item quantity="one">%d клиент</item>
+        <item quantity="few">%d клиента</item>
+        <item quantity="many">%d клиентов</item>
+        <item quantity="other">%d клиентов</item>
+    </plurals>
+    <string name="rec_sync_client_syncing">-Клиент %s: синхронизация…\n</string>
+    <string name="rec_sync_client_synced">-Клиент %s: %.2f мс синхронизирован\n</string>
+    <string name="realtime">реал. время</string>
+    <string name="unknown">неизвестно</string>
     
     <string name="preference_category_camera_effects">Эффекты</string>
     <string name="preference_auto_stabilise">Автостабилизация</string>
@@ -977,5 +1028,6 @@
 
     <string name="preference_comment_ypr">Сохранять связанную систему координат</string>
     <string name="preference_comment_ypr_summary">Сохранять связанную систему координат устройства в EXIF фото в комментарии пользователя (только для формата JPEG)</string>
+    <string name="do_nothing">Ничего не делать в этом режиме</string>
 
 </resources>

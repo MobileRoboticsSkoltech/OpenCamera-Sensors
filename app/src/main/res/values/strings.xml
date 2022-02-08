@@ -71,7 +71,56 @@
     
     <string name="failed_to_stamp">Failed to stamp info to photo</string>
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
-    
+
+    <string name="preference_rec_sync_settings">RecSync settings…</string>
+    <string name="preference_enable_rec_sync">Use RecSync</string>
+    <string name="preference_enable_rec_sync_summary">Enable or disable RecSync. It is used for synchronous multi-cam recording. Requires Camera2 API support and Wi-Fi or hotspot to be enabled.</string>
+    <string name="preference_enable_phase_alignment">Enable phase alignment</string>
+    <string name="preference_enable_phase_alignment_summary">Enables the ability to achieve sub-millisecond video synchronization via frame phase alignment. Devices of the same model with realtime timestamping support are needed for this to work properly.</string>
+    <string name="preference_sync_settings">Sync settings</string>
+    <string name="preference_sync_exposure">Exposure</string>
+    <string name="preference_sync_exposure_summary">Exposure time always syncs and locks.</string>
+    <string name="preference_sync_iso">ISO</string>
+    <string name="preference_sync_iso_summary">Whether to sync ISO value. It is locked when synced.</string>
+    <string name="preference_sync_wb">White balance</string>
+    <string name="preference_sync_wb_summary">Whether to sync white balance. If a client supports the selected white balance mode then it is synced. If the selected mode is unsupported or it is manual then the selected white balance temperature is synced.</string>
+    <string name="preference_sync_flash">Flash</string>
+    <string name="preference_sync_flash_summary">Whether to sync flash or torch mode.</string>
+    <string name="preference_sync_format">File format</string>
+    <string name="preference_sync_format_summary">Whether to sync the file format used for saving photos or videos (depends on the capture mode selected by a leader at the time of synchronization). If the selected format is unsupported by a client then it remains unchanged.</string>
+
+    <string name="recsync_unsupported_summary">Camera2 API, manual exposure time support and Android 7.0 or higher required</string>
+    <string name="sync_settings_unlocked">Lock and sync settings</string>
+    <string name="sync_settings_locked">Stop settings broadcast</string>
+    <string name="settings_broadcast_started">Settings broadcast started</string>
+    <string name="align_phases">Align phases</string>
+    <string name="timestamp_source">Timestamp source: %s</string>
+
+    <string name="rec_sync_only_video_supported">Only video recording is supported in RecSync mode</string>
+    <string name="rec_sync_settings_not_broadcast">Settings are not being broadcast</string>
+    <string name="rec_sync_phases_not_aligned">Phases are not aligned</string>
+
+    <string name="calculating_period">Calculating frames period for %.2f s</string>
+    <string name="phase_error">Phase Error: %.2f ms</string>
+    <string name="phase_alignment_started">Phase alignment started</string>
+    <string name="phase_alignment_succeeded">Phase alignment succeeded</string>
+    <string name="phase_alignment_failed">Phase alignment failed</string>
+
+    <string name="rec_sync_waiting_for_leader">%s: Waiting for Leader</string>
+    <string name="rec_sync_waiting_for_sync">%s: Waiting for Sync</string>
+    <string name="rec_sync_synced_to_leader">Client %s\n-Synced to Leader %s</string>
+    <string name="rec_sync_leader">Leader: %s</string>
+    <string name="rec_sync_client">Client: %s</string>
+    <string name="rec_sync_leader_clients">Leader %s: %s.\n</string>
+    <plurals name="clients_num">
+        <item quantity="one">%d client</item>
+        <item quantity="other">%d clients</item>
+    </plurals>
+    <string name="rec_sync_client_syncing">-Client %s: syncing…\n</string>
+    <string name="rec_sync_client_synced">-Client %s: %.2f ms sync\n</string>
+    <string name="realtime">realtime</string>
+    <string name="unknown">unknown</string>
+
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-level</string>
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (slower to take photos, and may fail on devices with too low memory)</string>
@@ -271,6 +320,8 @@
 
     <string name="start_video">Start recording video</string>
     <string name="stop_video">Stop recording video</string>
+
+    <string name="do_nothing">Do nothing in this mode</string>
 
     <string name="max_filesize">Max file size</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
