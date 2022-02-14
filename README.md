@@ -18,12 +18,12 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 
 ## Usage
 
-![screenshot settings](https://imgur.com/BytzCvA.png)
+![screenshot settings](https://imgur.com/Md2O0sO.png)
 
-- Go to preferences, enable Camera2API and press the “Enable sync video IMU recording” switch
+- Go to preferences, enable Camera2API and press the **“Enable sync video IMU recording”** switch in "IMU settings..."
 - (Optional) **Disable video stabilization** in video preferences of OpenCamera Sensors to minimize preprocessing effects
 - (Optional) Enable **save frames** option if you want to verify recorded data correctness
-- (Optional) Enable flash strobe and specify its frequency in additional sensor settings
+- (Optional) Enable **flash strobe** and specify its frequency in additional sensor settings
 - **Switch to video**, setup ISO and exposure time
 - **Record video**
 - **Get data** from ```DCIM/OpenCamera```:
@@ -45,7 +45,7 @@ This project is based on [Open Camera](https://opencamera.org.uk/)  —  a popul
 ### Synchronized recording on multiple smartphones (RecSync)
 
 **Important**: smartphones are required to support real-time timestamping to be correctly synchronized. This can be checked on the preview message when RecSync is enabled ("Timestamp source" should be "realtime").
-![screenshot timestamp source](https://i.imgur.com/vQHufyV.png)
+![screenshot timestamp source](https://imgur.com/vQHufyV.png)
 
 **Leader smartphone setup:**
 - Start a **Wi-Fi hotspot**
