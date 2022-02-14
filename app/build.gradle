@@ -9,7 +9,7 @@ android {
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
-        applicationId "com.opencamera_extended.app"
+        applicationId "com.opencamera_sensors.app"
         minSdkVersion 19
         // Important! When we decide to change this to 30 or more, we need to add full support for scoped storage
         targetSdkVersion 29
