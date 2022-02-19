@@ -150,21 +150,23 @@ class RemoteControl:
             self._recv_video_file(filename, data_length)
         return filename
 
-    def upload_files(self, serverIp, tag = "", devices = []):
+    def upload_files(self, server_ip, tag="", devices=[]):
+        # TODO: it works but returns "Unsupported app server version: ..." error
         """
         Sends a request to upload all files from the phone by name mask to the server at the given address
-        :param serverIp: (string) local network server address or remote
+        :param server_ip: (string) local network server address or remote
         :param tag: (string) name mask
-        :param devices: (list of string) id of devices from which we want to unload.
+        :param devices: (list of string) list of id of devices from which we want to unload.
         """
+        devices_str = ""
+        for device in devices:
+            if device.len == 4:
+                devices_str += device
         # open socket as a file
         socket_file = self.socket.makefile("rw")
         # send request message
-        devicesStr = ""
-        for device in devices:
-            devicesStr += device
         status, socket_file = self._send_and_get_response_status(
-            'tag?serverIp=%s^tag=%s&devices=%s\n' % (serverIp, tag, devicesStr)
+            'tag?serverIp=%s^tag=%s&devices=%s\n' % (server_ip, tag, devices_str)
         )
 
     def _send_and_get_response_status(self, msg):
@@ -180,7 +182,7 @@ class RemoteControl:
             socket_file.close()
             self.socket.close()
             print('Status: %s' % status)
-            # raise RuntimeError('Unsupported app server version: %s' % version)
+            raise RuntimeError('Unsupported app server version: %s' % version)
         if status.strip('\n') == self.props['ERROR']:
             msg = socket_file.readline()
             socket_file.close()

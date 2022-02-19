@@ -9,6 +9,7 @@ def main():
     remote = RemoteControl(HOST)
     print("Connected")
 
+    # A simple server example - https://pypi.org/project/uploadserver/
     remote.upload_files("http://192.168.152.181:8000/upload", "TEST")
     print('Closing connection')
     remote.close()
