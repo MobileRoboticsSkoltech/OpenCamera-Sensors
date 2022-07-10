@@ -1,0 +1,1 @@
+Synchronized recording of video and IMU data with advanced camera options

@@ -1,0 +1,6 @@
+Camera app for synchronized recording of video and IMU data with advanced camera options, useful for 3D reconstruction, SLAM, AR, video stabilization.
+
+The main OpenCamera Sensors features are:
+- Recording of sensor data (accelerometer, gyroscope, magnetometer) and video with frame timestamps synced to the same clock
+- Synchronized video recording on several smartphones with sub-millisecond accuracy
+- Remote control over network support
