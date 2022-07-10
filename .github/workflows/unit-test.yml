@@ -1,6 +1,6 @@
 name: Run unit tests
 
-on: [push, workflow_dispatch]
+on: [ push, workflow_dispatch ]
 
 env:
   keystore_password: ${{ secrets.KeystorePassword }}

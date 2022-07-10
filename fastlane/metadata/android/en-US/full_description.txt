@@ -1,0 +1,3 @@
+Camera app for synchronized recording of video and IMU data with advanced camera options, useful for 3D reconstruction, SLAM, AR, video stabilization.
+It records sensor data (accelerometer, gyroscope, magnetometer) and video with frame timestamps synced to the same clock.
+Supports remote control over network.
