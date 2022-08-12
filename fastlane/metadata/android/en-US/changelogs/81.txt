@@ -1,0 +1,1 @@
+Added RecSync functionality (synchronized video recording on multiple smartphones).
